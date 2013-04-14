@@ -74,6 +74,7 @@
     <Compile Include="Native\NativeGenericType.cs" />
     <Compile Include="Native\NativeTypeConstructor.cs" />
     <Compile Include="Parser\ES3Lexer.cs" />
+    <Compile Include="Parser\ES3Additions.cs" />
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="PropertyBags\DictionaryPropertyBag.cs" />
     <Compile Include="PropertyBags\DoubleListPropertyBag.cs" />
