@@ -12,6 +12,6 @@ desktop.ini
 *.suo
 TestResults
 *.itrace.csdef
-*.csproj.user
+*.user
 Jint/Parser/ES3.tokens
 *.vsmdi
