@@ -84,6 +84,9 @@ namespace Jint {
                 }
             }
 
+            if (debugInformation)
+                program.ProgramSource = source;
+
             return program;
         }
 

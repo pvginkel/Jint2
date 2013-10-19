@@ -8,7 +8,9 @@ namespace Jint.Debugger {
     [Serializable]
     public class DebugInformation : EventArgs {
         public Stack<string> CallStack { get; set; }
+        public Stack<JsScope> Scopes { get; set; }
         public Statement CurrentStatement { get; set; }
         public JsDictionaryObject Locals { get; set; }
+        public Program Program { get; set; }
     }
 }

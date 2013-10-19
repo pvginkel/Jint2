@@ -42,6 +42,7 @@ namespace Jint {
         
         private StringBuilder typeFullname;
         private string lastIdentifier = String.Empty;
+        private Stack<Program> programStack = new Stack<Program>();
 
         ResultInfo lastResult;
         Stack<ResultInfo> stackResults = new Stack<ResultInfo>();
@@ -103,7 +104,9 @@ namespace Jint {
             DebugInformation info = new DebugInformation();
             info.CurrentStatement = statement;
             info.CallStack = CallStack;
+            info.Scopes = Scopes;
             info.Locals = new JsObject(JsNull.Instance);
+            info.Program = programStack.Peek();
             DebugMode = false;
 
             foreach (var property in CurrentScope.GetKeys())
@@ -131,24 +134,30 @@ namespace Jint {
         }
 
         public void Visit(Program program) {
-            // initialize local variables, in case the visitor is used multiple times by the same engine
-            typeFullname = null;
-            exit = false;
-            lastIdentifier = String.Empty;
+            programStack.Push(program);
 
-            foreach (var statement in program.Statements) {
-                CurrentStatement = statement;
+            try {
+                // initialize local variables, in case the visitor is used multiple times by the same engine
+                typeFullname = null;
+                exit = false;
+                lastIdentifier = String.Empty;
 
-                if (DebugMode) {
-                    OnStep(CreateDebugInformation(statement));
+                foreach (var statement in program.Statements) {
+                    CurrentStatement = statement;
+
+                    if (DebugMode) {
+                        OnStep(CreateDebugInformation(statement));
+                    }
+                    Result = null;
+                    statement.Accept(this);
+
+                    if (exit) {
+                        exit = false;
+                        return;
+                    }
                 }
-                Result = null;
-                statement.Accept(this);
-
-                if (exit) {
-                    exit = false;
-                    return;
-                }
+            } finally {
+                programStack.Pop();
             }
         }
 
