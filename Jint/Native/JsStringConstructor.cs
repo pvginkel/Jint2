@@ -10,38 +10,38 @@ namespace Jint.Native {
     public class JsStringConstructor : JsConstructor {
         public JsStringConstructor(IGlobal global)
             : base(global) {
-            DefineOwnProperty(PROTOTYPE, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontDelete | PropertyAttributes.DontEnum);
+            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontDelete | PropertyAttributes.DontEnum);
             Name = "String";
 
             this["fromCharCode"] = global.FunctionClass.New<JsDictionaryObject>(FromCharCodeImpl);
         }
 
         public override void InitPrototype(IGlobal global) {
-            var Prototype = PrototypeProperty;
+            var prototype = PrototypeProperty;
 
-            Prototype.DefineOwnProperty("split", global.FunctionClass.New<JsDictionaryObject>(SplitImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("replace", global.FunctionClass.New<JsDictionaryObject>(ReplaceImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("match", global.FunctionClass.New<JsDictionaryObject>(MatchFunc), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("localeCompare", global.FunctionClass.New<JsDictionaryObject>(LocaleCompareImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("substring", global.FunctionClass.New<JsDictionaryObject>(SubstringImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("substr", global.FunctionClass.New<JsDictionaryObject>(SubstrImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("search", global.FunctionClass.New<JsDictionaryObject>(SearchImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsString>(ValueOfImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsDictionaryObject>(ConcatImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("charAt", global.FunctionClass.New<JsDictionaryObject>(CharAtImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("charCodeAt", global.FunctionClass.New<JsDictionaryObject>(CharCodeAtImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("lastIndexOf", global.FunctionClass.New<JsDictionaryObject>(LastIndexOfImpl, 1), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("indexOf", global.FunctionClass.New<JsDictionaryObject>(IndexOfImpl, 1), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLowerCase", global.FunctionClass.New<JsDictionaryObject>(ToLowerCaseImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleLowerCase", global.FunctionClass.New<JsDictionaryObject>(ToLocaleLowerCaseImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toUpperCase", global.FunctionClass.New<JsDictionaryObject>(ToUpperCaseImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleUpperCase", global.FunctionClass.New<JsDictionaryObject>(ToLocaleUpperCaseImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("slice", global.FunctionClass.New<JsDictionaryObject>(SliceImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("split", global.FunctionClass.New<JsDictionaryObject>(SplitImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("replace", global.FunctionClass.New<JsDictionaryObject>(ReplaceImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("match", global.FunctionClass.New<JsDictionaryObject>(MatchFunc), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("localeCompare", global.FunctionClass.New<JsDictionaryObject>(LocaleCompareImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("substring", global.FunctionClass.New<JsDictionaryObject>(SubstringImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("substr", global.FunctionClass.New<JsDictionaryObject>(SubstrImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("search", global.FunctionClass.New<JsDictionaryObject>(SearchImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsString>(ValueOfImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsDictionaryObject>(ConcatImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("charAt", global.FunctionClass.New<JsDictionaryObject>(CharAtImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("charCodeAt", global.FunctionClass.New<JsDictionaryObject>(CharCodeAtImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("lastIndexOf", global.FunctionClass.New<JsDictionaryObject>(LastIndexOfImpl, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("indexOf", global.FunctionClass.New<JsDictionaryObject>(IndexOfImpl, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLowerCase", global.FunctionClass.New<JsDictionaryObject>(ToLowerCaseImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleLowerCase", global.FunctionClass.New<JsDictionaryObject>(ToLocaleLowerCaseImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toUpperCase", global.FunctionClass.New<JsDictionaryObject>(ToUpperCaseImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleUpperCase", global.FunctionClass.New<JsDictionaryObject>(ToLocaleUpperCaseImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("slice", global.FunctionClass.New<JsDictionaryObject>(SliceImpl, 2), PropertyAttributes.DontEnum);
 
             #region Properties
-            Prototype.DefineOwnProperty(new PropertyDescriptor<JsDictionaryObject>(global, Prototype, "length", LengthImpl));
+            prototype.DefineOwnProperty(new PropertyDescriptor<JsDictionaryObject>(global, prototype, "length", LengthImpl));
             #endregion
         }
 
@@ -250,7 +250,7 @@ namespace Jint.Native {
         /// <returns></returns>
         public JsInstance MatchFunc(JsDictionaryObject target, JsInstance[] parameters)
         {
-            JsRegExp regexp = parameters[0].Class == JsInstance.CLASS_STRING
+            JsRegExp regexp = parameters[0].Class == JsInstance.ClassString
                 ? Global.RegExpClass.New(parameters[0].ToString(), false, false, false)
                 : (JsRegExp)parameters[0];
 
@@ -300,7 +300,7 @@ namespace Jint.Native {
             string source = target.ToString();
 
             JsFunction function = replaceValue as JsFunction;
-            if (searchValue.Class == JsInstance.CLASS_REGEXP) {
+            if (searchValue.Class == JsInstance.ClassRegexp) {
                 int count = ((JsRegExp)parameters[0]).IsGlobal ? int.MaxValue : 1;
                 var regexp = ((JsRegExp)parameters[0]);
                 int lastIndex = regexp.IsGlobal ? 0 : Math.Max(0, (int)regexp["lastIndex"].ToNumber() - 1);
@@ -391,7 +391,7 @@ namespace Jint.Native {
         /// <returns></returns>
         public JsInstance SearchImpl(JsDictionaryObject target, JsInstance[] parameters) {
             // Converts the parameters to a regex
-            if (parameters[0].Class == JsInstance.CLASS_STRING) {
+            if (parameters[0].Class == JsInstance.ClassString) {
                 parameters[0] = Global.RegExpClass.New(parameters[0].ToString(), false, false, false);
             }
 
@@ -436,30 +436,30 @@ namespace Jint.Native {
         /// <param name="parameters"></param>
         /// <returns></returns>
         public JsInstance SplitImpl(JsDictionaryObject target, JsInstance[] parameters) {
-            JsObject A = Global.ArrayClass.New();
-            string S = target.ToString();
+            JsObject a = Global.ArrayClass.New();
+            string s = target.ToString();
 
             if (parameters.Length == 0 || parameters[0] == JsUndefined.Instance) {
-                A["0"] = Global.StringClass.New(S);
+                a["0"] = Global.StringClass.New(s);
             }
 
             JsInstance separator = parameters[0];
             int limit = parameters.Length > 1 ? Convert.ToInt32(parameters[1].ToNumber()) : Int32.MaxValue;
-            int s = S.Length;
+            int length = s.Length;
             string[] result;
 
-            if (separator.Class == JsInstance.CLASS_REGEXP) {
-                result = ((JsRegExp)parameters[0]).Regex.Split(S, limit);
+            if (separator.Class == JsInstance.ClassRegexp) {
+                result = ((JsRegExp)parameters[0]).Regex.Split(s, limit);
             }
             else {
-                result = S.Split(new string[] { separator.ToString() }, limit, StringSplitOptions.None);
+                result = s.Split(new string[] { separator.ToString() }, limit, StringSplitOptions.None);
             }
 
             for (int i = 0; i < result.Length; i++) {
-                A[i.ToString()] = Global.StringClass.New(result[i]);
+                a[i.ToString()] = Global.StringClass.New(result[i]);
             }
 
-            return A;
+            return a;
         }
 
         /// <summary>

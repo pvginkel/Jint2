@@ -22,26 +22,26 @@ namespace Jint.Native {
                 throw new ArgumentException("the target of call() must be a function");
             }
 
-            JsDictionaryObject _this;
-            JsInstance[] _parameters;
+            JsDictionaryObject @this;
+            JsInstance[] targetParameters;
             if (parameters.Length >= 1 && parameters[0] != JsUndefined.Instance && parameters[0] != JsNull.Instance)
-                _this = parameters[0] as JsDictionaryObject;
+                @this = parameters[0] as JsDictionaryObject;
             else
-                _this = visitor.Global as JsDictionaryObject;
+                @this = visitor.Global as JsDictionaryObject;
 
             if (parameters.Length >= 2 && parameters[1] != JsNull.Instance) {
-                _parameters = new JsInstance[parameters.Length - 1];
+                targetParameters = new JsInstance[parameters.Length - 1];
                 for (int i = 1; i < parameters.Length; i++) {
-                    _parameters[i - 1] = parameters[i];
+                    targetParameters[i - 1] = parameters[i];
                 }
             }
             else {
-                _parameters = JsInstance.EMPTY;
+                targetParameters = JsInstance.Empty;
             }
-            // Executes the statements in 'that' and use _this as the target of the call
-            visitor.ExecuteFunction(function, _this, _parameters);
+            // Executes the statements in 'that' and use @this as the target of the call
+            visitor.ExecuteFunction(function, @this, targetParameters);
             return visitor.Result;
-            //visitor.CallFunction(function, _this, _parameters);
+            //visitor.CallFunction(function, @this, targetParameters);
 
             //return visitor.Result;
         }

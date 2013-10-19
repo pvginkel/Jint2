@@ -23,12 +23,12 @@ namespace Jint.Native {
         {
             get
             {
-                return TYPE_NULL;
+                return TypeNull;
             }
         }
 
         public override string Class {
-            get { return CLASS_OBJECT; }
+            get { return ClassObject; }
         }
 
         public override int Length {

@@ -11,22 +11,10 @@ using System.Security.Permissions;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Jint.Delegates {
-    public delegate void Action();
-    public delegate void Action<T1, T2>(T1 t1, T2 t2);
-    public delegate void Action<T1, T2, T3>(T1 t1, T2 t2, T3 t3);
-
-    public delegate TResult Func<TResult>();
-    public delegate TResult Func<T, TResult>(T t);
-    public delegate TResult Func<T1, T2, TResult>(T1 t1, T2 t2);
-    public delegate TResult Func<T1, T2, T3, TResult>(T1 t1, T2 t2, T3 t3);
-    public delegate TResult Func<T1, T2, T3, T4, TResult>(T1 t1, T2 t2, T3 t3, T4 t4);
-}
-
 namespace Jint {
     [Serializable]
     public class JintEngine {
-        protected ExecutionVisitor Visitor;
+        private ExecutionVisitor _visitor;
 
         [System.Diagnostics.DebuggerStepThrough]
         public JintEngine()
@@ -35,28 +23,28 @@ namespace Jint {
 
         [System.Diagnostics.DebuggerStepThrough]
         public JintEngine(Options options) {
-            Visitor = new ExecutionVisitor(options);
-            permissionSet = new PermissionSet(PermissionState.None);
-            Visitor.AllowClr = allowClr;
+            _visitor = new ExecutionVisitor(options);
+            _permissionSet = new PermissionSet(PermissionState.None);
+            _visitor.AllowClr = _allowClr;
             MaxRecursions = 400;
 
-            var global = Visitor.Global as JsObject;
+            var global = _visitor.Global as JsObject;
 
-            global["ToBoolean"] = Visitor.Global.FunctionClass.New(new Func<object, Boolean>(Convert.ToBoolean));
-            global["ToByte"] = Visitor.Global.FunctionClass.New(new Func<object, Byte>(Convert.ToByte));
-            global["ToChar"] = Visitor.Global.FunctionClass.New(new Func<object, Char>(Convert.ToChar));
-            global["ToDateTime"] = Visitor.Global.FunctionClass.New(new Func<object, DateTime>(Convert.ToDateTime));
-            global["ToDecimal"] = Visitor.Global.FunctionClass.New(new Func<object, Decimal>(Convert.ToDecimal));
-            global["ToDouble"] = Visitor.Global.FunctionClass.New(new Func<object, Double>(Convert.ToDouble));
-            global["ToInt16"] = Visitor.Global.FunctionClass.New(new Func<object, Int16>(Convert.ToInt16));
-            global["ToInt32"] = Visitor.Global.FunctionClass.New(new Func<object, Int32>(Convert.ToInt32));
-            global["ToInt64"] = Visitor.Global.FunctionClass.New(new Func<object, Int64>(Convert.ToInt64));
-            global["ToSByte"] = Visitor.Global.FunctionClass.New(new Func<object, SByte>(Convert.ToSByte));
-            global["ToSingle"] = Visitor.Global.FunctionClass.New(new Func<object, Single>(Convert.ToSingle));
-            global["ToString"] = Visitor.Global.FunctionClass.New(new Func<object, String>(Convert.ToString));
-            global["ToUInt16"] = Visitor.Global.FunctionClass.New(new Func<object, UInt16>(Convert.ToUInt16));
-            global["ToUInt32"] = Visitor.Global.FunctionClass.New(new Func<object, UInt32>(Convert.ToUInt32));
-            global["ToUInt64"] = Visitor.Global.FunctionClass.New(new Func<object, UInt64>(Convert.ToUInt64));
+            global["ToBoolean"] = _visitor.Global.FunctionClass.New(new Func<object, Boolean>(Convert.ToBoolean));
+            global["ToByte"] = _visitor.Global.FunctionClass.New(new Func<object, Byte>(Convert.ToByte));
+            global["ToChar"] = _visitor.Global.FunctionClass.New(new Func<object, Char>(Convert.ToChar));
+            global["ToDateTime"] = _visitor.Global.FunctionClass.New(new Func<object, DateTime>(Convert.ToDateTime));
+            global["ToDecimal"] = _visitor.Global.FunctionClass.New(new Func<object, Decimal>(Convert.ToDecimal));
+            global["ToDouble"] = _visitor.Global.FunctionClass.New(new Func<object, Double>(Convert.ToDouble));
+            global["ToInt16"] = _visitor.Global.FunctionClass.New(new Func<object, Int16>(Convert.ToInt16));
+            global["ToInt32"] = _visitor.Global.FunctionClass.New(new Func<object, Int32>(Convert.ToInt32));
+            global["ToInt64"] = _visitor.Global.FunctionClass.New(new Func<object, Int64>(Convert.ToInt64));
+            global["ToSByte"] = _visitor.Global.FunctionClass.New(new Func<object, SByte>(Convert.ToSByte));
+            global["ToSingle"] = _visitor.Global.FunctionClass.New(new Func<object, Single>(Convert.ToSingle));
+            global["ToString"] = _visitor.Global.FunctionClass.New(new Func<object, String>(Convert.ToString));
+            global["ToUInt16"] = _visitor.Global.FunctionClass.New(new Func<object, UInt16>(Convert.ToUInt16));
+            global["ToUInt32"] = _visitor.Global.FunctionClass.New(new Func<object, UInt32>(Convert.ToUInt32));
+            global["ToUInt64"] = _visitor.Global.FunctionClass.New(new Func<object, UInt64>(Convert.ToUInt64));
 
             BreakPoints = new List<BreakPoint>();
         }
@@ -65,11 +53,11 @@ namespace Jint {
         /// A global object associated with this engine instance
         /// </summary>
         public IGlobal Global {
-            get { return Visitor.Global; }
+            get { return _visitor.Global; }
         }
 
-        private bool allowClr = false;
-        private PermissionSet permissionSet;
+        private bool _allowClr;
+        private PermissionSet _permissionSet;
 
         public static Program Compile(string source, bool debugInformation) {
             Program program = null;
@@ -204,18 +192,18 @@ namespace Jint {
                 throw new
                     ArgumentException("Script can't be null", "script");
 
-            Visitor.DebugMode = this.DebugMode;
-            Visitor.MaxRecursions = this.MaxRecursions;
-            Visitor.PermissionSet = permissionSet;
-            Visitor.AllowClr = allowClr;
-            Visitor.Result = null;
+            _visitor.DebugMode = DebugMode;
+            _visitor.MaxRecursions = MaxRecursions;
+            _visitor.PermissionSet = _permissionSet;
+            _visitor.AllowClr = _allowClr;
+            _visitor.Result = null;
 
             if (DebugMode) {
-                Visitor.Step += OnStep;
+                _visitor.Step += OnStep;
             }
 
             try {
-                Visitor.Visit(program);
+                _visitor.Visit(program);
             }
             catch (SecurityException) {
                 throw;
@@ -228,8 +216,8 @@ namespace Jint {
                 var source = String.Empty;
 
                 if (DebugMode) {
-                    while (Visitor.CallStack.Count > 0) {
-                        stackTrace.AppendLine(Visitor.CallStack.Pop());
+                    while (_visitor.CallStack.Count > 0) {
+                        stackTrace.AppendLine(_visitor.CallStack.Pop());
                     }
 
                     if (stackTrace.Length > 0) {
@@ -237,9 +225,9 @@ namespace Jint {
                     }
                 }
 
-                if (Visitor.CurrentStatement.Source != null) {
-                    source = Environment.NewLine + Visitor.CurrentStatement.Source.ToString()
-                            + Environment.NewLine + Visitor.CurrentStatement.Source.Code;
+                if (_visitor.CurrentStatement.Source != null) {
+                    source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
+                            + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
                 }
 
                 throw new JintException(message + source + stackTrace, e);
@@ -249,8 +237,8 @@ namespace Jint {
                 string source = String.Empty;
 
                 if (DebugMode) {
-                    while (Visitor.CallStack.Count > 0) {
-                        stackTrace.AppendLine(Visitor.CallStack.Pop());
+                    while (_visitor.CallStack.Count > 0) {
+                        stackTrace.AppendLine(_visitor.CallStack.Pop());
                     }
 
                     if (stackTrace.Length > 0) {
@@ -258,18 +246,18 @@ namespace Jint {
                     }
                 }
 
-                if (Visitor.CurrentStatement != null && Visitor.CurrentStatement.Source != null) {
-                    source = Environment.NewLine + Visitor.CurrentStatement.Source.ToString()
-                            + Environment.NewLine + Visitor.CurrentStatement.Source.Code;
+                if (_visitor.CurrentStatement != null && _visitor.CurrentStatement.Source != null) {
+                    source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
+                            + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
                 }
 
                 throw new JintException(e.Message + source + stackTrace, e);
             }
             finally {
-                Visitor.Step -= OnStep;
+                _visitor.Step -= OnStep;
             }
 
-            return Visitor.Result == null ? null : unwrap ? Visitor.Global.Marshaller.MarshalJsValue<object>( Visitor.Result) : Visitor.Result;
+            return _visitor.Result == null ? null : unwrap ? _visitor.Global.Marshaller.MarshalJsValue<object>( _visitor.Result) : _visitor.Result;
         }
 
         #region Debugger
@@ -304,7 +292,7 @@ namespace Jint {
         /// <param name="value">Available object</param>
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, object value) {
-            Visitor.GlobalScope[name] = Visitor.Global.WrapClr(value);
+            _visitor.GlobalScope[name] = _visitor.Global.WrapClr(value);
             return this;
         }
 
@@ -315,7 +303,7 @@ namespace Jint {
         /// <param name="value">Available Double value</param>
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, double value) {
-            Visitor.GlobalScope[name] = Visitor.Global.NumberClass.New(value);
+            _visitor.GlobalScope[name] = _visitor.Global.NumberClass.New(value);
             return this;
         }
 
@@ -327,9 +315,9 @@ namespace Jint {
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, string value) {
             if (value == null)
-                Visitor.GlobalScope[name] = JsNull.Instance;
+                _visitor.GlobalScope[name] = JsNull.Instance;
             else
-                Visitor.GlobalScope[name] = Visitor.Global.StringClass.New(value);
+                _visitor.GlobalScope[name] = _visitor.Global.StringClass.New(value);
             return this;
         }
 
@@ -340,7 +328,7 @@ namespace Jint {
         /// <param name="value">Available Int32 value</param>
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, int value) {
-            Visitor.GlobalScope[name] = Visitor.Global.WrapClr(value);
+            _visitor.GlobalScope[name] = _visitor.Global.WrapClr(value);
             return this;
         }
 
@@ -351,7 +339,7 @@ namespace Jint {
         /// <param name="value">Available Boolean value</param>
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, bool value) {
-            Visitor.GlobalScope[name] = Visitor.Global.BooleanClass.New(value);
+            _visitor.GlobalScope[name] = _visitor.Global.BooleanClass.New(value);
             return this;
         }
 
@@ -362,36 +350,36 @@ namespace Jint {
         /// <param name="value">Available DateTime value</param>
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, DateTime value) {
-            Visitor.GlobalScope[name] = Visitor.Global.DateClass.New(value);
+            _visitor.GlobalScope[name] = _visitor.Global.DateClass.New(value);
             return this;
         }
         #endregion
 
         public JintEngine AddPermission(IPermission perm) {
-            permissionSet.AddPermission(perm);
+            _permissionSet.AddPermission(perm);
             return this;
         }
 
         public JintEngine SetFunction(string name, JsFunction function) {
-            Visitor.GlobalScope[name] = function;
+            _visitor.GlobalScope[name] = function;
             return this;
         }
 
         public object CallFunction(string name, params object[] args) {
-            JsInstance oldResult = Visitor.Result;
-            Visitor.Visit(new Identifier(name));
-            var returnValue = CallFunction((JsFunction)Visitor.Result, args);
-            Visitor.Result = oldResult;
+            JsInstance oldResult = _visitor.Result;
+            _visitor.Visit(new Identifier(name));
+            var returnValue = CallFunction((JsFunction)_visitor.Result, args);
+            _visitor.Result = oldResult;
             return returnValue;
         }
 
         public object CallFunction(JsFunction function, params object[] args) {
-            Visitor.ExecuteFunction(function, null, Array.ConvertAll<object,JsInstance>( args, x => Visitor.Global.Marshaller.MarshalClrValue<object>(x) ));
-            return Visitor.Global.Marshaller.MarshalJsValue<object>(Visitor.Returned);
+            _visitor.ExecuteFunction(function, null, Array.ConvertAll<object,JsInstance>( args, x => _visitor.Global.Marshaller.MarshalClrValue<object>(x) ));
+            return _visitor.Global.Marshaller.MarshalJsValue<object>(_visitor.Returned);
         }
 
         public JintEngine SetFunction(string name, Delegate function) {
-            Visitor.GlobalScope[name] = Visitor.Global.FunctionClass.New(function);
+            _visitor.GlobalScope[name] = _visitor.Global.FunctionClass.New(function);
             return this;
         }
 
@@ -428,7 +416,7 @@ namespace Jint {
                     }
 
                     if (!String.IsNullOrEmpty(l.Condition)) {
-                        return Convert.ToBoolean(this.Run(l.Condition));
+                        return Convert.ToBoolean(Run(l.Condition));
                     }
 
                     return true;
@@ -448,37 +436,37 @@ namespace Jint {
         }
 
         public JintEngine DisableSecurity() {
-            permissionSet = new PermissionSet(PermissionState.Unrestricted);
+            _permissionSet = new PermissionSet(PermissionState.Unrestricted);
             return this;
         }
 
         public JintEngine AllowClr()
         {
-            allowClr = true;
+            _allowClr = true;
             return this;
         }
 
         public JintEngine AllowClr(bool value)
         {
-            allowClr = value;
+            _allowClr = value;
             return this;
         }
 
         public JintEngine EnableSecurity()
         {
-            permissionSet = new PermissionSet(PermissionState.None);
+            _permissionSet = new PermissionSet(PermissionState.None);
             return this;
         }
 
         public void Save(Stream s) {
             BinaryFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(s, Visitor);
+            formatter.Serialize(s, _visitor);
         }
 
         public static void Load(JintEngine engine, Stream s) {
             BinaryFormatter formatter = new BinaryFormatter();
             var visitor = (ExecutionVisitor)formatter.Deserialize(s);
-            engine.Visitor = visitor;
+            engine._visitor = visitor;
         }
 
         public static JintEngine Load(Stream s) {

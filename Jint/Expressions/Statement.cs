@@ -8,14 +8,10 @@ namespace Jint.Expressions {
         public string Label { get; set; }
 
         public abstract void Accept(IStatementVisitor visitor);
-        protected SourceCodeDescriptor source;
 
-        public SourceCodeDescriptor Source {
-            get { return source; }
-            set { source = value; }
-        }
+        public SourceCodeDescriptor Source { get; set; }
 
-        public Statement() {
+        protected Statement() {
             Label = String.Empty;
         }
     }

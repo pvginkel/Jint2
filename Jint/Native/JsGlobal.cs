@@ -19,8 +19,8 @@ namespace Jint.Native {
 
         public JsGlobal(ExecutionVisitor visitor, Options options)
             : base(JsNull.Instance) {
-            this.Options = options;
-            this.Visitor = visitor;
+            Options = options;
+            Visitor = visitor;
 
             this["null"] = JsNull.Instance;
             JsObject objectProrotype = new JsObject(JsNull.Instance);
@@ -58,11 +58,11 @@ namespace Jint.Native {
             this["Math"] = MathClass = new JsMathConstructor(this);
 
             // 15.1 prototype of the global object varies on the implementation
-            //this.Prototype = ObjectClass.PrototypeProperty;
+            //Prototype = ObjectClass.PrototypeProperty;
             #endregion
 
 
-            foreach (JsInstance c in this.GetValues()) {
+            foreach (JsInstance c in GetValues()) {
                 if (c is JsConstructor) {
                     ((JsConstructor)c).InitPrototype(this);
                 }
@@ -72,7 +72,7 @@ namespace Jint.Native {
             this["NaN"] = NumberClass["NaN"];  // 15.1.1.1
             this["Infinity"] = NumberClass["POSITIVE_INFINITY"]; // // 15.1.1.2
             this["undefined"] = JsUndefined.Instance; // 15.1.1.3
-            this[JsScope.THIS] = this;
+            this[JsScope.This] = this;
             #endregion
 
             #region Global Functions
@@ -81,7 +81,7 @@ namespace Jint.Native {
             this["parseInt"] = new JsFunctionWrapper(ParseInt, FunctionClass.PrototypeProperty); // 15.1.2.2
             this["parseFloat"] = new JsFunctionWrapper(ParseFloat, FunctionClass.PrototypeProperty); // 15.1.2.3
             this["isNaN"] = new JsFunctionWrapper(IsNaN, FunctionClass.PrototypeProperty);
-            this["isFinite"] = new JsFunctionWrapper(isFinite, FunctionClass.PrototypeProperty);
+            this["isFinite"] = new JsFunctionWrapper(IsFinite, FunctionClass.PrototypeProperty);
             this["decodeURI"] = new JsFunctionWrapper(DecodeURI, FunctionClass.PrototypeProperty);
             this["encodeURI"] = new JsFunctionWrapper(EncodeURI, FunctionClass.PrototypeProperty);
             this["decodeURIComponent"] = new JsFunctionWrapper(DecodeURIComponent, FunctionClass.PrototypeProperty);
@@ -96,7 +96,7 @@ namespace Jint.Native {
         {
             get
             {
-                return CLASS_GLOBAL;
+                return ClassGlobal;
             }
         }
 
@@ -125,7 +125,7 @@ namespace Jint.Native {
         /// 15.1.2.1
         /// </summary>
         public JsInstance Eval(JsInstance[] arguments) {
-            if (JsInstance.CLASS_STRING != arguments[0].Class) {
+            if (JsInstance.ClassString != arguments[0].Class) {
                 return arguments[0];
             }
 
@@ -135,14 +135,14 @@ namespace Jint.Native {
                 p = JintEngine.Compile(arguments[0].ToString(), Visitor.DebugMode);
             }
             catch (Exception e) {
-                throw new JsException(this.SyntaxErrorClass.New(e.Message));
+                throw new JsException(SyntaxErrorClass.New(e.Message));
             }
 
             try {
                 p.Accept((IStatementVisitor)Visitor);
             }
             catch (Exception e) {
-                throw new JsException(this.EvalErrorClass.New(e.Message));
+                throw new JsException(EvalErrorClass.New(e.Message));
             }
 
             return Visitor.Result;
@@ -251,7 +251,7 @@ namespace Jint.Native {
         /// <summary>
         /// 15.1.2.5
         /// </summary>
-        protected JsInstance isFinite(JsInstance[] arguments) {
+        protected JsInstance IsFinite(JsInstance[] arguments) {
             if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
                 return BooleanClass.False;
             }
@@ -268,50 +268,50 @@ namespace Jint.Native {
                 return StringClass.New();
             }
 
-            return this.StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
+            return StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
         }
 
-        private static char[] reservedEncoded = new char[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
-        private static char[] reservedEncodedComponent = new char[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
+        private static readonly char[] ReservedEncoded = new char[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
+        private static readonly char[] ReservedEncodedComponent = new char[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
 
         protected JsInstance EncodeURI(JsInstance[] arguments) {
             if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
-                return this.StringClass.New();
+                return StringClass.New();
             }
 
             string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
-            foreach (char c in reservedEncoded) {
+            foreach (char c in ReservedEncoded) {
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString());
             }
 
-            foreach (char c in reservedEncodedComponent) {
+            foreach (char c in ReservedEncodedComponent) {
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString());
             }
 
-            return this.StringClass.New(encoded.ToUpper());
+            return StringClass.New(encoded.ToUpper());
         }
 
         protected JsInstance DecodeURIComponent(JsInstance[] arguments) {
             if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
-                return this.StringClass.New();
+                return StringClass.New();
             }
 
-            return this.StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
+            return StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
         }
 
         protected JsInstance EncodeURIComponent(JsInstance[] arguments) {
             if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
-                return this.StringClass.New();
+                return StringClass.New();
             }
 
             string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
-            foreach (char c in reservedEncodedComponent) {
+            foreach (char c in ReservedEncodedComponent) {
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString().ToUpper());
             }
 
-            return this.StringClass.New(encoded);
+            return StringClass.New(encoded);
         }
 
         #endregion

@@ -15,7 +15,9 @@ namespace Jint.Shell {
             var jint = new JintEngine();
 
             jint.SetFunction("print", new Action<object>(s => { Console.ForegroundColor = ConsoleColor.Blue; Console.Write(s); Console.ResetColor(); }));
+#pragma warning disable 612,618
             jint.SetFunction("import", new Action<string>(s => { Assembly.LoadWithPartialName(s); }));
+#pragma warning restore 612,618
             jint.DisableSecurity();
 
             while (true) {

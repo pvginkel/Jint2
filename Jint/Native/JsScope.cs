@@ -11,20 +11,20 @@ namespace Jint.Native {
     /// </remarks>
     [Serializable]
     public class JsScope : JsDictionaryObject {
-        private Descriptor thisDescriptor;
-        private Descriptor argumentsDescriptor;
-        private JsScope globalScope;
-        private JsDictionaryObject bag;
+        private Descriptor _thisDescriptor;
+        private Descriptor _argumentsDescriptor;
+        private readonly JsScope _globalScope;
+        private readonly JsDictionaryObject _bag;
 
-        public static string THIS = "this";
-        public static string ARGUMENTS = "arguments";
+        public static string This = "this";
+        public static string Arguments = "arguments";
 
         /// <summary>
         /// Creates a new Global scope
         /// </summary>
         public JsScope()
             : base(JsNull.Instance) {
-            globalScope = null;
+            _globalScope = null;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Jint.Native {
             if (outer == null)
                 throw new ArgumentNullException("outer");
 
-            globalScope = outer.Global;
+            _globalScope = outer.Global;
         }
 
         public JsScope(JsScope outer, JsDictionaryObject bag)
@@ -45,49 +45,49 @@ namespace Jint.Native {
                 throw new ArgumentNullException("outer");
             if (bag == null)
                 throw new ArgumentNullException("bag");
-            globalScope = outer.Global;
-            this.bag = bag;
+            _globalScope = outer.Global;
+            _bag = bag;
         }
 
         public JsScope(JsDictionaryObject bag)
             : base(JsNull.Instance) {
-            this.bag = bag;
+            _bag = bag;
         }
 
         public override string Class {
-            get { return CLASS_SCOPE; }
+            get { return ClassScope; }
         }
 
         public override string Type
         {
-            get { return TYPE_OBJECT; }
+            get { return TypeObject; }
         }
 
         public JsScope Global {
-            get { return globalScope ?? this; }
+            get { return _globalScope ?? this; }
         }
 
         public override JsInstance this[string index] {
             get {
-                if (index == THIS && thisDescriptor != null)
-                    return thisDescriptor.Get(this);
-                if (index == ARGUMENTS && argumentsDescriptor != null)
-                    return argumentsDescriptor.Get(this);
+                if (index == This && _thisDescriptor != null)
+                    return _thisDescriptor.Get(this);
+                if (index == Arguments && _argumentsDescriptor != null)
+                    return _argumentsDescriptor.Get(this);
                 return base[index]; // will use overriden GetDescriptor
             }
             set {
-                if (index == THIS) {
-                    if (thisDescriptor != null)
-                        thisDescriptor.Set(this, value);
+                if (index == This) {
+                    if (_thisDescriptor != null)
+                        _thisDescriptor.Set(this, value);
                     else {
-                        DefineOwnProperty(thisDescriptor = new ValueDescriptor(this, index, value));
+                        DefineOwnProperty(_thisDescriptor = new ValueDescriptor(this, index, value));
                     }
                 }
-                else if (index == ARGUMENTS) {
-                    if (argumentsDescriptor != null)
-                        argumentsDescriptor.Set(this, value);
+                else if (index == Arguments) {
+                    if (_argumentsDescriptor != null)
+                        _argumentsDescriptor.Set(this, value);
                     else {
-                        DefineOwnProperty(argumentsDescriptor = new ValueDescriptor(this, index, value));
+                        DefineOwnProperty(_argumentsDescriptor = new ValueDescriptor(this, index, value));
                     }
                 }
                 else {
@@ -95,10 +95,10 @@ namespace Jint.Native {
                     if (d != null) {
                         d.Set(this, value);
                     }
-                    else if (globalScope != null) {
+                    else if (_globalScope != null) {
                         // TODO: move to Execution visitor
                         // define missing property in the global scope
-                        globalScope.DefineOwnProperty(index, value);
+                        _globalScope.DefineOwnProperty(index, value);
                     }
                     else {
                         // this scope is a global scope
@@ -127,8 +127,8 @@ namespace Jint.Native {
             if ((own = base.GetDescriptor(index)) != null && own.Owner == this)
                 return own;
 
-            if (bag != null && (d = bag.GetDescriptor(index)) != null) {
-                Descriptor link = new LinkedDescriptor(this, d.Name, d, bag);
+            if (_bag != null && (d = _bag.GetDescriptor(index)) != null) {
+                Descriptor link = new LinkedDescriptor(this, d.Name, d, _bag);
                 DefineOwnProperty(link);
                 return link;
             }
@@ -137,21 +137,21 @@ namespace Jint.Native {
         }
 
         public override IEnumerable<string> GetKeys() {
-            if (bag != null) {
-                foreach (var key in bag.GetKeys())
-                    if (baseGetDescriptor(key) == null)
+            if (_bag != null) {
+                foreach (var key in _bag.GetKeys())
+                    if (BaseGetDescriptor(key) == null)
                         yield return key;
             }
-            foreach (var key in baseGetKeys())
+            foreach (var key in BaseGetKeys())
                 yield return key;
         }
 
-        private Descriptor baseGetDescriptor(string key)
+        private Descriptor BaseGetDescriptor(string key)
         {
             return base.GetDescriptor(key);
         }
 
-        private IEnumerable<string> baseGetKeys()
+        private IEnumerable<string> BaseGetKeys()
         {
             return base.GetKeys();
         }
@@ -163,17 +163,17 @@ namespace Jint.Native {
 
         public override bool IsClr {
             get {
-                return bag != null ? bag.IsClr : false;
+                return _bag != null ? _bag.IsClr : false;
             }
         }
 
         public override object Value {
             get {
-                return bag != null ? bag.Value : null;
+                return _bag != null ? _bag.Value : null;
             }
             set {
-                if (bag != null)
-                    bag.Value = value;
+                if (_bag != null)
+                    _bag.Value = value;
             }
         }
 

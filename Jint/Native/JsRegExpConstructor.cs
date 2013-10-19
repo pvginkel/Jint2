@@ -10,18 +10,18 @@ namespace Jint.Native {
         public JsRegExpConstructor(IGlobal global)
             : base(global) {
             Name = "RegExp";
-            DefineOwnProperty(PROTOTYPE, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
         }
 
         public override void InitPrototype(IGlobal global) {
-            var Prototype = PrototypeProperty;
-            //Prototype = global.ObjectClass.New(this);
+            var prototype = PrototypeProperty;
+            //prototype = global.ObjectClass.New(this);
 
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("lastIndex", global.FunctionClass.New<JsRegExp>(GetLastIndex), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("exec", global.FunctionClass.New<JsRegExp>(ExecImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("test", global.FunctionClass.New<JsRegExp>(TestImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("lastIndex", global.FunctionClass.New<JsRegExp>(GetLastIndex), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("exec", global.FunctionClass.New<JsRegExp>(ExecImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("test", global.FunctionClass.New<JsRegExp>(TestImpl), PropertyAttributes.DontEnum);
         }
 
         public JsInstance GetLastIndex(JsRegExp regex, JsInstance[] parameters) {
@@ -43,16 +43,16 @@ namespace Jint.Native {
 
         public JsInstance ExecImpl(JsRegExp regexp, JsInstance[] parameters)
         {
-            JsArray A = Global.ArrayClass.New();
+            JsArray a = Global.ArrayClass.New();
             string input = parameters[0].ToString();
-            A["input"] = Global.StringClass.New(input);
+            a["input"] = Global.StringClass.New(input);
 
             int i = 0;
             var lastIndex = regexp.IsGlobal ? regexp["lastIndex"].ToNumber() : 0;
             MatchCollection matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
             if (matches.Count > 0) {
                 // A[Global.NumberClass.New(i++)] = Global.StringClass.New(matches[0].Value);
-                A["index"] = Global.NumberClass.New(matches[0].Index);
+                a["index"] = Global.NumberClass.New(matches[0].Index);
 
                 if(regexp.IsGlobal)
                 {
@@ -60,10 +60,10 @@ namespace Jint.Native {
                 }
 
                 foreach (Group g in matches[0].Groups) {
-                    A[Global.NumberClass.New(i++)] = Global.StringClass.New(g.Value);
+                    a[Global.NumberClass.New(i++)] = Global.StringClass.New(g.Value);
                 }
                 
-                return A;
+                return a;
             }
             else
             {

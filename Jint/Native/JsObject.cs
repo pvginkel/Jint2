@@ -13,7 +13,7 @@ namespace Jint.Native {
 
         public JsObject(object value, JsObject prototype)
             : base(prototype) {
-            this.value = value;
+            _value = value;
         }
 
         public JsObject(JsObject prototype)
@@ -28,18 +28,18 @@ namespace Jint.Native {
         }
 
         public override string Class {
-            get { return CLASS_OBJECT; }
+            get { return ClassObject; }
         }
 
         public override string Type {
-            get { return TYPE_OBJECT; }
+            get { return TypeObject; }
         }
 
-        protected object value;
+        private object _value;
 
         public override object Value {
-            get { return value; }
-            set { this.value = value; }
+            get { return _value; }
+            set { _value = value; }
         }
 
         public override int GetHashCode() {
@@ -130,14 +130,14 @@ namespace Jint.Native {
         }
 
         public override string ToString() {
-            if (value == null) {
+            if (_value == null) {
                 return null;
             }
 
-            if (value is IConvertible)
+            if (_value is IConvertible)
                 return Convert.ToString(Value);
 
-            return value.ToString();
+            return _value.ToString();
         }
         #endregion
     }

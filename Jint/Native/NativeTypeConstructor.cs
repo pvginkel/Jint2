@@ -10,7 +10,7 @@ namespace Jint.Native
             : base(typeof(Type), global,typePrototype,typePrototype)
         {
             // redefine prototype
-            DefineOwnProperty(PROTOTYPE, typePrototype);
+            DefineOwnProperty(PrototypeName, typePrototype);
         }
 
         /// <summary>

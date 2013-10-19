@@ -15,31 +15,31 @@ namespace Jint.Native
         public NativeDescriptor(JsDictionaryObject owner, string name, JsGetter getter)
             : base(owner, name)
         {
-            this.getter = getter;
+            _getter = getter;
             Writable = false;
         }
 
         public NativeDescriptor(JsDictionaryObject owner, string name, JsGetter getter, JsSetter setter)
             : base(owner, name)
         {
-            this.getter = getter;
-            this.setter = setter;
+            _getter = getter;
+            _setter = setter;
         }
 
         public NativeDescriptor(JsDictionaryObject owner, NativeDescriptor src)
             : base(owner, src.Name)
         {
-            getter = src.getter;
-            setter = src.setter;
+            _getter = src._getter;
+            _setter = src._setter;
             Writable = src.Writable;
             Configurable = src.Configurable;
             Enumerable = src.Enumerable;
         }
 
-        JsGetter getter;
-        JsSetter setter;
+        private readonly JsGetter _getter;
+        private readonly JsSetter _setter;
 
-        public override bool isReference {
+        public override bool IsReference {
             get { return false; }
         }
 
@@ -49,13 +49,13 @@ namespace Jint.Native
 
         public override JsInstance Get(JsDictionaryObject that)
         {
-            return getter != null ? getter(that) : JsUndefined.Instance ;
+            return _getter != null ? _getter(that) : JsUndefined.Instance ;
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value)
         {
-            if (setter != null)
-                setter(that, value);
+            if (_setter != null)
+                _setter(that, value);
         }
 
         internal override DescriptorType DescriptorType

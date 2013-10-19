@@ -13,16 +13,16 @@ namespace Jint.Native
     /// </summary>
     public class NativeMethod: JsFunction {
 
-        MethodInfo m_nativeMethod;
-        JsMethodImpl m_impl;
+        private readonly MethodInfo _nativeMethod;
+        private readonly JsMethodImpl _impl;
 
         public NativeMethod(JsMethodImpl impl, MethodInfo nativeMethod , JsObject prototype) :
             base(prototype)
         {
             if (impl == null)
                 throw new ArgumentNullException("impl");
-            m_nativeMethod = nativeMethod;
-            m_impl = impl;
+            _nativeMethod = nativeMethod;
+            _impl = impl;
             if (nativeMethod != null)
             {
                 Name = nativeMethod.Name;
@@ -46,8 +46,8 @@ namespace Jint.Native
             if (global == null)
                 throw new ArgumentNullException("global");
 
-            m_nativeMethod = info;
-            m_impl = global.Marshaller.WrapMethod(info, true);
+            _nativeMethod = info;
+            _impl = global.Marshaller.WrapMethod(info, true);
             Name = info.Name;
 
             foreach (var item in info.GetParameters())
@@ -64,12 +64,12 @@ namespace Jint.Native
 
         public MethodInfo GetWrappedMethod()
         {
-            return m_nativeMethod;
+            return _nativeMethod;
         }
 
         public override JsInstance Execute(Jint.Expressions.IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters)
         {
-            visitor.Return( m_impl(visitor.Global, that, parameters) );
+            visitor.Return( _impl(visitor.Global, that, parameters) );
             return that;
         }
 

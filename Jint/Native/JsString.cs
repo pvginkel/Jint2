@@ -7,21 +7,21 @@ using Jint.Delegates;
 namespace Jint.Native {
     [Serializable]
     public sealed class JsString : JsObject, ILiteral {
-        private string value;
+        private readonly string _value;
 
         public override object Value {
             get {
-                return value;
+                return _value;
             }
         }
         public JsString(JsObject prototype)
             : base(prototype) {
-            value = String.Empty;
+            _value = String.Empty;
         }
 
         public JsString(string str, JsObject prototype)
             : base(prototype) {
-            value = str;
+            _value = str;
         }
 
         public static bool StringToBoolean(string value) {
@@ -43,7 +43,7 @@ namespace Jint.Native {
         }
 
         public override bool ToBoolean() {
-            return StringToBoolean(value);
+            return StringToBoolean(_value);
         }
 
         public static double StringToNumber(string value) {
@@ -62,32 +62,32 @@ namespace Jint.Native {
         }
 
         public override double ToNumber() {
-            return StringToNumber(value);
+            return StringToNumber(_value);
         }
 
         public override string ToSource() {
             /// TODO: subsitute escape sequences
-            return value == null ? "null" : "'" + ToString() + "'";
+            return _value == null ? "null" : "'" + ToString() + "'";
         }
 
         public override string ToString() {
-            return value.ToString();
+            return _value.ToString();
         }
 
         public override string Class {
-            get { return CLASS_STRING; }
+            get { return ClassString; }
         }
 
         public override string Type
         {
             get
             {
-                return TYPE_STRING;
+                return TypeString;
             }
         }
 
         public override int GetHashCode() {
-            return value.GetHashCode();
+            return _value.GetHashCode();
         }
     }
 }

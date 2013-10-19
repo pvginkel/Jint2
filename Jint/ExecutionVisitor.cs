@@ -14,20 +14,19 @@ namespace Jint {
 
     public class ExecutionVisitor : IStatementVisitor, IJintVisitor{
         struct ResultInfo {
-            public JsDictionaryObject baseObject;
-            public JsInstance result;
+            public JsDictionaryObject BaseObject;
+            public JsInstance Result;
         }
 
-        protected internal ITypeResolver typeResolver;
+        private ITypeResolver _typeResolver;
 
         public IGlobal Global { get; private set; }
         public JsScope GlobalScope { get; private set; }
 
         protected Stack<JsScope> Scopes = new Stack<JsScope>();
 
-        protected bool exit;
-        protected JsInstance returnInstance;
-        protected int recursionLevel;
+        private bool _exit;
+        private int _recursionLevel;
 
         public event EventHandler<DebugInformation> Step;
         public Stack<string> CallStack { get; set; }
@@ -36,39 +35,38 @@ namespace Jint {
         public bool DebugMode { get; set; }
         public int MaxRecursions { get; set; }
 
-        public JsInstance Returned { get { return returnInstance; } }
+        public JsInstance Returned { get; private set; }
         public bool AllowClr { get; set; }
         public PermissionSet PermissionSet { get; set; }
         
-        private StringBuilder typeFullname;
-        private string lastIdentifier = String.Empty;
-        private Stack<Program> programStack = new Stack<Program>();
+        private StringBuilder _typeFullName;
+        private string _lastIdentifier = String.Empty;
+        private readonly Stack<Program> _programStack = new Stack<Program>();
 
-        ResultInfo lastResult;
-        Stack<ResultInfo> stackResults = new Stack<ResultInfo>();
+        private ResultInfo _lastResult;
 
         public JsDictionaryObject CallTarget {
             get {
-                return lastResult.baseObject;
+                return _lastResult.BaseObject;
             }
         }
         public JsInstance Result {
             get {
-                return lastResult.result;
+                return _lastResult.Result;
             }
             set {
-                lastResult.result = value;
-                lastResult.baseObject = null;
+                _lastResult.Result = value;
+                _lastResult.BaseObject = null;
             }
         }
 
         public void SetResult(JsInstance value, JsDictionaryObject baseObject) {
-            lastResult.result = value;
-            lastResult.baseObject = baseObject;
+            _lastResult.Result = value;
+            _lastResult.BaseObject = baseObject;
         }
 
         public ExecutionVisitor(Options options) {
-            typeResolver = CachedTypeResolver.Default;
+            _typeResolver = CachedTypeResolver.Default;
 
             Global = new JsGlobal(this, options);
             GlobalScope = new JsScope(Global as JsObject);
@@ -78,19 +76,19 @@ namespace Jint {
             CallStack = new Stack<string>();
         }
 
-        public ExecutionVisitor(IGlobal GlobalObject, JsScope Scope) {
-            if (GlobalObject == null)
-                throw new ArgumentNullException("GlobalObject");
-            if (Scope == null)
-                throw new ArgumentNullException("Scope");
+        public ExecutionVisitor(IGlobal globalObject, JsScope scope) {
+            if (globalObject == null)
+                throw new ArgumentNullException("globalObject");
+            if (scope == null)
+                throw new ArgumentNullException("scope");
 
-            typeResolver = CachedTypeResolver.Default;
+            _typeResolver = CachedTypeResolver.Default;
 
-            Global = GlobalObject;
-            GlobalScope = Scope.Global;
+            Global = globalObject;
+            GlobalScope = scope.Global;
             MaxRecursions = 500;
 
-            EnterScope(Scope);
+            EnterScope(scope);
             CallStack = new Stack<string>();
         }
 
@@ -106,7 +104,7 @@ namespace Jint {
             info.CallStack = CallStack;
             info.Scopes = Scopes;
             info.Locals = new JsObject(JsNull.Instance);
-            info.Program = programStack.Peek();
+            info.Program = _programStack.Peek();
             DebugMode = false;
 
             foreach (var property in CurrentScope.GetKeys())
@@ -134,13 +132,13 @@ namespace Jint {
         }
 
         public void Visit(Program program) {
-            programStack.Push(program);
+            _programStack.Push(program);
 
             try {
                 // initialize local variables, in case the visitor is used multiple times by the same engine
-                typeFullname = null;
-                exit = false;
-                lastIdentifier = String.Empty;
+                _typeFullName = null;
+                _exit = false;
+                _lastIdentifier = String.Empty;
 
                 foreach (var statement in program.Statements) {
                     CurrentStatement = statement;
@@ -151,13 +149,13 @@ namespace Jint {
                     Result = null;
                     statement.Accept(this);
 
-                    if (exit) {
-                        exit = false;
+                    if (_exit) {
+                        _exit = false;
                         return;
                     }
                 }
             } finally {
-                programStack.Pop();
+                _programStack.Pop();
             }
         }
 
@@ -253,7 +251,7 @@ namespace Jint {
                     JsObject target = baseObject as JsObject;
                     if (target.Indexer != null)
                     {
-                        target.Indexer.set(target, Result, value);
+                        target.Indexer.Set(target, Result, value);
                         Result = value;
                         return;
                     }
@@ -290,7 +288,7 @@ namespace Jint {
                 }
 
                 Result = null;
-                typeFullname = null;
+                _typeFullName = null;
 
                 s.Accept(this);
 
@@ -301,14 +299,16 @@ namespace Jint {
             CurrentStatement = oldStatement;
         }
 
-        protected ContinueStatement continueStatement = null;
+        private ContinueStatement _continueStatement;
+
         public void Visit(ContinueStatement statement) {
-            continueStatement = statement;
+            _continueStatement = statement;
         }
 
-        protected BreakStatement breakStatement = null;
+        private BreakStatement _breakStatement;
+
         public void Visit(BreakStatement statement) {
-            breakStatement = statement;
+            _breakStatement = statement;
         }
 
         public void Visit(DoWhileStatement statement) {
@@ -318,8 +318,8 @@ namespace Jint {
                 ResetContinueIfPresent(statement.Label);
 
                 if (StopStatementFlow()) {
-                    if (breakStatement != null && statement.Label == breakStatement.Label) {
-                        breakStatement = null;
+                    if (_breakStatement != null && statement.Label == _breakStatement.Label) {
+                        _breakStatement = null;
                     }
 
                     return;
@@ -371,8 +371,8 @@ namespace Jint {
                     ResetContinueIfPresent(statement.Label);
 
                     if (StopStatementFlow()) {
-                        if (breakStatement != null && statement.Label == breakStatement.Label) {
-                            breakStatement = null;
+                        if (_breakStatement != null && statement.Label == _breakStatement.Label) {
+                            _breakStatement = null;
                         }
 
                         return;
@@ -395,8 +395,8 @@ namespace Jint {
                     ResetContinueIfPresent(statement.Label);
 
                     if (StopStatementFlow()) {
-                        if (breakStatement != null && statement.Label == breakStatement.Label) {
-                            breakStatement = null;
+                        if (_breakStatement != null && statement.Label == _breakStatement.Label) {
+                            _breakStatement = null;
                         }
 
                         return;
@@ -445,8 +445,8 @@ namespace Jint {
                 ResetContinueIfPresent(statement.Label);
 
                 if (StopStatementFlow()) {
-                    if (breakStatement != null && statement.Label == breakStatement.Label) {
-                        breakStatement = null;
+                    if (_breakStatement != null && statement.Label == _breakStatement.Label) {
+                        _breakStatement = null;
                     }
 
                     return;
@@ -514,12 +514,12 @@ namespace Jint {
                 Return(Result);
             }
 
-            exit = true;
+            _exit = true;
         }
 
         public JsInstance Return(JsInstance instance) {
-            returnInstance = instance;
-            return returnInstance;
+            Returned = instance;
+            return Returned;
         }
 
         public void Visit(SwitchStatement statement) {
@@ -533,20 +533,20 @@ namespace Jint {
                     if (found) {
                         // jumping from one case to the next one
                         clause.Statements.Accept(this);
-                        if (exit)
+                        if (_exit)
                             break;
                     } else {
                         new BinaryExpression(BinaryExpressionType.Equal, (Expression)statement.Expression, clause.Expression).Accept(this);
                         if (Result.ToBoolean()) {
                             clause.Statements.Accept(this);
                             found = true;
-                            if (exit)
+                            if (_exit)
                                 break;
                         }
                     }
 
-                    if (breakStatement != null) {
-                        breakStatement = null;
+                    if (_breakStatement != null) {
+                        _breakStatement = null;
                         break;
                     }
                 }
@@ -556,8 +556,8 @@ namespace Jint {
                 statement.DefaultStatements.Accept(this);
 
                 // handle break statements in default case by clearing it
-                if (breakStatement != null) {
-                    breakStatement = null;
+                if (_breakStatement != null) {
+                    _breakStatement = null;
                 }
             }
         }
@@ -644,8 +644,8 @@ namespace Jint {
                 ResetContinueIfPresent(statement.Label);
 
                 if (StopStatementFlow()) {
-                    if (breakStatement != null && statement.Label == breakStatement.Label) {
-                        breakStatement = null;
+                    if (_breakStatement != null && statement.Label == _breakStatement.Label) {
+                        _breakStatement = null;
                     }
 
                     return;
@@ -661,10 +661,10 @@ namespace Jint {
 
             expression.Expression.Accept(this);
 
-            if (AllowClr && Result == JsUndefined.Instance && typeFullname != null && typeFullname.Length > 0 && expression.Generics.Count > 0)
+            if (AllowClr && Result == JsUndefined.Instance && _typeFullName != null && _typeFullName.Length > 0 && expression.Generics.Count > 0)
             {
-                string typeName = typeFullname.ToString();
-                typeFullname = new StringBuilder();
+                string typeName = _typeFullName.ToString();
+                _typeFullName = new StringBuilder();
 
                 var genericParameters = new Type[expression.Generics.Count];
 
@@ -684,7 +684,7 @@ namespace Jint {
                 }
 
                 typeName += "`" + genericParameters.Length;
-                Result = Global.Marshaller.MarshalClrValue<Type>(typeResolver.ResolveType(typeName).MakeGenericType(genericParameters));
+                Result = Global.Marshaller.MarshalClrValue<Type>(_typeResolver.ResolveType(typeName).MakeGenericType(genericParameters));
             }
 
             if (Result != null && Result is JsFunction) {
@@ -759,7 +759,7 @@ namespace Jint {
                 {
                     return Global.BooleanClass.True;
                 }
-                else if (x.Type == JsInstance.TYPE_NUMBER)
+                else if (x.Type == JsInstance.TypeNumber)
                 {
                     if (x.ToNumber() == double.NaN)
                     {
@@ -778,15 +778,15 @@ namespace Jint {
                         return Global.BooleanClass.False;
                     }
                 }
-                else if (x.Type == JsInstance.TYPE_STRING)
+                else if (x.Type == JsInstance.TypeString)
                 {
                     return Global.BooleanClass.New(x.ToString() == y.ToString());
                 }
-                else if (x.Type == JsInstance.TYPE_BOOLEAN)
+                else if (x.Type == JsInstance.TypeBoolean)
                 {
                     return Global.BooleanClass.New(x.ToBoolean() == y.ToBoolean());
                 }
-                else if (x.Type == JsInstance.TYPE_OBJECT )
+                else if (x.Type == JsInstance.TypeObject )
                 {
                     return Global.BooleanClass.New(x == y);
                 }
@@ -803,23 +803,23 @@ namespace Jint {
             {
                 return Global.BooleanClass.True;
             }
-            else if (x.Type == JsInstance.TYPE_NUMBER && y.Type == JsInstance.TYPE_STRING)
+            else if (x.Type == JsInstance.TypeNumber && y.Type == JsInstance.TypeString)
             {
                 return Global.BooleanClass.New(x.ToNumber() == y.ToNumber());
             }
-            else if (x.Type == JsInstance.TYPE_STRING && y.Type == JsInstance.TYPE_NUMBER)
+            else if (x.Type == JsInstance.TypeString && y.Type == JsInstance.TypeNumber)
             {
                 return Global.BooleanClass.New(x.ToNumber() == y.ToNumber());
             }
-            else if (x.Type == JsInstance.TYPE_BOOLEAN || y.Type == JsInstance.TYPE_BOOLEAN)
+            else if (x.Type == JsInstance.TypeBoolean || y.Type == JsInstance.TypeBoolean)
             {
                 return Global.BooleanClass.New(x.ToNumber() == y.ToNumber());
             }
-            else if (y.Type == JsInstance.TYPE_OBJECT && (x.Type == JsInstance.TYPE_STRING || x.Type == JsInstance.TYPE_NUMBER))
+            else if (y.Type == JsInstance.TypeObject && (x.Type == JsInstance.TypeString || x.Type == JsInstance.TypeNumber))
             {
                 return Compare(x, y.ToPrimitive(Global));
             }
-            else if (x.Type == JsInstance.TYPE_OBJECT && (y.Type == JsInstance.TYPE_STRING || y.Type == JsInstance.TYPE_NUMBER))
+            else if (x.Type == JsInstance.TypeObject && (y.Type == JsInstance.TypeString || y.Type == JsInstance.TypeNumber))
             {
                 return Compare(x.ToPrimitive(Global), y);
             }
@@ -970,7 +970,7 @@ namespace Jint {
                         JsInstance lprim = left.ToPrimitive(Global);
                         JsInstance rprim = right.ToPrimitive(Global);
 
-                        if (lprim.Class == JsInstance.CLASS_STRING || rprim.Class == JsInstance.CLASS_STRING)
+                        if (lprim.Class == JsInstance.ClassString || rprim.Class == JsInstance.ClassString)
                             Result = Global.StringClass.New(String.Concat(lprim.ToString(), rprim.ToString()));
                         else
                             Result = Global.NumberClass.New(lprim.ToNumber() + rprim.ToNumber());
@@ -1093,9 +1093,9 @@ namespace Jint {
                     if (Result == null)
                         Result = Global.StringClass.New(JsUndefined.Instance.Type);
                     else if (Result is JsNull)
-                        Result = Global.StringClass.New(JsInstance.TYPE_OBJECT);
+                        Result = Global.StringClass.New(JsInstance.TypeObject);
                     else if (Result is JsFunction)
-                        Result = Global.StringClass.New(JsInstance.TYPEOF_FUNCTION);
+                        Result = Global.StringClass.New(JsInstance.TypeofFunction);
                     else
                         Result = Global.StringClass.New(Result.Type);
 
@@ -1241,21 +1241,21 @@ namespace Jint {
             expression.Member.Accept(this);
 
             // Try to evaluate a CLR type
-            if (AllowClr && Result == JsUndefined.Instance && typeFullname != null && typeFullname.Length > 0) {
+            if (AllowClr && Result == JsUndefined.Instance && _typeFullName != null && _typeFullName.Length > 0) {
                 EnsureClrAllowed();
 
-                Type type = typeResolver.ResolveType(typeFullname.ToString());
+                Type type = _typeResolver.ResolveType(_typeFullName.ToString());
 
                 if (type != null) {
                     Result = Global.WrapClr(type);
-                    typeFullname = new StringBuilder();
+                    _typeFullName = new StringBuilder();
                 }
             }
         }
 
         public void EnsureIdentifierIsDefined(object value) {
             if (value == null) {
-                throw new JsException(Global.ReferenceErrorClass.New(lastIdentifier + " is not defined"));
+                throw new JsException(Global.ReferenceErrorClass.New(_lastIdentifier + " is not defined"));
             }
         }
 
@@ -1269,7 +1269,7 @@ namespace Jint {
             if (target.IsClr)
                 EnsureClrAllowed();
 
-            if (target.Class == JsInstance.CLASS_STRING)
+            if (target.Class == JsInstance.ClassString)
             {
                 try
                 {
@@ -1283,7 +1283,7 @@ namespace Jint {
             }
 
             if (target.Indexer != null)
-                SetResult(target.Indexer.get(target, Result), target);
+                SetResult(target.Indexer.Get(target, Result), target);
             else
                 SetResult(target[Result], target);
         }
@@ -1293,7 +1293,7 @@ namespace Jint {
             var target = Result;
 
             if (target == JsUndefined.Instance || Result == null) {
-                if (String.IsNullOrEmpty(lastIdentifier)) {
+                if (String.IsNullOrEmpty(_lastIdentifier)) {
                     throw new JsException(Global.TypeErrorClass.New("Method isn't defined"));
                 }
             }
@@ -1354,7 +1354,7 @@ namespace Jint {
                 }
                 #endregion
 
-                returnInstance = JsUndefined.Instance;
+                Returned = JsUndefined.Instance;
 
                 var original = new JsInstance[parameters.Length];
                 parameters.CopyTo(original, 0);
@@ -1379,8 +1379,8 @@ namespace Jint {
                 }
                 #endregion
 
-                Result = returnInstance;
-                returnInstance = JsUndefined.Instance;
+                Result = Returned;
+                Returned = JsUndefined.Instance;
                 return;
             }
             else {
@@ -1399,7 +1399,7 @@ namespace Jint {
                 return;
             }
 
-            if (recursionLevel++ > MaxRecursions) {
+            if (_recursionLevel++ > MaxRecursions) {
                 throw new JsException(Global.ErrorClass.New("Too many recursions in the script."));
             }
 
@@ -1433,15 +1433,15 @@ namespace Jint {
 
             // define arguments variable
             if (HasOption(Options.Strict))
-                functionScope.DefineOwnProperty(JsScope.ARGUMENTS, args);
+                functionScope.DefineOwnProperty(JsScope.Arguments, args);
             else
-                args.DefineOwnProperty(JsScope.ARGUMENTS, args);
+                args.DefineOwnProperty(JsScope.Arguments, args);
 
             // set this variable
             if (that != null)
-                functionScope.DefineOwnProperty(JsScope.THIS, that);
+                functionScope.DefineOwnProperty(JsScope.This, that);
             else
-                functionScope.DefineOwnProperty(JsScope.THIS, that = Global as JsObject);
+                functionScope.DefineOwnProperty(JsScope.This, that = Global as JsObject);
 
             // enter activation object
             EnterScope(functionScope);
@@ -1462,9 +1462,9 @@ namespace Jint {
                 }
 
                 // Resets the return flag
-                if (exit)
+                if (_exit)
                 {
-                    exit = false;
+                    _exit = false;
                 }
             }
             finally {
@@ -1475,7 +1475,7 @@ namespace Jint {
                 {
                     CodeAccessPermission.RevertPermitOnly();
                 }
-                recursionLevel--;
+                _recursionLevel--;
             }
         }
 
@@ -1496,7 +1496,7 @@ namespace Jint {
 
             Result = null;
 
-            string propertyName = lastIdentifier = expression.Text;
+            string propertyName = _lastIdentifier = expression.Text;
 
             JsInstance result = null;
 
@@ -1505,8 +1505,8 @@ namespace Jint {
                 return;
             }
 
-            if (Result == null && typeFullname != null && typeFullname.Length > 0) {
-                typeFullname.Append('.').Append(propertyName);
+            if (Result == null && _typeFullName != null && _typeFullName.Length > 0) {
+                _typeFullName.Append('.').Append(propertyName);
             }
 
             SetResult(JsUndefined.Instance, callTarget);
@@ -1542,11 +1542,11 @@ namespace Jint {
         public void Visit(Identifier expression) {
             Result = null;
 
-            string propertyName = lastIdentifier = expression.Text;
+            string propertyName = _lastIdentifier = expression.Text;
 
             Descriptor result = null;
             if (CurrentScope.TryGetDescriptor(propertyName, out result)) {
-                if (!result.isReference)
+                if (!result.IsReference)
                     Result = result.Get(CurrentScope);
                 else {
                     LinkedDescriptor r = result as LinkedDescriptor;
@@ -1567,12 +1567,12 @@ namespace Jint {
 
             // Try to record full path in case it's a type
             if (Result == null) {
-                if(typeFullname == null)
+                if(_typeFullName == null)
                 {
-                    typeFullname = new StringBuilder();
+                    _typeFullName = new StringBuilder();
                 }
 
-                typeFullname.Append(propertyName);
+                _typeFullName.Append(propertyName);
             }
         }
 
@@ -1597,15 +1597,15 @@ namespace Jint {
         /// Called by a loop to stop the "continue" keyword escalation
         /// </summary>
         protected void ResetContinueIfPresent(string label) {
-            if (continueStatement != null && continueStatement.Label == label) {
-                continueStatement = null;
+            if (_continueStatement != null && _continueStatement.Label == label) {
+                _continueStatement = null;
             }
         }
 
         protected bool StopStatementFlow() {
-            return exit ||
-            breakStatement != null ||
-            continueStatement != null;
+            return _exit ||
+            _breakStatement != null ||
+            _continueStatement != null;
         }
 
         public void Visit(ArrayDeclaration expression) {
@@ -1631,13 +1631,13 @@ namespace Jint {
 
         public void OnDeserialization(object sender) {
             /*
-            this.methodInvoker = new CachedMethodInvoker(this);
-            this.propertyGetter = new CachedReflectionPropertyGetter(methodInvoker);
-            this.constructorInvoker = new CachedConstructorInvoker(methodInvoker);
+            methodInvoker = new CachedMethodInvoker(this);
+            propertyGetter = new CachedReflectionPropertyGetter(methodInvoker);
+            constructorInvoker = new CachedConstructorInvoker(methodInvoker);
             
-            this.fieldGetter = new CachedReflectionFieldGetter(methodInvoker);
+            fieldGetter = new CachedReflectionFieldGetter(methodInvoker);
             */
-            this.typeResolver = new CachedTypeResolver();
+            _typeResolver = new CachedTypeResolver();
         }
 
         #endregion

@@ -9,9 +9,9 @@ namespace Jint.Native {
     /// <remarks>
     /// This descriptors are used in scopes
     /// </remarks>
-    class LinkedDescriptor : Descriptor {
-        Descriptor d;
-        JsDictionaryObject m_that;
+    internal class LinkedDescriptor : Descriptor {
+        private readonly Descriptor _descriptor;
+        private readonly JsDictionaryObject _that;
 
         /// <summary>
         /// Constructs new descriptor
@@ -23,29 +23,29 @@ namespace Jint.Native {
         /// used in the calls to a 'Get' and 'Set' properties of the source descriptor.</param>
         public LinkedDescriptor(JsDictionaryObject owner, string name, Descriptor source, JsDictionaryObject that)
             : base(owner, name) {
-            if (source.isReference) {
+            if (source.IsReference) {
                 LinkedDescriptor sourceLink = source as LinkedDescriptor;
-                d = sourceLink.d;
-                m_that = sourceLink.m_that;
+                _descriptor = sourceLink._descriptor;
+                _that = sourceLink._that;
             } else
-                d = source;
+                _descriptor = source;
             Enumerable = true;
             Writable = true;
             Configurable = true;
-            m_that = that;
+            _that = that;
         }
 
         public JsDictionaryObject targetObject {
-            get { return m_that; }
+            get { return _that; }
         }
 
-        public override bool isReference {
+        public override bool IsReference {
             get { return true ; }
         }
 
-        public override bool isDeleted {
+        public override bool IsDeleted {
             get {
-                return d.isDeleted;
+                return _descriptor.IsDeleted;
             }
             protected set {
                 /* do nothing */;
@@ -54,18 +54,18 @@ namespace Jint.Native {
 
         public override Descriptor Clone() {
             return new LinkedDescriptor(Owner, Name, this, targetObject) {
-                Writable = this.Writable,
-                Configurable = this.Configurable,
-                Enumerable = this.Enumerable
+                Writable = Writable,
+                Configurable = Configurable,
+                Enumerable = Enumerable
             };
         }
 
         public override JsInstance Get(JsDictionaryObject that) {
-            return d.Get(that);
+            return _descriptor.Get(that);
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value) {
-            d.Set(that, value);
+            _descriptor.Set(that, value);
         }
 
         internal override DescriptorType DescriptorType {

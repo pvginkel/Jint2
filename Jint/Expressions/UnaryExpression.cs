@@ -4,21 +4,13 @@ namespace Jint.Expressions {
     [Serializable]
     public class UnaryExpression : Expression {
         public UnaryExpression(UnaryExpressionType type, Expression expression) {
-            this.type = type;
-            this.expression = expression;
+            Type = type;
+            Expression = expression;
         }
 
-        private Expression expression;
-        public Expression Expression {
-            get { return expression; }
-            set { expression = value; }
-        }
+        public Expression Expression { get; set; }
 
-        private UnaryExpressionType type;
-        public UnaryExpressionType Type {
-            get { return type; }
-            set { type = value; }
-        }
+        public UnaryExpressionType Type { get; set; }
 
         [System.Diagnostics.DebuggerStepThrough]
         public override void Accept(IStatementVisitor visitor) {

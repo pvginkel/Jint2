@@ -4,31 +4,16 @@ namespace Jint.Expressions {
     [Serializable]
     public class TernaryExpression : Expression {
         public TernaryExpression(Expression leftExpression, Expression middleExpression, Expression rightExpression) {
-            this.leftExpression = leftExpression;
-            this.middleExpression = middleExpression;
-            this.rightExpression = rightExpression;
+            LeftExpression = leftExpression;
+            MiddleExpression = middleExpression;
+            RightExpression = rightExpression;
         }
 
-        private Expression leftExpression;
+        public Expression LeftExpression { get; set; }
 
-        public Expression LeftExpression {
-            get { return leftExpression; }
-            set { leftExpression = value; }
-        }
+        public Expression MiddleExpression { get; set; }
 
-        private Expression middleExpression;
-
-        public Expression MiddleExpression {
-            get { return middleExpression; }
-            set { middleExpression = value; }
-        }
-
-        private Expression rightExpression;
-
-        public Expression RightExpression {
-            get { return rightExpression; }
-            set { rightExpression = value; }
-        }
+        public Expression RightExpression { get; set; }
 
         [System.Diagnostics.DebuggerStepThrough]
         public override void Accept(IStatementVisitor visitor) {
@@ -36,7 +21,7 @@ namespace Jint.Expressions {
         }
 
         public override string ToString() {
-            return leftExpression.ToString() + " (" + middleExpression.ToString() + ", " + rightExpression.ToString() + ")";
+            return LeftExpression + " (" + MiddleExpression + ", " + RightExpression + ")";
         }
     }
 

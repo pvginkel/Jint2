@@ -6,23 +6,23 @@ using Jint.Expressions;
 namespace Jint.Native {
     [Serializable]
     public class JsErrorConstructor : JsConstructor {
-        private string errorType;
+        private readonly string _errorType;
 
         public JsErrorConstructor(IGlobal global, string errorType)
             : base(global) {
-            this.errorType = errorType;
+            _errorType = errorType;
             Name = errorType;
 
-            DefineOwnProperty(PROTOTYPE, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
         }
 
         public override void InitPrototype(IGlobal global) {
-            //Prototype = global.FunctionClass;
-            var Prototype = PrototypeProperty;
+            //prototype = global.FunctionClass;
+            var prototype = PrototypeProperty;
 
-            Prototype.DefineOwnProperty("name", global.StringClass.New(errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("name", global.StringClass.New(_errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
         }
 
         public JsError New(string message) {

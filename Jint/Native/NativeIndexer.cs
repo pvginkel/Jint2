@@ -11,40 +11,40 @@ namespace Jint.Native
     /// </summary>
     public class NativeIndexer : INativeIndexer
     {
-        NativeOverloadImpl<MethodInfo, JsIndexerGetter> m_getOverload;
-        NativeOverloadImpl<MethodInfo, JsIndexerSetter> m_setOverload;
+        private readonly NativeOverloadImpl<MethodInfo, JsIndexerGetter> _getOverload;
+        private readonly NativeOverloadImpl<MethodInfo, JsIndexerSetter> _setOverload;
 
         public NativeIndexer(Marshaller marshaller, MethodInfo[] getters, MethodInfo[] setters)
         {
-            m_getOverload = new NativeOverloadImpl<MethodInfo, JsIndexerGetter>(
+            _getOverload = new NativeOverloadImpl<MethodInfo, JsIndexerGetter>(
                 marshaller,
-                delegate(Type[] genericArgs, int Length)
+                delegate(Type[] genericArgs, int length)
                 {
-                    return Array.FindAll<MethodInfo>(getters, mi => mi.GetParameters().Length == Length);
+                    return Array.FindAll<MethodInfo>(getters, mi => mi.GetParameters().Length == length);
                 },
-                new NativeOverloadImpl<MethodInfo, JsIndexerGetter>.WrapMmemberDelegate(marshaller.WrapIndexerGetter)
+                new NativeOverloadImpl<MethodInfo, JsIndexerGetter>.WrapMemberDelegate(marshaller.WrapIndexerGetter)
             );
-            m_setOverload = new NativeOverloadImpl<MethodInfo, JsIndexerSetter>(
+            _setOverload = new NativeOverloadImpl<MethodInfo, JsIndexerSetter>(
                 marshaller,
-                delegate(Type[] genericArgs, int Length)
+                delegate(Type[] genericArgs, int length)
                 {
-                    return Array.FindAll<MethodInfo>(setters, mi => mi.GetParameters().Length == Length);
+                    return Array.FindAll<MethodInfo>(setters, mi => mi.GetParameters().Length == length);
                 },
-                new NativeOverloadImpl<MethodInfo,JsIndexerSetter>.WrapMmemberDelegate(marshaller.WrapIndexerSetter)
+                new NativeOverloadImpl<MethodInfo,JsIndexerSetter>.WrapMemberDelegate(marshaller.WrapIndexerSetter)
             );
         }
 
-        public JsInstance get(JsInstance that, JsInstance index)
+        public JsInstance Get(JsInstance that, JsInstance index)
         {
-            JsIndexerGetter getter = m_getOverload.ResolveOverload(new JsInstance[] { index }, null);
+            JsIndexerGetter getter = _getOverload.ResolveOverload(new JsInstance[] { index }, null);
             if (getter == null)
                 throw new JintException("No matching overload found");
             return getter(that, index);
         }
 
-        public void set(JsInstance that, JsInstance index, JsInstance value)
+        public void Set(JsInstance that, JsInstance index, JsInstance value)
         {
-            JsIndexerSetter setter = m_setOverload.ResolveOverload(new JsInstance[] { index, value }, null);
+            JsIndexerSetter setter = _setOverload.ResolveOverload(new JsInstance[] { index, value }, null);
             if (setter == null)
                 throw new JintException("No matching overload found");
 

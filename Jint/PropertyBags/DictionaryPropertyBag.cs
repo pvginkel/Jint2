@@ -7,20 +7,20 @@ namespace Jint
 {
     class DictionaryPropertyBag : IPropertyBag
     {
-        private Dictionary<string, Descriptor> bag = new Dictionary<string, Descriptor>(5);
+        private readonly Dictionary<string, Descriptor> _bag = new Dictionary<string, Descriptor>(5);
 
         #region IPropertyBag Members
 
         public Descriptor Put(string name, Descriptor descriptor)
         {
             // replace existing without any exception
-            bag[name] = descriptor;
+            _bag[name] = descriptor;
             return descriptor;
         }
 
         public void Delete(string name)
         {
-            bag.Remove(name);
+            _bag.Remove(name);
         }
 
         public Jint.Native.Descriptor Get(string name)
@@ -32,12 +32,12 @@ namespace Jint
 
         public bool TryGet(string name, out Jint.Native.Descriptor descriptor)
         {
-           return bag.TryGetValue(name, out descriptor);
+           return _bag.TryGetValue(name, out descriptor);
         }
 
         public int Count
         {
-            get { return bag.Count; }
+            get { return _bag.Count; }
         }
 
         #endregion
@@ -47,7 +47,7 @@ namespace Jint
 
         public IEnumerable<Descriptor> Values
         {
-            get { return bag.Values; }
+            get { return _bag.Values; }
         }
 
         #endregion
@@ -56,7 +56,7 @@ namespace Jint
 
         public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator()
         {
-            return bag.GetEnumerator();
+            return _bag.GetEnumerator();
         }
 
         #endregion

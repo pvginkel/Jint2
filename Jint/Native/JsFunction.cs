@@ -6,10 +6,10 @@ using Jint.Expressions;
 namespace Jint.Native {
     [Serializable]
     public class JsFunction : JsObject {
-        public static string CALL = "call";
-        public static string APPLY = "apply";
-        public static string CONSTRUCTOR = "constructor";
-        public static string PROTOTYPE = "prototype";
+        public static string CallName = "call";
+        public static string ApplyName = "apply";
+        public static string ConstructorName = "constructor";
+        public static string PrototypeName = "prototype";
 
         public string Name { get; set; }
         public Statement Statement { get; set; }
@@ -37,7 +37,7 @@ namespace Jint.Native {
             : base(prototype) {
             Arguments = new List<string>();
             Statement = new EmptyStatement();
-            DefineOwnProperty(PROTOTYPE, JsNull.Instance, PropertyAttributes.DontEnum);
+            DefineOwnProperty(PrototypeName, JsNull.Instance, PropertyAttributes.DontEnum);
         }
 
         public override int Length
@@ -48,23 +48,22 @@ namespace Jint.Native {
             }
             set
             {
-                ;
             }
         }
 
         public JsObject PrototypeProperty {
             get {
-                return this[PROTOTYPE] as JsObject;
+                return this[PrototypeName] as JsObject;
             }
             set {
-                this[PROTOTYPE] = value;
+                this[PrototypeName] = value;
             }
         }
 
         //15.3.5.3
         public virtual bool HasInstance(JsObject inst) {
             if (inst != null && inst != JsNull.Instance && inst != JsNull.Instance) {
-                return this.PrototypeProperty.IsPrototypeOf(inst);
+                return PrototypeProperty.IsPrototypeOf(inst);
             }
             return false;
         }
@@ -101,7 +100,7 @@ namespace Jint.Native {
         }
 
         public override string Class {
-            get { return CLASS_FUNCTION; }
+            get { return ClassFunction; }
         }
 
         public override string ToSource() {

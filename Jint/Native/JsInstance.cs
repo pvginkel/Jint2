@@ -9,16 +9,13 @@ namespace Jint.Native {
     /// </summary>
     [Serializable]
     public abstract class JsInstance : IComparable<JsInstance> {
-        public static JsInstance[] EMPTY = new JsInstance[0];
+        public static JsInstance[] Empty = new JsInstance[0];
 
         public abstract bool IsClr { get; }
 
         public abstract object Value { get; set; }
 
         public PropertyAttributes Attributes { get; set; }
-
-        public JsInstance() {
-        }
 
         public virtual JsInstance ToPrimitive(IGlobal global) {
             return JsUndefined.Instance;
@@ -52,34 +49,34 @@ namespace Jint.Native {
             return Value != null ? Value.GetHashCode() : base.GetHashCode();
         }
 
-        public const string TYPE_OBJECT = "object";
-        public const string TYPE_BOOLEAN = "boolean";
-        public const string TYPE_STRING = "string";
-        public const string TYPE_NUMBER = "number";
-        public const string TYPE_UNDEFINED = "undefined";
-        public const string TYPE_NULL = "null";
+        public const string TypeObject = "object";
+        public const string TypeBoolean = "boolean";
+        public const string TypeString = "string";
+        public const string TypeNumber = "number";
+        public const string TypeUndefined = "undefined";
+        public const string TypeNull = "null";
 
-        public const string TYPE_DESCRIPTOR = "descriptor";
+        public const string TypeDescriptor = "descriptor";
 
-        public const string TYPEOF_FUNCTION = "function"; // used only in typeof operator!!!
+        public const string TypeofFunction = "function"; // used only in typeof operator!!!
 
         // embed classes ecma262.3 15
         
-        public const string CLASS_NUMBER = "Number";
-        public const string CLASS_STRING = "String";
-        public const string CLASS_BOOLEAN = "Boolean";
+        public const string ClassNumber = "Number";
+        public const string ClassString = "String";
+        public const string ClassBoolean = "Boolean";
 
-        public const string CLASS_OBJECT = "Object";
-        public const string CLASS_FUNCTION = "Function";
-        public const string CLASS_ARRAY = "Array";
-        public const string CLASS_REGEXP = "RegExp";
-        public const string CLASS_DATE = "Date";
-        public const string CLASS_ERROR = "Error";
+        public const string ClassObject = "Object";
+        public const string ClassFunction = "Function";
+        public const string ClassArray = "Array";
+        public const string ClassRegexp = "RegExp";
+        public const string ClassDate = "Date";
+        public const string ClassError = "Error";
 
-        public const string CLASS_ARGUMENTS = "Arguments";
-        public const string CLASS_GLOBAL = "Global";
-        public const string CLASS_DESCRIPTOR = "Descriptor";
-        public const string CLASS_SCOPE = "Scope";
+        public const string ClassArguments = "Arguments";
+        public const string ClassGlobal = "Global";
+        public const string ClassDescriptor = "Descriptor";
+        public const string ClassScope = "Scope";
 
         /// <summary>
         /// Class of an object, don't confuse with type of an object.
@@ -124,7 +121,7 @@ namespace Jint.Native {
             {
                 return global.BooleanClass.True;
             }
-            else if (left.Type == JsInstance.TYPE_NUMBER)
+            else if (left.Type == JsInstance.TypeNumber)
             {
                 if (left == global.NumberClass["NaN"] || right == global.NumberClass["NaN"])
                 {
@@ -137,11 +134,11 @@ namespace Jint.Native {
                 else
                     return global.BooleanClass.False;
             }
-            else if (left.Type == JsInstance.TYPE_STRING)
+            else if (left.Type == JsInstance.TypeString)
             {
                 return global.BooleanClass.New(left.ToString() == right.ToString());
             }
-            else if (left.Type == JsInstance.TYPE_BOOLEAN)
+            else if (left.Type == JsInstance.TypeBoolean)
             {
                 return global.BooleanClass.New(left.ToBoolean() == right.ToBoolean());
             }

@@ -7,7 +7,7 @@ namespace Jint.Expressions {
         }
 
         public Indexer(Expression index) {
-            this.Index = index;
+            Index = index;
         }
 
         public Expression Index { get; set; }

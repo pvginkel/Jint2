@@ -10,29 +10,29 @@ namespace Jint.Native {
         public JsArrayConstructor(IGlobal global)
             : base(global) {
             Name = "Array";
-            DefineOwnProperty(PROTOTYPE, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
         }
 
         public override void InitPrototype(IGlobal global) {
-            var Prototype = PrototypeProperty;
+            var prototype = PrototypeProperty;
 
-            Prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, Prototype, "length", GetLengthImpl, SetLengthImpl) { Enumerable = false });
+            prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, prototype, "length", GetLengthImpl, SetLengthImpl) { Enumerable = false });
 
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsArray>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsArray>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsObject>(Concat), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("join", global.FunctionClass.New<JsObject>(Join, 1), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("pop", global.FunctionClass.New<JsObject>(Pop), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("push", global.FunctionClass.New<JsObject>(Push, 1), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("reverse", global.FunctionClass.New<JsObject>(Reverse), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("shift", global.FunctionClass.New<JsObject>(Shift), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("slice", global.FunctionClass.New<JsObject>(Slice, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("sort", global.FunctionClass.New<JsObject>(Sort), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("splice", global.FunctionClass.New<JsObject>(Splice, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("unshift", global.FunctionClass.New<JsObject>(UnShift, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsArray>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsArray>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsObject>(Concat), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("join", global.FunctionClass.New<JsObject>(Join, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("pop", global.FunctionClass.New<JsObject>(Pop), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("push", global.FunctionClass.New<JsObject>(Push, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("reverse", global.FunctionClass.New<JsObject>(Reverse), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("shift", global.FunctionClass.New<JsObject>(Shift), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("slice", global.FunctionClass.New<JsObject>(Slice, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("sort", global.FunctionClass.New<JsObject>(Sort), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("splice", global.FunctionClass.New<JsObject>(Splice, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("unshift", global.FunctionClass.New<JsObject>(UnShift, 1), PropertyAttributes.DontEnum);
 
-            Prototype.DefineOwnProperty("indexOf", global.FunctionClass.New<JsObject>(IndexOfImpl, 1), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("lastIndexOf", global.FunctionClass.New<JsObject>(LastIndexOfImpl, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("indexOf", global.FunctionClass.New<JsObject>(IndexOfImpl, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("lastIndexOf", global.FunctionClass.New<JsObject>(LastIndexOfImpl, 1), PropertyAttributes.DontEnum);
         }
 
 
@@ -46,7 +46,7 @@ namespace Jint.Native {
             JsArray array = New();
 
             for (int i = 0; i < parameters.Length; i++)
-                array.put(i, parameters[i]); // fast versin since it avoids a type conversion
+                array.Put(i, parameters[i]); // fast versin since it avoids a type conversion
 
             return array;
         }
@@ -121,7 +121,7 @@ namespace Jint.Native {
         /// <returns></returns>
         public JsInstance Concat(JsObject target, JsInstance[] parameters) {
             if (target is JsArray)
-                return ((JsArray)target).concat(Global, parameters);
+                return ((JsArray)target).Concat(Global, parameters);
             JsArray array = Global.ArrayClass.New();
             List<JsInstance> items = new List<JsInstance>();
             items.Add(target);
@@ -135,12 +135,12 @@ namespace Jint.Native {
                         string p = k.ToString();
                         JsInstance result = null;
                         if (((JsObject)e).TryGetProperty(p, out result))
-                            array.put(n, result);
+                            array.Put(n, result);
                         n++;
                     }
                 }
                 else {
-                    array.put(n, e);
+                    array.Put(n, e);
                     n++;
                 }
             }
@@ -155,7 +155,7 @@ namespace Jint.Native {
         /// <returns></returns>
         public JsInstance Join(JsObject target, JsInstance[] parameters) {
             if (target is JsArray)
-                return ((JsArray)target).join(Global, parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
+                return ((JsArray)target).Join(Global, parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
             string separator = (parameters.Length == 0 || parameters[0] == JsUndefined.Instance)
                 ? ","
                 : parameters[0].ToString();
@@ -375,7 +375,7 @@ namespace Jint.Native {
                 string from = (relativeStart + k).ToString();
                 JsInstance result = null;
                 if (target.TryGetProperty(from, out result)) {
-                    array.put(k, result);
+                    array.Put(k, result);
                 }
             }
 

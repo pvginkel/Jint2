@@ -8,13 +8,13 @@ using System.Reflection;
 namespace Jint.Native {
     [Serializable]
     public class JsClrMethodInfo : JsObject {
-        private string value;
+        private readonly string _value;
 
         public JsClrMethodInfo() {
         }
 
         public JsClrMethodInfo(string method) {
-            value = method;
+            _value = method;
         }
 
         public override bool ToBoolean() {
@@ -29,15 +29,13 @@ namespace Jint.Native {
             return String.Empty;
         }
 
-        public const string TYPEOF = "clrMethodInfo";
-
         public override string Class {
-            get { return TYPEOF; }
+            get { return "clrMethodInfo"; }
         }
 
         public override object Value {
             get {
-                return value;
+                return _value;
             }
         }
     }

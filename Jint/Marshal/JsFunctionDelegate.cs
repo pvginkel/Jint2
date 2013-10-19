@@ -8,14 +8,16 @@ using System.Reflection.Emit;
 
 namespace Jint.Marshal
 {
-    class JsFunctionDelegate
+    internal class JsFunctionDelegate
     {
-        Delegate m_impl;
-        IJintVisitor m_visitor;
-        JsFunction m_function;
-        JsDictionaryObject m_that;
-        Marshaller m_marshaller;
-        Type m_delegateType;
+        private Delegate _impl;
+// ReSharper disable NotAccessedField.Local
+        private IJintVisitor _visitor;
+        private JsFunction _function;
+        private JsDictionaryObject _that;
+        private Marshaller _marshaller;
+// ReSharper restore NotAccessedField.Local
+        private readonly Type _delegateType;
 
         public JsFunctionDelegate(IJintVisitor visitor, JsFunction function, JsDictionaryObject that,Type delegateType)
         {
@@ -27,19 +29,20 @@ namespace Jint.Marshal
                 throw new ArgumentNullException("delegateType");
             if (!typeof(Delegate).IsAssignableFrom(delegateType))
                 throw new ArgumentException("A delegate type is required", "delegateType");
-            m_visitor = visitor;
-            m_function = function;
-            m_delegateType = delegateType;
-            m_that = that;
-            m_marshaller = visitor.Global.Marshaller;
+
+            _visitor = visitor;
+            _function = function;
+            _delegateType = delegateType;
+            _that = that;
+            _marshaller = visitor.Global.Marshaller;
         }
 
         public Delegate GetDelegate()
         {
-            if (m_impl!= null)
-                return m_impl;
+            if (_impl!= null)
+                return _impl;
 
-            MethodInfo method = m_delegateType.GetMethod("Invoke");
+            MethodInfo method = _delegateType.GetMethod("Invoke");
             ParameterInfo[] parameters = method.GetParameters();
             Type[] delegateParameters = new Type[parameters.Length + 1];
             
@@ -71,7 +74,7 @@ namespace Jint.Marshal
 
             // load a marshller
             code.Emit(OpCodes.Ldarg_0);
-            code.Emit(OpCodes.Ldfld,typeof(JsFunctionDelegate).GetField("m_marshaller",BindingFlags.NonPublic|BindingFlags.Instance));
+            code.Emit(OpCodes.Ldfld,typeof(JsFunctionDelegate).GetField("_marshaller",BindingFlags.NonPublic|BindingFlags.Instance));
             code.Emit(OpCodes.Stloc_1);
 
             //code.EmitWriteLine("pre args");
@@ -116,16 +119,16 @@ namespace Jint.Marshal
                 code.Emit(OpCodes.Stelem, typeof(JsInstance) );
             }
 
-            // m_visitor.ExecuteFunction(m_function,m_that,arguments)
+            // _visitor.ExecuteFunction(_function,_that,arguments)
 
             code.Emit(OpCodes.Ldarg_0);
-            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("m_visitor", BindingFlags.NonPublic | BindingFlags.Instance));
+            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("_visitor", BindingFlags.NonPublic | BindingFlags.Instance));
 
             code.Emit(OpCodes.Ldarg_0);
-            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("m_function", BindingFlags.NonPublic | BindingFlags.Instance));
+            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("_function", BindingFlags.NonPublic | BindingFlags.Instance));
 
             code.Emit(OpCodes.Ldarg_0);
-            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("m_that", BindingFlags.NonPublic | BindingFlags.Instance));
+            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("_that", BindingFlags.NonPublic | BindingFlags.Instance));
 
             code.Emit(OpCodes.Ldloc_0); //params
 
@@ -156,19 +159,19 @@ namespace Jint.Marshal
                 }
             }
 
-            // return marshaller.MarshalJsValue<method.ReturnType>(m_visitor.Returned)
+            // return marshaller.MarshalJsValue<method.ReturnType>(_visitor.Returned)
             if (!method.ReturnType.Equals(typeof(void)))
             {
                 code.Emit(OpCodes.Ldloc_1);
                 code.Emit(OpCodes.Ldarg_0);
-                code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("m_visitor", BindingFlags.NonPublic | BindingFlags.Instance));
+                code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("_visitor", BindingFlags.NonPublic | BindingFlags.Instance));
                 code.Emit(OpCodes.Call, typeof(IJintVisitor).GetProperty("Returned").GetGetMethod());
                 code.Emit(OpCodes.Call, typeof(Marshaller).GetMethod("MarshalJsValue").MakeGenericMethod(method.ReturnType));
             }
             
             code.Emit(OpCodes.Ret);
 
-            return m_impl = dm.CreateDelegate(m_delegateType,this);
+            return _impl = dm.CreateDelegate(_delegateType,this);
         }
     }
 }

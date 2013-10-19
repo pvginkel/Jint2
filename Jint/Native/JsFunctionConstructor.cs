@@ -12,22 +12,22 @@ namespace Jint.Native {
         public JsFunctionConstructor(IGlobal global, JsObject prototype)
             : base(global, prototype) {
             Name = "Function";
-            DefineOwnProperty(PROTOTYPE, prototype, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, prototype, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
         }
 
         public override void InitPrototype(IGlobal global) {
-            var Prototype = PrototypeProperty;
+            var prototype = PrototypeProperty;
 
-            // ((JsFunction)Prototype).Scope = global.ObjectClass.Scope;
+            // ((JsFunction)prototype).Scope = global.ObjectClass.Scope;
 
-            Prototype.DefineOwnProperty("constructor", this, PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("constructor", this, PropertyAttributes.DontEnum);
 
-            Prototype.DefineOwnProperty(CALL.ToString(), new JsCallFunction(this), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty(APPLY.ToString(), new JsApplyFunction(this), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty(CallName, new JsCallFunction(this), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty(ApplyName, new JsApplyFunction(this), PropertyAttributes.DontEnum);
 
-            Prototype.DefineOwnProperty("toString", New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, Prototype, "length", GetLengthImpl, SetLengthImpl));
+            prototype.DefineOwnProperty("toString", New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, prototype, "length", GetLengthImpl, SetLengthImpl));
         }
 
 

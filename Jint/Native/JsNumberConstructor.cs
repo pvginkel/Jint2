@@ -11,23 +11,23 @@ namespace Jint.Native {
             : base(global) {
             Name = "Number";
 
-            DefineOwnProperty(PROTOTYPE, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontEnum | PropertyAttributes.DontDelete);
+            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontEnum | PropertyAttributes.DontDelete);
 
-            this.DefineOwnProperty("MAX_VALUE", New(Double.MaxValue));
-            this.DefineOwnProperty("MIN_VALUE", New(Double.MinValue));
-            this.DefineOwnProperty("NaN", New(Double.NaN));
-            this.DefineOwnProperty("NEGATIVE_INFINITY", New(Double.PositiveInfinity));
-            this.DefineOwnProperty("POSITIVE_INFINITY", New(Double.NegativeInfinity));
+            DefineOwnProperty("MAX_VALUE", New(Double.MaxValue));
+            DefineOwnProperty("MIN_VALUE", New(Double.MinValue));
+            DefineOwnProperty("NaN", New(Double.NaN));
+            DefineOwnProperty("NEGATIVE_INFINITY", New(Double.PositiveInfinity));
+            DefineOwnProperty("POSITIVE_INFINITY", New(Double.NegativeInfinity));
         }
 
         public override void InitPrototype(IGlobal global) {
-            var Prototype = PrototypeProperty;
+            var prototype = PrototypeProperty;
 
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsInstance>(ToStringImpl,1), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsInstance>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toFixed", global.FunctionClass.New<JsInstance>(ToFixedImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toExponential", global.FunctionClass.New<JsInstance>(ToExponentialImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toPrecision", global.FunctionClass.New<JsInstance>(ToPrecisionImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsInstance>(ToStringImpl,1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsInstance>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toFixed", global.FunctionClass.New<JsInstance>(ToFixedImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toExponential", global.FunctionClass.New<JsInstance>(ToExponentialImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toPrecision", global.FunctionClass.New<JsInstance>(ToPrecisionImpl), PropertyAttributes.DontEnum);
         }
 
         public JsNumber New(double value) {
@@ -67,7 +67,7 @@ namespace Jint.Native {
             return ToStringImpl(target, new JsInstance[0]);
         }
 
-        private static char[] rDigits = {
+        private static readonly char[] RDigits = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
         'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
@@ -112,7 +112,7 @@ namespace Jint.Native {
                     if (longPositive == 0) break;
 
                     outDigits[outDigits.Length - digitIndex - 1] =
-                        rDigits[longPositive % radix];
+                        RDigits[longPositive % radix];
                     longPositive /= radix;
                 }
 

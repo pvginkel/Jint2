@@ -9,35 +9,35 @@ namespace Jint.Marshal {
     /// <summary>
     /// A helper class for generating proxy code while marshalling methods, properties and delegates.
     /// </summary>
-    class ProxyHelper {
+    internal class ProxyHelper {
 
-        struct MarshalledParameter {
-            public LocalBuilder tempLocal;
-            public int index;
+        private struct MarshaledParameter {
+            public readonly LocalBuilder TempLocal;
+            public readonly int Index;
 
-            public MarshalledParameter(LocalBuilder temp, int index) {
-                tempLocal = temp;
-                this.index = index;
+            public MarshaledParameter(LocalBuilder temp, int index) {
+                TempLocal = temp;
+                Index = index;
             }
         };
 
-        static ProxyHelper m_default;
-        
-        Dictionary<MethodInfo, JsMethodImpl> methodCache = new Dictionary<MethodInfo, JsMethodImpl>();
-        Dictionary<ConstructorInfo, ConstructorImpl> ctorCache = new Dictionary<ConstructorInfo, ConstructorImpl>();
-        Dictionary<PropertyInfo, DynamicMethod> propGetCache = new Dictionary<PropertyInfo, DynamicMethod>();
-        Dictionary<PropertyInfo, DynamicMethod> propSetCache = new Dictionary<PropertyInfo, DynamicMethod>();
-        Dictionary<FieldInfo, DynamicMethod> fieldSetCache = new Dictionary<FieldInfo, DynamicMethod>();
-        Dictionary<FieldInfo, DynamicMethod> fieldGetCache = new Dictionary<FieldInfo, DynamicMethod>();
-        Dictionary<MethodInfo, DynamicMethod> indexerGetCache = new Dictionary<MethodInfo, DynamicMethod>();
-        Dictionary<MethodInfo, DynamicMethod> indexerSetCache = new Dictionary<MethodInfo, DynamicMethod>();
+        private static ProxyHelper _default;
+
+        private readonly Dictionary<MethodInfo, JsMethodImpl> _methodCache = new Dictionary<MethodInfo, JsMethodImpl>();
+        private readonly Dictionary<ConstructorInfo, ConstructorImpl> _ctorCache = new Dictionary<ConstructorInfo, ConstructorImpl>();
+        private readonly Dictionary<PropertyInfo, DynamicMethod> _propGetCache = new Dictionary<PropertyInfo, DynamicMethod>();
+        private readonly Dictionary<PropertyInfo, DynamicMethod> _propSetCache = new Dictionary<PropertyInfo, DynamicMethod>();
+        private readonly Dictionary<FieldInfo, DynamicMethod> _fieldSetCache = new Dictionary<FieldInfo, DynamicMethod>();
+        private readonly Dictionary<FieldInfo, DynamicMethod> _fieldGetCache = new Dictionary<FieldInfo, DynamicMethod>();
+        private readonly Dictionary<MethodInfo, DynamicMethod> _indexerGetCache = new Dictionary<MethodInfo, DynamicMethod>();
+        private readonly Dictionary<MethodInfo, DynamicMethod> _indexerSetCache = new Dictionary<MethodInfo, DynamicMethod>();
 
         public static ProxyHelper Default {
             get {
                 lock (typeof(ProxyHelper)) {
-                    if (m_default == null)
-                        m_default = new ProxyHelper();
-                    return m_default;
+                    if (_default == null)
+                        _default = new ProxyHelper();
+                    return _default;
                 }
             }
         }
@@ -56,15 +56,15 @@ namespace Jint.Marshal {
                 throw new InvalidOperationException("Can't wrap an unclosed generic");
 
             JsMethodImpl result;
-            lock (methodCache) {
-                if (methodCache.TryGetValue(info, out result))
+            lock (_methodCache) {
+                if (_methodCache.TryGetValue(info, out result))
                     return result;
             }
 
             LinkedList<ParameterInfo> parameters = new LinkedList<ParameterInfo>(info.GetParameters());
-            LinkedList<MarshalledParameter> outParams = new LinkedList<MarshalledParameter>();
+            LinkedList<MarshaledParameter> outParams = new LinkedList<MarshaledParameter>();
 
-            DynamicMethod jsWrapper = new DynamicMethod("jsWrapper", typeof(JsInstance), new Type[] { typeof(IGlobal), typeof(JsInstance), typeof(JsInstance[]) }, this.GetType());
+            DynamicMethod jsWrapper = new DynamicMethod("jsWrapper", typeof(JsInstance), new Type[] { typeof(IGlobal), typeof(JsInstance), typeof(JsInstance[]) }, GetType());
             var code = jsWrapper.GetILGenerator();
 
             code.DeclareLocal(typeof(int)); // local #0: count of the passed arguments
@@ -172,7 +172,7 @@ namespace Jint.Marshal {
                     code.Emit(OpCodes.Ldloca, tempLocal.LocalIndex);
 
                     if (parameter.IsOut)
-                        outParams.AddLast(new MarshalledParameter(tempLocal, i));
+                        outParams.AddLast(new MarshaledParameter(tempLocal, i));
                 } else {
                     code.Emit(
                         OpCodes.Call,
@@ -195,16 +195,16 @@ namespace Jint.Marshal {
                 var lblEnd = code.DefineLabel();
 
                 code.Emit(OpCodes.Ldloc_0);
-                code.Emit(OpCodes.Ldc_I4, param.index);
+                code.Emit(OpCodes.Ldc_I4, param.Index);
                 code.Emit(OpCodes.Ble, lblEnd);
 
                 // set arguments[i] = marshaller.MarshalClrValue(tempLocal);
                 code.Emit(OpCodes.Ldarg_2);
-                code.Emit(OpCodes.Ldc_I4, param.index);
+                code.Emit(OpCodes.Ldc_I4, param.Index);
 
                 code.Emit(OpCodes.Ldloc_1);
-                code.Emit(OpCodes.Ldloc, param.tempLocal);
-                code.Emit(OpCodes.Call, typeof(Marshaller).GetMethod("MarshalClrValue").MakeGenericMethod(param.tempLocal.LocalType));
+                code.Emit(OpCodes.Ldloc, param.TempLocal);
+                code.Emit(OpCodes.Call, typeof(Marshaller).GetMethod("MarshalClrValue").MakeGenericMethod(param.TempLocal.LocalType));
 
                 code.Emit(OpCodes.Stelem, typeof(JsInstance));
 
@@ -222,8 +222,8 @@ namespace Jint.Marshal {
             code.Emit(OpCodes.Ret);
 
             result = (JsMethodImpl)jsWrapper.CreateDelegate(typeof(JsMethodImpl));
-            lock (methodCache) {
-                methodCache[info] = result;
+            lock (_methodCache) {
+                _methodCache[info] = result;
             }
             return result;
         }
@@ -240,14 +240,14 @@ namespace Jint.Marshal {
                 throw new ArgumentNullException("info");
 
             ConstructorImpl result;
-            lock (ctorCache) {
-                if (ctorCache.TryGetValue(info, out result))
+            lock (_ctorCache) {
+                if (_ctorCache.TryGetValue(info, out result))
                     return result;
             }
 
             LinkedList<ParameterInfo> parameters = new LinkedList<ParameterInfo>(info.GetParameters());
 
-            DynamicMethod dm = new DynamicMethod("clrConstructor", typeof(object), new Type[] { typeof(IGlobal), typeof(JsInstance[]) }, this.GetType());
+            DynamicMethod dm = new DynamicMethod("clrConstructor", typeof(object), new Type[] { typeof(IGlobal), typeof(JsInstance[]) }, GetType());
             var code = dm.GetILGenerator();
 
             code.DeclareLocal(typeof(int)); // local #0: count of the passed arguments
@@ -327,8 +327,8 @@ namespace Jint.Marshal {
 
             result = (ConstructorImpl)dm.CreateDelegate(typeof(ConstructorImpl));
 
-            lock (ctorCache) {
-                ctorCache[info] = result;
+            lock (_ctorCache) {
+                _ctorCache[info] = result;
             }
 
             return result;
@@ -339,12 +339,12 @@ namespace Jint.Marshal {
                 throw new ArgumentNullException("prop");
 
             DynamicMethod dm;
-            lock (propGetCache) {
-                propGetCache.TryGetValue(prop, out dm);
+            lock (_propGetCache) {
+                _propGetCache.TryGetValue(prop, out dm);
             }
 
             if (dm == null) {
-                dm = new DynamicMethod("dynamicPropertyGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsDictionaryObject) }, this.GetType());
+                dm = new DynamicMethod("dynamicPropertyGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsDictionaryObject) }, GetType());
 
                 MethodInfo info = prop.GetGetMethod();
 
@@ -375,8 +375,8 @@ namespace Jint.Marshal {
 
                 code.Emit(OpCodes.Ret);
 
-                lock (propGetCache) {
-                    propGetCache[prop] = dm;
+                lock (_propGetCache) {
+                    _propGetCache[prop] = dm;
                 }
             }
 
@@ -388,11 +388,11 @@ namespace Jint.Marshal {
                 throw new ArgumentNullException("field");
 
             DynamicMethod dm;
-            lock (fieldGetCache) {
-                fieldGetCache.TryGetValue(field, out dm);
+            lock (_fieldGetCache) {
+                _fieldGetCache.TryGetValue(field, out dm);
             }
             if (dm == null) {
-                dm = new DynamicMethod("dynamicFieldGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsDictionaryObject) }, this.GetType());
+                dm = new DynamicMethod("dynamicFieldGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsDictionaryObject) }, GetType());
                 var code = dm.GetILGenerator();
 
                 code.Emit(OpCodes.Ldarg_0);
@@ -416,8 +416,8 @@ namespace Jint.Marshal {
 
                 code.Emit(OpCodes.Ret);
 
-                lock (fieldGetCache) {
-                    fieldGetCache[field] = dm;
+                lock (_fieldGetCache) {
+                    _fieldGetCache[field] = dm;
                 }
             }
 
@@ -430,11 +430,11 @@ namespace Jint.Marshal {
 
             DynamicMethod dm;
 
-            lock (propSetCache) {
-                propSetCache.TryGetValue(prop, out dm);
+            lock (_propSetCache) {
+                _propSetCache.TryGetValue(prop, out dm);
             }
             if (dm == null) {
-                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsDictionaryObject), typeof(JsInstance) }, this.GetType());
+                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsDictionaryObject), typeof(JsInstance) }, GetType());
                 MethodInfo info = prop.GetSetMethod();
 
                 var code = dm.GetILGenerator();
@@ -465,8 +465,8 @@ namespace Jint.Marshal {
 
                 code.Emit(OpCodes.Ret);
 
-                lock (propSetCache) {
-                    propSetCache[prop] = dm;
+                lock (_propSetCache) {
+                    _propSetCache[prop] = dm;
                 }
             }
 
@@ -479,12 +479,12 @@ namespace Jint.Marshal {
 
             DynamicMethod dm;
 
-            lock (fieldSetCache) {
-                fieldSetCache.TryGetValue(field, out dm);
+            lock (_fieldSetCache) {
+                _fieldSetCache.TryGetValue(field, out dm);
             }
 
             if (dm == null) {
-                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsDictionaryObject), typeof(JsInstance) }, this.GetType());
+                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsDictionaryObject), typeof(JsInstance) }, GetType());
 
                 var code = dm.GetILGenerator();
 
@@ -514,8 +514,8 @@ namespace Jint.Marshal {
 
                 code.Emit(OpCodes.Ret);
 
-                lock (fieldSetCache) {
-                    fieldSetCache[field] = dm;
+                lock (_fieldSetCache) {
+                    _fieldSetCache[field] = dm;
                 }
             }
             return (JsSetter)dm.CreateDelegate(typeof(JsSetter), marshaller);
@@ -527,8 +527,8 @@ namespace Jint.Marshal {
 
             DynamicMethod dm;
 
-            lock (indexerGetCache) {
-                indexerGetCache.TryGetValue(getMethod, out dm);
+            lock (_indexerGetCache) {
+                _indexerGetCache.TryGetValue(getMethod, out dm);
             }
 
             if (dm == null) {
@@ -538,7 +538,7 @@ namespace Jint.Marshal {
 
 
 
-                dm = new DynamicMethod("dynamicIndexerSetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsInstance), typeof(JsInstance) }, this.GetType());
+                dm = new DynamicMethod("dynamicIndexerSetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsInstance), typeof(JsInstance) }, GetType());
 
                 ILGenerator code = dm.GetILGenerator();
 
@@ -581,8 +581,8 @@ namespace Jint.Marshal {
 
                 code.Emit(OpCodes.Ret);
 
-                lock (indexerGetCache) {
-                    indexerGetCache[getMethod] = dm;
+                lock (_indexerGetCache) {
+                    _indexerGetCache[getMethod] = dm;
                 }
             }
 
@@ -595,8 +595,8 @@ namespace Jint.Marshal {
 
             DynamicMethod dm;
 
-            lock (indexerSetCache) {
-                indexerSetCache.TryGetValue(setMethod, out dm);
+            lock (_indexerSetCache) {
+                _indexerSetCache.TryGetValue(setMethod, out dm);
             }
 
             if (dm == null) {
@@ -604,7 +604,7 @@ namespace Jint.Marshal {
                 if (!(setMethod.GetParameters().Length == 2 && setMethod.ReturnType.Equals(typeof(void))))
                     throw new ArgumentException("Invalid getter", "getMethod");
 
-                dm = new DynamicMethod("dynamicIndexerSetter", typeof(void), new Type[] { typeof(Marshaller), typeof(JsInstance), typeof(JsInstance), typeof(JsInstance) },this.GetType());
+                dm = new DynamicMethod("dynamicIndexerSetter", typeof(void), new Type[] { typeof(Marshaller), typeof(JsInstance), typeof(JsInstance), typeof(JsInstance) },GetType());
 
                 ILGenerator code = dm.GetILGenerator();
 
@@ -656,8 +656,8 @@ namespace Jint.Marshal {
 
                 code.Emit(OpCodes.Ret);
 
-                lock (indexerSetCache) {
-                    indexerSetCache[setMethod] = dm;
+                lock (_indexerSetCache) {
+                    _indexerSetCache[setMethod] = dm;
                 }
             }
 

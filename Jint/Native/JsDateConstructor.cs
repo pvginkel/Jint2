@@ -12,7 +12,7 @@ namespace Jint.Native {
         protected JsDateConstructor(IGlobal global, bool initializeUTC)
             : base(global) {
             Name = "Date";
-            DefineOwnProperty(PROTOTYPE, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
 
             DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
             DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
@@ -22,60 +22,60 @@ namespace Jint.Native {
 
         public override void InitPrototype(IGlobal global) {
             //Prototype = global.FunctionClass;
-            var Prototype = PrototypeProperty;
+            var prototype = PrototypeProperty;
 
-            Prototype.DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
 
             #region Static Methods
-            Prototype.DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("parseLocale", new JsFunctionWrapper(ParseLocaleImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("parseLocale", new JsFunctionWrapper(ParseLocaleImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
             #endregion
 
             #region Methods
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toDateString", global.FunctionClass.New<JsDictionaryObject>(ToDateStringImpl, 0), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toTimeString", global.FunctionClass.New<JsDictionaryObject>(ToTimeStringImpl, 0), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleDateString", global.FunctionClass.New<JsDictionaryObject>(ToLocaleDateStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleTimeString", global.FunctionClass.New<JsDictionaryObject>(ToLocaleTimeStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsDictionaryObject>(ValueOfImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getTime", global.FunctionClass.New<JsDictionaryObject>(GetTimeImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getFullYear", global.FunctionClass.New<JsDictionaryObject>(GetFullYearImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCFullYear", global.FunctionClass.New<JsDictionaryObject>(GetUTCFullYearImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getMonth", global.FunctionClass.New<JsDictionaryObject>(GetMonthImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCMonth", global.FunctionClass.New<JsDictionaryObject>(GetUTCMonthImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getDate", global.FunctionClass.New<JsDictionaryObject>(GetDateImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCDate", global.FunctionClass.New<JsDictionaryObject>(GetUTCDateImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getDay", global.FunctionClass.New<JsDictionaryObject>(GetDayImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCDay", global.FunctionClass.New<JsDictionaryObject>(GetUTCDayImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getHours", global.FunctionClass.New<JsDictionaryObject>(GetHoursImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCHours", global.FunctionClass.New<JsDictionaryObject>(GetUTCHoursImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getMinutes", global.FunctionClass.New<JsDictionaryObject>(GetMinutesImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCMinutes", global.FunctionClass.New<JsDictionaryObject>(GetUTCMinutesImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getSeconds", global.FunctionClass.New<JsDictionaryObject>(GetSecondsImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCSeconds", global.FunctionClass.New<JsDictionaryObject>(GetUTCSecondsImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getMilliseconds", global.FunctionClass.New<JsDictionaryObject>(GetMillisecondsImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getUTCMilliseconds", global.FunctionClass.New<JsDictionaryObject>(GetUTCMillisecondsImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getTimezoneOffset", global.FunctionClass.New<JsDictionaryObject>(GetTimezoneOffsetImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toDateString", global.FunctionClass.New<JsDictionaryObject>(ToDateStringImpl, 0), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toTimeString", global.FunctionClass.New<JsDictionaryObject>(ToTimeStringImpl, 0), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleDateString", global.FunctionClass.New<JsDictionaryObject>(ToLocaleDateStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleTimeString", global.FunctionClass.New<JsDictionaryObject>(ToLocaleTimeStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsDictionaryObject>(ValueOfImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getTime", global.FunctionClass.New<JsDictionaryObject>(GetTimeImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getFullYear", global.FunctionClass.New<JsDictionaryObject>(GetFullYearImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCFullYear", global.FunctionClass.New<JsDictionaryObject>(GetUTCFullYearImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getMonth", global.FunctionClass.New<JsDictionaryObject>(GetMonthImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCMonth", global.FunctionClass.New<JsDictionaryObject>(GetUTCMonthImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getDate", global.FunctionClass.New<JsDictionaryObject>(GetDateImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCDate", global.FunctionClass.New<JsDictionaryObject>(GetUTCDateImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getDay", global.FunctionClass.New<JsDictionaryObject>(GetDayImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCDay", global.FunctionClass.New<JsDictionaryObject>(GetUTCDayImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getHours", global.FunctionClass.New<JsDictionaryObject>(GetHoursImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCHours", global.FunctionClass.New<JsDictionaryObject>(GetUTCHoursImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getMinutes", global.FunctionClass.New<JsDictionaryObject>(GetMinutesImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCMinutes", global.FunctionClass.New<JsDictionaryObject>(GetUTCMinutesImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getSeconds", global.FunctionClass.New<JsDictionaryObject>(GetSecondsImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCSeconds", global.FunctionClass.New<JsDictionaryObject>(GetUTCSecondsImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getMilliseconds", global.FunctionClass.New<JsDictionaryObject>(GetMillisecondsImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getUTCMilliseconds", global.FunctionClass.New<JsDictionaryObject>(GetUTCMillisecondsImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getTimezoneOffset", global.FunctionClass.New<JsDictionaryObject>(GetTimezoneOffsetImpl), PropertyAttributes.DontEnum);
 
-            Prototype.DefineOwnProperty("setTime", global.FunctionClass.New<JsDictionaryObject>(SetTimeImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setMilliseconds", global.FunctionClass.New<JsDictionaryObject>(SetMillisecondsImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCMilliseconds", global.FunctionClass.New<JsDictionaryObject>(SetUTCMillisecondsImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setSeconds", global.FunctionClass.New<JsDictionaryObject>(SetSecondsImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCSeconds", global.FunctionClass.New<JsDictionaryObject>(SetUTCSecondsImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setMinutes", global.FunctionClass.New<JsDictionaryObject>(SetMinutesImpl, 3), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCMinutes", global.FunctionClass.New<JsDictionaryObject>(SetUTCMinutesImpl, 3), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setHours", global.FunctionClass.New<JsDictionaryObject>(SetHoursImpl, 4), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCHours", global.FunctionClass.New<JsDictionaryObject>(SetUTCHoursImpl, 4), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setDate", global.FunctionClass.New<JsDictionaryObject>(SetDateImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCDate", global.FunctionClass.New<JsDictionaryObject>(SetUTCDateImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setMonth", global.FunctionClass.New<JsDictionaryObject>(SetMonthImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCMonth", global.FunctionClass.New<JsDictionaryObject>(SetUTCMonthImpl, 2), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setFullYear", global.FunctionClass.New<JsDictionaryObject>(SetFullYearImpl, 3), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("setUTCFullYear", global.FunctionClass.New<JsDictionaryObject>(SetUTCFullYearImpl, 3), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setTime", global.FunctionClass.New<JsDictionaryObject>(SetTimeImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setMilliseconds", global.FunctionClass.New<JsDictionaryObject>(SetMillisecondsImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCMilliseconds", global.FunctionClass.New<JsDictionaryObject>(SetUTCMillisecondsImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setSeconds", global.FunctionClass.New<JsDictionaryObject>(SetSecondsImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCSeconds", global.FunctionClass.New<JsDictionaryObject>(SetUTCSecondsImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setMinutes", global.FunctionClass.New<JsDictionaryObject>(SetMinutesImpl, 3), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCMinutes", global.FunctionClass.New<JsDictionaryObject>(SetUTCMinutesImpl, 3), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setHours", global.FunctionClass.New<JsDictionaryObject>(SetHoursImpl, 4), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCHours", global.FunctionClass.New<JsDictionaryObject>(SetUTCHoursImpl, 4), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setDate", global.FunctionClass.New<JsDictionaryObject>(SetDateImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCDate", global.FunctionClass.New<JsDictionaryObject>(SetUTCDateImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setMonth", global.FunctionClass.New<JsDictionaryObject>(SetMonthImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCMonth", global.FunctionClass.New<JsDictionaryObject>(SetUTCMonthImpl, 2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setFullYear", global.FunctionClass.New<JsDictionaryObject>(SetFullYearImpl, 3), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("setUTCFullYear", global.FunctionClass.New<JsDictionaryObject>(SetUTCFullYearImpl, 3), PropertyAttributes.DontEnum);
 
-            Prototype.DefineOwnProperty("toUTCString", global.FunctionClass.New<JsDictionaryObject>(ToUTCStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toUTCString", global.FunctionClass.New<JsDictionaryObject>(ToUTCStringImpl), PropertyAttributes.DontEnum);
             #endregion
         }
         public JsDateConstructor(IGlobal global)
@@ -83,15 +83,15 @@ namespace Jint.Native {
         }
 
         public JsDate New() {
-            return new JsDate(this.PrototypeProperty);
+            return new JsDate(PrototypeProperty);
         }
 
         public JsDate New(double value) {
-            return new JsDate(value, this.PrototypeProperty);
+            return new JsDate(value, PrototypeProperty);
         }
 
         public JsDate New(DateTime value) {
-            return new JsDate(value.ToUniversalTime(), this.PrototypeProperty);
+            return new JsDate(value.ToUniversalTime(), PrototypeProperty);
         }
 
         public JsDate New(DateTime value, JsObject prototype)
@@ -103,10 +103,10 @@ namespace Jint.Native {
             JsDate result = null;
 
             if (parameters.Length == 1) {
-                if ((parameters[0].Class == JsInstance.CLASS_NUMBER || parameters[0].Class == JsInstance.CLASS_OBJECT) && double.IsNaN(parameters[0].ToNumber())) {
+                if ((parameters[0].Class == JsInstance.ClassNumber || parameters[0].Class == JsInstance.ClassObject) && double.IsNaN(parameters[0].ToNumber())) {
                     result = New(double.NaN);
                 }
-                else if (parameters[0].Class == JsInstance.CLASS_NUMBER)
+                else if (parameters[0].Class == JsInstance.ClassNumber)
                 {
                     result = New(parameters[0].ToNumber());
                 }
@@ -173,7 +173,7 @@ namespace Jint.Native {
 
             if (that == null || (that as IGlobal) == visitor.Global)
             {
-                return visitor.Return(ToStringImpl(result, JsInstance.EMPTY));
+                return visitor.Return(ToStringImpl(result, JsInstance.Empty));
             }
 
             return result;
@@ -188,18 +188,18 @@ namespace Jint.Native {
                 return true;
             }
 
-            if (DateTime.TryParseExact(p, JsDate.FORMAT, culture, DateTimeStyles.None, out d)) {
+            if (DateTime.TryParseExact(p, JsDate.Format, culture, DateTimeStyles.None, out d)) {
                 result = New(d).ToNumber();
                 return true;
             }
 
             DateTime ld;
 
-            if (DateTime.TryParseExact(p, JsDate.DATEFORMAT, culture, DateTimeStyles.None, out ld)) {
+            if (DateTime.TryParseExact(p, JsDate.DateFormat, culture, DateTimeStyles.None, out ld)) {
                 d = d.AddTicks(ld.Ticks);
             }
 
-            if (DateTime.TryParseExact(p, JsDate.TIMEFORMAT, culture, DateTimeStyles.None, out ld)) {
+            if (DateTime.TryParseExact(p, JsDate.TimeFormat, culture, DateTimeStyles.None, out ld)) {
                 d = d.AddTicks(ld.Ticks);
             }
 
@@ -242,7 +242,7 @@ namespace Jint.Native {
         }
 
         internal static DateTime CreateDateTime(double number) {
-            return new DateTime((long)(number * JsDate.TICKSFACTOR + JsDate.OFFSET_1970), DateTimeKind.Utc);
+            return new DateTime((long)(number * JsDate.TicksFactor + JsDate.Offset1970), DateTimeKind.Utc);
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace Jint.Native {
                 return Global.StringClass.New(double.NaN.ToString());
             }
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.FORMAT, CultureInfo.InvariantCulture));
+            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace Jint.Native {
                 return Global.StringClass.New(double.NaN.ToString());
             }
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DATEFORMAT, CultureInfo.InvariantCulture));
+            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace Jint.Native {
                 return Global.StringClass.New(double.NaN.ToString());
             }
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TIMEFORMAT, CultureInfo.InvariantCulture));
+            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace Jint.Native {
                 return Global.StringClass.New(double.NaN.ToString());
             }
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DATEFORMAT));
+            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat));
         }
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace Jint.Native {
                 return Global.StringClass.New(double.NaN.ToString());
             }
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TIMEFORMAT));
+            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat));
         }
 
         /// <summary>
@@ -537,7 +537,7 @@ namespace Jint.Native {
                 return Global.StringClass.New(double.NaN.ToString());
             }
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToString(JsDate.FORMATUTC, CultureInfo.InvariantCulture));
+            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -901,8 +901,8 @@ namespace Jint.Native {
         public JsInstance UTCImpl(JsInstance[] parameters) {
             for (int i = 0; i < parameters.Length; i++) {
                 if (parameters[i] == JsUndefined.Instance  // undefined
-                    || (parameters[i].Class == JsInstance.CLASS_NUMBER && double.IsNaN(parameters[i].ToNumber())) // NaN
-                    || (parameters[i].Class == JsInstance.CLASS_NUMBER && double.IsInfinity(parameters[i].ToNumber())) // Infinity
+                    || (parameters[i].Class == JsInstance.ClassNumber && double.IsNaN(parameters[i].ToNumber())) // NaN
+                    || (parameters[i].Class == JsInstance.ClassNumber && double.IsInfinity(parameters[i].ToNumber())) // Infinity
                     //|| parameters[i].Class == JsInstance.CLASS_OBJECT // don't accept objects ???!
                     ) {
                     return Global.NaN;

@@ -8,7 +8,7 @@ namespace Jint.Expressions {
         public Expression Expression { get; set; }
 
         public ThrowStatement(Expression expression) {
-            this.Expression = expression;
+            Expression = expression;
         }
 
         [System.Diagnostics.DebuggerStepThrough]

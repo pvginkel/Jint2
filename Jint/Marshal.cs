@@ -24,16 +24,15 @@ namespace Jint
     /// </remarks>
     public class Marshaller
     {
-
-        IGlobal m_global;
-        Dictionary<Type, NativeConstructor> m_typeCache = new Dictionary<Type,NativeConstructor>();
-        Dictionary<Type, Delegate> m_arrayMarshllers = new Dictionary<Type, Delegate>();
-        NativeTypeConstructor m_typeType;
+        private readonly IGlobal _global;
+        private readonly Dictionary<Type, NativeConstructor> _typeCache = new Dictionary<Type, NativeConstructor>();
+        private readonly Dictionary<Type, Delegate> _arrayMarshallers = new Dictionary<Type, Delegate>();
+        private NativeTypeConstructor _typeType;
 
         /* Assuming that Object supports IConvertable
          *
          */
-        static bool[,] IntegralTypeConvertions = {
+        private static readonly bool[,] IntegralTypeConversions = {
         //      Empty   Object  DBNull  Boolean Char    SByte   Byte    Int16   UInt16  Int32   UInt32  Int64   UInt64  Single  Double  Decimal DateTim -----   String
 /*Empty*/   {   false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  true    },
 /*Objec*/   {   false,  false,  false,  true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   false,  true    },
@@ -62,15 +61,15 @@ namespace Jint
         /// <param name="global">A global object which can be used for constructing new JsObjects while marshalling.</param>
         public Marshaller(IGlobal global)
         {
-            this.m_global = global;
+            _global = global;
         }
 
         public void InitTypes()
         {
-            // we cant initize a m_typeType property since m_global.Marshller should be initialized
-            m_typeType = NativeTypeConstructor.CreateNativeTypeConstructor(m_global);
+            // we cant initize a _typeType property since _global.Marshller should be initialized
+            _typeType = NativeTypeConstructor.CreateNativeTypeConstructor(_global);
 
-            m_typeCache[typeof(Type)] = m_typeType;
+            _typeCache[typeof(Type)] = _typeType;
 
             //TODO: replace a native contructors with apropriate js constructors
             foreach (var t in new Type[] {
@@ -85,13 +84,13 @@ namespace Jint
                 typeof(Byte),
                 typeof(SByte)
             })
-                m_typeCache[t] = CreateConstructor(t, m_global.NumberClass.PrototypeProperty);
+                _typeCache[t] = CreateConstructor(t, _global.NumberClass.PrototypeProperty);
 
-            m_typeCache[typeof(String)] = CreateConstructor(typeof(String), m_global.StringClass.PrototypeProperty);
-            m_typeCache[typeof(Char)] = CreateConstructor(typeof(Char), m_global.StringClass.PrototypeProperty);
-            m_typeCache[typeof(Boolean)] = CreateConstructor(typeof(Boolean), m_global.BooleanClass.PrototypeProperty);
-            m_typeCache[typeof(DateTime)] = CreateConstructor(typeof(DateTime), m_global.DateClass.PrototypeProperty);
-            m_typeCache[typeof(Regex)] = CreateConstructor(typeof(Regex), m_global.RegExpClass.PrototypeProperty);
+            _typeCache[typeof(String)] = CreateConstructor(typeof(String), _global.StringClass.PrototypeProperty);
+            _typeCache[typeof(Char)] = CreateConstructor(typeof(Char), _global.StringClass.PrototypeProperty);
+            _typeCache[typeof(Boolean)] = CreateConstructor(typeof(Boolean), _global.BooleanClass.PrototypeProperty);
+            _typeCache[typeof(DateTime)] = CreateConstructor(typeof(DateTime), _global.DateClass.PrototypeProperty);
+            _typeCache[typeof(Regex)] = CreateConstructor(typeof(Regex), _global.RegExpClass.PrototypeProperty);
 
         }
 
@@ -116,8 +115,8 @@ namespace Jint
                 {
                     // Generic defenitions aren't types in the meaning of js
                     // but they are instances of System.Type
-                    var res = new NativeGenericType(t, m_typeType.PrototypeProperty);
-                    m_typeType.SetupNativeProperties(res);
+                    var res = new NativeGenericType(t, _typeType.PrototypeProperty);
+                    _typeType.SetupNativeProperties(res);
                     return res;
                 }
                 else
@@ -134,22 +133,22 @@ namespace Jint
         public JsConstructor MarshalType(Type t)
         {
             NativeConstructor res;
-            if (m_typeCache.TryGetValue(t, out res))
+            if (_typeCache.TryGetValue(t, out res))
                 return res;
             
-            return m_typeCache[t] = CreateConstructor(t);
+            return _typeCache[t] = CreateConstructor(t);
         }
 
         NativeConstructor CreateConstructor(Type t)
         {
             // TODO: Move this code to NativeTypeConstructor.Wrap
             /* NativeConstructor res;
-            res = new NativeConstructor(t, m_global);
-            res.InitPrototype(m_global);
-            m_typeType.SetupNativeProperties(res);
+            res = new NativeConstructor(t, _global);
+            res.InitPrototype(_global);
+            _typeType.SetupNativeProperties(res);
             return res;
             */
-            return (NativeConstructor)m_typeType.Wrap(t);
+            return (NativeConstructor)_typeType.Wrap(t);
         }
 
         /// <summary>
@@ -166,11 +165,11 @@ namespace Jint
         NativeConstructor CreateConstructor(Type t, JsObject prototypePropertyPrototype)
         {
             /* NativeConstructor res;
-            res = new NativeConstructor(t, m_global,prototypeProperty);
-            res.InitPrototype(m_global);
-            m_typeType.SetupNativeProperties(res);
+            res = new NativeConstructor(t, _global,prototypeProperty);
+            res.InitPrototype(_global);
+            _typeType.SetupNativeProperties(res);
             return res; */
-            return (NativeConstructor)m_typeType.WrapSpecialType(t, prototypePropertyPrototype);
+            return (NativeConstructor)_typeType.WrapSpecialType(t, prototypePropertyPrototype);
         }
 
         TElem[] MarshalJsArrayHelper<TElem>(JsObject value)
@@ -189,8 +188,8 @@ namespace Jint
         object MarshalJsFunctionHelper(JsFunction func,Type delegateType)
         {
             // create independent visitor
-            ExecutionVisitor visitor = new ExecutionVisitor(m_global, new JsScope((JsObject)m_global));
-            var v = ((ExecutionVisitor)m_global.Visitor);
+            ExecutionVisitor visitor = new ExecutionVisitor(_global, new JsScope((JsObject)_global));
+            var v = ((ExecutionVisitor)_global.Visitor);
             visitor.AllowClr = v.AllowClr;
             visitor.PermissionSet = v.PermissionSet;
 
@@ -216,11 +215,11 @@ namespace Jint
                 {
                     if (value == null || value == JsUndefined.Instance || value == JsNull.Instance)
                         return default(T);
-                    if (m_global.ArrayClass.HasInstance(value as JsObject))
+                    if (_global.ArrayClass.HasInstance(value as JsObject))
                     {
                         Delegate marshller;
-                        if (!m_arrayMarshllers.TryGetValue(typeof(T), out marshller))
-                            m_arrayMarshllers[typeof(T)] = marshller = Delegate.CreateDelegate(
+                        if (!_arrayMarshallers.TryGetValue(typeof(T), out marshller))
+                            _arrayMarshallers[typeof(T)] = marshller = Delegate.CreateDelegate(
                                 typeof(Func<JsObject, T>),
                                 this,
                                 typeof(Marshaller)
@@ -415,7 +414,7 @@ namespace Jint
         public bool IsAssignable(Type target, Type source)
         {
             return
-                (typeof(IConvertible).IsAssignableFrom(source) && IntegralTypeConvertions[(int)Type.GetTypeCode(source), (int)Type.GetTypeCode(target)])
+                (typeof(IConvertible).IsAssignableFrom(source) && IntegralTypeConversions[(int)Type.GetTypeCode(source), (int)Type.GetTypeCode(target)])
                 || target.IsAssignableFrom(source);
         }
     }

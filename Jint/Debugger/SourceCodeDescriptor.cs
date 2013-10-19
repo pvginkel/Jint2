@@ -8,36 +8,18 @@ namespace Jint.Debugger {
         [Serializable]
         public class Location {
             public Location(int line, int c) {
-                this.line = line;
-                this._Char = c;
+                Line = line;
+                Char = c;
             }
 
-            private int line;
+            public int Line { get; set; }
 
-            public int Line {
-                get { return line; }
-                set { line = value; }
-            }
-            private int _Char;
-
-            public int Char {
-                get { return _Char; }
-                set { _Char = value; }
-            }
+            public int Char { get; set; }
         }
 
-        protected Location start;
+        public Location Start { get; set; }
 
-        public Location Start {
-            get { return start; }
-            set { start = value; }
-        }
-        protected Location stop;
-
-        public Location Stop {
-            get { return stop; }
-            set { stop = value; }
-        }
+        public Location Stop { get; set; }
 
         public string Code { get; private set; }
 

@@ -12,7 +12,7 @@ namespace Jint.Native {
     [Serializable]
     public abstract class Descriptor {
         public Descriptor(JsDictionaryObject owner, string name) {
-            this.Owner = owner;
+            Owner = owner;
             Name = name;
         }
 
@@ -23,9 +23,9 @@ namespace Jint.Native {
         public bool Writable { get; set; }
         public JsDictionaryObject Owner { get; set; }
 
-        public virtual bool isDeleted { get; protected set; }
+        public virtual bool IsDeleted { get; protected set; }
 
-        public abstract bool isReference { get; }
+        public abstract bool IsReference { get; }
 
         /// <summary>
         /// Marks a descriptor as a deleted.
@@ -34,7 +34,7 @@ namespace Jint.Native {
         /// A descriptor may be deleted to force a refresh of cached references.
         /// </remarks>
         public virtual void Delete() {
-            isDeleted = true;
+            IsDeleted = true;
         }
 
         public bool IsClr {
@@ -68,7 +68,7 @@ namespace Jint.Native {
         /// <param name="obj"></param>
         /// <returns></returns>
         internal static Descriptor ToPropertyDesciptor(IGlobal global, JsDictionaryObject owner, string name, JsInstance jsInstance) {
-            if (jsInstance.Class != JsInstance.CLASS_OBJECT) {
+            if (jsInstance.Class != JsInstance.ClassObject) {
                 throw new JsException(global.TypeErrorClass.New("The target object has to be an instance of an object"));
             }
 

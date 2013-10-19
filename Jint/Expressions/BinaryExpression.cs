@@ -4,31 +4,16 @@ namespace Jint.Expressions {
     [Serializable]
     public class BinaryExpression : Expression {
         public BinaryExpression(BinaryExpressionType type, Expression leftExpression, Expression rightExpression) {
-            this.type = type;
-            this.leftExpression = leftExpression;
-            this.rightExpression = rightExpression;
+            Type = type;
+            LeftExpression = leftExpression;
+            RightExpression = rightExpression;
         }
 
-        private Expression leftExpression;
+        public Expression LeftExpression { get; set; }
 
-        public Expression LeftExpression {
-            get { return leftExpression; }
-            set { leftExpression = value; }
-        }
+        public Expression RightExpression { get; set; }
 
-        private Expression rightExpression;
-
-        public Expression RightExpression {
-            get { return rightExpression; }
-            set { rightExpression = value; }
-        }
-
-        private BinaryExpressionType type;
-
-        public BinaryExpressionType Type {
-            get { return type; }
-            set { type = value; }
-        }
+        public BinaryExpressionType Type { get; set; }
 
         [System.Diagnostics.DebuggerStepThrough]
         public override void Accept(IStatementVisitor visitor) {
@@ -36,7 +21,7 @@ namespace Jint.Expressions {
         }
 
         public override string ToString() {
-            return Type.ToString() + " (" + leftExpression.ToString() + ", " + rightExpression.ToString() + ")";
+            return Type + " (" + LeftExpression + ", " + RightExpression + ")";
         }
     }
 

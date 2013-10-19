@@ -4,23 +4,13 @@ namespace Jint.Expressions {
     [Serializable]
     public class ValueExpression : Expression {
         public ValueExpression(object value, TypeCode typeCode) {
-            this.value = value;
-            this.typeCode = typeCode;
+            Value = value;
+            TypeCode = typeCode;
         }
 
-        private object value;
+        public object Value { get; set; }
 
-        public object Value {
-            get { return value; }
-            set { this.value = value; }
-        }
-
-        private TypeCode typeCode;
-
-        public TypeCode TypeCode {
-            get { return typeCode; }
-            set { typeCode = value; }
-        }
+        public TypeCode TypeCode { get; set; }
 
         [System.Diagnostics.DebuggerStepThrough]
         public override void Accept(IStatementVisitor visitor) {

@@ -6,7 +6,11 @@ using Jint.Delegates;
 namespace Jint.Native {
     [Serializable]
     public class JsError : JsObject {
-        private string message { get { return this["message"].ToString(); } set { this["message"] = global.StringClass.New(value); } }
+        private string Message
+        {
+            get { return this["message"].ToString(); }
+            set { this["message"] = _global.StringClass.New(value); }
+        }
 
         public override bool IsClr
         {
@@ -18,11 +22,11 @@ namespace Jint.Native {
 
         public override object Value {
             get {
-                return message;
+                return Message;
             }
         }
 
-        private IGlobal global;
+        private readonly IGlobal _global;
 
         public JsError(IGlobal global)
             : this(global, string.Empty) {
@@ -30,12 +34,12 @@ namespace Jint.Native {
 
         public JsError(IGlobal global, string message)
             : base(global.ErrorClass.PrototypeProperty) {
-            this.global = global;
-            this.message = message;
+            _global = global;
+            Message = message;
         }
 
         public override string Class {
-            get { return CLASS_ERROR; }
+            get { return ClassError; }
         }
 
         public override string ToString() {

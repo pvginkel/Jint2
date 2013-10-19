@@ -8,40 +8,40 @@ namespace Jint.Native {
     public class PropertyDescriptor : Descriptor {
         public PropertyDescriptor(IGlobal global, JsDictionaryObject owner, string name)
             : base(owner, name) {
-            this.global = global;
+            _global = global;
             Enumerable = false;
         }
 
-        private IGlobal global;
+        private readonly IGlobal _global;
 
         public JsFunction GetFunction { get; set; }
         public JsFunction SetFunction { get; set; }
 
-        public override bool isReference {
+        public override bool IsReference {
             get { return false; }
         }
 
         public override Descriptor Clone() {
-            return new PropertyDescriptor(global, Owner, Name) {
-                Enumerable = this.Enumerable,
-                Configurable = this.Configurable,
-                Writable = this.Writable,
-                GetFunction = this.GetFunction,
-                SetFunction = this.SetFunction
+            return new PropertyDescriptor(_global, Owner, Name) {
+                Enumerable = Enumerable,
+                Configurable = Configurable,
+                Writable = Writable,
+                GetFunction = GetFunction,
+                SetFunction = SetFunction
             };
         }
 
         public override JsInstance Get(JsDictionaryObject that) {
-            //JsDictionaryObject that = global.Visitor.CallTarget;
-            global.Visitor.ExecuteFunction(GetFunction, that, JsInstance.EMPTY);
-            return global.Visitor.Returned;
+            //JsDictionaryObject that = _global._visitor.CallTarget;
+            _global.Visitor.ExecuteFunction(GetFunction, that, JsInstance.Empty);
+            return _global.Visitor.Returned;
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value) {
             if (SetFunction == null)
-                throw new JsException(global.TypeErrorClass.New());
-            //JsDictionaryObject that = global.Visitor.CallTarget;
-            global.Visitor.ExecuteFunction(SetFunction, that, new JsInstance[] { value });
+                throw new JsException(_global.TypeErrorClass.New());
+            //JsDictionaryObject that = _global._visitor.CallTarget;
+            _global.Visitor.ExecuteFunction(SetFunction, that, new JsInstance[] { value });
         }
 
         internal override DescriptorType DescriptorType {

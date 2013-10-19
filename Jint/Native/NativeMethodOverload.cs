@@ -9,22 +9,21 @@ namespace Jint.Native
 {
     public class NativeMethodOverload : JsFunction
     {
-
-        Marshaller m_marshaller;
-        NativeOverloadImpl<MethodInfo, JsMethodImpl> m_overloads;
+        private readonly Marshaller _marshaller;
+        private readonly NativeOverloadImpl<MethodInfo, JsMethodImpl> _overloads;
 
         // a list of methods
-        LinkedList<MethodInfo> m_methods = new LinkedList<MethodInfo>();
+        private readonly LinkedList<MethodInfo> _methods = new LinkedList<MethodInfo>();
         
         // a list of generics
-        LinkedList<MethodInfo> m_generics = new LinkedList<MethodInfo>();
+        private readonly LinkedList<MethodInfo> _generics = new LinkedList<MethodInfo>();
 
         public NativeMethodOverload(ICollection<MethodInfo> methods , JsObject prototype, IGlobal global)
             : base(prototype)
         {
             if (global == null)
                 throw new ArgumentNullException("global");
-            m_marshaller = global.Marshaller;
+            _marshaller = global.Marshaller;
 
             foreach (MethodInfo info in methods)
             {
@@ -35,15 +34,15 @@ namespace Jint.Native
             foreach (var method in methods)
             {
                 if (method.IsGenericMethodDefinition)
-                    m_generics.AddLast(method);
+                    _generics.AddLast(method);
                 else if (! method.ContainsGenericParameters)
-                    m_methods.AddLast(method);
+                    _methods.AddLast(method);
             }
 
-            m_overloads = new NativeOverloadImpl<MethodInfo, JsMethodImpl>(
-                m_marshaller,
-                new NativeOverloadImpl<MethodInfo, JsMethodImpl>.GetMembersDelegate(this.GetMembers),
-                new NativeOverloadImpl<MethodInfo, JsMethodImpl>.WrapMmemberDelegate(this.WrapMember)
+            _overloads = new NativeOverloadImpl<MethodInfo, JsMethodImpl>(
+                _marshaller,
+                new NativeOverloadImpl<MethodInfo, JsMethodImpl>.GetMembersDelegate(GetMembers),
+                new NativeOverloadImpl<MethodInfo, JsMethodImpl>.WrapMemberDelegate(WrapMember)
             );
         }
 
@@ -71,11 +70,11 @@ namespace Jint.Native
 
         public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (m_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
+            if (_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
                 return base.Execute(visitor, that, parameters, genericArguments);
             else
             {
-                JsMethodImpl impl = m_overloads.ResolveOverload(parameters, genericArguments);
+                JsMethodImpl impl = _overloads.ResolveOverload(parameters, genericArguments);
                 if (impl == null)
                     throw new JintException(String.Format("No matching overload found {0}<{1}>", Name, genericArguments));
                 visitor.Return(impl(visitor.Global, that, parameters));
@@ -85,7 +84,7 @@ namespace Jint.Native
 
         protected JsMethodImpl WrapMember(MethodInfo info)
         {
-            return m_marshaller.WrapMethod(info,true);
+            return _marshaller.WrapMethod(info,true);
         }
 
         protected IEnumerable<MethodInfo> GetMembers(Type[] genericArguments, int argCount)
@@ -93,7 +92,7 @@ namespace Jint.Native
             if (genericArguments != null && genericArguments.Length > 0)
             {
 
-                foreach (var item in m_generics)
+                foreach (var item in _generics)
                 {
                     // try specialize generics
                     if (item.GetGenericArguments().Length == genericArguments.Length && item.GetParameters().Length == argCount)
@@ -112,7 +111,7 @@ namespace Jint.Native
                 }
             }
 
-            foreach (var item in m_methods)
+            foreach (var item in _methods)
             {
                 ParameterInfo[] parameters = item.GetParameters();
                 if (parameters.Length != argCount)

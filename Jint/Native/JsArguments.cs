@@ -6,36 +6,36 @@ using Jint.Delegates;
 namespace Jint.Native {
     [Serializable]
     public class JsArguments : JsObject {
-        public const string CALLEE = "callee";
+        public const string CalleeName = "callee";
 
-        protected ValueDescriptor calleeDescriptor;
+        private readonly ValueDescriptor _calleeDescriptor;
 
         protected JsFunction Callee {
-            get { return this[CALLEE] as JsFunction; }
-            set { this[CALLEE] = value; }
+            get { return this[CalleeName] as JsFunction; }
+            set { this[CalleeName] = value; }
         }
 
         public JsArguments(IGlobal global, JsFunction callee, JsInstance[] arguments)
             : base(global.ObjectClass.New())
         {            
-            this.global = global;
+            _global = global;
 
             // Add the named parameters            
             for (int i = 0; i < arguments.Length ; i++)
-                this.DefineOwnProperty(
+                DefineOwnProperty(
                     new ValueDescriptor(this, i.ToString(), arguments[i]) { Enumerable = false }
                 );
 
-            length = arguments.Length;
+            _length = arguments.Length;
 
-            calleeDescriptor = new ValueDescriptor(this, CALLEE, callee) { Enumerable = false };
-            DefineOwnProperty(calleeDescriptor);
+            _calleeDescriptor = new ValueDescriptor(this, CalleeName, callee) { Enumerable = false };
+            DefineOwnProperty(_calleeDescriptor);
 
             DefineOwnProperty(new PropertyDescriptor<JsArguments>(global, this, "length", GetLength) { Enumerable = false });
         }
 
-        private int length;
-        private IGlobal global;
+        private int _length;
+        private readonly IGlobal _global;
 
         public override bool IsClr
         {
@@ -58,19 +58,19 @@ namespace Jint.Native {
         /// </summary>
         public override int Length {
             get {
-                return length;
+                return _length;
             }
             set {
-                length = value;
+                _length = value;
             }
         }
 
         public override string Class {
-            get { return CLASS_ARGUMENTS; }
+            get { return ClassArguments; }
         }
 
         public JsInstance GetLength(JsArguments target) {
-            return global.NumberClass.New(target.length);
+            return _global.NumberClass.New(target._length);
         }
     }
 }

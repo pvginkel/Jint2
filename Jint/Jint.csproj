@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CachedTypeResolver.cs" />
+    <Compile Include="Delegates\Delegates.cs" />
     <Compile Include="Marshal\Delegates.cs" />
     <Compile Include="Marshal\JsFunctionDelegate.cs" />
     <Compile Include="Marshal\JsPropertyAttribute.cs" />

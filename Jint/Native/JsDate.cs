@@ -7,30 +7,30 @@ using System.Globalization;
 namespace Jint.Native {
     [Serializable]
     public sealed class JsDate : JsObject {
-        static internal long OFFSET_1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
-        static internal int TICKSFACTOR = 10000;
+        internal static long Offset1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
+        internal static int TicksFactor = 10000;
 
-        private DateTime value;
+        private DateTime _value;
 
         public override object Value {
             get {
-                return value;
+                return _value;
             }
             set {
                 if (value is DateTime)
-                    this.value = (DateTime)value;
+                    _value = (DateTime)value;
                 else if (value is double)
-                    this.value = JsDateConstructor.CreateDateTime((double)value);
+                    _value = JsDateConstructor.CreateDateTime((double)value);
             }
         }
 
         public JsDate(JsObject prototype)
             : base(prototype) {
-                value = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                _value = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
         public JsDate(DateTime date, JsObject prototype): base(prototype) {
-            value = date;
+            _value = date;
         }
 
         public JsDate(double value, JsObject prototype)
@@ -46,32 +46,32 @@ namespace Jint.Native {
         }
 
         public override double ToNumber() {
-            return DateToDouble(value);
+            return DateToDouble(_value);
         }
 
-        public static string FORMAT = "ddd, dd MMM yyyy HH':'mm':'ss 'GMT'zzz";
-        public static string FORMATUTC = "ddd, dd MMM yyyy HH':'mm':'ss 'UTC'";
-        public static string DATEFORMAT = "ddd, dd MMM yyyy";
-        public static string TIMEFORMAT = "HH':'mm':'ss 'GMT'zzz";
+        public static string Format = "ddd, dd MMM yyyy HH':'mm':'ss 'GMT'zzz";
+        public static string FormatUtc = "ddd, dd MMM yyyy HH':'mm':'ss 'UTC'";
+        public static string DateFormat = "ddd, dd MMM yyyy";
+        public static string TimeFormat = "HH':'mm':'ss 'GMT'zzz";
 
         public static double DateToDouble(DateTime date) {
-            return (date.ToUniversalTime().Ticks - OFFSET_1970) / TICKSFACTOR;
+            return (date.ToUniversalTime().Ticks - Offset1970) / TicksFactor;
         }
 
         public static string DateToString(DateTime date) {
-            return date.ToLocalTime().ToString(FORMAT, CultureInfo.InvariantCulture);
+            return date.ToLocalTime().ToString(Format, CultureInfo.InvariantCulture);
         }
 
         public override string ToString() {
-            return DateToString(value);
+            return DateToString(_value);
         }
 
         public override object ToObject() {
-            return value;
+            return _value;
         }
 
         public override string Class {
-            get { return CLASS_DATE; }
+            get { return ClassDate; }
         }
     }
 }

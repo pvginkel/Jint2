@@ -8,14 +8,14 @@ using System.Reflection;
 namespace Jint.Native {
     [Serializable]
     public class JsClrConstructorInfo : JsObject {
-        private ConstructorInfo value;
+        private readonly ConstructorInfo _value;
 
         public JsClrConstructorInfo() {
-            value = null;
+            _value = null;
         }
 
         public JsClrConstructorInfo(ConstructorInfo clr) {
-            value = clr;
+            _value = clr;
         }
 
         public override bool ToBoolean() {
@@ -27,18 +27,16 @@ namespace Jint.Native {
         }
 
         public override string ToString() {
-            return value.Name;
+            return _value.Name;
         }
 
-        public const string TYPEOF = "clrMethodInfo";
-
         public override string Class {
-            get { return TYPEOF; }
+            get { return "clrMethodInfo"; }
         }
 
         public override object Value {
             get {
-                return value;
+                return _value;
             }
         }
     }

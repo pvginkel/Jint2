@@ -6,11 +6,11 @@ using System.Globalization;
 namespace Jint.Native {
     [Serializable]
     public sealed class JsNumber : JsObject, ILiteral {
-        private double value;
+        private readonly double _value;
 
         public override object Value {
             get {
-                return value;
+                return _value;
             }
         }
 
@@ -20,12 +20,12 @@ namespace Jint.Native {
 
         public JsNumber(double num, JsObject prototype)
             : base(prototype) {
-            value = num;
+            _value = num;
         }
 
         public JsNumber(int num, JsObject prototype)
             : base(prototype) {
-            value = num;
+            _value = num;
         }
 
         public override bool IsClr
@@ -41,30 +41,30 @@ namespace Jint.Native {
         }
 
         public override bool ToBoolean() {
-            return NumberToBoolean(value);
+            return NumberToBoolean(_value);
         }
 
         public override double ToNumber() {
-            return value;
+            return _value;
         }
 
         public override string ToString() {
-            return value.ToString(CultureInfo.InvariantCulture);
+            return _value.ToString(CultureInfo.InvariantCulture);
         }
 
         public override object ToObject() {
-            return value;
+            return _value;
         }
 
         public override string Class {
-            get { return CLASS_NUMBER; }
+            get { return ClassNumber; }
         }
 
         public override string Type
         {
             get
             {
-                return TYPE_NUMBER;
+                return TypeNumber;
             }
         }
     }

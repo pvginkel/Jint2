@@ -12,33 +12,33 @@ namespace Jint.Native {
             Configurable = true;
         }
 
-        JsInstance value;
+        private JsInstance _value;
 
         public ValueDescriptor(JsDictionaryObject owner, string name, JsInstance value)
             : this(owner, name) {
             Set(null, value);
         }
 
-        public override bool isReference {
+        public override bool IsReference {
             get { return false; }
         }
 
         public override Descriptor Clone() {
-            return new ValueDescriptor(Owner, Name, value) {
-                Enumerable = this.Enumerable,
-                Configurable = this.Configurable,
-                Writable = this.Writable
+            return new ValueDescriptor(Owner, Name, _value) {
+                Enumerable = Enumerable,
+                Configurable = Configurable,
+                Writable = Writable
             };
         }
 
         public override JsInstance Get(JsDictionaryObject that) {
-            return value ?? JsUndefined.Instance;
+            return _value ?? JsUndefined.Instance;
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value) {
             if (!Writable)
                 throw new JintException("This property is not writable");
-            this.value = value;
+            _value = value;
         }
 
         internal override DescriptorType DescriptorType {

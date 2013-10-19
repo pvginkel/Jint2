@@ -9,28 +9,28 @@ namespace Jint.Native {
         public JsObjectConstructor(IGlobal global, JsObject prototype, JsObject rootPrototype)
             : base(global) {
             Name = "Object";
-            DefineOwnProperty(PROTOTYPE, rootPrototype, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, rootPrototype, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
         }
 
         public override void InitPrototype(IGlobal global) {
-            var Prototype = PrototypeProperty;
+            var prototype = PrototypeProperty;
 
             // we need to keep this becouse the prototype is passed to the consctrucor rather than created in it
-            Prototype.DefineOwnProperty("constructor", this, PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("constructor", this, PropertyAttributes.DontEnum);
 
-            //Prototype.DefineOwnProperty("length", new PropertyDescriptor<JsDictionaryObject>(global, Prototype, "length", GetLengthImpl, SetLengthImpl));
+            //prototype.DefineOwnProperty("length", new PropertyDescriptor<JsDictionaryObject>(global, Prototype, "length", GetLengthImpl, SetLengthImpl));
 
-            Prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsDictionaryObject>(ValueOfImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("hasOwnProperty", global.FunctionClass.New<JsDictionaryObject>(HasOwnPropertyImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("isPrototypeOf", global.FunctionClass.New<JsDictionaryObject>(IsPrototypeOfImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("propertyIsEnumerable", global.FunctionClass.New<JsDictionaryObject>(PropertyIsEnumerableImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getPrototypeOf", new JsFunctionWrapper(GetPrototypeOfImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsDictionaryObject>(ValueOfImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("hasOwnProperty", global.FunctionClass.New<JsDictionaryObject>(HasOwnPropertyImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("isPrototypeOf", global.FunctionClass.New<JsDictionaryObject>(IsPrototypeOfImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("propertyIsEnumerable", global.FunctionClass.New<JsDictionaryObject>(PropertyIsEnumerableImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("getPrototypeOf", new JsFunctionWrapper(GetPrototypeOfImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
             if (global.HasOption(Options.Ecmascript5)) {
-                Prototype.DefineOwnProperty("defineProperty", new JsFunctionWrapper(DefineProperty, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-                Prototype.DefineOwnProperty("__lookupGetter__", global.FunctionClass.New<JsDictionaryObject>(GetGetFunction), PropertyAttributes.DontEnum);
-                Prototype.DefineOwnProperty("__lookupSetter__", global.FunctionClass.New<JsDictionaryObject>(GetSetFunction), PropertyAttributes.DontEnum);
+                prototype.DefineOwnProperty("defineProperty", new JsFunctionWrapper(DefineProperty, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+                prototype.DefineOwnProperty("__lookupGetter__", global.FunctionClass.New<JsDictionaryObject>(GetGetFunction), PropertyAttributes.DontEnum);
+                prototype.DefineOwnProperty("__lookupSetter__", global.FunctionClass.New<JsDictionaryObject>(GetSetFunction), PropertyAttributes.DontEnum);
             }
         }
 
@@ -40,8 +40,8 @@ namespace Jint.Native {
         /// <param name="constructor">JsFunction which is used as a constructor</param>
         /// <returns>new object</returns>
         public JsObject New(JsFunction constructor) {
-            JsObject obj = new JsObject(this.PrototypeProperty);
-            obj.DefineOwnProperty(new ValueDescriptor(obj, CONSTRUCTOR, constructor) { Enumerable = false });
+            JsObject obj = new JsObject(PrototypeProperty);
+            obj.DefineOwnProperty(new ValueDescriptor(obj, ConstructorName, constructor) { Enumerable = false });
             return obj;
         }
 
@@ -49,12 +49,12 @@ namespace Jint.Native {
         /// Creates new JsObject, sets a [[Prototype]] to the Prototype parameter and a 'constructor' property to the specified function.
         /// </summary>
         /// <param name="constructor">JsFunction which is used as a constructor</param>
-        /// <param name="Prototype">JsObjetc which is used as a prototype</param>
+        /// <param name="prototype">JsObjetc which is used as a prototype</param>
         /// <returns>new object</returns>
-        public JsObject New(JsFunction constructor, JsObject Prototype)
+        public JsObject New(JsFunction constructor, JsObject prototype)
         {
-            JsObject obj = new JsObject(Prototype);
-            obj.DefineOwnProperty(new ValueDescriptor(obj, CONSTRUCTOR, constructor) { Enumerable = false });
+            JsObject obj = new JsObject(prototype);
+            obj.DefineOwnProperty(new ValueDescriptor(obj, ConstructorName, constructor) { Enumerable = false });
             return obj;
         }
 
@@ -64,7 +64,7 @@ namespace Jint.Native {
         /// <param name="value">Value to store in the new object</param>
         /// <returns>new object</returns>
         public JsObject New(object value) {
-            return new JsObject(value, this.PrototypeProperty);
+            return new JsObject(value, PrototypeProperty);
         }
 
         public JsObject New(object value, JsObject prototype)
@@ -87,9 +87,9 @@ namespace Jint.Native {
         public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters) {
             if (parameters.Length > 0) {
                 switch (parameters[0].Class) {
-                    case JsInstance.CLASS_STRING: return Global.StringClass.New(parameters[0].ToString());
-                    case JsInstance.CLASS_NUMBER: return Global.NumberClass.New(parameters[0].ToNumber());
-                    case JsInstance.CLASS_BOOLEAN: return Global.BooleanClass.New(parameters[0].ToBoolean());
+                    case JsInstance.ClassString: return Global.StringClass.New(parameters[0].ToString());
+                    case JsInstance.ClassNumber: return Global.NumberClass.New(parameters[0].ToNumber());
+                    case JsInstance.ClassBoolean: return Global.BooleanClass.New(parameters[0].ToBoolean());
                     default:
                         return parameters[0];
                 }
@@ -115,7 +115,7 @@ namespace Jint.Native {
 
         // 15.2.4.6
         public JsInstance IsPrototypeOfImpl(JsDictionaryObject target, JsInstance[] parameters) {
-            if (target.Class != JsInstance.CLASS_OBJECT) {
+            if (target.Class != JsInstance.ClassObject) {
                 return Global.BooleanClass.False;
             }
 
@@ -147,9 +147,9 @@ namespace Jint.Native {
         /// </summary>
         /// <returns></returns>
         public JsInstance GetPrototypeOfImpl(JsInstance[] parameters) {
-            if (parameters[0].Class != JsInstance.CLASS_OBJECT)
+            if (parameters[0].Class != JsInstance.ClassObject)
                 throw new JsException(Global.TypeErrorClass.New());
-            return ((parameters[0] as JsObject ?? JsUndefined.Instance)[JsFunction.CONSTRUCTOR] as JsObject ?? JsUndefined.Instance)[JsFunction.PROTOTYPE];
+            return ((parameters[0] as JsObject ?? JsUndefined.Instance)[JsFunction.ConstructorName] as JsObject ?? JsUndefined.Instance)[JsFunction.PrototypeName];
         }
 
         /// <summary>

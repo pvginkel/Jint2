@@ -14,7 +14,7 @@ namespace Jint.Native {
     /// </remarks>
     [Serializable]
     public abstract class JsDictionaryObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>> {
-        protected internal IPropertyBag properties = new MiniCachedPropertyBag();
+        private readonly IPropertyBag _properties = new MiniCachedPropertyBag();
 
         /// <summary>
         /// Determines wheater object is extensible or not. Extensible object allows defining new own properties.
@@ -24,9 +24,9 @@ namespace Jint.Native {
         /// </remarks>
         public bool Extensible { get; set; }
 
-        public bool hasChildren { get; private set; }
+        public bool HasChildren { get; private set; }
 
-        private int m_length = 0;
+        private int _length;
 
         /// <summary>
         /// gets the number of an actually stored properties
@@ -34,7 +34,7 @@ namespace Jint.Native {
         /// <remarks>
         /// This is a non ecma262 standart property
         /// </remarks>
-        public virtual int Length { get { return m_length; } set { } }
+        public virtual int Length { get { return _length; } set { } }
 
         /// <summary>
         /// Creates new Object without prototype
@@ -49,9 +49,9 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="prototype">Prototype</param>
         public JsDictionaryObject(JsDictionaryObject prototype) {
-            this.Prototype = prototype;
+            Prototype = prototype;
             Extensible = true;
-            prototype.hasChildren = true;
+            prototype.HasChildren = true;
         }
 
         /// <summary>
@@ -89,29 +89,29 @@ namespace Jint.Native {
         /// <returns>true of false</returns>
         public virtual bool HasOwnProperty(string key) {
             Descriptor desc;
-            return properties.TryGet(key, out desc) && desc.Owner == this;
+            return _properties.TryGet(key, out desc) && desc.Owner == this;
         }
 
         public virtual bool HasProperty(JsInstance key) {
-            return this.HasProperty(key.ToString());
+            return HasProperty(key.ToString());
         }
 
         public virtual bool HasOwnProperty(JsInstance key) {
-            return this.HasOwnProperty(key.ToString());
+            return HasOwnProperty(key.ToString());
         }
 
         public virtual Descriptor GetDescriptor(string index) {
 
             Descriptor result;
-            if (properties.TryGet(index, out result))
-                if (!result.isDeleted)
+            if (_properties.TryGet(index, out result))
+                if (!result.IsDeleted)
                     return result;
                 else
-                    properties.Delete(index); // remove from cache
+                    _properties.Delete(index); // remove from cache
 
             // Prototype always a JsObject, (JsNull.Instance is also an object and next call will return null in case of null)
             if ((result = Prototype.GetDescriptor(index)) != null)
-                properties.Put(index, result); // cache descriptior
+                _properties.Put(index, result); // cache descriptior
 
             return result;
         }
@@ -168,9 +168,9 @@ namespace Jint.Native {
             Descriptor d = null;
             if (TryGetDescriptor(index, out d) && d.Owner == this) {
                 if (d.Configurable) {
-                    properties.Delete(index);
+                    _properties.Delete(index);
                     d.Delete();
-                    m_length--;
+                    _length--;
                 }
                 else {
                     throw new JintException("Property " + index + " isn't configurable");
@@ -189,18 +189,18 @@ namespace Jint.Native {
         public virtual void DefineOwnProperty(Descriptor currentDescriptor) {
             string key = currentDescriptor.Name;
             Descriptor desc;
-            if (properties.TryGet(key, out desc) && desc.Owner == this) {
+            if (_properties.TryGet(key, out desc) && desc.Owner == this) {
 
                 // updating an existing property
                 switch (desc.DescriptorType) {
                     case DescriptorType.Value:
                         switch (currentDescriptor.DescriptorType) {
                             case DescriptorType.Value:
-                                properties.Get(key).Set(this, currentDescriptor.Get(this));
+                                _properties.Get(key).Set(this, currentDescriptor.Get(this));
                                 break;
                             case DescriptorType.Accessor:
-                                properties.Delete(key);
-                                properties.Put(key, currentDescriptor);
+                                _properties.Delete(key);
+                                _properties.Put(key, currentDescriptor);
                                 break;
                             case DescriptorType.Clr:
                                 throw new NotSupportedException();
@@ -226,15 +226,15 @@ namespace Jint.Native {
                 if (desc != null)
                     desc.Owner.RedefineProperty(desc.Name); // if we have a cached property
 
-                properties.Put(key, currentDescriptor);
-                m_length++;
+                _properties.Put(key, currentDescriptor);
+                _length++;
             }
         }
 
         void RedefineProperty(string name) {
             Descriptor old;
-            if (properties.TryGet(name, out old) && old.Owner == this) {
-                properties.Put(name, old.Clone());
+            if (_properties.TryGet(name, out old) && old.Owner == this) {
+                _properties.Put(name, old.Clone());
                 old.Delete();
             }
         }
@@ -242,7 +242,7 @@ namespace Jint.Native {
         #region IEnumerable<KeyValuePair<JsInstance,JsInstance>> Members
 
         public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator() {
-            foreach (KeyValuePair<string, Descriptor> descriptor in properties) {
+            foreach (KeyValuePair<string, Descriptor> descriptor in _properties) {
                 if (descriptor.Value.Enumerable)
                     yield return new KeyValuePair<string, JsInstance>(descriptor.Key, descriptor.Value.Get(this));
             }
@@ -253,13 +253,13 @@ namespace Jint.Native {
         #region IEnumerable Members
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
-            return properties.GetEnumerator();
+            return _properties.GetEnumerator();
         }
 
         #endregion
 
         public virtual IEnumerable<JsInstance> GetValues() {
-            foreach (Descriptor descriptor in properties.Values) {
+            foreach (Descriptor descriptor in _properties.Values) {
                 if (descriptor.Enumerable)
                     yield return descriptor.Get(this);
             }
@@ -276,7 +276,7 @@ namespace Jint.Native {
                 }
             }
 
-            foreach (KeyValuePair<string, Descriptor> descriptor in properties) {
+            foreach (KeyValuePair<string, Descriptor> descriptor in _properties) {
                 if (descriptor.Value.Enumerable && descriptor.Value.Owner == this)
                     yield return descriptor.Key;
             }
@@ -298,7 +298,7 @@ namespace Jint.Native {
                 return GetGetFunction(target.Prototype, parameters);
             }
 
-            PropertyDescriptor desc = target.properties.Get(parameters[0].ToString()) as PropertyDescriptor;
+            PropertyDescriptor desc = target._properties.Get(parameters[0].ToString()) as PropertyDescriptor;
             if (desc == null) {
                 return JsUndefined.Instance;
             }
@@ -322,7 +322,7 @@ namespace Jint.Native {
                 return GetSetFunction(target.Prototype, parameters);
             }
 
-            PropertyDescriptor desc = target.properties.Get(parameters[0].ToString()) as PropertyDescriptor;
+            PropertyDescriptor desc = target._properties.Get(parameters[0].ToString()) as PropertyDescriptor;
             if (desc == null) {
                 return JsUndefined.Instance;
             }

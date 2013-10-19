@@ -12,13 +12,13 @@ namespace Jint.Native {
     [Serializable]
     public class ClrImplDefinition<T> : JsFunction
         where T : JsInstance {
-        Delegate impl;
-        private int length;
-        bool hasParameters;
+        private readonly Delegate _impl;
+        private readonly int _length;
+        private readonly bool _hasParameters;
 
         private ClrImplDefinition(bool hasParameters, JsObject prototype)
             : base(prototype) {
-            this.hasParameters = hasParameters;
+            _hasParameters = hasParameters;
         }
 
         public ClrImplDefinition(Func<T, JsInstance[], JsInstance> impl, JsObject prototype)
@@ -27,8 +27,8 @@ namespace Jint.Native {
 
         public ClrImplDefinition(Func<T, JsInstance[], JsInstance> impl, int length, JsObject prototype)
             : this(true, prototype) {
-            this.impl = impl;
-            this.length = length;
+            _impl = impl;
+            _length = length;
         }
 
         public ClrImplDefinition(Func<T, JsInstance> impl, JsObject prototype)
@@ -37,17 +37,17 @@ namespace Jint.Native {
 
         public ClrImplDefinition(Func<T, JsInstance> impl, int length, JsObject prototype)
             : this(false, prototype) {
-            this.impl = impl;
-            this.length = length;
+            _impl = impl;
+            _length = length;
         }
 
         public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters) {
             try {
                 JsInstance result;
-                if (hasParameters)
-                    result = impl.DynamicInvoke(new object[] { that, parameters }) as JsInstance;
+                if (_hasParameters)
+                    result = _impl.DynamicInvoke(new object[] { that, parameters }) as JsInstance;
                 else
-                    result = impl.DynamicInvoke(new object[] { that }) as JsInstance;
+                    result = _impl.DynamicInvoke(new object[] { that }) as JsInstance;
 
                 visitor.Return(result);
                 return result;
@@ -70,14 +70,14 @@ namespace Jint.Native {
 
         public override int Length {
             get {
-                if (length == -1)
+                if (_length == -1)
                     return base.Length;
-                return length;
+                return _length;
             }
         }
 
         public override string ToString() {
-            return String.Format("function {0}() { [native code] }", impl.Method.Name);
+            return String.Format("function {0}() { [native code] }", _impl.Method.Name);
         }
 
     }

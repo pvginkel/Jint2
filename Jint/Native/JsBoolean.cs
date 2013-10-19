@@ -5,21 +5,20 @@ using System.Text;
 namespace Jint.Native {
     [Serializable]
     public sealed class JsBoolean : JsObject, ILiteral {
-        private bool value;
-
+        private readonly bool _value;
 
         public override object Value {
-            get { return value; }
+            get { return _value; }
         }
 
         public JsBoolean(JsObject prototype)
             : this(false, prototype) {
-            value = false;
+            _value = false;
         }
 
         public JsBoolean(bool boolean, JsObject prototype)
             : base(prototype) {
-            value = boolean;
+            _value = boolean;
         }
 
         public override bool IsClr
@@ -34,20 +33,20 @@ namespace Jint.Native {
         {
             get
             {
-                return TYPE_BOOLEAN;
+                return TypeBoolean;
             }
         }
 
         public override string Class {
-            get { return CLASS_BOOLEAN; }
+            get { return ClassBoolean; }
         }
 
         public override bool ToBoolean() {
-            return value;
+            return _value;
         }
 
         public override string ToString() {
-            return value ? "true" : "false";
+            return _value ? "true" : "false";
         }
 
         public static double BooleanToNumber(bool value) {
@@ -55,7 +54,7 @@ namespace Jint.Native {
         }
 
         public override double ToNumber() {
-            return BooleanToNumber(value);
+            return BooleanToNumber(_value);
         }
     }
 }

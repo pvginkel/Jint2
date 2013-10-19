@@ -6,23 +6,24 @@ namespace Jint.Native
 {
     class NativeArrayIndexer<T>: INativeIndexer
     {
-        Marshaller m_marshller;
+        private readonly Marshaller _marshaller;
+
         public NativeArrayIndexer(Marshaller marshaller)
         {
             if (marshaller == null)
                 throw new ArgumentNullException("marshaller");
-            m_marshller = marshaller;
+            _marshaller = marshaller;
         }
         #region INativeIndexer Members
 
-        public JsInstance get(JsInstance that, JsInstance index)
+        public JsInstance Get(JsInstance that, JsInstance index)
         {
-            return m_marshller.MarshalClrValue<T>( m_marshller.MarshalJsValue<T[]>(that)[m_marshller.MarshalJsValue<int>(index)] );
+            return _marshaller.MarshalClrValue<T>( _marshaller.MarshalJsValue<T[]>(that)[_marshaller.MarshalJsValue<int>(index)] );
         }
 
-        public void set(JsInstance that, JsInstance index, JsInstance value)
+        public void Set(JsInstance that, JsInstance index, JsInstance value)
         {
-            m_marshller.MarshalJsValue<T[]>(that)[m_marshller.MarshalJsValue<int>(index)] = m_marshller.MarshalJsValue<T>(value);
+            _marshaller.MarshalJsValue<T[]>(that)[_marshaller.MarshalJsValue<int>(index)] = _marshaller.MarshalJsValue<T>(value);
         }
 
         #endregion

@@ -21,31 +21,31 @@ namespace Jint.Native {
             if (function == null) {
                 throw new ArgumentException("the target of call() must be a function");
             }
-            JsDictionaryObject _this;
-            JsInstance[] _parameters;
+            JsDictionaryObject @this;
+            JsInstance[] targetParameters;
             if (parameters.Length >= 1 && parameters[0] != JsUndefined.Instance && parameters[0] != JsNull.Instance)
-                _this = parameters[0] as JsDictionaryObject;
+                @this = parameters[0] as JsDictionaryObject;
             else
-                _this = visitor.Global as JsDictionaryObject;
+                @this = visitor.Global as JsDictionaryObject;
 
             if (parameters.Length >= 2 && parameters[1] != JsNull.Instance) {
                 JsObject arguments = parameters[1] as JsObject;
                 if (arguments == null)
                     throw new JsException(visitor.Global.TypeErrorClass.New("second argument must be an array"));
-                _parameters = new JsInstance[arguments.Length];
+                targetParameters = new JsInstance[arguments.Length];
                 for (int i = 0; i < arguments.Length; i++) {
-                    _parameters[i] = arguments[i.ToString()];
+                    targetParameters[i] = arguments[i.ToString()];
                 }
             }
             else {
-                _parameters = JsInstance.EMPTY;
+                targetParameters = JsInstance.Empty;
             }
 
 
-            // Executes the statements in 'that' and use _this as the target of the call
-            visitor.ExecuteFunction(function, _this, _parameters);
+            // Executes the statements in 'that' and use @this as the target of the call
+            visitor.ExecuteFunction(function, @this, targetParameters);
             return visitor.Result;
-            //visitor.CallFunction(function, _this, _parameters);
+            //visitor.CallFunction(function, @this, targetParameters);
 
             //return visitor.Result;
         }

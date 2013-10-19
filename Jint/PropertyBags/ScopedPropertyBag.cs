@@ -9,46 +9,46 @@ namespace Jint.PropertyBags
     {
         public void EnterScope()
         {
-            currentScope = new List<Stack<Descriptor>>();
-            scopes.Push(currentScope);
+            _currentScope = new List<Stack<Descriptor>>();
+            _scopes.Push(_currentScope);
         }
 
         public void ExitScope()
         {
-            foreach (Stack<Descriptor> desc in currentScope)
+            foreach (Stack<Descriptor> desc in _currentScope)
             {
                 desc.Pop();
             }
-            scopes.Pop();
-            currentScope = scopes.Peek();
+            _scopes.Pop();
+            _currentScope = _scopes.Peek();
         }
 
-        Dictionary<string, Stack<Descriptor>> bag = new Dictionary<string, Stack<Descriptor>>();
-        Stack<List<Stack<Descriptor>>> scopes = new Stack<List<Stack<Descriptor>>>();
-        List<Stack<Descriptor>> currentScope;
+        private readonly Dictionary<string, Stack<Descriptor>> _bag = new Dictionary<string, Stack<Descriptor>>();
+        private readonly Stack<List<Stack<Descriptor>>> _scopes = new Stack<List<Stack<Descriptor>>>();
+        private List<Stack<Descriptor>> _currentScope;
 
         #region IPropertyBag Members
 
         public Jint.Native.Descriptor Put(string name, Jint.Native.Descriptor descriptor)
         {
             Stack<Descriptor> stack;
-            if (!bag.TryGetValue(name, out stack))
+            if (!_bag.TryGetValue(name, out stack))
             {
                 stack = new Stack<Descriptor>();
-                bag.Add(name, stack);
+                _bag.Add(name, stack);
             }
             stack.Push(descriptor);
-            currentScope.Add(stack);
+            _currentScope.Add(stack);
             return descriptor;
         }
 
         public void Delete(string name)
         {
             Stack<Descriptor> stack;
-            if (bag.TryGetValue(name, out stack) && currentScope.Contains(stack))
+            if (_bag.TryGetValue(name, out stack) && _currentScope.Contains(stack))
             {
                 stack.Pop();
-                currentScope.Remove(stack);
+                _currentScope.Remove(stack);
             }
 
         }
@@ -56,7 +56,7 @@ namespace Jint.PropertyBags
         public Jint.Native.Descriptor Get(string name)
         {
             Stack<Descriptor> stack;
-            if (bag.TryGetValue(name, out stack))
+            if (_bag.TryGetValue(name, out stack))
                 return stack.Count > 0 ? stack.Peek() : null;
             return null;
         }
@@ -69,7 +69,7 @@ namespace Jint.PropertyBags
 
         public int Count
         {
-            get { return bag.Count; }
+            get { return _bag.Count; }
         }
 
         public IEnumerable<Jint.Native.Descriptor> Values

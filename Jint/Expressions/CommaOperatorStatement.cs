@@ -6,12 +6,12 @@ namespace Jint.Expressions {
     [Serializable]
     public class CommaOperatorStatement : Expression {
         class StatementInfo {
-            public int index { get; private set; }
-            public Statement statement { get; private set; }
+            public int Index { get; private set; }
+            public Statement Statement { get; private set; }
 
             public StatementInfo(int i, Statement s) {
-                index = i;
-                statement = s;
+                Index = i;
+                Statement = s;
             }
         }
 

@@ -15,14 +15,14 @@ namespace Jint.Native
     /// </remarks>
     public class NativeConstructor: JsConstructor
     {
-        Type reflectedType;
+        private readonly Type _reflectedType;
 
-        LinkedList<NativeDescriptor> m_properties = new LinkedList<NativeDescriptor>();
-        INativeIndexer m_indexer;
+        private readonly LinkedList<NativeDescriptor> _properties = new LinkedList<NativeDescriptor>();
+        private readonly INativeIndexer _indexer;
 
-        ConstructorInfo[] m_constructors;
-        Marshaller m_marshaller;
-        NativeOverloadImpl<ConstructorInfo, ConstructorImpl> m_overloads;
+        private readonly ConstructorInfo[] _constructors;
+        private readonly Marshaller _marshaller;
+        private readonly NativeOverloadImpl<ConstructorInfo, ConstructorImpl> _overloads;
 
         // TODO: native constructors should have an own prototype rather then the function prototype
         public NativeConstructor(Type type, IGlobal global) :
@@ -30,12 +30,12 @@ namespace Jint.Native
         {
         }
 
-        public NativeConstructor(Type type, IGlobal global, JsObject PrototypePrototype) :
-            this(type, global, PrototypePrototype, global.FunctionClass.PrototypeProperty)
+        public NativeConstructor(Type type, IGlobal global, JsObject prototypePrototype) :
+            this(type, global, prototypePrototype, global.FunctionClass.PrototypeProperty)
         {
         }
 
-        public NativeConstructor(Type type, IGlobal global, JsObject PrototypePrototype, JsObject prototype) :
+        public NativeConstructor(Type type, IGlobal global, JsObject prototypePrototype, JsObject prototype) :
             base(global,prototype)
         {
             if (type == null)
@@ -44,28 +44,28 @@ namespace Jint.Native
             if (type.IsGenericType && type.ContainsGenericParameters)
                 throw new InvalidOperationException("A native constructor can't be built against an open generic");
 
-            m_marshaller = global.Marshaller;
+            _marshaller = global.Marshaller;
 
-            reflectedType = type;
+            _reflectedType = type;
             Name = type.FullName;
 
             if (!type.IsAbstract)
             {
-                m_constructors = type.GetConstructors();
+                _constructors = type.GetConstructors();
             }
 
-            DefineOwnProperty(PROTOTYPE, PrototypePrototype == null ? Global.ObjectClass.New(this) : Global.ObjectClass.New(this,PrototypePrototype), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            DefineOwnProperty(PrototypeName, prototypePrototype == null ? Global.ObjectClass.New(this) : Global.ObjectClass.New(this,prototypePrototype), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
 
-            m_overloads = new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>(
-                m_marshaller,
-                new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>.GetMembersDelegate(this.GetMembers),
-                new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>.WrapMmemberDelegate(this.WrapMember)
+            _overloads = new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>(
+                _marshaller,
+                new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>.GetMembersDelegate(GetMembers),
+                new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>.WrapMemberDelegate(WrapMember)
             );
 
             // if this is a value type, define a default constructor
             if (type.IsValueType)
             {
-                m_overloads.DefineCustomOverload(
+                _overloads.DefineCustomOverload(
                     new Type[0],
                     new Type[0],
                     (ConstructorImpl)Delegate.CreateDelegate(
@@ -123,7 +123,7 @@ namespace Jint.Native
             {
                 ParameterInfo[] indexerParams = info.GetIndexParameters();
                 if (indexerParams == null || indexerParams.Length == 0)
-                    m_properties.AddLast(global.Marshaller.MarshalPropertyInfo(info, this));
+                    _properties.AddLast(global.Marshaller.MarshalPropertyInfo(info, this));
                 else if (info.Name == "Item" && indexerParams.Length == 1)
                 {
                     if (info.CanRead)
@@ -140,19 +140,19 @@ namespace Jint.Native
                 MethodInfo[] setters = new MethodInfo[setMethods.Count];
                 setMethods.CopyTo(setters, 0);
 
-                m_indexer = new NativeIndexer(m_marshaller, getters, setters);
+                _indexer = new NativeIndexer(_marshaller, getters, setters);
             }
 
-            if (reflectedType.IsArray)
+            if (_reflectedType.IsArray)
             {
-                m_indexer = (INativeIndexer)typeof(NativeArrayIndexer<>)
-                    .MakeGenericType(reflectedType.GetElementType())
+                _indexer = (INativeIndexer)typeof(NativeArrayIndexer<>)
+                    .MakeGenericType(_reflectedType.GetElementType())
                     .GetConstructor(new Type[]{typeof(Marshaller)})
-                    .Invoke(new object[]{m_marshaller});
+                    .Invoke(new object[]{_marshaller});
             }
 
             foreach (var info in type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public) )
-                m_properties.AddLast(global.Marshaller.MarshalFieldInfo(info,this));
+                _properties.AddLast(global.Marshaller.MarshalFieldInfo(info,this));
 
         }
 
@@ -187,7 +187,7 @@ namespace Jint.Native
         {
             get
             {
-                return reflectedType;
+                return _reflectedType;
             }
             set
             {
@@ -201,7 +201,7 @@ namespace Jint.Native
 
             Dictionary<string, LinkedList<MethodInfo>> members = new Dictionary<string, LinkedList<MethodInfo>>();
 
-            foreach (var info in reflectedType.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+            foreach (var info in _reflectedType.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
             {
                 if (info.ReturnType.IsByRef)
                     continue;
@@ -215,7 +215,7 @@ namespace Jint.Native
             foreach (var pair in members)
                 proto[pair.Key] = ReflectOverload(pair.Value);
 
-            proto["toString"] = new NativeMethod(reflectedType.GetMethod("ToString",new Type[0]), Global.FunctionClass.PrototypeProperty, Global);
+            proto["toString"] = new NativeMethod(_reflectedType.GetMethod("ToString",new Type[0]), Global.FunctionClass.PrototypeProperty, Global);
         }
 
         /// <summary>
@@ -241,14 +241,14 @@ namespace Jint.Native
         public override JsInstance Execute(Jint.Expressions.IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters)
         {
             if (that == null || that == JsUndefined.Instance || that == JsNull.Instance || (that as IGlobal) == visitor.Global)
-                throw new JintException("A constructor '" + reflectedType.FullName + "' should be applied to the object");
+                throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
             if (that.Value != null)
-                throw new JintException("Can't apply the constructor '" + reflectedType.FullName + "' to already initialized '" + that.Value.ToString() + "'");
+                throw new JintException("Can't apply the constructor '" + _reflectedType.FullName + "' to already initialized '" + that.Value.ToString() + "'");
 
             that.Value = CreateInstance(visitor, parameters);
             SetupNativeProperties(that);
-            ((JsObject)that).Indexer = m_indexer;
+            ((JsObject)that).Indexer = _indexer;
             return that;
         }
 
@@ -275,11 +275,11 @@ namespace Jint.Native
         /// <returns>A newly created native object</returns>
         object CreateInstance(Jint.Expressions.IJintVisitor visitor, JsInstance[] parameters)
         {
-            ConstructorImpl impl = m_overloads.ResolveOverload(parameters, null);
+            ConstructorImpl impl = _overloads.ResolveOverload(parameters, null);
             if (impl == null)
                 throw new JintException(
                     String.Format("No matching overload found {0}({1})",
-                        reflectedType.FullName,
+                        _reflectedType.FullName,
                         String.Join(",", Array.ConvertAll<JsInstance, string>(parameters, p => p.ToString()))
                     )
                 );
@@ -291,17 +291,17 @@ namespace Jint.Native
         {
             if (target == null || target == JsNull.Instance || target == JsUndefined.Instance )
                 throw new ArgumentException("A valid js object is required","target");
-            foreach (var prop in m_properties)
+            foreach (var prop in _properties)
                 target.DefineOwnProperty(new NativeDescriptor(target, prop) );
         }
 
         public override JsInstance Wrap<T>(T value)
         {
-            if (!reflectedType.IsAssignableFrom(value.GetType()))
-                throw new JintException("Attempt to wrap '" + typeof(T).FullName + "' with '" + reflectedType.FullName+ "'");
+            if (!_reflectedType.IsAssignableFrom(value.GetType()))
+                throw new JintException("Attempt to wrap '" + typeof(T).FullName + "' with '" + _reflectedType.FullName+ "'");
             JsObject inst = Global.ObjectClass.New(PrototypeProperty);
             inst.Value = value;
-            inst.Indexer = m_indexer;
+            inst.Indexer = _indexer;
             SetupNativeProperties(inst);
 
             return inst;
@@ -309,14 +309,14 @@ namespace Jint.Native
 
         protected ConstructorImpl WrapMember(ConstructorInfo info)
         {
-            return m_marshaller.WrapConstructor(info,true);
+            return _marshaller.WrapConstructor(info,true);
         }
 
         protected IEnumerable<ConstructorInfo> GetMembers(Type[] genericArguments, int argCount) {
-            if (m_constructors == null)
+            if (_constructors == null)
                 return new ConstructorInfo[0];
 
-            return Array.FindAll(m_constructors, con => con.GetParameters().Length == argCount);
+            return Array.FindAll(_constructors, con => con.GetParameters().Length == argCount);
 
         }
     }

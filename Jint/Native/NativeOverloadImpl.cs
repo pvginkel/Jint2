@@ -15,23 +15,23 @@ namespace Jint.Native
         where TImpl : class
     {
         public delegate IEnumerable<TMemberInfo> GetMembersDelegate(Type[] genericArguments, int argCount);
-        public delegate TImpl WrapMmemberDelegate(TMemberInfo info);
+        public delegate TImpl WrapMemberDelegate(TMemberInfo info);
 
-        Dictionary<string, TImpl> m_protoCache = new Dictionary<string, TImpl>();
-        Dictionary<TMemberInfo, TImpl> m_reflectCache = new Dictionary<TMemberInfo, TImpl>();
-        Marshaller m_marshaller;
-        GetMembersDelegate GetMembers;
-        WrapMmemberDelegate WrapMember;
+        private readonly Dictionary<string, TImpl> _protoCache = new Dictionary<string, TImpl>();
+        private readonly Dictionary<TMemberInfo, TImpl> _reflectCache = new Dictionary<TMemberInfo, TImpl>();
+        private readonly Marshaller _marshaller;
+        private readonly GetMembersDelegate _getMembers;
+        private readonly WrapMemberDelegate _wrapMember;
         
 
-        class MethodMatch
+        private class MethodMatch
         {
-            public TMemberInfo method;
-            public int weight;
-            public Type[] parameters;
+            public TMemberInfo Method;
+            public int Weight;
+            public Type[] Parameters;
         }
 
-        public NativeOverloadImpl(Marshaller marshaller, GetMembersDelegate getMembers, WrapMmemberDelegate wrapMember)
+        public NativeOverloadImpl(Marshaller marshaller, GetMembersDelegate getMembers, WrapMemberDelegate wrapMember)
         {
             if (marshaller == null)
                 throw new ArgumentNullException("marshaller");
@@ -40,9 +40,9 @@ namespace Jint.Native
             if (wrapMember == null)
                 throw new ArgumentNullException("wrapMember");
 
-            m_marshaller = marshaller;
-            GetMembers = getMembers;
-            WrapMember = wrapMember;
+            _marshaller = marshaller;
+            _getMembers = getMembers;
+            _wrapMember = wrapMember;
         }
 
         protected TMemberInfo MatchMethod(Type[] args, IEnumerable<TMemberInfo> members)
@@ -53,12 +53,12 @@ namespace Jint.Native
                 matches.AddLast(
                     new MethodMatch()
                     {
-                        method = m,
-                        parameters = Array.ConvertAll<ParameterInfo, Type>(
+                        Method = m,
+                        Parameters = Array.ConvertAll<ParameterInfo, Type>(
                             m.GetParameters(),
                             p => p.ParameterType
                         ),
-                        weight = 0
+                        Weight = 0
                     }
                 );
             
@@ -73,16 +73,16 @@ namespace Jint.Native
                         var nextNode = node.Next;
                         if (t != null)
                         {
-                            Type paramType = node.Value.parameters[i];
+                            Type paramType = node.Value.Parameters[i];
                             if (t.Equals(paramType))
                             {
-                                node.Value.weight += 1;
+                                node.Value.Weight += 1;
                             }
                             else if (typeof(Delegate).IsAssignableFrom(paramType) && typeof(JsFunction).IsAssignableFrom(t))
                             {
                                 // we can assing a js function to a delegate
                             }
-                            else if (!m_marshaller.IsAssignable(paramType,t))
+                            else if (!_marshaller.IsAssignable(paramType,t))
                             {
                                 matches.Remove(node);
                             }
@@ -91,7 +91,7 @@ namespace Jint.Native
                         else
                         {
                             // we can't assign undefined or null values to a value types
-                            if (node.Value.parameters[i].IsValueType)
+                            if (node.Value.Parameters[i].IsValueType)
                             {
                                 matches.Remove(node);
                             }
@@ -104,9 +104,9 @@ namespace Jint.Native
             MethodMatch best = null;
 
             foreach (var match in matches)
-                best = best == null ? match : (best.weight < match.weight ? match : best);
+                best = best == null ? match : (best.Weight < match.Weight ? match : best);
 
-            return best == null ? null : best.method ;
+            return best == null ? null : best.Method ;
         }
 
         protected string MakeKey(Type[] types, Type[] genericArguments)
@@ -132,22 +132,22 @@ namespace Jint.Native
 
         public void DefineCustomOverload(Type[] args, Type[] generics, TImpl impl)
         {
-            m_protoCache[MakeKey(args, generics)] = impl;
+            _protoCache[MakeKey(args, generics)] = impl;
         }
 
         public TImpl ResolveOverload(JsInstance[] args, Type[] generics)
         {
-            Type[] argTypes = Array.ConvertAll<JsInstance, Type>(args, x => m_marshaller.GetInstanceType(x));
+            Type[] argTypes = Array.ConvertAll<JsInstance, Type>(args, x => _marshaller.GetInstanceType(x));
             string key = MakeKey(argTypes, generics);
             TImpl method;
-            if (!m_protoCache.TryGetValue(key, out method))
+            if (!_protoCache.TryGetValue(key, out method))
             {
-                TMemberInfo info = MatchMethod(argTypes, GetMembers(generics,args.Length) );
+                TMemberInfo info = MatchMethod(argTypes, _getMembers(generics,args.Length) );
 
-                if (info != null && !m_reflectCache.TryGetValue(info, out method))
-                    m_reflectCache[info] = method = WrapMember(info);
+                if (info != null && !_reflectCache.TryGetValue(info, out method))
+                    _reflectCache[info] = method = _wrapMember(info);
 
-                m_protoCache[key] = method;
+                _protoCache[key] = method;
             }
 
             return method;

@@ -7,60 +7,60 @@ namespace Jint
 {
     class DoubleListPropertyBag : IPropertyBag
     {
-        private IList<string> keys;
-        private IList<Descriptor> values;
+        private readonly IList<string> _keys;
+        private readonly IList<Descriptor> _values;
 
         public DoubleListPropertyBag()
         {
-            keys = new List<string>(5);
-            values = new List<Descriptor>(5);
+            _keys = new List<string>(5);
+            _values = new List<Descriptor>(5);
         }
 
         #region IPropertyBag Members
 
         public Descriptor Put(string name, Descriptor descriptor)
         {
-            lock (keys)
+            lock (_keys)
             {
-                keys.Add(name);
-                values.Add(descriptor);
+                _keys.Add(name);
+                _values.Add(descriptor);
             }
             return descriptor;
         }
 
         public void Delete(string name)
         {
-            int index = keys.IndexOf(name);
-            keys.RemoveAt(index);
-            values.RemoveAt(index);
+            int index = _keys.IndexOf(name);
+            _keys.RemoveAt(index);
+            _values.RemoveAt(index);
         }
 
         public Descriptor Get(string name)
         {
-            int index = keys.IndexOf(name);
-            return values[index];
+            int index = _keys.IndexOf(name);
+            return _values[index];
         }
 
         public bool TryGet(string name, out Jint.Native.Descriptor descriptor)
         {
-            int index = keys.IndexOf(name);
+            int index = _keys.IndexOf(name);
             if (index < 0)
             {
                 descriptor = null;
                 return false;
             }
-            descriptor = values[index];
+            descriptor = _values[index];
             return true;
         }
 
         public int Count
         {
-            get { return keys.Count; }
+            get { return _keys.Count; }
         }
 
         public IEnumerable<Descriptor> Values
         {
-            get { return values; }
+            get { return _values; }
         }
 
         #endregion
@@ -69,8 +69,8 @@ namespace Jint
 
         public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator()
         {
-            for (int i = 0; i < keys.Count; i++)
-                yield return new KeyValuePair<string, Descriptor>(keys[i], values[i]);
+            for (int i = 0; i < _keys.Count; i++)
+                yield return new KeyValuePair<string, Descriptor>(_keys[i], _values[i]);
         }
 
         #endregion
