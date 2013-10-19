@@ -12,7 +12,7 @@ namespace Jint.Tests.Performance
         [Test]
         public void SimpleTest()
         {
-            var engine = new JintEngine();
+            var engine = new JintEngine(Options.EcmaScript5 | Options.Strict, JintBackend.Compiled);
 
             engine.Run("1 + 3;");
         }

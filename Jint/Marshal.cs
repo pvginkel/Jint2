@@ -185,16 +185,9 @@ namespace Jint
             return res;
         }
 
-        object MarshalJsFunctionHelper(JsFunction func,Type delegateType)
+        private object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
         {
-            // create independent visitor
-            ExecutionVisitor visitor = new ExecutionVisitor(_global, new JsScope((JsObject)_global));
-            var v = ((ExecutionVisitor)_global.Visitor);
-            visitor.AllowClr = v.AllowClr;
-            visitor.PermissionSet = v.PermissionSet;
-
-            JsFunctionDelegate wrapper = new JsFunctionDelegate(visitor, func, JsNull.Instance , delegateType);
-            return wrapper.GetDelegate();
+            return _global.Backend.MarshalJsFunctionHelper(func, delegateType);
         }
 
         /// <summary>

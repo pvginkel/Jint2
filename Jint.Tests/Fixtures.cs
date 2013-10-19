@@ -25,11 +25,11 @@ namespace Jint.Tests {
         }
 
         protected object Test(string script) {
-            return Test(Options.Ecmascript3 | Options.Strict, script);
+            return Test(Options.EcmaScript3 | Options.Strict, script);
         }
 
         protected object Test(string script, Action<JintEngine> action) {
-            return Test(Options.Ecmascript3 | Options.Strict, script, action);
+            return Test(Options.EcmaScript3 | Options.Strict, script, action);
         }
 
         protected object Test(Options options, string script, Action<JintEngine> action)
@@ -1025,7 +1025,7 @@ var fakeButton = new Test.FakeButton();");
             }");
 
             //Strict mode disabled
-            engine = new JintEngine(Options.Ecmascript3)
+            engine = new JintEngine(Options.EcmaScript3)
             .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
             ;
             engine.Run(@"

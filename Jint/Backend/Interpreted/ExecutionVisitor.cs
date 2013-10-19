@@ -6,9 +6,11 @@ using System.Collections;
 using Jint.Native;
 using System.Security;
 
-namespace Jint {
+namespace Jint.Backend.Interpreted {
 
     public class ExecutionVisitor : IStatementVisitor, IJintVisitor{
+        private readonly IBackend _backend;
+
         struct ResultInfo {
             public JsDictionaryObject BaseObject;
             public JsInstance Result;
@@ -55,10 +57,11 @@ namespace Jint {
             _lastResult.BaseObject = baseObject;
         }
 
-        public ExecutionVisitor(Options options) {
+        public ExecutionVisitor(Options options, IBackend backend) {
+            _backend = backend;
             _typeResolver = CachedTypeResolver.Default;
 
-            Global = new JsGlobal(this, options);
+            Global = new JsGlobal(_backend, options);
             GlobalScope = new JsScope(Global as JsObject);
 
             EnterScope(GlobalScope);
@@ -676,10 +679,6 @@ namespace Jint {
                 // Evaluates the right expression
                 expression.RightExpression.Accept(this);
             }
-        }
-
-        public static bool IsNullOrUndefined(JsInstance o) {
-            return (o == JsUndefined.Instance) || (o == JsNull.Instance) || (o.IsClr && o.Value == null);
         }
 
         public JsBoolean Compare(JsInstance x, JsInstance y)

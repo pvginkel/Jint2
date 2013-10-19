@@ -13,14 +13,14 @@ namespace Jint.Native {
         /// <summary>
         /// Useful for eval()
         /// </summary>
-        public IJintVisitor Visitor { get; set; }
+        public IBackend Backend { get; set; }
 
         public Options Options { get; set; }
 
-        public JsGlobal(ExecutionVisitor visitor, Options options)
+        internal JsGlobal(IBackend backend, Options options)
             : base(JsNull.Instance) {
             Options = options;
-            Visitor = visitor;
+            Backend = backend;
 
             this["null"] = JsNull.Instance;
             JsObject objectProrotype = new JsObject(JsNull.Instance);
@@ -129,23 +129,7 @@ namespace Jint.Native {
                 return arguments[0];
             }
 
-            Program p;
-
-            try {
-                p = JintEngine.Compile(arguments[0].ToString());
-            }
-            catch (Exception e) {
-                throw new JsException(SyntaxErrorClass.New(e.Message));
-            }
-
-            try {
-                p.Accept((IStatementVisitor)Visitor);
-            }
-            catch (Exception e) {
-                throw new JsException(EvalErrorClass.New(e.Message));
-            }
-
-            return Visitor.Result;
+            return Backend.Eval(arguments);
         }
 
         /// <summary>

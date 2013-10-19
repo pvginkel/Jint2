@@ -53,8 +53,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backend\Interpreted\InterpretedBackend.cs" />
     <Compile Include="CachedTypeResolver.cs" />
     <Compile Include="Delegates\Delegates.cs" />
+    <Compile Include="IBackend.cs" />
+    <Compile Include="JintBackend.cs" />
     <Compile Include="Marshal\Delegates.cs" />
     <Compile Include="Marshal\JsFunctionDelegate.cs" />
     <Compile Include="Marshal\JsPropertyAttribute.cs" />
@@ -97,7 +100,7 @@
     <Compile Include="Native\PropertyDescriptor.cs" />
     <Compile Include="Native\ValueDescriptor.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="ExecutionVisitor.cs" />
+    <Compile Include="Backend\Interpreted\ExecutionVisitor.cs" />
     <Compile Include="Expressions\ArrayDeclaration.cs" />
     <Compile Include="Expressions\CommaOperatorStatement.cs" />
     <Compile Include="Expressions\ClrIdentifier.cs" />
@@ -165,7 +168,7 @@
     <Compile Include="Expressions\SwitchStatement.cs" />
     <Compile Include="Expressions\Expression.cs" />
     <Compile Include="Expressions\Indexer.cs" />
-    <Compile Include="IJintVisitor.cs" />
+    <Compile Include="Expressions\IJintVisitor.cs" />
     <Compile Include="Expressions\TernaryExpression.cs" />
     <Compile Include="Expressions\ThrowStatement.cs" />
     <Compile Include="Expressions\TryStatement.cs" />
@@ -183,6 +186,9 @@
     <None Include="ES3.g" />
     <None Include="Key.snk" />
     <None Include="Parser\Generate.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Backend\Compiled\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

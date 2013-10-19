@@ -76,14 +76,13 @@ namespace Jint.Native {
 
             for (int i = 0; i < target.Length; i++) {
                 var obj = (JsDictionaryObject)target[i.ToString()];
-                if (ExecutionVisitor.IsNullOrUndefined(obj)) {
+                if (IsNullOrUndefined(obj)) {
                     result[i.ToString()] = Global.StringClass.New();
                 }
                 else {
                     var function = obj["toString"] as JsFunction;
                     if (function != null) {
-                        Global.Visitor.ExecuteFunction(function, obj, parameters);
-                        result[i.ToString()] = Global.Visitor.Returned;
+                        result[i.ToString()] = Global.Backend.ExecuteFunction(function, obj, parameters);
                     }
                     else {
                         result[i.ToString()] = Global.StringClass.New();
@@ -106,8 +105,7 @@ namespace Jint.Native {
 
             for (int i = 0; i < target.Length; i++) {
                 var obj = (JsDictionaryObject)target[i.ToString()];
-                Global.Visitor.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters);
-                result[i.ToString()] = Global.Visitor.Returned;
+                result[i.ToString()] = Global.Backend.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters);
             }
 
             return Global.StringClass.New(result.ToString());
@@ -337,7 +335,7 @@ namespace Jint.Native {
 
             if (compare != null) {
                 try {
-                    values.Sort(new JsComparer(Global.Visitor, compare));
+                    values.Sort(new JsComparer(Global.Backend, compare));
                 }
                 catch (Exception e) {
                     if (e.InnerException is JsException) {

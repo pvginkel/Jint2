@@ -27,7 +27,7 @@ namespace Jint.Native {
 
         JsInstance NaN { get; }
 
-        Jint.Expressions.IJintVisitor Visitor { get; }
+        IBackend Backend { get; }
         Jint.Marshaller Marshaller { get; }
     }
 }

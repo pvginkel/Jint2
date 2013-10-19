@@ -329,9 +329,7 @@ namespace Jint.Native {
                         replaceParameters.Add(Global.NumberClass.New(m.Index));
                         replaceParameters.Add(Global.StringClass.New(source));
 
-                        Global.Visitor.ExecuteFunction(function, null, replaceParameters.ToArray());
-
-                        return Global.Visitor.Returned.ToString();
+                        return Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray()).ToString();
                     }, count, lastIndex);
 
 
@@ -365,8 +363,7 @@ namespace Jint.Native {
                         replaceParameters.Add(Global.NumberClass.New(index));
                         replaceParameters.Add(Global.StringClass.New(source));
 
-                        Global.Visitor.ExecuteFunction(function, null, replaceParameters.ToArray());
-                        replaceValue = Global.Visitor.Result;
+                        replaceValue = Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray());
 
                         return Global.StringClass.New(source.Substring(0, index) + replaceValue.ToString() + source.Substring(index + search.Length));
                     }

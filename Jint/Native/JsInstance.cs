@@ -11,6 +11,11 @@ namespace Jint.Native {
     public abstract class JsInstance : IComparable<JsInstance> {
         public static JsInstance[] Empty = new JsInstance[0];
 
+        public static bool IsNullOrUndefined(JsInstance o)
+        {
+            return (o == JsUndefined.Instance) || (o == JsNull.Instance) || (o.IsClr && o.Value == null);
+        }
+
         public abstract bool IsClr { get; }
 
         public abstract object Value { get; set; }

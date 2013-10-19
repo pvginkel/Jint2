@@ -11,60 +11,58 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Jint.Parser;
 
-namespace Jint {
+namespace Jint
+{
     [Serializable]
-    public class JintEngine {
-        private ExecutionVisitor _visitor;
+    public class JintEngine
+    {
+        private IBackend _backend;
 
         [System.Diagnostics.DebuggerStepThrough]
         public JintEngine()
-            : this(Options.Ecmascript5 | Options.Strict) {
+            : this(Options.EcmaScript5 | Options.Strict)
+        {
         }
 
         [System.Diagnostics.DebuggerStepThrough]
-        public JintEngine(Options options) {
-            _visitor = new ExecutionVisitor(options);
-            _permissionSet = new PermissionSet(PermissionState.None);
-            _visitor.AllowClr = _allowClr;
+        public JintEngine(Options options)
+            : this(options, JintBackend.Interpreted)
+        {
+        }
 
-            var global = _visitor.Global as JsObject;
+        internal JintEngine(Options options, JintBackend backend)
+        {
+            switch (backend)
+            {
+                case JintBackend.Interpreted:
+                    _backend = new Backend.Interpreted.InterpretedBackend(options);
+                    break;
 
-            global["ToBoolean"] = _visitor.Global.FunctionClass.New(new Func<object, Boolean>(Convert.ToBoolean));
-            global["ToByte"] = _visitor.Global.FunctionClass.New(new Func<object, Byte>(Convert.ToByte));
-            global["ToChar"] = _visitor.Global.FunctionClass.New(new Func<object, Char>(Convert.ToChar));
-            global["ToDateTime"] = _visitor.Global.FunctionClass.New(new Func<object, DateTime>(Convert.ToDateTime));
-            global["ToDecimal"] = _visitor.Global.FunctionClass.New(new Func<object, Decimal>(Convert.ToDecimal));
-            global["ToDouble"] = _visitor.Global.FunctionClass.New(new Func<object, Double>(Convert.ToDouble));
-            global["ToInt16"] = _visitor.Global.FunctionClass.New(new Func<object, Int16>(Convert.ToInt16));
-            global["ToInt32"] = _visitor.Global.FunctionClass.New(new Func<object, Int32>(Convert.ToInt32));
-            global["ToInt64"] = _visitor.Global.FunctionClass.New(new Func<object, Int64>(Convert.ToInt64));
-            global["ToSByte"] = _visitor.Global.FunctionClass.New(new Func<object, SByte>(Convert.ToSByte));
-            global["ToSingle"] = _visitor.Global.FunctionClass.New(new Func<object, Single>(Convert.ToSingle));
-            global["ToString"] = _visitor.Global.FunctionClass.New(new Func<object, String>(Convert.ToString));
-            global["ToUInt16"] = _visitor.Global.FunctionClass.New(new Func<object, UInt16>(Convert.ToUInt16));
-            global["ToUInt32"] = _visitor.Global.FunctionClass.New(new Func<object, UInt32>(Convert.ToUInt32));
-            global["ToUInt64"] = _visitor.Global.FunctionClass.New(new Func<object, UInt64>(Convert.ToUInt64));
+                default:
+                    throw new ArgumentOutOfRangeException("backend");
+            }
         }
 
         /// <summary>
         /// A global object associated with this engine instance
         /// </summary>
-        public IGlobal Global {
-            get { return _visitor.Global; }
+        public IGlobal Global
+        {
+            get { return _backend.Global; }
         }
 
-        private bool _allowClr;
-        private PermissionSet _permissionSet;
-
-        public static Program Compile(string source) {
+        public static Program Compile(string source)
+        {
             Program program = null;
-            if (!string.IsNullOrEmpty(source)) {
+            if (!string.IsNullOrEmpty(source))
+            {
                 var lexer = new ES3Lexer(new ANTLRStringStream(source));
                 var parser = new ES3Parser(new CommonTokenStream(lexer));
 
                 program = parser.Execute();
 
-                if (parser.Errors != null && parser.Errors.Count > 0) {
+                if (parser.Errors != null && parser.Errors.Count > 0)
+                {
                     throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
                 }
             }
@@ -77,15 +75,18 @@ namespace Jint {
         /// If errors are detected, the Error property contains the message.
         /// </summary>
         /// <returns>True if the expression syntax is correct, otherwiser False</returns>
-        public static bool HasErrors(string script, out string errors) {
-            try {
+        public static bool HasErrors(string script, out string errors)
+        {
+            try
+            {
                 errors = null;
                 Program program = Compile(script);
 
                 // In case HasErrors() is called multiple times for the same expression
                 return program != null;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 errors = e.Message;
                 return true;
             }
@@ -99,7 +100,8 @@ namespace Jint {
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(string script) {
+        public object Run(string script)
+        {
             return Run(script, true);
         }
 
@@ -111,7 +113,8 @@ namespace Jint {
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(Program program) {
+        public object Run(Program program)
+        {
             return Run(program, true);
         }
 
@@ -123,7 +126,8 @@ namespace Jint {
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(TextReader reader) {
+        public object Run(TextReader reader)
+        {
             return Run(reader.ReadToEnd());
         }
 
@@ -136,7 +140,8 @@ namespace Jint {
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(TextReader reader, bool unwrap) {
+        public object Run(TextReader reader, bool unwrap)
+        {
             return Run(reader.ReadToEnd(), unwrap);
         }
 
@@ -149,7 +154,8 @@ namespace Jint {
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(string script, bool unwrap) {
+        public object Run(string script, bool unwrap)
+        {
 
             if (script == null)
                 throw new
@@ -159,10 +165,12 @@ namespace Jint {
 
 
 
-            try {
+            try
+            {
                 program = Compile(script);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 throw new JintException("An unexpected error occured while parsing the script", e);
             }
 
@@ -181,48 +189,9 @@ namespace Jint {
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(Program program, bool unwrap) {
-            if (program == null)
-                throw new
-                    ArgumentException("Script can't be null", "script");
-
-            _visitor.PermissionSet = _permissionSet;
-            _visitor.AllowClr = _allowClr;
-            _visitor.Result = null;
-
-            try {
-                _visitor.Visit(program);
-            }
-            catch (SecurityException) {
-                throw;
-            }
-            catch (JsException e) {
-                string message = e.Message;
-                if (e.Value is JsError)
-                    message = e.Value.Value.ToString();
-                var stackTrace = new StringBuilder();
-                var source = String.Empty;
-
-                if (_visitor.CurrentStatement.Source != null) {
-                    source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
-                            + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
-                }
-
-                throw new JintException(message + source + stackTrace, e);
-            }
-            catch (Exception e) {
-                StringBuilder stackTrace = new StringBuilder();
-                string source = String.Empty;
-
-                if (_visitor.CurrentStatement != null && _visitor.CurrentStatement.Source != null) {
-                    source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
-                            + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
-                }
-
-                throw new JintException(e.Message + source + stackTrace, e);
-            }
-
-            return _visitor.Result == null ? null : unwrap ? _visitor.Global.Marshaller.MarshalJsValue<object>( _visitor.Result) : _visitor.Result;
+        public object Run(Program program, bool unwrap)
+        {
+            return _backend.Run(program, unwrap);
         }
 
         #region SetParameter overloads
@@ -233,8 +202,9 @@ namespace Jint {
         /// <param name="name">Local name of the object duting the execution of the script</param>
         /// <param name="value">Available object</param>
         /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, object value) {
-            _visitor.GlobalScope[name] = _visitor.Global.WrapClr(value);
+        public JintEngine SetParameter(string name, object value)
+        {
+            _backend.GlobalScope[name] = _backend.Global.WrapClr(value);
             return this;
         }
 
@@ -244,8 +214,9 @@ namespace Jint {
         /// <param name="name">Local name of the Double value during the execution of the script</param>
         /// <param name="value">Available Double value</param>
         /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, double value) {
-            _visitor.GlobalScope[name] = _visitor.Global.NumberClass.New(value);
+        public JintEngine SetParameter(string name, double value)
+        {
+            _backend.GlobalScope[name] = _backend.Global.NumberClass.New(value);
             return this;
         }
 
@@ -255,11 +226,12 @@ namespace Jint {
         /// <param name="name">Local name of the String instance during the execution of the script</param>
         /// <param name="value">Available String instance</param>
         /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, string value) {
+        public JintEngine SetParameter(string name, string value)
+        {
             if (value == null)
-                _visitor.GlobalScope[name] = JsNull.Instance;
+                _backend.GlobalScope[name] = JsNull.Instance;
             else
-                _visitor.GlobalScope[name] = _visitor.Global.StringClass.New(value);
+                _backend.GlobalScope[name] = _backend.Global.StringClass.New(value);
             return this;
         }
 
@@ -269,8 +241,9 @@ namespace Jint {
         /// <param name="name">Local name of the Int32 value during the execution of the script</param>
         /// <param name="value">Available Int32 value</param>
         /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, int value) {
-            _visitor.GlobalScope[name] = _visitor.Global.WrapClr(value);
+        public JintEngine SetParameter(string name, int value)
+        {
+            _backend.GlobalScope[name] = _backend.Global.WrapClr(value);
             return this;
         }
 
@@ -280,8 +253,9 @@ namespace Jint {
         /// <param name="name">Local name of the Boolean value during the execution of the script</param>
         /// <param name="value">Available Boolean value</param>
         /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, bool value) {
-            _visitor.GlobalScope[name] = _visitor.Global.BooleanClass.New(value);
+        public JintEngine SetParameter(string name, bool value)
+        {
+            _backend.GlobalScope[name] = _backend.Global.BooleanClass.New(value);
             return this;
         }
 
@@ -291,37 +265,38 @@ namespace Jint {
         /// <param name="name">Local name of the DateTime value during the execution of the script</param>
         /// <param name="value">Available DateTime value</param>
         /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, DateTime value) {
-            _visitor.GlobalScope[name] = _visitor.Global.DateClass.New(value);
+        public JintEngine SetParameter(string name, DateTime value)
+        {
+            _backend.GlobalScope[name] = _backend.Global.DateClass.New(value);
             return this;
         }
         #endregion
 
-        public JintEngine AddPermission(IPermission perm) {
-            _permissionSet.AddPermission(perm);
+        public JintEngine AddPermission(IPermission perm)
+        {
+            _backend.PermissionSet.AddPermission(perm);
             return this;
         }
 
-        public JintEngine SetFunction(string name, JsFunction function) {
-            _visitor.GlobalScope[name] = function;
+        public JintEngine SetFunction(string name, JsFunction function)
+        {
+            _backend.GlobalScope[name] = function;
             return this;
         }
 
-        public object CallFunction(string name, params object[] args) {
-            JsInstance oldResult = _visitor.Result;
-            _visitor.Visit(new Identifier(name));
-            var returnValue = CallFunction((JsFunction)_visitor.Result, args);
-            _visitor.Result = oldResult;
-            return returnValue;
+        public object CallFunction(string name, params object[] args)
+        {
+            return _backend.CallFunction(name, args);
         }
 
-        public object CallFunction(JsFunction function, params object[] args) {
-            _visitor.ExecuteFunction(function, null, Array.ConvertAll<object,JsInstance>( args, x => _visitor.Global.Marshaller.MarshalClrValue<object>(x) ));
-            return _visitor.Global.Marshaller.MarshalJsValue<object>(_visitor.Returned);
+        public object CallFunction(JsFunction function, params object[] args)
+        {
+            return _backend.CallFunction(function, args);
         }
 
-        public JintEngine SetFunction(string name, Delegate function) {
-            _visitor.GlobalScope[name] = _visitor.Global.FunctionClass.New(function);
+        public JintEngine SetFunction(string name, Delegate function)
+        {
+            _backend.GlobalScope[name] = _backend.Global.FunctionClass.New(function);
             return this;
         }
 
@@ -330,45 +305,48 @@ namespace Jint {
         /// </summary>
         /// <param name="value">The string literal to espace</param>
         /// <returns>The escaped string literal, without sinlge quotes, back slashes and line breaks</returns>
-        public static string EscapteStringLiteral(string value) {
+        public static string EscapteStringLiteral(string value)
+        {
             return value.Replace("\\", "\\\\").Replace("'", "\\'").Replace(Environment.NewLine, "\\r\\n");
         }
 
-        public JintEngine DisableSecurity() {
-            _permissionSet = new PermissionSet(PermissionState.Unrestricted);
+        public JintEngine DisableSecurity()
+        {
+            _backend.PermissionSet = new PermissionSet(PermissionState.Unrestricted);
             return this;
         }
 
         public JintEngine AllowClr()
         {
-            _allowClr = true;
+            _backend.AllowClr = true;
             return this;
         }
 
         public JintEngine AllowClr(bool value)
         {
-            _allowClr = value;
+            _backend.AllowClr = value;
             return this;
         }
 
         public JintEngine EnableSecurity()
         {
-            _permissionSet = new PermissionSet(PermissionState.None);
+            _backend.PermissionSet = new PermissionSet(PermissionState.None);
             return this;
         }
 
-        public void Save(Stream s) {
+        public void Save(Stream s)
+        {
             BinaryFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(s, _visitor);
+            formatter.Serialize(s, _backend);
         }
 
-        public static void Load(JintEngine engine, Stream s) {
-            BinaryFormatter formatter = new BinaryFormatter();
-            var visitor = (ExecutionVisitor)formatter.Deserialize(s);
-            engine._visitor = visitor;
+        public static void Load(JintEngine engine, Stream s)
+        {
+            engine._backend = (IBackend)new BinaryFormatter().Deserialize(s);
         }
 
-        public static JintEngine Load(Stream s) {
+        public static JintEngine Load(Stream s)
+        {
             JintEngine engine = new JintEngine();
             Load(engine, s);
             return engine;

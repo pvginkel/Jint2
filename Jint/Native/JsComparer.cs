@@ -6,19 +6,21 @@ using Jint.Expressions;
 namespace Jint.Native {
     [Serializable]
     public class JsComparer : IComparer<JsInstance> {
-        public IJintVisitor Visitor { get; set; }
-        public JsFunction Function { get; set; }
+        public IBackend Backend { get; private set; }
+        public JsFunction Function { get; private set; }
 
-        public JsComparer(IJintVisitor visitor, JsFunction function) {
-            Visitor = visitor;
+        public JsComparer(IBackend backend, JsFunction function) {
+            if (backend == null)
+                throw new ArgumentNullException("backend");
+            if (function == null)
+                throw new ArgumentNullException("function");
+
+            Backend = backend;
             Function = function;
         }
 
         public int Compare(JsInstance x, JsInstance y) {
-            Visitor.Result = Function;
-            new MethodCall(new List<Expression>() { new ValueExpression(x, TypeCode.Object), new ValueExpression(y, TypeCode.Object) }).Accept((IStatementVisitor)Visitor);
-            return Math.Sign(Visitor.Result.ToNumber());
+            return Backend.Compare(Function, x, y);
         }
-
     }
 }
