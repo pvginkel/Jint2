@@ -1,5 +1,4 @@
 using System;
-using Antlr.Runtime.Tree;
 using Jint.Debugger;
 
 namespace Jint.Expressions {

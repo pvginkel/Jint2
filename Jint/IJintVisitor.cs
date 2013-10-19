@@ -47,8 +47,6 @@ namespace Jint.Expressions {
 
     public interface IJintVisitor {
 
-        bool DebugMode { get; }
-
         JsInstance Result { get; set; }
         JsDictionaryObject CallTarget { get; }
 

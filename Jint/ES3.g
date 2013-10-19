@@ -187,6 +187,11 @@ tokens
 
 }
 
+@lexer::namespace { Jint.Parser }
+@parser::namespace { Jint.Parser }
+@lexer::modifier { internal }
+@parser::modifier { internal }
+
 @lexer::members
 {
     private IToken last;
@@ -273,7 +278,6 @@ tokens
 using System;
 using System.Text;
 using System.Globalization;
-using System.Collections.Generic;
 using Jint.Expressions;
 using Jint.Debugger;
 }
@@ -486,46 +490,9 @@ using Jint.Debugger;
 
 		private string[] script = new string[0];
 	    
-    		public bool DebugMode { get; set; }
-	    	
 			private SourceCodeDescriptor ExtractSourceCode(CommonToken start, CommonToken stop)
 			{
-				if(!DebugMode)
-				{
-            		return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine, "No source code available.");
-				}
-	            
-				try
-				{
-					StringBuilder source = new StringBuilder();
-
-					for (int i = start.Line - 1; i <= stop.Line - 1; i++)
-					{
-						int charStart = 0;
-						int charStop = script[i].Length;
-
-						if (i == start.Line - 1)
-						{
-							charStart = start.CharPositionInLine;
-						}
-
-						if (i == stop.Line - 1)
-						{
-							charStop = stop.CharPositionInLine;
-						}
-
-						int length = charStop - charStart;
-
-						source.Append(script[i].Substring(charStart, length)).Append(Environment.NewLine);
-					}
-
-					return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine, source.ToString());
-				}
-				catch
-				{
-					return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine, "No source code available.");
-				}
-
+                return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine, "No source code available.");
 			}
 
 		public AssignmentOperator ResolveAssignmentOperator(string op)

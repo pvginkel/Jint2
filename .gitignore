@@ -4,7 +4,6 @@ Thumbs.db
 /*.docstates
 /*.shfbproj_*
 /*.dotCover
-/Libraries
 /packages
 /_ReSharper*
 /*.DotSettings

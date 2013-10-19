@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Jint.Expressions;
 using System.Collections;
-using System.Reflection;
 using Jint.Native;
-using Jint.Debugger;
 using System.Security;
-using System.Runtime.Serialization;
-using Jint.Delegates;
 
 namespace Jint {
 
@@ -26,14 +22,8 @@ namespace Jint {
         protected Stack<JsScope> Scopes = new Stack<JsScope>();
 
         private bool _exit;
-        private int _recursionLevel;
 
-        public event EventHandler<DebugInformation> Step;
-        public Stack<string> CallStack { get; set; }
         public Statement CurrentStatement { get; set; }
-
-        public bool DebugMode { get; set; }
-        public int MaxRecursions { get; set; }
 
         public JsInstance Returned { get; private set; }
         public bool AllowClr { get; set; }
@@ -72,8 +62,6 @@ namespace Jint {
             GlobalScope = new JsScope(Global as JsObject);
 
             EnterScope(GlobalScope);
-
-            CallStack = new Stack<string>();
         }
 
         public ExecutionVisitor(IGlobal globalObject, JsScope scope) {
@@ -86,33 +74,8 @@ namespace Jint {
 
             Global = globalObject;
             GlobalScope = scope.Global;
-            MaxRecursions = 500;
 
             EnterScope(scope);
-            CallStack = new Stack<string>();
-        }
-
-        public void OnStep(DebugInformation info) {
-            if (Step != null && info.CurrentStatement != null && info.CurrentStatement.Source != null) {
-                Step(this, info);
-            }
-        }
-
-        public DebugInformation CreateDebugInformation(Statement statement) {
-            DebugInformation info = new DebugInformation();
-            info.CurrentStatement = statement;
-            info.CallStack = CallStack;
-            info.Scopes = Scopes;
-            info.Locals = new JsObject(JsNull.Instance);
-            info.Program = _programStack.Peek();
-            DebugMode = false;
-
-            foreach (var property in CurrentScope.GetKeys())
-                info.Locals[property] = CurrentScope[property];
-
-            DebugMode = true;
-
-            return info;
         }
 
         public JsScope CurrentScope {
@@ -143,9 +106,6 @@ namespace Jint {
                 foreach (var statement in program.Statements) {
                     CurrentStatement = statement;
 
-                    if (DebugMode) {
-                        OnStep(CreateDebugInformation(statement));
-                    }
                     Result = null;
                     statement.Accept(this);
 
@@ -266,10 +226,6 @@ namespace Jint {
 
         public void Visit(CommaOperatorStatement statement) {
             foreach (var s in statement.Statements) {
-                if (DebugMode) {
-                    OnStep(CreateDebugInformation(s));
-                }
-
                 s.Accept(this);
 
                 if (StopStatementFlow()) {
@@ -282,10 +238,6 @@ namespace Jint {
             Statement oldStatement = CurrentStatement;
             foreach (var s in statement.Statements) {
                 CurrentStatement = s;
-
-                if (DebugMode) {
-                    OnStep(CreateDebugInformation(s));
-                }
 
                 Result = null;
                 _typeFullName = null;
@@ -1336,24 +1288,6 @@ namespace Jint {
             var function = target as JsFunction;
             if (function != null)
             {
-                #region DebugMode
-                if (DebugMode) {
-                    var stack = function.Name + "(";
-                    var paramStrings = new string[parameters.Length];
-
-                    for (int i = 0; i < parameters.Length; i++) {
-                        if (parameters[i] != null)
-                            paramStrings[i] = parameters[i].ToSource();
-                        else
-                            paramStrings[i] = "null";
-                    }
-
-                    stack += String.Join(", ", paramStrings);
-                    stack += ")";
-                    CallStack.Push(stack);
-                }
-                #endregion
-
                 Returned = JsUndefined.Instance;
 
                 var original = new JsInstance[parameters.Length];
@@ -1373,15 +1307,8 @@ namespace Jint {
                         }
                     }
 
-                #region DebugMode
-                if (DebugMode) {
-                    CallStack.Pop();
-                }
-                #endregion
-
                 Result = Returned;
                 Returned = JsUndefined.Instance;
-                return;
             }
             else {
                 throw new JsException(Global.ErrorClass.New("Function expected."));
@@ -1397,10 +1324,6 @@ namespace Jint {
         public void ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters) {
             if (function == null) {
                 return;
-            }
-
-            if (_recursionLevel++ > MaxRecursions) {
-                throw new JsException(Global.ErrorClass.New("Too many recursions in the script."));
             }
 
             // ecma chapter 10.
@@ -1475,7 +1398,6 @@ namespace Jint {
                 {
                     CodeAccessPermission.RevertPermitOnly();
                 }
-                _recursionLevel--;
             }
         }
 

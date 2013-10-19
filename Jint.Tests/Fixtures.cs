@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Jint.Expressions;
-using Jint.Delegates;
 using System.IO;
 using Jint.Native;
 using System.Reflection;
-using Jint.Debugger;
 using System.Security.Permissions;
 using System.Diagnostics;
 using System.Text;
@@ -750,98 +747,6 @@ var fakeButton = new Test.FakeButton();");
         }
 
         [Test]
-        public void ShouldDebugScripts() {
-            var jint = new JintEngine()
-            .SetDebugMode(true);
-            jint.BreakPoints.Add(new BreakPoint(4, 22)); // return x*x;
-
-            jint.Step += (sender, info) => Assert.IsNotNull(info.CurrentStatement);
-
-            bool brokeOnReturn = false;
-
-            jint.Break += (sender, info) => {
-                Assert.IsNotNull(info.CurrentStatement);
-                Assert.IsTrue(info.CurrentStatement is ReturnStatement);
-                Assert.AreEqual(3, Convert.ToInt32(info.Locals["x"].Value));
-
-                brokeOnReturn = true;
-            };
-
-            jint.Run(@"
-                var i = 3; 
-                function square(x) { 
-                    return x*x; 
-                }
-
-                return square(i);
-            ");
-
-            Assert.IsTrue(brokeOnReturn);
-
-        }
-
-        [Test]
-        public void ShouldBreakInLoops() {
-            var jint = new JintEngine()
-                .SetDebugMode(true);
-            jint.BreakPoints.Add(new BreakPoint(4, 22)); // x += 1;
-
-            jint.Step += (sender, info) => Assert.IsNotNull(info.CurrentStatement);
-
-            bool brokeInLoop = false;
-
-            jint.Break += (sender, info) => {
-                Assert.IsNotNull(info.CurrentStatement);
-                Assert.IsTrue(info.CurrentStatement is ExpressionStatement);
-                Assert.AreEqual(7, Convert.ToInt32(info.Locals["x"].Value));
-
-                brokeInLoop = true;
-            };
-
-            jint.Run(@"
-                var x = 7;
-                for(i=0; i<3; i++) { 
-                    x += i; 
-                    return;
-                }
-            ");
-
-            Assert.IsTrue(brokeInLoop);
-        }
-
-        [Test]
-        public void ShouldBreakOnCondition() {
-            JintEngine jint = new JintEngine()
-            .SetDebugMode(true);
-            jint.BreakPoints.Add(new BreakPoint(4, 22, "x == 2;")); // return x*x;
-
-            jint.Step += (sender, info) => Assert.IsNotNull(info.CurrentStatement);
-
-            bool brokeOnReturn = false;
-
-            jint.Break += (sender, info) => {
-                Assert.IsNotNull(info.CurrentStatement);
-                Assert.IsTrue(info.CurrentStatement is ReturnStatement);
-                Assert.AreEqual(2, Convert.ToInt32(info.Locals["x"].Value));
-
-                brokeOnReturn = true;
-            };
-
-            jint.Run(@"
-                var i = 3; 
-                function square(x) { 
-                    return x*x; 
-                }
-                
-                square(1);
-                square(2);
-                square(3);
-            ");
-
-            Assert.IsTrue(brokeOnReturn);
-        }
-
-        [Test]
         public void ShouldHandleInlineCLRMethodCalls() {
             string script = @"
                 var box = new Jint.Tests.Box();
@@ -937,7 +842,7 @@ var fakeButton = new Test.FakeButton();");
                     continue;
                 }
                 Trace.WriteLine(Path.GetFileNameWithoutExtension(resx));
-                JintEngine.Compile(program, true);
+                JintEngine.Compile(program);
             }
         }
 
@@ -945,7 +850,6 @@ var fakeButton = new Test.FakeButton();");
         public void ShouldHandleNativeTypes() {
 
             var jint = new JintEngine()
-            .SetDebugMode(true)
             .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
             .SetFunction("print", new Action<string>(System.Console.WriteLine))
             .SetParameter("foo", "native string");
@@ -959,7 +863,6 @@ var fakeButton = new Test.FakeButton();");
         public void ClrNullShouldBeConverted() {
 
             var jint = new JintEngine()
-            .SetDebugMode(true)
             .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
             .SetFunction("print", new Action<string>(System.Console.WriteLine))
             .SetParameter("foo", null);
@@ -1008,7 +911,6 @@ var fakeButton = new Test.FakeButton();");
                 StringWriter sw = new StringWriter(output);
 
                 var jint = new JintEngine()
-                .SetDebugMode(true)
                 .SetFunction("print", new Action<string>(sw.WriteLine));
 
                 jint.Run(extensions);
@@ -1063,7 +965,6 @@ var fakeButton = new Test.FakeButton();");
                 Console.WriteLine(Path.GetFileNameWithoutExtension(resx));
 
                 var jint = new JintEngine()
-                .SetDebugMode(true)
                 .SetFunction("print", new Action<string>(System.Console.WriteLine));
 
                 jint.Run(extensions);
@@ -1160,7 +1061,6 @@ var fakeButton = new Test.FakeButton();");
         public void ShouldHandleClrArrays() {
             var values = new int[] { 2, 3, 4, 5, 6, 7 };
             var jint = new JintEngine()
-            .SetDebugMode(true)
             .SetParameter("a", values)
             .AllowClr();
 
@@ -1177,7 +1077,6 @@ var fakeButton = new Test.FakeButton();");
 
             var jint = new JintEngine()
             .AllowClr()
-            .SetDebugMode(true)
             .SetParameter("dic", dic);
 
             Assert.AreEqual(1, jint.Run("return dic['a'];"));
@@ -1192,7 +1091,6 @@ var fakeButton = new Test.FakeButton();");
 
             var jint = new JintEngine()
             .AllowClr()
-            .SetDebugMode(true)
             .SetParameter("box", box);
 
             Assert.AreEqual(10, jint.Run("return box.Width"));
@@ -1210,7 +1108,6 @@ var fakeButton = new Test.FakeButton();");
             var box = new Box { width = 10, height = 20 };
 
             var jint = new JintEngine()
-            .SetDebugMode(true)
             .AllowClr()
             .SetParameter("box", box);
 
@@ -1231,7 +1128,6 @@ var fakeButton = new Test.FakeButton();");
             var box = new Box { Width = 10, Height = 20 };
 
             var jint = new Jint.JintEngine()
-            .SetDebugMode(true)
             .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
             .SetParameter("box", box);
 
@@ -1536,27 +1432,6 @@ var fakeButton = new Test.FakeButton();");
                     assert(false, Math.random() == Math.random());
                 }
             ");
-        }
-
-        [Test]
-        public void MaxRecursionsShouldBeDetected() {
-            Test(@"
-                function doSomething(){
-                    doSomethingElse();
-                }
-
-                function doSomethingElse(){
-                    doSomething();
-                }
-
-                try {
-                    doSomething();
-                    assert(true, false);
-                }
-                catch (e){
-                    return;                
-                }
-                ");
         }
 
         [Test]

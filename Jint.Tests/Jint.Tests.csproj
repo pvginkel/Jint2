@@ -26,7 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,6 +35,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\Jint\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
@@ -46,6 +52,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Performance\PerformanceFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Fixtures.cs" />
     <Compile Include="SunSpider.cs" />
@@ -105,6 +112,9 @@
     <EmbeddedResource Include="ecma_3\Array\15.4.4.4-001.js" />
     <EmbeddedResource Include="ecma_3\Array\15.4.5.1-01.js" />
     <EmbeddedResource Include="ecma_3\Array\15.5.4.8-01.js" />
+    <None Include="..\Jint\Key.snk">
+      <Link>Key.snk</Link>
+    </None>
     <None Include="ecma_3\Array\browser.js" />
     <EmbeddedResource Include="ecma_3\Array\regress-101488.js" />
     <EmbeddedResource Include="ecma_3\Array\regress-130451.js" />

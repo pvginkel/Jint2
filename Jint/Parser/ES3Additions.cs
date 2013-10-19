@@ -2,39 +2,48 @@
 using System.Collections.Generic;
 using System.Text;
 using Antlr.Runtime;
+using Jint.Expressions;
 
-partial class ES3Lexer
+namespace Jint.Parser
 {
-    public override void ReportError(RecognitionException e)
+    partial class ES3Lexer
     {
-        throw e;
+        public override void ReportError(RecognitionException e)
+        {
+            throw e;
+        }
+
+        protected override object RecoverFromMismatchedToken(IIntStream input, int ttype, BitSet follow)
+        {
+            throw new MismatchedTokenException(ttype, input);
+        }
+
+        public override object RecoverFromMismatchedSet(IIntStream input, RecognitionException e, BitSet follow)
+        {
+            throw e;
+        }
     }
 
-    protected override object RecoverFromMismatchedToken(IIntStream input, int ttype, BitSet follow)
+    partial class ES3Parser
     {
-        throw new MismatchedTokenException(ttype, input);
-    }
+        public override void ReportError(RecognitionException e)
+        {
+            throw e;
+        }
 
-    public override object RecoverFromMismatchedSet(IIntStream input, RecognitionException e, BitSet follow)
-    {
-        throw e;
-    }
-}
+        protected override object RecoverFromMismatchedToken(IIntStream input, int ttype, BitSet follow)
+        {
+            throw new MismatchedTokenException(ttype, input);
+        }
 
-partial class ES3Parser
-{
-    public override void ReportError(RecognitionException e)
-    {
-        throw e;
-    }
+        public override object RecoverFromMismatchedSet(IIntStream input, RecognitionException e, BitSet follow)
+        {
+            throw e;
+        }
 
-    protected override object RecoverFromMismatchedToken(IIntStream input, int ttype, BitSet follow)
-    {
-        throw new MismatchedTokenException(ttype, input);
-    }
-
-    public override object RecoverFromMismatchedSet(IIntStream input, RecognitionException e, BitSet follow)
-    {
-        throw e;
+        public Program Execute()
+        {
+            return program().value;
+        }
     }
 }

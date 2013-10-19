@@ -79,8 +79,6 @@
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="PropertyBags\DictionaryPropertyBag.cs" />
     <Compile Include="PropertyBags\DoubleListPropertyBag.cs" />
-    <Compile Include="Debugger\BreakPoint.cs" />
-    <Compile Include="Debugger\DebugInformation.cs" />
     <Compile Include="Debugger\SourceCodeDescriptor.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\IGenericExpression.cs" />
@@ -182,7 +180,9 @@
     <Compile Include="PropertyBags\ScopedPropertyBag.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ES3.g" />
     <None Include="Key.snk" />
+    <None Include="Parser\Generate.bat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

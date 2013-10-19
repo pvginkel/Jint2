@@ -5,11 +5,11 @@ using Jint.Expressions;
 using Antlr.Runtime;
 using Jint.Native;
 using Jint.Delegates;
-using Jint.Debugger;
 using System.Security;
 using System.Security.Permissions;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Jint.Parser;
 
 namespace Jint {
     [Serializable]
@@ -26,7 +26,6 @@ namespace Jint {
             _visitor = new ExecutionVisitor(options);
             _permissionSet = new PermissionSet(PermissionState.None);
             _visitor.AllowClr = _allowClr;
-            MaxRecursions = 400;
 
             var global = _visitor.Global as JsObject;
 
@@ -45,8 +44,6 @@ namespace Jint {
             global["ToUInt16"] = _visitor.Global.FunctionClass.New(new Func<object, UInt16>(Convert.ToUInt16));
             global["ToUInt32"] = _visitor.Global.FunctionClass.New(new Func<object, UInt32>(Convert.ToUInt32));
             global["ToUInt64"] = _visitor.Global.FunctionClass.New(new Func<object, UInt64>(Convert.ToUInt64));
-
-            BreakPoints = new List<BreakPoint>();
         }
 
         /// <summary>
@@ -59,21 +56,18 @@ namespace Jint {
         private bool _allowClr;
         private PermissionSet _permissionSet;
 
-        public static Program Compile(string source, bool debugInformation) {
+        public static Program Compile(string source) {
             Program program = null;
             if (!string.IsNullOrEmpty(source)) {
                 var lexer = new ES3Lexer(new ANTLRStringStream(source));
-                var parser = new ES3Parser(new CommonTokenStream(lexer)) { DebugMode = debugInformation };
+                var parser = new ES3Parser(new CommonTokenStream(lexer));
 
-                program = parser.program().value;
+                program = parser.Execute();
 
                 if (parser.Errors != null && parser.Errors.Count > 0) {
                     throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
                 }
             }
-
-            if (debugInformation)
-                program.ProgramSource = source;
 
             return program;
         }
@@ -86,7 +80,7 @@ namespace Jint {
         public static bool HasErrors(string script, out string errors) {
             try {
                 errors = null;
-                Program program = Compile(script, false);
+                Program program = Compile(script);
 
                 // In case HasErrors() is called multiple times for the same expression
                 return program != null;
@@ -166,7 +160,7 @@ namespace Jint {
 
 
             try {
-                program = Compile(script, DebugMode);
+                program = Compile(script);
             }
             catch (Exception e) {
                 throw new JintException("An unexpected error occured while parsing the script", e);
@@ -192,15 +186,9 @@ namespace Jint {
                 throw new
                     ArgumentException("Script can't be null", "script");
 
-            _visitor.DebugMode = DebugMode;
-            _visitor.MaxRecursions = MaxRecursions;
             _visitor.PermissionSet = _permissionSet;
             _visitor.AllowClr = _allowClr;
             _visitor.Result = null;
-
-            if (DebugMode) {
-                _visitor.Step += OnStep;
-            }
 
             try {
                 _visitor.Visit(program);
@@ -215,16 +203,6 @@ namespace Jint {
                 var stackTrace = new StringBuilder();
                 var source = String.Empty;
 
-                if (DebugMode) {
-                    while (_visitor.CallStack.Count > 0) {
-                        stackTrace.AppendLine(_visitor.CallStack.Pop());
-                    }
-
-                    if (stackTrace.Length > 0) {
-                        stackTrace.Insert(0, Environment.NewLine + "------ Stack Trace:" + Environment.NewLine);
-                    }
-                }
-
                 if (_visitor.CurrentStatement.Source != null) {
                     source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
                             + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
@@ -236,16 +214,6 @@ namespace Jint {
                 StringBuilder stackTrace = new StringBuilder();
                 string source = String.Empty;
 
-                if (DebugMode) {
-                    while (_visitor.CallStack.Count > 0) {
-                        stackTrace.AppendLine(_visitor.CallStack.Pop());
-                    }
-
-                    if (stackTrace.Length > 0) {
-                        stackTrace.Insert(0, Environment.NewLine + "------ Stack Trace:" + Environment.NewLine);
-                    }
-                }
-
                 if (_visitor.CurrentStatement != null && _visitor.CurrentStatement.Source != null) {
                     source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
                             + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
@@ -253,35 +221,9 @@ namespace Jint {
 
                 throw new JintException(e.Message + source + stackTrace, e);
             }
-            finally {
-                _visitor.Step -= OnStep;
-            }
 
             return _visitor.Result == null ? null : unwrap ? _visitor.Global.Marshaller.MarshalJsValue<object>( _visitor.Result) : _visitor.Result;
         }
-
-        #region Debugger
-        public event EventHandler<DebugInformation> Step;
-        public event EventHandler<DebugInformation> Break;
-        public List<BreakPoint> BreakPoints { get; private set; }
-        public bool DebugMode { get; private set; }
-        public int MaxRecursions { get; private set; }
-        public List<string> WatchList { get; set; }
-
-        public JintEngine SetDebugMode(bool debugMode) {
-            DebugMode = debugMode;
-            return this;
-        }
-
-        /// <summary>
-        /// Defines the max allowed number of recursions in the script
-        /// </summary>
-        public JintEngine SetMaxRecursions(int maxRecursions) {
-            MaxRecursions = maxRecursions;
-            return this;
-        }
-
-        #endregion
 
         #region SetParameter overloads
 
@@ -390,49 +332,6 @@ namespace Jint {
         /// <returns>The escaped string literal, without sinlge quotes, back slashes and line breaks</returns>
         public static string EscapteStringLiteral(string value) {
             return value.Replace("\\", "\\\\").Replace("'", "\\'").Replace(Environment.NewLine, "\\r\\n");
-        }
-
-        protected void OnStep(object sender, DebugInformation info) {
-            if (Step != null) {
-                Step(this, info);
-            }
-
-            if (Break != null) {
-                BreakPoint breakpoint = BreakPoints.Find(l => {
-                    bool afterStart, beforeEnd;
-
-                    afterStart = l.Line > info.CurrentStatement.Source.Start.Line
-                        || (l.Line == info.CurrentStatement.Source.Start.Line && l.Char >= info.CurrentStatement.Source.Start.Char);
-
-                    if (!afterStart) {
-                        return false;
-                    }
-
-                    beforeEnd = l.Line < info.CurrentStatement.Source.Stop.Line
-                        || (l.Line == info.CurrentStatement.Source.Stop.Line && l.Char <= info.CurrentStatement.Source.Stop.Char);
-
-                    if (!beforeEnd) {
-                        return false;
-                    }
-
-                    if (!String.IsNullOrEmpty(l.Condition)) {
-                        return Convert.ToBoolean(Run(l.Condition));
-                    }
-
-                    return true;
-                });
-
-
-                if (breakpoint != null) {
-                    Break(this, info);
-                }
-            }
-        }
-
-        protected void OnBreak(object sender, DebugInformation info) {
-            if (Break != null) {
-                Break(this, info);
-            }
         }
 
         public JintEngine DisableSecurity() {

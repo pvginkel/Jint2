@@ -132,7 +132,7 @@ namespace Jint.Native {
             Program p;
 
             try {
-                p = JintEngine.Compile(arguments[0].ToString(), Visitor.DebugMode);
+                p = JintEngine.Compile(arguments[0].ToString());
             }
             catch (Exception e) {
                 throw new JsException(SyntaxErrorClass.New(e.Message));
