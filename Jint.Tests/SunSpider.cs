@@ -1,14 +1,14 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using NUnit.Framework;
 
 namespace Jint.Tests {
     /// <summary>
     /// Summary description for SunSpider
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class SunSpider {
 
         private static void ExecuteSunSpiderScript(string scriptName)
@@ -30,158 +30,158 @@ namespace Jint.Tests {
 
                 
 
-        [TestMethod]
+        [Test]
         public void ShouldRun3DCube()
         {
             ExecuteSunSpiderScript("3d-cube.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRun3DMorph()
         {
             ExecuteSunSpiderScript("3d-morph.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRun3DRaytrace()
         {
             ExecuteSunSpiderScript("3d-raytrace.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunAccessBinaryTrees()
         {
             ExecuteSunSpiderScript("access-binary-trees.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunAccessFannkuch()
         {
             ExecuteSunSpiderScript("access-fannkuch.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunAccessNbody()
         {
             ExecuteSunSpiderScript("access-nbody.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunAccessNsieve()
         {
             ExecuteSunSpiderScript("access-nsieve.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunBitops3BitsInByte()
         {
             ExecuteSunSpiderScript("bitops-3bit-bits-in-byte.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunBitopsBitsInByte()
         {
             ExecuteSunSpiderScript("bitops-bits-in-byte.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunBitopsBitwiseAnd()
         {
             ExecuteSunSpiderScript("bitops-bitwise-and.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunBitopsNsieveBits()
         {
             ExecuteSunSpiderScript("bitops-nsieve-bits.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunControlflowRecurise()
         {
             ExecuteSunSpiderScript("controlflow-recursive.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunCryptoAes()
         {
             ExecuteSunSpiderScript("crypto-aes.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunCrypotMd5()
         {
             ExecuteSunSpiderScript("crypto-md5.js");
         }
         
-        [TestMethod]
+        [Test]
         public void ShouldRunCruptoSha1()
         {
             ExecuteSunSpiderScript("crypto-sha1.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunDateFormatTofte()
         {
             ExecuteSunSpiderScript("date-format-tofte.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunDateFormatXparb()
         {
             ExecuteSunSpiderScript("date-format-xparb.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunMathCrodic()
         {
             ExecuteSunSpiderScript("math-cordic.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunMathPartialSums()
         {
             ExecuteSunSpiderScript("math-partial-sums.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunMathSpecialNorm()
         {
             ExecuteSunSpiderScript("math-spectral-norm.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunRegexpDna()
         {
             ExecuteSunSpiderScript("regexp-dna.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunStringBase64()
         {
             ExecuteSunSpiderScript("string-base64.js");
         }
         
 
-        [TestMethod]
+        [Test]
         public void ShouldRunStinFasta()
         {
             ExecuteSunSpiderScript("string-fasta.js");
         }
 
-                [TestMethod]
+                [Test]
         public void ShouldRunStringTagcloud()
         {
             ExecuteSunSpiderScript("string-tagcloud.js");
         }
 
-                [TestMethod]
+                [Test]
         public void ShouldRunStringUnpackCode()
         {
             ExecuteSunSpiderScript("string-unpack-code.js");
         }
 
-        [TestMethod]
+        [Test]
         public void ShouldRunStringValidateInput()
         {
             ExecuteSunSpiderScript("string-validate-input.js");

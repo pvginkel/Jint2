@@ -1,14 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CEA18D60-4A58-4C3E-ACD2-3745BF8D2429}"
-	ProjectSection(SolutionItems) = preProject
-		Jint.vsmdi = Jint.vsmdi
-		Jint1.vsmdi = Jint1.vsmdi
-		Jint2.vsmdi = Jint2.vsmdi
-		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jint", "Jint\Jint.csproj", "{DBF3AEF6-9D13-4E03-899B-561BCFDD9920}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jint.Tests", "Jint.Tests\Jint.Tests.csproj", "{2D10BAFA-AC74-4D14-8B24-5C992742803D}"
