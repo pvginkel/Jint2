@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
 using Jint.Expressions;
@@ -13,7 +14,9 @@ namespace Jint.Native {
     /// Implements generic property storing mechanism
     /// </remarks>
     [Serializable]
-    public abstract class JsDictionaryObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>> {
+    [DebuggerTypeProxy(typeof(JsDictionaryObjectDebugView))]
+    public abstract class JsDictionaryObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
+    {
         private readonly IPropertyBag _properties = new MiniCachedPropertyBag();
 
         /// <summary>

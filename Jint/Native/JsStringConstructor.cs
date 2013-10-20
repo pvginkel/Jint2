@@ -5,18 +5,22 @@ using Jint.Delegates;
 using System.Text.RegularExpressions;
 using Jint.Expressions;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsStringConstructor : JsConstructor {
+    public class JsStringConstructor : JsConstructor
+    {
         public JsStringConstructor(IGlobal global)
-            : base(global) {
+            : base(global)
+        {
             DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontDelete | PropertyAttributes.DontEnum);
             Name = "String";
 
             this["fromCharCode"] = global.FunctionClass.New<JsDictionaryObject>(FromCharCodeImpl);
         }
 
-        public override void InitPrototype(IGlobal global) {
+        public override void InitPrototype(IGlobal global)
+        {
             var prototype = PrototypeProperty;
 
             prototype.DefineOwnProperty("split", global.FunctionClass.New<JsDictionaryObject>(SplitImpl, 2), PropertyAttributes.DontEnum);
@@ -45,31 +49,39 @@ namespace Jint.Native {
             #endregion
         }
 
-        public JsString New() {
+        public JsString New()
+        {
             return New(String.Empty);
         }
 
-        public JsString New(string value) {
+        public JsString New(string value)
+        {
             return new JsString(value, PrototypeProperty);
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters) {
+        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        {
             if (that == null || (that as IGlobal) == visitor.Global)
             {
                 // 15.5.1 - When String is called as a function rather than as a constructor, it performs a type conversion.
-                if (parameters.Length > 0) {
+                if (parameters.Length > 0)
+                {
                     return visitor.Return(Global.StringClass.New(parameters[0].ToString()));
                 }
-                else {
+                else
+                {
                     return visitor.Return(Global.StringClass.New(String.Empty));
                 }
             }
-            else {
+            else
+            {
                 // 15.5.2 - When String is called as part of a new expression, it is a constructor: it initialises the newly created object.
-                if (parameters.Length > 0) {
+                if (parameters.Length > 0)
+                {
                     that.Value = parameters[0].ToString();
                 }
-                else {
+                else
+                {
                     that.Value = String.Empty;
                 }
 
@@ -86,11 +98,15 @@ namespace Jint.Native {
         /// <param name="newString"></param>
         /// <param name="groups"></param>
         /// <returns></returns>
-        private static string EvaluateReplacePattern(string matched, string before, string after, string newString, GroupCollection groups) {
-            if (newString.Contains("$")) {
+        private static string EvaluateReplacePattern(string matched, string before, string after, string newString, GroupCollection groups)
+        {
+            if (newString.Contains("$"))
+            {
                 Regex rr = new Regex(@"\$\$|\$&|\$`|\$'|\$\d{1,2}", RegexOptions.Compiled);
-                var res = rr.Replace(newString, delegate(Match m) {
-                    switch (m.Value) {
+                var res = rr.Replace(newString, delegate(Match m)
+                {
+                    switch (m.Value)
+                    {
                         case "$$": return "$";
                         case "$&": return matched;
                         case "$`": return before;
@@ -111,7 +127,8 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        public JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             return Global.StringClass.New(target.ToString());
         }
 
@@ -121,7 +138,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ValueOfImpl(JsString target, JsInstance[] parameters) {
+        public JsInstance ValueOfImpl(JsString target, JsInstance[] parameters)
+        {
             return Global.StringClass.New(target.ToString());
         }
 
@@ -131,7 +149,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance CharAtImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance CharAtImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             return SubstringImpl(target, new JsInstance[] { parameters[0], Global.NumberClass.New(parameters[0].ToNumber() + 1) });
         }
 
@@ -141,14 +160,17 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance CharCodeAtImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance CharCodeAtImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             var r = target.ToString();
             var at = (int)parameters[0].ToNumber();
 
-            if (r == String.Empty || at > r.Length - 1) {
+            if (r == String.Empty || at > r.Length - 1)
+            {
                 return Global.NaN;
             }
-            else {
+            else
+            {
                 return Global.NumberClass.New(Convert.ToInt32(r[at]));
             }
         }
@@ -159,7 +181,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance FromCharCodeImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance FromCharCodeImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             //var r = target.ToString();
 
             //if (r == String.Empty || at > r.Length - 1)
@@ -181,12 +204,14 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        public JsInstance ConcatImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance ConcatImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             StringBuilder sb = new StringBuilder();
 
             sb.Append(target.ToString());
 
-            for (int i = 0; i < parameters.Length; i++) {
+            for (int i = 0; i < parameters.Length; i++)
+            {
                 sb.Append(parameters[i].ToString());
             }
 
@@ -198,21 +223,26 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        public JsInstance IndexOfImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance IndexOfImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             string source = target.ToString();
             string searchString = parameters[0].ToString();
             int position = parameters.Length > 1 ? (int)parameters[1].ToNumber() : 0;
 
-            if (searchString == String.Empty) {
-                if (parameters.Length > 1) {
+            if (searchString == String.Empty)
+            {
+                if (parameters.Length > 1)
+                {
                     return Global.NumberClass.New(Math.Min(source.Length, position));
                 }
-                else {
+                else
+                {
                     return Global.NumberClass.New(0);
                 }
             }
 
-            if (position >= source.Length) {
+            if (position >= source.Length)
+            {
                 return Global.NumberClass.New(-1);
             }
 
@@ -224,7 +254,8 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        public JsInstance LastIndexOfImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance LastIndexOfImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             string source = target.ToString();
             string searchString = parameters[0].ToString();
             int position = parameters.Length > 1 ? (int)parameters[1].ToNumber() : source.Length;
@@ -238,7 +269,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance LocaleCompareImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance LocaleCompareImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             return Global.NumberClass.New(target.ToString().CompareTo(parameters[0].ToString()));
         }
 
@@ -256,7 +288,7 @@ namespace Jint.Native {
 
             if (!regexp.IsGlobal)
             {
-                return Global.RegExpClass.ExecImpl(regexp, new JsInstance[] {target});
+                return Global.RegExpClass.ExecImpl(regexp, new JsInstance[] { target });
             }
             else
             {
@@ -285,61 +317,74 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ReplaceImpl(JsDictionaryObject target, JsInstance[] parameters) {
-            if (parameters.Length == 0) {
+        public JsInstance ReplaceImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
+            if (parameters.Length == 0)
+            {
                 return Global.StringClass.New(target.ToString());
             }
 
             JsInstance searchValue = parameters[0];
             JsInstance replaceValue = JsUndefined.Instance;
 
-            if (parameters.Length > 1) {
+            if (parameters.Length > 1)
+            {
                 replaceValue = parameters[1];
             }
 
             string source = target.ToString();
 
             JsFunction function = replaceValue as JsFunction;
-            if (searchValue.Class == JsInstance.ClassRegexp) {
+            if (searchValue.Class == JsInstance.ClassRegexp)
+            {
                 int count = ((JsRegExp)parameters[0]).IsGlobal ? int.MaxValue : 1;
                 var regexp = ((JsRegExp)parameters[0]);
                 int lastIndex = regexp.IsGlobal ? 0 : Math.Max(0, (int)regexp["lastIndex"].ToNumber() - 1);
 
-                if (regexp.IsGlobal) {
+                if (regexp.IsGlobal)
+                {
                     regexp["lastIndex"] = Global.NumberClass.New(0);
                 }
 
                 if (replaceValue is JsFunction)
                 {
-                    string ret = ((JsRegExp)parameters[0]).Regex.Replace(source, delegate(Match m) {
+                    string ret = ((JsRegExp)parameters[0]).Regex.Replace(source, delegate(Match m)
+                    {
                         List<JsInstance> replaceParameters = new List<JsInstance>();
-                        if (!regexp.IsGlobal) {
+                        if (!regexp.IsGlobal)
+                        {
                             regexp["lastIndex"] = Global.NumberClass.New(m.Index + 1);
                         }
 
                         replaceParameters.Add(Global.StringClass.New(m.Value));
-                        for (int i = 1; i < m.Groups.Count; i++) {
-                            if (m.Groups[i].Success) {
+                        for (int i = 1; i < m.Groups.Count; i++)
+                        {
+                            if (m.Groups[i].Success)
+                            {
                                 replaceParameters.Add(Global.StringClass.New(m.Groups[i].Value));
                             }
-                            else {
+                            else
+                            {
                                 replaceParameters.Add(JsUndefined.Instance);
                             }
                         }
                         replaceParameters.Add(Global.NumberClass.New(m.Index));
                         replaceParameters.Add(Global.StringClass.New(source));
 
-                        return Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray()).ToString();
+                        return Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray(), null).ToString();
                     }, count, lastIndex);
 
 
                     return Global.StringClass.New(ret);
 
                 }
-                else {
+                else
+                {
                     string str = parameters[1].ToString();
-                    string ret = ((JsRegExp)parameters[0]).Regex.Replace(target.ToString(), delegate(Match m) {
-                        if (!regexp.IsGlobal) {
+                    string ret = ((JsRegExp)parameters[0]).Regex.Replace(target.ToString(), delegate(Match m)
+                    {
+                        if (!regexp.IsGlobal)
+                        {
                             regexp["lastIndex"] = Global.NumberClass.New(m.Index + 1);
                         }
 
@@ -352,10 +397,12 @@ namespace Jint.Native {
 
 
             }
-            else {
+            else
+            {
                 string search = searchValue.ToString();
                 int index = source.IndexOf(search);
-                if (index != -1) {
+                if (index != -1)
+                {
                     if (replaceValue is JsFunction)
                     {
                         List<JsInstance> replaceParameters = new List<JsInstance>();
@@ -363,18 +410,20 @@ namespace Jint.Native {
                         replaceParameters.Add(Global.NumberClass.New(index));
                         replaceParameters.Add(Global.StringClass.New(source));
 
-                        replaceValue = Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray());
+                        replaceValue = Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray(), null);
 
                         return Global.StringClass.New(source.Substring(0, index) + replaceValue.ToString() + source.Substring(index + search.Length));
                     }
-                    else {
+                    else
+                    {
                         string before = source.Substring(0, index);
                         string after = source.Substring(index + search.Length);
                         string newString = EvaluateReplacePattern(search, before, after, replaceValue.ToString(), null);
                         return Global.StringClass.New(before + newString + after);
                     }
                 }
-                else {
+                else
+                {
                     return Global.StringClass.New(source);
                 }
             }
@@ -386,18 +435,22 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SearchImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance SearchImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             // Converts the parameters to a regex
-            if (parameters[0].Class == JsInstance.ClassString) {
+            if (parameters[0].Class == JsInstance.ClassString)
+            {
                 parameters[0] = Global.RegExpClass.New(parameters[0].ToString(), false, false, false);
             }
 
             Match m = ((JsRegExp)parameters[0]).Regex.Match(target.ToString());
 
-            if (m != null && m.Success) {
+            if (m != null && m.Success)
+            {
                 return Global.NumberClass.New(m.Index);
             }
-            else {
+            else
+            {
                 return Global.NumberClass.New(-1);
             }
         }
@@ -408,18 +461,22 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SliceImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance SliceImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             string source = target.ToString();
             int start = (int)parameters[0].ToNumber();
             int end = source.Length;
-            if (parameters.Length > 1) {
+            if (parameters.Length > 1)
+            {
                 end = (int)parameters[1].ToNumber();
-                if (end < 0) {
+                if (end < 0)
+                {
                     end = source.Length + end;
                 }
             }
 
-            if (start < 0) {
+            if (start < 0)
+            {
                 start = source.Length + start;
             }
 
@@ -432,11 +489,13 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SplitImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance SplitImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             JsObject a = Global.ArrayClass.New();
             string s = target.ToString();
 
-            if (parameters.Length == 0 || parameters[0] == JsUndefined.Instance) {
+            if (parameters.Length == 0 || parameters[0] == JsUndefined.Instance)
+            {
                 a["0"] = Global.StringClass.New(s);
             }
 
@@ -445,14 +504,17 @@ namespace Jint.Native {
             int length = s.Length;
             string[] result;
 
-            if (separator.Class == JsInstance.ClassRegexp) {
+            if (separator.Class == JsInstance.ClassRegexp)
+            {
                 result = ((JsRegExp)parameters[0]).Regex.Split(s, limit);
             }
-            else {
+            else
+            {
                 result = s.Split(new string[] { separator.ToString() }, limit, StringSplitOptions.None);
             }
 
-            for (int i = 0; i < result.Length; i++) {
+            for (int i = 0; i < result.Length; i++)
+            {
                 a[i.ToString()] = Global.StringClass.New(result[i]);
             }
 
@@ -465,15 +527,18 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SubstringImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance SubstringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             string str = target.ToString();
             int start = 0, end = str.Length;
 
-            if (parameters.Length > 0 && !double.IsNaN(parameters[0].ToNumber())) {
+            if (parameters.Length > 0 && !double.IsNaN(parameters[0].ToNumber()))
+            {
                 start = Convert.ToInt32(parameters[0].ToNumber());
             }
 
-            if (parameters.Length > 1 && parameters[1] != JsUndefined.Instance && !double.IsNaN(parameters[1].ToNumber())) {
+            if (parameters.Length > 1 && parameters[1] != JsUndefined.Instance && !double.IsNaN(parameters[1].ToNumber()))
+            {
                 end = Convert.ToInt32(parameters[1].ToNumber());
             }
 
@@ -484,15 +549,18 @@ namespace Jint.Native {
             return New(str);
         }
 
-        public JsInstance SubstrImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance SubstrImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             string str = target.ToString();
             int start = 0, end = str.Length;
 
-            if (parameters.Length > 0 && !double.IsNaN(parameters[0].ToNumber())) {
+            if (parameters.Length > 0 && !double.IsNaN(parameters[0].ToNumber()))
+            {
                 start = Convert.ToInt32(parameters[0].ToNumber());
             }
 
-            if (parameters.Length > 1 && parameters[1] != JsUndefined.Instance && !double.IsNaN(parameters[1].ToNumber())) {
+            if (parameters.Length > 1 && parameters[1] != JsUndefined.Instance && !double.IsNaN(parameters[1].ToNumber()))
+            {
                 end = Convert.ToInt32(parameters[1].ToNumber());
             }
 
@@ -509,7 +577,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLowerCaseImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance ToLowerCaseImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             return Global.StringClass.New(target.ToString().ToLowerInvariant());
         }
 
@@ -519,7 +588,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLocaleLowerCaseImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance ToLocaleLowerCaseImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             return Global.StringClass.New(target.ToString().ToLower());
         }
 
@@ -529,7 +599,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToUpperCaseImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance ToUpperCaseImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             return Global.StringClass.New(target.ToString().ToUpperInvariant());
         }
 
@@ -539,7 +610,8 @@ namespace Jint.Native {
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLocaleUpperCaseImpl(JsDictionaryObject target, JsInstance[] parameters) {
+        public JsInstance ToLocaleUpperCaseImpl(JsDictionaryObject target, JsInstance[] parameters)
+        {
             string str = target.ToString();
             return Global.StringClass.New(str.ToUpper());
         }
@@ -549,7 +621,8 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        public JsInstance LengthImpl(JsDictionaryObject target) {
+        public JsInstance LengthImpl(JsDictionaryObject target)
+        {
             string str = target.ToString();
             return Global.NumberClass.New(str.Length);
         }

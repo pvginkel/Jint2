@@ -13,11 +13,11 @@ namespace Jint.Native {
         /// <summary>
         /// Useful for eval()
         /// </summary>
-        public IBackend Backend { get; set; }
+        public IJintBackend Backend { get; set; }
 
         public Options Options { get; set; }
 
-        internal JsGlobal(IBackend backend, Options options)
+        public JsGlobal(IJintBackend backend, Options options)
             : base(JsNull.Instance) {
             Options = options;
             Backend = backend;

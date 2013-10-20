@@ -36,7 +36,7 @@ namespace Jint.Tests {
         {
             var jint = new JintEngine()
                 .AllowClr()
-                .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+                .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
                 .SetFunction("fail", new Action<string>(Assert.Fail))
                 .SetFunction("istrue", new Action<bool>(Assert.IsTrue))
                 .SetFunction("isfalse", new Action<bool>(Assert.IsFalse))
@@ -427,7 +427,7 @@ bar');
         [Test]
         public void ShouldNotWrapJsInstancesIfExpected() {
             var engine = new JintEngine()
-            .SetFunction("evaluate", new Delegates.Func<JsNumber, JsInstance, JsString>(GiveMeJavascript));
+            .SetFunction("evaluate", new Func<JsNumber, JsInstance, JsString>(GiveMeJavascript));
 
             const string script = @"
                 var r = evaluate(3, [1,2]);
@@ -521,7 +521,7 @@ bar');
         [Test]
         public void ShouldHandleCustomMethods() {
             Assert.AreEqual(9d, new JintEngine()
-                .SetFunction("square", new Delegates.Func<double, double>(a => a * a))
+                .SetFunction("square", new Func<double, double>(a => a * a))
                 .Run("return square(3);"));
 
             new JintEngine()
@@ -538,7 +538,7 @@ bar');
 
             var result =
                 new JintEngine()
-                .SetFunction("multiply", new Delegates.Func<double, double, double>((x, y) => x * y))
+                .SetFunction("multiply", new Func<double, double, double>((x, y) => x * y))
                 .Run(script);
 
             Assert.AreEqual(16d, result);
@@ -850,7 +850,7 @@ var fakeButton = new Test.FakeButton();");
         public void ShouldHandleNativeTypes() {
 
             var jint = new JintEngine()
-            .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
             .SetFunction("print", new Action<string>(System.Console.WriteLine))
             .SetParameter("foo", "native string");
 
@@ -863,7 +863,7 @@ var fakeButton = new Test.FakeButton();");
         public void ClrNullShouldBeConverted() {
 
             var jint = new JintEngine()
-            .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
             .SetFunction("print", new Action<string>(System.Console.WriteLine))
             .SetParameter("foo", null);
 
@@ -1002,7 +1002,7 @@ var fakeButton = new Test.FakeButton();");
         public void ShouldHandleStrictMode() {
             //Strict mode enabled
             var engine = new JintEngine(Options.Strict)
-            .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
             ;
             engine.Run(@"
             try{
@@ -1026,7 +1026,7 @@ var fakeButton = new Test.FakeButton();");
 
             //Strict mode disabled
             engine = new JintEngine(Options.EcmaScript3)
-            .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
             ;
             engine.Run(@"
             try{
@@ -1050,7 +1050,7 @@ var fakeButton = new Test.FakeButton();");
         [Test]
         public void ShouldHandleMultipleRunsInSameScope() {
             var jint = new JintEngine()
-                .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+                .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
                 .SetFunction("print", new Action<string>(System.Console.WriteLine));
 
             jint.Run(@" var g = []; function foo() { assert(0, g.length); }");
@@ -1128,7 +1128,7 @@ var fakeButton = new Test.FakeButton();");
             var box = new Box { Width = 10, Height = 20 };
 
             var jint = new Jint.JintEngine()
-            .SetFunction("assert", new Delegates.Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
             .SetParameter("box", box);
 
             jint.Run(@"
@@ -1653,7 +1653,7 @@ var fakeButton = new Test.FakeButton();");
         public void ClrExceptionsShouldNotBeLost() {
             try {
                 Test(@"foo();",
-                     jint => jint.SetFunction("foo", new Delegates.Action(delegate { throw new ArgumentNullException("bar"); })));
+                     jint => jint.SetFunction("foo", new Action(delegate { throw new ArgumentNullException("bar"); })));
                 Assert.Fail();
             }
             catch(JintException e) {
@@ -1671,13 +1671,13 @@ var fakeButton = new Test.FakeButton();");
                     square = function(x) { return x*x;}
                     assert(9, callme(3));
                 ",
-                 jint => jint.SetFunction("callme", new Delegates.Func<double, object>(x => jint.CallFunction("square", x)))
+                 jint => jint.SetFunction("callme", new Func<double, object>(x => jint.CallFunction("square", x)))
             );
             Test(
                 @"
                     assert(true,callme(function() { return true; } ));
                 ",
-                jint => jint.SetFunction("callme", new Delegates.Func<Delegates.Func<bool>, object>(
+                jint => jint.SetFunction("callme", new Func<Func<bool>, object>(
                     callback => {
                         return callback();
                     }
@@ -1689,8 +1689,8 @@ var fakeButton = new Test.FakeButton();");
         public void NumberMethodsShouldWorkOnMarshalledNumbers() {
             new JintEngine()
                 .DisableSecurity()
-                .SetFunction("getDouble", new Delegates.Func<double>(() => { return 11.34543; }))
-                .SetFunction("getInt", new Delegates.Func<int>(() => { return 13; }))
+                .SetFunction("getDouble", new Func<double>(() => { return 11.34543; }))
+                .SetFunction("getInt", new Func<int>(() => { return 13; }))
                 .SetFunction("print", new Action<string>(s => Console.WriteLine(s)))
                 .Run(@"
                     print( getDouble().toFixed(2) );

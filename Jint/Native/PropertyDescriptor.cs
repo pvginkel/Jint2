@@ -33,13 +33,13 @@ namespace Jint.Native {
 
         public override JsInstance Get(JsDictionaryObject that) {
             //JsDictionaryObject that = _global._visitor.CallTarget;
-            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.Empty);
+            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.Empty, null);
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value) {
             if (SetFunction == null)
                 throw new JsException(_global.TypeErrorClass.New());
-            _global.Backend.ExecuteFunction(SetFunction, that, new[] { value });
+            _global.Backend.ExecuteFunction(SetFunction, that, new[] { value }, null);
         }
 
         internal override DescriptorType DescriptorType {

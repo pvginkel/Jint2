@@ -6,10 +6,10 @@ using Jint.Expressions;
 namespace Jint.Native {
     [Serializable]
     public class JsComparer : IComparer<JsInstance> {
-        public IBackend Backend { get; private set; }
+        public IJintBackend Backend { get; private set; }
         public JsFunction Function { get; private set; }
 
-        public JsComparer(IBackend backend, JsFunction function) {
+        public JsComparer(IJintBackend backend, JsFunction function) {
             if (backend == null)
                 throw new ArgumentNullException("backend");
             if (function == null)

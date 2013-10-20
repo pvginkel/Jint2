@@ -3,31 +3,31 @@ namespace Jint.Native {
     public interface IGlobal {
         bool HasOption(Options options);
 
-        Jint.Native.JsArrayConstructor ArrayClass { get; }
-        Jint.Native.JsBooleanConstructor BooleanClass { get; }
-        Jint.Native.JsDateConstructor DateClass { get; }
-        Jint.Native.JsErrorConstructor ErrorClass { get; }
-        Jint.Native.JsErrorConstructor EvalErrorClass { get; }
-        Jint.Native.JsFunctionConstructor FunctionClass { get; }
-        Jint.Native.JsInstance IsNaN(Jint.Native.JsInstance[] arguments);
-        Jint.Native.JsMathConstructor MathClass { get; }
-        Jint.Native.JsNumberConstructor NumberClass { get; }
-        Jint.Native.JsObjectConstructor ObjectClass { get; }
-        Jint.Native.JsInstance ParseFloat(Jint.Native.JsInstance[] arguments);
-        Jint.Native.JsInstance ParseInt(Jint.Native.JsInstance[] arguments);
-        Jint.Native.JsErrorConstructor RangeErrorClass { get; }
-        Jint.Native.JsErrorConstructor ReferenceErrorClass { get; }
-        Jint.Native.JsRegExpConstructor RegExpClass { get; }
-        Jint.Native.JsStringConstructor StringClass { get; }
-        Jint.Native.JsErrorConstructor SyntaxErrorClass { get; }
-        Jint.Native.JsErrorConstructor TypeErrorClass { get; }
-        Jint.Native.JsErrorConstructor URIErrorClass { get; }
-        Jint.Native.JsObject Wrap(object value);
-        Jint.Native.JsObject WrapClr(object value);
+        JsArrayConstructor ArrayClass { get; }
+        JsBooleanConstructor BooleanClass { get; }
+        JsDateConstructor DateClass { get; }
+        JsErrorConstructor ErrorClass { get; }
+        JsErrorConstructor EvalErrorClass { get; }
+        JsFunctionConstructor FunctionClass { get; }
+        JsInstance IsNaN(JsInstance[] arguments);
+        JsMathConstructor MathClass { get; }
+        JsNumberConstructor NumberClass { get; }
+        JsObjectConstructor ObjectClass { get; }
+        JsInstance ParseFloat(Jint.Native.JsInstance[] arguments);
+        JsInstance ParseInt(Jint.Native.JsInstance[] arguments);
+        JsErrorConstructor RangeErrorClass { get; }
+        JsErrorConstructor ReferenceErrorClass { get; }
+        JsRegExpConstructor RegExpClass { get; }
+        JsStringConstructor StringClass { get; }
+        JsErrorConstructor SyntaxErrorClass { get; }
+        JsErrorConstructor TypeErrorClass { get; }
+        JsErrorConstructor URIErrorClass { get; }
+        JsObject Wrap(object value);
+        JsObject WrapClr(object value);
 
         JsInstance NaN { get; }
 
-        IBackend Backend { get; }
-        Jint.Marshaller Marshaller { get; }
+        IJintBackend Backend { get; }
+        Marshaller Marshaller { get; }
     }
 }

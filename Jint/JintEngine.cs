@@ -16,7 +16,7 @@ namespace Jint
     [Serializable]
     public class JintEngine
     {
-        private IBackend _backend;
+        private IJintBackend _backend;
 
         [System.Diagnostics.DebuggerStepThrough]
         public JintEngine()
@@ -36,6 +36,10 @@ namespace Jint
             {
                 case JintBackend.Interpreted:
                     _backend = new Backend.Interpreted.InterpretedBackend(options);
+                    break;
+
+                case JintBackend.Compiled:
+                    _backend = new Backend.Compiled.CompiledBackend(options);
                     break;
 
                 default:
@@ -162,8 +166,6 @@ namespace Jint
                     ArgumentException("Script can't be null", "script");
 
             Program program;
-
-
 
             try
             {
@@ -342,7 +344,7 @@ namespace Jint
 
         public static void Load(JintEngine engine, Stream s)
         {
-            engine._backend = (IBackend)new BinaryFormatter().Deserialize(s);
+            engine._backend = (IJintBackend)new BinaryFormatter().Deserialize(s);
         }
 
         public static JintEngine Load(Stream s)

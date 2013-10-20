@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using Jint.Expressions;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsFunction : JsObject {
+    public class JsFunction : JsObject
+    {
         public static string CallName = "call";
         public static string ApplyName = "apply";
         public static string ConstructorName = "constructor";
@@ -17,7 +19,8 @@ namespace Jint.Native {
         public JsScope Scope { get; set; }
 
         public JsFunction(IGlobal global, Statement statement)
-            : this(global.FunctionClass.PrototypeProperty) {
+            : this(global.FunctionClass.PrototypeProperty)
+        {
             Statement = statement;
         }
 
@@ -26,7 +29,8 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="global"></param>
         public JsFunction(IGlobal global)
-            : this(global.FunctionClass.PrototypeProperty) {
+            : this(global.FunctionClass.PrototypeProperty)
+        {
         }
 
         /// <summary>
@@ -34,7 +38,8 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="prototype">prototype for this object</param>
         public JsFunction(JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
             Arguments = new List<string>();
             Statement = new EmptyStatement();
             DefineOwnProperty(PrototypeName, JsNull.Instance, PropertyAttributes.DontEnum);
@@ -51,25 +56,31 @@ namespace Jint.Native {
             }
         }
 
-        public JsObject PrototypeProperty {
-            get {
+        public JsObject PrototypeProperty
+        {
+            get
+            {
                 return this[PrototypeName] as JsObject;
             }
-            set {
+            set
+            {
                 this[PrototypeName] = value;
             }
         }
 
         //15.3.5.3
-        public virtual bool HasInstance(JsObject inst) {
-            if (inst != null && inst != JsNull.Instance && inst != JsNull.Instance) {
+        public virtual bool HasInstance(JsObject inst)
+        {
+            if (inst != null && inst != JsNull.Instance && inst != JsNull.Instance)
+            {
                 return PrototypeProperty.IsPrototypeOf(inst);
             }
             return false;
         }
 
         //13.2.2
-        public virtual JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor) {
+        public virtual JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)
+        {
             var instance = visitor.Global.ObjectClass.New(PrototypeProperty);
             visitor.ExecuteFunction(this, instance, parameters);
 
@@ -84,30 +95,38 @@ namespace Jint.Native {
             }
         }
 
-        public override object Value {
+        public override object Value
+        {
             get { return null; }
             set { }
         }
 
-        public virtual JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters) {
-            Statement.Accept((IStatementVisitor)visitor);
-            return that;
+        public JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters)
+        {
+            return Execute(visitor, that, parameters, null);
         }
 
         public virtual JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            throw new JintException("This method can't be called as a generic");
+            if (genericArguments != null)
+                throw new JintException("This method can't be called as a generic");
+
+            Statement.Accept((IStatementVisitor)visitor);
+            return that;
         }
 
-        public override string Class {
+        public override string Class
+        {
             get { return ClassFunction; }
         }
 
-        public override string ToSource() {
+        public override string ToSource()
+        {
             return String.Format("function {0} ( {1} ) {{ {2} }}", Name, String.Join(", ", Arguments.ToArray()), GetBody());
         }
 
-        public virtual string GetBody() {
+        public virtual string GetBody()
+        {
             return "/* js code */";
         }
 
@@ -116,11 +135,13 @@ namespace Jint.Native {
             return ToSource();
         }
 
-        public override bool ToBoolean() {
+        public override bool ToBoolean()
+        {
             return true;
         }
 
-        public override double ToNumber() {
+        public override double ToNumber()
+        {
             return 1;
         }
     }

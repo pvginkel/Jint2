@@ -11,12 +11,13 @@ namespace Jint.Native
     /// <summary>
     /// Wraps a single method which is implemented by the delegate
     /// </summary>
-    public class NativeMethod: JsFunction {
+    public class NativeMethod : JsFunction
+    {
 
         private readonly MethodInfo _nativeMethod;
         private readonly JsMethodImpl _impl;
 
-        public NativeMethod(JsMethodImpl impl, MethodInfo nativeMethod , JsObject prototype) :
+        public NativeMethod(JsMethodImpl impl, MethodInfo nativeMethod, JsObject prototype) :
             base(prototype)
         {
             if (impl == null)
@@ -32,7 +33,7 @@ namespace Jint.Native
         }
 
         public NativeMethod(JsMethodImpl impl, JsObject prototype) :
-            this(impl,null,prototype)
+            this(impl, null, prototype)
         {
             foreach (var item in impl.Method.GetParameters())
                 Arguments.Add(item.Name);
@@ -67,9 +68,9 @@ namespace Jint.Native
             return _nativeMethod;
         }
 
-        public override JsInstance Execute(Jint.Expressions.IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters)
+        public override JsInstance Execute(Jint.Expressions.IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            visitor.Return( _impl(visitor.Global, that, parameters) );
+            visitor.Return(_impl(visitor.Global, that, parameters));
             return that;
         }
 
@@ -83,9 +84,10 @@ namespace Jint.Native
             return "[native code]";
         }
 
-        public override JsInstance ToPrimitive(IGlobal global) {
-            return global.StringClass.New( ToString() );
+        public override JsInstance ToPrimitive(IGlobal global)
+        {
+            return global.StringClass.New(ToString());
         }
     }
-    
+
 }

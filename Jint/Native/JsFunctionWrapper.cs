@@ -4,26 +4,33 @@ using System.Text;
 using Jint.Expressions;
 using Jint.Delegates;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsFunctionWrapper : JsFunction {
+    public class JsFunctionWrapper : JsFunction
+    {
         public Func<JsInstance[], JsInstance> Delegate { get; set; }
 
         public JsFunctionWrapper(Func<JsInstance[], JsInstance> d, JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
             Delegate = d;
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters) {
-            try {
+        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        {
+            try
+            {
                 //visitor.CurrentScope["this"] = visitor.Global;
-                JsInstance result = Delegate( parameters );
-                visitor.Return(result == null ? JsUndefined.Instance : result);
+                JsInstance result = Delegate(parameters);
+                visitor.Return(result ?? JsUndefined.Instance);
 
                 return that;
             }
-            catch (Exception e) {
-                if (e.InnerException is JsException) {
+            catch (Exception e)
+            {
+                if (e.InnerException is JsException)
+                {
                     throw e.InnerException;
                 }
 
@@ -31,7 +38,8 @@ namespace Jint.Native {
             }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return String.Format("function {0}() {{ [native code] }}", Delegate.Method.Name);
         }
     }

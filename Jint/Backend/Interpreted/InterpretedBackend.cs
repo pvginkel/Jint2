@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using Jint.Delegates;
 using Jint.Expressions;
@@ -11,9 +11,9 @@ using Jint.Native;
 namespace Jint.Backend.Interpreted
 {
     [Serializable]
-    internal class InterpretedBackend : IBackend
+    internal class InterpretedBackend : IJintBackend
     {
-        private readonly ExecutionVisitor _visitor;
+        private readonly Visitor _visitor;
 
         public IGlobal Global
         {
@@ -25,15 +25,21 @@ namespace Jint.Backend.Interpreted
             get { return _visitor.GlobalScope; }
         }
 
-        public bool AllowClr { get; set; }
+        public bool AllowClr
+        {
+            get { return _visitor.AllowClr; }
+            set { _visitor.AllowClr = value; }
+        }
 
-        public PermissionSet PermissionSet { get; set; }
+        public PermissionSet PermissionSet
+        {
+            get { return _visitor.PermissionSet; }
+            set { _visitor.PermissionSet = value; }
+        }
 
         public InterpretedBackend(Options options)
         {
-            _visitor = new ExecutionVisitor(options, this);
-            PermissionSet = new PermissionSet(PermissionState.None);
-            _visitor.AllowClr = AllowClr;
+            _visitor = new Visitor(options, this);
 
             var global = _visitor.Global as JsObject;
 
@@ -57,15 +63,21 @@ namespace Jint.Backend.Interpreted
         public object Run(Program program, bool unwrap)
         {
             if (program == null)
-                throw new ArgumentException("Script can't be null", "program");
+                throw new ArgumentNullException("program");
 
-            _visitor.PermissionSet = PermissionSet;
-            _visitor.AllowClr = AllowClr;
             _visitor.Result = null;
 
             try
             {
+#if DEBUG
+                var stopwatch = Stopwatch.StartNew();
+#endif
+
                 _visitor.Visit(program);
+
+#if DEBUG
+                Console.WriteLine(stopwatch.Elapsed);
+#endif
             }
             catch (SecurityException)
             {
@@ -74,54 +86,70 @@ namespace Jint.Backend.Interpreted
             catch (JsException e)
             {
                 string message = e.Message;
+
                 if (e.Value is JsError)
                     message = e.Value.Value.ToString();
+
                 var stackTrace = new StringBuilder();
                 var source = String.Empty;
 
                 if (_visitor.CurrentStatement.Source != null)
                 {
-                    source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
-                            + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
+                    source =
+                        Environment.NewLine +
+                        _visitor.CurrentStatement.Source + Environment.NewLine +
+                        _visitor.CurrentStatement.Source.Code;
                 }
 
                 throw new JintException(message + source + stackTrace, e);
             }
             catch (Exception e)
             {
-                StringBuilder stackTrace = new StringBuilder();
+                var stackTrace = new StringBuilder();
                 string source = String.Empty;
 
                 if (_visitor.CurrentStatement != null && _visitor.CurrentStatement.Source != null)
                 {
-                    source = Environment.NewLine + _visitor.CurrentStatement.Source.ToString()
-                            + Environment.NewLine + _visitor.CurrentStatement.Source.Code;
+                    source =
+                        Environment.NewLine +
+                        _visitor.CurrentStatement.Source + Environment.NewLine +
+                        _visitor.CurrentStatement.Source.Code;
                 }
 
                 throw new JintException(e.Message + source + stackTrace, e);
             }
 
-            return _visitor.Result == null ? null : unwrap ? _visitor.Global.Marshaller.MarshalJsValue<object>(_visitor.Result) : _visitor.Result;
+            return
+                _visitor.Result == null
+                ? null
+                : unwrap
+                    ? _visitor.Global.Marshaller.MarshalJsValue<object>(_visitor.Result)
+                    : _visitor.Result;
         }
 
         public object CallFunction(string name, object[] args)
         {
-            JsInstance oldResult = _visitor.Result;
+            var oldResult = _visitor.Result;
+
             _visitor.Visit(new Identifier(name));
+
             var returnValue = CallFunction((JsFunction)_visitor.Result, args);
+
             _visitor.Result = oldResult;
+
             return returnValue;
         }
 
         public object CallFunction(JsFunction function, object[] args)
         {
-            _visitor.ExecuteFunction(function, null, Array.ConvertAll(args, x => _visitor.Global.Marshaller.MarshalClrValue<object>(x)));
+            _visitor.ExecuteFunction(function, null, Array.ConvertAll(args, x => _visitor.Global.Marshaller.MarshalClrValue(x)));
+
             return _visitor.Global.Marshaller.MarshalJsValue<object>(_visitor.Returned);
         }
 
-        public JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments)
+        public JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters)
         {
-            _visitor.ExecuteFunction(function, that, arguments);
+            _visitor.ExecuteFunction(function, that, arguments, genericParameters);
 
             return _visitor.Returned;
         }
@@ -129,14 +157,24 @@ namespace Jint.Backend.Interpreted
         public int Compare(JsFunction function, JsInstance x, JsInstance y)
         {
             _visitor.Result = function;
-            new MethodCall(new List<Expression>() { new ValueExpression(x, TypeCode.Object), new ValueExpression(y, TypeCode.Object) }).Accept((IStatementVisitor)_visitor);
+
+            var methodCall = new MethodCall(
+                new List<Expression>
+                {
+                    new ValueExpression(x, TypeCode.Object),
+                    new ValueExpression(y, TypeCode.Object)
+                }
+            );
+
+            methodCall.Accept(_visitor);
+
             return Math.Sign(_visitor.Result.ToNumber());
         }
 
         public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
         {
             // create independent visitor
-            var visitor = new ExecutionVisitor(Global, new JsScope((JsObject)Global))
+            var visitor = new Visitor(Global, new JsScope((JsObject)Global))
             {
                 AllowClr = _visitor.AllowClr,
                 PermissionSet = _visitor.PermissionSet
@@ -149,11 +187,11 @@ namespace Jint.Backend.Interpreted
 
         public JsInstance Eval(JsInstance[] arguments)
         {
-            Program p;
+            Program program;
 
             try
             {
-                p = JintEngine.Compile(arguments[0].ToString());
+                program = JintEngine.Compile(arguments[0].ToString());
             }
             catch (Exception e)
             {
@@ -162,7 +200,7 @@ namespace Jint.Backend.Interpreted
 
             try
             {
-                p.Accept(_visitor);
+                program.Accept(_visitor);
             }
             catch (Exception e)
             {

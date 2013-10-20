@@ -35,7 +35,7 @@ namespace Jint.Native {
             _that = that;
         }
 
-        public JsDictionaryObject targetObject {
+        public JsDictionaryObject TargetObject {
             get { return _that; }
         }
 
@@ -53,7 +53,7 @@ namespace Jint.Native {
         }
 
         public override Descriptor Clone() {
-            return new LinkedDescriptor(Owner, Name, this, targetObject) {
+            return new LinkedDescriptor(Owner, Name, this, TargetObject) {
                 Writable = Writable,
                 Configurable = Configurable,
                 Enumerable = Enumerable

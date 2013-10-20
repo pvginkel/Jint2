@@ -14,11 +14,11 @@ namespace Jint.Native
 
         // a list of methods
         private readonly LinkedList<MethodInfo> _methods = new LinkedList<MethodInfo>();
-        
+
         // a list of generics
         private readonly LinkedList<MethodInfo> _generics = new LinkedList<MethodInfo>();
 
-        public NativeMethodOverload(ICollection<MethodInfo> methods , JsObject prototype, IGlobal global)
+        public NativeMethodOverload(ICollection<MethodInfo> methods, JsObject prototype, IGlobal global)
             : base(prototype)
         {
             if (global == null)
@@ -35,7 +35,7 @@ namespace Jint.Native
             {
                 if (method.IsGenericMethodDefinition)
                     _generics.AddLast(method);
-                else if (! method.ContainsGenericParameters)
+                else if (!method.ContainsGenericParameters)
                     _methods.AddLast(method);
             }
 
@@ -54,18 +54,15 @@ namespace Jint.Native
             }
         }
 
-        public override object Value {
-            get {
+        public override object Value
+        {
+            get
+            {
                 return true;
             }
-            set {
-                ;
+            set
+            {
             }
-        }
-
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters)
-        {
-            return Execute(visitor, that, parameters, null);
         }
 
         public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
@@ -84,7 +81,7 @@ namespace Jint.Native
 
         protected JsMethodImpl WrapMember(MethodInfo info)
         {
-            return _marshaller.WrapMethod(info,true);
+            return _marshaller.WrapMethod(info, true);
         }
 
         protected IEnumerable<MethodInfo> GetMembers(Type[] genericArguments, int argCount)

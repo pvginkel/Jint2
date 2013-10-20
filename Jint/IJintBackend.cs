@@ -7,7 +7,7 @@ using Jint.Native;
 
 namespace Jint
 {
-    public interface IBackend
+    public interface IJintBackend
     {
         IGlobal Global { get; }
         JsScope GlobalScope { get; }
@@ -22,7 +22,7 @@ namespace Jint
 
         JsInstance Eval(JsInstance[] arguments);
 
-        JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments);
+        JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters);
 
         int Compare(JsFunction function, JsInstance x, JsInstance y);
 
