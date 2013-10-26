@@ -201,7 +201,7 @@ namespace Jint.Backend.Compiled
 
             if (left.Previous == null)
             {
-                string memberName = ((Identifier)left.Member).Text;
+                string memberName = SanitizeName(((Identifier)left.Member).Text);
                 string alias = _scopeBuilder.FindAndCreateAlias(memberName);
 
                 if (alias != null)
@@ -259,6 +259,21 @@ namespace Jint.Backend.Compiled
                     );
                 }
             }
+        }
+
+        private string SanitizeName(string name)
+        {
+            var sb = new StringBuilder();
+
+            foreach (char c in name)
+            {
+                if (c == '$')
+                    sb.Append("__DOLLAR__");
+                else
+                    sb.Append(c);
+            }
+
+            return sb.ToString();
         }
 
         public void Visit(BlockStatement expression)
@@ -412,7 +427,7 @@ namespace Jint.Backend.Compiled
                 ));
             }
 
-            string memberName = statement.Name;
+            string memberName = SanitizeName(statement.Name);
 
             _scopeBuilder.EnsureVariable(memberName);
             string alias = _scopeBuilder.FindAndCreateAlias(memberName);
@@ -448,7 +463,7 @@ namespace Jint.Backend.Compiled
 
             for (int i = 0; i < expression.Parameters.Count; i++)
             {
-                string parameter = expression.Parameters[i];
+                string parameter = SanitizeName(expression.Parameters[i]);
 
                 _scopeBuilder.EnsureVariable(parameter);
                 string alias = _scopeBuilder.FindAndCreateAlias(parameter);
@@ -590,16 +605,17 @@ namespace Jint.Backend.Compiled
                     throw new InvalidOperationException("Can't declare a global variable");
             }
 
-            _scopeBuilder.EnsureVariable(statement.Identifier);
+            string identifier = SanitizeName(statement.Identifier);
+            _scopeBuilder.EnsureVariable(identifier);
 
-            string alias = _scopeBuilder.FindAndCreateAlias(statement.Identifier);
+            string alias = _scopeBuilder.FindAndCreateAlias(identifier);
 
             _result = Syntax.ExpressionStatement(
                 Syntax.BinaryExpression(
                     BinaryOperator.Equals,
                     Syntax.MemberAccessExpression(
                         Syntax.ParseName(alias),
-                        statement.Identifier
+                        identifier
                     ),
                     _result != null ? (ExpressionSyntax)_result : Syntax.ParseName("JsUndefined.Instance")
                 )
@@ -759,7 +775,7 @@ namespace Jint.Backend.Compiled
 
         public void Visit(Identifier expression)
         {
-            string propertyName = _lastIdentifier = expression.Text;
+            string propertyName = _lastIdentifier = SanitizeName(expression.Text);
             string alias = _scopeBuilder.FindAndCreateAlias(propertyName);
 
             if (alias != null)
@@ -1109,7 +1125,7 @@ namespace Jint.Backend.Compiled
 
                     if (member.Previous == null)
                     {
-                        string memberName = ((Identifier)member.Member).Text;
+                        string memberName = SanitizeName(((Identifier)member.Member).Text);
 
                         _scopeBuilder.EnsureVariable(memberName);
                         string alias = _scopeBuilder.FindAndCreateAlias(memberName);
@@ -1133,7 +1149,7 @@ namespace Jint.Backend.Compiled
                             _result = Syntax.InvocationExpression(
                                 Syntax.ParseName(type + "IncrementIdentifier"),
                                 Syntax.ArgumentList(
-                                    Syntax.Argument(Syntax.LiteralExpression(((Identifier)member.Member).Text)),
+                                    Syntax.Argument(Syntax.LiteralExpression(memberName)),
                                     Syntax.Argument((ExpressionSyntax)operand),
                                     Syntax.Argument(Syntax.LiteralExpression(offset))
                                 )

@@ -30,13 +30,8 @@ namespace Jint.Expressions
             if (variableName == null)
                 throw new ArgumentNullException("variableName");
 
-            foreach (string item in DeclaredVariables)
-            {
-                if (String.Equals(variableName, item, StringComparison.OrdinalIgnoreCase))
-                    return;
-            }
-
-            DeclaredVariables.Add(variableName);
+            if (!DeclaredVariables.Contains(variableName))
+                DeclaredVariables.Add(variableName);
         }
 
         [System.Diagnostics.DebuggerStepThrough]

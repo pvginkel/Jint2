@@ -144,7 +144,7 @@ namespace Jint.Backend.Compiled
 
             private bool HasVariable(string variableName)
             {
-                return _variableNames.Contains(variableName, StringComparer.OrdinalIgnoreCase);
+                return _variableNames.Contains(variableName);
             }
         }
     }
