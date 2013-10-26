@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
-using Jint.Delegates;
-using Jint.Expressions;
 using Jint.Native;
 
 namespace Jint.Backend.Compiled
@@ -469,6 +467,13 @@ namespace Jint.Backend.Compiled
             return value;
         }
 
+        protected JsInstance PrefixIncrementIdentifier(ref JsInstance identifier, int offset)
+        {
+            identifier = Global.NumberClass.New(identifier.ToNumber() + offset);
+
+            return identifier;
+        }
+
         protected JsInstance PrefixIncrementMember(JsInstance baseObject, string identifier, JsInstance value, int offset)
         {
             value = Global.NumberClass.New(value.ToNumber() + offset);
@@ -490,6 +495,15 @@ namespace Jint.Backend.Compiled
         protected JsInstance PostfixIncrementIdentifier(string identifier, JsInstance value, int offset)
         {
             AssignIdentifier(identifier, Global.NumberClass.New(value.ToNumber() + offset));
+
+            return value;
+        }
+
+        protected JsInstance PostfixIncrementIdentifier(ref JsInstance identifier, int offset)
+        {
+            var value = identifier;
+
+            identifier = Global.NumberClass.New(value.ToNumber() + offset);
 
             return value;
         }
@@ -589,6 +603,18 @@ namespace Jint.Backend.Compiled
             SetResult(JsUndefined.Instance, callTarget);
 
             return _lastResult.Result;
+        }
+
+        protected JsScope GetScope(int parent)
+        {
+            var scope = CurrentScope;
+
+            for (int i = 0; i < parent; i++)
+            {
+                scope = scope.Outer;
+            }
+
+            return scope;
         }
 
         private struct ResultInfo

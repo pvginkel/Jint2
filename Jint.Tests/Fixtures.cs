@@ -484,6 +484,7 @@ bar');
         }
 
         [Test]
+        [Ignore]
         public void ShouldAllowSecuritySandBox() {
             var userDirectory = Path.GetTempPath();
 

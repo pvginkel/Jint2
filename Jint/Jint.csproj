@@ -193,6 +193,7 @@
     <Compile Include="PropertyBags\ScopedPropertyBag.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backend\Compiled\Visitor.ScopeBuilder.cs" />
     <None Include="ES3.g" />
     <None Include="Key.snk" />
     <None Include="packages.config" />

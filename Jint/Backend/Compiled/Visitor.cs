@@ -9,7 +9,7 @@ using Jint.Native;
 
 namespace Jint.Backend.Compiled
 {
-    internal class Visitor : IStatementVisitor, IJintVisitor
+    internal partial class Visitor : IStatementVisitor, IJintVisitor
     {
         private readonly Options _options;
         private readonly CompiledBackend _backend;
@@ -21,6 +21,8 @@ namespace Jint.Backend.Compiled
         private string _lastIdentifier;
         private int _nextAnonymousVariableId = 1;
         private int _nextAnonymousFunctionId = 1;
+        private int _nextAnonymousClassId = 1;
+        private ScopeBuilder _scopeBuilder;
 
         public JsInstance Result
         {
@@ -60,6 +62,10 @@ namespace Jint.Backend.Compiled
                 baseList: Syntax.BaseList("JintProgram")
             );
 
+            _block = _main = Syntax.Block();
+
+            _scopeBuilder = new ScopeBuilder(this, null, _block);
+
             _class.Members.Add(Syntax.ConstructorDeclaration(
                 identifier: "Program",
                 parameterList: Syntax.ParameterList(
@@ -70,7 +76,7 @@ namespace Jint.Backend.Compiled
                     Syntax.Parameter(
                         identifier: "options",
                         type: "Options"
-                    )
+                    )   
                 ),
                 initializer: Syntax.ConstructorInitializer(
                     ThisOrBase.Base,
@@ -83,8 +89,6 @@ namespace Jint.Backend.Compiled
                 modifiers: Modifiers.Public
             ));
 
-            _block = _main = Syntax.Block();
-
             _class.Members.Add(Syntax.MethodDeclaration(
                 returnType: "JsInstance",
                 identifier: "Main",
@@ -92,6 +96,11 @@ namespace Jint.Backend.Compiled
                 body: _main,
                 modifiers: Modifiers.Public | Modifiers.Override
             ));
+        }
+
+        public void Close()
+        {
+            _scopeBuilder.Build();
         }
 
         public ClassDeclarationSyntax GetClassDeclaration()
@@ -145,6 +154,11 @@ namespace Jint.Backend.Compiled
             return "__AnonymousFunction" + _nextAnonymousFunctionId++;
         }
 
+        private string GetNextAnonymousClassName()
+        {
+            return "__AnonymousClass" + _nextAnonymousClassId++;
+        }
+
         public void Visit(AssignmentExpression statement)
         {
             if (statement.AssignmentOperator == AssignmentOperator.Assign)
@@ -181,13 +195,30 @@ namespace Jint.Backend.Compiled
 
             if (left.Previous == null)
             {
-                _result = Syntax.InvocationExpression(
-                    Syntax.ParseName("AssignIdentifier"),
-                    Syntax.ArgumentList(
-                        Syntax.Argument(Syntax.LiteralExpression(((Identifier)left.Member).Text)),
-                        Syntax.Argument((ExpressionSyntax)right)
-                    )
-                );
+                string memberName = ((Identifier)left.Member).Text;
+                string alias = _scopeBuilder.FindAndCreateAlias(memberName);
+
+                if (alias != null)
+                {
+                    _result = Syntax.BinaryExpression(
+                        BinaryOperator.Equals,
+                        Syntax.MemberAccessExpression(
+                            Syntax.ParseName(alias),
+                            memberName
+                        ),
+                        (ExpressionSyntax)right
+                    );
+                }
+                else
+                {
+                    _result = Syntax.InvocationExpression(
+                        Syntax.ParseName("AssignIdentifier"),
+                        Syntax.ArgumentList(
+                            Syntax.Argument(Syntax.LiteralExpression(memberName)),
+                            Syntax.Argument((ExpressionSyntax)right)
+                        )
+                    );
+                }
             }
             else
             {
@@ -346,7 +377,7 @@ namespace Jint.Backend.Compiled
 
         public void Visit(FunctionDeclarationStatement statement)
         {
-            string functionName = DeclareFunction(statement);
+            var functionName = DeclareFunction(statement);
 
             if ((_options & Options.Strict) != 0)
             {
@@ -383,6 +414,45 @@ namespace Jint.Backend.Compiled
 
             var block = Syntax.Block();
 
+            _scopeBuilder = new ScopeBuilder(this, _scopeBuilder, block);
+
+            // Assign the function parameters.
+
+            for (int i = 0; i < expression.Parameters.Count; i++)
+            {
+                string parameter = expression.Parameters[i];
+
+                _scopeBuilder.EnsureVariable(parameter);
+                string alias = _scopeBuilder.FindAndCreateAlias(parameter);
+
+                block.Statements.Add(Syntax.ExpressionStatement(
+                    Syntax.BinaryExpression(
+                        BinaryOperator.Equals,
+                        Syntax.MemberAccessExpression(
+                            Syntax.ParseName(alias),
+                            parameter
+                        ),
+                        Syntax.ConditionalExpression(
+                            Syntax.BinaryExpression(
+                                BinaryOperator.GreaterThan,
+                                Syntax.MemberAccessExpression(
+                                    Syntax.ParseName("arguments"),
+                                    "Length"
+                                ),
+                                Syntax.LiteralExpression(i)
+                            ),
+                            Syntax.ElementAccessExpression(
+                                Syntax.ParseName("arguments"),
+                                Syntax.BracketedArgumentList(
+                                    Syntax.Argument(Syntax.LiteralExpression(i))
+                                )
+                            ),
+                            Syntax.ParseName("JsUndefined.Instance")
+                        )
+                    )
+                ));
+            }
+
             _class.Members.Add(Syntax.MethodDeclaration(
                 returnType: "JsInstance",
                 identifier: functionName,
@@ -409,6 +479,9 @@ namespace Jint.Backend.Compiled
             block.Statements.Add(Syntax.ReturnStatement(
                 Syntax.IdentifierName("JsUndefined.Instance")
             ));
+
+            _scopeBuilder.Build();
+            _scopeBuilder = _scopeBuilder.Parent;
 
             return functionName;
         }
@@ -486,14 +559,21 @@ namespace Jint.Backend.Compiled
                 statement.Expression.Accept(this);
 
                 if (statement.Global)
-                    throw new InvalidOperationException("Cant declare a global variable");
+                    throw new InvalidOperationException("Can't declare a global variable");
             }
 
-            _result = Syntax.InvocationExpression(
-                Syntax.IdentifierName("AssignVariable"),
-                Syntax.ArgumentList(
-                    Syntax.Argument(Syntax.LiteralExpression(statement.Identifier)),
-                    Syntax.Argument(_result != null ? (ExpressionSyntax)_result : Syntax.IdentifierName("null"))
+            _scopeBuilder.EnsureVariable(statement.Identifier);
+
+            string alias = _scopeBuilder.FindAndCreateAlias(statement.Identifier);
+
+            _result = Syntax.ExpressionStatement(
+                Syntax.BinaryExpression(
+                    BinaryOperator.Equals,
+                    Syntax.MemberAccessExpression(
+                        Syntax.ParseName(alias),
+                        statement.Identifier
+                    ),
+                    _result != null ? (ExpressionSyntax)_result : Syntax.ParseName("JsUndefined.Instance")
                 )
             );
         }
@@ -629,12 +709,26 @@ namespace Jint.Backend.Compiled
         {
             string propertyName = _lastIdentifier = expression.Text;
 
-            _result = Syntax.InvocationExpression(
-                Syntax.IdentifierName("GetByIdentifier"),
-                Syntax.ArgumentList(
-                    Syntax.Argument(Syntax.LiteralExpression(propertyName))
-                )
-            );
+            string alias = _scopeBuilder.FindAndCreateAlias(propertyName);
+
+            if (alias != null)
+            {
+                _result = Syntax.MemberAccessExpression(
+                    Syntax.ParseName(alias),
+                    propertyName
+                );
+            }
+            else
+            {
+                // TODO: Normalize fallback to global scope.
+
+                _result = Syntax.InvocationExpression(
+                    Syntax.IdentifierName("GetByIdentifier"),
+                    Syntax.ArgumentList(
+                        Syntax.Argument(Syntax.LiteralExpression(propertyName))
+                    )
+                );
+            }
         }
 
         public void Visit(JsonExpression expression)
@@ -966,14 +1060,36 @@ namespace Jint.Backend.Compiled
 
                     if (member.Previous == null)
                     {
-                        _result = Syntax.InvocationExpression(
-                            Syntax.ParseName(type + "IncrementIdentifier"),
-                            Syntax.ArgumentList(
-                                Syntax.Argument(Syntax.LiteralExpression(((Identifier)member.Member).Text)),
-                                Syntax.Argument((ExpressionSyntax)operand),
-                                Syntax.Argument(Syntax.LiteralExpression(offset))
-                            )
-                        );
+                        string memberName = ((Identifier)member.Member).Text;
+
+                        _scopeBuilder.EnsureVariable(memberName);
+                        string alias = _scopeBuilder.FindAndCreateAlias(memberName);
+
+                        if (alias != null)
+                        {
+                            var argument = Syntax.Argument((ExpressionSyntax)operand);
+
+                            argument.Modifier = ParameterModifier.Ref;
+
+                            _result = Syntax.InvocationExpression(
+                                Syntax.ParseName(type + "IncrementIdentifier"),
+                                Syntax.ArgumentList(
+                                    argument,
+                                    Syntax.Argument(Syntax.LiteralExpression(offset))
+                                )
+                            );
+                        }
+                        else
+                        {
+                            _result = Syntax.InvocationExpression(
+                                Syntax.ParseName(type + "IncrementIdentifier"),
+                                Syntax.ArgumentList(
+                                    Syntax.Argument(Syntax.LiteralExpression(((Identifier)member.Member).Text)),
+                                    Syntax.Argument((ExpressionSyntax)operand),
+                                    Syntax.Argument(Syntax.LiteralExpression(offset))
+                                )
+                            );
+                        }
                     }
                     else
                     {

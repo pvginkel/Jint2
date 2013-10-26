@@ -26,7 +26,7 @@ namespace Jint
 
         [System.Diagnostics.DebuggerStepThrough]
         public JintEngine(Options options)
-            : this(options, JintBackend.Interpreted)
+            : this(options, JintBackend.Compiled)
         {
         }
 

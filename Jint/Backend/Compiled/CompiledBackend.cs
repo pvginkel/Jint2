@@ -49,6 +49,8 @@ namespace Jint.Backend.Compiled
 
             _visitor.Visit(program);
 
+            _visitor.Close();
+
             var klass = _visitor.GetClassDeclaration();
             var compilationUnit = Syntax.CompilationUnit(
                 usings: new[]
