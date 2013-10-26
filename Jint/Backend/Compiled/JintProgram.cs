@@ -155,7 +155,7 @@ namespace Jint.Backend.Compiled
             };
         }
 
-        protected JsInstance ExecuteFunction(JsDictionaryObject that, JsInstance target, JsInstance[] parameters)
+        protected JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters)
         {
             if (target == JsUndefined.Instance || target == null)
             {
@@ -193,7 +193,7 @@ namespace Jint.Backend.Compiled
 
             parameters.CopyTo(original, 0);
 
-            var returned = _backend.ExecuteFunction(function, that, parameters, genericParameters);
+            var returned = _backend.ExecuteFunction(function, (JsObject)that, parameters, genericParameters);
 
             for (var i = 0; i < original.Length; i++)
             {

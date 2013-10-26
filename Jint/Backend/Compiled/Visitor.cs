@@ -17,7 +17,7 @@ namespace Jint.Backend.Compiled
         private BlockSyntax _main;
         private BlockSyntax _block;
         private SyntaxNode _result;
-        private SyntaxNode _callTarget;
+        private Expression _callTarget;
         private string _lastIdentifier;
         private int _nextAnonymousVariableId = 1;
         private int _nextAnonymousFunctionId = 1;
@@ -641,9 +641,26 @@ namespace Jint.Backend.Compiled
                 return;
             }
 
+            var previousCallTarget = _callTarget;
+
+            _callTarget = null;
+
+            var nestedMemberExpression = expression.Previous as MemberExpression;
+
+            if (
+                nestedMemberExpression != null && (
+                    nestedMemberExpression.Member is PropertyExpression ||
+                    nestedMemberExpression.Member is Identifier ||
+                    nestedMemberExpression.Member is Indexer
+                )
+            )
+                _callTarget = nestedMemberExpression.Previous;
+
             expression.Previous.Accept(this);
 
             expression.Member.Accept(this);
+
+            _callTarget = previousCallTarget;
 
             //// Try to evaluate a CLR type
             //if (AllowClr && Result == JsUndefined.Instance && _typeFullName != null && _typeFullName.Length > 0)
@@ -662,8 +679,15 @@ namespace Jint.Backend.Compiled
 
         public void Visit(MethodCall methodCall)
         {
-            var that = _callTarget;
             var target = _result;
+
+            SyntaxNode that = null;
+
+            if (_callTarget != null)
+            {
+                _callTarget.Accept(this);
+                that = _result;
+            }
 
             var arguments = new List<ExpressionSyntax>();
 
