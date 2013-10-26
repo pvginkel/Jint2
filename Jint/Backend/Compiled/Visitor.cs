@@ -1076,10 +1076,8 @@ namespace Jint.Backend.Compiled
                                 Syntax.PrefixUnaryExpression(
                                     op,
                                     Syntax.InvocationExpression(
-                                        Syntax.ParseName("ToNumber"),
-                                        Syntax.ArgumentList(
-                                            Syntax.Argument((ExpressionSyntax)operand)
-                                        )
+                                        Syntax.MemberAccessExpression((ExpressionSyntax)operand, "ToNumber"),
+                                        Syntax.ArgumentList()
                                     )
                                 )
                             )
@@ -1225,10 +1223,8 @@ namespace Jint.Backend.Compiled
                                         BinaryOperator.Minus,
                                         Syntax.LiteralExpression(0),
                                         Syntax.InvocationExpression(
-                                            Syntax.IdentifierName("ToNumber"),
-                                            Syntax.ArgumentList(
-                                                Syntax.Argument((ExpressionSyntax)operand)
-                                            )
+                                            Syntax.MemberAccessExpression((ExpressionSyntax)operand, "ToNumber"),
+                                            Syntax.ArgumentList()
                                         )
                                     ),
                                     Syntax.LiteralExpression(1)
