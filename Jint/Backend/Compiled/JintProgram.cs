@@ -151,7 +151,7 @@ namespace Jint.Backend.Compiled
             {
                 Name = name,
                 Scope = CurrentScope,
-                Arguments = new List<string>(parameters)
+                Arguments = new List<string>(parameters ?? new string[0])
             };
         }
 

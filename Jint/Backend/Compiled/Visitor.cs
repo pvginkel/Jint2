@@ -388,20 +388,37 @@ namespace Jint.Backend.Compiled
                 }
             }
 
-            _result = Syntax.InvocationExpression(
-                Syntax.IdentifierName("AssignVariable"),
-                Syntax.ArgumentList(
-                    Syntax.Argument(Syntax.LiteralExpression(statement.Name)),
-                    Syntax.Argument(
-                        Syntax.InvocationExpression(
-                            Syntax.IdentifierName("CreateFunction"),
-                            Syntax.ArgumentList(
-                                Syntax.Argument(Syntax.LiteralExpression(statement.Name)),
-                                Syntax.Argument(Syntax.IdentifierName(functionName)),
-                                Syntax.Argument(Syntax.ImplicitArrayCreationExpression(
-                                    Syntax.InitializerExpression(statement.Parameters.Select(Syntax.LiteralExpression))
-                                ))
-                            )
+            ArgumentSyntax parameters;
+
+            if (statement.Parameters.Count == 0)
+            {
+                parameters = Syntax.Argument(Syntax.LiteralExpression());
+            }
+            else
+            {
+                parameters = Syntax.Argument(Syntax.ImplicitArrayCreationExpression(
+                    Syntax.InitializerExpression(statement.Parameters.Select(Syntax.LiteralExpression))
+                ));
+            }
+
+            string memberName = statement.Name;
+
+            _scopeBuilder.EnsureVariable(memberName);
+            string alias = _scopeBuilder.FindAndCreateAlias(memberName);
+
+            _result = Syntax.ExpressionStatement(
+                Syntax.BinaryExpression(
+                    BinaryOperator.Equals,
+                    Syntax.MemberAccessExpression(
+                        Syntax.ParseName(alias),
+                        memberName
+                    ),
+                    Syntax.InvocationExpression(
+                        Syntax.IdentifierName("CreateFunction"),
+                        Syntax.ArgumentList(
+                            Syntax.Argument(Syntax.LiteralExpression(statement.Name)),
+                            Syntax.Argument(Syntax.IdentifierName(functionName)),
+                            parameters
                         )
                     )
                 )
