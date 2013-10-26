@@ -16,11 +16,8 @@ namespace Jint.Backend.Compiled
         private string _lastIdentifier;
 
         public IGlobal Global { get; private set; }
-
         public JsScope GlobalScope { get; private set;  }
-
         public JsScope CurrentScope { get; private set; }
-
         public PermissionSet PermissionSet { get; private set; }
 
         protected JintProgram(IJintBackend backend, Options options)
@@ -29,11 +26,11 @@ namespace Jint.Backend.Compiled
                 throw new ArgumentNullException("backend");
 
             _backend = backend;
-            Global = new JsGlobal(backend, options);
-            GlobalScope = new JsScope(Global as JsObject);
+            Global = backend.Global;
+            GlobalScope = backend.GlobalScope;
             PermissionSet = new PermissionSet(PermissionState.None);
 
-            var global = Global as JsObject;
+            var global = (JsObject)Global;
 
             global["ToBoolean"] = Global.FunctionClass.New(new Func<object, Boolean>(Convert.ToBoolean));
             global["ToByte"] = Global.FunctionClass.New(new Func<object, Byte>(Convert.ToByte));

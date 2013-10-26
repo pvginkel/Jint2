@@ -20,15 +20,8 @@ namespace Jint.Backend.Compiled
         private readonly Visitor _visitor;
         private JintProgram _program;
 
-        public IGlobal Global
-        {
-            get { return _program.Global; }
-        }
-
-        public JsScope GlobalScope
-        {
-            get { return _program.GlobalScope; }
-        }
+        public IGlobal Global { get; private set; }
+        public JsScope GlobalScope { get; private set; }
 
         public PermissionSet PermissionSet { get; set; }
 
@@ -38,6 +31,11 @@ namespace Jint.Backend.Compiled
         {
             _options = options;
             _visitor = new Visitor(options, this);
+
+            var global = new JsGlobal(this, options);
+
+            Global = global;
+            GlobalScope = new JsScope(global);
         }
 
         public object Run(Program program, bool unwrap)
