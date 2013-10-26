@@ -817,6 +817,15 @@ namespace Jint.Backend.Compiled
 
             var left = _result;
 
+            // Evaluates the left expression for the condition and saves the value
+            // TODO: When switching to MSIL, left must be stored in a temp so we
+            // don't calculate it twice.
+            expression.LeftExpression.Accept(this);
+
+            EnsureIdentifierIsDefined(_result);
+
+            var condition = _result;
+
             // Evaluates the right expression and saves the value
             expression.RightExpression.Accept(this);
 
@@ -829,31 +838,24 @@ namespace Jint.Backend.Compiled
             switch (expression.Type)
             {
                 case BinaryExpressionType.And:
-                case BinaryExpressionType.Or:
-                    switch (expression.Type)
-                    {
-                        case BinaryExpressionType.And: op = BinaryOperator.AmpersandAmpersand; break;
-                        case BinaryExpressionType.Or: op = BinaryOperator.BarBar; break;
-                        default: throw new InvalidOperationException();
-                    }
+                    _result = Syntax.ConditionalExpression(
+                        Syntax.InvocationExpression(
+                            Syntax.MemberAccessExpression((ExpressionSyntax)condition, "ToBoolean"),
+                            Syntax.ArgumentList()
+                        ),
+                        Syntax.CastExpression("JsInstance", (ExpressionSyntax)right),
+                        (ExpressionSyntax)left
+                    );
+                    break;
 
-                    _result = Syntax.InvocationExpression(
-                        Syntax.IdentifierName("Global.BooleanClass.New"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument(
-                                Syntax.BinaryExpression(
-                                    op,
-                                    Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression((ExpressionSyntax)left, "ToBoolean"),
-                                        Syntax.ArgumentList()
-                                    ),
-                                    Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression((ExpressionSyntax)right, "ToBoolean"),
-                                        Syntax.ArgumentList()
-                                    )
-                                )
-                            )
-                        )
+                case BinaryExpressionType.Or:
+                    _result = Syntax.ConditionalExpression(
+                        Syntax.InvocationExpression(
+                            Syntax.MemberAccessExpression((ExpressionSyntax)condition, "ToBoolean"),
+                            Syntax.ArgumentList()
+                        ),
+                        Syntax.CastExpression("JsInstance", (ExpressionSyntax)left),
+                        (ExpressionSyntax)right
                     );
                     break;
 
@@ -1222,9 +1224,13 @@ namespace Jint.Backend.Compiled
                     //break;
 
                 case UnaryExpressionType.Void:
-                    _result = Syntax.MemberAccessExpression(
-                        Syntax.ParseName("JsUndefined"),
-                        "Instance"
+                    expression.Expression.Accept(this);
+
+                    _result = Syntax.InvocationExpression(
+                        Syntax.ParseName("Void"),
+                        Syntax.ArgumentList(
+                            Syntax.Argument((ExpressionSyntax)_result)
+                        )
                     );
                     break;
 

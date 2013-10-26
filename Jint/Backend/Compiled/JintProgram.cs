@@ -614,6 +614,15 @@ namespace Jint.Backend.Compiled
             return scope;
         }
 
+        protected JsInstance Void(object unused)
+        {
+            // This method is here to allow the expression of a void to be
+            // evaluated, but still returning undefined.
+            // TODO: When switching to MSIL, this can be done more elegantly.
+
+            return JsUndefined.Instance;
+        }
+
         private struct ResultInfo
         {
             public JsDictionaryObject BaseObject;
