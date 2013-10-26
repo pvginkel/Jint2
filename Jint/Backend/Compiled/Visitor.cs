@@ -127,6 +127,11 @@ namespace Jint.Backend.Compiled
         {
             _lastIdentifier = null;
 
+            foreach (string variableName in expression.DeclaredVariables)
+            {
+                _scopeBuilder.EnsureVariable(variableName);
+            }
+
             foreach (var statement in expression.Statements)
             {
                 statement.Accept(this);
@@ -259,6 +264,11 @@ namespace Jint.Backend.Compiled
         public void Visit(BlockStatement expression)
         {
             var block = Syntax.Block();
+
+            foreach (string variableName in expression.DeclaredVariables)
+            {
+                _scopeBuilder.EnsureVariable(variableName);
+            }
 
             foreach (var statement in expression.Statements)
             {
@@ -750,7 +760,6 @@ namespace Jint.Backend.Compiled
         public void Visit(Identifier expression)
         {
             string propertyName = _lastIdentifier = expression.Text;
-
             string alias = _scopeBuilder.FindAndCreateAlias(propertyName);
 
             if (alias != null)

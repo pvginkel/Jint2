@@ -73,7 +73,8 @@ namespace Jint.Backend.Compiled
                             new[]
                             {
                                 Syntax.VariableDeclarator(
-                                    variableName
+                                    variableName,
+                                    initializer: Syntax.EqualsValueClause(Syntax.ParseName("JsUndefined.Instance"))
                                 )
                             }
                         )
