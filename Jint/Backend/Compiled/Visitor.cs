@@ -114,6 +114,7 @@ namespace Jint.Backend.Compiled
 
         public JsInstance Return(JsInstance result)
         {
+            _backend.Returned = result;
             return result;
         }
 

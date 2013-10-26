@@ -22,10 +22,10 @@ namespace Jint.Backend.Compiled
 
         public IGlobal Global { get; private set; }
         public JsScope GlobalScope { get; private set; }
-
         public PermissionSet PermissionSet { get; set; }
-
         public bool AllowClr { get; set; }
+        internal JsInstance Returned { get; set; }
+        internal JsInstance Result { get; private set; }
 
         public CompiledBackend(Options options)
         {
@@ -273,7 +273,9 @@ namespace Jint.Backend.Compiled
                     if (!AllowClr || (genericParameters != null && genericParameters.Length == 0))
                         genericParameters = null;
 
-                    return function.Execute(_visitor, that, parameters, genericParameters);
+                    Result = function.Execute(_visitor, that, parameters, genericParameters);
+
+                    return Returned;
                 }
                 finally
                 {

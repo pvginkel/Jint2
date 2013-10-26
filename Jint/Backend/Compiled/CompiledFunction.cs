@@ -23,7 +23,9 @@ namespace Jint.Backend.Compiled
 
         public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            return _function(that, parameters);
+            visitor.Return(_function(that, parameters));
+
+            return null;
         }
 
         public override string ToString()
