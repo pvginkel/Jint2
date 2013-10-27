@@ -25,7 +25,7 @@ namespace Jint.Backend.Compiled
         public PermissionSet PermissionSet { get; set; }
         public bool AllowClr { get; set; }
         internal JsInstance Returned { get; set; }
-        internal JsInstance Result { get; private set; }
+        internal JsInstance Result { get; set; }
 
         public CompiledBackend(Options options)
         {
@@ -297,6 +297,16 @@ namespace Jint.Backend.Compiled
         public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
         {
             throw new NotImplementedException();
+        }
+
+        public JsInstance Construct(JsFunction function, JsInstance[] parameters)
+        {
+            if (function == null)
+                throw new ArgumentNullException("function");
+            if (parameters == null)
+                throw new ArgumentNullException("parameters");
+
+            return function.Construct(parameters, null, _visitor);
         }
     }
 }

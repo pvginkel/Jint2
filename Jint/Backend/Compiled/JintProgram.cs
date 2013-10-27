@@ -148,12 +148,14 @@ namespace Jint.Backend.Compiled
 
         protected JsFunction CreateFunction(string name, CompiledFunctionDelegate function, string[] parameters)
         {
-            return new CompiledFunction(function, Global.FunctionClass.PrototypeProperty)
+            var result = new CompiledFunction(function, Global.FunctionClass.PrototypeProperty)
             {
                 Name = name,
                 Scope = CurrentScope,
                 Arguments = new List<string>(parameters ?? new string[0])
             };
+            result.PrototypeProperty = Global.ObjectClass.New(function);
+            return result;
         }
 
         protected JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters)
@@ -619,6 +621,14 @@ namespace Jint.Backend.Compiled
             }
         }
 
+        protected JsInstance CommaEvaluator(params JsInstance[] values)
+        {
+            // TODO: This is a hack to get the correct behavior with comma
+            // expressions. In MSIL, we can make this saner.
+
+            return values[values.Length - 1];
+        }
+
         private struct ResultInfo
         {
             public JsDictionaryObject BaseObject;
@@ -631,6 +641,56 @@ namespace Jint.Backend.Compiled
             GreaterOrEqual,
             Lesser,
             LesserOrEqual
+        }
+
+        protected JsonBuilder CreateJsonBuilder()
+        {
+            return new JsonBuilder(this);
+        }
+
+        protected JsInstance BuildExceptionVariable(Exception exception)
+        {
+            var jsException =
+                exception as JsException ??
+                new JsException(Global.ErrorClass.New(exception.Message));
+
+            return jsException.Value;
+        }
+
+        protected JsInstance Construct(JsFunction function, JsInstance[] parameters)
+        {
+            return _backend.Construct(function, parameters);
+        }
+
+        protected class JsonBuilder
+        {
+            private readonly JintProgram _program;
+            public JsDictionaryObject Object { get; private set; }
+
+            public JsonBuilder(JintProgram program)
+            {
+                _program = program;
+                Object = program.Global.ObjectClass.New();
+            }
+
+            public JsonBuilder Add(string key, JsInstance value)
+            {
+                Object.DefineOwnProperty(new ValueDescriptor(Object, key, value));
+                return this;
+            }
+
+            public JsonBuilder DefineAccessor(string key, JsFunction get, JsFunction set)
+            {
+                Object.DefineOwnProperty(
+                    new PropertyDescriptor(_program.Global, Object, key)
+                    {
+                        GetFunction = get,
+                        SetFunction = set,
+                        Enumerable = true
+                    }
+                );
+                return this;
+            }
         }
     }
 }

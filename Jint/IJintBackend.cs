@@ -27,5 +27,7 @@ namespace Jint
         int Compare(JsFunction function, JsInstance x, JsInstance y);
 
         object MarshalJsFunctionHelper(JsFunction func, Type delegateType);
+
+        JsInstance Construct(JsFunction function, JsInstance[] parameters);
     }
 }

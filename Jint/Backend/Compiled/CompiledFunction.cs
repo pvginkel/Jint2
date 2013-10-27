@@ -25,7 +25,7 @@ namespace Jint.Backend.Compiled
         {
             visitor.Return(_function(that, parameters));
 
-            return null;
+            return that;
         }
 
         public override string ToString()

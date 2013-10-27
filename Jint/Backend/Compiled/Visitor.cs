@@ -25,8 +25,8 @@ namespace Jint.Backend.Compiled
 
         public JsInstance Result
         {
-            get { throw new InvalidOperationException(); }
-            set { throw new InvalidOperationException(); }
+            get { return _backend.Result; }
+            set { _backend.Result = value; }
         }
 
         public JsDictionaryObject CallTarget
@@ -124,7 +124,7 @@ namespace Jint.Backend.Compiled
 
         public void ExecuteFunction(JsFunction function, JsDictionaryObject @this, JsInstance[] parameters)
         {
-            throw new NotImplementedException();
+            _backend.ExecuteFunction(function, @this, parameters, null);
         }
 
         public void Visit(Program expression)
@@ -455,28 +455,6 @@ namespace Jint.Backend.Compiled
         {
             var functionName = DeclareFunction(statement);
 
-            if ((_options & Options.Strict) != 0)
-            {
-                foreach (string arg in statement.Parameters)
-                {
-                    if (arg == "eval" || arg == "arguments")
-                        throw new JsException(Global.StringClass.New("The parameters do not respect strict mode"));
-                }
-            }
-
-            ArgumentSyntax parameters;
-
-            if (statement.Parameters.Count == 0)
-            {
-                parameters = Syntax.Argument(Syntax.LiteralExpression());
-            }
-            else
-            {
-                parameters = Syntax.Argument(Syntax.ImplicitArrayCreationExpression(
-                    Syntax.InitializerExpression(statement.Parameters.Select(Syntax.LiteralExpression))
-                ));
-            }
-
             string memberName = SanitizeName(statement.Name);
 
             _block.ScopeBuilder.EnsureVariable(memberName);
@@ -489,19 +467,46 @@ namespace Jint.Backend.Compiled
                         Syntax.ParseName(alias),
                         memberName
                     ),
-                    Syntax.InvocationExpression(
-                        Syntax.IdentifierName("CreateFunction"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument(Syntax.LiteralExpression(statement.Name)),
-                            Syntax.Argument(Syntax.IdentifierName(functionName)),
-                            parameters
-                        )
-                    )
+                    CreateFunctionSyntax(statement, functionName)
                 )
             );
         }
 
-        private string DeclareFunction(FunctionDeclarationStatement expression)
+        private InvocationExpressionSyntax CreateFunctionSyntax(IFunctionDeclaration function, string functionName)
+        {
+            if ((_options & Options.Strict) != 0)
+            {
+                foreach (string arg in function.Parameters)
+                {
+                    if (arg == "eval" || arg == "arguments")
+                        throw new JsException(Global.StringClass.New("The parameters do not respect strict mode"));
+                }
+            }
+
+            ArgumentSyntax parameters;
+
+            if (function.Parameters.Count == 0)
+            {
+                parameters = Syntax.Argument(Syntax.LiteralExpression());
+            }
+            else
+            {
+                parameters = Syntax.Argument(Syntax.ImplicitArrayCreationExpression(
+                    Syntax.InitializerExpression(function.Parameters.Select(Syntax.LiteralExpression))
+                ));
+            }
+
+            return Syntax.InvocationExpression(
+                Syntax.IdentifierName("CreateFunction"),
+                Syntax.ArgumentList(
+                    Syntax.Argument(Syntax.LiteralExpression(function.Name)),
+                    Syntax.Argument(Syntax.IdentifierName(functionName)),
+                    parameters
+                )
+            );
+        }
+
+        private string DeclareFunction(IFunctionDeclaration expression)
         {
             string functionName = GetNextAnonymousFunctionName();
 
@@ -601,7 +606,7 @@ namespace Jint.Backend.Compiled
             _result = Syntax.IfStatement(
                 Syntax.InvocationExpression(
                     Syntax.MemberAccessExpression(
-                        (ExpressionSyntax)expression,
+                        Syntax.ParenthesizedExpression((ExpressionSyntax)expression),
                         "ToBoolean"
                     ),
                     Syntax.ArgumentList()
@@ -644,7 +649,72 @@ namespace Jint.Backend.Compiled
 
         public void Visit(TryStatement expression)
         {
-            throw new NotImplementedException();
+            expression.Statement.Accept(this);
+
+            var tryBlock = Syntax.Block(MakeStatement(_result));
+
+            CatchClauseSyntax catchBlock = null;
+
+            if (expression.Catch != null)
+            {
+                string local = _block.GetNextAnonymousLocalName();
+                string identifier = SanitizeName(expression.Catch.Identifier);
+                _block.ScopeBuilder.EnsureVariable(identifier);
+                string alias = _block.ScopeBuilder.FindAndCreateAlias(identifier);
+
+                expression.Catch.Statement.Accept(this);
+
+                if (identifier == null)
+                {
+                    catchBlock = Syntax.CatchClause(
+                        block: Syntax.Block(
+                            MakeStatement(_result)
+                        )
+                    );
+                }
+                else
+                {
+                    catchBlock = Syntax.CatchClause(
+                        Syntax.CatchDeclaration(
+                            "Exception",
+                            local
+                        ),
+                        Syntax.Block(
+                            Syntax.ExpressionStatement(
+                                Syntax.BinaryExpression(
+                                    BinaryOperator.Equals,
+                                    Syntax.MemberAccessExpression(
+                                        Syntax.ParseName(alias),
+                                        identifier
+                                    ),
+                                    Syntax.InvocationExpression(
+                                        Syntax.ParseName("BuildExceptionVariable"),
+                                        Syntax.ArgumentList(
+                                            Syntax.Argument(Syntax.ParseName(local))
+                                        )
+                                    )
+                                )
+                            ),
+                            MakeStatement(_result)
+                        )
+                    );
+                }
+            }
+
+            BlockSyntax finallyBlock = null;
+
+            if (expression.Finally != null)
+            {
+                expression.Finally.Statement.Accept(this);
+
+                finallyBlock = Syntax.Block(MakeStatement(_result));
+            }
+
+            _result = Syntax.TryStatement(
+                tryBlock,
+                catchBlock == null ? null : new[] { catchBlock },
+                finallyBlock == null ? null : Syntax.FinallyClause(finallyBlock)
+            );
         }
 
         public void Visit(VariableDeclarationStatement statement)
@@ -703,12 +773,34 @@ namespace Jint.Backend.Compiled
 
         public void Visit(CommaOperatorStatement expression)
         {
-            throw new NotImplementedException();
+            var arguments = Syntax.ArgumentList();
+
+            foreach (var statement in expression.Statements)
+            {
+                statement.Accept(this);
+
+                var expressionStatement = _result as ExpressionStatementSyntax;
+
+                if (expressionStatement != null)
+                {
+                    _result = expressionStatement.Expression;
+                    expressionStatement.Expression = null;
+                }
+
+                arguments.Arguments.Add(Syntax.Argument(
+                    (ExpressionSyntax)_result
+                ));
+            }
+
+            _result = Syntax.InvocationExpression(
+                Syntax.ParseName("CommaEvaluator"),
+                arguments
+            );
         }
 
         public void Visit(FunctionExpression expression)
         {
-            throw new NotImplementedException();
+            _result = CreateFunctionSyntax(expression, DeclareFunction(expression));
         }
 
         public void Visit(MemberExpression expression)
@@ -854,12 +946,124 @@ namespace Jint.Backend.Compiled
 
         public void Visit(JsonExpression expression)
         {
-            throw new NotImplementedException();
+            var result = Syntax.InvocationExpression(
+                Syntax.ParseName("CreateJsonBuilder"),
+                Syntax.ArgumentList()
+            );
+
+            foreach (var item in expression.Values)
+            {
+                var propertyDeclaration = item.Value as PropertyDeclarationExpression;
+
+                if (propertyDeclaration == null)
+                    throw new InvalidOperationException("Unexpected property declaration");
+
+                switch (propertyDeclaration.Mode)
+                {
+                    case PropertyExpressionType.Data:
+                        propertyDeclaration.Expression.Accept(this);
+
+                        result = Syntax.InvocationExpression(
+                            Syntax.MemberAccessExpression(
+                                result,
+                                "Add"
+                            ),
+                            Syntax.ArgumentList(
+                                Syntax.Argument(Syntax.LiteralExpression(item.Key)),
+                                Syntax.Argument((ExpressionSyntax)_result)
+                            )
+                        );
+                        break;
+
+                    default:
+                        SyntaxNode get = null;
+                        SyntaxNode set = null;
+
+                        if (propertyDeclaration.GetExpression != null)
+                        {
+                            propertyDeclaration.GetExpression.Accept(this);
+                            get = _result;
+                        }
+                        if (propertyDeclaration.SetExpression != null)
+                        {
+                            propertyDeclaration.SetExpression.Accept(this);
+                            set = _result;
+                        }
+
+                        result = Syntax.InvocationExpression(
+                            Syntax.MemberAccessExpression(
+                                result,
+                                "DefineAccessor"
+                            ),
+                            Syntax.ArgumentList(
+                                Syntax.Argument(Syntax.LiteralExpression(item.Key)),
+                                Syntax.Argument(get != null ? (ExpressionSyntax)get : Syntax.LiteralExpression()),
+                                Syntax.Argument(set != null ? (ExpressionSyntax)set : Syntax.LiteralExpression())
+                            )
+                        );
+                        break;
+                }
+            }
+
+            _result = Syntax.MemberAccessExpression(
+                result,
+                "Object"
+            );
         }
 
         public void Visit(NewExpression expression)
         {
-            throw new NotImplementedException();
+            expression.Expression.Accept(this);
+            var expressionSyntax = _result;
+
+            //if (AllowClr && Result == JsUndefined.Instance && _typeFullName != null && _typeFullName.Length > 0 && expression.Generics.Count > 0)
+            //{
+            //    string typeName = _typeFullName.ToString();
+            //    _typeFullName = new StringBuilder();
+
+            //    var genericParameters = new Type[expression.Generics.Count];
+
+            //    try
+            //    {
+            //        int i = 0;
+            //        foreach (Expression generic in expression.Generics)
+            //        {
+            //            generic.Accept(this);
+            //            genericParameters[i] = Global.Marshaller.MarshalJsValue<Type>(Result);
+            //            i++;
+            //        }
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        throw new JintException("A type parameter is required", e);
+            //    }
+
+            //    typeName += "`" + genericParameters.Length;
+            //    Result = Global.Marshaller.MarshalClrValue<Type>(_typeResolver.ResolveType(typeName).MakeGenericType(genericParameters));
+            //}
+
+            var argumentExpressions = new ExpressionSyntax[expression.Arguments.Count];
+
+            for (int i = 0; i < expression.Arguments.Count; i++)
+            {
+                expression.Arguments[i].Accept(this);
+                argumentExpressions[i] = (ExpressionSyntax)_result;
+            }
+
+            var arguments = Syntax.ArrayCreationExpression(
+                "JsInstance[]",
+                Syntax.InitializerExpression(
+                    argumentExpressions
+                )
+            );
+
+            _result = Syntax.InvocationExpression(
+                Syntax.ParseName("Construct"),
+                Syntax.ArgumentList(
+                    Syntax.Argument(Syntax.CastExpression("JsFunction", (ExpressionSyntax)expressionSyntax)),
+                    Syntax.Argument(arguments)
+                )
+            );
         }
 
         public void Visit(BinaryExpression expression)

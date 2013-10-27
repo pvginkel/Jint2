@@ -185,6 +185,11 @@ namespace Jint.Backend.Interpreted
             return wrapper.GetDelegate();
         }
 
+        public JsInstance Construct(JsFunction function, JsInstance[] parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         public JsInstance Eval(JsInstance[] arguments)
         {
             Program program;

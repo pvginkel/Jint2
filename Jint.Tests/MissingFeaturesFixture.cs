@@ -29,5 +29,17 @@ namespace Jint.Tests
             Assert.AreEqual(2d, Test(@"i = 1; i.j = 1; i.j++; return i.j;"));
             Assert.AreEqual(2d, Test(@"i = 1; i.j = 1; ++i.j; return i.j;"));
         }
+
+        [Test]
+        public void BooleanLogic()
+        {
+            Test(
+@"
+var i = null;
+var j = null;
+
+if (!i && j) {}
+");
+        }
     }
 }
