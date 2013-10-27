@@ -1186,11 +1186,11 @@ var fakeButton = new Test.FakeButton();");
         public void ShouldNotReproduceBug85418() {
             var engine = new JintEngine();
             engine.SetParameter("a", 4);
-            Assert.AreEqual(4, engine.Run("a"));
-            Assert.AreEqual(4d, engine.Run("4"));
-            Assert.AreEqual(true, engine.Run("a == 4"));
-            Assert.AreEqual(true, engine.Run("4 == 4"));
-            Assert.AreEqual(true, engine.Run("a == a"));
+            Assert.AreEqual(4, engine.Run("return a"));
+            Assert.AreEqual(4d, engine.Run("return 4"));
+            Assert.AreEqual(true, engine.Run("return a == 4"));
+            Assert.AreEqual(true, engine.Run("return 4 == 4"));
+            Assert.AreEqual(true, engine.Run("return a == a"));
         }
 
         [Test]

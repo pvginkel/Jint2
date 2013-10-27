@@ -63,9 +63,11 @@ namespace Jint.Backend.Compiled
                 baseList: Syntax.BaseList("JintProgram")
             );
 
-            _block = _main = Syntax.Block();
+            _globalScopeBuilder = _scopeBuilder = new ScopeBuilder(this, null, true);
 
-            _globalScopeBuilder = _scopeBuilder = new ScopeBuilder(this, null, _block);
+            var body = Syntax.Block();
+
+            _block = _main = _scopeBuilder.InitializeBody(body);
 
             _class.Members.Add(Syntax.ConstructorDeclaration(
                 identifier: "Program",
@@ -94,7 +96,7 @@ namespace Jint.Backend.Compiled
                 returnType: "JsInstance",
                 identifier: "Main",
                 parameterList: Syntax.ParameterList(),
-                body: _main,
+                body: body,
                 modifiers: Modifiers.Public | Modifiers.Override
             ));
         }
@@ -452,9 +454,10 @@ namespace Jint.Backend.Compiled
         {
             string functionName = GetNextAnonymousFunctionName();
 
-            var block = Syntax.Block();
+            _scopeBuilder = new ScopeBuilder(this, _scopeBuilder, false);
 
-            _scopeBuilder = new ScopeBuilder(this, _scopeBuilder, block);
+            var body = Syntax.Block();
+            var block = _scopeBuilder.InitializeBody(body);
 
             // Assign the function parameters.
 
@@ -506,7 +509,7 @@ namespace Jint.Backend.Compiled
                         identifier: "arguments"
                     )
                 ),
-                body: block,
+                body: body,
                 modifiers: Modifiers.Private
             ));
 
