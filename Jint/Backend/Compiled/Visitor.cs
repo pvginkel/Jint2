@@ -23,6 +23,7 @@ namespace Jint.Backend.Compiled
         private int _nextAnonymousFunctionId = 1;
         private int _nextAnonymousClassId = 1;
         private ScopeBuilder _scopeBuilder;
+        private ScopeBuilder _globalScopeBuilder;
 
         public JsInstance Result
         {
@@ -64,7 +65,7 @@ namespace Jint.Backend.Compiled
 
             _block = _main = Syntax.Block();
 
-            _scopeBuilder = new ScopeBuilder(this, null, _block);
+            _globalScopeBuilder = _scopeBuilder = new ScopeBuilder(this, null, _block);
 
             _class.Members.Add(Syntax.ConstructorDeclaration(
                 identifier: "Program",
@@ -204,27 +205,23 @@ namespace Jint.Backend.Compiled
                 string memberName = SanitizeName(((Identifier)left.Member).Text);
                 string alias = _scopeBuilder.FindAndCreateAlias(memberName);
 
-                if (alias != null)
+                // If we're assigning a variable that isn't known in any scope,
+                // it's for the global scope.
+
+                if (alias == null)
                 {
-                    _result = Syntax.BinaryExpression(
-                        BinaryOperator.Equals,
-                        Syntax.MemberAccessExpression(
-                            Syntax.ParseName(alias),
-                            memberName
-                        ),
-                        (ExpressionSyntax)right
-                    );
+                    _globalScopeBuilder.EnsureVariable(memberName);
+                    alias = _scopeBuilder.FindAndCreateAlias(memberName);
                 }
-                else
-                {
-                    _result = Syntax.InvocationExpression(
-                        Syntax.ParseName("AssignIdentifier"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument(Syntax.LiteralExpression(memberName)),
-                            Syntax.Argument((ExpressionSyntax)right)
-                        )
-                    );
-                }
+
+                _result = Syntax.BinaryExpression(
+                    BinaryOperator.Equals,
+                    Syntax.MemberAccessExpression(
+                        Syntax.ParseName(alias),
+                        memberName
+                    ),
+                    (ExpressionSyntax)right
+                );
             }
             else
             {
@@ -1132,31 +1129,26 @@ namespace Jint.Backend.Compiled
                         _scopeBuilder.EnsureVariable(memberName);
                         string alias = _scopeBuilder.FindAndCreateAlias(memberName);
 
-                        if (alias != null)
-                        {
-                            var argument = Syntax.Argument((ExpressionSyntax)operand);
+                        // If we're assigning a variable that isn't known in any scope,
+                        // it's for the global scope.
 
-                            argument.Modifier = ParameterModifier.Ref;
-
-                            _result = Syntax.InvocationExpression(
-                                Syntax.ParseName(type + "IncrementIdentifier"),
-                                Syntax.ArgumentList(
-                                    argument,
-                                    Syntax.Argument(Syntax.LiteralExpression(offset))
-                                )
-                            );
-                        }
-                        else
+                        if (alias == null)
                         {
-                            _result = Syntax.InvocationExpression(
-                                Syntax.ParseName(type + "IncrementIdentifier"),
-                                Syntax.ArgumentList(
-                                    Syntax.Argument(Syntax.LiteralExpression(memberName)),
-                                    Syntax.Argument((ExpressionSyntax)operand),
-                                    Syntax.Argument(Syntax.LiteralExpression(offset))
-                                )
-                            );
+                            _globalScopeBuilder.EnsureVariable(memberName);
+                            alias = _scopeBuilder.FindAndCreateAlias(memberName);
                         }
+
+                        var argument = Syntax.Argument((ExpressionSyntax)operand);
+
+                        argument.Modifier = ParameterModifier.Ref;
+
+                        _result = Syntax.InvocationExpression(
+                            Syntax.ParseName(type + "IncrementIdentifier"),
+                            Syntax.ArgumentList(
+                                argument,
+                                Syntax.Argument(Syntax.LiteralExpression(offset))
+                            )
+                        );
                     }
                     else
                     {

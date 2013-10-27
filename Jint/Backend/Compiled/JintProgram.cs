@@ -455,15 +455,6 @@ namespace Jint.Backend.Compiled
             return Global.StringClass.New(operand.Type);
         }
 
-        protected JsInstance PrefixIncrementIdentifier(string identifier, JsInstance value, int offset)
-        {
-            value = Global.NumberClass.New(value.ToNumber() + offset);
-
-            AssignIdentifier(identifier, value);
-
-            return value;
-        }
-
         protected JsInstance PrefixIncrementIdentifier(ref JsInstance identifier, int offset)
         {
             identifier = Global.NumberClass.New(identifier.ToNumber() + offset);
@@ -489,13 +480,6 @@ namespace Jint.Backend.Compiled
             return value;
         }
 
-        protected JsInstance PostfixIncrementIdentifier(string identifier, JsInstance value, int offset)
-        {
-            AssignIdentifier(identifier, Global.NumberClass.New(value.ToNumber() + offset));
-
-            return value;
-        }
-
         protected JsInstance PostfixIncrementIdentifier(ref JsInstance identifier, int offset)
         {
             var value = identifier;
@@ -517,18 +501,6 @@ namespace Jint.Backend.Compiled
             AssignIndexer(baseObject, indexer, Global.NumberClass.New(value.ToNumber() + offset));
 
             return value;
-        }
-
-        protected JsInstance AssignIdentifier(string identifier, JsInstance value)
-        {
-            //Descriptor descriptor;
-            //CurrentScope.TryGetDescriptor(identifier, out descriptor);
-
-            // Assigning function Name
-            //if (value.Class == JsInstance.CLASS_FUNCTION)
-            //    ((JsFunction)value).Name = propertyName;
-
-            return CurrentScope[identifier] = value;
         }
 
         protected JsInstance AssignMember(JsInstance baseObject, string identifier, JsInstance value)

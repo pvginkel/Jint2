@@ -50,5 +50,21 @@ return myFunction(i);
 
             Assert.AreEqual(false, result);
         }
+
+        [Test]
+        public void Globals()
+        {
+            var engine = new JintEngine(Options.EcmaScript5 | Options.Strict, JintBackend.Compiled);
+
+            var result = engine.Run(
+@"
+i = 0;
+var j = i;
+function f() {
+    i = 3;
+    j = 4;
+}
+");
+        }
     }
 }
