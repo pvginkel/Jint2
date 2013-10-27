@@ -52,6 +52,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MissingFeaturesFixture.cs" />
     <Compile Include="Performance\PerformanceFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Fixtures.cs" />

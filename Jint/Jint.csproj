@@ -62,6 +62,7 @@
     <Compile Include="Backend\Compiled\CompiledFunctionDelegate.cs" />
     <Compile Include="Backend\Compiled\JintProgram.cs" />
     <Compile Include="Backend\Compiled\CompiledFunction.cs" />
+    <Compile Include="Backend\Compiled\Visitor.BlockManager.cs" />
     <Compile Include="Backend\Compiled\Visitor.cs" />
     <Compile Include="Backend\Interpreted\InterpretedBackend.cs" />
     <Compile Include="CachedTypeResolver.cs" />

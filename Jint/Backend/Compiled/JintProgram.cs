@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Security;
 using System.Security.Permissions;
@@ -593,6 +594,29 @@ namespace Jint.Backend.Compiled
             // TODO: When switching to MSIL, this can be done more elegantly.
 
             return JsUndefined.Instance;
+        }
+
+        protected IEnumerable<JsInstance> GetForEachKeys(JsInstance obj)
+        {
+            if (obj == null)
+                yield break;
+
+            var values = obj.Value as IEnumerable;
+
+            if (values != null)
+            {
+                foreach (object value in values)
+                {
+                    yield return Global.WrapClr(value);
+                }
+            }
+            else
+            {
+                foreach (string key in new List<string>(((JsDictionaryObject)obj).GetKeys()))
+                {
+                    yield return Global.StringClass.New(key);
+                }
+            }
         }
 
         private struct ResultInfo

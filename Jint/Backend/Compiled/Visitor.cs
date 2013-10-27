@@ -14,16 +14,14 @@ namespace Jint.Backend.Compiled
         private readonly Options _options;
         private readonly CompiledBackend _backend;
         private ClassDeclarationSyntax _class;
-        private BlockSyntax _main;
-        private BlockSyntax _block;
         private SyntaxNode _result;
         private Expression _callTarget;
         private string _lastIdentifier;
         private int _nextAnonymousVariableId = 1;
         private int _nextAnonymousFunctionId = 1;
         private int _nextAnonymousClassId = 1;
-        private ScopeBuilder _scopeBuilder;
-        private ScopeBuilder _globalScopeBuilder;
+        private BlockManager _block;
+        private BlockManager _main;
 
         public JsInstance Result
         {
@@ -63,11 +61,14 @@ namespace Jint.Backend.Compiled
                 baseList: Syntax.BaseList("JintProgram")
             );
 
-            _globalScopeBuilder = _scopeBuilder = new ScopeBuilder(this, null, true);
+            var scopeBuilder = new ScopeBuilder(this, null, true);
 
             var body = Syntax.Block();
 
-            _block = _main = _scopeBuilder.InitializeBody(body);
+            _block = _main = new BlockManager(
+                scopeBuilder.InitializeBody(body),
+                scopeBuilder
+            );
 
             _class.Members.Add(Syntax.ConstructorDeclaration(
                 identifier: "Program",
@@ -103,14 +104,14 @@ namespace Jint.Backend.Compiled
 
         public void Close()
         {
-            _scopeBuilder.Build();
+            _main.ScopeBuilder.Build();
         }
 
         public ClassDeclarationSyntax GetClassDeclaration()
         {
             // Make sure we return something.
 
-            _main.Statements.Add(Syntax.ReturnStatement(Syntax.IdentifierName("null")));
+            _main.Body.Statements.Add(Syntax.ReturnStatement(Syntax.IdentifierName("null")));
 
             return _class;
         }
@@ -132,14 +133,14 @@ namespace Jint.Backend.Compiled
 
             foreach (string variableName in expression.DeclaredVariables)
             {
-                _scopeBuilder.EnsureVariable(variableName);
+                _block.ScopeBuilder.EnsureVariable(variableName);
             }
 
             foreach (var statement in expression.Statements)
             {
                 statement.Accept(this);
 
-                _block.Statements.Add(MakeStatement(_result));
+                _block.Body.Statements.Add(MakeStatement(_result));
             }
         }
 
@@ -205,15 +206,15 @@ namespace Jint.Backend.Compiled
             if (left.Previous == null)
             {
                 string memberName = SanitizeName(((Identifier)left.Member).Text);
-                string alias = _scopeBuilder.FindAndCreateAlias(memberName);
+                string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
 
                 // If we're assigning a variable that isn't known in any scope,
                 // it's for the global scope.
 
                 if (alias == null)
                 {
-                    _globalScopeBuilder.EnsureVariable(memberName);
-                    alias = _scopeBuilder.FindAndCreateAlias(memberName);
+                    _main.ScopeBuilder.EnsureVariable(memberName);
+                    alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
                 }
 
                 _result = Syntax.BinaryExpression(
@@ -281,7 +282,7 @@ namespace Jint.Backend.Compiled
 
             foreach (string variableName in expression.DeclaredVariables)
             {
-                _scopeBuilder.EnsureVariable(variableName);
+                _block.ScopeBuilder.EnsureVariable(variableName);
             }
 
             foreach (var statement in expression.Statements)
@@ -319,9 +320,59 @@ namespace Jint.Backend.Compiled
             expression.Expression.Accept(this);
         }
 
-        public void Visit(ForEachInStatement expression)
+        public void Visit(ForEachInStatement statement)
         {
-            throw new NotImplementedException();
+            string identifier;
+
+            if (statement.InitialisationStatement is VariableDeclarationStatement)
+                identifier = ((VariableDeclarationStatement)statement.InitialisationStatement).Identifier;
+            else if (statement.InitialisationStatement is Identifier)
+                identifier = ((Identifier)statement.InitialisationStatement).Text;
+            else
+                throw new NotSupportedException("Only variable declaration are allowed in a for in loop");
+
+            string alias = _block.ScopeBuilder.FindAndCreateAlias(identifier);
+            ExpressionSyntax identifierSyntax;
+
+            if (alias == null)
+            {
+                _main.ScopeBuilder.EnsureVariable(identifier);
+                alias = _block.ScopeBuilder.FindAndCreateAlias(identifier);
+            }
+
+            statement.Expression.Accept(this);
+            var expression = _result;
+
+            string keyLocal = _block.GetNextAnonymousLocalName();
+
+            var body = Syntax.Block();
+
+            body.Statements.Add(Syntax.ExpressionStatement(
+                Syntax.BinaryExpression(
+                    BinaryOperator.Equals,
+                    Syntax.MemberAccessExpression(
+                        Syntax.ParseName(alias),
+                        identifier
+                    ),
+                    Syntax.ParseName(keyLocal)
+                )
+            ));
+
+            statement.Statement.Accept(this);
+
+            body.Statements.Add(MakeStatement(_result));
+
+            _result = Syntax.ForEachStatement(
+                "var",
+                keyLocal,
+                Syntax.InvocationExpression(
+                    Syntax.ParseName("GetForEachKeys"),
+                    Syntax.ArgumentList(
+                        Syntax.Argument((ExpressionSyntax)expression)
+                    )
+                ),
+                body
+            );
         }
 
         public void Visit(ForStatement statement)
@@ -428,8 +479,8 @@ namespace Jint.Backend.Compiled
 
             string memberName = SanitizeName(statement.Name);
 
-            _scopeBuilder.EnsureVariable(memberName);
-            string alias = _scopeBuilder.FindAndCreateAlias(memberName);
+            _block.ScopeBuilder.EnsureVariable(memberName);
+            string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
 
             _result = Syntax.ExpressionStatement(
                 Syntax.BinaryExpression(
@@ -454,10 +505,13 @@ namespace Jint.Backend.Compiled
         {
             string functionName = GetNextAnonymousFunctionName();
 
-            _scopeBuilder = new ScopeBuilder(this, _scopeBuilder, false);
+            var scopeBuilder = new ScopeBuilder(this, _block.ScopeBuilder, false);
 
             var body = Syntax.Block();
-            var block = _scopeBuilder.InitializeBody(body);
+            var block = scopeBuilder.InitializeBody(body);
+
+            var previousBlock = _block;
+            _block = new BlockManager(block, scopeBuilder);
 
             // Assign the function parameters.
 
@@ -465,8 +519,8 @@ namespace Jint.Backend.Compiled
             {
                 string parameter = SanitizeName(expression.Parameters[i]);
 
-                _scopeBuilder.EnsureVariable(parameter);
-                string alias = _scopeBuilder.FindAndCreateAlias(parameter);
+                scopeBuilder.EnsureVariable(parameter);
+                string alias = scopeBuilder.FindAndCreateAlias(parameter);
 
                 block.Statements.Add(Syntax.ExpressionStatement(
                     Syntax.BinaryExpression(
@@ -523,8 +577,8 @@ namespace Jint.Backend.Compiled
                 Syntax.IdentifierName("JsUndefined.Instance")
             ));
 
-            _scopeBuilder.Build();
-            _scopeBuilder = _scopeBuilder.Parent;
+            scopeBuilder.Build();
+            _block = previousBlock;
 
             return functionName;
         }
@@ -606,9 +660,9 @@ namespace Jint.Backend.Compiled
             }
 
             string identifier = SanitizeName(statement.Identifier);
-            _scopeBuilder.EnsureVariable(identifier);
+            _block.ScopeBuilder.EnsureVariable(identifier);
 
-            string alias = _scopeBuilder.FindAndCreateAlias(identifier);
+            string alias = _block.ScopeBuilder.FindAndCreateAlias(identifier);
 
             _result = Syntax.ExpressionStatement(
                 Syntax.BinaryExpression(
@@ -776,7 +830,7 @@ namespace Jint.Backend.Compiled
         public void Visit(Identifier expression)
         {
             string propertyName = _lastIdentifier = SanitizeName(expression.Text);
-            string alias = _scopeBuilder.FindAndCreateAlias(propertyName);
+            string alias = _block.ScopeBuilder.FindAndCreateAlias(propertyName);
 
             if (alias != null)
             {
@@ -1121,25 +1175,26 @@ namespace Jint.Backend.Compiled
                         expression.Expression as MemberExpression ??
                         new MemberExpression(expression.Expression, null);
 
-                    member.Accept(this);
-
-                    operand = _result;
-
                     if (member.Previous == null)
                     {
                         string memberName = SanitizeName(((Identifier)member.Member).Text);
 
-                        _scopeBuilder.EnsureVariable(memberName);
-                        string alias = _scopeBuilder.FindAndCreateAlias(memberName);
+                        _block.ScopeBuilder.EnsureVariable(memberName);
+                        string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
 
                         // If we're assigning a variable that isn't known in any scope,
                         // it's for the global scope.
 
                         if (alias == null)
                         {
-                            _globalScopeBuilder.EnsureVariable(memberName);
-                            alias = _scopeBuilder.FindAndCreateAlias(memberName);
+                            _main.ScopeBuilder.EnsureVariable(memberName);
+                            alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
                         }
+
+                        operand = Syntax.MemberAccessExpression(
+                            Syntax.ParseName(alias),
+                            memberName
+                        );
 
                         var argument = Syntax.Argument((ExpressionSyntax)operand);
 
@@ -1155,6 +1210,10 @@ namespace Jint.Backend.Compiled
                     }
                     else
                     {
+                        member.Accept(this);
+
+                        operand = _result;
+
                         member.Previous.Accept(this);
 
                         var baseObject = _result;

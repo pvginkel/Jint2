@@ -66,5 +66,17 @@ function f() {
 }
 ");
         }
+
+        [Test]
+        public void ForEach()
+        {
+            var engine = new JintEngine(Options.EcmaScript5 | Options.Strict, JintBackend.Compiled);
+
+            engine.Run(
+@"
+for (var x in y) {
+}
+");
+        }
     }
 }
