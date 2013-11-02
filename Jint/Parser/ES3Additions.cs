@@ -41,7 +41,7 @@ namespace Jint.Parser
             throw e;
         }
 
-        public Program Execute()
+        public ProgramSyntax Execute()
         {
             return program().value;
         }

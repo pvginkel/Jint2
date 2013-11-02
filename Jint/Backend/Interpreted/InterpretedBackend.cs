@@ -60,7 +60,7 @@ namespace Jint.Backend.Interpreted
             global["ToUInt64"] = _visitor.Global.FunctionClass.New(new Func<object, UInt64>(Convert.ToUInt64));
         }
 
-        public object Run(Program program, bool unwrap)
+        public object Run(ProgramSyntax program, bool unwrap)
         {
             if (program == null)
                 throw new ArgumentNullException("program");
@@ -73,7 +73,7 @@ namespace Jint.Backend.Interpreted
                 var stopwatch = Stopwatch.StartNew();
 #endif
 
-                _visitor.Visit(program);
+                _visitor.VisitProgram(program);
 
 #if DEBUG
                 Console.WriteLine(stopwatch.Elapsed);
@@ -131,7 +131,7 @@ namespace Jint.Backend.Interpreted
         {
             var oldResult = _visitor.Result;
 
-            _visitor.Visit(new Identifier(name));
+            _visitor.VisitIdentifier(new IdentifierSyntax(name));
 
             var returnValue = CallFunction((JsFunction)_visitor.Result, args);
 
@@ -158,11 +158,11 @@ namespace Jint.Backend.Interpreted
         {
             _visitor.Result = function;
 
-            var methodCall = new MethodCall(
-                new List<Expression>
+            var methodCall = new MethodCallSyntax(
+                new List<ExpressionSyntax>
                 {
-                    new ValueExpression(x, TypeCode.Object),
-                    new ValueExpression(y, TypeCode.Object)
+                    new ValueSyntax(x, TypeCode.Object),
+                    new ValueSyntax(y, TypeCode.Object)
                 }
             );
 
@@ -192,7 +192,7 @@ namespace Jint.Backend.Interpreted
 
         public JsInstance Eval(JsInstance[] arguments)
         {
-            Program program;
+            ProgramSyntax program;
 
             try
             {

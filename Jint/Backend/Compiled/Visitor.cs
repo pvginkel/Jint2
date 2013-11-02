@@ -6,16 +6,24 @@ using System.Text;
 using CSharpSyntax;
 using Jint.Expressions;
 using Jint.Native;
+using BinaryExpressionSyntax = Jint.Expressions.BinaryExpressionSyntax;
+using BlockSyntax = Jint.Expressions.BlockSyntax;
+using ExpressionStatementSyntax = Jint.Expressions.ExpressionStatementSyntax;
+using ExpressionSyntax = Jint.Expressions.ExpressionSyntax;
+using ISyntaxVisitor = Jint.Expressions.ISyntaxVisitor;
+using PropertyDeclarationSyntax = Jint.Expressions.PropertyDeclarationSyntax;
+using SyntaxNode = Jint.Expressions.SyntaxNode;
+using VariableDeclarationSyntax = Jint.Expressions.VariableDeclarationSyntax;
 
 namespace Jint.Backend.Compiled
 {
-    internal partial class Visitor : IStatementVisitor, IJintVisitor
+    internal partial class Visitor : ISyntaxVisitor, IJintVisitor
     {
         private readonly Options _options;
         private readonly CompiledBackend _backend;
         private ClassDeclarationSyntax _class;
-        private SyntaxNode _result;
-        private Expression _callTarget;
+        private CSharpSyntax.SyntaxNode _result;
+        private ExpressionSyntax _callTarget;
         private string _lastIdentifier;
         private int _nextAnonymousVariableId = 1;
         private int _nextAnonymousFunctionId = 1;
@@ -127,7 +135,7 @@ namespace Jint.Backend.Compiled
             _backend.ExecuteFunction(function, @this, parameters, null);
         }
 
-        public void Visit(Program expression)
+        public void VisitProgram(ProgramSyntax expression)
         {
             _lastIdentifier = null;
 
@@ -144,14 +152,14 @@ namespace Jint.Backend.Compiled
             }
         }
 
-        private StatementSyntax MakeStatement(SyntaxNode result)
+        private StatementSyntax MakeStatement(CSharpSyntax.SyntaxNode result)
         {
             var statement = result as StatementSyntax;
 
             if (statement != null)
                 return statement;
 
-            return Syntax.ExpressionStatement((ExpressionSyntax)result);
+            return Syntax.ExpressionStatement((CSharpSyntax.ExpressionSyntax)result);
         }
 
         private string GetNextAnonymousVariableName()
@@ -169,7 +177,7 @@ namespace Jint.Backend.Compiled
             return "__AnonymousClass" + _nextAnonymousClassId++;
         }
 
-        public void Visit(AssignmentExpression statement)
+        public void VisitAssignment(AssignmentSyntax statement)
         {
             if (statement.AssignmentOperator == AssignmentOperator.Assign)
             {
@@ -195,17 +203,17 @@ namespace Jint.Backend.Compiled
                     default: throw new InvalidOperationException();
                 }
 
-                var binaryExpression = new BinaryExpression(op, statement.Left, statement.Right);
+                var binaryExpression = new BinaryExpressionSyntax(op, statement.Left, statement.Right);
 
                 binaryExpression.Accept(this);
             }
 
             var right = _result;
-            var left = statement.Left as MemberExpression ?? new MemberExpression(statement.Left, null);
+            var left = statement.Left as MemberAccessSyntax ?? new MemberAccessSyntax(statement.Left, null);
 
             if (left.Previous == null)
             {
-                string memberName = SanitizeName(((Identifier)left.Member).Text);
+                string memberName = SanitizeName(((IdentifierSyntax)left.Member).Text);
                 string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
 
                 // If we're assigning a variable that isn't known in any scope,
@@ -223,7 +231,7 @@ namespace Jint.Backend.Compiled
                         Syntax.ParseName(alias),
                         memberName
                     ),
-                    (ExpressionSyntax)right
+                    (CSharpSyntax.ExpressionSyntax)right
                 );
             }
             else
@@ -232,14 +240,14 @@ namespace Jint.Backend.Compiled
 
                 var baseObject = _result;
 
-                if (left.Member is Identifier)
+                if (left.Member is IdentifierSyntax)
                 {
                     _result = Syntax.InvocationExpression(
                         Syntax.ParseName("AssignMember"),
                         Syntax.ArgumentList(
-                            Syntax.Argument((ExpressionSyntax)baseObject),
-                            Syntax.Argument(Syntax.LiteralExpression(((Identifier)left.Member).Text)),
-                            Syntax.Argument((ExpressionSyntax)right)
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
+                            Syntax.Argument(Syntax.LiteralExpression(((IdentifierSyntax)left.Member).Text)),
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)right)
                         )
                     );
                 }
@@ -247,14 +255,14 @@ namespace Jint.Backend.Compiled
                 {
                     left.Previous.Accept(this);
 
-                    ((Indexer)left.Member).Index.Accept(this);
+                    ((IndexerSyntax)left.Member).Expression.Accept(this);
 
                     _result = Syntax.InvocationExpression(
                         Syntax.ParseName("AssignIndexer"),
                         Syntax.ArgumentList(
-                            Syntax.Argument((ExpressionSyntax)baseObject),
-                            Syntax.Argument((ExpressionSyntax)_result),
-                            Syntax.Argument((ExpressionSyntax)right)
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)_result),
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)right)
                         )
                     );
                 }
@@ -276,7 +284,7 @@ namespace Jint.Backend.Compiled
             return sb.ToString();
         }
 
-        public void Visit(BlockStatement expression)
+        public void VisitBlock(BlockSyntax expression)
         {
             var block = Syntax.Block();
 
@@ -295,44 +303,43 @@ namespace Jint.Backend.Compiled
             _result = block;
         }
 
-        public void Visit(BreakStatement expression)
+        public void VisitBreak(BreakSyntax expression)
         {
             _result = Syntax.BreakStatement();
         }
 
-        public void Visit(ContinueStatement expression)
+        public void VisitContinue(ContinueSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(DoWhileStatement expression)
+        public void VisitDoWhile(DoWhileSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(EmptyStatement expression)
+        public void VisitEmpty(EmptySyntax expression)
         {
             _result = Syntax.EmptyStatement();
         }
 
-        public void Visit(ExpressionStatement expression)
+        public void VisitExpressionStatement(ExpressionStatementSyntax expression)
         {
             expression.Expression.Accept(this);
         }
 
-        public void Visit(ForEachInStatement statement)
+        public void VisitForEachIn(ForEachInSyntax statement)
         {
             string identifier;
 
-            if (statement.InitialisationStatement is VariableDeclarationStatement)
-                identifier = ((VariableDeclarationStatement)statement.InitialisationStatement).Identifier;
-            else if (statement.InitialisationStatement is Identifier)
-                identifier = ((Identifier)statement.InitialisationStatement).Text;
+            if (statement.Initialization is VariableDeclarationSyntax)
+                identifier = ((VariableDeclarationSyntax)statement.Initialization).Identifier;
+            else if (statement.Initialization is IdentifierSyntax)
+                identifier = ((IdentifierSyntax)statement.Initialization).Text;
             else
                 throw new NotSupportedException("Only variable declaration are allowed in a for in loop");
 
             string alias = _block.ScopeBuilder.FindAndCreateAlias(identifier);
-            ExpressionSyntax identifierSyntax;
 
             if (alias == null)
             {
@@ -358,7 +365,7 @@ namespace Jint.Backend.Compiled
                 )
             ));
 
-            statement.Statement.Accept(this);
+            statement.Body.Accept(this);
 
             body.Statements.Add(MakeStatement(_result));
 
@@ -368,54 +375,54 @@ namespace Jint.Backend.Compiled
                 Syntax.InvocationExpression(
                     Syntax.ParseName("GetForEachKeys"),
                     Syntax.ArgumentList(
-                        Syntax.Argument((ExpressionSyntax)expression)
+                        Syntax.Argument((CSharpSyntax.ExpressionSyntax)expression)
                     )
                 ),
                 body
             );
         }
 
-        public void Visit(ForStatement statement)
+        public void VisitFor(ForSyntax syntax)
         {
-            SyntaxNode condition = null;
-            SyntaxNode increment = null;
-            SyntaxNode body = null;
+            CSharpSyntax.SyntaxNode condition = null;
+            CSharpSyntax.SyntaxNode increment = null;
+            CSharpSyntax.SyntaxNode body = null;
 
             var block = Syntax.Block();
 
-            if (statement.InitialisationStatement != null)
+            if (syntax.Initialization != null)
             {
-                statement.InitialisationStatement.Accept(this);
+                syntax.Initialization.Accept(this);
                 block.Statements.Add(MakeStatement(_result));
             }
 
-            if (statement.ConditionExpression != null)
+            if (syntax.Test != null)
             {
-                statement.ConditionExpression.Accept(this);
+                syntax.Test.Accept(this);
                 condition = _result;
             }
 
-            if (statement.IncrementExpression != null)
+            if (syntax.Increment != null)
             {
-                statement.IncrementExpression.Accept(this);
+                syntax.Increment.Accept(this);
                 increment = _result;
             }
 
-            if (statement.Statement != null)
+            if (syntax.Body != null)
             {
-                statement.Statement.Accept(this);
+                syntax.Body.Accept(this);
                 body = _result;
             }
 
             block.Statements.Add(Syntax.ForStatement(
                 condition: Syntax.InvocationExpression(
                     Syntax.MemberAccessExpression(
-                        (ExpressionSyntax)condition,
+                        (CSharpSyntax.ExpressionSyntax)condition,
                         "ToBoolean"
                     ),
                     Syntax.ArgumentList()
                 ),
-                incrementors: new[] { (ExpressionSyntax)increment },
+                incrementors: new[] { (CSharpSyntax.ExpressionSyntax)increment },
                 statement: MakeStatement(body)
             ));
 
@@ -451,7 +458,7 @@ namespace Jint.Backend.Compiled
             //}
         }
 
-        public void Visit(FunctionDeclarationStatement statement)
+        public void VisitFunctionDeclaration(FunctionDeclarationSyntax statement)
         {
             var functionName = DeclareFunction(statement);
 
@@ -572,7 +579,7 @@ namespace Jint.Backend.Compiled
                 modifiers: Modifiers.Private
             ));
 
-            expression.Statement.Accept(this);
+            expression.Body.Accept(this);
 
             block.Statements.Add(MakeStatement(_result));
 
@@ -588,15 +595,15 @@ namespace Jint.Backend.Compiled
             return functionName;
         }
 
-        public void Visit(IfStatement statement)
+        public void VisitIf(IfSyntax statement)
         {
-            statement.Expression.Accept(this);
+            statement.Test.Accept(this);
             var expression = _result;
 
             statement.Then.Accept(this);
             var @then = _result;
 
-            SyntaxNode @else = null;
+            CSharpSyntax.SyntaxNode @else = null;
             if (statement.Else != null)
             {
                 statement.Else.Accept(this);
@@ -606,7 +613,7 @@ namespace Jint.Backend.Compiled
             _result = Syntax.IfStatement(
                 Syntax.InvocationExpression(
                     Syntax.MemberAccessExpression(
-                        Syntax.ParenthesizedExpression((ExpressionSyntax)expression),
+                        Syntax.ParenthesizedExpression((CSharpSyntax.ExpressionSyntax)expression),
                         "ToBoolean"
                     ),
                     Syntax.ArgumentList()
@@ -618,13 +625,13 @@ namespace Jint.Backend.Compiled
             );
         }
 
-        public void Visit(ReturnStatement statement)
+        public void VisitReturn(ReturnSyntax statement)
         {
             if (statement.Expression != null)
             {
                 statement.Expression.Accept(this);
 
-                _result = Syntax.ReturnStatement((ExpressionSyntax)_result);
+                _result = Syntax.ReturnStatement((CSharpSyntax.ExpressionSyntax)_result);
             }
             else
             {
@@ -632,24 +639,24 @@ namespace Jint.Backend.Compiled
             }
         }
 
-        public void Visit(SwitchStatement expression)
+        public void VisitSwitch(SwitchSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(WithStatement expression)
+        public void VisitWith(WithSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(ThrowStatement expression)
+        public void VisitThrow(ThrowSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(TryStatement expression)
+        public void VisitTry(TrySyntax expression)
         {
-            expression.Statement.Accept(this);
+            expression.Body.Accept(this);
 
             var tryBlock = Syntax.Block(MakeStatement(_result));
 
@@ -662,7 +669,7 @@ namespace Jint.Backend.Compiled
                 _block.ScopeBuilder.EnsureVariable(identifier);
                 string alias = _block.ScopeBuilder.FindAndCreateAlias(identifier);
 
-                expression.Catch.Statement.Accept(this);
+                expression.Catch.Body.Accept(this);
 
                 if (identifier == null)
                 {
@@ -701,11 +708,11 @@ namespace Jint.Backend.Compiled
                 }
             }
 
-            BlockSyntax finallyBlock = null;
+            CSharpSyntax.BlockSyntax finallyBlock = null;
 
             if (expression.Finally != null)
             {
-                expression.Finally.Statement.Accept(this);
+                expression.Finally.Body.Accept(this);
 
                 finallyBlock = Syntax.Block(MakeStatement(_result));
             }
@@ -717,7 +724,7 @@ namespace Jint.Backend.Compiled
             );
         }
 
-        public void Visit(VariableDeclarationStatement statement)
+        public void VisitVariableDeclaration(VariableDeclarationSyntax statement)
         {
             _result = null;
 
@@ -741,23 +748,23 @@ namespace Jint.Backend.Compiled
                         Syntax.ParseName(alias),
                         identifier
                     ),
-                    _result != null ? (ExpressionSyntax)_result : Syntax.ParseName("JsUndefined.Instance")
+                    _result != null ? (CSharpSyntax.ExpressionSyntax)_result : Syntax.ParseName("JsUndefined.Instance")
                 )
             );
         }
 
-        public void Visit(WhileStatement statement)
+        public void VisitWhile(WhileSyntax statement)
         {
-            statement.Condition.Accept(this);
+            statement.Test.Accept(this);
             var condition = _result;
 
-            statement.Statement.Accept(this);
+            statement.Body.Accept(this);
             var body = _result;
 
             _result = Syntax.WhileStatement(
                 Syntax.InvocationExpression(
                     Syntax.MemberAccessExpression(
-                        (ExpressionSyntax)condition,
+                        (CSharpSyntax.ExpressionSyntax)condition,
                         "ToBoolean"
                     ),
                     Syntax.ArgumentList()
@@ -766,20 +773,20 @@ namespace Jint.Backend.Compiled
             );
         }
 
-        public void Visit(ArrayDeclaration expression)
+        public void VisitArrayDeclaration(ArrayDeclarationSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(CommaOperatorStatement expression)
+        public void VisitCommaOperator(CommaOperatorSyntax expression)
         {
             var arguments = Syntax.ArgumentList();
 
-            foreach (var statement in expression.Statements)
+            foreach (var statement in expression.Expressions)
             {
                 statement.Accept(this);
 
-                var expressionStatement = _result as ExpressionStatementSyntax;
+                var expressionStatement = _result as CSharpSyntax.ExpressionStatementSyntax;
 
                 if (expressionStatement != null)
                 {
@@ -788,7 +795,7 @@ namespace Jint.Backend.Compiled
                 }
 
                 arguments.Arguments.Add(Syntax.Argument(
-                    (ExpressionSyntax)_result
+                    (CSharpSyntax.ExpressionSyntax)_result
                 ));
             }
 
@@ -798,12 +805,12 @@ namespace Jint.Backend.Compiled
             );
         }
 
-        public void Visit(FunctionExpression expression)
+        public void VisitFunction(FunctionSyntax expression)
         {
             _result = CreateFunctionSyntax(expression, DeclareFunction(expression));
         }
 
-        public void Visit(MemberExpression expression)
+        public void VisitMemberAccess(MemberAccessSyntax expression)
         {
             if (expression.Previous == null)
             {
@@ -817,13 +824,13 @@ namespace Jint.Backend.Compiled
 
             _callTarget = null;
 
-            var nestedMemberExpression = expression.Previous as MemberExpression;
+            var nestedMemberExpression = expression.Previous as MemberAccessSyntax;
 
             if (
                 nestedMemberExpression != null && (
-                    nestedMemberExpression.Member is PropertyExpression ||
-                    nestedMemberExpression.Member is Identifier ||
-                    nestedMemberExpression.Member is Indexer
+                    nestedMemberExpression.Member is PropertySyntax ||
+                    nestedMemberExpression.Member is IdentifierSyntax ||
+                    nestedMemberExpression.Member is IndexerSyntax
                 )
             )
                 _callTarget = nestedMemberExpression.Previous;
@@ -849,11 +856,11 @@ namespace Jint.Backend.Compiled
             //}
         }
 
-        public void Visit(MethodCall methodCall)
+        public void VisitMethodCall(MethodCallSyntax methodCall)
         {
             var target = _result;
 
-            SyntaxNode that = null;
+            CSharpSyntax.SyntaxNode that = null;
 
             if (_callTarget != null)
             {
@@ -861,20 +868,20 @@ namespace Jint.Backend.Compiled
                 that = _result;
             }
 
-            var arguments = new List<ExpressionSyntax>();
+            var arguments = new List<CSharpSyntax.ExpressionSyntax>();
 
             foreach (var argument in methodCall.Arguments)
             {
                 argument.Accept(this);
 
-                arguments.Add((ExpressionSyntax)_result);
+                arguments.Add((CSharpSyntax.ExpressionSyntax)_result);
             }
 
             _result = Syntax.InvocationExpression(
                 Syntax.IdentifierName("ExecuteFunction"),
                 Syntax.ArgumentList(
-                    Syntax.Argument(that != null ? (ExpressionSyntax)that : Syntax.IdentifierName("null")),
-                    Syntax.Argument((ExpressionSyntax)target),
+                    Syntax.Argument(that != null ? (CSharpSyntax.ExpressionSyntax)that : Syntax.IdentifierName("null")),
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)target),
                     Syntax.Argument(Syntax.ArrayCreationExpression(
                         "JsInstance[]",
                         Syntax.InitializerExpression(
@@ -885,41 +892,41 @@ namespace Jint.Backend.Compiled
             );
         }
 
-        public void Visit(Indexer expression)
+        public void VisitIndexer(IndexerSyntax expression)
         {
             var baseObject = _result;
 
-            expression.Index.Accept(this);
+            expression.Expression.Accept(this);
             var indexer = _result;
 
             _result = Syntax.InvocationExpression(
                 Syntax.ParseName("GetByIndexer"),
                 Syntax.ArgumentList(
-                    Syntax.Argument((ExpressionSyntax)baseObject),
-                    Syntax.Argument((ExpressionSyntax)indexer)
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)indexer)
                 )
             );
         }
 
-        public void Visit(PropertyExpression expression)
+        public void VisitProperty(PropertySyntax expression)
         {
             var baseObject = _result;
 
             _result = Syntax.InvocationExpression(
                 Syntax.ParseName("GetByProperty"),
                 Syntax.ArgumentList(
-                    Syntax.Argument((ExpressionSyntax)baseObject),
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
                     Syntax.Argument(Syntax.LiteralExpression(expression.Text))
                 )
             );
         }
 
-        public void Visit(PropertyDeclarationExpression expression)
+        public void VisitPropertyDeclaration(PropertyDeclarationSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(Identifier expression)
+        public void VisitIdentifier(IdentifierSyntax expression)
         {
             string propertyName = _lastIdentifier = SanitizeName(expression.Text);
             string alias = _block.ScopeBuilder.FindAndCreateAlias(propertyName);
@@ -944,7 +951,7 @@ namespace Jint.Backend.Compiled
             }
         }
 
-        public void Visit(JsonExpression expression)
+        public void VisitJsonExpression(JsonExpressionSyntax expression)
         {
             var result = Syntax.InvocationExpression(
                 Syntax.ParseName("CreateJsonBuilder"),
@@ -953,7 +960,7 @@ namespace Jint.Backend.Compiled
 
             foreach (var item in expression.Values)
             {
-                var propertyDeclaration = item.Value as PropertyDeclarationExpression;
+                var propertyDeclaration = item.Value as PropertyDeclarationSyntax;
 
                 if (propertyDeclaration == null)
                     throw new InvalidOperationException("Unexpected property declaration");
@@ -970,14 +977,14 @@ namespace Jint.Backend.Compiled
                             ),
                             Syntax.ArgumentList(
                                 Syntax.Argument(Syntax.LiteralExpression(item.Key)),
-                                Syntax.Argument((ExpressionSyntax)_result)
+                                Syntax.Argument((CSharpSyntax.ExpressionSyntax)_result)
                             )
                         );
                         break;
 
                     default:
-                        SyntaxNode get = null;
-                        SyntaxNode set = null;
+                        CSharpSyntax.SyntaxNode get = null;
+                        CSharpSyntax.SyntaxNode set = null;
 
                         if (propertyDeclaration.GetExpression != null)
                         {
@@ -997,8 +1004,8 @@ namespace Jint.Backend.Compiled
                             ),
                             Syntax.ArgumentList(
                                 Syntax.Argument(Syntax.LiteralExpression(item.Key)),
-                                Syntax.Argument(get != null ? (ExpressionSyntax)get : Syntax.LiteralExpression()),
-                                Syntax.Argument(set != null ? (ExpressionSyntax)set : Syntax.LiteralExpression())
+                                Syntax.Argument(get != null ? (CSharpSyntax.ExpressionSyntax)get : Syntax.LiteralExpression()),
+                                Syntax.Argument(set != null ? (CSharpSyntax.ExpressionSyntax)set : Syntax.LiteralExpression())
                             )
                         );
                         break;
@@ -1011,7 +1018,7 @@ namespace Jint.Backend.Compiled
             );
         }
 
-        public void Visit(NewExpression expression)
+        public void VisitNew(NewSyntax expression)
         {
             expression.Expression.Accept(this);
             var expressionSyntax = _result;
@@ -1042,12 +1049,12 @@ namespace Jint.Backend.Compiled
             //    Result = Global.Marshaller.MarshalClrValue<Type>(_typeResolver.ResolveType(typeName).MakeGenericType(genericParameters));
             //}
 
-            var argumentExpressions = new ExpressionSyntax[expression.Arguments.Count];
+            var argumentExpressions = new CSharpSyntax.ExpressionSyntax[expression.Arguments.Count];
 
             for (int i = 0; i < expression.Arguments.Count; i++)
             {
                 expression.Arguments[i].Accept(this);
-                argumentExpressions[i] = (ExpressionSyntax)_result;
+                argumentExpressions[i] = (CSharpSyntax.ExpressionSyntax)_result;
             }
 
             var arguments = Syntax.ArrayCreationExpression(
@@ -1060,16 +1067,16 @@ namespace Jint.Backend.Compiled
             _result = Syntax.InvocationExpression(
                 Syntax.ParseName("Construct"),
                 Syntax.ArgumentList(
-                    Syntax.Argument(Syntax.CastExpression("JsFunction", (ExpressionSyntax)expressionSyntax)),
+                    Syntax.Argument(Syntax.CastExpression("JsFunction", (CSharpSyntax.ExpressionSyntax)expressionSyntax)),
                     Syntax.Argument(arguments)
                 )
             );
         }
 
-        public void Visit(BinaryExpression expression)
+        public void VisitBinaryExpression(BinaryExpressionSyntax expression)
         {
             // Evaluates the left expression and saves the value
-            expression.LeftExpression.Accept(this);
+            expression.Left.Accept(this);
 
             EnsureIdentifierIsDefined(_result);
 
@@ -1078,14 +1085,14 @@ namespace Jint.Backend.Compiled
             // Evaluates the left expression for the condition and saves the value
             // TODO: When switching to MSIL, left must be stored in a temp so we
             // don't calculate it twice.
-            expression.LeftExpression.Accept(this);
+            expression.Left.Accept(this);
 
             EnsureIdentifierIsDefined(_result);
 
             var condition = _result;
 
             // Evaluates the right expression and saves the value
-            expression.RightExpression.Accept(this);
+            expression.Right.Accept(this);
 
             EnsureIdentifierIsDefined(_result);
 
@@ -1098,22 +1105,22 @@ namespace Jint.Backend.Compiled
                 case BinaryExpressionType.And:
                     _result = Syntax.ConditionalExpression(
                         Syntax.InvocationExpression(
-                            Syntax.MemberAccessExpression((ExpressionSyntax)condition, "ToBoolean"),
+                            Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)condition, "ToBoolean"),
                             Syntax.ArgumentList()
                         ),
-                        Syntax.CastExpression("JsInstance", (ExpressionSyntax)right),
-                        (ExpressionSyntax)left
+                        Syntax.CastExpression("JsInstance", (CSharpSyntax.ExpressionSyntax)right),
+                        (CSharpSyntax.ExpressionSyntax)left
                     );
                     break;
 
                 case BinaryExpressionType.Or:
                     _result = Syntax.ConditionalExpression(
                         Syntax.InvocationExpression(
-                            Syntax.MemberAccessExpression((ExpressionSyntax)condition, "ToBoolean"),
+                            Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)condition, "ToBoolean"),
                             Syntax.ArgumentList()
                         ),
-                        Syntax.CastExpression("JsInstance", (ExpressionSyntax)left),
-                        (ExpressionSyntax)right
+                        Syntax.CastExpression("JsInstance", (CSharpSyntax.ExpressionSyntax)left),
+                        (CSharpSyntax.ExpressionSyntax)right
                     );
                     break;
 
@@ -1131,8 +1138,8 @@ namespace Jint.Backend.Compiled
                     _result = Syntax.InvocationExpression(
                         Syntax.IdentifierName(expression.Type.ToString()),
                         Syntax.ArgumentList(
-                            Syntax.Argument((ExpressionSyntax)left),
-                            Syntax.Argument((ExpressionSyntax)right)
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)left),
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)right)
                         )
                     );
                     break;
@@ -1153,11 +1160,11 @@ namespace Jint.Backend.Compiled
                                 Syntax.BinaryExpression(
                                     op,
                                     Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression((ExpressionSyntax)left, "ToNumber"),
+                                        Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)left, "ToNumber"),
                                         Syntax.ArgumentList()
                                     ),
                                     Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression((ExpressionSyntax)right, "ToNumber"),
+                                        Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)right, "ToNumber"),
                                         Syntax.ArgumentList()
                                     )
                                 )
@@ -1176,13 +1183,13 @@ namespace Jint.Backend.Compiled
                                     Syntax.ArgumentList(
                                         Syntax.Argument(
                                             Syntax.InvocationExpression(
-                                                Syntax.MemberAccessExpression((ExpressionSyntax)left, "ToNumber"),
+                                                Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)left, "ToNumber"),
                                                 Syntax.ArgumentList()
                                             )
                                         ),
                                         Syntax.Argument(
                                             Syntax.InvocationExpression(
-                                                Syntax.MemberAccessExpression((ExpressionSyntax)right, "ToNumber"),
+                                                Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)right, "ToNumber"),
                                                 Syntax.ArgumentList()
                                             )
                                         )
@@ -1225,8 +1232,8 @@ namespace Jint.Backend.Compiled
                     _result = Syntax.InvocationExpression(
                         Syntax.ParseName("Compare"),
                         Syntax.ArgumentList(
-                            Syntax.Argument((ExpressionSyntax)left),
-                            Syntax.Argument((ExpressionSyntax)right),
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)left),
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)right),
                             Syntax.Argument(Syntax.ParseName("CompareMode." + expression.Type))
                         )
                     );
@@ -1263,40 +1270,40 @@ namespace Jint.Backend.Compiled
             }
         }
 
-        private static InvocationExpressionSyntax CompileSame(SyntaxNode left, SyntaxNode right)
+        private static InvocationExpressionSyntax CompileSame(CSharpSyntax.SyntaxNode left, CSharpSyntax.SyntaxNode right)
         {
             return Syntax.InvocationExpression(
                 Syntax.ParseName("JsInstance.StrictlyEquals"),
                 Syntax.ArgumentList(
                     Syntax.Argument(Syntax.ParseName("Global")),
-                    Syntax.Argument((ExpressionSyntax)left),
-                    Syntax.Argument((ExpressionSyntax)right)
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)left),
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)right)
                 )
             );
         }
 
-        private static InvocationExpressionSyntax CompileEquals(SyntaxNode left, SyntaxNode right)
+        private static InvocationExpressionSyntax CompileEquals(CSharpSyntax.SyntaxNode left, CSharpSyntax.SyntaxNode right)
         {
             return Syntax.InvocationExpression(
                 Syntax.ParseName("CompareEquals"),
                 Syntax.ArgumentList(
-                    Syntax.Argument((ExpressionSyntax)left),
-                    Syntax.Argument((ExpressionSyntax)right)
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)left),
+                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)right)
                 )
             );
         }
 
-        public void Visit(TernaryExpression expression)
+        public void VisitTernary(TernarySyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(UnaryExpression expression)
+        public void VisitUnaryExpression(UnaryExpressionSyntax expression)
         {
-            expression.Expression.Accept(this);
+            expression.Operand.Accept(this);
             var operand = _result;
 
-            MemberExpression member;
+            MemberAccessSyntax member;
             PrefixUnaryOperator op;
 
             switch (expression.Type)
@@ -1305,7 +1312,7 @@ namespace Jint.Backend.Compiled
                     _result = Syntax.InvocationExpression(
                         Syntax.ParseName(expression.Type.ToString()),
                         Syntax.ArgumentList(
-                            Syntax.Argument((ExpressionSyntax)operand)
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)operand)
                         )
                     );
                     break;
@@ -1325,7 +1332,7 @@ namespace Jint.Backend.Compiled
                                     op,
                                     Syntax.InvocationExpression(
                                         Syntax.MemberAccessExpression(
-                                            (ExpressionSyntax)operand,
+                                            (CSharpSyntax.ExpressionSyntax)operand,
                                             "ToBoolean"
                                         ),
                                         Syntax.ArgumentList()
@@ -1352,7 +1359,7 @@ namespace Jint.Backend.Compiled
                                 Syntax.PrefixUnaryExpression(
                                     op,
                                     Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression((ExpressionSyntax)operand, "ToNumber"),
+                                        Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)operand, "ToNumber"),
                                         Syntax.ArgumentList()
                                     )
                                 )
@@ -1376,12 +1383,12 @@ namespace Jint.Backend.Compiled
                         : "Postfix";
 
                     member =
-                        expression.Expression as MemberExpression ??
-                        new MemberExpression(expression.Expression, null);
+                        expression.Operand as MemberAccessSyntax ??
+                        new MemberAccessSyntax(expression.Operand, null);
 
                     if (member.Previous == null)
                     {
-                        string memberName = SanitizeName(((Identifier)member.Member).Text);
+                        string memberName = SanitizeName(((IdentifierSyntax)member.Member).Text);
 
                         _block.ScopeBuilder.EnsureVariable(memberName);
                         string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
@@ -1400,7 +1407,7 @@ namespace Jint.Backend.Compiled
                             memberName
                         );
 
-                        var argument = Syntax.Argument((ExpressionSyntax)operand);
+                        var argument = Syntax.Argument((CSharpSyntax.ExpressionSyntax)operand);
 
                         argument.Modifier = ParameterModifier.Ref;
 
@@ -1422,14 +1429,14 @@ namespace Jint.Backend.Compiled
 
                         var baseObject = _result;
 
-                        if (member.Member is Identifier)
+                        if (member.Member is IdentifierSyntax)
                         {
                             _result = Syntax.InvocationExpression(
                                 Syntax.ParseName(type + "IncrementMember"),
                                 Syntax.ArgumentList(
-                                    Syntax.Argument((ExpressionSyntax)baseObject),
-                                    Syntax.Argument(Syntax.LiteralExpression(((Identifier)member.Member).Text)),
-                                    Syntax.Argument((ExpressionSyntax)operand),
+                                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
+                                    Syntax.Argument(Syntax.LiteralExpression(((IdentifierSyntax)member.Member).Text)),
+                                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)operand),
                                     Syntax.Argument(Syntax.LiteralExpression(offset))
                                 )
                             );
@@ -1441,9 +1448,9 @@ namespace Jint.Backend.Compiled
                             _result = Syntax.InvocationExpression(
                                 Syntax.ParseName(type + "IncrementIndexer"),
                                 Syntax.ArgumentList(
-                                    Syntax.Argument((ExpressionSyntax)baseObject),
-                                    Syntax.Argument((ExpressionSyntax)_result),
-                                    Syntax.Argument((ExpressionSyntax)operand),
+                                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
+                                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)_result),
+                                    Syntax.Argument((CSharpSyntax.ExpressionSyntax)operand),
                                     Syntax.Argument(Syntax.LiteralExpression(offset))
                                 )
                             );
@@ -1482,12 +1489,12 @@ namespace Jint.Backend.Compiled
                     //break;
 
                 case UnaryExpressionType.Void:
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
 
                     _result = Syntax.InvocationExpression(
                         Syntax.ParseName("Void"),
                         Syntax.ArgumentList(
-                            Syntax.Argument((ExpressionSyntax)_result)
+                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)_result)
                         )
                     );
                     break;
@@ -1503,7 +1510,7 @@ namespace Jint.Backend.Compiled
                                         BinaryOperator.Minus,
                                         Syntax.LiteralExpression(0),
                                         Syntax.InvocationExpression(
-                                            Syntax.MemberAccessExpression((ExpressionSyntax)operand, "ToNumber"),
+                                            Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)operand, "ToNumber"),
                                             Syntax.ArgumentList()
                                         )
                                     ),
@@ -1517,7 +1524,7 @@ namespace Jint.Backend.Compiled
             }
         }
 
-        public void Visit(ValueExpression expression)
+        public void VisitValue(ValueSyntax expression)
         {
             switch (expression.TypeCode)
             {
@@ -1563,12 +1570,12 @@ namespace Jint.Backend.Compiled
             }
         }
 
-        public void Visit(RegexpExpression expression)
+        public void VisitRegexp(RegexpSyntax expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Visit(Statement expression)
+        public void VisitClrIdentifier(ClrIdentifierSyntax expression)
         {
             throw new NotImplementedException();
         }

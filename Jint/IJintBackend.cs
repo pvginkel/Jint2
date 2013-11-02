@@ -14,7 +14,7 @@ namespace Jint
         PermissionSet PermissionSet { get; set; }
         bool AllowClr { get; set; }
 
-        object Run(Program program, bool unwrap);
+        object Run(ProgramSyntax program, bool unwrap);
 
         object CallFunction(string name, object[] args);
 

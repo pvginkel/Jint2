@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Jint.Expressions;
 using Antlr.Runtime;
@@ -18,13 +19,13 @@ namespace Jint
     {
         private IJintBackend _backend;
 
-        [System.Diagnostics.DebuggerStepThrough]
+        [DebuggerStepThrough]
         public JintEngine()
             : this(Options.EcmaScript5 | Options.Strict)
         {
         }
 
-        [System.Diagnostics.DebuggerStepThrough]
+        [DebuggerStepThrough]
         public JintEngine(Options options)
             : this(options, JintBackend.Compiled)
         {
@@ -55,9 +56,9 @@ namespace Jint
             get { return _backend.Global; }
         }
 
-        public static Program Compile(string source)
+        public static ProgramSyntax Compile(string source)
         {
-            Program program = null;
+            ProgramSyntax program = null;
             if (!string.IsNullOrEmpty(source))
             {
                 var lexer = new ES3Lexer(new ANTLRStringStream(source));
@@ -84,7 +85,7 @@ namespace Jint
             try
             {
                 errors = null;
-                Program program = Compile(script);
+                ProgramSyntax program = Compile(script);
 
                 // In case HasErrors() is called multiple times for the same expression
                 return program != null;
@@ -117,7 +118,7 @@ namespace Jint
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(Program program)
+        public object Run(ProgramSyntax program)
         {
             return Run(program, true);
         }
@@ -165,7 +166,7 @@ namespace Jint
                 throw new
                     ArgumentException("Script can't be null", "script");
 
-            Program program;
+            ProgramSyntax program;
 
             try
             {
@@ -191,7 +192,7 @@ namespace Jint
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(Program program, bool unwrap)
+        public object Run(ProgramSyntax program, bool unwrap)
         {
             return _backend.Run(program, unwrap);
         }

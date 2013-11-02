@@ -137,8 +137,8 @@ namespace Jint.Native
 
             if (parameters.Length >= 1)
             {
-                Program p = JintEngine.Compile(parameters[parameters.Length - 1].Value.ToString());
-                instance.Statement = new BlockStatement(p);
+                ProgramSyntax p = JintEngine.Compile(parameters[parameters.Length - 1].Value.ToString());
+                instance.Statement = new BlockSyntax(p);
             }
 
             return instance;

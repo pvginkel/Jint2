@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Expressions {
+namespace Jint.Expressions
+{
     [Serializable]
-    public class CaseClause {
-        public Expression Expression { get; set; }
-        public BlockStatement Statements { get; private set; }
+    public class CaseClause
+    {
+        public ExpressionSyntax Expression { get; set; }
+        public BlockSyntax Body { get; private set; }
 
-        public CaseClause() {
-            Statements = new BlockStatement();
+        public CaseClause()
+        {
+            Body = new BlockSyntax();
         }
     }
 }

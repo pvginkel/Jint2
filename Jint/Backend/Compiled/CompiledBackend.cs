@@ -38,14 +38,14 @@ namespace Jint.Backend.Compiled
             GlobalScope = new JsScope(global);
         }
 
-        public object Run(Program program, bool unwrap)
+        public object Run(ProgramSyntax program, bool unwrap)
         {
             if (program == null)
                 throw new ArgumentNullException("program");
 
             _visitor.Reset();
 
-            _visitor.Visit(program);
+            _visitor.VisitProgram(program);
 
             _visitor.Close();
 

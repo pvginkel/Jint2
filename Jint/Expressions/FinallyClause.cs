@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Expressions {
+namespace Jint.Expressions
+{
     [Serializable]
-    public class FinallyClause {
-        public Statement Statement { get; set; }
+    public class FinallyClause
+    {
+        public SyntaxNode Body { get; set; }
 
-        public FinallyClause(Statement statement) {
-            Statement = statement;
+        public FinallyClause(SyntaxNode statement)
+        {
+            Body = statement;
         }
     }
 }

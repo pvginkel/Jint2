@@ -14,11 +14,11 @@ namespace Jint.Native
         public static string PrototypeName = "prototype";
 
         public string Name { get; set; }
-        public Statement Statement { get; set; }
+        public SyntaxNode Statement { get; set; }
         public List<string> Arguments { get; set; }
         public JsScope Scope { get; set; }
 
-        public JsFunction(IGlobal global, Statement statement)
+        public JsFunction(IGlobal global, SyntaxNode statement)
             : this(global.FunctionClass.PrototypeProperty)
         {
             Statement = statement;
@@ -41,7 +41,7 @@ namespace Jint.Native
             : base(prototype)
         {
             Arguments = new List<string>();
-            Statement = new EmptyStatement();
+            Statement = new EmptySyntax();
             DefineOwnProperty(PrototypeName, JsNull.Instance, PropertyAttributes.DontEnum);
         }
 
@@ -111,7 +111,7 @@ namespace Jint.Native
             if (genericArguments != null)
                 throw new JintException("This method can't be called as a generic");
 
-            Statement.Accept((IStatementVisitor)visitor);
+            Statement.Accept((ISyntaxVisitor)visitor);
             return that;
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Permissions;
 using System.Text;
 using Jint.Expressions;
@@ -10,7 +11,7 @@ using System.Security;
 namespace Jint.Backend.Interpreted
 {
 
-    internal class Visitor : IStatementVisitor, IJintVisitor
+    internal class Visitor : ISyntaxVisitor, IJintVisitor
     {
         private readonly IJintBackend _backend;
 
@@ -29,7 +30,7 @@ namespace Jint.Backend.Interpreted
 
         private bool _exit;
 
-        public Statement CurrentStatement { get; set; }
+        public SyntaxNode CurrentStatement { get; set; }
 
         public JsInstance Returned { get; private set; }
         public bool AllowClr { get; set; }
@@ -113,7 +114,7 @@ namespace Jint.Backend.Interpreted
             Scopes.Pop();
         }
 
-        public void Visit(Program program)
+        public void VisitProgram(ProgramSyntax program)
         {
             // initialize local variables, in case the visitor is used multiple times by the same engine
             _typeFullName = null;
@@ -135,43 +136,43 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(AssignmentExpression statement)
+        public void VisitAssignment(AssignmentSyntax statement)
         {
             switch (statement.AssignmentOperator)
             {
                 case AssignmentOperator.Assign: statement.Right.Accept(this);
                     break;
-                case AssignmentOperator.Multiply: new BinaryExpression(BinaryExpressionType.Times, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.Multiply: new BinaryExpressionSyntax(BinaryExpressionType.Times, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.Divide: new BinaryExpression(BinaryExpressionType.Div, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.Divide: new BinaryExpressionSyntax(BinaryExpressionType.Div, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.Modulo: new BinaryExpression(BinaryExpressionType.Modulo, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.Modulo: new BinaryExpressionSyntax(BinaryExpressionType.Modulo, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.Add: new BinaryExpression(BinaryExpressionType.Plus, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.Add: new BinaryExpressionSyntax(BinaryExpressionType.Plus, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.Substract: new BinaryExpression(BinaryExpressionType.Minus, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.Substract: new BinaryExpressionSyntax(BinaryExpressionType.Minus, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.ShiftLeft: new BinaryExpression(BinaryExpressionType.LeftShift, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.ShiftLeft: new BinaryExpressionSyntax(BinaryExpressionType.LeftShift, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.ShiftRight: new BinaryExpression(BinaryExpressionType.RightShift, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.ShiftRight: new BinaryExpressionSyntax(BinaryExpressionType.RightShift, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.UnsignedRightShift: new BinaryExpression(BinaryExpressionType.UnsignedRightShift, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.UnsignedRightShift: new BinaryExpressionSyntax(BinaryExpressionType.UnsignedRightShift, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.And: new BinaryExpression(BinaryExpressionType.BitwiseAnd, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.And: new BinaryExpressionSyntax(BinaryExpressionType.BitwiseAnd, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.Or: new BinaryExpression(BinaryExpressionType.BitwiseOr, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.Or: new BinaryExpressionSyntax(BinaryExpressionType.BitwiseOr, statement.Left, statement.Right).Accept(this);
                     break;
-                case AssignmentOperator.XOr: new BinaryExpression(BinaryExpressionType.BitwiseXOr, statement.Left, statement.Right).Accept(this);
+                case AssignmentOperator.XOr: new BinaryExpressionSyntax(BinaryExpressionType.BitwiseXOr, statement.Left, statement.Right).Accept(this);
                     break;
                 default: throw new NotSupportedException();
             }
 
             JsInstance right = Result;
 
-            MemberExpression left = statement.Left as MemberExpression;
+            MemberAccessSyntax left = statement.Left as MemberAccessSyntax;
             if (left == null)
             {
-                left = new MemberExpression(statement.Left, null);
+                left = new MemberAccessSyntax(statement.Left, null);
             }
 
             Assign(left, right);
@@ -179,7 +180,7 @@ namespace Jint.Backend.Interpreted
             Result = right;
         }
 
-        public void Assign(MemberExpression left, JsInstance value)
+        public void Assign(MemberAccessSyntax left, JsInstance value)
         {
             string propertyName;
             Descriptor d = null;
@@ -206,16 +207,16 @@ namespace Jint.Backend.Interpreted
             {
                 baseObject = CurrentScope;
                 // this a variable
-                propertyName = ((Identifier)left.Member).Text;
+                propertyName = ((IdentifierSyntax)left.Member).Text;
 
                 CurrentScope.TryGetDescriptor(propertyName, out d);
             }
 
             // now baseObject contains an object or a scope against which to resolve left.Member
 
-            if (left.Member is Identifier)
+            if (left.Member is IdentifierSyntax)
             {
-                propertyName = ((Identifier)left.Member).Text;
+                propertyName = ((IdentifierSyntax)left.Member).Text;
 
                 // Assigning function Name
                 //if (value.Class == JsInstance.CLASS_FUNCTION)
@@ -225,10 +226,10 @@ namespace Jint.Backend.Interpreted
             }
             else
             {
-                Indexer indexer = left.Member as Indexer;
+                IndexerSyntax indexer = left.Member as IndexerSyntax;
 
                 // calculate index expression
-                indexer.Index.Accept(this);
+                indexer.Expression.Accept(this);
 
                 if (baseObject is JsObject)
                 {
@@ -248,9 +249,9 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(CommaOperatorStatement statement)
+        public void VisitCommaOperator(CommaOperatorSyntax statement)
         {
-            foreach (var s in statement.Statements)
+            foreach (var s in statement.Expressions)
             {
                 s.Accept(this);
 
@@ -261,9 +262,9 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(BlockStatement statement)
+        public void VisitBlock(BlockSyntax statement)
         {
-            Statement oldStatement = CurrentStatement;
+            SyntaxNode oldStatement = CurrentStatement;
             foreach (var s in statement.Statements)
             {
                 CurrentStatement = s;
@@ -281,25 +282,25 @@ namespace Jint.Backend.Interpreted
             CurrentStatement = oldStatement;
         }
 
-        private ContinueStatement _continueStatement;
+        private ContinueSyntax _continueStatement;
 
-        public void Visit(ContinueStatement statement)
+        public void VisitContinue(ContinueSyntax statement)
         {
             _continueStatement = statement;
         }
 
-        private BreakStatement _breakStatement;
+        private BreakSyntax _breakStatement;
 
-        public void Visit(BreakStatement statement)
+        public void VisitBreak(BreakSyntax statement)
         {
             _breakStatement = statement;
         }
 
-        public void Visit(DoWhileStatement statement)
+        public void VisitDoWhile(DoWhileSyntax statement)
         {
             do
             {
-                statement.Statement.Accept(this);
+                statement.Body.Accept(this);
 
                 ResetContinueIfPresent(statement.Label);
 
@@ -313,32 +314,31 @@ namespace Jint.Backend.Interpreted
                     return;
                 }
 
-                statement.Condition.Accept(this);
+                statement.Test.Accept(this);
 
                 EnsureIdentifierIsDefined(Result);
 
             } while (Result.ToBoolean());
         }
 
-        public void Visit(EmptyStatement statement)
+        public void VisitEmpty(EmptySyntax statement)
         {
-            return;
         }
 
-        [System.Diagnostics.DebuggerStepThrough]
-        public void Visit(ExpressionStatement statement)
+        [DebuggerStepThrough]
+        public void VisitExpressionStatement(ExpressionStatementSyntax statement)
         {
             statement.Expression.Accept(this);
         }
 
-        public void Visit(ForEachInStatement statement)
+        public void VisitForEachIn(ForEachInSyntax statement)
         {
             string identifier;
 
-            if (statement.InitialisationStatement is VariableDeclarationStatement)
-                identifier = ((VariableDeclarationStatement)statement.InitialisationStatement).Identifier;
-            else if (statement.InitialisationStatement is Identifier)
-                identifier = ((Identifier)statement.InitialisationStatement).Text;
+            if (statement.Initialization is VariableDeclarationSyntax)
+                identifier = ((VariableDeclarationSyntax)statement.Initialization).Identifier;
+            else if (statement.Initialization is IdentifierSyntax)
+                identifier = ((IdentifierSyntax)statement.Initialization).Text;
             else
                 throw new NotSupportedException("Only variable declaration are allowed in a for in loop");
 
@@ -352,7 +352,7 @@ namespace Jint.Backend.Interpreted
                 {
                     CurrentScope[identifier] = Global.WrapClr(value);
 
-                    statement.Statement.Accept(this);
+                    statement.Body.Accept(this);
 
                     ResetContinueIfPresent(statement.Label);
 
@@ -380,7 +380,7 @@ namespace Jint.Backend.Interpreted
 
                     CurrentScope[identifier] = Global.StringClass.New(value);
 
-                    statement.Statement.Accept(this);
+                    statement.Body.Accept(this);
 
                     ResetContinueIfPresent(statement.Label);
 
@@ -403,7 +403,7 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(WithStatement statement)
+        public void VisitWith(WithSyntax statement)
         {
             statement.Expression.Accept(this);
 
@@ -416,7 +416,7 @@ namespace Jint.Backend.Interpreted
 
             try
             {
-                statement.Statement.Accept(this);
+                statement.Body.Accept(this);
             }
             finally
             {
@@ -424,13 +424,13 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(ForStatement statement)
+        public void VisitFor(ForSyntax syntax)
         {
-            if (statement.InitialisationStatement != null)
-                statement.InitialisationStatement.Accept(this);
+            if (syntax.Initialization != null)
+                syntax.Initialization.Accept(this);
 
-            if (statement.ConditionExpression != null)
-                statement.ConditionExpression.Accept(this);
+            if (syntax.Test != null)
+                syntax.Test.Accept(this);
             else
                 Result = Global.BooleanClass.New(true);
 
@@ -438,13 +438,13 @@ namespace Jint.Backend.Interpreted
 
             while (Result.ToBoolean())
             {
-                statement.Statement.Accept(this);
+                syntax.Body.Accept(this);
 
-                ResetContinueIfPresent(statement.Label);
+                ResetContinueIfPresent(syntax.Label);
 
                 if (StopStatementFlow())
                 {
-                    if (_breakStatement != null && statement.Label == _breakStatement.Label)
+                    if (_breakStatement != null && syntax.Label == _breakStatement.Label)
                     {
                         _breakStatement = null;
                     }
@@ -453,11 +453,11 @@ namespace Jint.Backend.Interpreted
                 }
 
                 // Goes back in the scopes so that the variables are accessible after the statement
-                if (statement.IncrementExpression != null)
-                    statement.IncrementExpression.Accept(this);
+                if (syntax.Increment != null)
+                    syntax.Increment.Accept(this);
 
-                if (statement.ConditionExpression != null)
-                    statement.ConditionExpression.Accept(this);
+                if (syntax.Test != null)
+                    syntax.Test.Accept(this);
                 else
                     Result = Global.BooleanClass.New(true);
 
@@ -468,11 +468,11 @@ namespace Jint.Backend.Interpreted
         {
             JsFunction f = Global.FunctionClass.New();
 
-            var statementsWithDefaultReturn = new BlockStatement();
+            var statementsWithDefaultReturn = new BlockSyntax();
 
             // injects a default return statement at the end of each function
-            statementsWithDefaultReturn.Statements.AddLast(functionDeclaration.Statement);
-            statementsWithDefaultReturn.Statements.AddLast(new ReturnStatement(new Identifier("undefined")));
+            statementsWithDefaultReturn.Statements.AddLast(functionDeclaration.Body);
+            statementsWithDefaultReturn.Statements.AddLast(new ReturnSyntax(new IdentifierSyntax("undefined")));
             f.Statement = statementsWithDefaultReturn;
 
             f.Name = functionDeclaration.Name;
@@ -491,15 +491,15 @@ namespace Jint.Backend.Interpreted
             return f;
         }
 
-        public void Visit(FunctionDeclarationStatement statement)
+        public void VisitFunctionDeclaration(FunctionDeclarationSyntax statement)
         {
             JsFunction f = CreateFunction(statement);
             CurrentScope.DefineOwnProperty(statement.Name, f);
         }
 
-        public void Visit(IfStatement statement)
+        public void VisitIf(IfSyntax statement)
         {
-            statement.Expression.Accept(this);
+            statement.Test.Accept(this);
 
             EnsureIdentifierIsDefined(Result);
 
@@ -516,7 +516,7 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(ReturnStatement statement)
+        public void VisitReturn(ReturnSyntax statement)
         {
             if (statement.Expression != null)
             {
@@ -533,30 +533,30 @@ namespace Jint.Backend.Interpreted
             return Returned;
         }
 
-        public void Visit(SwitchStatement statement)
+        public void VisitSwitch(SwitchSyntax statement)
         {
             CurrentStatement = statement.Expression;
 
             bool found = false;
-            if (statement.CaseClauses != null)
+            if (statement.Cases != null)
             {
-                foreach (var clause in statement.CaseClauses)
+                foreach (var clause in statement.Cases)
                 {
                     CurrentStatement = clause.Expression;
 
                     if (found)
                     {
                         // jumping from one case to the next one
-                        clause.Statements.Accept(this);
+                        clause.Body.Accept(this);
                         if (_exit)
                             break;
                     }
                     else
                     {
-                        new BinaryExpression(BinaryExpressionType.Equal, (Expression)statement.Expression, clause.Expression).Accept(this);
+                        new BinaryExpressionSyntax(BinaryExpressionType.Equal, (ExpressionSyntax)statement.Expression, clause.Expression).Accept(this);
                         if (Result.ToBoolean())
                         {
-                            clause.Statements.Accept(this);
+                            clause.Body.Accept(this);
                             found = true;
                             if (_exit)
                                 break;
@@ -571,9 +571,9 @@ namespace Jint.Backend.Interpreted
                 }
             }
 
-            if (!found && statement.DefaultStatements != null)
+            if (!found && statement.Default != null)
             {
-                statement.DefaultStatements.Accept(this);
+                statement.Default.Accept(this);
 
                 // handle break statements in default case by clearing it
                 if (_breakStatement != null)
@@ -583,7 +583,7 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(ThrowStatement statement)
+        public void VisitThrow(ThrowSyntax statement)
         {
             Result = JsUndefined.Instance;
 
@@ -595,11 +595,11 @@ namespace Jint.Backend.Interpreted
             throw new JsException(Result);
         }
 
-        public void Visit(TryStatement statement)
+        public void VisitTry(TrySyntax statement)
         {
             try
             {
-                statement.Statement.Accept(this);
+                statement.Body.Accept(this);
             }
             catch (Exception e)
             {
@@ -615,10 +615,10 @@ namespace Jint.Backend.Interpreted
                     if (statement.Catch.Identifier != null)
                     {
                         // if catch is called, Result contains the thrown value
-                        Assign(new MemberExpression(new PropertyExpression(statement.Catch.Identifier), null), jsException.Value);
+                        Assign(new MemberAccessSyntax(new PropertySyntax(statement.Catch.Identifier), null), jsException.Value);
                     }
 
-                    statement.Catch.Statement.Accept(this);
+                    statement.Catch.Body.Accept(this);
                 }
                 else
                 {
@@ -631,13 +631,13 @@ namespace Jint.Backend.Interpreted
                 if (statement.Finally != null)
                 {
                     JsObject catchScope = new JsObject();
-                    statement.Finally.Statement.Accept(this);
+                    statement.Finally.Body.Accept(this);
                 }
             }
 
         }
 
-        public void Visit(VariableDeclarationStatement statement)
+        public void VisitVariableDeclaration(VariableDeclarationSyntax statement)
         {
             Result = JsUndefined.Instance;
 
@@ -669,15 +669,15 @@ namespace Jint.Backend.Interpreted
 
         }
 
-        public void Visit(WhileStatement statement)
+        public void VisitWhile(WhileSyntax statement)
         {
-            statement.Condition.Accept(this);
+            statement.Test.Accept(this);
 
             EnsureIdentifierIsDefined(Result);
 
             while (Result.ToBoolean())
             {
-                statement.Statement.Accept(this);
+                statement.Body.Accept(this);
 
                 ResetContinueIfPresent(statement.Label);
 
@@ -691,11 +691,11 @@ namespace Jint.Backend.Interpreted
                     return;
                 }
 
-                statement.Condition.Accept(this);
+                statement.Test.Accept(this);
             }
         }
 
-        public void Visit(NewExpression expression)
+        public void VisitNew(NewSyntax expression)
         {
 
             Result = null;
@@ -712,7 +712,7 @@ namespace Jint.Backend.Interpreted
                 try
                 {
                     int i = 0;
-                    foreach (Expression generic in expression.Generics)
+                    foreach (ExpressionSyntax generic in expression.Generics)
                     {
                         generic.Accept(this);
                         genericParameters[i] = Global.Marshaller.MarshalJsValue<Type>(Result);
@@ -749,12 +749,12 @@ namespace Jint.Backend.Interpreted
                 throw new JsException(Global.ErrorClass.New("Function expected."));
         }
 
-        public void Visit(TernaryExpression expression)
+        public void VisitTernary(TernarySyntax expression)
         {
             Result = null;
 
             // Evaluates the left expression and saves the value
-            expression.LeftExpression.Accept(this);
+            expression.Test.Accept(this);
             var left = Result;
 
             Result = null;
@@ -764,12 +764,12 @@ namespace Jint.Backend.Interpreted
             if (left.ToBoolean())
             {
                 // Evaluates the middle expression
-                expression.MiddleExpression.Accept(this);
+                expression.Then.Accept(this);
             }
             else
             {
                 // Evaluates the right expression
-                expression.RightExpression.Accept(this);
+                expression.Else.Accept(this);
             }
         }
 
@@ -904,10 +904,10 @@ namespace Jint.Backend.Interpreted
         }
 
 
-        public void Visit(BinaryExpression expression)
+        public void VisitBinaryExpression(BinaryExpressionSyntax expression)
         {
             // Evaluates the left expression and saves the value
-            expression.LeftExpression.Accept(this);
+            expression.Left.Accept(this);
 
             EnsureIdentifierIsDefined(Result);
 
@@ -928,7 +928,7 @@ namespace Jint.Backend.Interpreted
             }
 
             // Evaluates the right expression and saves the value
-            expression.RightExpression.Accept(this);
+            expression.Right.Accept(this);
 
             EnsureIdentifierIsDefined(Result);
 
@@ -1087,7 +1087,7 @@ namespace Jint.Backend.Interpreted
                     break;
 
                 case BinaryExpressionType.NotSame:
-                    new BinaryExpression(BinaryExpressionType.Same, expression.LeftExpression, expression.RightExpression).Accept(this);
+                    new BinaryExpressionSyntax(BinaryExpressionType.Same, expression.Left, expression.Right).Accept(this);
                     Result = Global.BooleanClass.New(!Result.ToBoolean());
                     break;
 
@@ -1123,9 +1123,9 @@ namespace Jint.Backend.Interpreted
                         var func = right as JsFunction;
                         var obj = left as JsObject;
                         if (func == null)
-                            throw new JsException(Global.TypeErrorClass.New("Right argument should be a function: " + expression.RightExpression.ToString()));
+                            throw new JsException(Global.TypeErrorClass.New("Right argument should be a function: " + expression.Right.ToString()));
                         if (obj == null)
-                            throw new JsException(Global.TypeErrorClass.New("Left argument should be an object: " + expression.LeftExpression.ToString()));
+                            throw new JsException(Global.TypeErrorClass.New("Left argument should be an object: " + expression.Left.ToString()));
 
                         Result = Global.BooleanClass.New(func.HasInstance(obj));
                     }
@@ -1148,15 +1148,15 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(UnaryExpression expression)
+        public void VisitUnaryExpression(UnaryExpressionSyntax expression)
         {
-            MemberExpression member;
+            MemberAccessSyntax member;
 
             switch (expression.Type)
             {
                 case UnaryExpressionType.TypeOf:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
 
                     if (Result == null)
                         Result = Global.StringClass.New(JsUndefined.Instance.Type);
@@ -1170,30 +1170,30 @@ namespace Jint.Backend.Interpreted
                     break;
 
                 case UnaryExpressionType.Not:
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     Result = Global.BooleanClass.New(!Result.ToBoolean());
                     break;
 
                 case UnaryExpressionType.Negate:
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     Result = Global.NumberClass.New(-Result.ToNumber());
                     break;
 
                 case UnaryExpressionType.Positive:
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     Result = Global.NumberClass.New(+Result.ToNumber());
                     break;
 
                 case UnaryExpressionType.PostfixPlusPlus:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     JsInstance value = Result;
 
-                    member = expression.Expression as MemberExpression ?? new MemberExpression(expression.Expression, null);
+                    member = expression.Operand as MemberAccessSyntax ?? new MemberAccessSyntax(expression.Operand, null);
 
                     Assign(member, Global.NumberClass.New(value.ToNumber() + 1));
 
@@ -1203,11 +1203,11 @@ namespace Jint.Backend.Interpreted
 
                 case UnaryExpressionType.PostfixMinusMinus:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     value = Result;
 
-                    member = expression.Expression as MemberExpression ?? new MemberExpression(expression.Expression, null);
+                    member = expression.Operand as MemberAccessSyntax ?? new MemberAccessSyntax(expression.Operand, null);
 
                     Assign(member, Global.NumberClass.New(value.ToNumber() - 1));
 
@@ -1217,40 +1217,40 @@ namespace Jint.Backend.Interpreted
 
                 case UnaryExpressionType.PrefixPlusPlus:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     value = Global.NumberClass.New(Result.ToNumber() + 1);
 
-                    member = expression.Expression as MemberExpression ?? new MemberExpression(expression.Expression, null);
+                    member = expression.Operand as MemberAccessSyntax ?? new MemberAccessSyntax(expression.Operand, null);
                     Assign(member, value);
 
                     break;
 
                 case UnaryExpressionType.PrefixMinusMinus:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     value = Global.NumberClass.New(Result.ToNumber() - 1);
 
-                    member = expression.Expression as MemberExpression ?? new MemberExpression(expression.Expression, null);
+                    member = expression.Operand as MemberAccessSyntax ?? new MemberAccessSyntax(expression.Operand, null);
                     Assign(member, value);
 
                     break;
 
                 case UnaryExpressionType.Delete:
 
-                    member = expression.Expression as MemberExpression;
+                    member = expression.Operand as MemberAccessSyntax;
                     if (member == null)
                         throw new NotImplementedException("delete");
                     member.Previous.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     value = Result;
                     string propertyName = null;
-                    if (member.Member is PropertyExpression)
-                        propertyName = ((PropertyExpression)member.Member).Text;
-                    if (member.Member is Indexer)
+                    if (member.Member is PropertySyntax)
+                        propertyName = ((PropertySyntax)member.Member).Text;
+                    if (member.Member is IndexerSyntax)
                     {
-                        ((Indexer)member.Member).Index.Accept(this);
+                        ((IndexerSyntax)member.Member).Expression.Accept(this);
                         propertyName = Result.ToString();
                     }
                     if (string.IsNullOrEmpty(propertyName))
@@ -1268,13 +1268,13 @@ namespace Jint.Backend.Interpreted
 
                 case UnaryExpressionType.Void:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     Result = JsUndefined.Instance;
                     break;
 
                 case UnaryExpressionType.Inv:
 
-                    expression.Expression.Accept(this);
+                    expression.Operand.Accept(this);
                     EnsureIdentifierIsDefined(Result);
                     Result = Global.NumberClass.New(0 - Result.ToNumber() - 1);
                     break;
@@ -1282,7 +1282,7 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(ValueExpression expression)
+        public void VisitValue(ValueSyntax expression)
         {
             switch (expression.TypeCode)
             {
@@ -1296,18 +1296,18 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(FunctionExpression fe)
+        public void VisitFunction(FunctionSyntax fe)
         {
             Result = CreateFunction(fe);
         }
 
-        public void Visit(Statement expression)
+        public void VisitClrIdentifier(ClrIdentifierSyntax expression)
         {
             // fallback for an unsupported expression
             throw new NotImplementedException();
         }
 
-        public void Visit(MemberExpression expression)
+        public void VisitMemberAccess(MemberAccessSyntax expression)
         {
             if (expression.Previous != null)
             {
@@ -1340,13 +1340,13 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(Indexer indexer)
+        public void VisitIndexer(IndexerSyntax indexer)
         {
             EnsureIdentifierIsDefined(Result);
 
             JsObject target = (JsObject)Result;
 
-            indexer.Index.Accept(this);
+            indexer.Expression.Accept(this);
 
             if (target.IsClr)
                 EnsureClrAllowed();
@@ -1370,7 +1370,7 @@ namespace Jint.Backend.Interpreted
                 SetResult(target[Result], target);
         }
 
-        public void Visit(MethodCall methodCall)
+        public void VisitMethodCall(MethodCallSyntax methodCall)
         {
             var that = CallTarget;
             var target = Result;
@@ -1433,13 +1433,13 @@ namespace Jint.Backend.Interpreted
                 for (var i = 0; i < original.Length; i++)
                     if (original[i] != parameters[i])
                     {
-                        if (methodCall.Arguments[i] is MemberExpression && ((MemberExpression)methodCall.Arguments[i]).Member is IAssignable)
+                        if (methodCall.Arguments[i] is MemberAccessSyntax && ((MemberAccessSyntax)methodCall.Arguments[i]).Member is IAssignable)
                         {
-                            Assign((MemberExpression)methodCall.Arguments[i], parameters[i]);
+                            Assign((MemberAccessSyntax)methodCall.Arguments[i], parameters[i]);
                         }
-                        else if (methodCall.Arguments[i] is Identifier)
+                        else if (methodCall.Arguments[i] is IdentifierSyntax)
                         {
-                            Assign(new MemberExpression(methodCall.Arguments[i], null), parameters[i]);
+                            Assign(new MemberAccessSyntax(methodCall.Arguments[i], null), parameters[i]);
                         }
                     }
 
@@ -1548,7 +1548,7 @@ namespace Jint.Backend.Interpreted
         }
 
 
-        public void Visit(PropertyExpression expression)
+        public void VisitProperty(PropertySyntax expression)
         {
             // save base of current expression
             var callTarget = Result as JsDictionaryObject;
@@ -1579,7 +1579,7 @@ namespace Jint.Backend.Interpreted
             SetResult(JsUndefined.Instance, callTarget);
         }
 
-        public void Visit(PropertyDeclarationExpression expression)
+        public void VisitPropertyDeclaration(PropertyDeclarationSyntax expression)
         {
             // previous result was the object in which we need to define a property
             var target = Result as JsDictionaryObject;
@@ -1610,7 +1610,7 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(Identifier expression)
+        public void VisitIdentifier(IdentifierSyntax expression)
         {
             Result = null;
 
@@ -1661,7 +1661,7 @@ namespace Jint.Backend.Interpreted
             }
         }
 
-        public void Visit(JsonExpression json)
+        public void VisitJsonExpression(JsonExpressionSyntax json)
         {
             JsObject instance = Global.ObjectClass.New();
 
@@ -1692,7 +1692,7 @@ namespace Jint.Backend.Interpreted
             _continueStatement != null;
         }
 
-        public void Visit(ArrayDeclaration expression)
+        public void VisitArrayDeclaration(ArrayDeclarationSyntax expression)
         {
             var array = Global.ArrayClass.New();
 
@@ -1708,7 +1708,7 @@ namespace Jint.Backend.Interpreted
             Result = array;
         }
 
-        public void Visit(RegexpExpression expression)
+        public void VisitRegexp(RegexpSyntax expression)
         {
             Result = Global.RegExpClass.New(expression.Regexp, expression.Options.Contains("g"), expression.Options.Contains("i"), expression.Options.Contains("m"));
         }
