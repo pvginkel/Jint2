@@ -7,6 +7,7 @@ namespace Jint
     internal enum JintBackend
     {
         Interpreted,
-        Compiled
+        Compiled,
+        Dlr
     }
 }

@@ -180,7 +180,6 @@ namespace Jint.Expressions
 
         public virtual void VisitProperty(PropertySyntax syntax)
         {
-            VisitIdentifier(syntax);
         }
 
         public virtual void VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)

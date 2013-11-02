@@ -12,7 +12,7 @@ namespace Jint.Expressions
     public class MemberAccessSyntax : ExpressionSyntax
     {
         public ExpressionSyntax Member { get; set; }
-        public ExpressionSyntax Previous { get; set; }
+        public ExpressionSyntax Previous { get; private set; }
 
         public MemberAccessSyntax(ExpressionSyntax member, ExpressionSyntax previous)
         {

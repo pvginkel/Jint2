@@ -8,6 +8,6 @@ namespace Jint.Expressions
     {
         string Name { get; set; }
         List<string> Parameters { get; set; }
-        SyntaxNode Body { get; set; }
+        BlockSyntax Body { get; set; }
     }
 }

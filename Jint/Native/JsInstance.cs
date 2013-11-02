@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using Jint.Expressions;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     /// <summary>
     /// A base class for values in javascript.
     /// </summary>
     [Serializable]
-    public abstract class JsInstance : IComparable<JsInstance> {
+    public abstract class JsInstance : IComparable<JsInstance>
+    {
         public static JsInstance[] Empty = new JsInstance[0];
 
         public static bool IsNullOrUndefined(JsInstance o)
@@ -22,35 +24,43 @@ namespace Jint.Native {
 
         public PropertyAttributes Attributes { get; set; }
 
-        public virtual JsInstance ToPrimitive(IGlobal global) {
+        public virtual JsInstance ToPrimitive(IGlobal global)
+        {
             return JsUndefined.Instance;
         }
 
-        public virtual bool ToBoolean() {
+        public virtual bool ToBoolean()
+        {
             return true;
         }
 
-        public virtual double ToNumber() {
+        public virtual double ToNumber()
+        {
             return 0;
         }
 
-        public virtual int ToInteger() {
+        public virtual int ToInteger()
+        {
             return (int)ToNumber();
         }
 
-        public virtual object ToObject() {
+        public virtual object ToObject()
+        {
             return Value;
         }
 
-        public virtual string ToSource() {
+        public virtual string ToSource()
+        {
             return ToString();
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return (Value ?? Class).ToString();
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return Value != null ? Value.GetHashCode() : base.GetHashCode();
         }
 
@@ -66,7 +76,7 @@ namespace Jint.Native {
         public const string TypeofFunction = "function"; // used only in typeof operator!!!
 
         // embed classes ecma262.3 15
-        
+
         public const string ClassNumber = "Number";
         public const string ClassString = "String";
         public const string ClassBoolean = "Boolean";
@@ -104,8 +114,9 @@ namespace Jint.Native {
         /// <param name="function"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        [Obsolete("will be removed in the 1.0 version",true)]
-        public virtual object Call(IJintVisitor visitor, string function, params JsInstance[] parameters) {
+        [Obsolete("will be removed in the 1.0 version", true)]
+        public virtual object Call(IJintVisitor visitor, string function, params JsInstance[] parameters)
+        {
             if (function == "toString")
                 return visitor.Global.StringClass.New(ToString());
             return JsUndefined.Instance;
@@ -154,7 +165,7 @@ namespace Jint.Native {
             else
             {
                 return global.BooleanClass.False;
-            }            
+            }
         }
 
 

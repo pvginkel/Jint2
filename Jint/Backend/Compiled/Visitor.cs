@@ -139,9 +139,9 @@ namespace Jint.Backend.Compiled
         {
             _lastIdentifier = null;
 
-            foreach (string variableName in expression.DeclaredVariables)
+            foreach (var variable in expression.DeclaredVariables)
             {
-                _block.ScopeBuilder.EnsureVariable(variableName);
+                _block.ScopeBuilder.EnsureVariable(variable.Name);
             }
 
             foreach (var statement in expression.Statements)
@@ -213,7 +213,7 @@ namespace Jint.Backend.Compiled
 
             if (left.Previous == null)
             {
-                string memberName = SanitizeName(((IdentifierSyntax)left.Member).Text);
+                string memberName = SanitizeName(((IdentifierSyntax)left.Member).Name);
                 string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
 
                 // If we're assigning a variable that isn't known in any scope,
@@ -246,7 +246,7 @@ namespace Jint.Backend.Compiled
                         Syntax.ParseName("AssignMember"),
                         Syntax.ArgumentList(
                             Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
-                            Syntax.Argument(Syntax.LiteralExpression(((IdentifierSyntax)left.Member).Text)),
+                            Syntax.Argument(Syntax.LiteralExpression(((IdentifierSyntax)left.Member).Name)),
                             Syntax.Argument((CSharpSyntax.ExpressionSyntax)right)
                         )
                     );
@@ -288,9 +288,9 @@ namespace Jint.Backend.Compiled
         {
             var block = Syntax.Block();
 
-            foreach (string variableName in expression.DeclaredVariables)
+            foreach (var variable in expression.DeclaredVariables)
             {
-                _block.ScopeBuilder.EnsureVariable(variableName);
+                _block.ScopeBuilder.EnsureVariable(variable.Name);
             }
 
             foreach (var statement in expression.Statements)
@@ -335,7 +335,7 @@ namespace Jint.Backend.Compiled
             if (statement.Initialization is VariableDeclarationSyntax)
                 identifier = ((VariableDeclarationSyntax)statement.Initialization).Identifier;
             else if (statement.Initialization is IdentifierSyntax)
-                identifier = ((IdentifierSyntax)statement.Initialization).Text;
+                identifier = ((IdentifierSyntax)statement.Initialization).Name;
             else
                 throw new NotSupportedException("Only variable declaration are allowed in a for in loop");
 
@@ -916,7 +916,7 @@ namespace Jint.Backend.Compiled
                 Syntax.ParseName("GetByProperty"),
                 Syntax.ArgumentList(
                     Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
-                    Syntax.Argument(Syntax.LiteralExpression(expression.Text))
+                    Syntax.Argument(Syntax.LiteralExpression(expression.Name))
                 )
             );
         }
@@ -928,7 +928,7 @@ namespace Jint.Backend.Compiled
 
         public void VisitIdentifier(IdentifierSyntax expression)
         {
-            string propertyName = _lastIdentifier = SanitizeName(expression.Text);
+            string propertyName = _lastIdentifier = SanitizeName(expression.Name);
             string alias = _block.ScopeBuilder.FindAndCreateAlias(propertyName);
 
             if (alias != null)
@@ -1388,7 +1388,7 @@ namespace Jint.Backend.Compiled
 
                     if (member.Previous == null)
                     {
-                        string memberName = SanitizeName(((IdentifierSyntax)member.Member).Text);
+                        string memberName = SanitizeName(((IdentifierSyntax)member.Member).Name);
 
                         _block.ScopeBuilder.EnsureVariable(memberName);
                         string alias = _block.ScopeBuilder.FindAndCreateAlias(memberName);
@@ -1435,7 +1435,7 @@ namespace Jint.Backend.Compiled
                                 Syntax.ParseName(type + "IncrementMember"),
                                 Syntax.ArgumentList(
                                     Syntax.Argument((CSharpSyntax.ExpressionSyntax)baseObject),
-                                    Syntax.Argument(Syntax.LiteralExpression(((IdentifierSyntax)member.Member).Text)),
+                                    Syntax.Argument(Syntax.LiteralExpression(((IdentifierSyntax)member.Member).Name)),
                                     Syntax.Argument((CSharpSyntax.ExpressionSyntax)operand),
                                     Syntax.Argument(Syntax.LiteralExpression(offset))
                                 )

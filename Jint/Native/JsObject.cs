@@ -2,56 +2,68 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsObject : JsDictionaryObject {
-
+    public class JsObject : JsDictionaryObject
+    {
         public INativeIndexer Indexer { get; set; }
 
-        public JsObject() {
+        public JsObject()
+        {
         }
 
         public JsObject(object value, JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
             _value = value;
         }
 
         public JsObject(JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
         }
 
-        public override bool IsClr {
-            get {
+        public override bool IsClr
+        {
+            get
+            {
                 // if this instance holds a native value
                 return Value != null;
             }
         }
 
-        public override string Class {
+        public override string Class
+        {
             get { return ClassObject; }
         }
 
-        public override string Type {
+        public override string Type
+        {
             get { return TypeObject; }
         }
 
         private object _value;
 
-        public override object Value {
+        public override object Value
+        {
             get { return _value; }
             set { _value = value; }
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
         }
 
         #region primitive operations
-        public override JsInstance ToPrimitive(IGlobal global) {
-            if (Value != null && ! (Value is IComparable) )
+        public override JsInstance ToPrimitive(IGlobal global)
+        {
+            if (Value != null && !(Value is IComparable))
                 return global.StringClass.New(Value.ToString());
 
-            switch (Convert.GetTypeCode(Value)) {
+            switch (Convert.GetTypeCode(Value))
+            {
                 case TypeCode.Boolean:
                     return global.BooleanClass.New((bool)Value);
                 case TypeCode.Char:
@@ -78,11 +90,13 @@ namespace Jint.Native {
 
         }
 
-        public override bool ToBoolean() {
+        public override bool ToBoolean()
+        {
             if (Value != null && !(Value is IConvertible))
                 return true;
 
-            switch (Convert.GetTypeCode(Value)) {
+            switch (Convert.GetTypeCode(Value))
+            {
                 case TypeCode.Boolean:
                     return (bool)Value;
                 case TypeCode.Char:
@@ -109,14 +123,16 @@ namespace Jint.Native {
             }
         }
 
-        public override double ToNumber() {
+        public override double ToNumber()
+        {
             if (Value == null)
                 return 0;
 
             if (!(Value is IConvertible))
                 return double.NaN;
 
-            switch (Convert.GetTypeCode(Value)) {
+            switch (Convert.GetTypeCode(Value))
+            {
                 case TypeCode.Boolean:
                     return JsBoolean.BooleanToNumber((bool)Value);
                 case TypeCode.Char:
@@ -129,8 +145,10 @@ namespace Jint.Native {
             }
         }
 
-        public override string ToString() {
-            if (_value == null) {
+        public override string ToString()
+        {
+            if (_value == null)
+            {
                 return null;
             }
 

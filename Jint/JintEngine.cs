@@ -35,12 +35,16 @@ namespace Jint
         {
             switch (backend)
             {
-                case JintBackend.Interpreted:
-                    _backend = new Backend.Interpreted.InterpretedBackend(options);
-                    break;
+                //case JintBackend.Interpreted:
+                //    _backend = new Backend.Interpreted.InterpretedBackend(options);
+                //    break;
 
-                case JintBackend.Compiled:
-                    _backend = new Backend.Compiled.CompiledBackend(options);
+                //case JintBackend.Compiled:
+                //    _backend = new Backend.Compiled.CompiledBackend(options);
+                //    break;
+
+                case JintBackend.Dlr:
+                    _backend = new Backend.Dlr.DlrBackend(options);
                     break;
 
                 default:

@@ -18,8 +18,8 @@ namespace Jint.Native
         private readonly JsScope _globalScope;
         private readonly JsDictionaryObject _bag;
 
-        public static string This = "this";
-        public static string Arguments = "arguments";
+        public const string This = "this";
+        public const string Arguments = "arguments";
 
         public JsScope Outer { get; private set; }
         public object CompiledScope { get; set; }

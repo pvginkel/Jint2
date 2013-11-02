@@ -8,6 +8,7 @@ namespace Jint.Expressions
     public class CatchClause
     {
         public string Identifier { get; set; }
+        public Variable Target { get; set; }
         public SyntaxNode Body { get; set; }
 
         public CatchClause(string identifier, SyntaxNode statement)

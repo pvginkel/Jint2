@@ -9,12 +9,12 @@ namespace Jint.Expressions
     public class BlockSyntax : SyntaxNode
     {
         public LinkedList<SyntaxNode> Statements { get; private set; }
-        public List<string> DeclaredVariables { get; private set; }
+        public VariableCollection DeclaredVariables { get; private set; }
 
         public BlockSyntax()
         {
             Statements = new LinkedList<SyntaxNode>();
-            DeclaredVariables = new List<string>();
+            DeclaredVariables = new VariableCollection();
         }
 
         public BlockSyntax(BlockSyntax other)
@@ -26,13 +26,19 @@ namespace Jint.Expressions
             DeclaredVariables = other.DeclaredVariables;
         }
 
-        internal void DeclareVariable(string variableName)
+        internal Variable DeclareVariable(string variableName)
         {
             if (variableName == null)
                 throw new ArgumentNullException("variableName");
 
-            if (!DeclaredVariables.Contains(variableName))
-                DeclaredVariables.Add(variableName);
+            Variable variable;
+            if (!DeclaredVariables.TryGetItem(variableName, out variable))
+            {
+                variable = new Variable(variableName);
+                DeclaredVariables.Add(variable);
+            }
+
+            return variable;
         }
 
         [DebuggerStepThrough]

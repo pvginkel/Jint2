@@ -10,6 +10,7 @@ namespace Jint.Expressions
     {
         public bool Global { get; set; }
         public string Identifier { get; set; }
+        public Variable Target { get; set; }
         public ExpressionSyntax Expression { get; set; }
 
         [DebuggerStepThrough]

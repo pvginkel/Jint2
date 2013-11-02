@@ -52,19 +52,36 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\CSharpSyntax.0.2.0.0\lib\net35-Client\CSharpSyntax.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backend\Compiled\CompiledBackend.cs" />
+    <Compile Include="Backend\Compiled\CompiledBackend.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backend\Compiled\CompiledFunction.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Backend\Compiled\CompiledFunctionDelegate.cs" />
-    <Compile Include="Backend\Compiled\JintProgram.cs" />
-    <Compile Include="Backend\Compiled\CompiledFunction.cs" />
-    <Compile Include="Backend\Compiled\Visitor.BlockManager.cs" />
-    <Compile Include="Backend\Compiled\Visitor.cs" />
-    <Compile Include="Backend\Interpreted\InterpretedBackend.cs" />
+    <Compile Include="Backend\Compiled\JintProgram.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backend\Compiled\Visitor.BlockManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backend\Compiled\Visitor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backend\Compiled\Visitor.ScopeBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backend\Dlr\DlrBackend.cs" />
+    <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
+    <Compile Include="Runtime\JintContext.cs" />
+    <Compile Include="Backend\Dlr\VariableMarkerPhase.cs" />
     <Compile Include="CachedTypeResolver.cs" />
     <Compile Include="Delegates\Delegates.cs" />
     <Compile Include="Expressions\AssignmentOperator.cs" />
@@ -72,6 +89,9 @@
     <Compile Include="Expressions\PropertyExpressionType.cs" />
     <Compile Include="Expressions\SyntaxVisitor.cs" />
     <Compile Include="Expressions\UnaryExpressionType.cs" />
+    <Compile Include="Expressions\Variable.cs" />
+    <Compile Include="Expressions\VariableCollection.cs" />
+    <Compile Include="Expressions\VariableType.cs" />
     <Compile Include="IJintBackend.cs" />
     <Compile Include="JintBackend.cs" />
     <Compile Include="Marshal\Delegates.cs" />
@@ -116,7 +136,6 @@
     <Compile Include="Native\PropertyDescriptor.cs" />
     <Compile Include="Native\ValueDescriptor.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="Backend\Interpreted\Visitor.cs" />
     <Compile Include="Expressions\ArrayDeclarationSyntax.cs" />
     <Compile Include="Expressions\CommaOperatorSyntax.cs" />
     <Compile Include="Expressions\ClrIdentifierSyntax.cs" />
@@ -198,9 +217,14 @@
     <Compile Include="PropertyBags\MiniCachedPropertyBag.cs" />
     <Compile Include="Native\JsDictionaryObjectDebugView.cs" />
     <Compile Include="PropertyBags\ScopedPropertyBag.cs" />
+    <Compile Include="Runtime\JintGetMemberBinder.cs" />
+    <Compile Include="Runtime\JintRuntime.cs" />
+    <Compile Include="Runtime\JintSetMemberBinder.cs" />
+    <Compile Include="Runtime\RuntimeHelpers.cs" />
+    <Compile Include="Support\KeyedCollection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backend\Compiled\Visitor.ScopeBuilder.cs" />
+    <Compile Include="Backend\Dlr\ExpressionVisitor.Scope.cs" />
     <None Include="ES3.g" />
     <None Include="Key.snk" />
     <None Include="packages.config" />

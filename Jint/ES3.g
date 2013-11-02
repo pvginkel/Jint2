@@ -991,7 +991,7 @@ propertyAssignment returns [PropertyDeclarationSyntax value]
 	$value = new PropertyDeclarationSyntax();
 	FunctionSyntax func=new FunctionSyntax();
 }
-	: acc=accessor { $value.Mode=acc.value; } { $value.Expression=func; } prop2=propertyName { $value.Name=func.Name=prop2.value; } (parameters=formalParameterList { func.Parameters.AddRange(parameters.value); })? statements=functionBody { func.Statement=statements.value; } 
+	: acc=accessor { $value.Mode=acc.value; } { $value.Expression=func; } prop2=propertyName { $value.Name=func.Name=prop2.value; } (parameters=formalParameterList { func.Parameters.AddRange(parameters.value); })? statements=functionBody { func.Body=statements.value; } 
 	| prop1=propertyName { $value.Name=prop1.value; } COLON ass=assignmentExpression { $value.Expression=ass.value; }
 	;
 	
@@ -1334,14 +1334,14 @@ expression returns [ExpressionSyntax value]
 @init{
 	var cs = new CommaOperatorSyntax();
 }
-	: first=assignmentExpression { $value = first.value; } ( COMMA { if(cs.Statements.Count == 0) { cs.Statements.Add($value); $value = cs; } } follow=assignmentExpression  { cs.Statements.Add(follow.value); } )* 
+	: first=assignmentExpression { $value = first.value; } ( COMMA { if(cs.Expressions.Count == 0) { cs.Expressions.Add($value); $value = cs; } } follow=assignmentExpression  { cs.Expressions.Add(follow.value); } )* 
 	;
 
 expressionNoIn returns [ExpressionSyntax value]
 @init{
 	var cs = new CommaOperatorSyntax();
 }
-	: first=assignmentExpressionNoIn { $value = first.value; } ( COMMA {if(cs.Statements.Count == 0) { cs.Statements.Add($value); $value = cs; } } follow=assignmentExpressionNoIn  { cs.Statements.Add(follow.value); } )* 
+	: first=assignmentExpressionNoIn { $value = first.value; } ( COMMA {if(cs.Expressions.Count == 0) { cs.Expressions.Add($value); $value = cs; } } follow=assignmentExpressionNoIn  { cs.Expressions.Add(follow.value); } )* 
 	;
 
 // $>
@@ -1446,16 +1446,16 @@ variableStatement returns [SyntaxNode value]
 }
 @after{
 	// hoisting
-	if(cs.Statements.Count > 0) {
-		foreach(var vd in cs.Statements) {
-            _currentBody.DeclareVariable(((VariableDeclarationSyntax)vd).Identifier);
+	if(cs.Expressions.Count > 0) {
+		foreach(VariableDeclarationSyntax vd in cs.Expressions) {
+            vd.Target = _currentBody.DeclareVariable(vd.Identifier);
 		}
 	}
 	else {
-        _currentBody.DeclareVariable(first.value.Identifier);
+        first.value.Target = _currentBody.DeclareVariable(first.value.Identifier);
 	}
 }
-	: VAR first=variableDeclaration { first.value.Global = false; $value = first.value; } ( COMMA { if( cs.Statements.Count == 0) { cs.Statements.Add($value); $value = cs; } } follow=variableDeclaration  { cs.Statements.Add(follow.value); follow.value.Global = false; } )* semic
+	: VAR first=variableDeclaration { first.value.Global = false; $value = first.value; } ( COMMA { if( cs.Expressions.Count == 0) { cs.Expressions.Add($value); $value = cs; } } follow=variableDeclaration  { cs.Expressions.Add(follow.value); follow.value.Global = false; } )* semic
 	
 	;
 
@@ -1507,7 +1507,7 @@ var st = new IfSyntax();
 $value = st;
 }
 // The predicate is there just to get rid of the warning. ANTLR will handle the dangling else just fine.
-	: IF LPAREN expression { st.Expression = $expression.value; } RPAREN then=statement { st.Then = $then.value; } ( { input.LA(1) == ELSE }? ELSE els=statement { st.Else = $els.value; } )?
+	: IF LPAREN expression { st.Test = $expression.value; } RPAREN then=statement { st.Then = $then.value; } ( { input.LA(1) == ELSE }? ELSE els=statement { st.Else = $els.value; } )?
 	
 
 	;
@@ -1573,7 +1573,7 @@ Furthermore backtracking seemed to have 3 major drawbacks:
 - when introducing a k value to optimize the backtracking away, ANTLR runs out of heap space
 */
 forStatement returns [IForStatement value]
-	: FOR^ LPAREN! fo=forControl { $value = fo.value; }  RPAREN! st=statement {  $value.Statement = st.value; }
+	: FOR^ LPAREN! fo=forControl { $value = fo.value; }  RPAREN! st=statement {  $value.Body = st.value; }
 	;
 
 forControl returns [IForStatement value]
@@ -1590,17 +1590,17 @@ forControlVar returns [IForStatement value]
 }
 @after {
 	// hoisting
-	if(cs.Statements.Count > 0) {
-		foreach(var vd in cs.Statements) {
-            _currentBody.DeclareVariable(((VariableDeclarationSyntax)vd).Identifier);
+	if(cs.Expressions.Count > 0) {
+		foreach(VariableDeclarationSyntax vd in cs.Expressions) {
+            vd.Target = _currentBody.DeclareVariable(vd.Identifier);
 		}
 	}
 	else {
-        _currentBody.DeclareVariable(first.value.Identifier);
+        first.value.Target = _currentBody.DeclareVariable(first.value.Identifier);
 	}
 }
 
-	: VAR first=variableDeclarationNoIn { foreachStatement.InitialisationStatement = forStatement.InitialisationStatement = first.value; first.value.Global = false;  }
+	: VAR first=variableDeclarationNoIn { foreachStatement.Initialization = forStatement.Initialization = first.value; first.value.Global = false;  }
 	(
 		(
 			IN ex=expression { $value = foreachStatement; foreachStatement.Expression = $ex.value; }
@@ -1608,8 +1608,8 @@ forControlVar returns [IForStatement value]
 		)
 		|
 		(
-			( COMMA { if( cs.Statements.Count == 0) { foreachStatement.InitialisationStatement = forStatement.InitialisationStatement = cs; cs.Statements.Add(first.value); } } follow=variableDeclarationNoIn {  follow.value.Global = false; cs.Statements.Add(follow.value); } )* 
-			SEMIC ( ex1=expression { forStatement.ConditionExpression = $ex1.value;} ) ? SEMIC (ex2=expression {  forStatement.IncrementExpression = $ex2.value; })? { $value = forStatement; }
+			( COMMA { if( cs.Expressions.Count == 0) { foreachStatement.Initialization = forStatement.Initialization = cs; cs.Expressions.Add(first.value); } } follow=variableDeclarationNoIn {  follow.value.Global = false; cs.Expressions.Add(follow.value); } )* 
+			SEMIC ( ex1=expression { forStatement.Test = $ex1.value;} ) ? SEMIC (ex2=expression {  forStatement.Increment = $ex2.value; })? { $value = forStatement; }
 			
 		)
 	)
@@ -1623,7 +1623,7 @@ forControlExpression returns [IForStatement value]
 
 	object[] isLhs = new object[1];
 }
-	: ex1=expressionNoIn { foreachStatement.InitialisationStatement = forStatement.InitialisationStatement = ex1.value; }
+	: ex1=expressionNoIn { foreachStatement.Initialization = forStatement.Initialization = ex1.value; }
 	( 
 		{ IsLeftHandSideIn(ex1.value, isLhs) }? (
 			IN ex2=expression { $value = foreachStatement; foreachStatement.Expression = ex2.value; }
@@ -1631,7 +1631,7 @@ forControlExpression returns [IForStatement value]
 		)
 		|
 		(
-			SEMIC ( ex2=expression { forStatement.ConditionExpression = ex2.value;} ) ? SEMIC (ex3=expression {  forStatement.IncrementExpression = ex3.value; })? { $value = forStatement; }
+			SEMIC ( ex2=expression { forStatement.Test = ex2.value;} ) ? SEMIC (ex3=expression {  forStatement.Increment = ex3.value; })? { $value = forStatement; }
 			
 		)
 	)
@@ -1641,7 +1641,7 @@ forControlSemic returns [ForSyntax value]
 @init{
 	$value = new ForSyntax();
 }
-	: SEMIC ( ex1=expression { $value.ConditionExpression = ex1.value;} ) ? SEMIC (ex2=expression {  $value.IncrementExpression = ex2.value; })? 
+	: SEMIC ( ex1=expression { $value.Test = ex1.value;} ) ? SEMIC (ex2=expression {  $value.Increment = ex2.value; })? 
 	
 	;
 
@@ -1720,7 +1720,7 @@ switchStatement returns [SyntaxNode value]
 	int defaultClauseCount = 0;
 }
 	:	SWITCH LPAREN expression { switchStatement.Expression = $expression.value; } RPAREN 
-		LBRACE ( { defaultClauseCount == 0 }?=> defaultClause { defaultClauseCount++; switchStatement.DefaultStatements=$defaultClause.value; } | caseClause { switchStatement.CaseClauses.Add($caseClause.value); } )* RBRACE
+		LBRACE ( { defaultClauseCount == 0 }?=> defaultClause { defaultClauseCount++; switchStatement.Default=$defaultClause.value; } | caseClause { switchStatement.Cases.Add($caseClause.value); } )* RBRACE
 		
 	;
 
@@ -1728,7 +1728,7 @@ caseClause returns [CaseClause value]
 @init {
 	$value = new CaseClause();
 }
-	: CASE^ expression { $value.Expression = $expression.value; } COLON!( statement { $value.Statements.Statements.AddLast($statement.value); })*
+	: CASE^ expression { $value.Expression = $expression.value; } COLON!( statement { $value.Body.Statements.AddLast($statement.value); })*
 	;
 	
 defaultClause returns [BlockSyntax value]
@@ -1778,10 +1778,13 @@ tryStatement returns [TrySyntax value]
 @init{
 	$value = new TrySyntax();
 }
-	: TRY^ b=block  { $value.Statement = b.value; } ( c=catchClause { $value.Catch = c.value; } (first=finallyClause { $value.Finally = first.value; })? | last=finallyClause { $value.Finally = last.value; } )
+	: TRY^ b=block  { $value.Body = b.value; } ( c=catchClause { $value.Catch = c.value; } (first=finallyClause { $value.Finally = first.value; })? | last=finallyClause { $value.Finally = last.value; } )
 	;
 	
 catchClause returns [CatchClause value]
+@after{
+    $value.Target = _currentBody.DeclareVariable($value.Identifier);
+}
 	: CATCH^ LPAREN! id=Identifier RPAREN! block { $value = new CatchClause($id.text, $block.value); }
 	;
 	
@@ -1806,11 +1809,11 @@ functionDeclaration returns [SyntaxNode value]
     _currentBody.Statements.AddFirst(statement);
 }
 @after {
-    _currentBody.DeclareVariable(statement.Name);
+    statement.Target = _currentBody.DeclareVariable(statement.Name);
 }
 	: FUNCTION 	name=Identifier { statement.Name = name.Text; } 
 			parameters=formalParameterList { statement.Parameters.AddRange(parameters.value); }
-			body=functionBody { statement.Statement = body.value; }
+			body=functionBody { statement.Body = body.value; }
 	  
 
 	;
@@ -1819,7 +1822,7 @@ functionExpression returns [FunctionSyntax value]
 @init {
 	$value = new FunctionSyntax();
 }
-	: FUNCTION (name=Identifier { $value.Name = name.Text; } )? formalParameterList { $value.Parameters.AddRange($formalParameterList.value) ;} functionBody { $value.Statement = $functionBody.value; }
+	: FUNCTION (name=Identifier { $value.Name = name.Text; } )? formalParameterList { $value.Parameters.AddRange($formalParameterList.value) ;} functionBody { $value.Body = $functionBody.value; }
 	
 
 	;

@@ -9,7 +9,7 @@ namespace Jint.Expressions
     public class FunctionSyntax : ExpressionSyntax, IFunctionDeclaration
     {
         public List<string> Parameters { get; set; }
-        public SyntaxNode Body { get; set; }
+        public BlockSyntax Body { get; set; }
         public string Name { get; set; }
 
         public FunctionSyntax()

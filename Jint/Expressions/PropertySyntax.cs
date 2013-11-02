@@ -6,8 +6,8 @@ namespace Jint.Expressions
     [Serializable]
     public class PropertySyntax : IdentifierSyntax
     {
-        public PropertySyntax(string text)
-            : base(text)
+        public PropertySyntax(string name)
+            : base(name)
         {
         }
 
