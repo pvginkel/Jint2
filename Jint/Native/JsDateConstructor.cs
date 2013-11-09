@@ -193,16 +193,17 @@ namespace Jint.Native
             return result;
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            JsDate result = Construct(parameters);
+            JsDate date = Construct(parameters);
 
-            if (that == null || (that as IGlobal) == visitor.Global)
+            if (that == null || (that as IGlobal) == global)
             {
-                return visitor.Return(ToStringImpl(result, JsInstance.Empty));
+                var result = ToStringImpl(date, Empty);
+                return new JsFunctionResult(result, result);
             }
 
-            return result;
+            return new JsFunctionResult(null, date);
         }
 
         private bool ParseDate(string p, IFormatProvider culture, out double result)

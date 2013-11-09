@@ -40,12 +40,14 @@ namespace Jint.Native
             return new JsBoolean(value, PrototypeProperty);
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
+            JsInstance result;
+
             // e.g., var foo = Boolean(true);
-            if (that == null || (that as IGlobal) == visitor.Global)
+            if (that == null || (that as IGlobal) == global)
             {
-                visitor.Return(parameters.Length > 0 ? new JsBoolean(parameters[0].ToBoolean(), PrototypeProperty) : new JsBoolean(PrototypeProperty));
+                result = parameters.Length > 0 ? new JsBoolean(parameters[0].ToBoolean(), PrototypeProperty) : new JsBoolean(PrototypeProperty);
             }
             else // e.g., var foo = new Boolean(true);
             {
@@ -58,10 +60,10 @@ namespace Jint.Native
                     that.Value = false;
                 }
 
-                visitor.Return(that);
+                result = that;
             }
 
-            return that;
+            return new JsFunctionResult(result, that);
         }
 
 

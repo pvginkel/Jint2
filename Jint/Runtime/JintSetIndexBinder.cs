@@ -8,23 +8,26 @@ using Jint.Native;
 
 namespace Jint.Runtime
 {
-    internal class JintSetMemberBinder : SetMemberBinder
+    public class JintSetIndexBinder : SetIndexBinder
     {
-        public JintSetMemberBinder(string name)
-            : base(name, false)
+        public JintSetIndexBinder(CallInfo callInfo)
+            : base(callInfo)
         {
         }
 
-        public override DynamicMetaObject FallbackSetMember(DynamicMetaObject target, DynamicMetaObject value, DynamicMetaObject errorSuggestion)
+        public override DynamicMetaObject FallbackSetIndex(DynamicMetaObject target, DynamicMetaObject[] indexes, DynamicMetaObject value, DynamicMetaObject errorSuggestion)
         {
-            if (typeof(JsDictionaryObject).IsAssignableFrom(target.LimitType))
-            {
+            if (
+                typeof(JsDictionaryObject).IsAssignableFrom(target.LimitType) &&
+                indexes.Length == 1 &&
+                typeof(JsInstance).IsAssignableFrom(indexes[0].LimitType)
+            ) {
                 return new DynamicMetaObject(
                     Expression.Assign(
                         Expression.Property(
                             Expression.Convert(target.Expression, typeof(JsDictionaryObject)),
                             "Item",
-                            Expression.Constant(Name)
+                            indexes[0].Expression
                         ),
                         value.Expression
                     ),
@@ -33,6 +36,8 @@ namespace Jint.Runtime
                             target.Expression,
                             typeof(JsDictionaryObject)
                         )
+                    ).Merge(
+                        BindingRestrictions.Combine(indexes)
                     )
                 );
             }
@@ -48,7 +53,7 @@ namespace Jint.Runtime
                     target.LimitType
                 ),
                 typeof(InvalidOperationException),
-                "Cannot bind member \"" + Name + "\""
+                "Cannot bind get index"
             );
         }
     }

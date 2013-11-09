@@ -10,6 +10,8 @@ namespace Jint.Expressions
     {
         public LinkedList<SyntaxNode> Statements { get; private set; }
         public VariableCollection DeclaredVariables { get; private set; }
+        public Closure Closure { get; set; }
+        public Closure ParentClosure { get; set; }
 
         public BlockSyntax()
         {

@@ -101,18 +101,17 @@ namespace Jint.Native
             set { }
         }
 
-        public JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters)
+        public JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters)
         {
-            return Execute(visitor, that, parameters, null);
+            return Execute(global, that, parameters, null);
         }
 
-        public virtual JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public virtual JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (genericArguments != null)
                 throw new JintException("This method can't be called as a generic");
 
-            Statement.Accept((ISyntaxVisitor)visitor);
-            return that;
+            throw new InvalidOperationException();
         }
 
         public override string Class

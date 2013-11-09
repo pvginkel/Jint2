@@ -87,11 +87,14 @@ namespace Jint.Native
             return Global.BooleanClass.New(array != null && array.Length > 0);
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal globa, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
+            JsInstance result;
+
             if (parameters.Length == 0)
             {
-                return visitor.Return(New());
+                result = New();
+                return new JsFunctionResult(result, result);
                 //throw new ArgumentNullException("pattern");
             }
 
@@ -108,7 +111,8 @@ namespace Jint.Native
                 }
             }
 
-            return visitor.Return(New(parameters[0].ToString(), g, ic, m));
+            result = New(parameters[0].ToString(), g, ic, m);
+            return new JsFunctionResult(result, result);
         }
 
         public JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)

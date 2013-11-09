@@ -48,7 +48,7 @@ namespace Jint.Native
             _length = length;
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             try
             {
@@ -58,8 +58,7 @@ namespace Jint.Native
                 else
                     result = _impl.DynamicInvoke(new object[] { that }) as JsInstance;
 
-                visitor.Return(result);
-                return result;
+                return new JsFunctionResult(result, result);
             }
             catch (TargetInvocationException e)
             {
@@ -68,7 +67,7 @@ namespace Jint.Native
             catch (ArgumentException)
             {
                 var constructor = that["constructor"] as JsFunction;
-                throw new JsException(visitor.Global.TypeErrorClass.New("incompatible type: " + constructor == null ? "<unknown>" : constructor.Name));
+                throw new JsException(global.TypeErrorClass.New("incompatible type: " + constructor == null ? "<unknown>" : constructor.Name));
             }
             catch (Exception e)
             {

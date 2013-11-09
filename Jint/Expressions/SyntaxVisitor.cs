@@ -154,15 +154,9 @@ namespace Jint.Expressions
             syntax.Body.Accept(this);
         }
 
-        public virtual void VisitMemberAccess(MemberAccessSyntax syntax)
-        {
-            if (syntax.Previous != null)
-                syntax.Previous.Accept(this);
-            syntax.Member.Accept(this);
-        }
-
         public virtual void VisitMethodCall(MethodCallSyntax syntax)
         {
+            syntax.Expression.Accept(this);
             foreach (var argument in syntax.Arguments)
             {
                 argument.Accept(this);
@@ -176,10 +170,12 @@ namespace Jint.Expressions
         public virtual void VisitIndexer(IndexerSyntax syntax)
         {
             syntax.Expression.Accept(this);
+            syntax.Index.Accept(this);
         }
 
         public virtual void VisitProperty(PropertySyntax syntax)
         {
+            syntax.Expression.Accept(this);
         }
 
         public virtual void VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)

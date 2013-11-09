@@ -57,11 +57,12 @@ namespace Jint.Native
             return array;
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as IGlobal) == visitor.Global)
+            if (that == null || (that as IGlobal) == global)
             {
-                return visitor.Return(Construct(parameters, null, visitor));
+                var result = Construct(parameters, null, null);
+                return new JsFunctionResult(result, result);
             }
             else
             {
@@ -71,7 +72,7 @@ namespace Jint.Native
                     that[i.ToString()] = parameters[i];
                 }
 
-                return visitor.Return(that);
+                return new JsFunctionResult(that, that);
             }
         }
 

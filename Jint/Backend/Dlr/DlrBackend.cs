@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace Jint.Backend.Dlr
 {
     internal class DlrBackend : IJintBackend
     {
-        private readonly JintContext _context = new JintContext();
+        private readonly JintContext _context;
         private readonly JintRuntime _runtime;
 
         public Options Options { get; private set; }
@@ -36,7 +37,8 @@ namespace Jint.Backend.Dlr
         {
             Options = options;
 
-            _runtime = new JintRuntime(this, Options);
+            _runtime = new JintRuntime(this, Options, AllowClr, PermissionSet);
+            _context = new JintContext(_runtime.Global);
         }
 
         public object Run(ProgramSyntax program, bool unwrap)
@@ -48,30 +50,7 @@ namespace Jint.Backend.Dlr
 
             var expression = program.Accept(new ExpressionVisitor(_context));
 
-//#if DEBUG
-//            var dynamicAssembly = AppDomain.CurrentDomain.DefineDynamicAssembly(
-//                new AssemblyName("CompiledDebugAssembly"),
-//                AssemblyBuilderAccess.Save
-//            );
-
-//            var dynamicModule = dynamicAssembly.DefineDynamicModule("CompiledDebugModule", "CompiledDebugAssembly.dll");
-//            var dynamicType = dynamicModule.DefineType("CompiledDebugType");
-//            var dynamicMethod = dynamicType.DefineMethod(
-//                "<>Main",
-//                MethodAttributes.Public | MethodAttributes.Static
-//            );
-
-//            ((LambdaExpression)expression).CompileToMethod(dynamicMethod);
-//            dynamicType.CreateType();
-
-//            dynamicAssembly.Save("CompiledDebugAssembly.dll");
-//#endif
-
-#if DEBUG
-            Console.WriteLine(
-                typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
-            );
-#endif
+            PrintExpression(expression);   
 
             var result = ((Func<JintRuntime, JsInstance>)((LambdaExpression)expression).Compile())(_runtime);
 
@@ -81,6 +60,14 @@ namespace Jint.Backend.Dlr
                 : unwrap
                     ? Global.Marshaller.MarshalJsValue<object>(result)
                     : result;
+        }
+
+        [Conditional("DEBUG")]
+        public static void PrintExpression(Expression expression)
+        {
+            Console.WriteLine(
+                typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
+            );
         }
 
         public object CallFunction(string name, object[] args)

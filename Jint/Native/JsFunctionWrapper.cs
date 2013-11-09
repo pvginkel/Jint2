@@ -17,15 +17,14 @@ namespace Jint.Native
             Delegate = d;
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             try
             {
                 //visitor.CurrentScope["this"] = visitor.Global;
-                JsInstance result = Delegate(parameters);
-                visitor.Return(result ?? JsUndefined.Instance);
+                var result = Delegate(parameters) ?? JsUndefined.Instance;
 
-                return that;
+                return new JsFunctionResult(result, that);
             }
             catch (Exception e)
             {

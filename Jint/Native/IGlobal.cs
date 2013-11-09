@@ -1,6 +1,9 @@
 ﻿using System;
-namespace Jint.Native {
-    public interface IGlobal {
+
+namespace Jint.Native
+{
+    public interface IGlobal
+    {
         bool HasOption(Options options);
 
         JsArrayConstructor ArrayClass { get; }

@@ -59,27 +59,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backend\Compiled\CompiledBackend.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Backend\Compiled\CompiledFunction.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Backend\Compiled\CompiledFunctionDelegate.cs" />
-    <Compile Include="Backend\Compiled\JintProgram.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Backend\Compiled\Visitor.BlockManager.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Backend\Compiled\Visitor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Backend\Compiled\Visitor.ScopeBuilder.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Backend\Dlr\ClosureManager.cs" />
+    <Compile Include="Backend\Dlr\DlrFunction.cs" />
     <Compile Include="Backend\Dlr\DlrBackend.cs" />
+    <Compile Include="Backend\Dlr\DlrFunctionDelegate.cs" />
+    <Compile Include="Native\JsFunctionResult.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
+    <Compile Include="Expressions\ClosedOverVariable.cs" />
+    <Compile Include="Expressions\Closure.cs" />
+    <Compile Include="Runtime\JintConvertBinder.cs" />
+    <Compile Include="Runtime\JintBinaryOperationBinder.cs" />
     <Compile Include="Runtime\JintContext.cs" />
     <Compile Include="Backend\Dlr\VariableMarkerPhase.cs" />
     <Compile Include="CachedTypeResolver.cs" />
@@ -217,9 +206,12 @@
     <Compile Include="PropertyBags\MiniCachedPropertyBag.cs" />
     <Compile Include="Native\JsDictionaryObjectDebugView.cs" />
     <Compile Include="PropertyBags\ScopedPropertyBag.cs" />
+    <Compile Include="Runtime\JintGetIndexBinder.cs" />
     <Compile Include="Runtime\JintGetMemberBinder.cs" />
     <Compile Include="Runtime\JintRuntime.cs" />
+    <Compile Include="Runtime\JintSetIndexBinder.cs" />
     <Compile Include="Runtime\JintSetMemberBinder.cs" />
+    <Compile Include="Runtime\JintUnaryOperationBinder.cs" />
     <Compile Include="Runtime\RuntimeHelpers.cs" />
     <Compile Include="Support\KeyedCollection.cs" />
   </ItemGroup>

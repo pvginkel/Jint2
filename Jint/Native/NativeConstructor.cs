@@ -240,18 +240,18 @@ namespace Jint.Native
         /// <param name="that"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public override JsInstance Execute(Jint.Expressions.IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || that == JsUndefined.Instance || that == JsNull.Instance || (that as IGlobal) == visitor.Global)
+            if (that == null || that == JsUndefined.Instance || that == JsNull.Instance || (that as IGlobal) == global)
                 throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
             if (that.Value != null)
                 throw new JintException("Can't apply the constructor '" + _reflectedType.FullName + "' to already initialized '" + that.Value + "'");
 
-            that.Value = CreateInstance(visitor, parameters);
+            that.Value = CreateInstance(global, parameters);
             SetupNativeProperties(that);
             ((JsObject)that).Indexer = _indexer;
-            return that;
+            return new JsFunctionResult(null, that);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Jint.Native
         /// <returns>A newly created js object</returns>
         public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, Jint.Expressions.IJintVisitor visitor)
         {
-            return (JsObject)Wrap(CreateInstance(visitor, parameters));
+            return (JsObject)Wrap(CreateInstance(visitor.Global, parameters));
         }
 
         /// <summary>
@@ -275,7 +275,7 @@ namespace Jint.Native
         /// <param name="visitor">Execution visitor</param>
         /// <param name="parameters">Parameters for a constructor</param>
         /// <returns>A newly created native object</returns>
-        object CreateInstance(Jint.Expressions.IJintVisitor visitor, JsInstance[] parameters)
+        private object CreateInstance(IGlobal global, JsInstance[] parameters)
         {
             ConstructorImpl impl = _overloads.ResolveOverload(parameters, null);
             if (impl == null)
@@ -286,7 +286,7 @@ namespace Jint.Native
                     )
                 );
 
-            return impl(visitor.Global, parameters);
+            return impl(global, parameters);
         }
 
         public void SetupNativeProperties(JsDictionaryObject target)

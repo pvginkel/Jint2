@@ -28,7 +28,6 @@ namespace Jint.Expressions
         void VisitCommaOperator(CommaOperatorSyntax syntax);
 
         void VisitFunction(FunctionSyntax syntax);
-        void VisitMemberAccess(MemberAccessSyntax syntax);
         void VisitMethodCall(MethodCallSyntax syntax);
         void VisitIndexer(IndexerSyntax syntax);
         void VisitProperty(PropertySyntax syntax);
@@ -70,7 +69,6 @@ namespace Jint.Expressions
         T VisitCommaOperator(CommaOperatorSyntax syntax);
 
         T VisitFunction(FunctionSyntax syntax);
-        T VisitMemberAccess(MemberAccessSyntax syntax);
         T VisitMethodCall(MethodCallSyntax syntax);
         T VisitIndexer(IndexerSyntax syntax);
         T VisitProperty(PropertySyntax syntax);

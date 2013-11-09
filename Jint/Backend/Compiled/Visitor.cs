@@ -255,7 +255,7 @@ namespace Jint.Backend.Compiled
                 {
                     left.Previous.Accept(this);
 
-                    ((IndexerSyntax)left.Member).Expression.Accept(this);
+                    ((IndexerSyntax)left.Member).Index.Accept(this);
 
                     _result = Syntax.InvocationExpression(
                         Syntax.ParseName("AssignIndexer"),
@@ -896,7 +896,7 @@ namespace Jint.Backend.Compiled
         {
             var baseObject = _result;
 
-            expression.Expression.Accept(this);
+            expression.Index.Accept(this);
             var indexer = _result;
 
             _result = Syntax.InvocationExpression(

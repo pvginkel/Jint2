@@ -92,21 +92,24 @@ namespace Jint.Native
         /// <summary>
         /// 15.2.2.1
         /// </summary>
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (parameters.Length > 0)
             {
+                JsInstance thatResult;
+
                 switch (parameters[0].Class)
                 {
-                    case JsInstance.ClassString: return Global.StringClass.New(parameters[0].ToString());
-                    case JsInstance.ClassNumber: return Global.NumberClass.New(parameters[0].ToNumber());
-                    case JsInstance.ClassBoolean: return Global.BooleanClass.New(parameters[0].ToBoolean());
-                    default:
-                        return parameters[0];
+                    case ClassString: thatResult = Global.StringClass.New(parameters[0].ToString()); break;
+                    case ClassNumber: thatResult = Global.NumberClass.New(parameters[0].ToNumber()); break;
+                    case ClassBoolean: thatResult = Global.BooleanClass.New(parameters[0].ToBoolean()); break;
+                    default: thatResult = parameters[0]; break;
                 }
+
+                return new JsFunctionResult(null, thatResult);
             }
 
-            return New(this);
+            return new JsFunctionResult(null, New(this));
         }
 
         // 15.2.4.3 and 15.2.4.4

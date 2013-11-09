@@ -9,7 +9,7 @@ namespace Jint.Expressions
     {
         public string Name { get; private set; }
         public VariableType Type { get; set; }
-        public bool IsClosedOver { get; set; }
+        public ClosedOverVariable ClosureField { get; set; }
 
         public Variable(string name)
         {
@@ -21,7 +21,7 @@ namespace Jint.Expressions
 
         public override string ToString()
         {
-            return Name + " [" + Type + (IsClosedOver ? "*" : "") + "]";
+            return Name + " [" + Type + (ClosureField != null ? "*" : "") + "]";
         }
     }
 }

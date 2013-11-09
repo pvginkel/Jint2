@@ -65,17 +65,17 @@ namespace Jint.Native
             }
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
-                return base.Execute(visitor, that, parameters, genericArguments);
+                return base.Execute(global, that, parameters, genericArguments);
             else
             {
                 JsMethodImpl impl = _overloads.ResolveOverload(parameters, genericArguments);
                 if (impl == null)
                     throw new JintException(String.Format("No matching overload found {0}<{1}>", Name, genericArguments));
-                visitor.Return(impl(visitor.Global, that, parameters));
-                return that;
+                var result = impl(global, that, parameters);
+                return new JsFunctionResult(result, that);
             }
         }
 

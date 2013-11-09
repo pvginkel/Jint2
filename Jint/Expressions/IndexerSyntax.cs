@@ -6,20 +6,23 @@ namespace Jint.Expressions
     [Serializable]
     public class IndexerSyntax : ExpressionSyntax, IAssignable
     {
-        public IndexerSyntax()
+        public IndexerSyntax(ExpressionSyntax expression)
         {
+            Expression = expression;
         }
 
-        public IndexerSyntax(ExpressionSyntax index)
+        public IndexerSyntax(ExpressionSyntax expression, ExpressionSyntax index)
+            : this(expression)
         {
-            Expression = index;
+            Index = index;
         }
 
         public ExpressionSyntax Expression { get; set; }
+        public ExpressionSyntax Index { get; set; }
 
         public override string ToString()
         {
-            return "[" + Expression + "]" + base.ToString();
+            return "[" + Index + "]" + base.ToString();
         }
 
         [DebuggerStepThrough]

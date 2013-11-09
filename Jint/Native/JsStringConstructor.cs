@@ -59,33 +59,29 @@ namespace Jint.Native
             return new JsString(value, PrototypeProperty);
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as IGlobal) == visitor.Global)
+            if (that == null || (that as IGlobal) == global)
             {
+                JsInstance result;
+
                 // 15.5.1 - When String is called as a function rather than as a constructor, it performs a type conversion.
                 if (parameters.Length > 0)
-                {
-                    return visitor.Return(Global.StringClass.New(parameters[0].ToString()));
-                }
+                    result = Global.StringClass.New(parameters[0].ToString());
                 else
-                {
-                    return visitor.Return(Global.StringClass.New(String.Empty));
-                }
+                    result = Global.StringClass.New(String.Empty);
+
+                return new JsFunctionResult(result, result);
             }
             else
             {
                 // 15.5.2 - When String is called as part of a new expression, it is a constructor: it initialises the newly created object.
                 if (parameters.Length > 0)
-                {
                     that.Value = parameters[0].ToString();
-                }
                 else
-                {
                     that.Value = String.Empty;
-                }
 
-                return visitor.Return(that);
+                return new JsFunctionResult(that, that);
             }
         }
 

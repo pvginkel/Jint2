@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Dynamic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -13,52 +16,227 @@ namespace Jint.Backend.Dlr
     {
         private class Scope
         {
+            private readonly ExpressionVisitor _visitor;
+            private readonly List<Expression> _statements;
             public Scope Parent { get; private set; }
             public Dictionary<Variable, ParameterExpression> Variables { get; private set; }
             public ParameterExpression Runtime { get; private set; }
             public ParameterExpression This { get; private set; }
+            public Closure Closure { get; private set; }
+            public ParameterExpression ClosureLocal { get; private set; }
+            public ParameterExpression ArgumentsLocal { get; private set; }
+            public LabelTarget Return { get; private set; }
+            public Dictionary<Closure, ParameterExpression> ClosureLocals { get; private set; }
+            public Stack<LabelTarget> BreakTargets { get; private set; }
+            public Stack<LabelTarget> ContinueTargets { get; private set; }
 
-            public Scope(ParameterExpression runtime, ParameterExpression @this, Scope parent)
+            public Scope(ExpressionVisitor visitor, ParameterExpression @this, Closure closure, ParameterExpression closureLocal, ParameterExpression argumentsLocal, List<Expression> statements, Scope parent)
             {
-                if (runtime == null)
-                    throw new ArgumentNullException("runtime");
+                if (visitor == null)
+                    throw new ArgumentNullException("visitor");
+                if (statements == null)
+                    throw new ArgumentNullException("statements");
 
+                _visitor = visitor;
+                _statements = statements;
                 This = @this;
-                Runtime = runtime;
+                Closure = closure;
+                ClosureLocal = closureLocal;
+                ArgumentsLocal = argumentsLocal;
+                Runtime = Expression.Parameter(
+                    typeof(JintRuntime),
+                    RuntimeParameterName
+                );
+
                 Variables = new Dictionary<Variable, ParameterExpression>();
                 Parent = parent;
+                Return = Expression.Label(typeof(JsInstance), "return");
+                ClosureLocals = new Dictionary<Closure, ParameterExpression>();
+                BreakTargets = new Stack<LabelTarget>();
+                ContinueTargets = new Stack<LabelTarget>();
             }
 
-            public Expression ResolveVariable(Variable variable)
+            private Expression FindVariable(Variable variable)
+            {
+                Debug.Assert(
+                    variable.Type == VariableType.Local ||
+                    variable.Type == VariableType.Arguments ||
+                    variable.Type == VariableType.Parameter
+                );
+
+                switch (variable.Type)
+                {
+                    case VariableType.Arguments:
+                        return ArgumentsLocal;
+
+                    case VariableType.Parameter:
+                        return Variables[variable];
+
+                    case VariableType.Local:
+                        var closureField = variable.ClosureField;
+
+                        if (closureField == null)
+                            return Variables[variable];
+
+                        return Expression.Field(
+                            BuildClosureAliases(closureField.Closure),
+                            closureField.Field
+                        );
+
+                    default:
+                        throw new InvalidOperationException("Cannot find variable of argument");
+                }
+            }
+
+            public Expression BuildSet(ExpressionSyntax syntax, Expression value)
+            {
+                if (syntax is IdentifierSyntax)
+                    return BuildSet(((IdentifierSyntax)syntax).Target, value);
+
+                if (syntax is IndexerSyntax)
+                {
+                    var indexer = (IndexerSyntax)syntax;
+
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _visitor._context.SetIndex(new CallInfo(0)),
+                            typeof(object),
+                            BuildGet(indexer.Expression),
+                            indexer.Index.Accept(_visitor),
+                            value
+                        ),
+                        typeof(JsInstance)
+                    );
+                }
+
+                throw new NotImplementedException();
+            }
+
+            public Expression BuildSet(Variable variable, Expression value)
             {
                 switch (variable.Type)
                 {
-                    case VariableType.This:
-                        return This;
+                    case VariableType.Global:
+                        return Expression.Convert(
+                            Expression.Dynamic(
+                                _visitor._context.SetMember(variable.Name),
+                                typeof(object),
+                                Expression.Property(
+                                    Runtime,
+                                    JintRuntime.GlobalScopeName
+                                ),
+                                value
+                            ),
+                            typeof(JsInstance)
+                        );
 
-                    //case VariableType.Global:
-                    //    return Expression.Dynamic(
-                    //        Binder.GetMember(variable.Name),
-                    //        typeof(JsInstance),
-                    //        Expression.Property(
-                    //            Runtime,
-                    //            JintRuntime.GlobalScopeName
-                    //        )
-                    //    );
+                    default:
+                        return Expression.Assign(
+                            FindVariable(variable),
+                            value
+                        );
                 }
+            }
 
-                var current = this;
+            public Expression BuildGet(ExpressionSyntax syntax)
+            {
+                if (syntax is IdentifierSyntax)
+                    return BuildGet(((IdentifierSyntax)syntax).Target);
 
-                while (current != null)
+                if (syntax is MethodCallSyntax)
+                    return ((MethodCallSyntax)syntax).Accept(_visitor);
+
+                if (syntax is PropertySyntax)
                 {
-                    ParameterExpression result;
-                    if (Variables.TryGetValue(variable, out result))
-                        return result;
+                    var property = (PropertySyntax)syntax;
 
-                    current = current.Parent;
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _visitor._context.GetMember(property.Name),
+                            typeof(object),
+                            property.Expression.Accept(_visitor)
+                        ),
+                        typeof(JsInstance)
+                    );
                 }
 
-                throw new InvalidOperationException("Could not find parameter for variable");
+                if (syntax is IndexerSyntax)
+                {
+                    var indexer = (IndexerSyntax)syntax;
+
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _visitor._context.GetIndex(new CallInfo(0)),
+                            typeof(object),
+                            BuildGet(indexer.Expression),
+                            indexer.Index.Accept(_visitor)
+                        ),
+                        typeof(JsInstance)
+                    );
+                }
+
+                throw new NotImplementedException();
+            }
+
+            public Expression BuildGet(Variable variable)
+            {
+                switch (variable.Type)
+                {
+                    case VariableType.Global:
+                        return Expression.Convert(
+                            Expression.Dynamic(
+                                _visitor._context.GetMember(variable.Name),
+                                typeof(object),
+                                Expression.Property(
+                                    Runtime,
+                                    JintRuntime.GlobalScopeName
+                                )
+                            ),
+                            typeof(JsInstance)
+                        );
+
+                    default:
+                        return FindVariable(variable);
+                }
+            }
+
+            private ParameterExpression BuildClosureAliases(Closure targetClosure)
+            {
+                var closure = Closure;
+                ParameterExpression parentParameter = null;
+
+                while (true)
+                {
+                    ParameterExpression closureParameter;
+                    if (!ClosureLocals.TryGetValue(closure, out closureParameter))
+                    {
+                        // Our closure is always added as a parameter, so we sould
+                        // always be able to get it.
+
+                        Debug.Assert(closure != Closure);
+
+                        closureParameter = Expression.Parameter(
+                            closure.Type,
+                            "closure_" + ClosureLocals.Count.ToString(CultureInfo.InvariantCulture)
+                        );
+
+                        _statements.Add(Expression.Assign(
+                            closureParameter,
+                            Expression.Field(
+                                parentParameter,
+                                Closure.ParentFieldName
+                            )
+                        ));
+
+                        ClosureLocals.Add(closure, closureParameter);
+                    }
+
+                    if (closure == targetClosure)
+                        return closureParameter;
+
+                    parentParameter = closureParameter;
+                    closure = closure.Parent;
+                }
             }
         }
     }

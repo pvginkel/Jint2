@@ -68,10 +68,10 @@ namespace Jint.Native
             return _nativeMethod;
         }
 
-        public override JsInstance Execute(Jint.Expressions.IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            visitor.Return(_impl(visitor.Global, that, parameters));
-            return that;
+            var result = _impl(global, that, parameters);
+            return new JsFunctionResult(result, that);
         }
 
         public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)

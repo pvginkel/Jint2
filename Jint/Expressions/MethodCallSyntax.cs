@@ -7,18 +7,20 @@ namespace Jint.Expressions
     [Serializable]
     public class MethodCallSyntax : ExpressionSyntax, IGenericExpression
     {
-        public MethodCallSyntax()
+        public MethodCallSyntax(ExpressionSyntax expression)
         {
+            Expression = expression;
             Arguments = new List<ExpressionSyntax>();
             Generics = new List<ExpressionSyntax>();
         }
 
-        public MethodCallSyntax(List<ExpressionSyntax> arguments)
-            : this()
+        public MethodCallSyntax(ExpressionSyntax expression, IEnumerable<ExpressionSyntax> arguments)
+            : this(expression)
         {
             Arguments.AddRange(arguments);
         }
 
+        public ExpressionSyntax Expression { get; set; }
         public List<ExpressionSyntax> Arguments { get; set; }
         public List<ExpressionSyntax> Generics { get; set; }
 

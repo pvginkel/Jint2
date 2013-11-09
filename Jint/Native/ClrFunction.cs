@@ -24,7 +24,7 @@ namespace Jint.Native
             Parameters = d.Method.GetParameters();
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             int clrParameterCount = Delegate.Method.GetParameters().Length;
             object[] clrParameters = new object[clrParameterCount];
@@ -33,17 +33,11 @@ namespace Jint.Native
             {
                 // First see if either the JsInstance or it's value can be directly accepted without converstion
                 if (typeof(JsInstance).IsAssignableFrom(Parameters[i].ParameterType) && Parameters[i].ParameterType.IsInstanceOfType(parameters[i]))
-                {
                     clrParameters[i] = parameters[i];
-                }
                 else if (Parameters[i].ParameterType.IsInstanceOfType(parameters[i].Value))
-                {
                     clrParameters[i] = parameters[i].Value;
-                }
                 else
-                {
-                    clrParameters[i] = visitor.Global.Marshaller.MarshalJsValue<object>(parameters[i]);
-                }
+                    clrParameters[i] = global.Marshaller.MarshalJsValue<object>(parameters[i]);
             }
 
             object result;
@@ -66,29 +60,17 @@ namespace Jint.Native
                 throw;
             }
 
-            if (result != null)
-            {
-                // Don't wrap if the result should be a JsInstance
-                if (typeof(JsInstance).IsInstanceOfType(result))
-                {
-                    visitor.Return((JsInstance)result);
-                }
-                else
-                {
-                    visitor.Return(visitor.Global.WrapClr(result));
-                }
-            }
-            else
-            {
-                visitor.Return(JsUndefined.Instance);
-            }
+            if (result == null)
+                result = JsUndefined.Instance;
+            else if (!(result is JsInstance))
+                result = global.WrapClr(result);
 
-            return null;
+            return new JsFunctionResult((JsInstance)result, null);
         }
 
         public override string ToString()
         {
-            return String.Format("function {0}() { [native code] }", Delegate.Method.Name);
+            return String.Format("function {0}() {{ [native code] }}", Delegate.Method.Name);
         }
     }
 }

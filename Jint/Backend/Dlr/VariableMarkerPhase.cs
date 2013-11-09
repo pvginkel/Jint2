@@ -10,14 +10,16 @@ namespace Jint.Backend.Dlr
 {
     internal class VariableMarkerPhase : SyntaxVisitor
     {
-        private readonly DlrBackend _backend;
         private readonly bool _isStrict;
-        private readonly List<BlockSyntax> _blocks = new List<BlockSyntax>();
+        private readonly List<BlockManager> _blocks = new List<BlockManager>();
+        private readonly List<BlockManager> _pendingClosures = new List<BlockManager>();
         private BlockSyntax _main;
 
         public VariableMarkerPhase(DlrBackend backend)
         {
-            _backend = backend;
+            if (backend == null)
+                throw new ArgumentNullException("backend");
+
             _isStrict = backend.Options.HasFlag(Options.Strict);
         }
 
@@ -35,34 +37,98 @@ namespace Jint.Backend.Dlr
             syntax.DeclareVariable(JsScope.This).Type = VariableType.This;
 
             _main = syntax;
-            _blocks.Add(syntax);
+            _blocks.Add(new BlockManager(syntax, null));
 
             base.VisitProgram(syntax);
+
+            // Build all pending closures.
+
+            foreach (var block in _pendingClosures)
+            {
+                BuildClosure(block);
+            }
+        }
+
+        private void BuildClosure(BlockManager block)
+        {
+            if (block.Block.Closure != null)
+                return;
+
+            // Find the parent closure.
+
+            var parent = block.Parent;
+
+            while (parent != null)
+            {
+                if (parent.ClosedOverVariables.Count > 0)
+                    break;
+
+                parent = parent.Parent;
+            }
+
+            // If the parent hasn't already been built, build it.
+
+            if (parent != null && parent.Block.Closure == null)
+                BuildClosure(parent);
+
+            // Build the closure.
+
+            var fields = new Dictionary<string, Type>();
+
+            // Add the variables that were closed over.
+
+            foreach (var variable in block.ClosedOverVariables)
+            {
+                fields.Add(variable.Name, typeof(JsInstance));
+            }
+
+            // If we have a parent closure, add a variable for that.
+
+            if (parent != null)
+                fields.Add(Closure.ParentFieldName, parent.Block.Closure.Type);
+
+            // Build the closure.
+
+            var closureType = ClosureManager.BuildClosure(fields);
+            var closure = new Closure(
+                closureType,
+                parent != null ? parent.Block.Closure : null
+            );
+
+            block.Block.Closure = closure;
+            block.Block.ParentClosure = parent != null ? parent.Block.Closure : null;
+
+            // Fix up all variables.
+
+            foreach (var variable in block.ClosedOverVariables)
+            {
+                variable.ClosureField = new ClosedOverVariable(
+                    closure,
+                    variable,
+                    closureType.GetField(variable.Name)
+                );
+            }
         }
 
         public override void VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
         {
-            ProcessFunction(syntax);
-
-            _blocks.Add(syntax.Body);
+            EnterFunction(syntax);
 
             base.VisitFunctionDeclaration(syntax);
 
-            _blocks.RemoveAt(_blocks.Count - 1);
+            ExitFunction(syntax);
         }
 
         public override void VisitFunction(FunctionSyntax syntax)
         {
-            ProcessFunction(syntax);
-
-            _blocks.Add(syntax.Body);
+            EnterFunction(syntax);
 
             base.VisitFunction(syntax);
 
-            _blocks.RemoveAt(_blocks.Count - 1);
+            ExitFunction(syntax);
         }
 
-        private void ProcessFunction(IFunctionDeclaration function)
+        private void EnterFunction(IFunctionDeclaration function)
         {
             var body = function.Body;
             var declaredVariables = body.DeclaredVariables;
@@ -99,6 +165,25 @@ namespace Jint.Backend.Dlr
                 if (item.Type == VariableType.Unknown)
                     item.Type = VariableType.Local;
             }
+
+            // Add ourselves to the top of the block stack.
+
+            _blocks.Add(new BlockManager(function.Body, _blocks[_blocks.Count - 1]));
+        }
+
+        private void ExitFunction(IFunctionDeclaration function)
+        {
+            // Add ourselves to the pending closures list if we need a closure
+            // to be built.
+
+            var block = _blocks[_blocks.Count - 1];
+
+            if (block.ClosedOverVariables.Count != 0)
+                _pendingClosures.Add(block);
+
+            // Remove ourselves from the top of the block stack.
+
+            _blocks.RemoveAt(_blocks.Count - 1);
         }
 
         public override void VisitIdentifier(IdentifierSyntax syntax)
@@ -117,7 +202,7 @@ namespace Jint.Backend.Dlr
             int count = _blocks.Count;
             for (int i = count - 1; i > 0; i--)
             {
-                if (_blocks[i].DeclaredVariables.TryGetItem(identifier, out variable))
+                if (_blocks[i].Block.DeclaredVariables.TryGetItem(identifier, out variable))
                 {
                     if (variable.Type != VariableType.Global && i < count - 1)
                     {
@@ -127,7 +212,7 @@ namespace Jint.Backend.Dlr
                             variable.Type == VariableType.Parameter
                         );
 
-                        variable.IsClosedOver = true;
+                        _blocks[i].ClosedOverVariables.Add(variable);
                     }
 
                     return variable;
@@ -144,6 +229,20 @@ namespace Jint.Backend.Dlr
                 Debug.Assert(variable.Type == VariableType.Global);
 
             return variable;
+        }
+
+        private class BlockManager
+        {
+            public BlockSyntax Block { get; private set; }
+            public BlockManager Parent { get; private set; }
+            public HashSet<Variable> ClosedOverVariables { get; private set; }
+
+            public BlockManager(BlockSyntax block, BlockManager parent)
+            {
+                Block = block;
+                Parent = parent;
+                ClosedOverVariables = new HashSet<Variable>();
+            }
         }
     }
 }

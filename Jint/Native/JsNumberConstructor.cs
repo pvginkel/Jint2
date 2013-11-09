@@ -44,33 +44,29 @@ namespace Jint.Native
             return New(0d);
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as IGlobal) == visitor.Global)
+            if (that == null || (that as IGlobal) == global)
             {
+                JsInstance result;
+
                 // 15.7.1 - When Number is called as a function rather than as a constructor, it performs a type conversion.
                 if (parameters.Length > 0)
-                {
-                    return visitor.Return(New(parameters[0].ToNumber()));
-                }
+                    result = New(parameters[0].ToNumber());
                 else
-                {
-                    return visitor.Return(New(0));
-                }
+                    result = New(0);
+
+                return new JsFunctionResult(result, result);
             }
             else
             {
                 // 15.7.2 - When Number is called as part of a new expression, it is a constructor: it initialises the newly created object.
                 if (parameters.Length > 0)
-                {
                     that.Value = parameters[0].ToNumber();
-                }
                 else
-                {
                     that.Value = 0;
-                }
 
-                return visitor.Return(that);
+                return new JsFunctionResult(that, that);
             }
         }
 

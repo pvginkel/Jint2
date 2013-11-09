@@ -8,31 +8,33 @@ using Jint.Native;
 
 namespace Jint.Runtime
 {
-    internal class JintSetMemberBinder : SetMemberBinder
+    public class JintGetIndexBinder : GetIndexBinder
     {
-        public JintSetMemberBinder(string name)
-            : base(name, false)
+        public JintGetIndexBinder(CallInfo callInfo)
+            : base(callInfo)
         {
         }
 
-        public override DynamicMetaObject FallbackSetMember(DynamicMetaObject target, DynamicMetaObject value, DynamicMetaObject errorSuggestion)
+        public override DynamicMetaObject FallbackGetIndex(DynamicMetaObject target, DynamicMetaObject[] indexes, DynamicMetaObject errorSuggestion)
         {
-            if (typeof(JsDictionaryObject).IsAssignableFrom(target.LimitType))
-            {
+            if (
+                typeof(JsDictionaryObject).IsAssignableFrom(target.LimitType) &&
+                indexes.Length == 1 &&
+                typeof(JsInstance).IsAssignableFrom(indexes[0].LimitType)
+            ) {
                 return new DynamicMetaObject(
-                    Expression.Assign(
-                        Expression.Property(
-                            Expression.Convert(target.Expression, typeof(JsDictionaryObject)),
-                            "Item",
-                            Expression.Constant(Name)
-                        ),
-                        value.Expression
+                    Expression.Property(
+                        Expression.Convert(target.Expression, typeof(JsDictionaryObject)),
+                        "Item",
+                        indexes[0].Expression
                     ),
                     BindingRestrictions.GetExpressionRestriction(
                         Expression.TypeIs(
                             target.Expression,
                             typeof(JsDictionaryObject)
                         )
+                    ).Merge(
+                        BindingRestrictions.Combine(indexes)
                     )
                 );
             }
@@ -48,7 +50,7 @@ namespace Jint.Runtime
                     target.LimitType
                 ),
                 typeof(InvalidOperationException),
-                "Cannot bind member \"" + Name + "\""
+                "Cannot bind set index"
             );
         }
     }

@@ -18,8 +18,10 @@ namespace Jint.Native
             DefineOwnProperty("length", constructor.Global.NumberClass.New(2), PropertyAttributes.ReadOnly);
         }
 
-        public override JsInstance Execute(IJintVisitor visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
+            throw new NotImplementedException();
+            /*
             JsFunction function = that as JsFunction;
 
             if (function == null)
@@ -56,6 +58,7 @@ namespace Jint.Native
             //visitor.CallFunction(function, @this, targetParameters);
 
             //return visitor.Result;
+             */
         }
     }
 }

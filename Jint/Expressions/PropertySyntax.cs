@@ -4,11 +4,21 @@ using System.Diagnostics;
 namespace Jint.Expressions
 {
     [Serializable]
-    public class PropertySyntax : IdentifierSyntax
+    public class PropertySyntax : ExpressionSyntax, IAssignable
     {
-        public PropertySyntax(string name)
-            : base(name)
+        public PropertySyntax(ExpressionSyntax expression, string name)
         {
+            Expression = expression;
+            Name = name;
+        }
+
+        public ExpressionSyntax Expression { get; set; }
+        public string Name { get; set; }
+        public Variable Target { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
         }
 
         [DebuggerStepThrough]
