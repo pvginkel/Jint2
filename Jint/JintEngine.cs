@@ -27,29 +27,8 @@ namespace Jint
 
         [DebuggerStepThrough]
         public JintEngine(Options options)
-            : this(options, JintBackend.Dlr)
         {
-        }
-
-        internal JintEngine(Options options, JintBackend backend)
-        {
-            switch (backend)
-            {
-                //case JintBackend.Interpreted:
-                //    _backend = new Backend.Interpreted.InterpretedBackend(options);
-                //    break;
-
-                //case JintBackend.Compiled:
-                //    _backend = new Backend.Compiled.CompiledBackend(options);
-                //    break;
-
-                case JintBackend.Dlr:
-                    _backend = new Backend.Dlr.DlrBackend(options);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException("backend");
-            }
+            _backend = new Backend.Dlr.DlrBackend(options);
         }
 
         /// <summary>

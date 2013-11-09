@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Jint.Tests
 {
     [TestFixture]
-    public class DlrFixture : Fixtures
+    public class DlrFixture : TestBase
     {
         [Test]
         public void VariableDeclaration()

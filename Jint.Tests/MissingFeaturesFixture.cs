@@ -11,7 +11,7 @@ namespace Jint.Tests
     {
         private JintEngine CreateEngine()
         {
-            return new JintEngine(Options.EcmaScript5 | Options.Strict, JintBackend.Compiled);
+            return new JintEngine();
         }
 
         private object Test(string code)

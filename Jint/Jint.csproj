@@ -48,10 +48,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Antlr3\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpSyntax, Version=0.2.0.0, Culture=neutral, PublicKeyToken=8836777e205ef027, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\CSharpSyntax.0.2.0.0\lib\net35-Client\CSharpSyntax.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -82,7 +78,6 @@
     <Compile Include="Expressions\VariableCollection.cs" />
     <Compile Include="Expressions\VariableType.cs" />
     <Compile Include="IJintBackend.cs" />
-    <Compile Include="JintBackend.cs" />
     <Compile Include="Marshal\Delegates.cs" />
     <Compile Include="Marshal\JsFunctionDelegate.cs" />
     <Compile Include="Marshal\JsPropertyAttribute.cs" />
@@ -219,7 +214,6 @@
     <Compile Include="Backend\Dlr\ExpressionVisitor.Scope.cs" />
     <None Include="ES3.g" />
     <None Include="Key.snk" />
-    <None Include="packages.config" />
     <None Include="Parser\Generate.bat" />
   </ItemGroup>
   <ItemGroup />

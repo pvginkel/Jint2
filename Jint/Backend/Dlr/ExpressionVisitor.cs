@@ -35,6 +35,11 @@ namespace Jint.Backend.Dlr
 
             statements.Add(ProcessFunctionBody(syntax, _scope.Runtime));
 
+            statements.Add(Expression.Label(
+                _scope.Return,
+                Expression.Constant(JsUndefined.Instance)
+            ));
+
             return Expression.Lambda<Func<JintRuntime, JsInstance>>(
                 Expression.Block(statements),
                 new[] { _scope.Runtime }
@@ -106,6 +111,9 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitBlock(BlockSyntax syntax)
         {
+            if (syntax.Statements.Count == 0)
+                return Expression.Empty();
+
             return Expression.Block(
                 syntax.Statements.Select(p => p.Accept(this))
             );
