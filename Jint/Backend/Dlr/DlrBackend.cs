@@ -95,7 +95,7 @@ namespace Jint.Backend.Dlr
             throw new NotImplementedException();
         }
 
-        public JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters)
+        public JsFunctionResult ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters)
         {
             return _runtime.ExecuteFunctionCore(function, that, arguments, genericParameters);
         }

@@ -20,6 +20,8 @@ namespace Jint.Runtime
         private readonly Dictionary<Type, JintConvertBinder> _implicitConverters = new Dictionary<Type, JintConvertBinder>();
         private readonly Dictionary<CallInfo, JintGetIndexBinder> _getIndex = new Dictionary<CallInfo, JintGetIndexBinder>();
         private readonly Dictionary<CallInfo, JintSetIndexBinder> _setIndex = new Dictionary<CallInfo, JintSetIndexBinder>();
+        private readonly Dictionary<string, JintDeleteMemberBinder> _deleteMember = new Dictionary<string, JintDeleteMemberBinder>();
+        private readonly Dictionary<CallInfo, JintDeleteIndexBinder> _deleteIndex = new Dictionary<CallInfo, JintDeleteIndexBinder>();
 
         public JintContext(IGlobal global)
         {
@@ -125,6 +127,30 @@ namespace Jint.Runtime
             {
                 result = new JintConvertBinder(_global, type, @explicit);
                 binders.Add(type, result);
+            }
+
+            return result;
+        }
+
+        public CallSiteBinder DeleteMember(string name)
+        {
+            JintDeleteMemberBinder result;
+            if (!_deleteMember.TryGetValue(name, out result))
+            {
+                result = new JintDeleteMemberBinder(name);
+                _deleteMember.Add(name, result);
+            }
+
+            return result;
+        }
+
+        public CallSiteBinder DeleteIndex(CallInfo callInfo)
+        {
+            JintDeleteIndexBinder result;
+            if (!_deleteIndex.TryGetValue(callInfo, out result))
+            {
+                result = new JintDeleteIndexBinder(callInfo);
+                _deleteIndex.Add(callInfo, result);
             }
 
             return result;

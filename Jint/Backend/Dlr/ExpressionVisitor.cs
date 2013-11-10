@@ -363,15 +363,32 @@ namespace Jint.Backend.Dlr
                     Expression.MakeCatchBlock(
                         typeof(Exception),
                         exception,
-                        Expression.Block(catchStatements),
+                        Expression.Block(
+                            typeof(void),
+                            catchStatements
+                        ),
                         null
                     )
                 };
             }
 
+            var body = syntax.Body.Accept(this);
+
+            if (body.Type != typeof(void))
+                body = Expression.Block(typeof(void), body);
+
+            Expression finallyBody = null;
+
+            if (syntax.Finally != null)
+            {
+                finallyBody = syntax.Finally.Body.Accept(this);
+                if (finallyBody.Type != typeof(void))
+                    finallyBody = Expression.Block(typeof(void), finallyBody);
+            }
+
             return Expression.TryCatchFinally(
-                syntax.Body.Accept(this),
-                syntax.Finally != null ? syntax.Finally.Body.Accept(this) : Expression.Empty(),
+                body,
+                finallyBody,
                 catches
             );
         }
@@ -909,6 +926,7 @@ namespace Jint.Backend.Dlr
                 case BinaryExpressionType.In:
                 case BinaryExpressionType.InstanceOf:
                 case BinaryExpressionType.Plus:
+                case BinaryExpressionType.Div:
                     return Expression.Call(
                         _scope.Runtime,
                         typeof(JintRuntime).GetMethod("BinaryOperation"),
@@ -925,7 +943,6 @@ namespace Jint.Backend.Dlr
                 case BinaryExpressionType.BitwiseAnd: expressionType = ExpressionType.And; break;
                 case BinaryExpressionType.BitwiseOr: expressionType = ExpressionType.Or; break;
                 case BinaryExpressionType.BitwiseXOr: expressionType = ExpressionType.ExclusiveOr; break;
-                case BinaryExpressionType.Div: expressionType = ExpressionType.Divide; break;
                 case BinaryExpressionType.Equal: expressionType = ExpressionType.Equal; break;
                 case BinaryExpressionType.Greater: expressionType = ExpressionType.GreaterThan; break;
                 case BinaryExpressionType.GreaterOrEqual: expressionType = ExpressionType.GreaterThanOrEqual; break;
@@ -960,74 +977,21 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitTernary(TernarySyntax syntax)
         {
-            throw new NotImplementedException();
+            return Expression.Condition(
+                Expression.Dynamic(
+                    _context.Convert(typeof(bool), true),
+                    typeof(bool),
+                    syntax.Test.Accept(this)
+                ),
+                syntax.Then.Accept(this),
+                syntax.Else.Accept(this)
+            );
         }
 
         public Expression VisitUnaryExpression(UnaryExpressionSyntax syntax)
         {
             switch (syntax.Operation)
             {
-                    /*
-                case UnaryExpressionType.TypeOf:
-                    _result = Syntax.InvocationExpression(
-                        Syntax.ParseName(syntax.Type.ToString()),
-                        Syntax.ArgumentList(
-                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)operand)
-                        )
-                    );
-                    break;
-
-                case UnaryExpressionType.Not:
-                    switch (syntax.Type)
-                    {
-                        case UnaryExpressionType.Not: op = PrefixUnaryOperator.Exclamation; break;
-                        default: throw new InvalidOperationException();
-                    }
-
-                    _result = Syntax.InvocationExpression(
-                        Syntax.ParseName("Global.BooleanClass.New"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument(
-                                Syntax.PrefixUnaryExpression(
-                                    op,
-                                    Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression(
-                                            (CSharpSyntax.ExpressionSyntax)operand,
-                                            "ToBoolean"
-                                        ),
-                                        Syntax.ArgumentList()
-                                    )
-                                )
-                            )
-                        )
-                    );
-                    break;
-
-                case UnaryExpressionType.Positive:
-                case UnaryExpressionType.Negate:
-                    switch (syntax.Type)
-                    {
-                        case UnaryExpressionType.Positive: op = PrefixUnaryOperator.Plus; break;
-                        case UnaryExpressionType.Negate: op = PrefixUnaryOperator.Minus; break;
-                        default: throw new InvalidOperationException();
-                    }
-
-                    _result = Syntax.InvocationExpression(
-                        Syntax.ParseName("Global.NumberClass.New"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument(
-                                Syntax.PrefixUnaryExpression(
-                                    op,
-                                    Syntax.InvocationExpression(
-                                        Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)operand, "ToNumber"),
-                                        Syntax.ArgumentList()
-                                    )
-                                )
-                            )
-                        )
-                    );
-                    break;
-                */
                 case UnaryExpressionType.PostfixPlusPlus:
                 case UnaryExpressionType.PostfixMinusMinus:
                 case UnaryExpressionType.PrefixPlusPlus:
@@ -1076,84 +1040,59 @@ namespace Jint.Backend.Dlr
                         );
                     }
 
-                    /*
-                case UnaryExpressionType.Delete:
-                    throw new NotImplementedException();
-
-                //member = expression.Expression as MemberExpression;
-                //if (member == null)
-                //    throw new InvalidOperationException("Delete is not implemented");
-                //member.Previous.Accept(this);
-                //EnsureIdentifierIsDefined(Result);
-                //value = Result;
-                //string propertyName = null;
-                //if (member.Member is PropertyExpression)
-                //    propertyName = ((PropertyExpression)member.Member).Text;
-                //if (member.Member is Indexer)
-                //{
-                //    ((Indexer)member.Member).Index.Accept(this);
-                //    propertyName = Result.ToString();
-                //}
-                //if (string.IsNullOrEmpty(propertyName))
-                //    throw new JsException(Global.TypeErrorClass.New());
-                //try
-                //{
-                //    ((JsDictionaryObject)value).Delete(propertyName);
-                //}
-                //catch (JintException)
-                //{
-                //    throw new JsException(Global.TypeErrorClass.New());
-                //}
-                //Result = value;
-                //break;
-
                 case UnaryExpressionType.Void:
-                    syntax.Operand.Accept(this);
-
-                    _result = Syntax.InvocationExpression(
-                        Syntax.ParseName("Void"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument((CSharpSyntax.ExpressionSyntax)_result)
-                        )
-                    );
-                    break;
+                    return Expression.Constant(JsUndefined.Instance);
 
                 case UnaryExpressionType.Inv:
-                    _result = Syntax.InvocationExpression(
-                        Syntax.ParseName("Global.NumberClass.New"),
-                        Syntax.ArgumentList(
-                            Syntax.Argument(
-                                Syntax.BinaryExpression(
-                                    BinaryOperator.Minus,
-                                    Syntax.BinaryExpression(
-                                        BinaryOperator.Minus,
-                                        Syntax.LiteralExpression(0),
-                                        Syntax.InvocationExpression(
-                                            Syntax.MemberAccessExpression((CSharpSyntax.ExpressionSyntax)operand, "ToNumber"),
-                                            Syntax.ArgumentList()
-                                        )
-                                    ),
-                                    Syntax.LiteralExpression(1)
-                                )
-                            )
-                        )
+                case UnaryExpressionType.TypeOf:
+                    return Expression.Call(
+                        _scope.Runtime,
+                        typeof(JintRuntime).GetMethod("UnaryOperation"),
+                        BuildGet(syntax.Operand),
+                        Expression.Constant(syntax.Operation)
                     );
-                    break;
-                    */
+
+                case UnaryExpressionType.Delete:
+                    var operand = (MemberSyntax)syntax.Operand;
+
+                    if (operand.Type == SyntaxType.Property)
+                    {
+                        return Expression.Convert(
+                            Expression.Dynamic(
+                                _context.DeleteMember(((PropertySyntax)operand).Name),
+                                typeof(object),
+                                operand.Expression.Accept(this)
+                            ),
+                            typeof(JsInstance)
+                        );
+                    }
+                    else
+                    {
+                        return Expression.Convert(
+                            Expression.Dynamic(
+                                _context.DeleteIndex(new CallInfo(0)),
+                                typeof(object),
+                                operand.Expression.Accept(this),
+                                ((IndexerSyntax)operand).Index.Accept(this)
+                            ),
+                            typeof(JsInstance)
+                        );
+                    }
             }
 
-            ExpressionType expressionType;
+            ExpressionType operation;
 
             switch (syntax.Operation)
             {
-                case UnaryExpressionType.Not: expressionType = ExpressionType.Not; break;
-                case UnaryExpressionType.Negate: expressionType = ExpressionType.Negate; break;
+                case UnaryExpressionType.Positive: operation = ExpressionType.UnaryPlus; break;
+                case UnaryExpressionType.Not: operation = ExpressionType.Not; break;
+                case UnaryExpressionType.Negate: operation = ExpressionType.Negate; break;
                 default: throw new NotImplementedException();
             }
 
             return Expression.Convert(
                 Expression.Dynamic(
-                    _context.UnaryOperation(expressionType),
+                    _context.UnaryOperation(operation),
                     typeof(object),
                     syntax.Operand.Accept(this)
                 ),

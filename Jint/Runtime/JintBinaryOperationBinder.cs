@@ -39,42 +39,7 @@ namespace Jint.Runtime
                 switch (Operation)
                 {
                     case ExpressionType.Subtract:
-                        var restriction = BindingRestrictions.GetExpressionRestriction(
-                            Expression.AndAlso(
-                                Expression.TypeIs(
-                                    target.Expression,
-                                    typeof(JsInstance)
-                                ),
-                                Expression.TypeIs(
-                                    arg.Expression,
-                                    typeof(JsInstance)
-                                )
-                            )
-                        );
-
-                        // Specifically exclude any JsString arguments to make
-                        // sure we go back to the concat version.
-
-                        if (Operation == ExpressionType.Add)
-                        {
-                            restriction = restriction.Merge(
-                                BindingRestrictions.GetExpressionRestriction(
-                                    Expression.Not(
-                                        Expression.OrElse(
-                                            Expression.TypeIs(
-                                                target.Expression,
-                                                typeof(JsString)
-                                            ),
-                                            Expression.TypeIs(
-                                                arg.Expression,
-                                                typeof(JsString)
-                                            )
-                                        )
-                                    )
-                                )
-                            );
-                        }
-
+                    case ExpressionType.Multiply:
                         return new DynamicMetaObject(
                             Expression.Convert(
                                 Expression.MakeBinary(
@@ -92,7 +57,18 @@ namespace Jint.Runtime
                                 ),
                                 typeof(object)
                             ),
-                            restriction
+                            BindingRestrictions.GetExpressionRestriction(
+                                Expression.AndAlso(
+                                    Expression.TypeIs(
+                                        target.Expression,
+                                        typeof(JsInstance)
+                                    ),
+                                    Expression.TypeIs(
+                                        arg.Expression,
+                                        typeof(JsInstance)
+                                    )
+                                )
+                            )
                         );
 
                     case ExpressionType.GreaterThan:
@@ -125,7 +101,6 @@ namespace Jint.Runtime
                                 )
                             )
                         );
-
                 }
             }
 

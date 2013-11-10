@@ -65,6 +65,28 @@ namespace Jint.Runtime
                                 )
                             )
                         );
+
+                    case ExpressionType.UnaryPlus:
+                        // The only thing we're really doing here is to coerce
+                        // the value to a number.
+
+                        return new DynamicMetaObject(
+                            Expression.Dynamic(
+                                _context.Convert(typeof(JsInstance), true),
+                                typeof(JsInstance),
+                                Expression.Dynamic(
+                                    _context.Convert(typeof(double), true),
+                                    typeof(double),
+                                    target.Expression
+                                )
+                            ),
+                            BindingRestrictions.GetExpressionRestriction(
+                                Expression.TypeIs(
+                                    target.Expression,
+                                    typeof(JsInstance)
+                                )
+                            )
+                        );
                 }
             }
 

@@ -406,7 +406,7 @@ namespace Jint.Native
                         replaceParameters.Add(Global.NumberClass.New(index));
                         replaceParameters.Add(Global.StringClass.New(source));
 
-                        replaceValue = Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray(), null);
+                        replaceValue = Global.Backend.ExecuteFunction(function, null, replaceParameters.ToArray(), null).Result;
 
                         return Global.StringClass.New(source.Substring(0, index) + replaceValue.ToString() + source.Substring(index + search.Length));
                     }

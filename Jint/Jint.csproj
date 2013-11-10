@@ -206,6 +206,8 @@
     <Compile Include="PropertyBags\MiniCachedPropertyBag.cs" />
     <Compile Include="Native\JsDictionaryObjectDebugView.cs" />
     <Compile Include="PropertyBags\ScopedPropertyBag.cs" />
+    <Compile Include="Runtime\JintDeleteIndexBinder.cs" />
+    <Compile Include="Runtime\JintDeleteMemberBinder.cs" />
     <Compile Include="Runtime\JintGetIndexBinder.cs" />
     <Compile Include="Runtime\JintGetMemberBinder.cs" />
     <Compile Include="Runtime\JintRuntime.cs" />

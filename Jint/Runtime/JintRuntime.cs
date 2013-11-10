@@ -118,10 +118,10 @@ namespace Jint.Runtime
                 }
             }
 
-            return returned;
+            return returned.Result;
         }
 
-        public JsInstance ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
+        public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
         {
 /*
             if (function == null)
@@ -210,9 +210,7 @@ namespace Jint.Runtime
                 if (!_allowClr)
                     genericParameters = null;
 
-                var result = function.Execute(Global, that, parameters, genericParameters);
-
-                return result.Result;
+                return function.Execute(Global, that ?? Global, parameters ?? JsInstance.Empty, genericParameters);
             }
             finally
             {
@@ -431,6 +429,39 @@ namespace Jint.Runtime
 
                     return Global.NumberClass.New(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
 
+                case BinaryExpressionType.Div:
+                    var rightNumber = right.ToNumber();
+                    var leftNumber = left.ToNumber();
+
+                    if (right == Global.NumberClass["NEGATIVE_INFINITY"] || right == Global.NumberClass["POSITIVE_INFINITY"])
+                        return Global.NumberClass.New(0);
+
+                    if (rightNumber == 0)
+                        return leftNumber > 0 ? Global.NumberClass["POSITIVE_INFINITY"] : Global.NumberClass["NEGATIVE_INFINITY"];
+
+                    return Global.NumberClass.New(leftNumber / rightNumber);
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public JsInstance UnaryOperation(JsInstance operand, UnaryExpressionType operation)
+        {
+            switch (operation)
+            {
+                case UnaryExpressionType.Inv:
+                    return Global.NumberClass.New(0 - operand.ToNumber() - 1);
+
+                case UnaryExpressionType.TypeOf:
+                    if (operand == null)
+                        return Global.StringClass.New(JsUndefined.Instance.Type);
+                    if (operand is JsNull)
+                        return Global.StringClass.New(JsInstance.TypeObject);
+                    if (operand is JsFunction)
+                        return Global.StringClass.New(JsInstance.TypeofFunction);
+                    return Global.StringClass.New(operand.Type);
+
                 default:
                     throw new NotImplementedException();
             }
@@ -500,8 +531,7 @@ namespace Jint.Runtime
             //}
 
             var function = target as JsFunction;
-
-            if (target == null)
+            if (function == null)
                 throw new JsException(Global.ErrorClass.New("Function expected."));
 
             return function.Construct(arguments, null, Global);

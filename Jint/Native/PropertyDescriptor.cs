@@ -40,7 +40,7 @@ namespace Jint.Native
         public override JsInstance Get(JsDictionaryObject that)
         {
             //JsDictionaryObject that = _global._visitor.CallTarget;
-            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.Empty, null);
+            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.Empty, null).Result;
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value)

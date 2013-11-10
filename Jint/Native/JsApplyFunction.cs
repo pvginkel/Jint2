@@ -54,9 +54,7 @@ namespace Jint.Native
             }
 
             // Executes the statements in 'that' and use _this as the target of the call
-            var result = global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
-
-            return new JsFunctionResult(result, null);
+            return global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
         }
     }
 }

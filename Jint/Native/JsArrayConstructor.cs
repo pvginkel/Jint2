@@ -97,13 +97,9 @@ namespace Jint.Native
                 {
                     var function = obj["toString"] as JsFunction;
                     if (function != null)
-                    {
-                        result[i.ToString()] = Global.Backend.ExecuteFunction(function, obj, parameters, null);
-                    }
+                        result[i.ToString()] = Global.Backend.ExecuteFunction(function, obj, parameters, null).Result;
                     else
-                    {
                         result[i.ToString()] = Global.StringClass.New();
-                    }
                 }
             }
 
@@ -124,7 +120,7 @@ namespace Jint.Native
             for (int i = 0; i < target.Length; i++)
             {
                 var obj = (JsDictionaryObject)target[i.ToString()];
-                result[i.ToString()] = Global.Backend.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters, null);
+                result[i.ToString()] = Global.Backend.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters, null).Result;
             }
 
             return Global.StringClass.New(result.ToString());

@@ -771,16 +771,7 @@ leftHandSideExpression returns [ExpressionSyntax value]
             );
         } 
 			
-		| DOT id=Identifier {
-            if($value is NewSyntax) {
-                ((NewSyntax)$value).Expression = new PropertySyntax(
-                    ((NewSyntax)$value).Expression,
-                    id.Text
-                );
-            } else {
-                $value = new PropertySyntax($value, id.Text);
-            }
-        }
+		| DOT id=Identifier { $value = new PropertySyntax($value, id.Text); }
 	)* 
 	  
 	;
