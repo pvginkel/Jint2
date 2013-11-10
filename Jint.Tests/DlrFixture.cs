@@ -76,9 +76,10 @@ f(7);
         {
             Test(
 @"
-var obj = {};
-obj.__lookupGetter__('hi');
-"
+(function(arg1, arg2) {
+        arg1 = arg2;
+    assert(arguments[0], 2);
+})(1, 2);"
             );
         }
     }

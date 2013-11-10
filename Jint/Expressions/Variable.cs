@@ -8,18 +8,19 @@ namespace Jint.Expressions
     public class Variable
     {
         public static readonly Variable This = new Variable(VariableType.This);
-        public static readonly Variable Arguments = new Variable(VariableType.Arguments);
 
         public string Name { get; private set; }
+        public int Index { get; private set; }
         public VariableType Type { get; set; }
         public ClosedOverVariable ClosureField { get; set; }
 
-        public Variable(string name)
+        public Variable(string name, int index)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
             Name = name;
+            Index = index;
         }
 
         private Variable(VariableType type)

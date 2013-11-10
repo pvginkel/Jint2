@@ -9,8 +9,10 @@ namespace Jint.Expressions
     {
 #if DEBUG
         internal const string ParentFieldName = "__parent";
+        internal const string ArgumentsFieldName = "__arguments";
 #else
         internal const string ParentFieldName = "<>parent";
+        internal const string ArgumentsFieldName = "<>arguments";
 #endif
 
         public Type Type { get; private set; }

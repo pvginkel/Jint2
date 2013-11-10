@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Jint.Expressions;
 using Jint.Native;
@@ -23,14 +24,15 @@ namespace Jint.Backend.Dlr
             public ParameterExpression Runtime { get; private set; }
             public ParameterExpression This { get; private set; }
             public Closure Closure { get; private set; }
+            public Variable ArgumentsVariable { get; private set; }
+            public ParameterExpression Function { get; private set; }
             public ParameterExpression ClosureLocal { get; private set; }
-            public ParameterExpression ArgumentsLocal { get; private set; }
             public LabelTarget Return { get; private set; }
             public Dictionary<Closure, ParameterExpression> ClosureLocals { get; private set; }
             public Stack<LabelTarget> BreakTargets { get; private set; }
             public Stack<LabelTarget> ContinueTargets { get; private set; }
 
-            public Scope(ExpressionVisitor visitor, ParameterExpression @this, Closure closure, ParameterExpression closureLocal, ParameterExpression argumentsLocal, List<Expression> statements, Scope parent)
+            public Scope(ExpressionVisitor visitor, ParameterExpression @this, Closure closure, ParameterExpression function, ParameterExpression closureLocal, Variable argumentsVariable, List<Expression> statements, Scope parent)
             {
                 if (visitor == null)
                     throw new ArgumentNullException("visitor");
@@ -41,8 +43,9 @@ namespace Jint.Backend.Dlr
                 _statements = statements;
                 This = @this;
                 Closure = closure;
+                Function = function;
                 ClosureLocal = closureLocal;
-                ArgumentsLocal = argumentsLocal;
+                ArgumentsVariable = argumentsVariable;
                 Runtime = Expression.Parameter(
                     typeof(JintRuntime),
                     RuntimeParameterName
@@ -61,20 +64,16 @@ namespace Jint.Backend.Dlr
                 Debug.Assert(
                     variable.Type == VariableType.Local ||
                     variable.Type == VariableType.Arguments ||
-                    variable.Type == VariableType.Parameter ||
                     variable.Type == VariableType.This
                 );
 
                 switch (variable.Type)
                 {
-                    case VariableType.Arguments:
-                        return ArgumentsLocal;
-
                     case VariableType.This:
                         return This;
 
-                    case VariableType.Parameter:
                     case VariableType.Local:
+                    case VariableType.Arguments:
                         var closureField = variable.ClosureField;
 
                         if (closureField == null)
@@ -108,12 +107,36 @@ namespace Jint.Backend.Dlr
                             typeof(JsInstance)
                         );
 
+                    case VariableType.Parameter:
+                        return Expression.Convert(
+                            Expression.Dynamic(
+                                _visitor._context.SetMember(variable.Index.ToString(CultureInfo.InvariantCulture)),
+                                typeof(object),
+                                ResolveArgumentsLocal(variable),
+                                value
+                            ),
+                            typeof(JsInstance)
+                        );
+
                     default:
                         return Expression.Assign(
                             FindVariable(variable),
                             value
                         );
                 }
+            }
+
+            private Expression ResolveArgumentsLocal(Variable variable)
+            {
+                Debug.Assert(variable.Type == VariableType.Parameter);
+
+                if (variable.ClosureField == null)
+                    return FindVariable(ArgumentsVariable);
+
+                return Expression.Field(
+                    BuildClosureAliases(variable.ClosureField.Closure),
+                    variable.ClosureField.Field
+                );
             }
 
             public Expression BuildGet(Variable variable)
@@ -129,6 +152,16 @@ namespace Jint.Backend.Dlr
                                     Runtime,
                                     JintRuntime.GlobalScopeName
                                 )
+                            ),
+                            typeof(JsInstance)
+                        );
+
+                    case VariableType.Parameter:
+                        return Expression.Convert(
+                            Expression.Dynamic(
+                                _visitor._context.GetMember(variable.Index.ToString(CultureInfo.InvariantCulture)),
+                                typeof(object),
+                                ResolveArgumentsLocal(variable)
                             ),
                             typeof(JsInstance)
                         );

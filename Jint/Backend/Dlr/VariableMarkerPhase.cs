@@ -32,12 +32,8 @@ namespace Jint.Backend.Dlr
                 variable.Type = VariableType.Global;
             }
 
-            // Add the "this" variable.
-
-            syntax.DeclareVariable(JsScope.This).Type = VariableType.This;
-
             _main = syntax;
-            _blocks.Add(new BlockManager(syntax, null));
+            _blocks.Add(new BlockManager(syntax, null, null));
 
             base.VisitProgram(syntax);
 
@@ -79,7 +75,10 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in block.ClosedOverVariables)
             {
-                fields.Add(variable.Name, typeof(JsInstance));
+                if (variable.Type == VariableType.Local)
+                    fields.Add(variable.Name, typeof(JsInstance));
+                else if (!fields.ContainsKey(Closure.ArgumentsFieldName))
+                    fields.Add(Closure.ArgumentsFieldName, typeof(JsArguments));
             }
 
             // If we have a parent closure, add a variable for that.
@@ -102,11 +101,27 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in block.ClosedOverVariables)
             {
-                variable.ClosureField = new ClosedOverVariable(
-                    closure,
-                    variable,
-                    closureType.GetField(variable.Name)
-                );
+                if (variable.Type == VariableType.Parameter)
+                {
+                    if (block.ArgumentsVariable.ClosureField == null)
+                    {
+                        block.ArgumentsVariable.ClosureField = new ClosedOverVariable(
+                            closure,
+                            block.ArgumentsVariable,
+                            closureType.GetField(Closure.ArgumentsFieldName)
+                        );
+                    }
+
+                    variable.ClosureField = block.ArgumentsVariable.ClosureField;
+                }
+                else
+                {
+                    variable.ClosureField = new ClosedOverVariable(
+                        closure,
+                        variable,
+                        closureType.GetField(variable.Name)
+                    );
+                }
             }
         }
 
@@ -135,8 +150,21 @@ namespace Jint.Backend.Dlr
 
             // Setup the "arguments" and "this" variables.
 
-            if (_isStrict && declaredVariables.Contains(JsScope.Arguments))
-                throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
+            Variable argumentsVariable;
+            if (declaredVariables.TryGetItem(JsScope.Arguments, out argumentsVariable))
+            {
+                if (_isStrict)
+                    throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
+            }
+            else
+            {
+                argumentsVariable = new Variable(JsScope.Arguments, -1)
+                {
+                    Type = VariableType.Arguments
+                };
+
+                declaredVariables.Add(argumentsVariable);
+            }
 
             // Check for strict mode.
 
@@ -145,9 +173,9 @@ namespace Jint.Backend.Dlr
 
             // Add or mark the parameters.
 
-            foreach (var parameter in function.Parameters)
+            for (int i = 0; i < function.Parameters.Count; i++)
             {
-                var variable = body.DeclareVariable(parameter);
+                var variable = body.DeclareVariable(function.Parameters[i], i);
 
                 if (variable.Type == VariableType.Unknown)
                     variable.Type = VariableType.Parameter;
@@ -163,7 +191,7 @@ namespace Jint.Backend.Dlr
 
             // Add ourselves to the top of the block stack.
 
-            _blocks.Add(new BlockManager(function.Body, _blocks[_blocks.Count - 1]));
+            _blocks.Add(new BlockManager(function.Body, argumentsVariable, _blocks[_blocks.Count - 1]));
         }
 
         private void ExitFunction(IFunctionDeclaration function)
@@ -222,8 +250,7 @@ namespace Jint.Backend.Dlr
 
             // Check for arguments.
 
-            if (identifier == JsScope.Arguments)
-                return Variable.Arguments;
+            Debug.Assert(identifier != JsScope.Arguments);
 
             // Else, it's a reference to a global variable.
 
@@ -240,12 +267,14 @@ namespace Jint.Backend.Dlr
         private class BlockManager
         {
             public BlockSyntax Block { get; private set; }
+            public Variable ArgumentsVariable { get; private set; }
             public BlockManager Parent { get; private set; }
             public HashSet<Variable> ClosedOverVariables { get; private set; }
 
-            public BlockManager(BlockSyntax block, BlockManager parent)
+            public BlockManager(BlockSyntax block, Variable argumentsVariable, BlockManager parent)
             {
                 Block = block;
+                ArgumentsVariable = argumentsVariable;
                 Parent = parent;
                 ClosedOverVariables = new HashSet<Variable>();
             }

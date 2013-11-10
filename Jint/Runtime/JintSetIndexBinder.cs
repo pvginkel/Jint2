@@ -42,6 +42,9 @@ namespace Jint.Runtime
                 );
             }
 
+            throw new InvalidOperationException();
+
+/*
             if (errorSuggestion != null)
                 return errorSuggestion;
 
@@ -53,8 +56,9 @@ namespace Jint.Runtime
                     target.LimitType
                 ),
                 typeof(InvalidOperationException),
-                "Cannot bind get index"
+                "Cannot bind set index"
             );
+*/
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -48,6 +49,8 @@ namespace Jint.Backend.Dlr
 
             program.Accept(new VariableMarkerPhase(this));
 
+            ResetExpressionDump();
+
             var expression = program.Accept(new ExpressionVisitor(_context));
 
             PrintExpression(expression);   
@@ -63,10 +66,17 @@ namespace Jint.Backend.Dlr
         }
 
         [Conditional("DEBUG")]
+        public static void ResetExpressionDump()
+        {
+            File.WriteAllText("Dump.txt", "");
+        }
+
+        [Conditional("DEBUG")]
         public static void PrintExpression(Expression expression)
         {
-            Console.WriteLine(
-                typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
+            File.AppendAllText(
+                "Dump.txt",
+                (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
             );
         }
 

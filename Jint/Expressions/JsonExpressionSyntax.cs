@@ -56,10 +56,12 @@ namespace Jint.Expressions
             {
                 case PropertyExpressionType.Get:
                     declaration.GetExpression = propertyExpression.Expression;
+                    declaration.Expression = null;
                     break;
 
                 case PropertyExpressionType.Set:
                     declaration.SetExpression = propertyExpression.Expression;
+                    declaration.Expression = null;
                     break;
             }
         }

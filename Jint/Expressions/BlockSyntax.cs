@@ -35,13 +35,18 @@ namespace Jint.Expressions
 
         internal Variable DeclareVariable(string variableName)
         {
+            return DeclareVariable(variableName, -1);
+        }
+
+        internal Variable DeclareVariable(string variableName, int index)
+        {
             if (variableName == null)
                 throw new ArgumentNullException("variableName");
 
             Variable variable;
             if (!DeclaredVariables.TryGetItem(variableName, out variable))
             {
-                variable = new Variable(variableName);
+                variable = new Variable(variableName, index);
                 DeclaredVariables.Add(variable);
             }
 

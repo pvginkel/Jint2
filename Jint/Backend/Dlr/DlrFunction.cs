@@ -26,7 +26,7 @@ namespace Jint.Backend.Dlr
 
         public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject @this, JsInstance[] parameters, Type[] genericArguments)
         {
-            var result = _function(_runtime, @this, _closure, parameters);
+            var result = _function(_runtime, @this, this, _closure, parameters);
 
             return new JsFunctionResult(result, @this);
         }

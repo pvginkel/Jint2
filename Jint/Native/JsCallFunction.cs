@@ -20,41 +20,34 @@ namespace Jint.Native
 
         public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            throw new NotImplementedException();
-            /*
-            JsFunction function = that as JsFunction;
+            var function = that as JsFunction;
 
             if (function == null)
-            {
                 throw new ArgumentException("the target of call() must be a function");
-            }
 
             JsDictionaryObject @this;
-            JsInstance[] targetParameters;
+
             if (parameters.Length >= 1 && parameters[0] != JsUndefined.Instance && parameters[0] != JsNull.Instance)
                 @this = parameters[0] as JsDictionaryObject;
             else
-                @this = global;
+                @this = global as JsDictionaryObject;
+
+            JsInstance[] parametersCopy;
 
             if (parameters.Length >= 2 && parameters[1] != JsNull.Instance)
             {
-                targetParameters = new JsInstance[parameters.Length - 1];
-                for (int i = 1; i < parameters.Length; i++)
-                {
-                    targetParameters[i - 1] = parameters[i];
-                }
+                parametersCopy = new JsInstance[parameters.Length - 1];
+                Array.Copy(parameters, 1, parametersCopy, 0, parametersCopy.Length);
             }
             else
             {
-                targetParameters = JsInstance.Empty;
+                parametersCopy = Empty;
             }
-            // Executes the statements in 'that' and use @this as the target of the call
-            visitor.ExecuteFunction(function, @this, targetParameters);
-            return visitor.Result;
-            //visitor.CallFunction(function, @this, targetParameters);
 
-            //return visitor.Result;
-             */
+            // Executes the statements in 'that' and use _this as the target of the call
+            var result = global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
+
+            return new JsFunctionResult(result, null);
         }
     }
 }

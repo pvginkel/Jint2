@@ -18,6 +18,7 @@ namespace Jint.Backend.Dlr
     internal partial class ExpressionVisitor : ISyntaxVisitor<Expression>
     {
         private static readonly MethodInfo _defineAccessorProperty = typeof(JsDictionaryObject).GetMethod("DefineAccessorProperty");
+        private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors().Single();
 
         private readonly JintContext _context;
         private Scope _scope;
@@ -36,7 +37,7 @@ namespace Jint.Backend.Dlr
         {
             var statements = new List<Expression>();
 
-            _scope = new Scope(this, null, null, null, null, statements, null);
+            _scope = new Scope(this, null, null, null, null, null, statements, null);
 
             statements.Add(ProcessFunctionBody(syntax, _scope.Runtime));
 
@@ -421,7 +422,46 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
         {
-            throw new NotImplementedException();
+            var statements = new List<Expression>();
+
+            var array = Expression.Parameter(typeof(JsArray), "array");
+
+            statements.Add(Expression.Assign(
+                array,
+                Expression.Call(
+                    Expression.Property(
+                        Expression.Property(
+                            _scope.Runtime,
+                            typeof(JintRuntime).GetProperty("Global")
+                        ),
+                        typeof(JsGlobal).GetProperty("ArrayClass")
+                    ),
+                    typeof(JsArrayConstructor).GetMethod("New")
+                )
+            ));
+
+            for (int i = 0; i < syntax.Parameters.Count; i++)
+            {
+                statements.Add(Expression.Dynamic(
+                    _context.SetIndex(new CallInfo(0)),
+                    typeof(object),
+                    array,
+                    Expression.Dynamic(
+                        _context.Convert(typeof(JsInstance), true),
+                        typeof(JsInstance),
+                        Expression.Constant(i.ToString(CultureInfo.InvariantCulture))
+                    ),
+                    syntax.Parameters[i].Accept(this)
+                ));
+            }
+
+            statements.Add(array);
+
+            return Expression.Block(
+                typeof(JsInstance),
+                new[] { array },
+                statements
+            );
         }
 
         public Expression VisitCommaOperator(CommaOperatorSyntax syntax)
@@ -456,6 +496,11 @@ namespace Jint.Backend.Dlr
                 typeof(JsDictionaryObject),
                 "this"
             );
+
+            var functionParameter = Expression.Parameter(
+                typeof(JsFunction),
+                "function"
+            );
             
             ParameterExpression closureLocal = null;
             var scopedClosure = FindScopedClosure(body, _scope);
@@ -470,12 +515,21 @@ namespace Jint.Backend.Dlr
 
             var argumentsParameter = Expression.Parameter(
                 typeof(JsInstance[]),
-                JsScope.Arguments
+                "argumentsParameter"
             );
 
             var statements = new List<Expression>();
 
-            _scope = new Scope(this, thisParameter, scopedClosure, closureLocal, argumentsParameter, statements, _scope);
+            _scope = new Scope(
+                this,
+                thisParameter,
+                scopedClosure,
+                functionParameter,
+                closureLocal,
+                body.DeclaredVariables.Single(p => p.Type == VariableType.Arguments),
+                statements,
+                _scope
+            );
 
             var closureParameter = Expression.Parameter(
                 typeof(object),
@@ -483,10 +537,12 @@ namespace Jint.Backend.Dlr
             );
 
             var locals = new List<ParameterExpression>();
+
             var parameters = new List<ParameterExpression>
             {
                 _scope.Runtime,
                 thisParameter,
+                functionParameter,
                 closureParameter,
                 argumentsParameter
             };
@@ -532,57 +588,12 @@ namespace Jint.Backend.Dlr
                 }
             }
 
-            // Copy the function parameters.
-
-            for (int i = 0; i < function.Parameters.Count; i++)
-            {
-                var assignment = Expression.Condition(
-                    Expression.MakeBinary(
-                        ExpressionType.GreaterThan,
-                        Expression.ArrayLength(argumentsParameter),
-                        Expression.Constant(i)
-                    ),
-                    Expression.ArrayAccess(
-                        argumentsParameter,
-                        Expression.Constant(i)
-                    ),
-                    Expression.Constant(JsUndefined.Instance),
-                    typeof(JsInstance)
-                );
-
-                string parameter = function.Parameters[i];
-                var declaredVariable = body.DeclaredVariables[parameter];
-
-                if (declaredVariable.ClosureField == null)
-                {
-                    var local = Expression.Parameter(
-                        typeof(JsInstance),
-                        parameter
-                    );
-                    locals.Add(local);
-
-                    _scope.Variables.Add(declaredVariable, local);
-
-                    statements.Add(Expression.Assign(
-                        local,
-                        assignment
-                    ));
-                }
-                else
-                {
-                    statements.Add(_scope.BuildSet(
-                        declaredVariable,
-                        assignment
-                    ));
-                }
-            }
-
             // Build the locals.
 
             foreach (var declaredVariable in body.DeclaredVariables)
             {
                 if (
-                    declaredVariable.Type == VariableType.Local &&
+                    (declaredVariable.Type == VariableType.Local || declaredVariable.Type == VariableType.Arguments) &&
                     declaredVariable.ClosureField == null
                 ) {
                     var local = Expression.Parameter(
@@ -599,6 +610,18 @@ namespace Jint.Backend.Dlr
                     _scope.Variables.Add(declaredVariable, local);
                 }
             }
+
+            // Initialize the arguments array.
+
+            statements.Add(_scope.BuildSet(
+                _scope.ArgumentsVariable,
+                Expression.New(
+                    _argumentsConstructor,
+                    Expression.Property(_scope.Runtime, typeof(JintRuntime).GetProperty("Global")),
+                    functionParameter,
+                    argumentsParameter
+                )
+            ));
 
             // Build the body.
 
@@ -617,6 +640,8 @@ namespace Jint.Backend.Dlr
             {
                 locals.Add(local);
             }
+
+            // Add the arguments if one was created.
 
             var lambda = Expression.Lambda<DlrFunctionDelegate>(
                 Expression.Block(

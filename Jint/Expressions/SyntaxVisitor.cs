@@ -180,7 +180,8 @@ namespace Jint.Expressions
 
         public virtual void VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)
         {
-            syntax.Expression.Accept(this);
+            if (syntax.Expression != null)
+                syntax.Expression.Accept(this);
             if (syntax.GetExpression != null)
                 syntax.GetExpression.Accept(this);
             if (syntax.SetExpression != null)

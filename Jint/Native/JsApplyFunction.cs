@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Jint.Expressions;
 
@@ -20,45 +21,42 @@ namespace Jint.Native
 
         public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            throw new NotImplementedException();
-            /*
-            JsFunction function = that as JsFunction;
+            var function = that as JsFunction;
 
             if (function == null)
-            {
-                throw new ArgumentException("the target of call() must be a function");
-            }
+                throw new ArgumentException("The target of call() must be a function");
+
             JsDictionaryObject @this;
-            JsInstance[] targetParameters;
+
             if (parameters.Length >= 1 && parameters[0] != JsUndefined.Instance && parameters[0] != JsNull.Instance)
                 @this = parameters[0] as JsDictionaryObject;
             else
-                @this = visitor.Global as JsDictionaryObject;
+                @this = global as JsDictionaryObject;
+
+            JsInstance[] parametersCopy;
 
             if (parameters.Length >= 2 && parameters[1] != JsNull.Instance)
             {
                 JsObject arguments = parameters[1] as JsObject;
                 if (arguments == null)
-                    throw new JsException(visitor.Global.TypeErrorClass.New("second argument must be an array"));
-                targetParameters = new JsInstance[arguments.Length];
+                    throw new JsException(global.TypeErrorClass.New("Second argument must be an array"));
+
+                parametersCopy = new JsInstance[arguments.Length];
+
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    targetParameters[i] = arguments[i.ToString()];
+                    parametersCopy[i] = arguments[i.ToString(CultureInfo.InvariantCulture)];
                 }
             }
             else
             {
-                targetParameters = JsInstance.Empty;
+                parametersCopy = Empty;
             }
 
+            // Executes the statements in 'that' and use _this as the target of the call
+            var result = global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
 
-            // Executes the statements in 'that' and use @this as the target of the call
-            visitor.ExecuteFunction(function, @this, targetParameters);
-            return visitor.Result;
-            //visitor.CallFunction(function, @this, targetParameters);
-
-            //return visitor.Result;
-             */
+            return new JsFunctionResult(result, null);
         }
     }
 }
