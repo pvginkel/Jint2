@@ -422,6 +422,15 @@ namespace Jint.Runtime
 
                     return Global.BooleanClass.New(function.HasInstance(obj));
 
+                case BinaryExpressionType.Plus:
+                    var leftPrimitive = left.ToPrimitive(Global);
+                    var rightPrimitive = right.ToPrimitive(Global);
+
+                    if (leftPrimitive is JsString || rightPrimitive is JsString)
+                        return Global.StringClass.New(String.Concat(leftPrimitive.ToString(), rightPrimitive.ToString()));
+
+                    return Global.NumberClass.New(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
+
                 default:
                     throw new NotImplementedException();
             }

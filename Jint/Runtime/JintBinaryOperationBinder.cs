@@ -36,61 +36,9 @@ namespace Jint.Runtime
                 typeof(JsInstance).IsAssignableFrom(arg.LimitType)
             )
             {
-                if (
-                    Operation == ExpressionType.Add && (
-                        typeof(JsString).IsAssignableFrom(target.LimitType) ||
-                        typeof(JsString).IsAssignableFrom(arg.LimitType)
-                    )
-                )
-                {
-                    return new DynamicMetaObject(
-                        Expression.Convert(
-                            Expression.Call(
-                                _concat,
-                                Expression.Dynamic(
-                                    _context.Convert(typeof(string), true),
-                                    typeof(string),
-                                    target.Expression
-                                ),
-                                Expression.Dynamic(
-                                    _context.Convert(typeof(string), true),
-                                    typeof(string),
-                                    arg.Expression
-                                )
-                            ),
-                            typeof(object)
-                        ),
-                        BindingRestrictions.GetExpressionRestriction(
-                            Expression.AndAlso(
-                                Expression.AndAlso(
-                                    Expression.TypeIs(
-                                        target.Expression,
-                                        typeof(JsInstance)
-                                    ),
-                                    Expression.TypeIs(
-                                        arg.Expression,
-                                        typeof(JsInstance)
-                                    )
-                                ),
-                                Expression.OrElse(
-                                    Expression.TypeIs(
-                                        target.Expression,
-                                        typeof(JsString)
-                                    ),
-                                    Expression.TypeIs(
-                                        arg.Expression,
-                                        typeof(JsString)
-                                    )
-                                )
-                            )
-                        )
-                    );
-                }
-
                 switch (Operation)
                 {
                     case ExpressionType.Subtract:
-                    case ExpressionType.Add:
                         var restriction = BindingRestrictions.GetExpressionRestriction(
                             Expression.AndAlso(
                                 Expression.TypeIs(

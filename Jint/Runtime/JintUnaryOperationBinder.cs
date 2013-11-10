@@ -44,6 +44,27 @@ namespace Jint.Runtime
                                 )
                             )
                         );
+
+                    case ExpressionType.Negate:
+                        return new DynamicMetaObject(
+                            Expression.Dynamic(
+                                _context.Convert(typeof(JsInstance), true),
+                                typeof(JsInstance),
+                                Expression.Negate(
+                                    Expression.Dynamic(
+                                        _context.Convert(typeof(double), true),
+                                        typeof(double),
+                                        target.Expression
+                                    )
+                                )
+                            ),
+                            BindingRestrictions.GetExpressionRestriction(
+                                Expression.TypeIs(
+                                    target.Expression,
+                                    typeof(JsInstance)
+                                )
+                            )
+                        );
                 }
             }
 
