@@ -19,6 +19,7 @@ namespace Jint.Backend.Dlr
     {
         private static readonly MethodInfo _defineAccessorProperty = typeof(JsDictionaryObject).GetMethod("DefineAccessorProperty");
         private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors().Single();
+        private static readonly MethodInfo _compareEquality = typeof(JintRuntime).GetMethod("CompareEquality");
 
         private readonly JintContext _context;
         private Scope _scope;
@@ -320,7 +321,73 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitSwitch(SwitchSyntax syntax)
         {
-            throw new NotImplementedException();
+            // Create the label that jumps to the end of the switch.
+            var after = Expression.Label("after");
+            _scope.BreakTargets.Push(after);
+
+            var statements = new List<Expression>();
+
+            var expression = Expression.Parameter(typeof(JsInstance), "expression");
+            var global = Expression.Parameter(typeof(JsGlobal), "global");
+
+            statements.Add(Expression.Assign(
+                global,
+                Expression.Property(
+                    _scope.Runtime,
+                    "Global"
+                )
+            ));
+
+            statements.Add(Expression.Assign(
+                expression,
+                syntax.Expression.Accept(this)
+            ));
+
+            var bodies = new List<Tuple<LabelTarget, Expression>>();
+
+            foreach (var caseClause in syntax.Cases)
+            {
+                var target = Expression.Label("target" + bodies.Count);
+
+                statements.Add(Expression.IfThen(
+                    Expression.Call(
+                        _compareEquality,
+                        global,
+                        expression,
+                        caseClause.Expression.Accept(this),
+                        Expression.Constant(ExpressionType.Equal)
+                    ),
+                    Expression.Goto(target)
+                ));
+
+                bodies.Add(Tuple.Create(target, caseClause.Body.Accept(this)));
+            }
+
+            if (syntax.Default != null)
+            {
+                var target = Expression.Label("default");
+
+                statements.Add(Expression.Goto(target));
+
+                bodies.Add(Tuple.Create(target, syntax.Default.Accept(this)));
+            }
+
+            foreach (var body in bodies)
+            {
+                statements.Add(Expression.Label(body.Item1));
+                statements.Add(body.Item2);
+            }
+
+            statements.Add(Expression.Label(after));
+
+            // Pop the break target to make the previous one available.
+            _scope.BreakTargets.Pop();
+
+            return Expression.Block(
+                typeof(void),
+                new[] { expression, global },
+                statements
+            );
         }
 
         public Expression VisitWith(WithSyntax syntax)
@@ -330,7 +397,12 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitThrow(ThrowSyntax syntax)
         {
-            throw new NotImplementedException();
+            return Expression.Throw(
+                Expression.New(
+                    typeof(JsException).GetConstructor(new[] { typeof(JsInstance) }),
+                    syntax.Expression.Accept(this)
+                )
+            );
         }
 
         public Expression VisitTry(TrySyntax syntax)

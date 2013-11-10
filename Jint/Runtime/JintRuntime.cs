@@ -270,7 +270,7 @@ namespace Jint.Runtime
             }
         }
 
-        private static bool CompareEquality(IGlobal global, JsInstance left, JsInstance right, ExpressionType expressionType)
+        public static bool CompareEquality(IGlobal global, JsInstance left, JsInstance right, ExpressionType expressionType)
         {
             bool result;
 
