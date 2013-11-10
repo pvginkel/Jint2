@@ -19,5 +19,10 @@ namespace Jint.Expressions
         {
             return visitor.VisitEmpty(this);
         }
+
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Empty; }
+        }
     }
 }

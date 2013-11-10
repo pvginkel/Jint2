@@ -11,6 +11,11 @@ namespace Jint.Expressions
             Text = text;
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.ClrIdentifier; }
+        }
+
         public string Text { get; set; }
 
         public override string ToString()

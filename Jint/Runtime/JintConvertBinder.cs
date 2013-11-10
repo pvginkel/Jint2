@@ -14,8 +14,10 @@ namespace Jint.Runtime
         private readonly IGlobal _global;
         private static readonly MethodInfo _toNumber = typeof(JsInstance).GetMethod("ToNumber");
         private static readonly MethodInfo _toBoolean = typeof(JsInstance).GetMethod("ToBoolean");
+        private static readonly MethodInfo _toString = typeof(JsInstance).GetMethod("ToString");
         private static readonly MethodInfo _newNumber = typeof(JsNumberConstructor).GetMethod("New", new[] { typeof(double) });
         private static readonly MethodInfo _newBoolean = typeof(JsBooleanConstructor).GetMethod("New", new[] { typeof(bool) });
+        private static readonly MethodInfo _newString = typeof(JsStringConstructor).GetMethod("New", new[] { typeof(string) });
 
         public JintConvertBinder(IGlobal global, Type type, bool @explicit)
             : base(type, @explicit)
@@ -33,6 +35,7 @@ namespace Jint.Runtime
                 {
                     case TypeCode.Double: method = _toNumber; break;
                     case TypeCode.Boolean: method = _toBoolean; break;
+                    case TypeCode.String: method = _toString; break;
 
                     default:
                         throw new NotImplementedException();
@@ -54,7 +57,6 @@ namespace Jint.Runtime
             else
             {
                 JsConstructor klass;
-                Type type;
                 MethodInfo method;
 
                 switch (Type.GetTypeCode(target.LimitType))
@@ -62,13 +64,16 @@ namespace Jint.Runtime
                     case TypeCode.Double:
                         klass = _global.NumberClass;
                         method = _newNumber;
-                        type = typeof(double);
                         break;
 
                     case TypeCode.Boolean:
                         klass = _global.BooleanClass;
                         method = _newBoolean;
-                        type = typeof(bool);
+                        break;
+
+                    case TypeCode.String:
+                        klass = _global.StringClass;
+                        method = _newString;
                         break;
 
                     default:
@@ -79,17 +84,18 @@ namespace Jint.Runtime
                     Expression.Call(
                         Expression.Constant(klass),
                         method,
-                        new[] { Expression.Convert(target.Expression, type) }
+                        new[] { Expression.Convert(target.Expression, target.LimitType) }
                     ),
                     BindingRestrictions.GetExpressionRestriction(
                         Expression.TypeIs(
                             target.Expression,
-                            type
+                            target.LimitType
                         )
                     )
                 );
             }
 
+            /*
             if (errorSuggestion != null)
                 return errorSuggestion;
 
@@ -103,6 +109,7 @@ namespace Jint.Runtime
                 typeof(InvalidOperationException),
                 "Cannot bind member \"" + Type + "\""
             );
+             */
         }
     }
 }

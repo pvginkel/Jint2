@@ -13,6 +13,11 @@ namespace Jint.Expressions
             Else = @else;
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Ternary; }
+        }
+
         public ExpressionSyntax Test { get; set; }
 
         public ExpressionSyntax Then { get; set; }

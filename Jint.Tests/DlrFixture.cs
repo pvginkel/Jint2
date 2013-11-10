@@ -52,5 +52,34 @@ f();
 assert(i, 4);
 ");
         }
+
+        [Test]
+        public void ShouldCloseOverParameter()
+        {
+            Test(
+@"
+function f(v) {
+    function g() {
+        assert(v, 7);
+    }
+
+  g();
+}
+
+f(7);
+"
+            );
+        }
+
+        [Test]
+        public void DummyTest()
+        {
+            Test(
+@"
+var obj = {};
+obj.__lookupGetter__('hi');
+"
+            );
+        }
     }
 }

@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class FunctionSyntax : ExpressionSyntax, IFunctionDeclaration
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Function; }
+        }
+
         public List<string> Parameters { get; set; }
         public BlockSyntax Body { get; set; }
         public string Name { get; set; }

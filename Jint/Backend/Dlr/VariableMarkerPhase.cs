@@ -135,13 +135,8 @@ namespace Jint.Backend.Dlr
 
             // Setup the "arguments" and "this" variables.
 
-            Variable variable;
-            if (!declaredVariables.TryGetItem(JsScope.Arguments, out variable))
-                body.DeclareVariable(JsScope.Arguments).Type = VariableType.Arguments;
-            else if (_isStrict)
+            if (_isStrict && declaredVariables.Contains(JsScope.Arguments))
                 throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
-
-            body.DeclareVariable(JsScope.This).Type = VariableType.This;
 
             // Check for strict mode.
 
@@ -152,7 +147,7 @@ namespace Jint.Backend.Dlr
 
             foreach (var parameter in function.Parameters)
             {
-                variable = body.DeclareVariable(parameter);
+                var variable = body.DeclareVariable(parameter);
 
                 if (variable.Type == VariableType.Unknown)
                     variable.Type = VariableType.Parameter;
@@ -195,6 +190,12 @@ namespace Jint.Backend.Dlr
 
         private Variable GetVariable(string identifier)
         {
+            // Arguments can be re-declared (of not strict). Because of this,
+            // we check arguments after resolving in a scope.
+
+            if (identifier == JsScope.This)
+                return Variable.This;
+
             Variable variable;
 
             // Try to find the identifier in a scope other than the global scope.
@@ -218,6 +219,11 @@ namespace Jint.Backend.Dlr
                     return variable;
                 }
             }
+
+            // Check for arguments.
+
+            if (identifier == JsScope.Arguments)
+                return Variable.Arguments;
 
             // Else, it's a reference to a global variable.
 

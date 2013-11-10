@@ -61,7 +61,8 @@ namespace Jint.Backend.Dlr
                 Debug.Assert(
                     variable.Type == VariableType.Local ||
                     variable.Type == VariableType.Arguments ||
-                    variable.Type == VariableType.Parameter
+                    variable.Type == VariableType.Parameter ||
+                    variable.Type == VariableType.This
                 );
 
                 switch (variable.Type)
@@ -69,9 +70,10 @@ namespace Jint.Backend.Dlr
                     case VariableType.Arguments:
                         return ArgumentsLocal;
 
-                    case VariableType.Parameter:
-                        return Variables[variable];
+                    case VariableType.This:
+                        return This;
 
+                    case VariableType.Parameter:
                     case VariableType.Local:
                         var closureField = variable.ClosureField;
 
@@ -86,30 +88,6 @@ namespace Jint.Backend.Dlr
                     default:
                         throw new InvalidOperationException("Cannot find variable of argument");
                 }
-            }
-
-            public Expression BuildSet(ExpressionSyntax syntax, Expression value)
-            {
-                if (syntax is IdentifierSyntax)
-                    return BuildSet(((IdentifierSyntax)syntax).Target, value);
-
-                if (syntax is IndexerSyntax)
-                {
-                    var indexer = (IndexerSyntax)syntax;
-
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _visitor._context.SetIndex(new CallInfo(0)),
-                            typeof(object),
-                            BuildGet(indexer.Expression),
-                            indexer.Index.Accept(_visitor),
-                            value
-                        ),
-                        typeof(JsInstance)
-                    );
-                }
-
-                throw new NotImplementedException();
             }
 
             public Expression BuildSet(Variable variable, Expression value)
@@ -136,46 +114,6 @@ namespace Jint.Backend.Dlr
                             value
                         );
                 }
-            }
-
-            public Expression BuildGet(ExpressionSyntax syntax)
-            {
-                if (syntax is IdentifierSyntax)
-                    return BuildGet(((IdentifierSyntax)syntax).Target);
-
-                if (syntax is MethodCallSyntax)
-                    return ((MethodCallSyntax)syntax).Accept(_visitor);
-
-                if (syntax is PropertySyntax)
-                {
-                    var property = (PropertySyntax)syntax;
-
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _visitor._context.GetMember(property.Name),
-                            typeof(object),
-                            property.Expression.Accept(_visitor)
-                        ),
-                        typeof(JsInstance)
-                    );
-                }
-
-                if (syntax is IndexerSyntax)
-                {
-                    var indexer = (IndexerSyntax)syntax;
-
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _visitor._context.GetIndex(new CallInfo(0)),
-                            typeof(object),
-                            BuildGet(indexer.Expression),
-                            indexer.Index.Accept(_visitor)
-                        ),
-                        typeof(JsInstance)
-                    );
-                }
-
-                throw new NotImplementedException();
             }
 
             public Expression BuildGet(Variable variable)

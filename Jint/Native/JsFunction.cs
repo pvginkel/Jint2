@@ -79,12 +79,17 @@ namespace Jint.Native
         }
 
         //13.2.2
-        public virtual JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)
+        public virtual JsObject Construct(JsInstance[] parameters, Type[] generics, IGlobal global)
         {
-            var instance = visitor.Global.ObjectClass.New(PrototypeProperty);
-            visitor.ExecuteFunction(this, instance, parameters);
+            var instance = global.ObjectClass.New(PrototypeProperty);
 
-            return (visitor.Result as JsObject ?? instance);
+            var result = global.Backend.ExecuteFunction(this, instance, parameters, generics);
+
+            var obj = result as JsObject;
+            if (obj != null && obj != JsUndefined.Instance)
+                return obj;
+
+            return instance;
         }
 
         public override bool IsClr

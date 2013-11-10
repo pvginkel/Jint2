@@ -8,7 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class NewSyntax : ExpressionSyntax, IGenericExpression
     {
-        // public List<Identifier> Identifiers { get; set; }
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.New; }
+        }
+
         public ExpressionSyntax Expression { get; set; }
         public List<ExpressionSyntax> Arguments { get; set; }
         public List<ExpressionSyntax> Generics { get; set; }
@@ -17,7 +21,6 @@ namespace Jint.Expressions
         {
             Expression = expression;
 
-            // Identifiers = new List<Identifier>();
             Arguments = new List<ExpressionSyntax>();
             Generics = new List<ExpressionSyntax>();
         }

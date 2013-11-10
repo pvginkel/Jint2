@@ -74,7 +74,7 @@ namespace Jint.Native
             return new JsFunctionResult(result, that);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
         {
             throw new JintException("This method can't be used as a constructor");
         }

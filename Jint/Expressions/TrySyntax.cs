@@ -12,6 +12,11 @@ namespace Jint.Expressions
         public CatchClause Catch { get; set; }
         public FinallyClause Finally { get; set; }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Try; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

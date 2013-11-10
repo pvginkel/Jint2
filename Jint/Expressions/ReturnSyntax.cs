@@ -19,6 +19,11 @@ namespace Jint.Expressions
             Expression = expression;
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Return; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class ArrayDeclarationSyntax : ExpressionSyntax
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.ArrayDeclaration; }
+        }
+
         public List<SyntaxNode> Parameters { get; set; }
 
         public ArrayDeclarationSyntax()

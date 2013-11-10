@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class RegexpSyntax : ExpressionSyntax
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Regexp; }
+        }
+
         public string Regexp { get; set; }
         public string Options { get; set; }
 

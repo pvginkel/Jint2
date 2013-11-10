@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class AssignmentSyntax : ExpressionSyntax
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Assignment; }
+        }
+
         public ExpressionSyntax Left { get; set; }
         public ExpressionSyntax Right { get; set; }
         public AssignmentOperator AssignmentOperator { get; set; }

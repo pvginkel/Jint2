@@ -18,6 +18,11 @@ namespace Jint.Expressions
             Parameters = new List<string>();
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.FunctionDeclaration; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

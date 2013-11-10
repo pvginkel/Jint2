@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
 using Jint.Runtime;
@@ -14,6 +17,8 @@ namespace Jint.Backend.Dlr
 {
     internal partial class ExpressionVisitor : ISyntaxVisitor<Expression>
     {
+        private static readonly MethodInfo _defineAccessorProperty = typeof(JsDictionaryObject).GetMethod("DefineAccessorProperty");
+
         private readonly JintContext _context;
         private Scope _scope;
 
@@ -84,7 +89,7 @@ namespace Jint.Backend.Dlr
         public Expression VisitAssignment(AssignmentSyntax syntax)
         {
             if (syntax.AssignmentOperator == AssignmentOperator.Assign)
-                return _scope.BuildSet(syntax.Left, syntax.Right.Accept(this));
+                return BuildSet(syntax.Left, syntax.Right.Accept(this));
 
             ExpressionType expressionType;
 
@@ -94,7 +99,7 @@ namespace Jint.Backend.Dlr
                 default: throw new NotImplementedException();
             }
 
-            return _scope.BuildSet(
+            return BuildSet(
                 syntax.Left,
                 Expression.Dynamic(
                     _context.Convert(typeof(JsInstance), true),
@@ -152,7 +157,42 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitForEachIn(ForEachInSyntax syntax)
         {
-            throw new NotImplementedException();
+            // Create break and continue labels and push them onto the stack.
+
+            var breakTarget = Expression.Label("break");
+            _scope.BreakTargets.Push(breakTarget);
+            var continueTarget = Expression.Label("continue");
+            _scope.ContinueTargets.Push(continueTarget);
+
+            // Temporary variable to hold a reference to the current key.
+
+            var keyLocal = Expression.Parameter(typeof(JsInstance), "key");
+
+            var result = ExpressionEx.ForEach(
+                keyLocal,
+                typeof(JsInstance),
+                // Call JintRuntime.GetForEachKeys to get the keys to enumerate over.
+                Expression.Call(
+                    _scope.Runtime,
+                    typeof(JintRuntime).GetMethod("GetForEachKeys"),
+                    syntax.Expression.Accept(this)
+                ),
+                Expression.Block(
+                    typeof(void),
+                    // Copy the current key to the provided target.
+                    BuildSet(syntax.Initialization, keyLocal),
+                    syntax.Body.Accept(this)
+                ),
+                breakTarget,
+                continueTarget
+            );
+
+            // Pop the break and continue labels to make the previous ones available.
+
+            _scope.BreakTargets.Pop();
+            _scope.ContinueTargets.Pop();
+
+            return result;
         }
 
         public Expression VisitFor(ForSyntax syntax)
@@ -289,7 +329,45 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitTry(TrySyntax syntax)
         {
-            throw new NotImplementedException();
+            CatchBlock[] catches = null;
+
+            var catchBlock = syntax.Catch;
+            if (catchBlock != null)
+            {
+                var exception = Expression.Parameter(typeof(Exception), "exception");
+
+                var catchStatements = new List<Expression>();
+
+                if (catchBlock.Identifier != null)
+                {
+                    catchStatements.Add(_scope.BuildSet(
+                        catchBlock.Target,
+                        Expression.Call(
+                            _scope.Runtime,
+                            typeof(JintRuntime).GetMethod("WrapException"),
+                            exception
+                        )
+                    ));
+                }
+
+                catchStatements.Add(catchBlock.Body.Accept(this));
+
+                catches = new[]
+                {
+                    Expression.MakeCatchBlock(
+                        typeof(Exception),
+                        exception,
+                        Expression.Block(catchStatements),
+                        null
+                    )
+                };
+            }
+
+            return Expression.TryCatchFinally(
+                syntax.Body.Accept(this),
+                syntax.Finally != null ? syntax.Finally.Body.Accept(this) : Expression.Empty(),
+                catches
+            );
         }
 
         public Expression VisitVariableDeclaration(VariableDeclarationSyntax syntax)
@@ -348,7 +426,9 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitCommaOperator(CommaOperatorSyntax syntax)
         {
-            throw new NotImplementedException();
+            return Expression.Block(
+                syntax.Expressions.Select(p => p.Accept(this))
+            );
         }
 
         public Expression VisitFunction(FunctionSyntax syntax)
@@ -358,27 +438,13 @@ namespace Jint.Backend.Dlr
 
         private Expression CreateFunctionSyntax(IFunctionDeclaration function, DlrFunctionDelegate compiledFunction)
         {
-            Expression parameters;
-
-            if (function.Parameters.Count == 0)
-            {
-                parameters = Expression.Constant(null, typeof(string[]));
-            }
-            else
-            {
-                parameters = Expression.NewArrayInit(
-                    typeof(string),
-                    function.Parameters.Select(Expression.Constant)
-                );
-            }
-
             return Expression.Call(
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("CreateFunction"),
                 Expression.Constant(function.Name, typeof(string)),
                 Expression.Constant(compiledFunction),
                 _scope.ClosureLocal != null ? (Expression)_scope.ClosureLocal : Expression.Constant(null),
-                parameters
+                MakeArrayInit(function.Parameters.Select(Expression.Constant), typeof(string), true)
             );
         }
 
@@ -470,31 +536,45 @@ namespace Jint.Backend.Dlr
 
             for (int i = 0; i < function.Parameters.Count; i++)
             {
-                var parameter = function.Parameters[i];
-                var local = Expression.Parameter(
-                    typeof(JsInstance),
-                    parameter
+                var assignment = Expression.Condition(
+                    Expression.MakeBinary(
+                        ExpressionType.GreaterThan,
+                        Expression.ArrayLength(argumentsParameter),
+                        Expression.Constant(i)
+                    ),
+                    Expression.ArrayAccess(
+                        argumentsParameter,
+                        Expression.Constant(i)
+                    ),
+                    Expression.Constant(JsUndefined.Instance),
+                    typeof(JsInstance)
                 );
-                locals.Add(local);
 
-                _scope.Variables.Add(body.DeclaredVariables[parameter], local);
+                string parameter = function.Parameters[i];
+                var declaredVariable = body.DeclaredVariables[parameter];
 
-                statements.Add(Expression.Assign(
-                    local,
-                    Expression.Condition(
-                        Expression.MakeBinary(
-                            ExpressionType.GreaterThan,
-                            Expression.ArrayLength(argumentsParameter),
-                            Expression.Constant(i)
-                        ),
-                        Expression.ArrayAccess(
-                            argumentsParameter,
-                            Expression.Constant(i)
-                        ),
-                        Expression.Constant(JsUndefined.Instance),
-                        typeof(JsInstance)
-                    )
-                ));
+                if (declaredVariable.ClosureField == null)
+                {
+                    var local = Expression.Parameter(
+                        typeof(JsInstance),
+                        parameter
+                    );
+                    locals.Add(local);
+
+                    _scope.Variables.Add(declaredVariable, local);
+
+                    statements.Add(Expression.Assign(
+                        local,
+                        assignment
+                    ));
+                }
+                else
+                {
+                    statements.Add(_scope.BuildSet(
+                        declaredVariable,
+                        assignment
+                    ));
+                }
             }
 
             // Build the locals.
@@ -572,62 +652,186 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitMethodCall(MethodCallSyntax syntax)
         {
-            Expression arguments;
+            var memberSyntax = syntax.Expression as MemberSyntax;
+            if (memberSyntax != null)
+            {
+                // We need to get a hold on the object we need to execute on.
+                // This applies to an index and property. The target is stored in
+                // a local and both the getter and the ExecuteFunction is this
+                // local.
 
-            if (syntax.Arguments.Count > 0)
-            {
-                arguments = Expression.NewArrayInit(
+                var target = Expression.Parameter(typeof(JsInstance), "target");
+
+                Expression getter;
+
+                if (memberSyntax.Type == SyntaxType.Property)
+                {
+                    getter = Expression.Convert(
+                        Expression.Dynamic(
+                            _context.GetMember(((PropertySyntax)memberSyntax).Name),
+                            typeof(object),
+                            target
+                        ),
+                        typeof(JsInstance)
+                    );
+                }
+                else
+                {
+                    getter = Expression.Convert(
+                        Expression.Dynamic(
+                            _context.GetIndex(new CallInfo(0)),
+                            typeof(object),
+                            BuildGet(((IndexerSyntax)memberSyntax).Index),
+                            target
+                        ),
+                        typeof(JsInstance)
+                    );
+                }
+
+                return Expression.Block(
                     typeof(JsInstance),
-                    syntax.Arguments.Select(p => p.Accept(this))
+                    new[] { target },
+                    Expression.Assign(target, memberSyntax.Expression.Accept(this)),
+                    Expression.Call(
+                        _scope.Runtime,
+                        typeof(JintRuntime).GetMethod("ExecuteFunction"),
+                        target,
+                        getter,
+                        MakeArrayInit(syntax.Arguments, typeof(JsInstance), true)
+                    )
                 );
-            }
-            else
-            {
-                arguments = Expression.Constant(null, typeof(JsInstance[]));
             }
 
             return Expression.Call(
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("ExecuteFunction"),
-                Expression.Constant(null, typeof(JsInstance)), // Call target (this)
-                _scope.BuildGet(syntax.Expression),
-                arguments
+                Expression.Constant(null, typeof(JsInstance)),
+                BuildGet(syntax.Expression),
+                MakeArrayInit(syntax.Arguments, typeof(JsInstance), true)
             );
         }
 
         public Expression VisitIndexer(IndexerSyntax syntax)
         {
-            return _scope.BuildGet(syntax);
+            return BuildGet(syntax);
         }
 
         public Expression VisitProperty(PropertySyntax syntax)
         {
-            throw new NotImplementedException();
+            return BuildGet(syntax);
         }
 
         public Expression VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Property declaration must be handled in VisitJsonExpression");
         }
 
         public Expression VisitIdentifier(IdentifierSyntax syntax)
         {
-            return _scope.BuildGet(syntax);
+            return BuildGet(syntax);
         }
 
         public Expression VisitJsonExpression(JsonExpressionSyntax syntax)
         {
-            throw new NotImplementedException();
+            var global = Expression.Parameter(typeof(JsGlobal), "global");
+            var obj = Expression.Parameter(typeof(JsObject), "obj");
+
+            var statements = new List<Expression>
+            {
+                Expression.Assign(
+                    global,
+                    Expression.Property(
+                        _scope.Runtime,
+                        typeof(JintRuntime).GetProperty("Global")
+                    )
+                ),
+                Expression.Assign(
+                    obj,
+                    Expression.Call(
+                        Expression.Property(
+                            global,
+                            typeof(JsGlobal).GetProperty("ObjectClass")
+                        ),
+                        typeof(JsObjectConstructor).GetMethod("New", new Type[0])
+                    )
+                )
+            };
+
+            foreach (var expression in syntax.Values)
+            {
+                var declaration = expression.Value;
+
+                switch (declaration.Mode)
+                {
+                    case PropertyExpressionType.Data:
+                        statements.Add(Expression.Dynamic(
+                            _context.SetMember(expression.Key),
+                            typeof(object),
+                            obj,
+                            declaration.Expression.Accept(this)
+                        ));
+                        break;
+
+                    default:
+                        statements.Add(Expression.Call(
+                            obj,
+                            _defineAccessorProperty,
+                            new[]
+                            {
+                                global,
+                                Expression.Constant(expression.Key),
+                                declaration.GetExpression != null ? declaration.GetExpression.Accept(this) : Expression.Default(typeof(JsFunction)),
+                                declaration.SetExpression != null ? declaration.SetExpression.Accept(this) : Expression.Default(typeof(JsFunction))
+                            }
+                        ));
+                        break;
+                }
+            }
+
+            statements.Add(obj);
+
+            return Expression.Block(
+                typeof(JsInstance),
+                new[] { obj, global },
+                statements
+            );
         }
 
         public Expression VisitNew(NewSyntax syntax)
         {
-            throw new NotImplementedException();
+            return Expression.Call(
+                _scope.Runtime,
+                typeof(JintRuntime).GetMethod("New"),
+                syntax.Expression.Accept(this),
+                MakeArrayInit(syntax.Arguments, typeof(JsInstance), true),
+                MakeArrayInit(syntax.Generics, typeof(JsInstance), true)
+            );
+        }
+
+        private Expression MakeArrayInit(IEnumerable<SyntaxNode> initializers, Type elementType, bool nullWhenEmpty)
+        {
+            return MakeArrayInit(initializers.Select(p => p.Accept(this)), elementType, nullWhenEmpty);
+        }
+
+        private Expression MakeArrayInit(IEnumerable<Expression> initializers, Type elementType, bool nullWhenEmpty)
+        {
+            var expressions = initializers.ToList();
+
+            if (expressions.Count == 0)
+            {
+                if (nullWhenEmpty)
+                    return Expression.Constant(null, elementType.MakeArrayType());
+
+                return Expression.NewArrayBounds(elementType, Expression.Constant(0));
+            }
+
+            return Expression.NewArrayInit(elementType, expressions);
+
         }
 
         public Expression VisitBinaryExpression(BinaryExpressionSyntax syntax)
         {
-            switch (syntax.Type)
+            switch (syntax.Operation)
             {
                 case BinaryExpressionType.And:
                     var tmp = Expression.Parameter(typeof(JsInstance), "tmp");
@@ -670,18 +874,22 @@ namespace Jint.Backend.Dlr
                 case BinaryExpressionType.LeftShift:
                 case BinaryExpressionType.RightShift:
                 case BinaryExpressionType.UnsignedRightShift:
+                case BinaryExpressionType.Same:
+                case BinaryExpressionType.NotSame:
+                case BinaryExpressionType.In:
+                case BinaryExpressionType.InstanceOf:
                     return Expression.Call(
                         _scope.Runtime,
                         typeof(JintRuntime).GetMethod("BinaryOperation"),
                         syntax.Left.Accept(this),
                         syntax.Right.Accept(this),
-                        Expression.Constant(syntax.Type)
+                        Expression.Constant(syntax.Operation)
                     );
             }
 
             ExpressionType expressionType;
 
-            switch (syntax.Type)
+            switch (syntax.Operation)
             {
                 case BinaryExpressionType.BitwiseAnd: expressionType = ExpressionType.And; break;
                 case BinaryExpressionType.BitwiseOr: expressionType = ExpressionType.Or; break;
@@ -706,9 +914,6 @@ namespace Jint.Backend.Dlr
             /*
                 case BinaryExpressionType.In: expressionType = ExpressionType.And; break;
                 case BinaryExpressionType.InstanceOf: expressionType = ExpressionType.And; break;
-                case BinaryExpressionType.NotSame: expressionType = ExpressionType.And; break;
-                case BinaryExpressionType.Same: expressionType = ExpressionType.And; break;
-                case BinaryExpressionType.UnsignedRightShift: expressionType = ExpressionType.RightShift; break;
             */
 
             return Expression.Dynamic(
@@ -730,7 +935,7 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitUnaryExpression(UnaryExpressionSyntax syntax)
         {
-            switch (syntax.Type)
+            switch (syntax.Operation)
             {
                     /*
                 case UnaryExpressionType.TypeOf:
@@ -797,8 +1002,8 @@ namespace Jint.Backend.Dlr
                 case UnaryExpressionType.PostfixMinusMinus:
                 case UnaryExpressionType.PrefixPlusPlus:
                 case UnaryExpressionType.PrefixMinusMinus:
-                    bool isIncrement = syntax.Type == UnaryExpressionType.PrefixPlusPlus || syntax.Type == UnaryExpressionType.PostfixPlusPlus;
-                    bool isPrefix = syntax.Type == UnaryExpressionType.PrefixMinusMinus || syntax.Type == UnaryExpressionType.PrefixPlusPlus;
+                    bool isIncrement = syntax.Operation == UnaryExpressionType.PrefixPlusPlus || syntax.Operation == UnaryExpressionType.PostfixPlusPlus;
+                    bool isPrefix = syntax.Operation == UnaryExpressionType.PrefixMinusMinus || syntax.Operation == UnaryExpressionType.PrefixPlusPlus;
 
                     var tmp = Expression.Parameter(
                         typeof(JsInstance),
@@ -824,9 +1029,9 @@ namespace Jint.Backend.Dlr
                         return Expression.Block(
                             typeof(JsInstance),
                             new[] { tmp },
-                            Expression.Assign(tmp, _scope.BuildGet(syntax.Operand)),
+                            Expression.Assign(tmp, BuildGet(syntax.Operand)),
                             Expression.Assign(tmp, calculationExpression),
-                            _scope.BuildSet(syntax.Operand, tmp),
+                            BuildSet(syntax.Operand, tmp),
                             tmp
                         );
                     }
@@ -835,8 +1040,8 @@ namespace Jint.Backend.Dlr
                         return Expression.Block(
                             typeof(JsInstance),
                             new[] { tmp },
-                            Expression.Assign(tmp, _scope.BuildGet(syntax.Operand)),
-                            _scope.BuildSet(syntax.Operand, calculationExpression),
+                            Expression.Assign(tmp, BuildGet(syntax.Operand)),
+                            BuildSet(syntax.Operand, calculationExpression),
                             tmp
                         );
                     }
@@ -909,7 +1114,7 @@ namespace Jint.Backend.Dlr
 
             ExpressionType expressionType;
 
-            switch (syntax.Type)
+            switch (syntax.Operation)
             {
                 case UnaryExpressionType.Not: expressionType = ExpressionType.Not; break;
                 default: throw new NotImplementedException();
@@ -983,6 +1188,94 @@ namespace Jint.Backend.Dlr
         public Expression VisitClrIdentifier(ClrIdentifierSyntax syntax)
         {
             throw new NotImplementedException();
+        }
+
+        public Expression BuildGet(SyntaxNode syntax)
+        {
+            switch (syntax.Type)
+            {
+                case SyntaxType.VariableDeclaration:
+                    return _scope.BuildGet(((VariableDeclarationSyntax)syntax).Target);
+
+                case SyntaxType.Identifier:
+                    return _scope.BuildGet(((IdentifierSyntax)syntax).Target);
+
+                case SyntaxType.MethodCall:
+                    return ((MethodCallSyntax)syntax).Accept(this);
+
+                case SyntaxType.Property:
+                    var property = (PropertySyntax)syntax;
+
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _context.GetMember(property.Name),
+                            typeof(object),
+                            property.Expression.Accept(this)
+                        ),
+                        typeof(JsInstance)
+                    );
+
+                case SyntaxType.Indexer:
+                    var indexer = (IndexerSyntax)syntax;
+
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _context.GetIndex(new CallInfo(0)),
+                            typeof(object),
+                            BuildGet(indexer.Expression),
+                            indexer.Index.Accept(this)
+                        ),
+                        typeof(JsInstance)
+                    );
+
+                case SyntaxType.Function:
+                    return syntax.Accept(this);
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public Expression BuildSet(SyntaxNode syntax, Expression value)
+        {
+            switch (syntax.Type)
+            {
+                case SyntaxType.VariableDeclaration:
+                    return _scope.BuildSet(((VariableDeclarationSyntax)syntax).Target, value);
+
+                case SyntaxType.Identifier:
+                    return _scope.BuildSet(((IdentifierSyntax)syntax).Target, value);
+
+                case SyntaxType.Property:
+                    var property = (PropertySyntax)syntax;
+
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _context.SetMember(property.Name),
+                            typeof(object),
+                            property.Expression.Accept(this),
+                            value
+                        ),
+                        typeof(JsInstance)
+                    );
+
+                case SyntaxType.Indexer:
+                    var indexer = (IndexerSyntax)syntax;
+
+                    return Expression.Convert(
+                        Expression.Dynamic(
+                            _context.SetIndex(new CallInfo(0)),
+                            typeof(object),
+                            BuildGet(indexer.Expression),
+                            indexer.Index.Accept(this),
+                            value
+                        ),
+                        typeof(JsInstance)
+                    );
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }

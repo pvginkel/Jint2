@@ -7,7 +7,7 @@ namespace Jint.Expressions
     public abstract class SyntaxNode
     {
         public string Label { get; set; }
-
+        public abstract SyntaxType Type { get; }
         public abstract void Accept(ISyntaxVisitor visitor);
         public abstract T Accept<T>(ISyntaxVisitor<T> visitor);
 

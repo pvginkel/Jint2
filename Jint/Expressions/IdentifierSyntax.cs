@@ -11,6 +11,11 @@ namespace Jint.Expressions
             Name = name;
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Identifier; }
+        }
+
         public string Name { get; set; }
         public Variable Target { get; set; }
 

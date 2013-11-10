@@ -667,7 +667,14 @@ objectLiteral returns [JsonExpressionSyntax value]
 @init{
 	$value = new JsonExpressionSyntax();
 }
-	: lb=LBRACE ( first=propertyAssignment { $value.Push(first.value); }  ( COMMA follow=propertyAssignment { $value.Push(follow.value); } )* )? RBRACE
+	:
+      lb=LBRACE (
+        first=propertyAssignment { $value.Push(first.value); } (
+          COMMA
+          follow=propertyAssignment { $value.Push(follow.value); }
+        )*
+      )?
+      RBRACE
 	;
 	
 propertyAssignment returns [PropertyDeclarationSyntax value]
@@ -675,8 +682,16 @@ propertyAssignment returns [PropertyDeclarationSyntax value]
 	$value = new PropertyDeclarationSyntax();
 	FunctionSyntax func=new FunctionSyntax();
 }
-	: acc=accessor { $value.Mode=acc.value; } { $value.Expression=func; } prop2=propertyName { $value.Name=func.Name=prop2.value; } (parameters=formalParameterList { func.Parameters.AddRange(parameters.value); })? statements=functionBody { func.Body=statements.value; } 
-	| prop1=propertyName { $value.Name=prop1.value; } COLON ass=assignmentExpression { $value.Expression=ass.value; }
+	:
+      acc=accessor { $value.Mode=acc.value; } { $value.Expression=func; }
+      prop2=propertyName { $value.Name=func.Name=prop2.value; } (
+        parameters=formalParameterList { func.Parameters.AddRange(parameters.value); }
+      )?
+      statements=functionBody { func.Body=statements.value; } 
+	|
+      prop1=propertyName { $value.Name=prop1.value; }
+      COLON
+      ass=assignmentExpression { $value.Expression=ass.value; }
 	;
 	
 accessor returns [PropertyExpressionType value]

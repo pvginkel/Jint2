@@ -87,7 +87,7 @@ namespace Jint.Backend.Dlr
 
         public JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters)
         {
-            throw new NotImplementedException();
+            return _runtime.ExecuteFunctionCore(function, that, arguments, genericParameters);
         }
 
         public int Compare(JsFunction function, JsInstance x, JsInstance y)

@@ -12,6 +12,11 @@ namespace Jint.Expressions
         public SyntaxNode Then { get; set; }
         public SyntaxNode Else { get; set; }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.If; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

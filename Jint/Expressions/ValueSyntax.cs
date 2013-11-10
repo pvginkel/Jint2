@@ -12,6 +12,11 @@ namespace Jint.Expressions
             TypeCode = typeCode;
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Value; }
+        }
+
         public object Value { get; set; }
 
         public TypeCode TypeCode { get; set; }

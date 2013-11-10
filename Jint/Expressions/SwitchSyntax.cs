@@ -17,6 +17,11 @@ namespace Jint.Expressions
             Cases = new List<CaseClause>();
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Switch; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

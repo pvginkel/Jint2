@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class CommaOperatorSyntax : ExpressionSyntax
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.CommaOperator; }
+        }
+
         public List<SyntaxNode> Expressions { get; set; }
 
         public CommaOperatorSyntax()

@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Jint.Expressions
 {
     [Serializable]
-    public class PropertySyntax : ExpressionSyntax, IAssignable
+    public class PropertySyntax : MemberSyntax
     {
         public PropertySyntax(ExpressionSyntax expression, string name)
         {
@@ -12,7 +12,11 @@ namespace Jint.Expressions
             Name = name;
         }
 
-        public ExpressionSyntax Expression { get; set; }
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Property; }
+        }
+
         public string Name { get; set; }
         public Variable Target { get; set; }
 

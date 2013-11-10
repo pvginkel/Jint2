@@ -12,6 +12,11 @@ namespace Jint.Expressions
         public ExpressionSyntax Expression { get; set; }
         public SyntaxNode Body { get; set; }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.ForEachIn; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

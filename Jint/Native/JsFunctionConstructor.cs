@@ -120,7 +120,7 @@ namespace Jint.Native
             return new JsFunctionResult(result, result);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
         {
             JsFunction instance = New();
 

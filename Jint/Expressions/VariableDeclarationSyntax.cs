@@ -13,6 +13,11 @@ namespace Jint.Expressions
         public Variable Target { get; set; }
         public ExpressionSyntax Expression { get; set; }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.VariableDeclaration; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

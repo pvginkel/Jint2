@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class WithSyntax : SyntaxNode
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.With; }
+        }
+
         public ExpressionSyntax Expression { get; set; }
         public SyntaxNode Body { get; set; }
 

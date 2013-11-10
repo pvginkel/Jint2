@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class PropertyDeclarationSyntax : ExpressionSyntax
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.PropertyDeclaration; }
+        }
+
         public string Name { get; set; }
 
         public ExpressionSyntax Expression { get; set; }
@@ -28,16 +33,6 @@ namespace Jint.Expressions
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
             return visitor.VisitPropertyDeclaration(this);
-        }
-
-        internal void SetSet(PropertyDeclarationSyntax propertyExpression)
-        {
-            SetExpression = propertyExpression.Expression;
-        }
-
-        internal void SetGet(PropertyDeclarationSyntax propertyExpression)
-        {
-            GetExpression = propertyExpression.Expression;
         }
     }
 }

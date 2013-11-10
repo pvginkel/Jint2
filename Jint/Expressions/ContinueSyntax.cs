@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class ContinueSyntax : SyntaxNode
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Continue; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

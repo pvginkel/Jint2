@@ -20,6 +20,11 @@ namespace Jint.Expressions
             Arguments.AddRange(arguments);
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.MethodCall; }
+        }
+
         public ExpressionSyntax Expression { get; set; }
         public List<ExpressionSyntax> Arguments { get; set; }
         public List<ExpressionSyntax> Generics { get; set; }

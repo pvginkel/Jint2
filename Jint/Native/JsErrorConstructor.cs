@@ -71,11 +71,11 @@ namespace Jint.Native
             return Global.StringClass.New(target["name"] + ": " + target["message"]);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
         {
             return parameters != null && parameters.Length > 0 ?
-                visitor.Global.ErrorClass.New(parameters[0].ToString()) :
-                visitor.Global.ErrorClass.New();
+                global.ErrorClass.New(parameters[0].ToString()) :
+                global.ErrorClass.New();
         }
     }
 }

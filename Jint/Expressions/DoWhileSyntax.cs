@@ -17,6 +17,11 @@ namespace Jint.Expressions
             Body = statement;
         }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.DoWhile; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

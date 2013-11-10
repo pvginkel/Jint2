@@ -6,15 +6,20 @@ namespace Jint.Expressions
     [Serializable]
     public class UnaryExpressionSyntax : ExpressionSyntax
     {
-        public UnaryExpressionSyntax(UnaryExpressionType type, ExpressionSyntax operand)
+        public UnaryExpressionSyntax(UnaryExpressionType operation, ExpressionSyntax operand)
         {
-            Type = type;
+            Operation = operation;
             Operand = operand;
+        }
+
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Unary; }
         }
 
         public ExpressionSyntax Operand { get; set; }
 
-        public UnaryExpressionType Type { get; set; }
+        public UnaryExpressionType Operation { get; set; }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

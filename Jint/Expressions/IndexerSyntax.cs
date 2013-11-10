@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Jint.Expressions
 {
     [Serializable]
-    public class IndexerSyntax : ExpressionSyntax, IAssignable
+    public class IndexerSyntax : MemberSyntax
     {
         public IndexerSyntax(ExpressionSyntax expression)
         {
@@ -17,7 +17,11 @@ namespace Jint.Expressions
             Index = index;
         }
 
-        public ExpressionSyntax Expression { get; set; }
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Indexer; }
+        }
+
         public ExpressionSyntax Index { get; set; }
 
         public override string ToString()

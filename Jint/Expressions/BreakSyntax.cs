@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class BreakSyntax : SyntaxNode
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Break; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

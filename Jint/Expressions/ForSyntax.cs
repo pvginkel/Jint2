@@ -13,6 +13,11 @@ namespace Jint.Expressions
         public SyntaxNode Increment { get; set; }
         public SyntaxNode Body { get; set; }
 
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.For; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

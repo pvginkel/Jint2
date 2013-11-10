@@ -47,7 +47,7 @@ namespace Jint.Native
             return array;
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IJintVisitor visitor)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
         {
             JsArray array = New();
 

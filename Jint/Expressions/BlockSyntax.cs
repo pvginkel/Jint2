@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class BlockSyntax : SyntaxNode
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Block; }
+        }
+
         public LinkedList<SyntaxNode> Statements { get; private set; }
         public VariableCollection DeclaredVariables { get; private set; }
         public Closure Closure { get; set; }

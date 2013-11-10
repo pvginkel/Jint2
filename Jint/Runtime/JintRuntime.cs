@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -103,7 +104,7 @@ namespace Jint.Runtime
 
             parameters.CopyTo(original, 0);
 
-            var returned = ExecuteFunction(function, (JsObject)that, parameters, genericParameters);
+            var returned = ExecuteFunctionCore(function, (JsObject)that, parameters, genericParameters);
 
             for (var i = 0; i < original.Length; i++)
             {
@@ -120,8 +121,9 @@ namespace Jint.Runtime
             return returned;
         }
 
-        private JsInstance ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
+        public JsInstance ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
         {
+/*
             if (function == null)
                 return null;
 
@@ -190,6 +192,27 @@ namespace Jint.Runtime
                 {
                     //_program.ExitScope(previousScope);
                 }
+            }
+            finally
+            {
+                if (_allowClr)
+                    CodeAccessPermission.RevertPermitOnly();
+            }
+*/
+            if (function == null)
+                throw new ArgumentNullException("function");
+
+            try
+            {
+                if (_allowClr)
+                    _permissionSet.PermitOnly();
+
+                if (!_allowClr)
+                    genericParameters = null;
+
+                var result = function.Execute(Global, that, parameters, genericParameters);
+
+                return result.Result;
             }
             finally
             {
@@ -375,8 +398,104 @@ namespace Jint.Runtime
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
 
-                default: throw new NotImplementedException();
+                case BinaryExpressionType.Same:
+                    return JsInstance.StrictlyEquals(Global, left, right);
+
+                case BinaryExpressionType.NotSame:
+                    var result = JsInstance.StrictlyEquals(Global, left, right);
+                    return Global.BooleanClass.New(!result.ToBoolean());
+
+                case BinaryExpressionType.In:
+                    if (right is ILiteral)
+                        throw new JsException(Global.ErrorClass.New("Cannot apply 'in' operator to the specified member."));
+
+                    return Global.BooleanClass.New(((JsDictionaryObject)right).HasProperty(left));
+
+                case BinaryExpressionType.InstanceOf:
+                    var function = right as JsFunction;
+                    var obj = left as JsObject;
+
+                    if (function == null)
+                        throw new JsException(Global.TypeErrorClass.New("Right argument should be a function"));
+                    if (obj == null)
+                        throw new JsException(Global.TypeErrorClass.New("Left argument should be an object"));
+
+                    return Global.BooleanClass.New(function.HasInstance(obj));
+
+                default:
+                    throw new NotImplementedException();
             }
+        }
+
+        public IEnumerable<JsInstance> GetForEachKeys(JsInstance obj)
+        {
+            if (obj == null)
+                yield break;
+
+            var values = obj.Value as IEnumerable;
+
+            if (values != null)
+            {
+                foreach (object value in values)
+                {
+                    yield return Global.WrapClr(value);
+                }
+            }
+            else
+            {
+                foreach (string key in new List<string>(((JsDictionaryObject)obj).GetKeys()))
+                {
+                    yield return Global.StringClass.New(key);
+                }
+            }
+        }
+
+        public JsInstance WrapException(Exception exception)
+        {
+            if (exception == null)
+                throw new ArgumentNullException("exception");
+
+            var jsException =
+                exception as JsException ??
+                new JsException(Global.ErrorClass.New(exception.Message));
+
+            return jsException.Value;
+        }
+
+        public JsInstance New(JsInstance target, JsInstance[] arguments, JsInstance[] generics)
+        {
+            //if (AllowClr && function  == JsUndefined.Instance && typeFullname != null && typeFullname.Length > 0 && expression.Generics.Count > 0)
+            //{
+            //    string typeName = typeFullname.ToString();
+            //    typeFullname = new StringBuilder();
+
+            //    var genericParameters = new Type[expression.Generics.Count];
+
+            //    try
+            //    {
+            //        int i = 0;
+            //        foreach (Expression generic in expression.Generics)
+            //        {
+            //            generic.Accept(this);
+            //            genericParameters[i] = Global.Marshaller.MarshalJsValue<Type>(Result);
+            //            i++;
+            //        }
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        throw new JintException("A type parameter is required", e);
+            //    }
+
+            //    typeName += "`" + genericParameters.Length;
+            //    Result = Global.Marshaller.MarshalClrValue<Type>(typeResolver.ResolveType(typeName).MakeGenericType(genericParameters));
+            //}
+
+            var function = target as JsFunction;
+
+            if (target == null)
+                throw new JsException(Global.ErrorClass.New("Function expected."));
+
+            return function.Construct(arguments, null, Global);
         }
     }
 }

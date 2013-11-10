@@ -264,9 +264,9 @@ namespace Jint.Native
         /// <param name="genericArgs">Ignored since this class represents a non-generic types</param>
         /// <param name="visitor">Execution visitor</param>
         /// <returns>A newly created js object</returns>
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, Jint.Expressions.IJintVisitor visitor)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
         {
-            return (JsObject)Wrap(CreateInstance(visitor.Global, parameters));
+            return (JsObject)Wrap(CreateInstance(global, parameters));
         }
 
         /// <summary>
