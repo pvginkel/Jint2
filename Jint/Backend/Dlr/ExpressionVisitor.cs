@@ -1299,7 +1299,20 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitRegexp(RegexpSyntax syntax)
         {
-            throw new NotImplementedException();
+            return Expression.Call(
+                Expression.Property(
+                    Expression.Property(
+                        _scope.Runtime,
+                        "Global"
+                    ),
+                    "RegExpClass"
+                ),
+                typeof(JsRegExpConstructor).GetMethod("New", new[] { typeof(string), typeof(bool), typeof(bool), typeof(bool) }),
+                Expression.Constant(syntax.Regexp),
+                Expression.Constant(syntax.Options.Contains("g")),
+                Expression.Constant(syntax.Options.Contains("i")),
+                Expression.Constant(syntax.Options.Contains("m"))
+            );
         }
 
         public Expression VisitClrIdentifier(ClrIdentifierSyntax syntax)
