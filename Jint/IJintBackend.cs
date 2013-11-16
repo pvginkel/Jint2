@@ -32,5 +32,7 @@ namespace Jint
         JsInstance Construct(JsFunction function, JsInstance[] parameters);
 
         JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs);
+
+        JsInstance ResolveUndefined(string typeFullname, Type[] generics);
     }
 }

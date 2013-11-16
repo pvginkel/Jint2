@@ -6,7 +6,7 @@ using System.Text;
 namespace Jint.Expressions
 {
     [Serializable]
-    public class NewSyntax : ExpressionSyntax, IGenericExpression
+    public class NewSyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -14,15 +14,10 @@ namespace Jint.Expressions
         }
 
         public ExpressionSyntax Expression { get; set; }
-        public List<ExpressionSyntax> Arguments { get; set; }
-        public List<ExpressionSyntax> Generics { get; set; }
 
         public NewSyntax(ExpressionSyntax expression)
         {
             Expression = expression;
-
-            Arguments = new List<ExpressionSyntax>();
-            Generics = new List<ExpressionSyntax>();
         }
 
         [DebuggerStepThrough]

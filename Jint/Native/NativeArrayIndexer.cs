@@ -18,7 +18,7 @@ namespace Jint.Native
 
         public JsInstance Get(JsInstance that, JsInstance index)
         {
-            return _marshaller.MarshalClrValue<T>( _marshaller.MarshalJsValue<T[]>(that)[_marshaller.MarshalJsValue<int>(index)] );
+            return _marshaller.MarshalClrValue( _marshaller.MarshalJsValue<T[]>(that)[_marshaller.MarshalJsValue<int>(index)] );
         }
 
         public void Set(JsInstance that, JsInstance index, JsInstance value)

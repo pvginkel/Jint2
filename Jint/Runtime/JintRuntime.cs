@@ -16,22 +16,20 @@ namespace Jint.Runtime
         internal const string GlobalName = "Global";
         internal const string GlobalScopeName = "GlobalScope";
 
+        private readonly IJintBackend _backend;
         private readonly Options _options;
-        private readonly bool _allowClr;
-        private readonly PermissionSet _permissionSet;
         private readonly bool _isStrict;
 
         public JsScope GlobalScope { get; private set; }
         public JsGlobal Global { get; private set; }
 
-        public JintRuntime(IJintBackend backend, Options options, bool allowClr, PermissionSet permissionSet)
+        public JintRuntime(IJintBackend backend, Options options)
         {
             if (backend == null)
                 throw new ArgumentNullException("backend");
 
+            _backend = backend;
             _options = options;
-            _allowClr = allowClr;
-            _permissionSet = permissionSet;
             _isStrict = _options.HasFlag(Options.Strict);
 
             var global = new JsGlobal(backend, options);
@@ -69,29 +67,26 @@ namespace Jint.Runtime
             return result;
         }
 
-        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters)
+        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments)
         {
             Type[] genericParameters = null;
 
-            //if (_allowClr && methodCall.Generics.Count > 0)
-            //{
-            //    genericParameters = new Type[methodCall.Generics.Count];
+            if (_backend.AllowClr && genericArguments != null && genericArguments.Length > 0)
+            {
+                genericParameters = new Type[genericArguments.Length];
 
-            //    try
-            //    {
-            //        var i = 0;
-            //        foreach (var generic in methodCall.Generics)
-            //        {
-            //            generic.Accept(this);
-            //            genericParameters[i] = Global.Marshaller.MarshalJsValue<Type>(Result);
-            //            i++;
-            //        }
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        throw new JintException("A type parameter is required", e);
-            //    }
-            //}
+                try
+                {
+                    for (int i = 0; i < genericArguments.Length; i++)
+                    {
+                        genericParameters[i] = (Type)genericArguments[i].Value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new JintException("A type parameter is required", e);
+                }
+            }
 
             var function = target as JsFunction;
             if (function == null)
@@ -100,25 +95,7 @@ namespace Jint.Runtime
             if (parameters == null)
                 parameters = new JsInstance[0];
 
-            var original = new JsInstance[parameters.Length];
-
-            parameters.CopyTo(original, 0);
-
-            var returned = ExecuteFunctionCore(function, (JsObject)that, parameters, genericParameters);
-
-            for (var i = 0; i < original.Length; i++)
-            {
-                if (original[i] != parameters[i])
-                {
-                    throw new NotImplementedException();
-                    //if (methodCall.Arguments[i] is MemberExpression && ((MemberExpression)methodCall.Arguments[i]).Member is IAssignable)
-                    //    Assign((MemberExpression)methodCall.Arguments[i], parameters[i]);
-                    //else if (methodCall.Arguments[i] is Identifier)
-                    //    Assign(new MemberExpression(methodCall.Arguments[i], null), parameters[i]);
-                }
-            }
-
-            return returned.Result;
+            return ExecuteFunctionCore(function, (JsObject)that, parameters, genericParameters).Result;
         }
 
         public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
@@ -174,14 +151,14 @@ namespace Jint.Runtime
 
             try
             {
-                if (_allowClr)
-                    _permissionSet.PermitOnly();
+                if (_backend.AllowClr)
+                    _backend.PermissionSet.PermitOnly();
 
                 //var previousScope = _program.EnterScope(functionScope);
 
                 try
                 {
-                    if (!_allowClr || (genericParameters != null && genericParameters.Length == 0))
+                    if (!_backend.AllowClr || (genericParameters != null && genericParameters.Length == 0))
                         genericParameters = null;
 
                     var result = function.Execute(Global, that, parameters);
@@ -195,7 +172,7 @@ namespace Jint.Runtime
             }
             finally
             {
-                if (_allowClr)
+                if (_backend.AllowClr)
                     CodeAccessPermission.RevertPermitOnly();
             }
 */
@@ -204,17 +181,17 @@ namespace Jint.Runtime
 
             try
             {
-                if (_allowClr)
-                    _permissionSet.PermitOnly();
+                if (_backend.AllowClr)
+                    _backend.PermissionSet.PermitOnly();
 
-                if (!_allowClr)
+                if (!_backend.AllowClr)
                     genericParameters = null;
 
                 return function.Execute(Global, that ?? Global, parameters ?? JsInstance.Empty, genericParameters);
             }
             finally
             {
-                if (_allowClr)
+                if (_backend.AllowClr)
                     CodeAccessPermission.RevertPermitOnly();
             }
         }
@@ -281,7 +258,7 @@ namespace Jint.Runtime
             else if (left.Type == right.Type)
             {
                 // if both are Objects but then only one is Clrs
-                if (left == JsUndefined.Instance)
+                if (left is JsUndefined)
                 {
                     result = true;
                 }
@@ -325,11 +302,11 @@ namespace Jint.Runtime
                     result = left.Value.Equals(right.Value);
                 }
             }
-            else if (left == JsNull.Instance && right == JsUndefined.Instance)
+            else if (left == JsNull.Instance && right is JsUndefined)
             {
                 result = true;
             }
-            else if (left == JsUndefined.Instance && right == JsNull.Instance)
+            else if (left is JsUndefined && right == JsNull.Instance)
             {
                 result = true;
             }
@@ -376,23 +353,23 @@ namespace Jint.Runtime
             switch (operation)
             {
                 case BinaryExpressionType.LeftShift:
-                    if (left == JsUndefined.Instance)
+                    if (left is JsUndefined)
                         return Global.NumberClass.New(0);
-                    if (right == JsUndefined.Instance)
+                    if (right is JsUndefined)
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) << Convert.ToUInt16(right.ToNumber()));
 
                 case BinaryExpressionType.RightShift:
-                    if (left == JsUndefined.Instance)
+                    if (left is JsUndefined)
                         return Global.NumberClass.New(0);
-                    if (right == JsUndefined.Instance)
+                    if (right is JsUndefined)
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
 
                 case BinaryExpressionType.UnsignedRightShift:
-                    if (left == JsUndefined.Instance)
+                    if (left is JsUndefined)
                         return Global.NumberClass.New(0);
-                    if (right == JsUndefined.Instance)
+                    if (right is JsUndefined)
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
 
@@ -504,31 +481,26 @@ namespace Jint.Runtime
 
         public JsInstance New(JsInstance target, JsInstance[] arguments, JsInstance[] generics)
         {
-            //if (AllowClr && function  == JsUndefined.Instance && typeFullname != null && typeFullname.Length > 0 && expression.Generics.Count > 0)
-            //{
-            //    string typeName = typeFullname.ToString();
-            //    typeFullname = new StringBuilder();
+            var undefined = target as JsUndefined;
 
-            //    var genericParameters = new Type[expression.Generics.Count];
+            if (_backend.AllowClr && undefined != null && !String.IsNullOrEmpty(undefined.Name) && generics.Length > 0)
+            {
+                var genericParameters = new Type[generics.Length];
 
-            //    try
-            //    {
-            //        int i = 0;
-            //        foreach (Expression generic in expression.Generics)
-            //        {
-            //            generic.Accept(this);
-            //            genericParameters[i] = Global.Marshaller.MarshalJsValue<Type>(Result);
-            //            i++;
-            //        }
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        throw new JintException("A type parameter is required", e);
-            //    }
+                try
+                {
+                    for (int i = 0; i < generics.Length; i++)
+                    {
+                        genericParameters[i] = (Type)generics[i].Value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new JintException("A type parameter is required", e);
+                }
 
-            //    typeName += "`" + genericParameters.Length;
-            //    Result = Global.Marshaller.MarshalClrValue<Type>(typeResolver.ResolveType(typeName).MakeGenericType(genericParameters));
-            //}
+                target = _backend.ResolveUndefined(undefined.Name, genericParameters);
+            }
 
             var function = target as JsFunction;
             if (function == null)

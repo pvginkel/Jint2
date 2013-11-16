@@ -157,6 +157,25 @@ namespace Jint.Native
 
             return _value.ToString();
         }
+
+        public override JsInstance this[JsInstance key]
+        {
+            get
+            {
+                if (Indexer != null)
+                    return Indexer.Get(this, key);
+
+                return base[key];
+            }
+            set
+            {
+                if (Indexer != null)
+                    Indexer.Set(this, key, value);
+                else
+                    base[key] = value;
+            }
+        }
+
         #endregion
     }
 }

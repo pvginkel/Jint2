@@ -784,6 +784,11 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitMethodCall(MethodCallSyntax syntax)
         {
+            Expression getter;
+            Expression target;
+            var statements = new List<Expression>();
+            var parameters = new List<ParameterExpression>();
+
             var memberSyntax = syntax.Expression as MemberSyntax;
             if (memberSyntax != null)
             {
@@ -792,9 +797,7 @@ namespace Jint.Backend.Dlr
                 // a local and both the getter and the ExecuteFunction is this
                 // local.
 
-                var target = Expression.Parameter(typeof(JsInstance), "target");
-
-                Expression getter;
+                target = Expression.Parameter(typeof(JsInstance), "target");
 
                 if (memberSyntax.Type == SyntaxType.Property)
                 {
@@ -820,26 +823,68 @@ namespace Jint.Backend.Dlr
                     );
                 }
 
-                return Expression.Block(
-                    typeof(JsInstance),
-                    new[] { target },
-                    Expression.Assign(target, memberSyntax.Expression.Accept(this)),
-                    Expression.Call(
-                        _scope.Runtime,
-                        typeof(JintRuntime).GetMethod("ExecuteFunction"),
-                        target,
-                        getter,
-                        MakeArrayInit(syntax.Arguments, typeof(JsInstance), true)
-                    )
-                );
+                statements.Add(Expression.Assign(target, memberSyntax.Expression.Accept(this)));
+                parameters.Add((ParameterExpression)target);
+            }
+            else
+            {
+                target = Expression.Constant(null, typeof(JsInstance));
+                getter = BuildGet(syntax.Expression);
             }
 
-            return Expression.Call(
-                _scope.Runtime,
-                typeof(JintRuntime).GetMethod("ExecuteFunction"),
-                Expression.Constant(null, typeof(JsInstance)),
-                BuildGet(syntax.Expression),
+            var arguments = Expression.Parameter(
+                typeof(JsInstance[]),
+                "arguments"
+            );
+            parameters.Add(arguments);
+            var result = Expression.Parameter(
+                typeof(JsInstance),
+                "result"
+            );
+            parameters.Add(result);
+
+            statements.Add(Expression.Assign(
+                arguments,
                 MakeArrayInit(syntax.Arguments, typeof(JsInstance), true)
+            ));
+
+            statements.Add(Expression.Assign(
+                result,
+                Expression.Call(
+                    _scope.Runtime,
+                    typeof(JintRuntime).GetMethod("ExecuteFunction"),
+                    target,
+                    getter,
+                    arguments,
+                    MakeArrayInit(syntax.Generics, typeof(JsInstance), true)
+                )
+            ));
+
+            // We need to read the arguments back for when the ExecuteFunction
+            // has out parameters for native calls.
+
+            for (int i = 0; i < syntax.Arguments.Count; i++)
+            {
+                var argument = syntax.Arguments[i];
+
+                if (argument is IAssignable)
+                {
+                    statements.Add(BuildSet(
+                        argument,
+                        Expression.ArrayIndex(
+                            arguments,
+                            Expression.Constant(i)
+                        )
+                    ));
+                }
+            }
+
+            statements.Add(result);
+
+            return Expression.Block(
+                typeof(JsInstance),
+                parameters,
+                statements
             );
         }
 
@@ -931,21 +976,37 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitNew(NewSyntax syntax)
         {
+            var methodCall = syntax.Expression as MethodCallSyntax;
+
+            List<ExpressionSyntax> arguments = null;
+            List<ExpressionSyntax> generics = null;
+            var expression = syntax.Expression;
+
+            if (methodCall != null)
+            {
+                arguments = methodCall.Arguments;
+                generics = methodCall.Generics;
+                expression = methodCall.Expression;
+            }
+
             return Expression.Call(
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("New"),
-                syntax.Expression.Accept(this),
-                MakeArrayInit(syntax.Arguments, typeof(JsInstance), true),
-                MakeArrayInit(syntax.Generics, typeof(JsInstance), true)
+                expression.Accept(this),
+                MakeArrayInit(arguments, typeof(JsInstance), true),
+                MakeArrayInit(generics, typeof(JsInstance), true)
             );
         }
 
         private Expression MakeArrayInit(IEnumerable<SyntaxNode> initializers, Type elementType, bool nullWhenEmpty)
         {
+            if (initializers == null)
+                initializers = new SyntaxNode[0];
+
             return MakeArrayInit(initializers.Select(p => p.Accept(this)), elementType, nullWhenEmpty);
         }
 
-        private Expression MakeArrayInit(IEnumerable<Expression> initializers, Type elementType, bool nullWhenEmpty)
+        public static Expression MakeArrayInit(IEnumerable<Expression> initializers, Type elementType, bool nullWhenEmpty)
         {
             var expressions = initializers.ToList();
 

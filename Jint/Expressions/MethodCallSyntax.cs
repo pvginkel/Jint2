@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Jint.Expressions
 {
     [Serializable]
-    public class MethodCallSyntax : ExpressionSyntax, IGenericExpression
+    public class MethodCallSyntax : ExpressionSyntax
     {
         public MethodCallSyntax(ExpressionSyntax expression)
         {

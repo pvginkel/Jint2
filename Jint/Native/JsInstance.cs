@@ -15,7 +15,7 @@ namespace Jint.Native
 
         public static bool IsNullOrUndefined(JsInstance o)
         {
-            return (o == JsUndefined.Instance) || (o == JsNull.Instance) || (o.IsClr && o.Value == null);
+            return (o is JsUndefined) || (o == JsNull.Instance) || (o.IsClr && o.Value == null);
         }
 
         public abstract bool IsClr { get; }

@@ -22,7 +22,7 @@ namespace Jint.Native
         private readonly Marshaller _marshaller;
         private readonly GetMembersDelegate _getMembers;
         private readonly WrapMemberDelegate _wrapMember;
-        
+
 
         private class MethodMatch
         {
@@ -61,7 +61,7 @@ namespace Jint.Native
                         Weight = 0
                     }
                 );
-            
+
 
             if (args != null)
             {
@@ -82,7 +82,7 @@ namespace Jint.Native
                             {
                                 // we can assing a js function to a delegate
                             }
-                            else if (!_marshaller.IsAssignable(paramType,t))
+                            else if (!_marshaller.IsAssignable(paramType, t))
                             {
                                 matches.Remove(node);
                             }
@@ -106,7 +106,7 @@ namespace Jint.Native
             foreach (var match in matches)
                 best = best == null ? match : (best.Weight < match.Weight ? match : best);
 
-            return best == null ? null : best.Method ;
+            return best == null ? null : best.Method;
         }
 
         protected string MakeKey(Type[] types, Type[] genericArguments)
@@ -137,12 +137,12 @@ namespace Jint.Native
 
         public TImpl ResolveOverload(JsInstance[] args, Type[] generics)
         {
-            Type[] argTypes = Array.ConvertAll<JsInstance, Type>(args, x => _marshaller.GetInstanceType(x));
+            Type[] argTypes = Array.ConvertAll(args, x => _marshaller.GetInstanceType(x));
             string key = MakeKey(argTypes, generics);
             TImpl method;
             if (!_protoCache.TryGetValue(key, out method))
             {
-                TMemberInfo info = MatchMethod(argTypes, _getMembers(generics,args.Length) );
+                TMemberInfo info = MatchMethod(argTypes, _getMembers(generics, args.Length));
 
                 if (info != null && !_reflectCache.TryGetValue(info, out method))
                     _reflectCache[info] = method = _wrapMember(info);

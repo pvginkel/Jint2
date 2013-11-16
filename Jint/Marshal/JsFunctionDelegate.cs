@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
+using Jint.Backend.Dlr;
 using Jint.Native;
 using Jint.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using Jint.Runtime;
 
 namespace Jint.Marshal
 {
@@ -12,17 +16,17 @@ namespace Jint.Marshal
     {
         private Delegate _impl;
 // ReSharper disable NotAccessedField.Local
-        private IJintVisitor _visitor;
+        private readonly IJintBackend _backend;
+        private readonly JintContext _context;
         private JsFunction _function;
         private JsDictionaryObject _that;
-        private Marshaller _marshaller;
 // ReSharper restore NotAccessedField.Local
         private readonly Type _delegateType;
 
-        public JsFunctionDelegate(IJintVisitor visitor, JsFunction function, JsDictionaryObject that,Type delegateType)
+        public JsFunctionDelegate(IJintBackend backend, JintContext context, JsFunction function, JsDictionaryObject that, Type delegateType)
         {
-            if (visitor == null)
-                throw new ArgumentNullException("visitor");
+            if (backend == null)
+                throw new ArgumentNullException("backend");
             if (function == null)
                 throw new ArgumentNullException("function");
             if (delegateType == null)
@@ -30,22 +34,79 @@ namespace Jint.Marshal
             if (!typeof(Delegate).IsAssignableFrom(delegateType))
                 throw new ArgumentException("A delegate type is required", "delegateType");
 
-            _visitor = visitor;
+            _backend = backend;
+            _context = context;
             _function = function;
             _delegateType = delegateType;
             _that = that;
-            _marshaller = visitor.Global.Marshaller;
         }
 
         public Delegate GetDelegate()
         {
-            if (_impl!= null)
+            if (_impl != null)
                 return _impl;
+
+            var invokeMethod = _delegateType.GetMethod("Invoke");
+
+            var parameters = new List<ParameterExpression>();
+
+            foreach (var parameter in invokeMethod.GetParameters())
+            {
+                parameters.Add(Expression.Parameter(
+                    parameter.ParameterType,
+                    parameter.Name
+                ));
+            }
+
+            Expression call = Expression.Call(
+                Expression.Constant(_backend),
+                typeof(IJintBackend).GetMethod("ExecuteFunction"),
+                Expression.Constant(_function),
+                Expression.Constant(_that),
+                Backend.Dlr.ExpressionVisitor.MakeArrayInit(
+                    parameters.Select(p => Expression.Call(
+                        Expression.Constant(_backend.Global.Marshaller),
+                        typeof(Marshaller).GetMethod("MarshalClrValue").MakeGenericMethod(p.Type),
+                        p
+                    )),
+                    typeof(JsInstance),
+                    true
+                ),
+                Expression.Constant(null, typeof(Type[]))
+            );
+
+            if (invokeMethod.ReturnType != typeof(void))
+            {
+                call = Expression.Dynamic(
+                    _context.Convert(invokeMethod.ReturnType, true),
+                    invokeMethod.ReturnType,
+                    Expression.Property(
+                        call,
+                        typeof(JsFunctionResult).GetProperty("Result")
+                    )
+                );
+            }
+
+            var lambda = Expression.Lambda(
+                _delegateType,
+                Expression.Block(
+                    invokeMethod.ReturnType,
+                    call
+                ),
+                parameters
+            );
+
+            return lambda.Compile();
+/*
+            _impl = _backend.ExecuteFunction(
+                _function,
+                _that,
+                _param
 
             MethodInfo method = _delegateType.GetMethod("Invoke");
             ParameterInfo[] parameters = method.GetParameters();
             Type[] delegateParameters = new Type[parameters.Length + 1];
-            
+
             for (int i = 1; i <= parameters.Length; i++)
                 delegateParameters[i] = parameters[i - 1].ParameterType;
             delegateParameters[0] = typeof(JsFunctionDelegate);
@@ -74,14 +135,14 @@ namespace Jint.Marshal
 
             // load a marshller
             code.Emit(OpCodes.Ldarg_0);
-            code.Emit(OpCodes.Ldfld,typeof(JsFunctionDelegate).GetField("_marshaller",BindingFlags.NonPublic|BindingFlags.Instance));
+            code.Emit(OpCodes.Ldfld, typeof(JsFunctionDelegate).GetField("_marshaller", BindingFlags.NonPublic | BindingFlags.Instance));
             code.Emit(OpCodes.Stloc_1);
 
             //code.EmitWriteLine("pre args");
 
             for (int i = 1; i <= parameters.Length; i++)
             {
-                ParameterInfo param = parameters[i-1];
+                ParameterInfo param = parameters[i - 1];
                 Type paramType = param.ParameterType;
 
                 code.Emit(OpCodes.Ldloc_0);
@@ -90,7 +151,7 @@ namespace Jint.Marshal
                 // marshal arg
                 code.Emit(OpCodes.Ldloc_1);
                 code.Emit(OpCodes.Ldarg, i);
-                
+
                 // if parameter is passed by reference
                 if (paramType.IsByRef)
                 {
@@ -116,7 +177,7 @@ namespace Jint.Marshal
                 );
                 // save arg
 
-                code.Emit(OpCodes.Stelem, typeof(JsInstance) );
+                code.Emit(OpCodes.Stelem, typeof(JsInstance));
             }
 
             // _visitor.ExecuteFunction(_function,_that,arguments)
@@ -138,7 +199,7 @@ namespace Jint.Marshal
             // foreach out parameter, marshal it back
             for (int i = 1; i <= parameters.Length; i++)
             {
-                ParameterInfo param = parameters[i-1];
+                ParameterInfo param = parameters[i - 1];
                 Type paramType = param.ParameterType.GetElementType();
                 if (param.IsOut)
                 {
@@ -168,10 +229,11 @@ namespace Jint.Marshal
                 code.Emit(OpCodes.Call, typeof(IJintVisitor).GetProperty("Returned").GetGetMethod());
                 code.Emit(OpCodes.Call, typeof(Marshaller).GetMethod("MarshalJsValue").MakeGenericMethod(method.ReturnType));
             }
-            
+
             code.Emit(OpCodes.Ret);
 
-            return _impl = dm.CreateDelegate(_delegateType,this);
+            return _impl = dm.CreateDelegate(_delegateType, this);
+*/
         }
     }
 }

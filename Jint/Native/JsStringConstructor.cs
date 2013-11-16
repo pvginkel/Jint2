@@ -490,7 +490,7 @@ namespace Jint.Native
             JsObject a = Global.ArrayClass.New();
             string s = target.ToString();
 
-            if (parameters.Length == 0 || parameters[0] == JsUndefined.Instance)
+            if (parameters.Length == 0 || parameters[0] is JsUndefined)
             {
                 a["0"] = Global.StringClass.New(s);
             }
@@ -533,7 +533,7 @@ namespace Jint.Native
                 start = Convert.ToInt32(parameters[0].ToNumber());
             }
 
-            if (parameters.Length > 1 && parameters[1] != JsUndefined.Instance && !double.IsNaN(parameters[1].ToNumber()))
+            if (parameters.Length > 1 && !(parameters[1] is JsUndefined) && !double.IsNaN(parameters[1].ToNumber()))
             {
                 end = Convert.ToInt32(parameters[1].ToNumber());
             }
@@ -555,7 +555,7 @@ namespace Jint.Native
                 start = Convert.ToInt32(parameters[0].ToNumber());
             }
 
-            if (parameters.Length > 1 && parameters[1] != JsUndefined.Instance && !double.IsNaN(parameters[1].ToNumber()))
+            if (parameters.Length > 1 && !(parameters[1] is JsUndefined) && !double.IsNaN(parameters[1].ToNumber()))
             {
                 end = Convert.ToInt32(parameters[1].ToNumber());
             }

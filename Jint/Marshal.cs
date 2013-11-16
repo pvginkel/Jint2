@@ -206,7 +206,7 @@ namespace Jint
             {
                 if (typeof(T).IsArray)
                 {
-                    if (value == null || value == JsUndefined.Instance || value == JsNull.Instance)
+                    if (value == null || value is JsUndefined || value == JsNull.Instance)
                         return default(T);
                     if (_global.ArrayClass.HasInstance(value as JsObject))
                     {
@@ -229,14 +229,14 @@ namespace Jint
                 }
                 else if (typeof(Delegate).IsAssignableFrom(typeof(T)))
                 {
-                    if (value == null || value == JsUndefined.Instance || value == JsNull.Instance)
+                    if (value == null || value is JsUndefined || value == JsNull.Instance)
                         return default(T);
 
                     if (! (value is JsFunction) )
                         throw new JintException("Can't convert a non function object to a delegate type");
                     return (T)MarshalJsFunctionHelper(value as JsFunction, typeof(T));
                 }
-                else if (value != JsNull.Instance && value != JsUndefined.Instance && value is T)
+                else if (value != JsNull.Instance && !(value is JsUndefined) && value is T)
                 {
                     return (T)(object)value;
                 }
@@ -280,7 +280,7 @@ namespace Jint
         /// <returns>A Type object</returns>
         public Type GetInstanceType(JsInstance value)
         {
-            if (value == null || value == JsUndefined.Instance || value == JsNull.Instance )
+            if (value == null || value is JsUndefined || value == JsNull.Instance )
                 return null;
 
             if (value.Value != null )

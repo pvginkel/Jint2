@@ -236,12 +236,12 @@ namespace Jint.Native {
             if (_length == 0)
                 return global.StringClass.New();
 
-            string sep = separator == JsUndefined.Instance ? "," : separator.ToString();
+            string sep = (separator is JsUndefined) ? "," : separator.ToString();
             string[] map = new string[_length];
 
             JsInstance item;
             for (int i = 0; i < _length; i++)
-                map[i] = _data.TryGetValue(i, out item) && item != JsNull.Instance && item != JsUndefined.Instance ? item.ToString() : "";
+                map[i] = _data.TryGetValue(i, out item) && item != JsNull.Instance && !(item is JsUndefined) ? item.ToString() : "";
 
             return global.StringClass.New(String.Join(sep, map));
         }

@@ -77,7 +77,7 @@ namespace Jint.Native
             var result = global.Backend.ExecuteFunction(this, instance, parameters, generics).This;
 
             var obj = result as JsObject;
-            if (obj != null && obj != JsUndefined.Instance)
+            if (obj != null && !(obj is JsUndefined))
                 return obj;
 
             return instance;

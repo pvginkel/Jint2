@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,6 +10,7 @@ using System.Reflection.Emit;
 using System.Security;
 using System.Text;
 using Jint.Expressions;
+using Jint.Marshal;
 using Jint.Native;
 using Jint.Runtime;
 
@@ -18,6 +20,7 @@ namespace Jint.Backend.Dlr
     {
         private readonly JintContext _context;
         private readonly JintRuntime _runtime;
+        private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
 
         public Options Options { get; private set; }
 
@@ -38,7 +41,7 @@ namespace Jint.Backend.Dlr
         {
             Options = options;
 
-            _runtime = new JintRuntime(this, Options, AllowClr, PermissionSet);
+            _runtime = new JintRuntime(this, Options);
             _context = new JintContext(_runtime.Global);
         }
 
@@ -136,12 +139,41 @@ namespace Jint.Backend.Dlr
 
         public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
         {
-            throw new NotImplementedException();
+            return new JsFunctionDelegate(this, _context, func, JsNull.Instance, delegateType).GetDelegate();
         }
 
         public JsInstance Construct(JsFunction function, JsInstance[] parameters)
         {
             throw new NotImplementedException();
+        }
+
+        public JsInstance ResolveUndefined(string typeFullname, Type[] generics)
+        {
+            if (AllowClr && !String.IsNullOrEmpty(typeFullname))
+            {
+                EnsureClrAllowed();
+
+                bool haveGenerics = generics != null && generics.Length > 0;
+
+                if (haveGenerics)
+                    typeFullname += "`" + generics.Length.ToString(CultureInfo.InvariantCulture);
+
+                var type = _typeResolver.ResolveType(typeFullname);
+
+                if (haveGenerics && type != null)
+                    type = type.MakeGenericType(generics);
+
+                if (type != null)
+                    return Global.WrapClr(type);
+            }
+
+            return new JsUndefined(Global, typeFullname);
+        }
+
+        private void EnsureClrAllowed()
+        {
+            if (!AllowClr)
+                throw new SecurityException("Use of Clr is not allowed");
         }
     }
 }

@@ -716,11 +716,6 @@ all the expressions surrounding member selection and calls have been moved to le
 memberExpression returns [ExpressionSyntax value]
 	: prim=primaryExpression { $value = prim.value; }
 	| func=functionExpression { $value = func.value; }
-	| exp=newExpression { $value = exp.value; }
-	;
-
-newExpression returns [NewSyntax value]
-	: NEW^ first=memberExpression { $value = new NewSyntax(first.value); }
 	;
 	
 arguments returns [List<ExpressionSyntax> value]
@@ -739,28 +734,33 @@ generics returns [List<ExpressionSyntax> value]
 	
 	;
 	
-	
 leftHandSideExpression returns [ExpressionSyntax value]
 @init {
 	List<ExpressionSyntax> gens = new List<ExpressionSyntax>();
+    bool isNew = false;
 }
 @after{
+    if (isNew)
+        $value = new NewSyntax($value);
 	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
 }
 	:
-	(
-		mem=memberExpression { $value = mem.value; } 
-	)
+    (
+        NEW { isNew = true; }
+    )?
+	mem=memberExpression { $value = mem.value; }
 	(
 		(gen=generics { gens = gen.value; } )? arg=arguments {
-            if($value is NewSyntax) {
-                ((NewSyntax)$value).Generics = gens;
-                ((NewSyntax)$value).Arguments = arg.value;
-            } else {
-                $value = new MethodCallSyntax($value, arg.value)
-                {
-                    Generics = gens
-                };
+            $value = new MethodCallSyntax(
+                $value,
+                arg.value
+            ) {
+                Generics = gens
+            };
+
+            if (isNew) {
+                isNew = false;
+                $value = new NewSyntax($value);
             }
         } 
 	
@@ -771,7 +771,12 @@ leftHandSideExpression returns [ExpressionSyntax value]
             );
         } 
 			
-		| DOT id=Identifier { $value = new PropertySyntax($value, id.Text); }
+		| DOT id=Identifier {
+            $value = new PropertySyntax(
+                $value,
+                id.Text
+            );
+        }
 	)* 
 	  
 	;

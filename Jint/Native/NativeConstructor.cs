@@ -242,7 +242,7 @@ namespace Jint.Native
         /// <returns></returns>
         public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || that == JsUndefined.Instance || that == JsNull.Instance || (that as IGlobal) == global)
+            if (that == null || that is JsUndefined || that == JsNull.Instance || (that as IGlobal) == global)
                 throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
             if (that.Value != null)
@@ -277,6 +277,9 @@ namespace Jint.Native
         /// <returns>A newly created native object</returns>
         private object CreateInstance(IGlobal global, JsInstance[] parameters)
         {
+            if (parameters == null)
+                parameters = JsInstance.Empty;
+
             ConstructorImpl impl = _overloads.ResolveOverload(parameters, null);
             if (impl == null)
                 throw new JintException(
@@ -291,7 +294,7 @@ namespace Jint.Native
 
         public void SetupNativeProperties(JsDictionaryObject target)
         {
-            if (target == null || target == JsNull.Instance || target == JsUndefined.Instance)
+            if (target == null || target == JsNull.Instance || target is JsUndefined)
                 throw new ArgumentException("A valid js object is required", "target");
             foreach (var prop in _properties)
                 target.DefineOwnProperty(new NativeDescriptor(target, prop));

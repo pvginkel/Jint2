@@ -203,14 +203,6 @@ namespace Jint.Expressions
         public virtual void VisitNew(NewSyntax syntax)
         {
             syntax.Expression.Accept(this);
-            foreach (var argument in syntax.Arguments)
-            {
-                argument.Accept(this);
-            }
-            foreach (var generic in syntax.Generics)
-            {
-                generic.Accept(this);
-            }
         }
 
         public virtual void VisitBinaryExpression(BinaryExpressionSyntax syntax)

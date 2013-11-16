@@ -33,7 +33,6 @@ assert(System.Convert.ToInt32(1), d.Year);
 assert(System.Convert.ToInt32(1), System.Convert.ToInt32(1));
 
 var i = System.Convert.ToInt32(1);
-
 var d = System.DateTime.Now;
 assert(System.Convert.ToInt32(new Date().getFullYear()), d.Year);
 

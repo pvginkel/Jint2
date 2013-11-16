@@ -34,6 +34,9 @@ namespace Jint.Runtime
                 );
             }
 
+            throw new NotImplementedException();
+
+/*
             if (errorSuggestion != null)
                 return errorSuggestion;
 
@@ -47,6 +50,7 @@ namespace Jint.Runtime
                 typeof(InvalidOperationException),
                 "Cannot bind member \"" + Name + "\""
             );
+*/
         }
     }
 }

@@ -76,9 +76,8 @@ f(7);
         {
             Test(
 @"
-var arr = [];
-arr[0] = function(x) { return x * x; };
-arr[1] = arr[0](2);
+var list = new System.Collections.Generic.List{System.Int32}(); 
+list.ConvertAll{System.Double}( function (x) { return x * x; });
 "
             );
         }

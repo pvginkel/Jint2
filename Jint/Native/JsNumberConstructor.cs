@@ -104,7 +104,7 @@ namespace Jint.Native
             // is radix defined ?
             if (parameters.Length > 0)
             {
-                if (parameters[0] != JsUndefined.Instance)
+                if (!(parameters[0] is JsUndefined))
                 {
                     radix = (int)parameters[0].ToNumber();
                 }
@@ -215,7 +215,7 @@ namespace Jint.Native
                 throw new JsException(Global.SyntaxErrorClass.New("precision missing"));
             }
 
-            if (parameters[0] == JsUndefined.Instance)
+            if (parameters[0] is JsUndefined)
             {
                 return ToStringImpl(target, new JsInstance[0]);
             }

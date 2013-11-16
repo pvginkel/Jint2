@@ -175,7 +175,7 @@ namespace Jint.Native
         {
             if (target is JsArray)
                 return ((JsArray)target).Join(Global, parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
-            string separator = (parameters.Length == 0 || parameters[0] == JsUndefined.Instance)
+            string separator = (parameters.Length == 0 || parameters[0] is JsUndefined)
                 ? ","
                 : parameters[0].ToString();
 
@@ -187,7 +187,7 @@ namespace Jint.Native
             JsInstance element0 = target[0.ToString()];
 
             StringBuilder r;
-            if (element0 == JsUndefined.Instance || element0 == JsNull.Instance)
+            if (element0 is JsUndefined || element0 == JsNull.Instance)
             {
                 r = new StringBuilder(string.Empty);
             }
@@ -202,8 +202,8 @@ namespace Jint.Native
             {
                 r.Append(separator);
                 JsInstance element = target[k.ToString()];
-                if (element != JsUndefined.Instance && element != JsNull.Instance)
-                    r.Append(element.ToString());
+                if (!(element is JsUndefined) && element != JsNull.Instance)
+                    r.Append(element);
             }
             return Global.StringClass.New(r.ToString());
         }

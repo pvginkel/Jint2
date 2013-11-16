@@ -1018,7 +1018,7 @@ namespace Jint.Native
         {
             for (int i = 0; i < parameters.Length; i++)
             {
-                if (parameters[i] == JsUndefined.Instance  // undefined
+                if (parameters[i] is JsUndefined // undefined
                     || (parameters[i].Class == JsInstance.ClassNumber && double.IsNaN(parameters[i].ToNumber())) // NaN
                     || (parameters[i].Class == JsInstance.ClassNumber && double.IsInfinity(parameters[i].ToNumber())) // Infinity
                     //|| parameters[i].Class == JsInstance.CLASS_OBJECT // don't accept objects ???!

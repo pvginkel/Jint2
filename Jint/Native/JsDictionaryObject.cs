@@ -85,7 +85,7 @@ namespace Jint.Native
 
                 obj = obj.Prototype;
 
-                if (obj == JsUndefined.Instance || obj == JsNull.Instance)
+                if (obj is JsUndefined || obj == JsNull.Instance)
                 {
                     return false;
                 }
@@ -328,7 +328,7 @@ namespace Jint.Native
         {
             var p = Prototype;
 
-            if (p != JsUndefined.Instance && p != JsNull.Instance && p != null)
+            if (!(p is JsUndefined) && p != JsNull.Instance && p != null)
             {
                 foreach (string key in p.GetKeys())
                 {
@@ -411,7 +411,7 @@ namespace Jint.Native
         {
             if (target == null)
                 return false;
-            if (target == JsUndefined.Instance || target == JsNull.Instance)
+            if (target is JsUndefined || target == JsNull.Instance)
                 return false;
             if (target.Prototype == this)
                 return true;

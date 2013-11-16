@@ -136,7 +136,7 @@ namespace Jint.Native {
         /// 15.1.2.2
         /// </summary>
         public JsInstance ParseInt(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return JsUndefined.Instance;
             }
 
@@ -161,7 +161,7 @@ namespace Jint.Native {
             }
 
             if (arguments.Length >= 2) {
-                if (arguments[1] != JsUndefined.Instance && !0.Equals(arguments[1])) {
+                if (!(arguments[1] is JsUndefined) && !0.Equals(arguments[1])) {
                     radix = Convert.ToInt32(arguments[1].Value);
                 }
             }
@@ -202,7 +202,7 @@ namespace Jint.Native {
         /// 15.1.2.3
         /// </summary>
         public JsInstance ParseFloat(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return JsUndefined.Instance;
             }
 
@@ -236,7 +236,7 @@ namespace Jint.Native {
         /// 15.1.2.5
         /// </summary>
         protected JsInstance IsFinite(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return BooleanClass.False;
             }
 
@@ -248,7 +248,7 @@ namespace Jint.Native {
         }
 
         protected JsInstance DecodeURI(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return StringClass.New();
             }
 
@@ -259,7 +259,7 @@ namespace Jint.Native {
         private static readonly char[] ReservedEncodedComponent = new char[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
 
         protected JsInstance EncodeURI(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return StringClass.New();
             }
 
@@ -277,7 +277,7 @@ namespace Jint.Native {
         }
 
         protected JsInstance DecodeURIComponent(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return StringClass.New();
             }
 
@@ -285,7 +285,7 @@ namespace Jint.Native {
         }
 
         protected JsInstance EncodeURIComponent(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] == JsUndefined.Instance) {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
                 return StringClass.New();
             }
 
@@ -331,7 +331,7 @@ namespace Jint.Native {
         }
 
         public JsObject WrapClr(object value) {
-            return (JsObject)Marshaller.MarshalClrValue<object>(value);
+            return (JsObject)Marshaller.MarshalClrValue(value);
         }
 
         public bool HasOption(Options options) {

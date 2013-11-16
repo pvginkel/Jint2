@@ -28,7 +28,7 @@ namespace Jint.Native
 
             JsDictionaryObject @this;
 
-            if (parameters.Length >= 1 && parameters[0] != JsUndefined.Instance && parameters[0] != JsNull.Instance)
+            if (parameters.Length >= 1 && !(parameters[0] is JsUndefined) && parameters[0] != JsNull.Instance)
                 @this = parameters[0] as JsDictionaryObject;
             else
                 @this = global as JsDictionaryObject;

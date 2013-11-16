@@ -109,7 +109,6 @@
     <Compile Include="PropertyBags\DoubleListPropertyBag.cs" />
     <Compile Include="Debugger\SourceCodeDescriptor.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
-    <Compile Include="Expressions\IGenericExpression.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Expressions\PropertyDeclarationSyntax.cs" />
     <Compile Include="IConstructorInvoker.cs" />
