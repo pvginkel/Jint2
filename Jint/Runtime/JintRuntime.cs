@@ -418,6 +418,13 @@ namespace Jint.Runtime
 
                     return Global.NumberClass.New(leftNumber / rightNumber);
 
+                case BinaryExpressionType.Modulo:
+                    if (right == Global.NumberClass["NEGATIVE_INFINITY"] || right == Global.NumberClass["POSITIVE_INFINITY"])
+                        return Global.NumberClass["POSITIVE_INFINITY"];
+                    if (right.ToNumber() == 0)
+                        return Global.NumberClass["NaN"];
+                    return Global.NumberClass.New(left.ToNumber() % right.ToNumber());
+
                 default:
                     throw new NotImplementedException();
             }

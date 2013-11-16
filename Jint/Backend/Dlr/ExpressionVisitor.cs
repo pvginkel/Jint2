@@ -146,23 +146,67 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitBreak(BreakSyntax syntax)
         {
-            if (_scope.BreakTargets.Count == 0)
-                throw new InvalidOperationException("There is nothing to break to");
-
-            return Expression.Goto(_scope.BreakTargets.Peek());
+            return Expression.Goto(FindLabelTarget(_scope.BreakTargets, syntax.Label));
         }
 
         public Expression VisitContinue(ContinueSyntax syntax)
         {
-            if (_scope.ContinueTargets.Count == 0)
-                throw new InvalidOperationException("There is nothing to continue to");
+            return Expression.Goto(FindLabelTarget(_scope.ContinueTargets, syntax.Label));
+        }
 
-            return Expression.Goto(_scope.ContinueTargets.Peek());
+        private LabelTarget FindLabelTarget(Stack<LabelTarget> targets, string label)
+        {
+            if (targets.Count == 0)
+                throw new InvalidOperationException("There is not label");
+
+            if (label != null)
+            {
+                var target = targets.LastOrDefault(p => p.Name == label);
+                if (target == null)
+                    throw new InvalidOperationException("Cannot find break target " + label);
+
+                return target;
+            }
+
+            return targets.Peek();
         }
 
         public Expression VisitDoWhile(DoWhileSyntax syntax)
         {
-            throw new NotImplementedException();
+            // Create the break and continue targets and push them onto the stack.
+
+            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
+            _scope.BreakTargets.Push(breakTarget);
+            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
+            _scope.ContinueTargets.Push(continueTarget);
+
+            var result = Expression.Loop(
+                Expression.Block(
+                    typeof(void),
+                    // Execute the body.
+                    syntax.Body.Accept(this),
+                    Expression.Label(continueTarget),
+                    // At the end of every iteration, perform the test.
+                    Expression.IfThenElse(
+                        Expression.Dynamic(
+                            _context.Convert(typeof(bool), true),
+                            typeof(bool),
+                            syntax.Test.Accept(this)
+                        ),
+                        Expression.Empty(),
+                        Expression.Goto(breakTarget)
+                    )
+                ),
+                breakTarget
+            );
+
+            // Pop the break and continue targets to make the previous ones
+            // available.
+
+            _scope.BreakTargets.Pop();
+            _scope.ContinueTargets.Pop();
+
+            return result;
         }
 
         public Expression VisitEmpty(EmptySyntax syntax)
@@ -179,9 +223,9 @@ namespace Jint.Backend.Dlr
         {
             // Create break and continue labels and push them onto the stack.
 
-            var breakTarget = Expression.Label("break");
+            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label("continue");
+            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
             _scope.ContinueTargets.Push(continueTarget);
 
             // Temporary variable to hold a reference to the current key.
@@ -219,6 +263,13 @@ namespace Jint.Backend.Dlr
         {
             var statements = new List<Expression>();
 
+            // Push the break and continue targets onto the stack.
+
+            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
+            _scope.BreakTargets.Push(breakTarget);
+            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
+            _scope.ContinueTargets.Push(continueTarget);
+
             // At the start of our block, we perform any initialization.
 
             if (syntax.Initialization != null)
@@ -238,13 +289,6 @@ namespace Jint.Backend.Dlr
                 syntax.Body != null
                 ? syntax.Body.Accept(this)
                 : null;
-
-            // Push the break and continue targets onto the stack.
-
-            var breakTarget = Expression.Label("break");
-            _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label("continue");
-            _scope.ContinueTargets.Push(continueTarget);
 
             var loopStatements = new List<Expression>();
 
@@ -276,6 +320,8 @@ namespace Jint.Backend.Dlr
 
             // Increment is done at the end.
 
+            loopStatements.Add(Expression.Label(continueTarget));
+
             if (increment != null)
                 loopStatements.Add(increment);
 
@@ -283,8 +329,7 @@ namespace Jint.Backend.Dlr
                 Expression.Block(
                     loopStatements
                 ),
-                breakTarget,
-                continueTarget
+                breakTarget
             ));
 
             // Remove the break and continue targets to make the previous ones
@@ -335,7 +380,7 @@ namespace Jint.Backend.Dlr
         public Expression VisitSwitch(SwitchSyntax syntax)
         {
             // Create the label that jumps to the end of the switch.
-            var after = Expression.Label("after");
+            var after = Expression.Label(syntax.Label ?? "<>after");
             _scope.BreakTargets.Push(after);
 
             var statements = new List<Expression>();
@@ -493,9 +538,9 @@ namespace Jint.Backend.Dlr
         {
             // Create the break and continue targets and push them onto the stack.
 
-            var breakTarget = Expression.Label("break");
+            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label("continue");
+            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
             _scope.ContinueTargets.Push(continueTarget);
 
             var result = Expression.Loop(
@@ -1073,6 +1118,7 @@ namespace Jint.Backend.Dlr
                 case BinaryExpressionType.InstanceOf:
                 case BinaryExpressionType.Plus:
                 case BinaryExpressionType.Div:
+                case BinaryExpressionType.Modulo:
                     return Expression.Call(
                         _scope.Runtime,
                         typeof(JintRuntime).GetMethod("BinaryOperation"),
@@ -1096,7 +1142,6 @@ namespace Jint.Backend.Dlr
                 case BinaryExpressionType.Lesser: expressionType = ExpressionType.LessThan; break;
                 case BinaryExpressionType.LesserOrEqual: expressionType = ExpressionType.LessThanOrEqual; break;
                 case BinaryExpressionType.Minus: expressionType = ExpressionType.Subtract; break;
-                case BinaryExpressionType.Modulo: expressionType = ExpressionType.Modulo; break;
                 case BinaryExpressionType.NotEqual: expressionType = ExpressionType.NotEqual; break;
                 case BinaryExpressionType.Pow: expressionType = ExpressionType.Power; break;
                 case BinaryExpressionType.RightShift: expressionType = ExpressionType.RightShift; break;

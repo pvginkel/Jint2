@@ -76,8 +76,14 @@ f(7);
         {
             Test(
 @"
-var list = new System.Collections.Generic.List{System.Int32}(); 
-list.ConvertAll{System.Double}( function (x) { return x * x; });
+test1: for (var i = 0; i < 3; i++) {
+    test2: for (var j = 0; j < 3; j++) {
+        break test1; 
+    }
+}
+
+assert(0, i);
+assert(0, j);
 "
             );
         }
