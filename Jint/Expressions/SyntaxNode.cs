@@ -8,6 +8,7 @@ namespace Jint.Expressions
     {
         public string Label { get; set; }
         public abstract SyntaxType Type { get; }
+        internal virtual bool IsAssignable { get { return false; } }
         public abstract void Accept(ISyntaxVisitor visitor);
         public abstract T Accept<T>(ISyntaxVisitor<T> visitor);
 

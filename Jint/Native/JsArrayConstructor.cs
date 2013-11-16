@@ -51,8 +51,11 @@ namespace Jint.Native
         {
             JsArray array = New();
 
-            for (int i = 0; i < parameters.Length; i++)
-                array.Put(i, parameters[i]); // fast versin since it avoids a type conversion
+            if (parameters != null)
+            {
+                for (int i = 0; i < parameters.Length; i++)
+                    array.Put(i, parameters[i]); // fast version since it avoids a type conversion
+            }
 
             return array;
         }

@@ -1,10 +1,11 @@
 using System;
 using System.Diagnostics;
+using Jint.Native;
 
 namespace Jint.Expressions
 {
     [Serializable]
-    public class IdentifierSyntax : ExpressionSyntax, IAssignable
+    public class IdentifierSyntax : ExpressionSyntax
     {
         public IdentifierSyntax(string name)
         {
@@ -14,6 +15,11 @@ namespace Jint.Expressions
         public override SyntaxType Type
         {
             get { return SyntaxType.Identifier; }
+        }
+
+        internal override bool IsAssignable
+        {
+            get { return Name != JsScope.This; }
         }
 
         public string Name { get; set; }

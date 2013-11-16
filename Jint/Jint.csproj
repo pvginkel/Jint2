@@ -127,7 +127,6 @@
     <Compile Include="Expressions\ArrayDeclarationSyntax.cs" />
     <Compile Include="Expressions\CommaOperatorSyntax.cs" />
     <Compile Include="Expressions\ClrIdentifierSyntax.cs" />
-    <Compile Include="Expressions\IAssignable.cs" />
     <Compile Include="Expressions\IdentifierSyntax.cs" />
     <Compile Include="Expressions\PropertySyntax.cs" />
     <Compile Include="Expressions\IForStatement.cs" />

@@ -912,7 +912,7 @@ namespace Jint.Backend.Dlr
             {
                 var argument = syntax.Arguments[i];
 
-                if (argument is IAssignable)
+                if (argument.IsAssignable)
                 {
                     statements.Add(BuildSet(
                         argument,

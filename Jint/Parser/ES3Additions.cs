@@ -178,7 +178,7 @@ namespace Jint.Parser
 
 		private static bool IsLeftHandSideExpression(ExpressionSyntax lhs)
 		{
-            return lhs == null || lhs is IAssignable;
+            return lhs == null || lhs.IsAssignable;
 		}
 	    	
 		private bool IsLeftHandSideIn(ExpressionSyntax lhs, object[] cached)
