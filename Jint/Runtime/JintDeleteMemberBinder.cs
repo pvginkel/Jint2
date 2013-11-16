@@ -25,7 +25,7 @@ namespace Jint.Runtime
                 return new DynamicMetaObject(
                     Expression.Block(
                         Expression.Call(
-                            target.Expression,
+                            Expression.Convert(target.Expression, typeof(JsDictionaryObject)),
                             _delete,
                             Expression.Constant(Name)
                         ),

@@ -1204,25 +1204,25 @@ namespace Jint.Backend.Dlr
 
                     if (operand.Type == SyntaxType.Property)
                     {
-                        return Expression.Convert(
+                        return Expression.Block(
                             Expression.Dynamic(
                                 _context.DeleteMember(((PropertySyntax)operand).Name),
-                                typeof(object),
+                                typeof(void),
                                 operand.Expression.Accept(this)
                             ),
-                            typeof(JsInstance)
+                            Expression.Default(typeof(JsInstance))
                         );
                     }
                     else
                     {
-                        return Expression.Convert(
+                        return Expression.Block(
                             Expression.Dynamic(
                                 _context.DeleteIndex(new CallInfo(0)),
-                                typeof(object),
+                                typeof(void),
                                 operand.Expression.Accept(this),
                                 ((IndexerSyntax)operand).Index.Accept(this)
                             ),
-                            typeof(JsInstance)
+                            Expression.Default(typeof(JsInstance))
                         );
                     }
             }

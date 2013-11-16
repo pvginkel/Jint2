@@ -11,7 +11,6 @@ namespace Jint.Runtime
 {
     internal class JintDeleteIndexBinder : DeleteIndexBinder
     {
-        private static readonly MethodInfo _toString = typeof(JsInstance).GetMethod("ToString");
         private static readonly MethodInfo _delete = typeof(JsDictionaryObject).GetMethod("Delete", new[] { typeof(JsInstance) });
 
         public JintDeleteIndexBinder(CallInfo callInfo)
@@ -30,7 +29,7 @@ namespace Jint.Runtime
                 return new DynamicMetaObject(
                     Expression.Block(
                         Expression.Call(
-                            target.Expression,
+                            Expression.Convert(target.Expression, typeof(JsDictionaryObject)),
                             _delete,
                             indexes[0].Expression
                         ),
