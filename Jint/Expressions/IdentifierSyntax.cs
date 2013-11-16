@@ -19,7 +19,12 @@ namespace Jint.Expressions
 
         internal override bool IsAssignable
         {
-            get { return Name != JsScope.This; }
+            get
+            {
+                return
+                    Name != JsInstance.TypeUndefined &&
+                    Name != JsScope.This;
+            }
         }
 
         public string Name { get; set; }

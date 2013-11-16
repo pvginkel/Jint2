@@ -192,7 +192,27 @@ namespace Jint
         /// <exception cref="Jint.JintException" />
         public object Run(ProgramSyntax program, bool unwrap)
         {
-            return _backend.Run(program, unwrap);
+            try
+            {
+                return _backend.Run(program, unwrap);
+            }
+            catch (SecurityException)
+            {
+                throw;
+            }
+            catch (JsException e)
+            {
+                string message = e.Message;
+
+                if (e.Value is JsError)
+                    message = e.Value.Value.ToString();
+
+                throw new JintException(message, e);
+            }
+            catch (Exception e)
+            {
+                throw new JintException(e.Message, e);
+            }
         }
 
         #region SetParameter overloads

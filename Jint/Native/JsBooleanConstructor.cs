@@ -52,13 +52,9 @@ namespace Jint.Native
             else // e.g., var foo = new Boolean(true);
             {
                 if (parameters.Length > 0)
-                {
                     that.Value = parameters[0].ToBoolean();
-                }
                 else
-                {
                     that.Value = false;
-                }
 
                 result = that;
             }

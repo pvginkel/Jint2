@@ -69,14 +69,12 @@ namespace Jint.Native
         {
             if (_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
                 return base.Execute(global, that, parameters, genericArguments);
-            else
-            {
-                JsMethodImpl impl = _overloads.ResolveOverload(parameters, genericArguments);
-                if (impl == null)
-                    throw new JintException(String.Format("No matching overload found {0}<{1}>", Name, genericArguments));
-                var result = impl(global, that, parameters);
-                return new JsFunctionResult(result, that);
-            }
+
+            JsMethodImpl impl = _overloads.ResolveOverload(parameters, genericArguments);
+            if (impl == null)
+                throw new JintException(String.Format("No matching overload found {0}<{1}>", Name, genericArguments));
+            var result = impl(global, that, parameters);
+            return new JsFunctionResult(result, that);
         }
 
         protected JsMethodImpl WrapMember(MethodInfo info)

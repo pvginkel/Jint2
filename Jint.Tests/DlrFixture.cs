@@ -76,14 +76,12 @@ f(7);
         {
             Test(
 @"
-test1: for (var i = 0; i < 3; i++) {
-    test2: for (var j = 0; j < 3; j++) {
-        break test1; 
-    }
-}
+var map = new System.Collections.Generic.Dictionary{System.String,System.String}();
+map['cat'] = 'Tom';
 
-assert(0, i);
-assert(0, j);
+var catName;
+assert(true,map.TryGetValue('cat',catName));
+assert('Tom',catName);
 "
             );
         }

@@ -67,7 +67,7 @@ namespace Jint.Runtime
             return result;
         }
 
-        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments)
+        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments, out bool[] outParameters)
         {
             Type[] genericParameters = null;
 
@@ -92,15 +92,21 @@ namespace Jint.Runtime
             if (function == null)
                 throw new JsException(Global.ErrorClass.New("Function expected."));
 
-            if (parameters == null)
-                parameters = new JsInstance[0];
+            var result = ExecuteFunctionCore(
+                function,
+                (JsObject)that,
+                parameters ?? JsInstance.Empty,
+                genericParameters
+            );
 
-            return ExecuteFunctionCore(function, (JsObject)that, parameters, genericParameters).Result;
+            outParameters = result.OutParameters;
+
+            return result.Result;
         }
 
         public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
         {
-/*
+            /*
             if (function == null)
                 return null;
 
@@ -175,7 +181,7 @@ namespace Jint.Runtime
                 if (_backend.AllowClr)
                     CodeAccessPermission.RevertPermitOnly();
             }
-*/
+            */
             if (function == null)
                 throw new ArgumentNullException("function");
 
@@ -424,6 +430,39 @@ namespace Jint.Runtime
                     if (right.ToNumber() == 0)
                         return Global.NumberClass["NaN"];
                     return Global.NumberClass.New(left.ToNumber() % right.ToNumber());
+
+                case BinaryExpressionType.BitwiseAnd:
+                    if (left is JsUndefined || right is JsUndefined)
+                        return Global.NumberClass.New(0);
+
+                    return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) & Convert.ToInt64(right.ToNumber()));
+
+                case BinaryExpressionType.BitwiseOr:
+                    if (left is JsUndefined)
+                    {
+                        if (right is JsUndefined)
+                            return Global.NumberClass.New(1);
+
+                        return Global.NumberClass.New(Convert.ToInt64(right.ToNumber()));
+                    }
+
+                    if (right is JsUndefined)
+                        return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
+
+                    return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) | Convert.ToInt64(right.ToNumber()));
+
+                case BinaryExpressionType.BitwiseXOr:
+                    if (left is JsUndefined)
+                    {
+                        if (right is JsUndefined)
+                            return Global.NumberClass.New(1);
+                        return Global.NumberClass.New(Convert.ToInt64(right.ToNumber()));
+                    }
+
+                    if (right is JsUndefined)
+                        return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
+
+                    return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) ^ Convert.ToInt64(right.ToNumber()));
 
                 default:
                     throw new NotImplementedException();

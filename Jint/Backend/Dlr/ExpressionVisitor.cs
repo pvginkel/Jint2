@@ -887,10 +887,25 @@ namespace Jint.Backend.Dlr
                 "result"
             );
             parameters.Add(result);
+            var outParameters = Expression.Parameter(
+                typeof(bool[]),
+                "outParameters"
+            );
+            parameters.Add(outParameters);
+
+            var expressions = new List<Expression>();
+            bool anyAssignable = false;
+
+            foreach (var expression in syntax.Arguments)
+            {
+                if (expression.IsAssignable)
+                    anyAssignable = true;
+                expressions.Add(expression.Accept(this));
+            }
 
             statements.Add(Expression.Assign(
                 arguments,
-                MakeArrayInit(syntax.Arguments, typeof(JsInstance), true)
+                MakeArrayInit(expressions, typeof(JsInstance), true)
             ));
 
             statements.Add(Expression.Assign(
@@ -901,27 +916,48 @@ namespace Jint.Backend.Dlr
                     target,
                     getter,
                     arguments,
-                    MakeArrayInit(syntax.Generics, typeof(JsInstance), true)
+                    MakeArrayInit(syntax.Generics, typeof(JsInstance), true),
+                    outParameters
                 )
             ));
 
             // We need to read the arguments back for when the ExecuteFunction
             // has out parameters for native calls.
 
-            for (int i = 0; i < syntax.Arguments.Count; i++)
+            if (anyAssignable)
             {
-                var argument = syntax.Arguments[i];
+                var writeBackStatements = new List<Expression>();
 
-                if (argument.IsAssignable)
+                for (int i = 0; i < syntax.Arguments.Count; i++)
                 {
-                    statements.Add(BuildSet(
-                        argument,
-                        Expression.ArrayIndex(
-                            arguments,
-                            Expression.Constant(i)
-                        )
-                    ));
+                    var argument = syntax.Arguments[i];
+
+                    if (argument.IsAssignable)
+                    {
+                        writeBackStatements.Add(Expression.IfThen(
+                            Expression.IsTrue(
+                                Expression.ArrayIndex(outParameters, Expression.Constant(i))
+                            ),
+                            BuildSet(
+                                argument,
+                                Expression.ArrayIndex(
+                                    arguments,
+                                    Expression.Constant(i)
+                                )
+                            )
+                        ));
+                    }
                 }
+
+                statements.Add(Expression.IfThen(
+                    Expression.NotEqual(
+                        outParameters,
+                        Expression.Constant(null)
+                    ),
+                    Expression.Block(
+                        writeBackStatements
+                    )
+                ));
             }
 
             statements.Add(result);
@@ -1119,6 +1155,9 @@ namespace Jint.Backend.Dlr
                 case BinaryExpressionType.Plus:
                 case BinaryExpressionType.Div:
                 case BinaryExpressionType.Modulo:
+                case BinaryExpressionType.BitwiseAnd:
+                case BinaryExpressionType.BitwiseOr:
+                case BinaryExpressionType.BitwiseXOr:
                     return Expression.Call(
                         _scope.Runtime,
                         typeof(JintRuntime).GetMethod("BinaryOperation"),
@@ -1132,9 +1171,6 @@ namespace Jint.Backend.Dlr
 
             switch (syntax.Operation)
             {
-                case BinaryExpressionType.BitwiseAnd: expressionType = ExpressionType.And; break;
-                case BinaryExpressionType.BitwiseOr: expressionType = ExpressionType.Or; break;
-                case BinaryExpressionType.BitwiseXOr: expressionType = ExpressionType.ExclusiveOr; break;
                 case BinaryExpressionType.Equal: expressionType = ExpressionType.Equal; break;
                 case BinaryExpressionType.Greater: expressionType = ExpressionType.GreaterThan; break;
                 case BinaryExpressionType.GreaterOrEqual: expressionType = ExpressionType.GreaterThanOrEqual; break;
@@ -1233,7 +1269,10 @@ namespace Jint.Backend.Dlr
                     }
 
                 case UnaryExpressionType.Void:
-                    return Expression.Constant(JsUndefined.Instance);
+                    return Expression.Block(
+                        syntax.Operand.Accept(this),
+                        Expression.Constant(JsUndefined.Instance)
+                    );
 
                 case UnaryExpressionType.Inv:
                 case UnaryExpressionType.TypeOf:

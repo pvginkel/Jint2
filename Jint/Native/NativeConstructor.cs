@@ -232,13 +232,15 @@ namespace Jint.Native
             return new T();
         }
 
-
         /// <summary>
         /// Peforms a construction of a CLR instance inside the specified 
         /// </summary>
-        /// <param name="visitor"></param>
+        /// <param name="global"></param>
         /// <param name="that"></param>
         /// <param name="parameters"></param>
+        /// <param name="genericArguments"></param>
+        /// <param name="outParameters"></param>
+        /// <param name="visitor"></param>
         /// <returns></returns>
         public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
