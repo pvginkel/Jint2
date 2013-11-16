@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Security;
+using System.Security.Permissions;
 using System.Text;
 using Jint.Expressions;
 using Jint.Marshal;
@@ -40,6 +41,7 @@ namespace Jint.Backend.Dlr
         public DlrBackend(Options options)
         {
             Options = options;
+            PermissionSet = new PermissionSet(PermissionState.None);
 
             _runtime = new JintRuntime(this, Options);
             _context = new JintContext(_runtime.Global);
@@ -56,7 +58,7 @@ namespace Jint.Backend.Dlr
 
             var expression = program.Accept(new ExpressionVisitor(_context));
 
-            PrintExpression(expression);   
+            PrintExpression(expression);
 
             var result = ((Func<JintRuntime, JsInstance>)((LambdaExpression)expression).Compile())(_runtime);
 
@@ -70,6 +72,9 @@ namespace Jint.Backend.Dlr
 
         public JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs)
         {
+            if (parameters == null)
+                parameters = JsInstance.Empty;
+
             var function = new FunctionSyntax();
 
             for (int i = 0; i < parameters.Length - 1; i++)
@@ -83,7 +88,15 @@ namespace Jint.Backend.Dlr
             }
 
             if (parameters.Length >= 1)
-                function.Body = JintEngine.CompileBlockStatements(parameters[parameters.Length - 1].Value.ToString());
+            {
+                function.Body = JintEngine.CompileBlockStatements(
+                    parameters[parameters.Length - 1].Value.ToString()
+                );
+            }
+            else
+            {
+                function.Body = new BlockSyntax();
+            }
 
             function.Accept(new VariableMarkerPhase(this));
 
@@ -106,20 +119,61 @@ namespace Jint.Backend.Dlr
         [Conditional("DEBUG")]
         public static void PrintExpression(Expression expression)
         {
-            File.AppendAllText(
-                "Dump.txt",
-                (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
-            );
+            try
+            {
+                File.AppendAllText(
+                    "Dump.txt",
+                    (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
+                );
+            }
+            catch
+            {
+                // When permissions are set, we may not be able to access the
+                // debug view. Just swallow all exceptions here.
+            }
         }
 
         public object CallFunction(string name, object[] args)
         {
-            throw new NotImplementedException();
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            return CallFunction((JsFunction)GlobalScope[name], args);
         }
 
         public object CallFunction(JsFunction function, object[] args)
         {
-            throw new NotImplementedException();
+            if (function == null)
+                throw new ArgumentNullException("function");
+
+            JsInstance[] arguments;
+
+            if (args == null || args.Length == 0)
+            {
+                arguments = JsInstance.Empty;
+            }
+            else
+            {
+                arguments = new JsInstance[args.Length];
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    arguments[i] = Global.Marshaller.MarshalClrValue(args[i]);
+                }
+            }
+
+            var result = ExecuteFunction(function, JsNull.Instance, arguments, null);
+
+            if (result.OutParameters != null)
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (result.OutParameters[i])
+                        args[i] = Global.Marshaller.MarshalJsValue<object>(arguments[i]);
+                }
+            }
+
+            return Global.Marshaller.MarshalJsValue<object>(result.Result);
         }
 
         public JsInstance Eval(JsInstance[] arguments)

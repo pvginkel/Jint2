@@ -76,12 +76,7 @@ f(7);
         {
             Test(
 @"
-var map = new System.Collections.Generic.Dictionary{System.String,System.String}();
-map['cat'] = 'Tom';
-
-var catName;
-assert(true,map.TryGetValue('cat',catName));
-assert('Tom',catName);
+assert('a', 'abcd'[0]);
 "
             );
         }

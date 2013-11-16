@@ -52,7 +52,23 @@ namespace Jint.Backend.Dlr
 
             // Build the body and return label.
 
-            AddBodyAndReturn(statements, _scope.Return, ProcessFunctionBody(syntax, _scope.Runtime));
+            var body = ProcessFunctionBody(syntax, _scope.Runtime);
+
+            if (body.Type == typeof(void))
+            {
+                statements.Add(body);
+                statements.Add(Expression.Label(
+                    _scope.Return,
+                    Expression.Constant(JsUndefined.Instance)
+                ));
+            }
+            else
+            {
+                statements.Add(Expression.Label(
+                    _scope.Return,
+                    body
+                ));
+            }
 
             return Expression.Lambda<Func<JintRuntime, JsInstance>>(
                 Expression.Block(
@@ -772,9 +788,16 @@ namespace Jint.Backend.Dlr
                 )
             ));
 
-            // Build the body and return label.
+            // Build the body.
 
-            AddBodyAndReturn(statements, _scope.Return, body.Accept(this));
+            statements.Add(body.Accept(this));
+
+            // Add the return label.
+
+            statements.Add(Expression.Label(
+                _scope.Return,
+                Expression.Constant(JsUndefined.Instance)
+            ));
 
             // Add all gathered locals for the closures to the locals list.
 
@@ -799,25 +822,6 @@ namespace Jint.Backend.Dlr
             DlrBackend.PrintExpression(lambda);
 
             return lambda.Compile();
-        }
-
-        private void AddBodyAndReturn(List<Expression> statements, LabelTarget returnLabel, Expression body)
-        {
-            if (body.Type == typeof(void))
-            {
-                statements.Add(body);
-                statements.Add(Expression.Label(
-                    returnLabel,
-                    Expression.Default(typeof(JsInstance))
-                ));
-            }
-            else
-            {
-                statements.Add(Expression.Label(
-                    returnLabel,
-                    body
-                ));
-            }
         }
 
         private Closure FindScopedClosure(BlockSyntax body, Scope scope)

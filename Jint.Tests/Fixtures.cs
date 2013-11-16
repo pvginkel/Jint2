@@ -52,6 +52,10 @@ namespace Jint.Tests
 
             var engine = new JintEngine().AddPermission(new FileIOPermission(PermissionState.Unrestricted));
             engine.AllowClr();
+
+            // The DLR compiler won't compile with permissions set
+            engine.DisableSecurity();
+
             engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader); } }));
             engine.SetFunction("print", new Action<string>(Console.WriteLine));
             engine.Run("var a='foo'; load('" + JintEngine.EscapteStringLiteral(filename) + "'); print(a);");

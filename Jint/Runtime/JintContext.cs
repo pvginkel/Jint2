@@ -69,7 +69,7 @@ namespace Jint.Runtime
             JintGetIndexBinder result;
             if (!_getIndex.TryGetValue(callInfo, out result))
             {
-                result = new JintGetIndexBinder(callInfo);
+                result = new JintGetIndexBinder(this, callInfo);
                 _getIndex.Add(callInfo, result);
             }
 
