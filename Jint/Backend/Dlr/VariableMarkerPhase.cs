@@ -136,6 +136,9 @@ namespace Jint.Backend.Dlr
 
         public override void VisitFunction(FunctionSyntax syntax)
         {
+            if (_main == null)
+                _main = syntax.Body;
+
             EnterFunction(syntax);
 
             base.VisitFunction(syntax);
@@ -191,7 +194,11 @@ namespace Jint.Backend.Dlr
 
             // Add ourselves to the top of the block stack.
 
-            _blocks.Add(new BlockManager(function.Body, argumentsVariable, _blocks[_blocks.Count - 1]));
+            BlockManager parentBlock = null;
+            if (_blocks.Count > 0)
+                parentBlock = _blocks[_blocks.Count - 1];
+
+            _blocks.Add(new BlockManager(function.Body, argumentsVariable, parentBlock));
         }
 
         private void ExitFunction(IFunctionDeclaration function)
@@ -227,9 +234,13 @@ namespace Jint.Backend.Dlr
             Variable variable;
 
             // Try to find the identifier in a scope other than the global scope.
+            // If we're parsing a function constructor, we don't have a main,
+            // so we don't skip over the global scope.
+
+            bool haveMain = _blocks[0].Block is ProgramSyntax;
 
             int count = _blocks.Count;
-            for (int i = count - 1; i > 0; i--)
+            for (int i = count - 1; i >= (haveMain ? 1 : 0); i--)
             {
                 if (_blocks[i].Block.DeclaredVariables.TryGetItem(identifier, out variable))
                 {

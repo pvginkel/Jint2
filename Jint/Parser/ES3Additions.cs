@@ -126,6 +126,11 @@ namespace Jint.Parser
             return program().value;
         }
 
+        public BlockSyntax ExecuteBlockStatements()
+        {
+            return blockStatements().value;
+        }
+
 		// References the upper level block currently parsed. 
 		// This is used to add variable declarations at the top of the body while parsing.
 		private BlockSyntax _currentBody;
@@ -321,6 +326,7 @@ namespace Jint.Parser
 			Errors.Add(msg + " at " + hdr);
 		}    
 
+        // TODO: Why is this there? Did we remove something that should use this?
 		private string[] script = new string[0];
 	    
 		private SourceCodeDescriptor ExtractSourceCode(CommonToken start, CommonToken stop)

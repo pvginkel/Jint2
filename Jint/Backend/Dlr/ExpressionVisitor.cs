@@ -38,7 +38,17 @@ namespace Jint.Backend.Dlr
         {
             var statements = new List<Expression>();
 
-            _scope = new Scope(this, null, null, null, null, null, statements, null);
+            var that = Expression.Parameter(typeof(JsInstance), "this");
+
+            _scope = new Scope(this, that, null, null, null, null, statements, null);
+
+            statements.Add(Expression.Assign(
+                that,
+                Expression.Property(
+                    _scope.Runtime,
+                    "Global"
+                )
+            ));
 
             statements.Add(ProcessFunctionBody(syntax, _scope.Runtime));
 
@@ -48,7 +58,10 @@ namespace Jint.Backend.Dlr
             ));
 
             return Expression.Lambda<Func<JintRuntime, JsInstance>>(
-                Expression.Block(statements),
+                Expression.Block(
+                    new[] { that },
+                    statements
+                ),
                 new[] { _scope.Runtime }
             );
         }
@@ -582,7 +595,7 @@ namespace Jint.Backend.Dlr
             );
         }
 
-        private DlrFunctionDelegate DeclareFunction(IFunctionDeclaration function)
+        public DlrFunctionDelegate DeclareFunction(IFunctionDeclaration function)
         {
             var body = function.Body;
 
@@ -800,8 +813,8 @@ namespace Jint.Backend.Dlr
                         Expression.Dynamic(
                             _context.GetIndex(new CallInfo(0)),
                             typeof(object),
-                            BuildGet(((IndexerSyntax)memberSyntax).Index),
-                            target
+                            target,
+                            BuildGet(((IndexerSyntax)memberSyntax).Index)
                         ),
                         typeof(JsInstance)
                     );
@@ -1056,7 +1069,8 @@ namespace Jint.Backend.Dlr
                     syntax.Test.Accept(this)
                 ),
                 syntax.Then.Accept(this),
-                syntax.Else.Accept(this)
+                syntax.Else.Accept(this),
+                typeof(JsInstance)
             );
         }
 
@@ -1270,11 +1284,8 @@ namespace Jint.Backend.Dlr
                         typeof(JsInstance)
                     );
 
-                case SyntaxType.Function:
-                    return syntax.Accept(this);
-
                 default:
-                    throw new NotImplementedException();
+                    return syntax.Accept(this);
             }
         }
 

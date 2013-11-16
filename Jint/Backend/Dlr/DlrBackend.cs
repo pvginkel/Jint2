@@ -65,6 +65,35 @@ namespace Jint.Backend.Dlr
                     : result;
         }
 
+        public JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs)
+        {
+            var function = new FunctionSyntax();
+
+            for (int i = 0; i < parameters.Length - 1; i++)
+            {
+                string arg = parameters[i].ToString();
+
+                foreach (string a in arg.Split(','))
+                {
+                    function.Parameters.Add(a.Trim());
+                }
+            }
+
+            if (parameters.Length >= 1)
+                function.Body = JintEngine.CompileBlockStatements(parameters[parameters.Length - 1].Value.ToString());
+
+            function.Accept(new VariableMarkerPhase(this));
+
+            ResetExpressionDump();
+
+            return _runtime.CreateFunction(
+                function.Name,
+                new ExpressionVisitor(_context).DeclareFunction(function),
+                null,
+                function.Parameters.ToArray()
+            );
+        }
+
         [Conditional("DEBUG")]
         public static void ResetExpressionDump()
         {

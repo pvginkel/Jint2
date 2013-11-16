@@ -1147,8 +1147,24 @@ block returns [BlockSyntax value]
 	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
 }
 	: lb=LBRACE (statement { $value.Statements.AddLast($statement.value); })* RBRACE
-	
 	;
+
+// Used for the Function constructor, because it doesn't have braces.
+
+blockStatements returns [BlockSyntax value]
+@init{
+    BlockSyntax block = new BlockSyntax();
+    var tempBody = _currentBody;
+    _currentBody = block;
+    $value = block;
+}
+@after{
+	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
+    _currentBody = tempBody;
+}
+	: (statement { $value.Statements.AddLast($statement.value); })*
+	;
+
 
 // $>
 	
@@ -1561,7 +1577,6 @@ functionBody returns [BlockSyntax value]
     _currentBody = tempBody;
 }
 	: lb=LBRACE (sourceElement { block.Statements.AddLast($sourceElement.value); }) * RBRACE
-	
 	;
 
 // $>

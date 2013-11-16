@@ -50,12 +50,27 @@ namespace Jint
                 program = parser.Execute();
 
                 if (parser.Errors != null && parser.Errors.Count > 0)
-                {
                     throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
-                }
             }
 
             return program;
+        }
+
+        internal static BlockSyntax CompileBlockStatements(string source)
+        {
+            BlockSyntax block = null;
+            if (!string.IsNullOrEmpty(source))
+            {
+                var lexer = new ES3Lexer(new ANTLRStringStream(source));
+                var parser = new ES3Parser(new CommonTokenStream(lexer));
+
+                block = parser.ExecuteBlockStatements();
+
+                if (parser.Errors != null && parser.Errors.Count > 0)
+                    throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
+            }
+
+            return block;
         }
 
         /// <summary>

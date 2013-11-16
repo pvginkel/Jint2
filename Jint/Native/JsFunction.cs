@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Expressions;
 
 namespace Jint.Native
 {
@@ -14,15 +13,8 @@ namespace Jint.Native
         public static string PrototypeName = "prototype";
 
         public string Name { get; set; }
-        public SyntaxNode Statement { get; set; }
         public List<string> Arguments { get; set; }
         public JsScope Scope { get; set; }
-
-        public JsFunction(IGlobal global, SyntaxNode statement)
-            : this(global.FunctionClass.PrototypeProperty)
-        {
-            Statement = statement;
-        }
 
         /// <summary>
         /// 
@@ -41,7 +33,6 @@ namespace Jint.Native
             : base(prototype)
         {
             Arguments = new List<string>();
-            Statement = new EmptySyntax();
             DefineOwnProperty(PrototypeName, JsNull.Instance, PropertyAttributes.DontEnum);
         }
 

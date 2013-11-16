@@ -76,10 +76,10 @@ f(7);
         {
             Test(
 @"
-(function(arg1, arg2) {
-        arg1 = arg2;
-    assert(arguments[0], 2);
-})(1, 2);"
+var arr = [];
+arr[0] = function(x) { return x * x; };
+arr[1] = arr[0](2);
+"
             );
         }
     }

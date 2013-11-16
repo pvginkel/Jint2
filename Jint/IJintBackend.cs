@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security;
 using System.Text;
+using Jint.Backend.Dlr;
 using Jint.Expressions;
 using Jint.Native;
 
@@ -29,5 +30,7 @@ namespace Jint
         object MarshalJsFunctionHelper(JsFunction func, Type delegateType);
 
         JsInstance Construct(JsFunction function, JsInstance[] parameters);
+
+        JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Jint.Backend.Dlr;
 using Jint.Expressions;
 using Jint.Delegates;
 using Jint.Marshal;
@@ -10,7 +11,6 @@ namespace Jint.Native
     [Serializable]
     public class JsFunctionConstructor : JsConstructor
     {
-
         public JsFunctionConstructor(IGlobal global, JsObject prototype)
             : base(global, prototype)
         {
@@ -33,8 +33,6 @@ namespace Jint.Native
             prototype.DefineOwnProperty("toLocaleString", New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, prototype, "length", GetLengthImpl, SetLengthImpl));
         }
-
-
 
         public JsInstance GetLengthImpl(JsDictionaryObject target)
         {
@@ -122,27 +120,7 @@ namespace Jint.Native
 
         public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
         {
-            JsFunction instance = New();
-
-            instance.Arguments = new List<string>();
-
-            for (int i = 0; i < parameters.Length - 1; i++)
-            {
-                string arg = parameters[i].ToString();
-
-                foreach (string a in arg.Split(','))
-                {
-                    instance.Arguments.Add(a.Trim());
-                }
-            }
-
-            if (parameters.Length >= 1)
-            {
-                ProgramSyntax p = JintEngine.Compile(parameters[parameters.Length - 1].Value.ToString());
-                instance.Statement = new BlockSyntax(p);
-            }
-
-            return instance;
+            return Global.Backend.CompileFunction(parameters, genericArgs);
         }
 
         public JsInstance ToString2(JsDictionaryObject target, JsInstance[] parameters)
