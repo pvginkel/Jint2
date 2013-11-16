@@ -50,12 +50,9 @@ namespace Jint.Backend.Dlr
                 )
             ));
 
-            statements.Add(ProcessFunctionBody(syntax, _scope.Runtime));
+            // Build the body and return label.
 
-            statements.Add(Expression.Label(
-                _scope.Return,
-                Expression.Constant(JsUndefined.Instance)
-            ));
+            AddBodyAndReturn(statements, _scope.Return, ProcessFunctionBody(syntax, _scope.Runtime));
 
             return Expression.Lambda<Func<JintRuntime, JsInstance>>(
                 Expression.Block(
@@ -775,16 +772,9 @@ namespace Jint.Backend.Dlr
                 )
             ));
 
-            // Build the body.
+            // Build the body and return label.
 
-            statements.Add(body.Accept(this));
-
-            // Add in the return label.
-
-            statements.Add(Expression.Label(
-                _scope.Return,
-                Expression.Constant(JsUndefined.Instance)
-            ));
+            AddBodyAndReturn(statements, _scope.Return, body.Accept(this));
 
             // Add all gathered locals for the closures to the locals list.
 
@@ -809,6 +799,25 @@ namespace Jint.Backend.Dlr
             DlrBackend.PrintExpression(lambda);
 
             return lambda.Compile();
+        }
+
+        private void AddBodyAndReturn(List<Expression> statements, LabelTarget returnLabel, Expression body)
+        {
+            if (body.Type == typeof(void))
+            {
+                statements.Add(body);
+                statements.Add(Expression.Label(
+                    returnLabel,
+                    Expression.Default(typeof(JsInstance))
+                ));
+            }
+            else
+            {
+                statements.Add(Expression.Label(
+                    returnLabel,
+                    body
+                ));
+            }
         }
 
         private Closure FindScopedClosure(BlockSyntax body, Scope scope)
