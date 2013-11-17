@@ -19,6 +19,7 @@ namespace Jint.Backend.Dlr
 {
     internal class DlrBackend : IJintBackend
     {
+        private readonly JintEngine _engine;
         private readonly JintContext _context;
         private readonly JintRuntime _runtime;
         private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
@@ -38,8 +39,12 @@ namespace Jint.Backend.Dlr
         public PermissionSet PermissionSet { get; set; }
         public bool AllowClr { get; set; }
 
-        public DlrBackend(Options options)
+        public DlrBackend(Options options, JintEngine engine)
         {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+
+            _engine = engine;
             Options = options;
             PermissionSet = new PermissionSet(PermissionState.None);
 
@@ -178,7 +183,31 @@ namespace Jint.Backend.Dlr
 
         public JsInstance Eval(JsInstance[] arguments)
         {
-            throw new NotImplementedException();
+            if (JsInstance.ClassString != arguments[0].Class)
+                return arguments[0];
+
+            ProgramSyntax program;
+
+            try
+            {
+                program = JintEngine.Compile(arguments[0].ToString());
+            }
+            catch (Exception e)
+            {
+                throw new JsException(Global.SyntaxErrorClass.New(e.Message));
+            }
+
+            if (program == null)
+                return JsNull.Instance;
+
+            try
+            {
+                return (JsInstance)Run(program, false);
+            }
+            catch (Exception e)
+            {
+                throw new JsException(Global.EvalErrorClass.New(e.Message));
+            }
         }
 
         public JsFunctionResult ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters)
@@ -188,7 +217,14 @@ namespace Jint.Backend.Dlr
 
         public int Compare(JsFunction function, JsInstance x, JsInstance y)
         {
-            throw new NotImplementedException();
+            var result = ExecuteFunction(
+                function,
+                JsNull.Instance,
+                new[] { x, y },
+                null
+            ).Result;
+
+            return (int)result.ToNumber();
         }
 
         public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)

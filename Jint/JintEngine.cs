@@ -28,7 +28,7 @@ namespace Jint
         [DebuggerStepThrough]
         public JintEngine(Options options)
         {
-            _backend = new Backend.Dlr.DlrBackend(options);
+            _backend = new Backend.Dlr.DlrBackend(options, this);
         }
 
         /// <summary>
@@ -159,7 +159,6 @@ namespace Jint
         /// <exception cref="Jint.JintException" />
         public object Run(string script, bool unwrap)
         {
-
             if (script == null)
                 throw new
                     ArgumentException("Script can't be null", "script");
