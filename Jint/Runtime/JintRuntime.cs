@@ -18,7 +18,6 @@ namespace Jint.Runtime
 
         private readonly IJintBackend _backend;
         private readonly Options _options;
-        private readonly bool _isStrict;
 
         public JsScope GlobalScope { get; private set; }
         public JsGlobal Global { get; private set; }
@@ -30,7 +29,6 @@ namespace Jint.Runtime
 
             _backend = backend;
             _options = options;
-            _isStrict = _options.HasFlag(Options.Strict);
 
             var global = new JsGlobal(backend, options);
 
@@ -62,7 +60,7 @@ namespace Jint.Runtime
                 Arguments = new List<string>(parameters ?? new string[0])
             };
 
-            result.PrototypeProperty = Global.ObjectClass.New(function);
+            result.PrototypeProperty = Global.ObjectClass.New(result);
 
             return result;
         }
