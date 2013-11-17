@@ -37,10 +37,47 @@ namespace Jint.Backend.Dlr
         public Expression VisitProgram(ProgramSyntax syntax)
         {
             var statements = new List<Expression>();
-
+            var locals = new List<ParameterExpression>();
+            
             var that = Expression.Parameter(typeof(JsInstance), "this");
 
-            _scope = new Scope(this, that, null, null, null, null, statements, null);
+            ParameterExpression closureLocal = null;
+
+            if (syntax.Closure != null)
+            {
+                closureLocal = Expression.Parameter(
+                    syntax.Closure.Type,
+                    "closure"
+                );
+                locals.Add(closureLocal);
+            }
+
+            _scope = new Scope(
+                this,
+                that,
+                syntax.Closure,
+                null,
+                closureLocal,
+                null,
+                statements,
+                null
+            );
+
+            locals.Add(that);
+
+            if (closureLocal != null)
+            {
+                // We don't add our closureLocal to locals here because
+                // later we add everything from _scope.ClosureLocals.
+                _scope.ClosureLocals.Add(syntax.Closure, closureLocal);
+
+                statements.Add(Expression.Assign(
+                    closureLocal,
+                    Expression.New(
+                        closureLocal.Type.GetConstructors()[0]
+                    )
+                ));
+            }
 
             statements.Add(Expression.Assign(
                 that,
@@ -72,7 +109,7 @@ namespace Jint.Backend.Dlr
 
             return Expression.Lambda<Func<JintRuntime, JsInstance>>(
                 Expression.Block(
-                    new[] { that },
+                    locals,
                     statements
                 ),
                 new[] { _scope.Runtime }
@@ -463,7 +500,10 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitWith(WithSyntax syntax)
         {
-            throw new NotImplementedException();
+            return Expression.Block(
+                _scope.BuildSet(syntax.Target, syntax.Expression.Accept(this)),
+                syntax.Body.Accept(this)
+            );
         }
 
         public Expression VisitThrow(ThrowSyntax syntax)
@@ -886,8 +926,44 @@ namespace Jint.Backend.Dlr
             }
             else
             {
-                target = Expression.Constant(null, typeof(JsInstance));
-                getter = BuildGet(syntax.Expression);
+                var identifierSyntax = syntax.Expression as IdentifierSyntax;
+
+                if (
+                    identifierSyntax != null &&
+                    identifierSyntax.Target.Type == VariableType.WithScope
+                )
+                {
+                    // With a with scope, the target depends on how the variable
+                    // is resolved.
+
+                    var withTarget = Expression.Parameter(typeof(JsInstance), "target");
+                    statements.Add(Expression.Assign(
+                        withTarget,
+                        Expression.Constant(null, typeof(JsInstance))
+                    ));
+
+                    var method = Expression.Parameter(
+                        typeof(JsInstance),
+                        "method"
+                    );
+
+                    parameters.Add(method);
+
+                    statements.Add(Expression.Assign(
+                        method,
+                        BuildGet(identifierSyntax, withTarget)
+                    ));
+
+                    getter = method;
+
+                    parameters.Add(withTarget);
+                    target = withTarget;
+                }
+                else
+                {
+                    target = Expression.Constant(null, typeof(JsInstance));
+                    getter = BuildGet(syntax.Expression);
+                }
             }
 
             var arguments = Expression.Parameter(
@@ -1419,13 +1495,18 @@ namespace Jint.Backend.Dlr
 
         public Expression BuildGet(SyntaxNode syntax)
         {
+            return BuildGet(syntax, null);
+        }
+
+        public Expression BuildGet(SyntaxNode syntax, ParameterExpression withTarget)
+        {
             switch (syntax.Type)
             {
                 case SyntaxType.VariableDeclaration:
-                    return _scope.BuildGet(((VariableDeclarationSyntax)syntax).Target);
+                    return _scope.BuildGet(((VariableDeclarationSyntax)syntax).Target, withTarget);
 
                 case SyntaxType.Identifier:
-                    return _scope.BuildGet(((IdentifierSyntax)syntax).Target);
+                    return _scope.BuildGet(((IdentifierSyntax)syntax).Target, withTarget);
 
                 case SyntaxType.MethodCall:
                     return ((MethodCallSyntax)syntax).Accept(this);
@@ -1449,7 +1530,7 @@ namespace Jint.Backend.Dlr
                         Expression.Dynamic(
                             _context.GetIndex(new CallInfo(0)),
                             typeof(object),
-                            BuildGet(indexer.Expression),
+                            BuildGet(indexer.Expression, withTarget),
                             indexer.Index.Accept(this)
                         ),
                         typeof(JsInstance)

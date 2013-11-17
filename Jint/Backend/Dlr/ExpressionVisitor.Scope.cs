@@ -118,6 +118,53 @@ namespace Jint.Backend.Dlr
                             typeof(JsInstance)
                         );
 
+                    case VariableType.WithScope:
+                        var resultParameter = Expression.Parameter(typeof(JsInstance), "result");
+
+                        var result = BuildSet(variable.FallbackVariable, resultParameter);
+
+                        var scope = variable.WithScope;
+
+                        while (scope != null)
+                        {
+                            var withLocal = Expression.Parameter(typeof(JsDictionaryObject), "with");
+
+                            result = Expression.Block(
+                                new[] { withLocal },
+                                Expression.Assign(
+                                    withLocal,
+                                    Expression.Convert(
+                                        BuildGet(scope.Variable, null),
+                                        typeof(JsDictionaryObject)
+                                    )
+                                ),
+                                Expression.Condition(
+                                    Expression.Call(
+                                        withLocal,
+                                        typeof(JsDictionaryObject).GetMethod("HasProperty", new[] { typeof(string) }),
+                                        Expression.Constant(variable.FallbackVariable.Name)
+                                    ),
+                                    Expression.Dynamic(
+                                        _visitor._context.SetMember(variable.FallbackVariable.Name),
+                                        typeof(object),
+                                        withLocal,
+                                        resultParameter
+                                    ),
+                                    result,
+                                    typeof(void)
+                                )
+                            );
+
+                            scope = scope.Parent;
+                        }
+
+                        return Expression.Block(
+                            new[] { resultParameter },
+                            Expression.Assign(resultParameter, value),
+                            result,
+                            resultParameter
+                        );
+
                     default:
                         return Expression.Assign(
                             FindVariable(variable),
@@ -139,7 +186,7 @@ namespace Jint.Backend.Dlr
                 );
             }
 
-            public Expression BuildGet(Variable variable)
+            public Expression BuildGet(Variable variable, ParameterExpression withTarget)
             {
                 switch (variable.Type)
                 {
@@ -165,6 +212,60 @@ namespace Jint.Backend.Dlr
                             ),
                             typeof(JsInstance)
                         );
+
+                    case VariableType.WithScope:
+                        var result = BuildGet(variable.FallbackVariable, null);
+
+                        var scope = variable.WithScope;
+
+                        while (scope != null)
+                        {
+                            var withLocal = Expression.Parameter(typeof(JsDictionaryObject), "with");
+
+                            Expression getter = Expression.Convert(
+                                Expression.Dynamic(
+                                    _visitor._context.GetMember(variable.FallbackVariable.Name),
+                                    typeof(object),
+                                    withLocal
+                                ),
+                                typeof(JsInstance)
+                            );
+
+                            if (withTarget != null)
+                            {
+                                getter = Expression.Block(
+                                    Expression.Assign(withTarget, withLocal),
+                                    getter
+                                );
+                            }
+
+                            result = Expression.Block(
+                                new[] { withLocal },
+                                Expression.Assign(
+                                    withLocal,
+                                    Expression.Convert(
+                                        BuildGet(scope.Variable, null),
+                                        typeof(JsDictionaryObject)
+                                    )
+                                ),
+                                Expression.Condition(
+                                    Expression.Call(
+                                        Expression.Convert(
+                                            withLocal,
+                                            typeof(JsDictionaryObject)
+                                        ),
+                                        typeof(JsDictionaryObject).GetMethod("HasProperty", new[] { typeof(string) }),
+                                        Expression.Constant(variable.FallbackVariable.Name)
+                                    ),
+                                    getter,
+                                    result
+                                )
+                            );
+
+                            scope = scope.Parent;
+                        }
+
+                        return result;
 
                     default:
                         return FindVariable(variable);

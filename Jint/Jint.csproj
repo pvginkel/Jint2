@@ -62,11 +62,12 @@
     <Compile Include="ExpressionExtensions\ExpressionEx.cs" />
     <Compile Include="ExpressionExtensions\ForEachExpression.cs" />
     <Compile Include="ExpressionExtensions\UsingExpression.cs" />
+    <Compile Include="Expressions\ClosedOverVariable.cs" />
     <Compile Include="Expressions\MemberSyntax.cs" />
     <Compile Include="Expressions\SyntaxType.cs" />
+    <Compile Include="Expressions\WithScope.cs" />
     <Compile Include="Native\JsFunctionResult.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
-    <Compile Include="Expressions\ClosedOverVariable.cs" />
     <Compile Include="Expressions\Closure.cs" />
     <Compile Include="Runtime\JintConvertBinder.cs" />
     <Compile Include="Runtime\JintBinaryOperationBinder.cs" />

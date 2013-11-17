@@ -13,6 +13,8 @@ namespace Jint.Expressions
         public int Index { get; private set; }
         public VariableType Type { get; set; }
         public ClosedOverVariable ClosureField { get; set; }
+        public WithScope WithScope { get; set; }
+        public Variable FallbackVariable { get; set; }
 
         public Variable(string name, int index)
         {
@@ -21,6 +23,18 @@ namespace Jint.Expressions
 
             Name = name;
             Index = index;
+        }
+
+        public Variable(Variable fallbackVariable, WithScope withScope)
+        {
+            if (fallbackVariable == null)
+                throw new ArgumentNullException("fallbackVariable");
+            if (withScope == null)
+                throw new ArgumentNullException("withScope");
+
+            FallbackVariable = fallbackVariable;
+            WithScope = withScope;
+            Type = VariableType.WithScope;
         }
 
         private Variable(VariableType type)

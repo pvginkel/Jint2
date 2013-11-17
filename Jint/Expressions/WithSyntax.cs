@@ -15,6 +15,7 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Expression { get; set; }
         public SyntaxNode Body { get; set; }
+        public Variable Target { get; set; }
 
         public WithSyntax(ExpressionSyntax expression, SyntaxNode statement)
         {

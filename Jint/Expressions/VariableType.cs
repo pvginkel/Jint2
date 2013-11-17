@@ -12,6 +12,7 @@ namespace Jint.Expressions
         Local,
         This,
         Arguments,
-        Global
+        Global,
+        WithScope
     }
 }

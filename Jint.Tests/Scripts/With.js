@@ -23,3 +23,61 @@ with (t) {
         assert(t2,test2());
     }
 }
+
+(function () {
+    var y = 3;
+    var x = { y: 7 };
+
+    with (x) {
+        y = 10;
+        (function () {
+            y = 11;
+        })();
+    }
+
+    assert(3, y);
+    assert(11, x.y);
+})();
+
+(function () {
+    var y = 3;
+    var x = { };
+
+    with (x) {
+        y = 10;
+        (function () {
+            x.y = 4;
+            y = 11;
+        })();
+    }
+
+    assert(10, y);
+    assert(11, x.y);
+})();
+
+var y = 3;
+var x = { y: 7 };
+
+with (x) {
+    y = 10;
+    (function () {
+        y = 11;
+    })();
+}
+
+assert(3, y);
+assert(11, x.y);
+
+var y = 3;
+var x = {};
+
+with (x) {
+    y = 10;
+    (function () {
+        x.y = 4;
+        y = 11;
+    })();
+}
+
+assert(10, y);
+assert(11, x.y);

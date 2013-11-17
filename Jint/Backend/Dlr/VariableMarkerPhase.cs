@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
@@ -10,10 +11,18 @@ namespace Jint.Backend.Dlr
 {
     internal class VariableMarkerPhase : SyntaxVisitor
     {
+#if DEBUG
+        private const string WithPrefix = "__with";
+#else
+        private const string WithPrefix = "<>with";
+#endif
+
         private readonly bool _isStrict;
         private readonly List<BlockManager> _blocks = new List<BlockManager>();
         private readonly List<BlockManager> _pendingClosures = new List<BlockManager>();
         private BlockSyntax _main;
+        private MarkerWithScope _withScope;
+        private int _nextWithScopeIndex = 1;
 
         public VariableMarkerPhase(DlrBackend backend)
         {
@@ -36,6 +45,9 @@ namespace Jint.Backend.Dlr
             _blocks.Add(new BlockManager(syntax, null, null));
 
             base.VisitProgram(syntax);
+
+            if (_blocks[0].ClosedOverVariables.Count != 0)
+                _pendingClosures.Add(_blocks[0]);
 
             // Build all pending closures.
 
@@ -223,9 +235,29 @@ namespace Jint.Backend.Dlr
             base.VisitIdentifier(syntax);
         }
 
+        public override void VisitWith(WithSyntax syntax)
+        {
+            syntax.Expression.Accept(this);
+
+            syntax.Target = new Variable(WithPrefix + (_nextWithScopeIndex++).ToString(CultureInfo.InvariantCulture), -1)
+            {
+                Type = VariableType.Local
+            };
+
+            var block = _blocks[_blocks.Count - 1];
+
+            block.Block.DeclaredVariables.Add(syntax.Target);
+
+            _withScope = new MarkerWithScope(_withScope, syntax.Target, block);
+
+            syntax.Body.Accept(this);
+
+            _withScope = _withScope.Parent;
+        }
+
         private Variable GetVariable(string identifier)
         {
-            // Arguments can be re-declared (of not strict). Because of this,
+            // Arguments can be re-declared (if not strict). Because of this,
             // we check arguments after resolving in a scope.
 
             if (identifier == JsScope.This)
@@ -255,6 +287,14 @@ namespace Jint.Backend.Dlr
                         _blocks[i].ClosedOverVariables.Add(variable);
                     }
 
+                    if (_withScope != null)
+                    {
+                        if (i < count - 1)
+                            CloseOverWithScope();
+
+                        return new Variable(variable, _withScope.WithScope);
+                    }
+
                     return variable;
                 }
             }
@@ -272,7 +312,41 @@ namespace Jint.Backend.Dlr
             else
                 Debug.Assert(variable.Type == VariableType.Global);
 
+            if (_withScope != null)
+            {
+                if (_blocks.Count > 1)
+                    CloseOverWithScope();
+
+                return new Variable(variable, _withScope.WithScope);
+            }
+
             return variable;
+        }
+
+        private void CloseOverWithScope()
+        {
+            var withScope = _withScope;
+
+            while (withScope != null)
+            {
+                withScope.Block.ClosedOverVariables.Add(withScope.WithScope.Variable);
+
+                withScope = withScope.Parent;
+            }
+        }
+
+        private class MarkerWithScope
+        {
+            public WithScope WithScope { get; private set; }
+            public MarkerWithScope Parent { get; private set; }
+            public BlockManager Block { get; private set; }
+
+            public MarkerWithScope(MarkerWithScope parent, Variable variable, BlockManager block)
+            {
+                Parent = parent;
+                WithScope = new WithScope(parent != null ? parent.WithScope : null, variable);
+                Block = block;
+            }
         }
 
         private class BlockManager
