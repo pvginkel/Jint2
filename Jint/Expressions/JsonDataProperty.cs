@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
-    public class CaseClause
+    public class JsonDataProperty : JsonProperty
     {
         public ExpressionSyntax Expression { get; private set; }
-        public BlockSyntax Body { get; private set; }
 
-        public CaseClause(ExpressionSyntax expression, BlockSyntax body)
+        public JsonDataProperty(string name, ExpressionSyntax expression)
+            : base(name)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
-            if (body == null)
-                throw new ArgumentNullException("body");
 
             Expression = expression;
-            Body = body;
         }
     }
 }

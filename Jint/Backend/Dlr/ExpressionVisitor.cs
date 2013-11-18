@@ -22,6 +22,7 @@ namespace Jint.Backend.Dlr
         private static readonly MethodInfo _compareEquality = typeof(JintRuntime).GetMethod("CompareEquality");
 
         private Scope _scope;
+        private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
 
         private const string RuntimeParameterName = "<>runtime";
 
@@ -115,7 +116,7 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in syntax.DeclaredVariables)
             {
-                if (variable.Type == VariableType.Local)
+                if (variable.Type == Expressions.VariableType.Local)
                 {
                     var parameter = Expression.Parameter(
                         typeof(JsInstance),
@@ -144,12 +145,12 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitAssignment(AssignmentSyntax syntax)
         {
-            if (syntax.AssignmentOperator == AssignmentOperator.Assign)
+            if (syntax.Operation == AssignmentOperator.Assign)
                 return BuildSet(syntax.Left, syntax.Right.Accept(this));
 
             SyntaxExpressionType operation;
 
-            switch (syntax.AssignmentOperator)
+            switch (syntax.Operation)
             {
                 case AssignmentOperator.Add: operation = SyntaxExpressionType.Add; break;
                 case AssignmentOperator.BitwiseAnd: operation = SyntaxExpressionType.BitwiseAnd; break;
@@ -159,7 +160,7 @@ namespace Jint.Backend.Dlr
                 case AssignmentOperator.BitwiseOr: operation = SyntaxExpressionType.BitwiseOr; break;
                 case AssignmentOperator.LeftShift: operation = SyntaxExpressionType.LeftShift; break;
                 case AssignmentOperator.RightShift: operation = SyntaxExpressionType.RightShift; break;
-                case AssignmentOperator.Substract: operation = SyntaxExpressionType.Subtract; break;
+                case AssignmentOperator.Subtract: operation = SyntaxExpressionType.Subtract; break;
                 case AssignmentOperator.UnsignedRightShift: operation = SyntaxExpressionType.UnsignedRightShift; break;
                 case AssignmentOperator.BitwiseExclusiveOr: operation = SyntaxExpressionType.BitwiseExclusiveOr; break;
                 default: throw new NotImplementedException();
@@ -187,12 +188,12 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitBreak(BreakSyntax syntax)
         {
-            return Expression.Goto(FindLabelTarget(_scope.BreakTargets, syntax.Label));
+            return Expression.Goto(FindLabelTarget(_scope.BreakTargets, syntax.Target));
         }
 
         public Expression VisitContinue(ContinueSyntax syntax)
         {
-            return Expression.Goto(FindLabelTarget(_scope.ContinueTargets, syntax.Label));
+            return Expression.Goto(FindLabelTarget(_scope.ContinueTargets, syntax.Target));
         }
 
         private LabelTarget FindLabelTarget(Stack<LabelTarget> targets, string label)
@@ -216,9 +217,9 @@ namespace Jint.Backend.Dlr
         {
             // Create the break and continue targets and push them onto the stack.
 
-            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
+            var breakTarget = Expression.Label(GetLabel(syntax) ?? "<>break");
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
+            var continueTarget = Expression.Label(GetLabel(syntax) ?? "<>continue");
             _scope.ContinueTargets.Push(continueTarget);
 
             var result = Expression.Loop(
@@ -246,6 +247,13 @@ namespace Jint.Backend.Dlr
             return result;
         }
 
+        private string GetLabel(SyntaxNode syntax)
+        {
+            string label;
+            _labels.TryGetValue(syntax, out label);
+            return label;
+        }
+
         public Expression VisitEmpty(EmptySyntax syntax)
         {
             return Expression.Empty();
@@ -260,9 +268,9 @@ namespace Jint.Backend.Dlr
         {
             // Create break and continue labels and push them onto the stack.
 
-            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
+            var breakTarget = Expression.Label(GetLabel(syntax) ?? "<>break");
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
+            var continueTarget = Expression.Label(GetLabel(syntax) ?? "<>continue");
             _scope.ContinueTargets.Push(continueTarget);
 
             // Temporary variable to hold a reference to the current key.
@@ -302,9 +310,9 @@ namespace Jint.Backend.Dlr
 
             // Push the break and continue targets onto the stack.
 
-            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
+            var breakTarget = Expression.Label(GetLabel(syntax) ?? "<>break");
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
+            var continueTarget = Expression.Label(GetLabel(syntax) ?? "<>continue");
             _scope.ContinueTargets.Push(continueTarget);
 
             // At the start of our block, we perform any initialization.
@@ -406,7 +414,7 @@ namespace Jint.Backend.Dlr
         public Expression VisitSwitch(SwitchSyntax syntax)
         {
             // Create the label that jumps to the end of the switch.
-            var after = Expression.Label(syntax.Label ?? "<>after");
+            var after = Expression.Label(GetLabel(syntax) ?? "<>after");
             _scope.BreakTargets.Push(after);
 
             var statements = new List<Expression>();
@@ -557,9 +565,9 @@ namespace Jint.Backend.Dlr
         {
             // Create the break and continue targets and push them onto the stack.
 
-            var breakTarget = Expression.Label(syntax.Label ?? "<>break");
+            var breakTarget = Expression.Label(GetLabel(syntax) ?? "<>break");
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = Expression.Label(syntax.Label ?? "<>continue");
+            var continueTarget = Expression.Label(GetLabel(syntax) ?? "<>continue");
             _scope.ContinueTargets.Push(continueTarget);
 
             var result = Expression.Loop(
@@ -687,7 +695,7 @@ namespace Jint.Backend.Dlr
                 scopedClosure,
                 functionParameter,
                 closureLocal,
-                body.DeclaredVariables.Single(p => p.Type == VariableType.Arguments),
+                body.DeclaredVariables.Single(p => p.Type == Expressions.VariableType.Arguments),
                 statements,
                 _scope
             );
@@ -754,7 +762,7 @@ namespace Jint.Backend.Dlr
             foreach (var declaredVariable in body.DeclaredVariables)
             {
                 if (
-                    (declaredVariable.Type == VariableType.Local || declaredVariable.Type == VariableType.Arguments) &&
+                    (declaredVariable.Type == Expressions.VariableType.Local || declaredVariable.Type == Expressions.VariableType.Arguments) &&
                     declaredVariable.ClosureField == null
                 ) {
                     var local = Expression.Parameter(
@@ -867,7 +875,7 @@ namespace Jint.Backend.Dlr
 
                 if (
                     identifierSyntax != null &&
-                    identifierSyntax.Target.Type == VariableType.WithScope
+                    identifierSyntax.Target.Type == Expressions.VariableType.WithScope
                 )
                 {
                     // With a with scope, the target depends on how the variable
@@ -1041,33 +1049,32 @@ namespace Jint.Backend.Dlr
                 )
             };
 
-            foreach (var expression in syntax.Values)
+            foreach (var property in syntax.Properties)
             {
-                var declaration = expression.Value;
-
-                switch (declaration.Mode)
+                var dataProperty = property as JsonDataProperty;
+                if (dataProperty != null)
                 {
-                    case PropertyExpressionType.Data:
-                        statements.Add(BuildSetMember(
-                            obj,
-                            expression.Key,
-                            declaration.Expression.Accept(this)
-                        ));
-                        break;
+                    statements.Add(BuildSetMember(
+                        obj,
+                        dataProperty.Name,
+                        dataProperty.Expression.Accept(this)
+                    ));
+                }
+                else
+                {
+                    var accessorProperty = (JsonAccessorProperty)property;
 
-                    default:
-                        statements.Add(Expression.Call(
-                            obj,
-                            _defineAccessorProperty,
-                            new[]
-                            {
-                                global,
-                                Expression.Constant(expression.Key),
-                                declaration.GetExpression != null ? declaration.GetExpression.Accept(this) : Expression.Default(typeof(JsFunction)),
-                                declaration.SetExpression != null ? declaration.SetExpression.Accept(this) : Expression.Default(typeof(JsFunction))
-                            }
-                        ));
-                        break;
+                    statements.Add(Expression.Call(
+                        obj,
+                        _defineAccessorProperty,
+                        new[]
+                        {
+                            global,
+                            Expression.Constant(accessorProperty.Name),
+                            accessorProperty.GetExpression != null ? accessorProperty.GetExpression.Accept(this) : Expression.Default(typeof(JsFunction)),
+                            accessorProperty.SetExpression != null ? accessorProperty.SetExpression.Accept(this) : Expression.Default(typeof(JsFunction))
+                        }
+                    ));
                 }
             }
 
@@ -1084,8 +1091,8 @@ namespace Jint.Backend.Dlr
         {
             var methodCall = syntax.Expression as MethodCallSyntax;
 
-            List<ExpressionSyntax> arguments = null;
-            List<ExpressionSyntax> generics = null;
+            IList<ExpressionSyntax> arguments = null;
+            IList<ExpressionSyntax> generics = null;
             var expression = syntax.Expression;
 
             if (methodCall != null)
@@ -1334,76 +1341,11 @@ namespace Jint.Backend.Dlr
             throw new NotImplementedException();
         }
 
-        public Expression BuildGet(SyntaxNode syntax)
+        public Expression VisitLabel(LabelSyntax syntax)
         {
-            return BuildGet(syntax, null);
-        }
+            _labels.Add(syntax.Expression, syntax.Label);
 
-        public Expression BuildGet(SyntaxNode syntax, ParameterExpression withTarget)
-        {
-            switch (syntax.Type)
-            {
-                case SyntaxType.VariableDeclaration:
-                    return _scope.BuildGet(((VariableDeclarationSyntax)syntax).Target, withTarget);
-
-                case SyntaxType.Identifier:
-                    return _scope.BuildGet(((IdentifierSyntax)syntax).Target, withTarget);
-
-                case SyntaxType.MethodCall:
-                    return ((MethodCallSyntax)syntax).Accept(this);
-
-                case SyntaxType.Property:
-                    var property = (PropertySyntax)syntax;
-
-                    return BuildGetMember(
-                        property.Expression.Accept(this),
-                        property.Name
-                    );
-
-                case SyntaxType.Indexer:
-                    var indexer = (IndexerSyntax)syntax;
-
-                    return BuildGetIndex(
-                        BuildGet(indexer.Expression, withTarget),
-                        indexer.Index.Accept(this)
-                    );
-
-                default:
-                    return syntax.Accept(this);
-            }
-        }
-
-        public Expression BuildSet(SyntaxNode syntax, Expression value)
-        {
-            switch (syntax.Type)
-            {
-                case SyntaxType.VariableDeclaration:
-                    return _scope.BuildSet(((VariableDeclarationSyntax)syntax).Target, value);
-
-                case SyntaxType.Identifier:
-                    return _scope.BuildSet(((IdentifierSyntax)syntax).Target, value);
-
-                case SyntaxType.Property:
-                    var property = (PropertySyntax)syntax;
-
-                    return BuildSetMember(
-                        property.Expression.Accept(this),
-                        property.Name,
-                        value
-                    );
-
-                case SyntaxType.Indexer:
-                    var indexer = (IndexerSyntax)syntax;
-
-                    return BuildSetIndex(
-                        BuildGet(indexer.Expression),
-                        indexer.Index.Accept(this),
-                        value
-                    );
-
-                default:
-                    throw new NotImplementedException();
-            }
+            return syntax.Expression.Accept(this);
         }
     }
 }

@@ -13,15 +13,21 @@ namespace Jint.Expressions
             get { return SyntaxType.PropertyDeclaration; }
         }
 
-        public string Name { get; set; }
+        public string Name { get; private set; }
+        public ExpressionSyntax Expression { get; private set; }
+        public PropertyExpressionType Mode { get; private set; }
 
-        public ExpressionSyntax Expression { get; set; }
+        public PropertyDeclarationSyntax(string name, ExpressionSyntax expression, PropertyExpressionType mode)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (expression == null)
+                throw new ArgumentNullException("expression");
 
-        public PropertyExpressionType Mode { get; set; }
-
-        public ExpressionSyntax GetExpression { get; set; }
-
-        public ExpressionSyntax SetExpression { get; set; }
+            Name = name;
+            Expression = expression;
+            Mode = mode;
+        }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

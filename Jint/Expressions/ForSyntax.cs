@@ -8,14 +8,25 @@ namespace Jint.Expressions
     [Serializable]
     public class ForSyntax : SyntaxNode, IForStatement
     {
-        public SyntaxNode Initialization { get; set; }
-        public SyntaxNode Test { get; set; }
-        public SyntaxNode Increment { get; set; }
-        public SyntaxNode Body { get; set; }
+        public SyntaxNode Initialization { get; private set; }
+        public SyntaxNode Test { get; private set; }
+        public SyntaxNode Increment { get; private set; }
+        public SyntaxNode Body { get; private set; }
 
         public override SyntaxType Type
         {
             get { return SyntaxType.For; }
+        }
+
+        public ForSyntax(SyntaxNode initialization, SyntaxNode test, SyntaxNode increment, SyntaxNode body)
+        {
+            if (body == null)
+                throw new ArgumentNullException("body");
+
+            Initialization = initialization;
+            Test = test;
+            Increment = increment;
+            Body = body;
         }
 
         [DebuggerStepThrough]

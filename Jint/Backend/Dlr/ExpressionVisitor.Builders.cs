@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Jint.Expressions;
 using Jint.Native;
 using Jint.Runtime;
 
@@ -21,6 +22,78 @@ namespace Jint.Backend.Dlr
         private static readonly MethodInfo _operationIndex = typeof(JintRuntime).GetMethod("Operation_Index");
         private static readonly MethodInfo _deleteByString = typeof(JsDictionaryObject).GetMethod("Delete", new[] { typeof(string) });
         private static readonly MethodInfo _deleteByInstance = typeof(JsDictionaryObject).GetMethod("Delete", new[] { typeof(JsInstance) });
+
+        public Expression BuildGet(SyntaxNode syntax)
+        {
+            return BuildGet(syntax, null);
+        }
+
+        public Expression BuildGet(SyntaxNode syntax, ParameterExpression withTarget)
+        {
+            switch (syntax.Type)
+            {
+                case SyntaxType.VariableDeclaration:
+                    return _scope.BuildGet(((VariableDeclarationSyntax)syntax).Target, withTarget);
+
+                case SyntaxType.Identifier:
+                    return _scope.BuildGet(((IdentifierSyntax)syntax).Target, withTarget);
+
+                case SyntaxType.MethodCall:
+                    return ((MethodCallSyntax)syntax).Accept(this);
+
+                case SyntaxType.Property:
+                    var property = (PropertySyntax)syntax;
+
+                    return BuildGetMember(
+                        property.Expression.Accept(this),
+                        property.Name
+                    );
+
+                case SyntaxType.Indexer:
+                    var indexer = (IndexerSyntax)syntax;
+
+                    return BuildGetIndex(
+                        BuildGet(indexer.Expression, withTarget),
+                        indexer.Index.Accept(this)
+                    );
+
+                default:
+                    return syntax.Accept(this);
+            }
+        }
+
+        public Expression BuildSet(SyntaxNode syntax, Expression value)
+        {
+            switch (syntax.Type)
+            {
+                case SyntaxType.VariableDeclaration:
+                    return _scope.BuildSet(((VariableDeclarationSyntax)syntax).Target, value);
+
+                case SyntaxType.Identifier:
+                    return _scope.BuildSet(((IdentifierSyntax)syntax).Target, value);
+
+                case SyntaxType.Property:
+                    var property = (PropertySyntax)syntax;
+
+                    return BuildSetMember(
+                        property.Expression.Accept(this),
+                        property.Name,
+                        value
+                    );
+
+                case SyntaxType.Indexer:
+                    var indexer = (IndexerSyntax)syntax;
+
+                    return BuildSetIndex(
+                        BuildGet(indexer.Expression),
+                        indexer.Index.Accept(this),
+                        value
+                    );
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
 
         private Expression BuildToBoolean(Expression expression)
         {

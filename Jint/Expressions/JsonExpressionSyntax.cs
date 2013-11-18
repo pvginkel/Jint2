@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
@@ -8,9 +10,14 @@ namespace Jint.Expressions
     [Serializable]
     public class JsonExpressionSyntax : ExpressionSyntax
     {
-        public JsonExpressionSyntax()
+        public IList<JsonProperty> Properties { get; private set; }
+
+        public JsonExpressionSyntax(IEnumerable<JsonProperty> properties)
         {
-            Values = new Dictionary<string, PropertyDeclarationSyntax>();
+            if (properties == null)
+                throw new ArgumentNullException("properties");
+
+            Properties = properties.ToReadOnly();
         }
 
         public override SyntaxType Type
@@ -18,7 +25,6 @@ namespace Jint.Expressions
             get { return SyntaxType.Json; }
         }
 
-        public Dictionary<string, PropertyDeclarationSyntax> Values { get; private set; }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
@@ -30,40 +36,6 @@ namespace Jint.Expressions
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
             return visitor.VisitJsonExpression(this);
-        }
-
-        internal void Push(PropertyDeclarationSyntax propertyExpression)
-        {
-            if (propertyExpression.Name == null)
-            {
-                propertyExpression.Name = propertyExpression.Mode.ToString().ToLower();
-                propertyExpression.Mode = PropertyExpressionType.Data;
-            }
-
-            PropertyDeclarationSyntax declaration;
-            if (Values.TryGetValue(propertyExpression.Name, out declaration))
-            {
-                if ((declaration.Mode == PropertyExpressionType.Data) != (propertyExpression.Mode == PropertyExpressionType.Data))
-                    throw new JintException("A property cannot be both an accessor and data");
-            }
-            else
-            {
-                declaration = propertyExpression;
-                Values.Add(propertyExpression.Name, propertyExpression);
-            }
-
-            switch (propertyExpression.Mode)
-            {
-                case PropertyExpressionType.Get:
-                    declaration.GetExpression = propertyExpression.Expression;
-                    declaration.Expression = null;
-                    break;
-
-                case PropertyExpressionType.Set:
-                    declaration.SetExpression = propertyExpression.Expression;
-                    declaration.Expression = null;
-                    break;
-            }
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Jint.Expressions
         Divide,
         Modulo,
         Add,
-        Substract,
+        Subtract,
         LeftShift,
         RightShift,
         UnsignedRightShift,

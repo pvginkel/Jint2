@@ -13,6 +13,13 @@ namespace Jint.Expressions
             get { return SyntaxType.Continue; }
         }
 
+        public string Target { get; private set; }
+
+        public ContinueSyntax(string target)
+        {
+            Target = target;
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

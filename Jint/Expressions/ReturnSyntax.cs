@@ -8,11 +8,7 @@ namespace Jint.Expressions
     [Serializable]
     public class ReturnSyntax : SyntaxNode
     {
-        public ExpressionSyntax Expression { get; set; }
-
-        public ReturnSyntax()
-        {
-        }
+        public ExpressionSyntax Expression { get; private set; }
 
         public ReturnSyntax(ExpressionSyntax expression)
         {

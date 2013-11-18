@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
@@ -13,44 +15,25 @@ namespace Jint.Expressions
             get { return SyntaxType.Block; }
         }
 
-        public LinkedList<SyntaxNode> Statements { get; private set; }
-        public VariableCollection DeclaredVariables { get; private set; }
-        public Closure Closure { get; set; }
-        public Closure ParentClosure { get; set; }
+        public IList<SyntaxNode> Statements { get; private set; }
+        internal VariableCollection DeclaredVariables { get; private set; }
+        internal Closure Closure { get; set; }
+        internal Closure ParentClosure { get; set; }
 
-        public BlockSyntax()
+        public BlockSyntax(IEnumerable<SyntaxNode> statements)
+            : this(statements, new VariableCollection())
         {
-            Statements = new LinkedList<SyntaxNode>();
-            DeclaredVariables = new VariableCollection();
         }
 
-        public BlockSyntax(BlockSyntax other)
+        internal BlockSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
         {
-            if (other == null)
-                throw new ArgumentNullException("other");
+            if (statements == null)
+                throw new ArgumentNullException("statements");
+            if (declaredVariables == null)
+                throw new ArgumentNullException("declaredVariables");
 
-            Statements = other.Statements;
-            DeclaredVariables = other.DeclaredVariables;
-        }
-
-        internal Variable DeclareVariable(string variableName)
-        {
-            return DeclareVariable(variableName, -1);
-        }
-
-        internal Variable DeclareVariable(string variableName, int index)
-        {
-            if (variableName == null)
-                throw new ArgumentNullException("variableName");
-
-            Variable variable;
-            if (!DeclaredVariables.TryGetItem(variableName, out variable))
-            {
-                variable = new Variable(variableName, index);
-                DeclaredVariables.Add(variable);
-            }
-
-            return variable;
+            Statements = statements.ToReadOnly();
+            DeclaredVariables = declaredVariables;
         }
 
         [DebuggerStepThrough]

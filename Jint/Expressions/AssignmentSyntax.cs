@@ -13,9 +13,21 @@ namespace Jint.Expressions
             get { return SyntaxType.Assignment; }
         }
 
-        public ExpressionSyntax Left { get; set; }
-        public ExpressionSyntax Right { get; set; }
-        public AssignmentOperator AssignmentOperator { get; set; }
+        public AssignmentOperator Operation { get; private set; }
+        public ExpressionSyntax Left { get; private set; }
+        public ExpressionSyntax Right { get; private set; }
+
+        public AssignmentSyntax(AssignmentOperator operation, ExpressionSyntax left, ExpressionSyntax right)
+        {
+            if (left == null)
+                throw new ArgumentNullException("left");
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            Operation = operation;
+            Left = left;
+            Right = right;
+        }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

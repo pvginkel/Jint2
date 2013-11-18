@@ -652,10 +652,22 @@ primaryExpression returns [ExpressionSyntax value]
 
 arrayLiteral returns [ArrayDeclarationSyntax value]
 @init {
-	$value = new ArrayDeclarationSyntax();
+    var parameters = new List<SyntaxNode>();
 }
-	: lb=LBRACK ( first=arrayItem { if(first.value != null) $value.Parameters.Add(first.value); } ( COMMA follow=arrayItem  { if(follow.value != null) $value.Parameters.Add(follow.value); })* )? RBRACK
-	
+@after {
+	$value = new ArrayDeclarationSyntax(parameters);
+}
+	:
+        lb=LBRACK
+		(
+            first=arrayItem
+            { if(first.value != null) parameters.Add(first.value); }
+            (
+                COMMA follow=arrayItem
+                { if(follow.value != null) parameters.Add(follow.value); }
+            )*
+        )?
+        RBRACK
 	;
 
 arrayItem returns [SyntaxNode value]
@@ -664,36 +676,83 @@ arrayItem returns [SyntaxNode value]
 	;
 
 objectLiteral returns [JsonExpressionSyntax value]
-@init{
-	$value = new JsonExpressionSyntax();
+@init {
+    var builder = new JsonPropertyBuilder();
+}
+@after {
+	$value = new JsonExpressionSyntax(builder.GetProperties());
 }
 	:
       lb=LBRACE (
-        first=propertyAssignment { $value.Push(first.value); } (
+        first=propertyAssignment { builder.AddProperty(first.value); } (
           COMMA
-          follow=propertyAssignment { $value.Push(follow.value); }
+          follow=propertyAssignment { builder.AddProperty(follow.value); }
         )*
       )?
       RBRACE
 	;
 	
 propertyAssignment returns [PropertyDeclarationSyntax value]
-@init {
-	$value = new PropertyDeclarationSyntax();
-	FunctionSyntax func=new FunctionSyntax();
-}
 	:
-      acc=accessor { $value.Mode=acc.value; } { $value.Expression=func; }
-      prop2=propertyName { $value.Name=func.Name=prop2.value; } (
-        parameters=formalParameterList { func.Parameters.AddRange(parameters.value); }
-      )?
-      statements=functionBody { func.Body=statements.value; } 
+        func=propertyFunctionAssignment
+        { $value = $func.value; }
 	|
-      prop1=propertyName { $value.Name=prop1.value; }
-      COLON
-      ass=assignmentExpression { $value.Expression=ass.value; }
+        data=propertyValueAssignment
+        { $value = $data.value; }
 	;
-	
+
+propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
+@init {
+    PropertyExpressionType mode;
+    BlockSyntax body;
+    List<string> parameters = null;
+    ExpressionSyntax expression;
+    string name;
+}
+@after {
+    $value = new PropertyDeclarationSyntax(
+        name,
+        new FunctionSyntax(
+            name,
+            parameters,
+            body
+        ),
+        mode
+    );
+}
+    :
+        acc=accessor
+        { mode = $acc.value; }
+        prop2=propertyName
+        { name = $prop2.value; }
+        (
+            parms=formalParameterList
+            { parameters = $parms.value; }
+        )?
+        statements=functionBody
+        { body = $statements.value; } 
+    ;
+
+propertyValueAssignment returns [PropertyDeclarationSyntax value]
+@init {
+    string name;
+    ExpressionSyntax expression;
+}
+@after {
+    $value = new PropertyDeclarationSyntax(
+        name,
+        expression,
+        PropertyExpressionType.Data
+    );
+}
+    :
+        prop1=propertyName
+        { name = $prop1.value; }
+        COLON
+        ass=assignmentExpression
+        { expression = $ass.value; }
+    ;        
+
 accessor returns [PropertyExpressionType value]
 	: ex1=Identifier { ex1.Text=="get" || ex1.Text=="set" }?=> { if(ex1.Text=="get") $value= PropertyExpressionType.Get; if(ex1.Text=="set") $value=PropertyExpressionType.Set; }
 	;
@@ -742,43 +801,54 @@ leftHandSideExpression returns [ExpressionSyntax value]
 @after{
     if (isNew)
         $value = new NewSyntax($value);
+
 	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
 }
 	:
-    (
-        NEW { isNew = true; }
-    )?
-	mem=memberExpression { $value = mem.value; }
-	(
-		(gen=generics { gens = gen.value; } )? arg=arguments {
-            $value = new MethodCallSyntax(
-                $value,
-                arg.value
-            ) {
-                Generics = gens
-            };
+        (
+            NEW
+            { isNew = true; }
+        )?
+	    mem=memberExpression
+        { $value = mem.value; }
+	    (
+		    (
+                gen=generics
+                { gens = $gen.value; }
+            )?
+            arg=arguments
+            {
+                $value = new MethodCallSyntax(
+                    $value,
+                    $arg.value,
+                    gens
+                );
 
-            if (isNew) {
-                isNew = false;
-                $value = new NewSyntax($value);
-            }
-        } 
+                if (isNew)
+                {
+                    isNew = false;
+                    $value = new NewSyntax($value);
+                }
+            } 
 	
-		| LBRACK exp=expression RBRACK {
-            $value = new IndexerSyntax(
-                $value,
-                exp.value
-            );
-        } 
+		|
+            LBRACK exp=expression RBRACK
+            {
+                $value = new IndexerSyntax(
+                    $value,
+                    $exp.value
+                );
+            } 
 			
-		| DOT id=Identifier {
-            $value = new PropertySyntax(
-                $value,
-                id.Text
-            );
-        }
-	)* 
-	  
+		|
+            DOT id=Identifier
+            {
+                $value = new PropertySyntax(
+                    $value,
+                    $id.Text
+                );
+            }
+	    )* 
 	;
 
 // $>
@@ -1011,13 +1081,24 @@ When it results in a Tree that is coming from a left hand side expression and th
 followed by the right recursive call.
 */
 assignmentExpression returns [ExpressionSyntax value]
-@init
-{
-	Object[] isLhs = new Object[1];
-	var assignment = new AssignmentSyntax();
+@init {
+    bool? isLhs = null;
 }
-	: lhs=conditionalExpression { $value = assignment.Left = lhs.value; }
-	(  { IsLeftHandSideAssign(lhs.value, isLhs) }? ass=assignmentOperator^ { assignment.AssignmentOperator = ResolveAssignmentOperator($ass.text); } exp=assignmentExpression {  assignment.Right = exp.value; $value = assignment; } )?
+	:
+        lhs=conditionalExpression
+        { $value = $lhs.value; }
+	    (
+            { IsLeftHandSideAssign($lhs.value, ref isLhs) }?
+            ass=assignmentOperator^
+            exp=assignmentExpression
+            {
+                $value = new AssignmentSyntax(
+                    ResolveAssignmentOperator($ass.text),
+                    $value,
+                    $exp.value
+                );
+            }
+        )?
 	;
 
 assignmentOperator 
@@ -1038,11 +1119,23 @@ assignmentOperator
 assignmentExpressionNoIn returns [ExpressionSyntax value]
 @init
 {
-	object[] isLhs = new object[1];
-	var assignment = new AssignmentSyntax();
+	bool? isLhs = null;
 }
-	: lhs=conditionalExpressionNoIn {  assignment.Left = $value = $lhs.value; } 
-	( { IsLeftHandSideAssign(lhs.value, isLhs) }? ass=assignmentOperator^ { assignment.AssignmentOperator = ResolveAssignmentOperator($ass.text); } exp=assignmentExpressionNoIn {  assignment.Right = exp.value; $value = assignment; } )?
+	:
+        lhs=conditionalExpressionNoIn
+        { $value = $lhs.value; } 
+	    (
+            { IsLeftHandSideAssign($lhs.value, ref isLhs) }?
+            ass=assignmentOperator^
+            exp=assignmentExpressionNoIn
+            {
+                $value = new AssignmentSyntax(
+                    ResolveAssignmentOperator($ass.text),
+                    $value,
+                    $exp.value
+                );
+            }
+        )?
 	;
 	
 // $>
@@ -1050,17 +1143,49 @@ assignmentExpressionNoIn returns [ExpressionSyntax value]
 // $<Comma operator (11.14)
 
 expression returns [ExpressionSyntax value]
-@init{
-	var cs = new CommaOperatorSyntax();
+@init {
+    List<SyntaxNode> nodes = null;
 }
-	: first=assignmentExpression { $value = first.value; } ( COMMA { if(cs.Expressions.Count == 0) { cs.Expressions.Add($value); $value = cs; } } follow=assignmentExpression  { cs.Expressions.Add(follow.value); } )* 
+@after {
+    if (nodes != null)
+        $value = new CommaOperatorSyntax(nodes);
+}
+	:
+        first=assignmentExpression
+        { $value = $first.value; }
+        (
+            COMMA
+            follow=assignmentExpression
+            {
+                if (nodes == null)
+                    nodes = new List<SyntaxNode> { $value };
+
+                nodes.Add($follow.value);
+            }
+        )*
 	;
 
 expressionNoIn returns [ExpressionSyntax value]
-@init{
-	var cs = new CommaOperatorSyntax();
+@init {
+    List<SyntaxNode> nodes = null;
 }
-	: first=assignmentExpressionNoIn { $value = first.value; } ( COMMA {if(cs.Expressions.Count == 0) { cs.Expressions.Add($value); $value = cs; } } follow=assignmentExpressionNoIn  { cs.Expressions.Add(follow.value); } )* 
+@after {
+    if (nodes != null)
+        $value = new CommaOperatorSyntax(nodes);
+}
+	:
+        first=assignmentExpressionNoIn
+        { $value = first.value; }
+        (
+            COMMA
+            follow=assignmentExpressionNoIn
+            {
+                if (nodes == null)
+                    nodes = new List<SyntaxNode> { $value };
+
+                nodes.Add($follow.value);
+            }
+        )* 
 	;
 
 // $>
@@ -1145,29 +1270,41 @@ statementTail returns [SyntaxNode value]
 // $<Block (12.1)
 
 block returns [BlockSyntax value] 
-@init{
-	$value = new BlockSyntax();
+@init {
+    var statements = new List<SyntaxNode>();
 }
 @after{
-	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
+    $value = new BlockSyntax(statements)
+    {
+        Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop)
+    };
 }
-	: lb=LBRACE (statement { $value.Statements.AddLast($statement.value); })* RBRACE
+	:
+        lb=LBRACE
+        (
+            statement
+            { statements.Add($statement.value); }
+        )*
+        RBRACE
 	;
 
 // Used for the Function constructor, because it doesn't have braces.
 
 blockStatements returns [BlockSyntax value]
 @init{
-    BlockSyntax block = new BlockSyntax();
     var tempBody = _currentBody;
-    _currentBody = block;
-    $value = block;
+    _currentBody = new BlockBuilder();
 }
 @after{
+    $value = _currentBody.CreateBlock();
 	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
     _currentBody = tempBody;
 }
-	: (statement { $value.Statements.AddLast($statement.value); })*
+	:
+        (
+            statement
+            { _currentBody.Statements.Add($statement.value); }
+        )*
 	;
 
 
@@ -1176,38 +1313,70 @@ blockStatements returns [BlockSyntax value]
 // $<Variable statement 12.2)
 
 variableStatement returns [SyntaxNode value]
-@init{
-	var cs = new CommaOperatorSyntax();
+@init {
+    List<SyntaxNode> statements = null;
 }
-@after{
-	// hoisting
-	if(cs.Expressions.Count > 0) {
-		foreach(VariableDeclarationSyntax vd in cs.Expressions) {
-            vd.Target = _currentBody.DeclareVariable(vd.Identifier);
-		}
-	}
-	else {
-        first.value.Target = _currentBody.DeclareVariable(first.value.Identifier);
-	}
+@after {
+    if (statements != null)
+        $value = new CommaOperatorSyntax(statements);
 }
-	: VAR first=variableDeclaration { first.value.Global = false; $value = first.value; } ( COMMA { if( cs.Expressions.Count == 0) { cs.Expressions.Add($value); $value = cs; } } follow=variableDeclaration  { cs.Expressions.Add(follow.value); follow.value.Global = false; } )* semic
-	
+	:
+        VAR first=variableDeclaration
+        {
+            $value = new VariableDeclarationSyntax(
+                $first.value.Identifier,
+                $first.value.Expression,
+                false
+            )
+            {
+                Target = _currentBody.DeclaredVariables.AddOrGet($first.value.Identifier)
+            };
+        }
+        (
+            COMMA follow=variableDeclaration
+            {
+                if (statements == null)
+                    statements = new List<SyntaxNode> { $value };
+
+                statements.Add(
+                    new VariableDeclarationSyntax(
+                        $follow.value.Identifier,
+                        $follow.value.Expression,
+                        false
+                    )
+                    {
+                        Target = _currentBody.DeclaredVariables.AddOrGet($follow.value.Identifier)
+                    }
+                );
+            }
+        )*
+        semic
 	;
 
 variableDeclaration returns [VariableDeclarationSyntax value]
 @init {
-	$value = new VariableDeclarationSyntax();
-	$value.Global = true;
+    ExpressionSyntax expression = null;
 }
-	: id=Identifier { $value.Identifier = id.Text; } ( ASSIGN^ ass=assignmentExpression { $value.Expression = ass.value; } )?
+	:
+        id=Identifier
+        (
+            ASSIGN^ ass=assignmentExpression
+            { expression = $ass.value; }
+        )?
+        { $value = new VariableDeclarationSyntax($id.Text, expression, true); }
 	;
 	
 variableDeclarationNoIn returns [VariableDeclarationSyntax value]
 @init {
-	$value = new VariableDeclarationSyntax();
-	$value.Global = true;
+	ExpressionSyntax expression = null;
 }
-	: id=Identifier { $value.Identifier = id.Text; } ( ASSIGN^ ass=assignmentExpressionNoIn { $value.Expression = ass.value; } )?
+	:
+        id=Identifier
+        (
+            ASSIGN^ ass=assignmentExpressionNoIn
+            { expression = $ass.value; }
+        )?
+        { $value = new VariableDeclarationSyntax($id.Text, expression, true); }
 	;
 
 // $>
@@ -1238,13 +1407,17 @@ expressionStatement returns [SyntaxNode value]
 
 ifStatement returns [SyntaxNode value]
 @init {
-var st = new IfSyntax();
-$value = st;
+    SyntaxNode elseStatement = null;
 }
 // The predicate is there just to get rid of the warning. ANTLR will handle the dangling else just fine.
-	: IF LPAREN expression { st.Test = $expression.value; } RPAREN then=statement { st.Then = $then.value; } ( { input.LA(1) == ELSE }? ELSE els=statement { st.Else = $els.value; } )?
-	
-
+	:
+        IF LPAREN expression RPAREN then=statement
+        (
+            { input.LA(1) == ELSE }?
+            ELSE els=statement
+            { elseStatement = $els.value; }
+        )?
+        { $value = new IfSyntax($expression.value, $then.value, elseStatement); }
 	;
 
 // $>
@@ -1254,7 +1427,7 @@ $value = st;
 iterationStatement returns [SyntaxNode value]
 	: dos=doStatement { $value = dos.value; }
 	| wh=whileStatement  { $value = wh.value; }
-	| fo=forStatement  { $value = (SyntaxNode)fo.value; }
+	| fo=forStatement  { $value = fo.value; }
 	;
 	
 doStatement returns [SyntaxNode value]
@@ -1267,7 +1440,8 @@ whileStatement returns [SyntaxNode value]
 	;
 
 /*
-The forStatement production is refactored considerably as the specification contains a very none LL(*) compliant definition.
+The forStatement production is refactored considerably as the specification
+contains a very none LL(*) compliant definition.
 The initial version was like this:	
 
 forStatement
@@ -1307,77 +1481,141 @@ Furthermore backtracking seemed to have 3 major drawbacks:
 - didn't seem to work well with ANTLRWorks
 - when introducing a k value to optimize the backtracking away, ANTLR runs out of heap space
 */
-forStatement returns [IForStatement value]
-	: FOR^ LPAREN! fo=forControl { $value = fo.value; }  RPAREN! st=statement {  $value.Body = st.value; }
-	;
-
-forControl returns [IForStatement value]
-	: ex1=forControlVar { $value = ex1.value; }
-	| ex2=forControlExpression { $value = ex2.value; }
-	| ex3=forControlSemic { $value = ex3.value; }
-	;
-
-forControlVar returns [IForStatement value]
+forStatement returns [SyntaxNode value]
 @init {
-	var forStatement = new ForSyntax();
-	var foreachStatement = new ForEachInSyntax();
-	var cs = new CommaOperatorSyntax();
+    ForBuilder builder;
 }
 @after {
-	// hoisting
-	if(cs.Expressions.Count > 0) {
-		foreach(VariableDeclarationSyntax vd in cs.Expressions) {
-            vd.Target = _currentBody.DeclareVariable(vd.Identifier);
-		}
-	}
-	else {
-        first.value.Target = _currentBody.DeclareVariable(first.value.Identifier);
-	}
+    $value = builder.CreateFor();
 }
-
-	: VAR first=variableDeclarationNoIn { foreachStatement.Initialization = forStatement.Initialization = first.value; first.value.Global = false;  }
-	(
-		(
-			IN ex=expression { $value = foreachStatement; foreachStatement.Expression = $ex.value; }
-			
-		)
-		|
-		(
-			( COMMA { if( cs.Expressions.Count == 0) { foreachStatement.Initialization = forStatement.Initialization = cs; cs.Expressions.Add(first.value); } } follow=variableDeclarationNoIn {  follow.value.Global = false; cs.Expressions.Add(follow.value); } )* 
-			SEMIC ( ex1=expression { forStatement.Test = $ex1.value;} ) ? SEMIC (ex2=expression {  forStatement.Increment = $ex2.value; })? { $value = forStatement; }
-			
-		)
-	)
+	:
+        FOR^
+        LPAREN!
+        fo=forControl
+        { builder = $fo.value; }
+        RPAREN! st=statement
+        { builder.Body = $st.value; }
 	;
 
-forControlExpression returns [IForStatement value]
+forControl returns [ForBuilder value]
+	:
+        ex1=forControlVar
+        { $value = $ex1.value; }
+	|
+        ex2=forControlExpression
+        { $value = $ex2.value; }
+	|
+        ex3=forControlSemic
+        { $value = $ex3.value; }
+	;
+
+forControlVar returns [ForBuilder value]
+@init {
+    $value = new ForBuilder();
+    List<SyntaxNode> statements = null;
+}
+@after {
+    if (statements != null)
+        $value.Initialization = new CommaOperatorSyntax(statements);
+}
+
+	:
+        VAR first=variableDeclarationNoIn
+        {
+            $value.Initialization = new VariableDeclarationSyntax(
+                $first.value.Identifier,
+                $first.value.Expression,
+                false
+            )
+            {
+                Target = _currentBody.DeclaredVariables.AddOrGet($first.value.Identifier)
+            };
+        }
+	    (
+		    (
+			    IN ex=expression
+                { $value.Expression = $ex.value; }
+		    )
+		    |
+		    (
+			    (
+                    COMMA follow=variableDeclarationNoIn
+                    {
+                        if (statements == null)
+                            statements = new List<SyntaxNode> { $value.Initialization };
+                        
+                        statements.Add(
+                            new VariableDeclarationSyntax(
+                                $follow.value.Identifier,
+                                $follow.value.Expression,
+                                false
+                            )
+                            {
+                                Target = _currentBody.DeclaredVariables.AddOrGet($follow.value.Identifier)
+                            }
+                        );
+                    }
+                )* 
+			    SEMIC
+                (
+                    ex1=expression
+                    { $value.Test = $ex1.value;}
+                )?
+                SEMIC
+                (
+                    ex2=expression
+                    { $value.Increment = $ex2.value; }
+                )?
+		    )
+	    )
+	;
+
+forControlExpression returns [ForBuilder value]
 @init
 {
-	var forStatement = new ForSyntax();
-	var foreachStatement = new ForEachInSyntax();
-
-	object[] isLhs = new object[1];
+    $value = new ForBuilder();
+	bool? isLhs = null;
 }
-	: ex1=expressionNoIn { foreachStatement.Initialization = forStatement.Initialization = ex1.value; }
-	( 
-		{ IsLeftHandSideIn(ex1.value, isLhs) }? (
-			IN ex2=expression { $value = foreachStatement; foreachStatement.Expression = ex2.value; }
-			
-		)
-		|
-		(
-			SEMIC ( ex2=expression { forStatement.Test = ex2.value;} ) ? SEMIC (ex3=expression {  forStatement.Increment = ex3.value; })? { $value = forStatement; }
-			
-		)
-	)
+	:
+        ex1=expressionNoIn
+        { $value.Initialization = $ex1.value; }
+	    ( 
+		    { IsLeftHandSideIn($ex1.value, ref isLhs) }?
+            (
+			    IN ex2=expression
+                { $value.Expression = $ex2.value; }
+		    )
+		    |
+		    (
+			    SEMIC
+                (
+                    ex2=expression
+                    { $value.Test = $ex2.value;}
+                )?
+                SEMIC
+                (
+                    ex3=expression
+                    { $value.Increment = $ex3.value; }
+                )?
+		    )
+	    )
 	;
 
-forControlSemic returns [ForSyntax value]
+forControlSemic returns [ForBuilder value]
 @init{
-	$value = new ForSyntax();
+	$value = new ForBuilder();
 }
-	: SEMIC ( ex1=expression { $value.Test = ex1.value;} ) ? SEMIC (ex2=expression {  $value.Increment = ex2.value; })? 
-	
+	:
+        SEMIC
+        (
+            ex1=expression
+            { $value.Test = $ex1.value;}
+        )?
+        SEMIC
+        (
+            ex2=expression
+            { $value.Increment = $ex2.value; }
+        )?
 	;
 
 // $>
@@ -1391,9 +1629,17 @@ As an optimization we check the la first to decide whether there is an identier 
 */
 continueStatement returns [SyntaxNode value]
 @init { 
-	string label = String.Empty; 
+	string label = null;
 }
-	: CONTINUE^ { if (input.LA(1) == Identifier) PromoteEOL(null); } (lb=Identifier { label = lb.Text; } )? semic! { $value = new ContinueSyntax() { Label = label }; }
+	:
+        CONTINUE^
+        { if (input.LA(1) == Identifier) PromoteEOL(null); }
+        (
+            lb=Identifier
+            { label = $lb.Text; }
+        )?
+        semic!
+        { $value = new ContinueSyntax(label); }
 	;
 
 // $>
@@ -1407,9 +1653,16 @@ As an optimization we check the la first to decide whether there is an identier 
 */
 breakStatement returns [SyntaxNode value]
 @init { 
-	string label = String.Empty; 
+	string label = null; 
 }
-	: BREAK^ { if (input.LA(1) == Identifier) PromoteEOL(null); } (lb=Identifier { label = lb.Text; } )? semic! { $value = new BreakSyntax() { Label = label }; }
+	:
+        BREAK^
+        { if (input.LA(1) == Identifier) PromoteEOL(null); }
+        (
+            lb=Identifier { label = $lb.Text; }
+        )?
+        semic!
+        { $value = new BreakSyntax(label); }
 	;
 
 // $>
@@ -1431,9 +1684,17 @@ return;
 */
 returnStatement returns [ReturnSyntax value]
 @init {
-	$value = new ReturnSyntax();
+    ExpressionSyntax returnExpression = null;
 }
-	: RETURN^ { PromoteEOL(null); } (expr=expression { $value.Expression = expr.value; })? semic!
+	:
+        RETURN^
+        { PromoteEOL(null); }
+        (
+            expr=expression
+            { returnExpression = $expr.value; }
+        )?
+        semic!
+        { $value = new ReturnSyntax(returnExpression); }
 	;
 
 // $>
@@ -1450,27 +1711,47 @@ withStatement returns [SyntaxNode value]
 
 switchStatement returns [SyntaxNode value]
 @init {
-	SwitchSyntax switchStatement = new SwitchSyntax();
-	$value = switchStatement;
-	int defaultClauseCount = 0;
+    BlockSyntax block = null;
+    var cases = new List<CaseClause>();
 }
-	:	SWITCH LPAREN expression { switchStatement.Expression = $expression.value; } RPAREN 
-		LBRACE ( { defaultClauseCount == 0 }?=> defaultClause { defaultClauseCount++; switchStatement.Default=$defaultClause.value; } | caseClause { switchStatement.Cases.Add($caseClause.value); } )* RBRACE
-		
+	:
+        SWITCH LPAREN expression RPAREN LBRACE
+        (
+            { block == null }?=>
+            def=defaultClause
+            { block = $def.value; }
+        |
+            caseClause
+            { cases.Add($caseClause.value); }
+        )*
+        RBRACE
+        { $value = new SwitchSyntax($expression.value, cases, block); }
 	;
 
 caseClause returns [CaseClause value]
 @init {
-	$value = new CaseClause();
+    var statements = new List<SyntaxNode>();
 }
-	: CASE^ expression { $value.Expression = $expression.value; } COLON!( statement { $value.Body.Statements.AddLast($statement.value); })*
+	:
+        CASE^ expression COLON!
+        (
+            statement
+            { statements.Add($statement.value); }
+        )*
+        { $value = new CaseClause($expression.value, new BlockSyntax(statements)); }
 	;
 	
 defaultClause returns [BlockSyntax value]
 @init {
-	$value = new BlockSyntax();
+    var statements = new List<SyntaxNode>();
 }
-	: DEFAULT^ COLON! (statement { $value.Statements.AddLast($statement.value); }) *
+	:
+        DEFAULT^ COLON!
+        (
+            statement
+            { statements.Add($statement.value); }
+        ) *
+        { $value = new BlockSyntax(statements); }
 	;
 
 // $>
@@ -1478,8 +1759,9 @@ defaultClause returns [BlockSyntax value]
 // $<Labelled statements (12.12)
 
 labelledStatement returns [SyntaxNode value]
-	: lb=Identifier COLON st=statement { $value = st.value;  $value.Label = lb.Text; }
-	
+	:
+        lb=Identifier COLON st=statement
+        { $value = new LabelSyntax($lb.Text, $st.value); }
 	;
 
 // $>
@@ -1511,20 +1793,38 @@ throwStatement returns [SyntaxNode value]
 
 tryStatement returns [TrySyntax value]
 @init{
-	$value = new TrySyntax();
+    CatchClause @catch = null;
+    FinallyClause @finally = null;
 }
-	: TRY^ b=block  { $value.Body = b.value; } ( c=catchClause { $value.Catch = c.value; } (first=finallyClause { $value.Finally = first.value; })? | last=finallyClause { $value.Finally = last.value; } )
+	:
+        TRY^ b=block
+        (
+            c=catchClause
+            { @catch = c.value; }
+            (
+                first=finallyClause
+                { @finally = first.value; }
+            )?
+        |
+            last=finallyClause
+            { @finally = last.value; }
+        )
+        { $value = new TrySyntax($b.value, @catch, @finally); }
 	;
 	
 catchClause returns [CatchClause value]
 @after{
-    $value.Target = _currentBody.DeclareVariable($value.Identifier);
+    $value.Target = _currentBody.DeclaredVariables.AddOrGet($value.Identifier);
 }
-	: CATCH^ LPAREN! id=Identifier RPAREN! block { $value = new CatchClause($id.text, $block.value); }
+	:
+        CATCH^ LPAREN! id=Identifier RPAREN! block
+        { $value = new CatchClause($id.text, $block.value); }
 	;
 	
 finallyClause returns [FinallyClause value]
-	: FINALLY^ block { $value = new FinallyClause($block.value); }
+	:
+        FINALLY^ block
+        { $value = new FinallyClause($block.value); }
 	;
 
 // $>
@@ -1539,49 +1839,88 @@ finallyClause returns [FinallyClause value]
 
 functionDeclaration returns [SyntaxNode value]
 @init {
-    FunctionDeclarationSyntax statement = new FunctionDeclarationSyntax();
-    $value = new EmptySyntax();
-    _currentBody.Statements.AddFirst(statement);
+    string name;
+    List<string> parameters;
+    BlockSyntax body;
 }
 @after {
-    statement.Target = _currentBody.DeclareVariable(statement.Name);
-}
-	: FUNCTION 	name=Identifier { statement.Name = name.Text; } 
-			parameters=formalParameterList { statement.Parameters.AddRange(parameters.value); }
-			body=functionBody { statement.Body = body.value; }
-	  
+    _currentBody.FunctionDeclarations.Add(
+        new FunctionDeclarationSyntax(
+            name,
+            parameters,
+            body
+        )
+        {
+            Target = _currentBody.DeclaredVariables.AddOrGet(name)
+        }
+    );
 
+    $value = new EmptySyntax();
+}
+	:
+        FUNCTION id=Identifier
+        { name = $id.Text; } 
+		parms=formalParameterList
+        { parameters = $parms.value; }
+		functionBody
+        { body = $functionBody.value; }
 	;
 
 functionExpression returns [FunctionSyntax value]
 @init {
-	$value = new FunctionSyntax();
+    string name = null;
+    List<string> parameters;
+    BlockSyntax body;
 }
-	: FUNCTION (name=Identifier { $value.Name = name.Text; } )? formalParameterList { $value.Parameters.AddRange($formalParameterList.value) ;} functionBody { $value.Body = $functionBody.value; }
-	
-
+@after {
+	$value = new FunctionSyntax(name, parameters, body);
+}
+	:
+        FUNCTION
+        (
+            id=Identifier
+            { name = $id.Text; }
+        )?
+        formalParameterList
+        { parameters = $formalParameterList.value; }
+        functionBody
+        { body = $functionBody.value; }
 	;
 
 formalParameterList returns [List<string> value]
 @init {
-List<string> identifiers = new List<string>();
-$value = identifiers;
+    List<string> identifiers = new List<string>();
+    $value = identifiers;
 }
-	: LPAREN ( first=Identifier { identifiers.Add($first.text); } ( COMMA follow=Identifier  { identifiers.Add($follow.text); } )* )? RPAREN
-	
+	:
+        LPAREN
+        (
+            first=Identifier
+            { identifiers.Add($first.text); }
+            (
+                COMMA follow=Identifier
+                { identifiers.Add($follow.text); }
+            )*
+        )?
+        RPAREN
 	;
 
 functionBody returns [BlockSyntax value]
 @init{
-    BlockSyntax block = new BlockSyntax();
     var tempBody = _currentBody;
-    _currentBody = block;
-    $value = block;
+    _currentBody = new BlockBuilder();
 }
 @after{
+    $value = _currentBody.CreateBlock();
     _currentBody = tempBody;
 }
-	: lb=LBRACE (sourceElement { block.Statements.AddLast($sourceElement.value); }) * RBRACE
+	:
+        lb=LBRACE
+        (
+            sourceElement
+            { _currentBody.Statements.Add($sourceElement.value); }
+        )*
+        RBRACE
 	;
 
 // $>
@@ -1591,10 +1930,14 @@ functionBody returns [BlockSyntax value]
 program returns [ProgramSyntax value]
 @init{
     script = input.ToString().Split('\n');
-    ProgramSyntax program = new ProgramSyntax();
-    _currentBody = program;
+    _currentBody = new BlockBuilder();
 }
-	: (follow=sourceElement { program.Statements.AddLast(follow.value); })* { $value = program; }
+	:
+        (
+            follow=sourceElement
+            { _currentBody.Statements.Add($follow.value); }
+        )*
+        { $value = _currentBody.CreateProgram(); }
 	;
 
 /*

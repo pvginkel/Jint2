@@ -7,11 +7,6 @@ namespace Jint.Expressions
     [Serializable]
     public class IdentifierSyntax : ExpressionSyntax
     {
-        public IdentifierSyntax(string name)
-        {
-            Name = name;
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Identifier; }
@@ -28,8 +23,16 @@ namespace Jint.Expressions
             }
         }
 
-        public string Name { get; set; }
-        public Variable Target { get; set; }
+        public string Name { get; private set; }
+        internal Variable Target { get; set; }
+
+        public IdentifierSyntax(string name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            Name = name;
+        }
 
         public override string ToString()
         {

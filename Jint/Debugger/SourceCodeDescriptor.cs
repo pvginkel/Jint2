@@ -2,36 +2,37 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Debugger {
+namespace Jint.Debugger
+{
     [Serializable]
-    public class SourceCodeDescriptor {
+    internal class SourceCodeDescriptor
+    {
         [Serializable]
-        public class Location {
-            public Location(int line, int c) {
+        public class Location
+        {
+            public Location(int line, int c)
+            {
                 Line = line;
                 Char = c;
             }
 
             public int Line { get; set; }
-
             public int Char { get; set; }
         }
 
         public Location Start { get; set; }
-
         public Location Stop { get; set; }
-
         public string Code { get; private set; }
 
-        public SourceCodeDescriptor(int startLine, int startChar, int stopLine, int stopChar, string code) {
+        public SourceCodeDescriptor(int startLine, int startChar, int stopLine, int stopChar, string code)
+        {
             Code = code;
-
             Start = new Location(startLine, startChar);
             Stop = new Location(stopLine, stopChar);
-
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "Line: " + Start.Line + " Char: " + Start.Char;
         }
     }

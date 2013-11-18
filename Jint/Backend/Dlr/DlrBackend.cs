@@ -78,7 +78,7 @@ namespace Jint.Backend.Dlr
             if (parameters == null)
                 parameters = JsInstance.Empty;
 
-            var function = new FunctionSyntax();
+            var newParameters = new List<string>();
 
             for (int i = 0; i < parameters.Length - 1; i++)
             {
@@ -86,20 +86,24 @@ namespace Jint.Backend.Dlr
 
                 foreach (string a in arg.Split(','))
                 {
-                    function.Parameters.Add(a.Trim());
+                    newParameters.Add(a.Trim());
                 }
             }
 
+            BlockSyntax newBody;
+
             if (parameters.Length >= 1)
             {
-                function.Body = JintEngine.CompileBlockStatements(
+                newBody = JintEngine.CompileBlockStatements(
                     parameters[parameters.Length - 1].Value.ToString()
                 );
             }
             else
             {
-                function.Body = new BlockSyntax();
+                newBody = new BlockSyntax(SyntaxNode.EmptyList);
             }
+
+            var function = new FunctionSyntax(null, newParameters, newBody);
 
             function.Accept(new VariableMarkerPhase(this));
 

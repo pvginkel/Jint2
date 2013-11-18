@@ -13,11 +13,14 @@ namespace Jint.Expressions
             get { return SyntaxType.ArrayDeclaration; }
         }
 
-        public List<SyntaxNode> Parameters { get; set; }
+        public IList<SyntaxNode> Parameters { get; private set; }
 
-        public ArrayDeclarationSyntax()
+        public ArrayDeclarationSyntax(IEnumerable<SyntaxNode> parameters)
         {
-            Parameters = new List<SyntaxNode>();
+            if (parameters == null)
+                throw new ArgumentNullException("parameters");
+
+            Parameters = parameters.ToReadOnly();
         }
 
         [DebuggerStepThrough]

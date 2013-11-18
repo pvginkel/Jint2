@@ -8,13 +8,18 @@ namespace Jint.Expressions
     [Serializable]
     public class WhileSyntax : SyntaxNode
     {
-        public ExpressionSyntax Test { get; set; }
-        public SyntaxNode Body { get; set; }
+        public ExpressionSyntax Test { get; private set; }
+        public SyntaxNode Body { get; private set; }
 
-        public WhileSyntax(ExpressionSyntax condition, SyntaxNode statement)
+        public WhileSyntax(ExpressionSyntax test, SyntaxNode body)
         {
-            Test = condition;
-            Body = statement;
+            if (test == null)
+                throw new ArgumentNullException("test");
+            if (body == null)
+                throw new ArgumentNullException("body");
+
+            Test = test;
+            Body = body;
         }
 
         public override SyntaxType Type

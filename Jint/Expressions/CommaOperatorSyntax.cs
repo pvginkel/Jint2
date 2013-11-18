@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
@@ -13,11 +15,14 @@ namespace Jint.Expressions
             get { return SyntaxType.CommaOperator; }
         }
 
-        public List<SyntaxNode> Expressions { get; set; }
+        public IList<SyntaxNode> Expressions { get; private set; }
 
-        public CommaOperatorSyntax()
+        public CommaOperatorSyntax(IEnumerable<SyntaxNode> expressions)
         {
-            Expressions = new List<SyntaxNode>();
+            if (expressions == null)
+                throw new ArgumentNullException("expressions");
+
+            Expressions = expressions.ToReadOnly();
         }
 
         [DebuggerStepThrough]

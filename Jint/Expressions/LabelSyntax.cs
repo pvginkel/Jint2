@@ -1,38 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
 {
     [Serializable]
-    public class ExpressionStatementSyntax : SyntaxNode
+    public class LabelSyntax : SyntaxNode
     {
-        public ExpressionSyntax Expression { get; private set; }
-
         public override SyntaxType Type
         {
-            get { return SyntaxType.ExpressionStatement; }
+            get { return SyntaxType.Label; }
         }
 
-        public ExpressionStatementSyntax(ExpressionSyntax expression)
+        public string Label { get; private set; }
+        public SyntaxNode Expression { get; private set; }
+
+        public LabelSyntax(string label, SyntaxNode expression)
         {
+            if (label == null)
+                throw new ArgumentNullException("label");
             if (expression == null)
                 throw new ArgumentNullException("expression");
 
+            Label = label;
             Expression = expression;
         }
 
-        [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {
-            visitor.VisitExpressionStatement(this);
+            visitor.VisitLabel(this);
         }
 
-        [DebuggerStepThrough]
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
-            return visitor.VisitExpressionStatement(this);
+            return visitor.VisitLabel(this);
         }
     }
 }

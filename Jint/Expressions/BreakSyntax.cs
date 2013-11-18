@@ -13,6 +13,13 @@ namespace Jint.Expressions
             get { return SyntaxType.Break; }
         }
 
+        public string Target { get; private set; }
+
+        public BreakSyntax(string target)
+        {
+            Target = target;
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

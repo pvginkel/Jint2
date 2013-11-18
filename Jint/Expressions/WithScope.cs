@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class WithScope
+    internal class WithScope
     {
         public WithScope Parent { get; private set; }
         public Variable Variable { get; private set; }

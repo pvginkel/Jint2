@@ -1,33 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Jint.Expressions
 {
     [Serializable]
     public class MethodCallSyntax : ExpressionSyntax
     {
-        public MethodCallSyntax(ExpressionSyntax expression)
-        {
-            Expression = expression;
-            Arguments = new List<ExpressionSyntax>();
-            Generics = new List<ExpressionSyntax>();
-        }
-
-        public MethodCallSyntax(ExpressionSyntax expression, IEnumerable<ExpressionSyntax> arguments)
-            : this(expression)
-        {
-            Arguments.AddRange(arguments);
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.MethodCall; }
         }
 
-        public ExpressionSyntax Expression { get; set; }
-        public List<ExpressionSyntax> Arguments { get; set; }
-        public List<ExpressionSyntax> Generics { get; set; }
+        public ExpressionSyntax Expression { get; private set; }
+        public IList<ExpressionSyntax> Arguments { get; private set; }
+        public IList<ExpressionSyntax> Generics { get; private set; }
+
+        public MethodCallSyntax(ExpressionSyntax expression, IEnumerable<ExpressionSyntax> arguments, IEnumerable<ExpressionSyntax> generics)
+        {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+            if (arguments == null)
+                throw new ArgumentNullException("arguments");
+            if (generics == null)
+                throw new ArgumentNullException("generics");
+
+            Expression = expression;
+            Arguments = arguments.ToReadOnly();
+            Generics = generics.ToReadOnly();
+        }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

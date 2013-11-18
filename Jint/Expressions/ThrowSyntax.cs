@@ -8,10 +8,13 @@ namespace Jint.Expressions
     [Serializable]
     public class ThrowSyntax : SyntaxNode
     {
-        public ExpressionSyntax Expression { get; set; }
+        public ExpressionSyntax Expression { get; private set; }
 
         public ThrowSyntax(ExpressionSyntax expression)
         {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+
             Expression = expression;
         }
 

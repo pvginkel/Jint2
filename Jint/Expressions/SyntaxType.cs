@@ -40,6 +40,7 @@ namespace Jint.Expressions
         Value,
         VariableDeclaration,
         While,
-        With
+        With,
+        Label
     }
 }

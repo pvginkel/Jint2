@@ -8,13 +8,25 @@ namespace Jint.Expressions
     [Serializable]
     public class IfSyntax : SyntaxNode
     {
-        public ExpressionSyntax Test { get; set; }
-        public SyntaxNode Then { get; set; }
-        public SyntaxNode Else { get; set; }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.If; }
+        }
+
+        public ExpressionSyntax Test { get; private set; }
+        public SyntaxNode Then { get; private set; }
+        public SyntaxNode Else { get; private set; }
+
+        public IfSyntax(ExpressionSyntax test, SyntaxNode then, SyntaxNode @else)
+        {
+            if (test == null)
+                throw new ArgumentNullException("test");
+            if (then == null)
+                throw new ArgumentNullException("then");
+
+            Test = test;
+            Then = then;
+            Else = @else;
         }
 
         [DebuggerStepThrough]

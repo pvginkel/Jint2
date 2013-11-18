@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class Closure
+    internal class Closure
     {
 #if DEBUG
         internal const string ParentFieldName = "__parent";

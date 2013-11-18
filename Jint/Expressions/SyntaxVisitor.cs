@@ -182,10 +182,6 @@ namespace Jint.Expressions
         {
             if (syntax.Expression != null)
                 syntax.Expression.Accept(this);
-            if (syntax.GetExpression != null)
-                syntax.GetExpression.Accept(this);
-            if (syntax.SetExpression != null)
-                syntax.SetExpression.Accept(this);
         }
 
         public virtual void VisitIdentifier(IdentifierSyntax syntax)
@@ -194,9 +190,21 @@ namespace Jint.Expressions
 
         public virtual void VisitJsonExpression(JsonExpressionSyntax syntax)
         {
-            foreach (var expression in syntax.Values.Values)
+            foreach (var property in syntax.Properties)
             {
-                expression.Accept(this);
+                var dataProperty = property as JsonDataProperty;
+                if (dataProperty != null)
+                {
+                    dataProperty.Expression.Accept(this);
+                }
+                else
+                {
+                    var accessorProperty = (JsonAccessorProperty)property;
+                    if (accessorProperty.GetExpression != null)
+                        accessorProperty.GetExpression.Accept(this);
+                    if (accessorProperty.SetExpression != null)
+                        accessorProperty.SetExpression.Accept(this);
+                }
             }
         }
 
@@ -233,6 +241,11 @@ namespace Jint.Expressions
 
         public virtual void VisitClrIdentifier(ClrIdentifierSyntax syntax)
         {
+        }
+
+        public virtual void VisitLabel(LabelSyntax syntax)
+        {
+            syntax.Expression.Accept(this);
         }
     }
 }

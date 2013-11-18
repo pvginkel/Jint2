@@ -6,20 +6,19 @@ namespace Jint.Expressions
     [Serializable]
     public class ValueSyntax : ExpressionSyntax
     {
-        public ValueSyntax(object value, TypeCode typeCode)
-        {
-            Value = value;
-            TypeCode = typeCode;
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Value; }
         }
 
-        public object Value { get; set; }
+        public object Value { get; private set; }
+        public TypeCode TypeCode { get; private set; }
 
-        public TypeCode TypeCode { get; set; }
+        public ValueSyntax(object value, TypeCode typeCode)
+        {
+            Value = value;
+            TypeCode = typeCode;
+        }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

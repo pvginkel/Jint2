@@ -8,13 +8,23 @@ namespace Jint.Expressions
     [Serializable]
     public class TrySyntax : SyntaxNode
     {
-        public SyntaxNode Body { get; set; }
-        public CatchClause Catch { get; set; }
-        public FinallyClause Finally { get; set; }
+        public SyntaxNode Body { get; private set; }
+        public CatchClause Catch { get; private set; }
+        public FinallyClause Finally { get; private set; }
 
         public override SyntaxType Type
         {
             get { return SyntaxType.Try; }
+        }
+
+        public TrySyntax(SyntaxNode body, CatchClause @catch, FinallyClause @finally)
+        {
+            if (body == null)
+                throw new ArgumentNullException("body");
+
+            Body = body;
+            Catch = @catch;
+            Finally = @finally;
         }
 
         [DebuggerStepThrough]

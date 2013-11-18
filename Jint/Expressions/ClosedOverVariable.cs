@@ -6,11 +6,11 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class ClosedOverVariable
+    internal class ClosedOverVariable
     {
         public Closure Closure { get; private set; }
-        public Variable Variable { get; private set; }
         public FieldInfo Field { get; private set; }
+        public Variable Variable { get; private set; }
 
         public ClosedOverVariable(Closure closure, Variable variable, FieldInfo field)
         {

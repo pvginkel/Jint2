@@ -6,17 +6,20 @@ namespace Jint.Expressions
     [Serializable]
     public class ClrIdentifierSyntax : ExpressionSyntax
     {
-        public ClrIdentifierSyntax(string text)
-        {
-            Text = text;
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.ClrIdentifier; }
         }
 
-        public string Text { get; set; }
+        public string Text { get; private set; }
+
+        public ClrIdentifierSyntax(string text)
+        {
+            if (text == null)
+                throw new ArgumentNullException("text");
+
+            Text = text;
+        }
 
         public override string ToString()
         {

@@ -6,19 +6,22 @@ namespace Jint.Expressions
     [Serializable]
     public class PropertySyntax : MemberSyntax
     {
-        public PropertySyntax(ExpressionSyntax expression, string name)
-        {
-            Expression = expression;
-            Name = name;
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Property; }
         }
 
-        public string Name { get; set; }
-        public Variable Target { get; set; }
+        public string Name { get; private set; }
+        internal Variable Target { get; set; }
+
+        public PropertySyntax(ExpressionSyntax expression, string name)
+            : base(expression)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            Name = name;
+        }
 
         public override string ToString()
         {

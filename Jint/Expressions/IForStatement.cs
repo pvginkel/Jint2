@@ -6,7 +6,7 @@ namespace Jint.Expressions
 {
     public interface IForStatement
     {
-        SyntaxNode Initialization { get; set; }
-        SyntaxNode Body { get; set; }
+        SyntaxNode Initialization { get; }
+        SyntaxNode Body { get; }
     }
 }

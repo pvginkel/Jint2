@@ -7,11 +7,14 @@ namespace Jint.Expressions
     [Serializable]
     public class FinallyClause
     {
-        public SyntaxNode Body { get; set; }
+        public SyntaxNode Body { get; private set; }
 
-        public FinallyClause(SyntaxNode statement)
+        public FinallyClause(SyntaxNode body)
         {
-            Body = statement;
+            if (body == null)
+                throw new ArgumentNullException("body");
+
+            Body = body;
         }
     }
 }

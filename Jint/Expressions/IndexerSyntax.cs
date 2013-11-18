@@ -6,23 +6,21 @@ namespace Jint.Expressions
     [Serializable]
     public class IndexerSyntax : MemberSyntax
     {
-        public IndexerSyntax(ExpressionSyntax expression)
-        {
-            Expression = expression;
-        }
-
-        public IndexerSyntax(ExpressionSyntax expression, ExpressionSyntax index)
-            : this(expression)
-        {
-            Index = index;
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Indexer; }
         }
 
-        public ExpressionSyntax Index { get; set; }
+        public ExpressionSyntax Index { get; private set; }
+
+        public IndexerSyntax(ExpressionSyntax expression, ExpressionSyntax index)
+            : base(expression)
+        {
+            if (index == null)
+                throw new ArgumentNullException("index");
+
+            Index = index;
+        }
 
         public override string ToString()
         {

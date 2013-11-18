@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
@@ -8,13 +10,18 @@ namespace Jint.Expressions
     [Serializable]
     public class SwitchSyntax : SyntaxNode
     {
-        public SyntaxNode Expression { get; set; }
-        public List<CaseClause> Cases { get; private set; }
-        public SyntaxNode Default { get; set; }
+        public SyntaxNode Expression { get; private set; }
+        public IList<CaseClause> Cases { get; private set; }
+        public SyntaxNode Default { get; private set; }
 
-        public SwitchSyntax()
+        public SwitchSyntax(SyntaxNode expression, IEnumerable<CaseClause> cases, SyntaxNode @default)
         {
-            Cases = new List<CaseClause>();
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+
+            Expression = expression;
+            Cases = cases.ToReadOnly();
+            Default = @default;
         }
 
         public override SyntaxType Type

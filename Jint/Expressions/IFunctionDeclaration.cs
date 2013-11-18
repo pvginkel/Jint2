@@ -6,8 +6,8 @@ namespace Jint.Expressions
 {
     public interface IFunctionDeclaration
     {
-        string Name { get; set; }
-        List<string> Parameters { get; set; }
-        BlockSyntax Body { get; set; }
+        string Name { get; }
+        IList<string> Parameters { get; }
+        BlockSyntax Body { get; }
     }
 }

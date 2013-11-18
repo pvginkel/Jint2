@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class Variable
+    internal class Variable
     {
         public static readonly Variable This = new Variable(VariableType.This);
 

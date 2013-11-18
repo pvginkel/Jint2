@@ -8,6 +8,11 @@ namespace Jint.Expressions
     [Serializable]
     public class EmptySyntax : SyntaxNode
     {
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Empty; }
+        }
+
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {
@@ -18,11 +23,6 @@ namespace Jint.Expressions
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
             return visitor.VisitEmpty(this);
-        }
-
-        public override SyntaxType Type
-        {
-            get { return SyntaxType.Empty; }
         }
     }
 }

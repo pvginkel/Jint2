@@ -13,10 +13,13 @@ namespace Jint.Expressions
             get { return SyntaxType.New; }
         }
 
-        public ExpressionSyntax Expression { get; set; }
+        public ExpressionSyntax Expression { get; private set; }
 
         public NewSyntax(ExpressionSyntax expression)
         {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+
             Expression = expression;
         }
 

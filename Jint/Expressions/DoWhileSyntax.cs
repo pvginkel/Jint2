@@ -8,18 +8,23 @@ namespace Jint.Expressions
     [Serializable]
     public class DoWhileSyntax : SyntaxNode
     {
-        public ExpressionSyntax Test { get; set; }
-        public SyntaxNode Body { get; set; }
-
-        public DoWhileSyntax(ExpressionSyntax condition, SyntaxNode statement)
-        {
-            Test = condition;
-            Body = statement;
-        }
+        public ExpressionSyntax Test { get; private set; }
+        public SyntaxNode Body { get; private set; }
 
         public override SyntaxType Type
         {
             get { return SyntaxType.DoWhile; }
+        }
+
+        public DoWhileSyntax(ExpressionSyntax condition, SyntaxNode statement)
+        {
+            if (condition == null)
+                throw new ArgumentNullException("condition");
+            if (statement == null)
+                throw new ArgumentNullException("statement");
+
+            Test = condition;
+            Body = statement;
         }
 
         [DebuggerStepThrough]

@@ -13,17 +13,17 @@ namespace Jint.Expressions
             get { return SyntaxType.Regexp; }
         }
 
-        public string Regexp { get; set; }
-        public string Options { get; set; }
-
-        public RegexpSyntax(string regexp)
-        {
-            Regexp = regexp;
-        }
+        public string Regexp { get; private set; }
+        public string Options { get; private set; }
 
         public RegexpSyntax(string regexp, string options)
-            : this(regexp)
         {
+            if (regexp == null)
+                throw new ArgumentNullException("regexp");
+            if (options == null)
+                throw new ArgumentNullException("options");
+
+            Regexp = regexp;
             Options = options;
         }
 

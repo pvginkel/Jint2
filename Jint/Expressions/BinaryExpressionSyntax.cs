@@ -6,23 +6,26 @@ namespace Jint.Expressions
     [Serializable]
     public class BinaryExpressionSyntax : ExpressionSyntax
     {
-        public BinaryExpressionSyntax(SyntaxExpressionType operation, ExpressionSyntax leftExpression, ExpressionSyntax rightExpression)
-        {
-            Operation = operation;
-            Left = leftExpression;
-            Right = rightExpression;
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Binary; }
         }
 
-        public ExpressionSyntax Left { get; set; }
+        public ExpressionSyntax Left { get; private set; }
+        public ExpressionSyntax Right { get; private set; }
+        public SyntaxExpressionType Operation { get; private set; }
 
-        public ExpressionSyntax Right { get; set; }
+        public BinaryExpressionSyntax(SyntaxExpressionType operation, ExpressionSyntax left, ExpressionSyntax right)
+        {
+            if (left == null)
+                throw new ArgumentNullException("left");
+            if (right == null)
+                throw new ArgumentNullException("right");
 
-        public SyntaxExpressionType Operation { get; set; }
+            Operation = operation;
+            Left = left;
+            Right = right;
+        }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

@@ -133,15 +133,13 @@ namespace Jint.Parser
 
 		// References the upper level block currently parsed. 
 		// This is used to add variable declarations at the top of the body while parsing.
-		private BlockSyntax _currentBody;
+		private BlockBuilder _currentBody;
 		
 		private const char BS = '\\';
-		private bool IsLeftHandSideAssign(ExpressionSyntax lhs, object[] cached)
+		private bool IsLeftHandSideAssign(ExpressionSyntax lhs, ref bool? cached)
 		{
-    		if (cached[0] != null)
-    		{
-    			return System.Convert.ToBoolean(cached[0]);
-    		}
+            if (cached.HasValue)
+                return cached.Value;
 	    	
     		bool result;
     		if(IsLeftHandSideExpression(lhs))
@@ -172,7 +170,7 @@ namespace Jint.Parser
     			result = false;
     		}
 	    	
-    		cached[0] = result;
+    		cached = result;
     		return result;
 		}
 
@@ -181,15 +179,13 @@ namespace Jint.Parser
             return lhs == null || lhs.IsAssignable;
 		}
 	    	
-		private bool IsLeftHandSideIn(ExpressionSyntax lhs, object[] cached)
+		private bool IsLeftHandSideIn(ExpressionSyntax lhs, ref bool? cached)
 		{
-    		if (cached[0] != null)
-    		{
-    			return System.Convert.ToBoolean(cached[0]);
-    		}
+            if (cached.HasValue)
+                return cached.Value;
 	    	
     		bool result = IsLeftHandSideExpression(lhs) && (input.LA(1) == IN);
-    		cached[0] = result;
+    		cached = result;
     		return result;
 		}
 
@@ -340,7 +336,7 @@ namespace Jint.Parser
     		{
     			case "=" : return AssignmentOperator.Assign;
     			case "+=" : return AssignmentOperator.Add;
-    			case "-=" : return AssignmentOperator.Substract;
+    			case "-=" : return AssignmentOperator.Subtract;
     			case "*=" : return AssignmentOperator.Multiply;
     			case "\\%=" : return AssignmentOperator.Modulo;
     			case "<<=" : return AssignmentOperator.LeftShift;

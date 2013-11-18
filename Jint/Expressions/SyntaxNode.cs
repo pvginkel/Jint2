@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Jint.Debugger;
 
 namespace Jint.Expressions
@@ -6,17 +7,14 @@ namespace Jint.Expressions
     [Serializable]
     public abstract class SyntaxNode
     {
-        public string Label { get; set; }
+        public static readonly IList<SyntaxNode> EmptyList = new SyntaxNode[0];
+
         public abstract SyntaxType Type { get; }
         internal virtual bool IsAssignable { get { return false; } }
+        internal SourceCodeDescriptor Source { get; set; }
+
         public abstract void Accept(ISyntaxVisitor visitor);
+
         public abstract T Accept<T>(ISyntaxVisitor<T> visitor);
-
-        public SourceCodeDescriptor Source { get; set; }
-
-        protected SyntaxNode()
-        {
-            Label = String.Empty;
-        }
     }
 }

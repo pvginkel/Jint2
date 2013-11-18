@@ -42,6 +42,8 @@ namespace Jint.Expressions
         void VisitValue(ValueSyntax syntax);
         void VisitRegexp(RegexpSyntax syntax);
         void VisitClrIdentifier(ClrIdentifierSyntax syntax);
+
+        void VisitLabel(LabelSyntax syntax);
     }
 
     public interface ISyntaxVisitor<out T>
@@ -83,6 +85,7 @@ namespace Jint.Expressions
         T VisitValue(ValueSyntax syntax);
         T VisitRegexp(RegexpSyntax syntax);
         T VisitClrIdentifier(ClrIdentifierSyntax syntax);
+        T VisitLabel(LabelSyntax syntax);
     }
 
     public interface IJintVisitor

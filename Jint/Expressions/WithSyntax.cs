@@ -13,14 +13,19 @@ namespace Jint.Expressions
             get { return SyntaxType.With; }
         }
 
-        public ExpressionSyntax Expression { get; set; }
-        public SyntaxNode Body { get; set; }
-        public Variable Target { get; set; }
+        public ExpressionSyntax Expression { get; private set; }
+        public SyntaxNode Body { get; private set; }
+        internal Variable Target { get; set; }
 
-        public WithSyntax(ExpressionSyntax expression, SyntaxNode statement)
+        public WithSyntax(ExpressionSyntax expression, SyntaxNode body)
         {
-            Body = statement;
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+            if (body == null)
+                throw new ArgumentNullException("body");
+
             Expression = expression;
+            Body = body;
         }
 
         [DebuggerStepThrough]
