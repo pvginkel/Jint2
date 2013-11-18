@@ -12,11 +12,11 @@ namespace Jint.Expressions
         Modulo,
         Add,
         Substract,
-        ShiftLeft,
-        ShiftRight,
+        LeftShift,
+        RightShift,
         UnsignedRightShift,
-        And,
-        Or,
-        XOr,
+        BitwiseAnd,
+        BitwiseOr,
+        BitwiseExclusiveOr,
     }
 }

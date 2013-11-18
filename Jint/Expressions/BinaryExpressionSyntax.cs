@@ -6,7 +6,7 @@ namespace Jint.Expressions
     [Serializable]
     public class BinaryExpressionSyntax : ExpressionSyntax
     {
-        public BinaryExpressionSyntax(BinaryExpressionType operation, ExpressionSyntax leftExpression, ExpressionSyntax rightExpression)
+        public BinaryExpressionSyntax(SyntaxExpressionType operation, ExpressionSyntax leftExpression, ExpressionSyntax rightExpression)
         {
             Operation = operation;
             Left = leftExpression;
@@ -22,7 +22,7 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Right { get; set; }
 
-        public BinaryExpressionType Operation { get; set; }
+        public SyntaxExpressionType Operation { get; set; }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

@@ -352,45 +352,45 @@ namespace Jint.Runtime
             }
         }
 
-        public JsInstance BinaryOperation(JsInstance left, JsInstance right, BinaryExpressionType operation)
+        public JsInstance BinaryOperation(JsInstance left, JsInstance right, SyntaxExpressionType operation)
         {
             switch (operation)
             {
-                case BinaryExpressionType.LeftShift:
+                case SyntaxExpressionType.LeftShift:
                     if (left is JsUndefined)
                         return Global.NumberClass.New(0);
                     if (right is JsUndefined)
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) << Convert.ToUInt16(right.ToNumber()));
 
-                case BinaryExpressionType.RightShift:
+                case SyntaxExpressionType.RightShift:
                     if (left is JsUndefined)
                         return Global.NumberClass.New(0);
                     if (right is JsUndefined)
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
 
-                case BinaryExpressionType.UnsignedRightShift:
+                case SyntaxExpressionType.UnsignedRightShift:
                     if (left is JsUndefined)
                         return Global.NumberClass.New(0);
                     if (right is JsUndefined)
                         return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()));
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
 
-                case BinaryExpressionType.Same:
+                case SyntaxExpressionType.Same:
                     return JsInstance.StrictlyEquals(Global, left, right);
 
-                case BinaryExpressionType.NotSame:
+                case SyntaxExpressionType.NotSame:
                     var result = JsInstance.StrictlyEquals(Global, left, right);
                     return Global.BooleanClass.New(!result.ToBoolean());
 
-                case BinaryExpressionType.In:
+                case SyntaxExpressionType.In:
                     if (right is ILiteral)
                         throw new JsException(Global.ErrorClass.New("Cannot apply 'in' operator to the specified member."));
 
                     return Global.BooleanClass.New(((JsDictionaryObject)right).HasProperty(left));
 
-                case BinaryExpressionType.InstanceOf:
+                case SyntaxExpressionType.InstanceOf:
                     var function = right as JsFunction;
                     var obj = left as JsObject;
 
@@ -401,7 +401,7 @@ namespace Jint.Runtime
 
                     return Global.BooleanClass.New(function.HasInstance(obj));
 
-                case BinaryExpressionType.Plus:
+                case SyntaxExpressionType.Add:
                     var leftPrimitive = left.ToPrimitive(Global);
                     var rightPrimitive = right.ToPrimitive(Global);
 
@@ -410,7 +410,7 @@ namespace Jint.Runtime
 
                     return Global.NumberClass.New(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
 
-                case BinaryExpressionType.Div:
+                case SyntaxExpressionType.Divide:
                     var rightNumber = right.ToNumber();
                     var leftNumber = left.ToNumber();
 
@@ -422,20 +422,20 @@ namespace Jint.Runtime
 
                     return Global.NumberClass.New(leftNumber / rightNumber);
 
-                case BinaryExpressionType.Modulo:
+                case SyntaxExpressionType.Modulo:
                     if (right == Global.NumberClass["NEGATIVE_INFINITY"] || right == Global.NumberClass["POSITIVE_INFINITY"])
                         return Global.NumberClass["POSITIVE_INFINITY"];
                     if (right.ToNumber() == 0)
                         return Global.NumberClass["NaN"];
                     return Global.NumberClass.New(left.ToNumber() % right.ToNumber());
 
-                case BinaryExpressionType.BitwiseAnd:
+                case SyntaxExpressionType.BitwiseAnd:
                     if (left is JsUndefined || right is JsUndefined)
                         return Global.NumberClass.New(0);
 
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) & Convert.ToInt64(right.ToNumber()));
 
-                case BinaryExpressionType.BitwiseOr:
+                case SyntaxExpressionType.BitwiseOr:
                     if (left is JsUndefined)
                     {
                         if (right is JsUndefined)
@@ -449,7 +449,7 @@ namespace Jint.Runtime
 
                     return Global.NumberClass.New(Convert.ToInt64(left.ToNumber()) | Convert.ToInt64(right.ToNumber()));
 
-                case BinaryExpressionType.BitwiseXOr:
+                case SyntaxExpressionType.BitwiseExclusiveOr:
                     if (left is JsUndefined)
                     {
                         if (right is JsUndefined)
@@ -467,14 +467,14 @@ namespace Jint.Runtime
             }
         }
 
-        public JsInstance UnaryOperation(JsInstance operand, UnaryExpressionType operation)
+        public JsInstance UnaryOperation(JsInstance operand, SyntaxExpressionType operation)
         {
             switch (operation)
             {
-                case UnaryExpressionType.Inv:
+                case SyntaxExpressionType.BitwiseNot:
                     return Global.NumberClass.New(0 - operand.ToNumber() - 1);
 
-                case UnaryExpressionType.TypeOf:
+                case SyntaxExpressionType.TypeOf:
                     if (operand == null)
                         return Global.StringClass.New(JsUndefined.Instance.Type);
                     if (operand is JsNull)

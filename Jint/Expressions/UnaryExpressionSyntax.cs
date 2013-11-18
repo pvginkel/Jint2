@@ -6,7 +6,7 @@ namespace Jint.Expressions
     [Serializable]
     public class UnaryExpressionSyntax : ExpressionSyntax
     {
-        public UnaryExpressionSyntax(UnaryExpressionType operation, ExpressionSyntax operand)
+        public UnaryExpressionSyntax(SyntaxExpressionType operation, ExpressionSyntax operand)
         {
             Operation = operation;
             Operand = operand;
@@ -19,7 +19,7 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Operand { get; set; }
 
-        public UnaryExpressionType Operation { get; set; }
+        public SyntaxExpressionType Operation { get; set; }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

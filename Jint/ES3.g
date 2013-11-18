@@ -795,9 +795,9 @@ postfixExpression returns [ExpressionSyntax value]
 	: left=leftHandSideExpression { $value = left.value; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEOL(null);  } ( post=postfixOperator^ { $value = new UnaryExpressionSyntax(post.value, $value); })?
 	;
 	
-postfixOperator returns [UnaryExpressionType value]
-	: op=INC { $op.Type = PINC; $value = UnaryExpressionType.PostfixPlusPlus; }
-	| op=DEC { $op.Type = PDEC; $value = UnaryExpressionType.PostfixMinusMinus; }
+postfixOperator returns [SyntaxExpressionType value]
+	: op=INC { $op.Type = PINC; $value = SyntaxExpressionType.PostIncrementAssign; }
+	| op=DEC { $op.Type = PDEC; $value = SyntaxExpressionType.PostDecrementAssign; }
 	;
 
 // $>
@@ -809,16 +809,16 @@ unaryExpression returns [ExpressionSyntax value]
 	| op=unaryOperator^ exp=unaryExpression { $value = new UnaryExpressionSyntax(op.value, exp.value); }
 	;
 	
-unaryOperator returns [UnaryExpressionType value]
-	: DELETE { $value = UnaryExpressionType.Delete; }
-	| VOID { $value = UnaryExpressionType.Void; }
-	| TYPEOF { $value = UnaryExpressionType.TypeOf; }
-	| INC { $value = UnaryExpressionType.PrefixPlusPlus; }
-	| DEC { $value = UnaryExpressionType.PrefixMinusMinus; }
-	| op=ADD { $op.Type = POS; $value = UnaryExpressionType.Positive; }
-	| op=SUB { $op.Type = NEG; $value = UnaryExpressionType.Negate; }
-	| INV { $value = UnaryExpressionType.Inv; }
-	| NOT { $value = UnaryExpressionType.Not; }
+unaryOperator returns [SyntaxExpressionType value]
+	: DELETE { $value = SyntaxExpressionType.Delete; }
+	| VOID { $value = SyntaxExpressionType.Void; }
+	| TYPEOF { $value = SyntaxExpressionType.TypeOf; }
+	| INC { $value = SyntaxExpressionType.PreIncrementAssign; }
+	| DEC { $value = SyntaxExpressionType.PostIncrementAssign; }
+	| op=ADD { $op.Type = POS; $value = SyntaxExpressionType.UnaryPlus; }
+	| op=SUB { $op.Type = NEG; $value = SyntaxExpressionType.Negate; }
+	| INV { $value = SyntaxExpressionType.BitwiseNot; }
+	| NOT { $value = SyntaxExpressionType.Not; }
 	;
 
 // $>
@@ -827,12 +827,12 @@ unaryOperator returns [UnaryExpressionType value]
 
 multiplicativeExpression returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=unaryExpression { $value = left.value; } ( 
-		( MUL { type= BinaryExpressionType.Times; } 
-		| DIV { type= BinaryExpressionType.Div; }
-		| MOD { type= BinaryExpressionType.Modulo; })^ 
+		( MUL { type= SyntaxExpressionType.Multiply; } 
+		| DIV { type= SyntaxExpressionType.Divide; }
+		| MOD { type= SyntaxExpressionType.Modulo; })^ 
 		right=unaryExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
@@ -842,11 +842,11 @@ multiplicativeExpression returns [ExpressionSyntax value]
 
 additiveExpression returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=multiplicativeExpression { $value = left.value; } ( 
-		( ADD { type= BinaryExpressionType.Plus; }
-		| SUB { type= BinaryExpressionType.Minus; })^ 
+		( ADD { type= SyntaxExpressionType.Add; }
+		| SUB { type= SyntaxExpressionType.Subtract; })^ 
 		right=multiplicativeExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
@@ -856,12 +856,12 @@ additiveExpression returns [ExpressionSyntax value]
 
 shiftExpression returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=additiveExpression { $value = left.value; } ( 
-		( SHL { type= BinaryExpressionType.LeftShift; }
-		| SHR { type= BinaryExpressionType.RightShift; }
-		| SHU { type= BinaryExpressionType.UnsignedRightShift; })^ 
+		( SHL { type= SyntaxExpressionType.LeftShift; }
+		| SHR { type= SyntaxExpressionType.RightShift; }
+		| SHU { type= SyntaxExpressionType.UnsignedRightShift; })^ 
 		right=additiveExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
@@ -871,28 +871,28 @@ shiftExpression returns [ExpressionSyntax value]
 
 relationalExpression returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=shiftExpression { $value = left.value; } ( 
-		( LT { type= BinaryExpressionType.Lesser; }
-		| GT { type= BinaryExpressionType.Greater; }
-		| LTE { type= BinaryExpressionType.LesserOrEqual; }
-		| GTE { type= BinaryExpressionType.GreaterOrEqual; }
-		| INSTANCEOF { type= BinaryExpressionType.InstanceOf;  }
-		| IN { type= BinaryExpressionType.In;  })^ 
+		( LT { type= SyntaxExpressionType.LessThan; }
+		| GT { type= SyntaxExpressionType.GreaterThan; }
+		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
+		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
+		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  }
+		| IN { type= SyntaxExpressionType.In;  })^ 
 		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
 relationalExpressionNoIn returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=shiftExpression { $value = left.value; } ( 
-		( LT { type= BinaryExpressionType.Lesser; }
-		| GT { type= BinaryExpressionType.Greater; }
-		| LTE { type= BinaryExpressionType.LesserOrEqual; }
-		| GTE { type= BinaryExpressionType.GreaterOrEqual; }
-		| INSTANCEOF { type= BinaryExpressionType.InstanceOf;  } )^ 
+		( LT { type= SyntaxExpressionType.LessThan; }
+		| GT { type= SyntaxExpressionType.GreaterThan; }
+		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
+		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
+		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  } )^ 
 		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
@@ -902,25 +902,25 @@ relationalExpressionNoIn returns [ExpressionSyntax value]
 
 equalityExpression returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=relationalExpression { $value = left.value; } ( 
-		( EQ { type= BinaryExpressionType.Equal; }
-		| NEQ { type= BinaryExpressionType.NotEqual; }
-		| SAME { type= BinaryExpressionType.Same; }
-		| NSAME { type= BinaryExpressionType.NotSame; })^ 
+		( EQ { type= SyntaxExpressionType.Equal; }
+		| NEQ { type= SyntaxExpressionType.NotEqual; }
+		| SAME { type= SyntaxExpressionType.Same; }
+		| NSAME { type= SyntaxExpressionType.NotSame; })^ 
 		right=relationalExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
 equalityExpressionNoIn returns [ExpressionSyntax value]
 @init {
-	BinaryExpressionType type = BinaryExpressionType.Unknown;
+	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
 	: left=relationalExpressionNoIn { $value = left.value; } ( 
-		( EQ { type= BinaryExpressionType.Equal; }
-		| NEQ { type= BinaryExpressionType.NotEqual; }
-		| SAME { type= BinaryExpressionType.Same; }
-		| NSAME { type= BinaryExpressionType.NotSame; })^ 
+		( EQ { type= SyntaxExpressionType.Equal; }
+		| NEQ { type= SyntaxExpressionType.NotEqual; }
+		| SAME { type= SyntaxExpressionType.Same; }
+		| NSAME { type= SyntaxExpressionType.NotSame; })^ 
 		right=relationalExpressionNoIn { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
 	;
 
@@ -929,27 +929,27 @@ equalityExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary bitwise operators (11.10)
 
 bitwiseANDExpression returns [ExpressionSyntax value]
-	: left=equalityExpression { $value = left.value; } ( AND^ right=equalityExpression { $value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseAnd, $value, right.value); })*
+	: left=equalityExpression { $value = left.value; } ( AND^ right=equalityExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right.value); })*
 	;
 
 bitwiseANDExpressionNoIn returns [ExpressionSyntax value]
-	: left=equalityExpressionNoIn { $value = left.value; } ( AND^ right=equalityExpressionNoIn { $value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseAnd, $value, right.value); })*
+	: left=equalityExpressionNoIn { $value = left.value; } ( AND^ right=equalityExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right.value); })*
 	;
 		
 bitwiseXORExpression returns [ExpressionSyntax value]
-	: left=bitwiseANDExpression { $value = left.value; } ( XOR^ right=bitwiseANDExpression { $value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseXOr, $value, right.value); })*
+	: left=bitwiseANDExpression { $value = left.value; } ( XOR^ right=bitwiseANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right.value); })*
 	;
 		
 bitwiseXORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseANDExpressionNoIn { $value = left.value; } ( XOR^ right=bitwiseANDExpressionNoIn { $value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseXOr, $value, right.value); })*
+	: left=bitwiseANDExpressionNoIn { $value = left.value; } ( XOR^ right=bitwiseANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right.value); })*
 	;
 	
 bitwiseORExpression returns [ExpressionSyntax value]
-	: left=bitwiseXORExpression { $value = left.value; } ( OR^ right=bitwiseXORExpression { $value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseOr, $value, right.value); })*
+	: left=bitwiseXORExpression { $value = left.value; } ( OR^ right=bitwiseXORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right.value); })*
 	;
 	
 bitwiseORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseXORExpressionNoIn { $value = left.value; } ( OR^ right=bitwiseXORExpressionNoIn { $value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseOr, $value, right.value); })*
+	: left=bitwiseXORExpressionNoIn { $value = left.value; } ( OR^ right=bitwiseXORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right.value); })*
 	;
 
 // $>
@@ -957,19 +957,19 @@ bitwiseORExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary logical operators (11.11)
 
 logicalANDExpression returns [ExpressionSyntax value]
-	:left= bitwiseORExpression { $value = left.value; } ( LAND^ right=bitwiseORExpression { $value = new BinaryExpressionSyntax(BinaryExpressionType.And, $value, right.value); })*
+	:left= bitwiseORExpression { $value = left.value; } ( LAND^ right=bitwiseORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right.value); })*
 	;
 
 logicalANDExpressionNoIn returns [ExpressionSyntax value]
-	:left= bitwiseORExpressionNoIn { $value = left.value; } ( LAND^ right=bitwiseORExpressionNoIn { $value = new BinaryExpressionSyntax(BinaryExpressionType.And, $value, right.value); })*
+	:left= bitwiseORExpressionNoIn { $value = left.value; } ( LAND^ right=bitwiseORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right.value); })*
 	;
 	
 logicalORExpression returns [ExpressionSyntax value]
-	: left=logicalANDExpression { $value = left.value; } ( LOR^ right=logicalANDExpression { $value = new BinaryExpressionSyntax(BinaryExpressionType.Or, $value, right.value); })*
+	: left=logicalANDExpression { $value = left.value; } ( LOR^ right=logicalANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right.value); })*
 	;
 	
 logicalORExpressionNoIn returns [ExpressionSyntax value]
-	: left=logicalANDExpressionNoIn { $value = left.value; } ( LOR^ right=logicalANDExpressionNoIn { $value = new BinaryExpressionSyntax(BinaryExpressionType.Or, $value, right.value); } )*
+	: left=logicalANDExpressionNoIn { $value = left.value; } ( LOR^ right=logicalANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right.value); } )*
 	;
 
 // $>

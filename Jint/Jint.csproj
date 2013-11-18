@@ -64,6 +64,7 @@
     <Compile Include="ExpressionExtensions\UsingExpression.cs" />
     <Compile Include="Expressions\ClosedOverVariable.cs" />
     <Compile Include="Expressions\MemberSyntax.cs" />
+    <Compile Include="Expressions\SyntaxExpressionType.cs" />
     <Compile Include="Expressions\SyntaxType.cs" />
     <Compile Include="Expressions\WithScope.cs" />
     <Compile Include="Native\JsFunctionResult.cs" />
@@ -76,10 +77,8 @@
     <Compile Include="CachedTypeResolver.cs" />
     <Compile Include="Delegates\Delegates.cs" />
     <Compile Include="Expressions\AssignmentOperator.cs" />
-    <Compile Include="Expressions\BinaryExpressionType.cs" />
     <Compile Include="Expressions\PropertyExpressionType.cs" />
     <Compile Include="Expressions\SyntaxVisitor.cs" />
-    <Compile Include="Expressions\UnaryExpressionType.cs" />
     <Compile Include="Expressions\Variable.cs" />
     <Compile Include="Expressions\VariableCollection.cs" />
     <Compile Include="Expressions\VariableType.cs" />

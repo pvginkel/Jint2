@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-16 11:12:20
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-18 15:24:13
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -3537,7 +3537,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 	private sealed partial class postfixOperator_return : ParserRuleReturnScope<IToken>, IAstRuleReturnScope<object>, IAstRuleReturnScope
 	{
-		public UnaryExpressionType value;
+		public SyntaxExpressionType value;
 		private object _tree;
 		public object Tree { get { return _tree; } set { _tree = value; } }
 		object IAstRuleReturnScope.Tree { get { return Tree; } }
@@ -3549,7 +3549,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_postfixOperator();
 
 	// $ANTLR start "postfixOperator"
-	// ..\\ES3.g:798:1: postfixOperator returns [UnaryExpressionType value] : (op= INC |op= DEC );
+	// ..\\ES3.g:798:1: postfixOperator returns [SyntaxExpressionType value] : (op= INC |op= DEC );
 	[GrammarRule("postfixOperator")]
 	private ES3Parser.postfixOperator_return postfixOperator()
 	{
@@ -3603,7 +3603,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, op_tree);
 
 				DebugLocation(799, 11);
-				 op.Type = PINC; retval.value = UnaryExpressionType.PostfixPlusPlus; 
+				 op.Type = PINC; retval.value = SyntaxExpressionType.PostIncrementAssign; 
 
 				}
 				break;
@@ -3619,7 +3619,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, op_tree);
 
 				DebugLocation(800, 11);
-				 op.Type = PDEC; retval.value = UnaryExpressionType.PostfixMinusMinus; 
+				 op.Type = PDEC; retval.value = SyntaxExpressionType.PostDecrementAssign; 
 
 				}
 				break;
@@ -3778,7 +3778,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 	private sealed partial class unaryOperator_return : ParserRuleReturnScope<IToken>, IAstRuleReturnScope<object>, IAstRuleReturnScope
 	{
-		public UnaryExpressionType value;
+		public SyntaxExpressionType value;
 		private object _tree;
 		public object Tree { get { return _tree; } set { _tree = value; } }
 		object IAstRuleReturnScope.Tree { get { return Tree; } }
@@ -3790,7 +3790,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_unaryOperator();
 
 	// $ANTLR start "unaryOperator"
-	// ..\\ES3.g:812:1: unaryOperator returns [UnaryExpressionType value] : ( DELETE | VOID | TYPEOF | INC | DEC |op= ADD |op= SUB | INV | NOT );
+	// ..\\ES3.g:812:1: unaryOperator returns [SyntaxExpressionType value] : ( DELETE | VOID | TYPEOF | INC | DEC |op= ADD |op= SUB | INV | NOT );
 	[GrammarRule("unaryOperator")]
 	private ES3Parser.unaryOperator_return unaryOperator()
 	{
@@ -3897,7 +3897,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, DELETE31_tree);
 
 				DebugLocation(813, 11);
-				 retval.value = UnaryExpressionType.Delete; 
+				 retval.value = SyntaxExpressionType.Delete; 
 
 				}
 				break;
@@ -3913,7 +3913,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, VOID32_tree);
 
 				DebugLocation(814, 9);
-				 retval.value = UnaryExpressionType.Void; 
+				 retval.value = SyntaxExpressionType.Void; 
 
 				}
 				break;
@@ -3929,7 +3929,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, TYPEOF33_tree);
 
 				DebugLocation(815, 11);
-				 retval.value = UnaryExpressionType.TypeOf; 
+				 retval.value = SyntaxExpressionType.TypeOf; 
 
 				}
 				break;
@@ -3945,7 +3945,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, INC34_tree);
 
 				DebugLocation(816, 8);
-				 retval.value = UnaryExpressionType.PrefixPlusPlus; 
+				 retval.value = SyntaxExpressionType.PreIncrementAssign; 
 
 				}
 				break;
@@ -3961,7 +3961,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, DEC35_tree);
 
 				DebugLocation(817, 8);
-				 retval.value = UnaryExpressionType.PrefixMinusMinus; 
+				 retval.value = SyntaxExpressionType.PostIncrementAssign; 
 
 				}
 				break;
@@ -3977,7 +3977,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, op_tree);
 
 				DebugLocation(818, 11);
-				 op.Type = POS; retval.value = UnaryExpressionType.Positive; 
+				 op.Type = POS; retval.value = SyntaxExpressionType.UnaryPlus; 
 
 				}
 				break;
@@ -3993,7 +3993,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, op_tree);
 
 				DebugLocation(819, 11);
-				 op.Type = NEG; retval.value = UnaryExpressionType.Negate; 
+				 op.Type = NEG; retval.value = SyntaxExpressionType.Negate; 
 
 				}
 				break;
@@ -4009,7 +4009,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, INV36_tree);
 
 				DebugLocation(820, 8);
-				 retval.value = UnaryExpressionType.Inv; 
+				 retval.value = SyntaxExpressionType.BitwiseNot; 
 
 				}
 				break;
@@ -4025,7 +4025,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, NOT37_tree);
 
 				DebugLocation(821, 8);
-				 retval.value = UnaryExpressionType.Not; 
+				 retval.value = SyntaxExpressionType.Not; 
 
 				}
 				break;
@@ -4094,7 +4094,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object MOD40_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "multiplicativeExpression");
 		DebugLocation(828, 1);
@@ -4179,7 +4179,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, MUL38_tree);
 
 						DebugLocation(833, 9);
-						 type= BinaryExpressionType.Times; 
+						 type= SyntaxExpressionType.Multiply; 
 
 						}
 						break;
@@ -4193,7 +4193,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, DIV39_tree);
 
 						DebugLocation(834, 9);
-						 type= BinaryExpressionType.Div; 
+						 type= SyntaxExpressionType.Divide; 
 
 						}
 						break;
@@ -4207,7 +4207,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, MOD40_tree);
 
 						DebugLocation(835, 9);
-						 type= BinaryExpressionType.Modulo; 
+						 type= SyntaxExpressionType.Modulo; 
 
 						}
 						break;
@@ -4301,7 +4301,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object SUB42_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "additiveExpression");
 		DebugLocation(843, 1);
@@ -4343,7 +4343,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					DebugEnterAlt(1);
 					// ..\\ES3.g:848:3: ( ADD | SUB ) right= multiplicativeExpression
 					{
-					DebugLocation(849, 47);
+					DebugLocation(849, 50);
 					// ..\\ES3.g:848:3: ( ADD | SUB )
 					int alt29=2;
 					try { DebugEnterSubRule(29);
@@ -4377,7 +4377,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, ADD41_tree);
 
 						DebugLocation(848, 9);
-						 type= BinaryExpressionType.Plus; 
+						 type= SyntaxExpressionType.Add; 
 
 						}
 						break;
@@ -4391,7 +4391,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, SUB42_tree);
 
 						DebugLocation(849, 9);
-						 type= BinaryExpressionType.Minus; 
+						 type= SyntaxExpressionType.Subtract; 
 
 						}
 						break;
@@ -4487,7 +4487,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object SHU45_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "shiftExpression");
 		DebugLocation(857, 1);
@@ -4572,7 +4572,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, SHL43_tree);
 
 						DebugLocation(862, 9);
-						 type= BinaryExpressionType.LeftShift; 
+						 type= SyntaxExpressionType.LeftShift; 
 
 						}
 						break;
@@ -4586,7 +4586,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, SHR44_tree);
 
 						DebugLocation(863, 9);
-						 type= BinaryExpressionType.RightShift; 
+						 type= SyntaxExpressionType.RightShift; 
 
 						}
 						break;
@@ -4600,7 +4600,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, SHU45_tree);
 
 						DebugLocation(864, 9);
-						 type= BinaryExpressionType.UnsignedRightShift; 
+						 type= SyntaxExpressionType.UnsignedRightShift; 
 
 						}
 						break;
@@ -4702,7 +4702,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object IN51_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "relationalExpression");
 		DebugLocation(872, 1);
@@ -4802,7 +4802,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, LT46_tree);
 
 						DebugLocation(877, 8);
-						 type= BinaryExpressionType.Lesser; 
+						 type= SyntaxExpressionType.LessThan; 
 
 						}
 						break;
@@ -4816,7 +4816,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, GT47_tree);
 
 						DebugLocation(878, 8);
-						 type= BinaryExpressionType.Greater; 
+						 type= SyntaxExpressionType.GreaterThan; 
 
 						}
 						break;
@@ -4830,7 +4830,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, LTE48_tree);
 
 						DebugLocation(879, 9);
-						 type= BinaryExpressionType.LesserOrEqual; 
+						 type= SyntaxExpressionType.LessThanOrEqual; 
 
 						}
 						break;
@@ -4844,7 +4844,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, GTE49_tree);
 
 						DebugLocation(880, 9);
-						 type= BinaryExpressionType.GreaterOrEqual; 
+						 type= SyntaxExpressionType.GreaterThanOrEqual; 
 
 						}
 						break;
@@ -4858,7 +4858,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, INSTANCEOF50_tree);
 
 						DebugLocation(881, 16);
-						 type= BinaryExpressionType.InstanceOf;  
+						 type= SyntaxExpressionType.InstanceOf;  
 
 						}
 						break;
@@ -4872,7 +4872,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, IN51_tree);
 
 						DebugLocation(882, 8);
-						 type= BinaryExpressionType.In;  
+						 type= SyntaxExpressionType.In;  
 
 						}
 						break;
@@ -4972,7 +4972,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object INSTANCEOF56_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "relationalExpressionNoIn");
 		DebugLocation(886, 1);
@@ -5067,7 +5067,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, LT52_tree);
 
 						DebugLocation(891, 8);
-						 type= BinaryExpressionType.Lesser; 
+						 type= SyntaxExpressionType.LessThan; 
 
 						}
 						break;
@@ -5081,7 +5081,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, GT53_tree);
 
 						DebugLocation(892, 8);
-						 type= BinaryExpressionType.Greater; 
+						 type= SyntaxExpressionType.GreaterThan; 
 
 						}
 						break;
@@ -5095,7 +5095,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, LTE54_tree);
 
 						DebugLocation(893, 9);
-						 type= BinaryExpressionType.LesserOrEqual; 
+						 type= SyntaxExpressionType.LessThanOrEqual; 
 
 						}
 						break;
@@ -5109,7 +5109,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, GTE55_tree);
 
 						DebugLocation(894, 9);
-						 type= BinaryExpressionType.GreaterOrEqual; 
+						 type= SyntaxExpressionType.GreaterThanOrEqual; 
 
 						}
 						break;
@@ -5123,7 +5123,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, INSTANCEOF56_tree);
 
 						DebugLocation(895, 16);
-						 type= BinaryExpressionType.InstanceOf;  
+						 type= SyntaxExpressionType.InstanceOf;  
 
 						}
 						break;
@@ -5221,7 +5221,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object NSAME60_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "equalityExpression");
 		DebugLocation(903, 1);
@@ -5311,7 +5311,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, EQ57_tree);
 
 						DebugLocation(908, 8);
-						 type= BinaryExpressionType.Equal; 
+						 type= SyntaxExpressionType.Equal; 
 
 						}
 						break;
@@ -5325,7 +5325,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, NEQ58_tree);
 
 						DebugLocation(909, 9);
-						 type= BinaryExpressionType.NotEqual; 
+						 type= SyntaxExpressionType.NotEqual; 
 
 						}
 						break;
@@ -5339,7 +5339,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, SAME59_tree);
 
 						DebugLocation(910, 10);
-						 type= BinaryExpressionType.Same; 
+						 type= SyntaxExpressionType.Same; 
 
 						}
 						break;
@@ -5353,7 +5353,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, NSAME60_tree);
 
 						DebugLocation(911, 11);
-						 type= BinaryExpressionType.NotSame; 
+						 type= SyntaxExpressionType.NotSame; 
 
 						}
 						break;
@@ -5451,7 +5451,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		object NSAME64_tree = default(object);
 
 
-			BinaryExpressionType type = BinaryExpressionType.Unknown;
+			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "equalityExpressionNoIn");
 		DebugLocation(915, 1);
@@ -5541,7 +5541,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, EQ61_tree);
 
 						DebugLocation(920, 8);
-						 type= BinaryExpressionType.Equal; 
+						 type= SyntaxExpressionType.Equal; 
 
 						}
 						break;
@@ -5555,7 +5555,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, NEQ62_tree);
 
 						DebugLocation(921, 9);
-						 type= BinaryExpressionType.NotEqual; 
+						 type= SyntaxExpressionType.NotEqual; 
 
 						}
 						break;
@@ -5569,7 +5569,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, SAME63_tree);
 
 						DebugLocation(922, 10);
-						 type= BinaryExpressionType.Same; 
+						 type= SyntaxExpressionType.Same; 
 
 						}
 						break;
@@ -5583,7 +5583,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						adaptor.AddChild(root_0, NSAME64_tree);
 
 						DebugLocation(923, 11);
-						 type= BinaryExpressionType.NotSame; 
+						 type= SyntaxExpressionType.NotSame; 
 
 						}
 						break;
@@ -5726,7 +5726,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(932, 85);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseAnd, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, retval.value, right.value); 
 
 					}
 					break;
@@ -5854,7 +5854,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(936, 93);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseAnd, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, retval.value, right.value); 
 
 					}
 					break;
@@ -5982,7 +5982,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(940, 89);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseXOr, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, retval.value, right.value); 
 
 					}
 					break;
@@ -6110,7 +6110,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(944, 97);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseXOr, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, retval.value, right.value); 
 
 					}
 					break;
@@ -6238,7 +6238,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(948, 88);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseOr, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, retval.value, right.value); 
 
 					}
 					break;
@@ -6366,7 +6366,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(952, 96);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.BitwiseOr, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, retval.value, right.value); 
 
 					}
 					break;
@@ -6494,7 +6494,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(960, 88);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.And, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.And, retval.value, right.value); 
 
 					}
 					break;
@@ -6622,7 +6622,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(964, 96);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.And, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.And, retval.value, right.value); 
 
 					}
 					break;
@@ -6750,7 +6750,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(968, 89);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.Or, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, retval.value, right.value); 
 
 					}
 					break;
@@ -6878,7 +6878,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 					adaptor.AddChild(root_0, right.Tree);
 					DebugLocation(972, 97);
-					 retval.value = new BinaryExpressionSyntax(BinaryExpressionType.Or, retval.value, right.value); 
+					 retval.value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, retval.value, right.value); 
 
 					}
 					break;

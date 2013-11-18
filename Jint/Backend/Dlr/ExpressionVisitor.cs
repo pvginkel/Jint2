@@ -156,21 +156,21 @@ namespace Jint.Backend.Dlr
             if (syntax.AssignmentOperator == AssignmentOperator.Assign)
                 return BuildSet(syntax.Left, syntax.Right.Accept(this));
 
-            BinaryExpressionType operation;
+            SyntaxExpressionType operation;
 
             switch (syntax.AssignmentOperator)
             {
-                case AssignmentOperator.Add: operation = BinaryExpressionType.Plus; break;
-                case AssignmentOperator.And: operation = BinaryExpressionType.BitwiseAnd; break;
-                case AssignmentOperator.Divide: operation = BinaryExpressionType.Div; break;
-                case AssignmentOperator.Modulo: operation = BinaryExpressionType.Modulo; break;
-                case AssignmentOperator.Multiply: operation = BinaryExpressionType.Times; break;
-                case AssignmentOperator.Or: operation = BinaryExpressionType.BitwiseOr; break;
-                case AssignmentOperator.ShiftLeft: operation = BinaryExpressionType.LeftShift; break;
-                case AssignmentOperator.ShiftRight: operation = BinaryExpressionType.RightShift; break;
-                case AssignmentOperator.Substract: operation = BinaryExpressionType.Minus; break;
-                case AssignmentOperator.UnsignedRightShift: operation = BinaryExpressionType.UnsignedRightShift; break;
-                case AssignmentOperator.XOr: operation = BinaryExpressionType.BitwiseXOr; break;
+                case AssignmentOperator.Add: operation = SyntaxExpressionType.Add; break;
+                case AssignmentOperator.BitwiseAnd: operation = SyntaxExpressionType.BitwiseAnd; break;
+                case AssignmentOperator.Divide: operation = SyntaxExpressionType.Divide; break;
+                case AssignmentOperator.Modulo: operation = SyntaxExpressionType.Modulo; break;
+                case AssignmentOperator.Multiply: operation = SyntaxExpressionType.Multiply; break;
+                case AssignmentOperator.BitwiseOr: operation = SyntaxExpressionType.BitwiseOr; break;
+                case AssignmentOperator.LeftShift: operation = SyntaxExpressionType.LeftShift; break;
+                case AssignmentOperator.RightShift: operation = SyntaxExpressionType.RightShift; break;
+                case AssignmentOperator.Substract: operation = SyntaxExpressionType.Subtract; break;
+                case AssignmentOperator.UnsignedRightShift: operation = SyntaxExpressionType.UnsignedRightShift; break;
+                case AssignmentOperator.BitwiseExclusiveOr: operation = SyntaxExpressionType.BitwiseExclusiveOr; break;
                 default: throw new NotImplementedException();
             }
 
@@ -1196,7 +1196,7 @@ namespace Jint.Backend.Dlr
         {
             switch (syntax.Operation)
             {
-                case BinaryExpressionType.And:
+                case SyntaxExpressionType.And:
                     var tmp = Expression.Parameter(typeof(JsInstance), "tmp");
 
                     return Expression.Block(
@@ -1215,7 +1215,7 @@ namespace Jint.Backend.Dlr
                         )
                     );
 
-                case BinaryExpressionType.Or:
+                case SyntaxExpressionType.Or:
                     tmp = Expression.Parameter(typeof(JsInstance), "tmp");
 
                     return Expression.Block(
@@ -1234,19 +1234,19 @@ namespace Jint.Backend.Dlr
                         )
                     );
 
-                case BinaryExpressionType.LeftShift:
-                case BinaryExpressionType.RightShift:
-                case BinaryExpressionType.UnsignedRightShift:
-                case BinaryExpressionType.Same:
-                case BinaryExpressionType.NotSame:
-                case BinaryExpressionType.In:
-                case BinaryExpressionType.InstanceOf:
-                case BinaryExpressionType.Plus:
-                case BinaryExpressionType.Div:
-                case BinaryExpressionType.Modulo:
-                case BinaryExpressionType.BitwiseAnd:
-                case BinaryExpressionType.BitwiseOr:
-                case BinaryExpressionType.BitwiseXOr:
+                case SyntaxExpressionType.LeftShift:
+                case SyntaxExpressionType.RightShift:
+                case SyntaxExpressionType.UnsignedRightShift:
+                case SyntaxExpressionType.Same:
+                case SyntaxExpressionType.NotSame:
+                case SyntaxExpressionType.In:
+                case SyntaxExpressionType.InstanceOf:
+                case SyntaxExpressionType.Add:
+                case SyntaxExpressionType.Divide:
+                case SyntaxExpressionType.Modulo:
+                case SyntaxExpressionType.BitwiseAnd:
+                case SyntaxExpressionType.BitwiseOr:
+                case SyntaxExpressionType.BitwiseExclusiveOr:
                     return Expression.Call(
                         _scope.Runtime,
                         typeof(JintRuntime).GetMethod("BinaryOperation"),
@@ -1260,23 +1260,23 @@ namespace Jint.Backend.Dlr
 
             switch (syntax.Operation)
             {
-                case BinaryExpressionType.Equal: expressionType = ExpressionType.Equal; break;
-                case BinaryExpressionType.Greater: expressionType = ExpressionType.GreaterThan; break;
-                case BinaryExpressionType.GreaterOrEqual: expressionType = ExpressionType.GreaterThanOrEqual; break;
-                case BinaryExpressionType.LeftShift: expressionType = ExpressionType.LeftShift; break;
-                case BinaryExpressionType.Lesser: expressionType = ExpressionType.LessThan; break;
-                case BinaryExpressionType.LesserOrEqual: expressionType = ExpressionType.LessThanOrEqual; break;
-                case BinaryExpressionType.Minus: expressionType = ExpressionType.Subtract; break;
-                case BinaryExpressionType.NotEqual: expressionType = ExpressionType.NotEqual; break;
-                case BinaryExpressionType.Pow: expressionType = ExpressionType.Power; break;
-                case BinaryExpressionType.RightShift: expressionType = ExpressionType.RightShift; break;
-                case BinaryExpressionType.Times: expressionType = ExpressionType.Multiply; break;
+                case SyntaxExpressionType.Equal: expressionType = ExpressionType.Equal; break;
+                case SyntaxExpressionType.GreaterThan: expressionType = ExpressionType.GreaterThan; break;
+                case SyntaxExpressionType.GreaterThanOrEqual: expressionType = ExpressionType.GreaterThanOrEqual; break;
+                case SyntaxExpressionType.LeftShift: expressionType = ExpressionType.LeftShift; break;
+                case SyntaxExpressionType.LessThan: expressionType = ExpressionType.LessThan; break;
+                case SyntaxExpressionType.LessThanOrEqual: expressionType = ExpressionType.LessThanOrEqual; break;
+                case SyntaxExpressionType.Subtract: expressionType = ExpressionType.Subtract; break;
+                case SyntaxExpressionType.NotEqual: expressionType = ExpressionType.NotEqual; break;
+                case SyntaxExpressionType.Power: expressionType = ExpressionType.Power; break;
+                case SyntaxExpressionType.RightShift: expressionType = ExpressionType.RightShift; break;
+                case SyntaxExpressionType.Multiply: expressionType = ExpressionType.Multiply; break;
                 default: throw new InvalidOperationException();
             }
 
             /*
-                case BinaryExpressionType.In: expressionType = ExpressionType.And; break;
-                case BinaryExpressionType.InstanceOf: expressionType = ExpressionType.And; break;
+                case SyntaxExpressionType.In: expressionType = ExpressionType.And; break;
+                case SyntaxExpressionType.InstanceOf: expressionType = ExpressionType.And; break;
             */
 
             return Expression.Dynamic(
@@ -1309,12 +1309,12 @@ namespace Jint.Backend.Dlr
         {
             switch (syntax.Operation)
             {
-                case UnaryExpressionType.PostfixPlusPlus:
-                case UnaryExpressionType.PostfixMinusMinus:
-                case UnaryExpressionType.PrefixPlusPlus:
-                case UnaryExpressionType.PrefixMinusMinus:
-                    bool isIncrement = syntax.Operation == UnaryExpressionType.PrefixPlusPlus || syntax.Operation == UnaryExpressionType.PostfixPlusPlus;
-                    bool isPrefix = syntax.Operation == UnaryExpressionType.PrefixMinusMinus || syntax.Operation == UnaryExpressionType.PrefixPlusPlus;
+                case SyntaxExpressionType.PostIncrementAssign:
+                case SyntaxExpressionType.PostDecrementAssign:
+                case SyntaxExpressionType.PreIncrementAssign:
+                case SyntaxExpressionType.PreDecrementAssign:
+                    bool isIncrement = syntax.Operation == SyntaxExpressionType.PreIncrementAssign || syntax.Operation == SyntaxExpressionType.PostIncrementAssign;
+                    bool isPrefix = syntax.Operation == SyntaxExpressionType.PreDecrementAssign || syntax.Operation == SyntaxExpressionType.PreIncrementAssign;
 
                     var tmp = Expression.Parameter(
                         typeof(JsInstance),
@@ -1357,14 +1357,14 @@ namespace Jint.Backend.Dlr
                         );
                     }
 
-                case UnaryExpressionType.Void:
+                case SyntaxExpressionType.Void:
                     return Expression.Block(
                         syntax.Operand.Accept(this),
                         Expression.Constant(JsUndefined.Instance)
                     );
 
-                case UnaryExpressionType.Inv:
-                case UnaryExpressionType.TypeOf:
+                case SyntaxExpressionType.BitwiseNot:
+                case SyntaxExpressionType.TypeOf:
                     return Expression.Call(
                         _scope.Runtime,
                         typeof(JintRuntime).GetMethod("UnaryOperation"),
@@ -1372,7 +1372,7 @@ namespace Jint.Backend.Dlr
                         Expression.Constant(syntax.Operation)
                     );
 
-                case UnaryExpressionType.Delete:
+                case SyntaxExpressionType.Delete:
                     var operand = (MemberSyntax)syntax.Operand;
 
                     if (operand.Type == SyntaxType.Property)
@@ -1404,9 +1404,9 @@ namespace Jint.Backend.Dlr
 
             switch (syntax.Operation)
             {
-                case UnaryExpressionType.Positive: operation = ExpressionType.UnaryPlus; break;
-                case UnaryExpressionType.Not: operation = ExpressionType.Not; break;
-                case UnaryExpressionType.Negate: operation = ExpressionType.Negate; break;
+                case SyntaxExpressionType.UnaryPlus: operation = ExpressionType.UnaryPlus; break;
+                case SyntaxExpressionType.Not: operation = ExpressionType.Not; break;
+                case SyntaxExpressionType.Negate: operation = ExpressionType.Negate; break;
                 default: throw new NotImplementedException();
             }
 

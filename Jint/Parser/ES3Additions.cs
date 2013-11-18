@@ -343,12 +343,12 @@ namespace Jint.Parser
     			case "-=" : return AssignmentOperator.Substract;
     			case "*=" : return AssignmentOperator.Multiply;
     			case "\\%=" : return AssignmentOperator.Modulo;
-    			case "<<=" : return AssignmentOperator.ShiftLeft;
-    			case ">>=" : return AssignmentOperator.ShiftRight;
+    			case "<<=" : return AssignmentOperator.LeftShift;
+    			case ">>=" : return AssignmentOperator.RightShift;
     			case ">>>=" : return AssignmentOperator.UnsignedRightShift;
-    			case "&=" : return AssignmentOperator.And;
-    			case "|=" : return AssignmentOperator.Or;
-    			case "^=" : return AssignmentOperator.XOr;
+    			case "&=" : return AssignmentOperator.BitwiseAnd;
+    			case "|=" : return AssignmentOperator.BitwiseOr;
+    			case "^=" : return AssignmentOperator.BitwiseExclusiveOr;
     			case "/=" : return AssignmentOperator.Divide;
     			default : throw new NotSupportedException("Invalid assignment operator: " + op);
     		}
