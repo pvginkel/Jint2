@@ -20,7 +20,6 @@ namespace Jint.Backend.Dlr
     internal class DlrBackend : IJintBackend
     {
         private readonly JintEngine _engine;
-        private readonly JintContext _context;
         private readonly JintRuntime _runtime;
         private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
 
@@ -49,7 +48,6 @@ namespace Jint.Backend.Dlr
             PermissionSet = new PermissionSet(PermissionState.None);
 
             _runtime = new JintRuntime(this, Options);
-            _context = new JintContext(_runtime.Global);
         }
 
         public object Run(ProgramSyntax program, bool unwrap)
@@ -61,7 +59,7 @@ namespace Jint.Backend.Dlr
 
             ResetExpressionDump();
 
-            var expression = program.Accept(new ExpressionVisitor(_context));
+            var expression = program.Accept(new ExpressionVisitor());
 
             PrintExpression(expression);
 
@@ -109,7 +107,7 @@ namespace Jint.Backend.Dlr
 
             return _runtime.CreateFunction(
                 function.Name,
-                new ExpressionVisitor(_context).DeclareFunction(function),
+                new ExpressionVisitor().DeclareFunction(function),
                 null,
                 function.Parameters.ToArray()
             );
@@ -229,7 +227,7 @@ namespace Jint.Backend.Dlr
 
         public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
         {
-            return new JsFunctionDelegate(this, _context, func, JsNull.Instance, delegateType).GetDelegate();
+            return new JsFunctionDelegate(this, func, JsNull.Instance, delegateType).GetDelegate();
         }
 
         public JsInstance Construct(JsFunction function, JsInstance[] parameters)

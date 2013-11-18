@@ -21,18 +21,9 @@ namespace Jint.Backend.Dlr
         private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors().Single();
         private static readonly MethodInfo _compareEquality = typeof(JintRuntime).GetMethod("CompareEquality");
 
-        private readonly JintContext _context;
         private Scope _scope;
 
         private const string RuntimeParameterName = "<>runtime";
-
-        public ExpressionVisitor(JintContext context)
-        {
-            if (context == null)
-                throw new ArgumentNullException("context");
-
-            _context = context;
-        }
 
         public Expression VisitProgram(ProgramSyntax syntax)
         {
@@ -238,11 +229,7 @@ namespace Jint.Backend.Dlr
                     Expression.Label(continueTarget),
                     // At the end of every iteration, perform the test.
                     Expression.IfThenElse(
-                        Expression.Dynamic(
-                            _context.Convert(typeof(bool), true),
-                            typeof(bool),
-                            syntax.Test.Accept(this)
-                        ),
+                        BuildToBoolean(syntax.Test.Accept(this)),
                         Expression.Empty(),
                         Expression.Goto(breakTarget)
                     )
@@ -350,14 +337,7 @@ namespace Jint.Backend.Dlr
             if (test != null)
             {
                 loopStatements.Add(Expression.IfThenElse(
-                    Expression.Dynamic(
-                        _context.Convert(
-                            typeof(bool),
-                            true
-                        ),
-                        typeof(bool),
-                        test
-                    ),
+                    BuildToBoolean(test),
                     Expression.Empty(),
                     Expression.Goto(breakTarget)
                 ));
@@ -407,11 +387,7 @@ namespace Jint.Backend.Dlr
         public Expression VisitIf(IfSyntax syntax)
         {
             return Expression.IfThenElse(
-                Expression.Dynamic(
-                    _context.Convert(typeof(bool), true),
-                    typeof(bool),
-                    syntax.Test.Accept(this)
-                ),
+                BuildToBoolean(syntax.Test.Accept(this)),
                 syntax.Then != null ? syntax.Then.Accept(this) : Expression.Empty(),
                 syntax.Else != null ? syntax.Else.Accept(this) : Expression.Empty()
             );
@@ -436,15 +412,6 @@ namespace Jint.Backend.Dlr
             var statements = new List<Expression>();
 
             var expression = Expression.Parameter(typeof(JsInstance), "expression");
-            var global = Expression.Parameter(typeof(JsGlobal), "global");
-
-            statements.Add(Expression.Assign(
-                global,
-                Expression.Property(
-                    _scope.Runtime,
-                    "Global"
-                )
-            ));
 
             statements.Add(Expression.Assign(
                 expression,
@@ -459,11 +426,10 @@ namespace Jint.Backend.Dlr
 
                 statements.Add(Expression.IfThen(
                     Expression.Call(
+                        _scope.Runtime,
                         _compareEquality,
-                        global,
                         expression,
-                        caseClause.Expression.Accept(this),
-                        Expression.Constant(ExpressionType.Equal)
+                        caseClause.Expression.Accept(this)
                     ),
                     Expression.Goto(target)
                 ));
@@ -493,7 +459,7 @@ namespace Jint.Backend.Dlr
 
             return Expression.Block(
                 typeof(void),
-                new[] { expression, global },
+                new[] { expression },
                 statements
             );
         }
@@ -601,11 +567,7 @@ namespace Jint.Backend.Dlr
                     typeof(void),
                     // At the beginning of every iteration, perform the test.
                     Expression.IfThenElse(
-                        Expression.Dynamic(
-                            _context.Convert(typeof(bool), true),
-                            typeof(bool),
-                            syntax.Test.Accept(this)
-                        ),
+                        BuildToBoolean(syntax.Test.Accept(this)),
                         Expression.Empty(),
                         Expression.Goto(breakTarget)
                     ),
@@ -647,15 +609,9 @@ namespace Jint.Backend.Dlr
 
             for (int i = 0; i < syntax.Parameters.Count; i++)
             {
-                statements.Add(Expression.Dynamic(
-                    _context.SetIndex(new CallInfo(0)),
-                    typeof(object),
+                statements.Add(BuildSetIndex(
                     array,
-                    Expression.Dynamic(
-                        _context.Convert(typeof(JsInstance), true),
-                        typeof(JsInstance),
-                        Expression.Constant(i.ToString(CultureInfo.InvariantCulture))
-                    ),
+                    BuildNewString(Expression.Constant(i.ToString(CultureInfo.InvariantCulture))),
                     syntax.Parameters[i].Accept(this)
                 ));
             }
@@ -898,28 +854,9 @@ namespace Jint.Backend.Dlr
                 target = Expression.Parameter(typeof(JsInstance), "target");
 
                 if (memberSyntax.Type == SyntaxType.Property)
-                {
-                    getter = Expression.Convert(
-                        Expression.Dynamic(
-                            _context.GetMember(((PropertySyntax)memberSyntax).Name),
-                            typeof(object),
-                            target
-                        ),
-                        typeof(JsInstance)
-                    );
-                }
+                    getter = BuildGetMember(target, ((PropertySyntax)memberSyntax).Name);
                 else
-                {
-                    getter = Expression.Convert(
-                        Expression.Dynamic(
-                            _context.GetIndex(new CallInfo(0)),
-                            typeof(object),
-                            target,
-                            BuildGet(((IndexerSyntax)memberSyntax).Index)
-                        ),
-                        typeof(JsInstance)
-                    );
-                }
+                    getter = BuildGetIndex(target, BuildGet(((IndexerSyntax)memberSyntax).Index));
 
                 statements.Add(Expression.Assign(target, memberSyntax.Expression.Accept(this)));
                 parameters.Add((ParameterExpression)target);
@@ -1111,10 +1048,9 @@ namespace Jint.Backend.Dlr
                 switch (declaration.Mode)
                 {
                     case PropertyExpressionType.Data:
-                        statements.Add(Expression.Dynamic(
-                            _context.SetMember(expression.Key),
-                            typeof(object),
+                        statements.Add(BuildSetMember(
                             obj,
+                            expression.Key,
                             declaration.Expression.Accept(this)
                         ));
                         break;
@@ -1204,11 +1140,7 @@ namespace Jint.Backend.Dlr
                         new[] { tmp },
                         Expression.Assign(tmp, syntax.Left.Accept(this)),
                         Expression.Condition(
-                            Expression.Dynamic(
-                                _context.Convert(typeof(bool), true),
-                                typeof(bool),
-                                tmp
-                            ),
+                            BuildToBoolean(tmp),
                             syntax.Right.Accept(this),
                             tmp,
                             typeof(JsInstance)
@@ -1223,82 +1155,27 @@ namespace Jint.Backend.Dlr
                         new[] { tmp },
                         Expression.Assign(tmp, syntax.Left.Accept(this)),
                         Expression.Condition(
-                            Expression.Dynamic(
-                                _context.Convert(typeof(bool), true),
-                                typeof(bool),
-                                tmp
-                            ),
+                            BuildToBoolean(tmp),
                             tmp,
                             syntax.Right.Accept(this),
                             typeof(JsInstance)
                         )
                     );
 
-                case SyntaxExpressionType.LeftShift:
-                case SyntaxExpressionType.RightShift:
-                case SyntaxExpressionType.UnsignedRightShift:
-                case SyntaxExpressionType.Same:
-                case SyntaxExpressionType.NotSame:
-                case SyntaxExpressionType.In:
-                case SyntaxExpressionType.InstanceOf:
-                case SyntaxExpressionType.Add:
-                case SyntaxExpressionType.Divide:
-                case SyntaxExpressionType.Modulo:
-                case SyntaxExpressionType.BitwiseAnd:
-                case SyntaxExpressionType.BitwiseOr:
-                case SyntaxExpressionType.BitwiseExclusiveOr:
+                default:
                     return Expression.Call(
                         _scope.Runtime,
-                        typeof(JintRuntime).GetMethod("BinaryOperation"),
+                        typeof(JintRuntime).GetMethod("Operation_" + syntax.Operation),
                         syntax.Left.Accept(this),
-                        syntax.Right.Accept(this),
-                        Expression.Constant(syntax.Operation)
+                        syntax.Right.Accept(this)
                     );
             }
-
-            ExpressionType expressionType;
-
-            switch (syntax.Operation)
-            {
-                case SyntaxExpressionType.Equal: expressionType = ExpressionType.Equal; break;
-                case SyntaxExpressionType.GreaterThan: expressionType = ExpressionType.GreaterThan; break;
-                case SyntaxExpressionType.GreaterThanOrEqual: expressionType = ExpressionType.GreaterThanOrEqual; break;
-                case SyntaxExpressionType.LeftShift: expressionType = ExpressionType.LeftShift; break;
-                case SyntaxExpressionType.LessThan: expressionType = ExpressionType.LessThan; break;
-                case SyntaxExpressionType.LessThanOrEqual: expressionType = ExpressionType.LessThanOrEqual; break;
-                case SyntaxExpressionType.Subtract: expressionType = ExpressionType.Subtract; break;
-                case SyntaxExpressionType.NotEqual: expressionType = ExpressionType.NotEqual; break;
-                case SyntaxExpressionType.Power: expressionType = ExpressionType.Power; break;
-                case SyntaxExpressionType.RightShift: expressionType = ExpressionType.RightShift; break;
-                case SyntaxExpressionType.Multiply: expressionType = ExpressionType.Multiply; break;
-                default: throw new InvalidOperationException();
-            }
-
-            /*
-                case SyntaxExpressionType.In: expressionType = ExpressionType.And; break;
-                case SyntaxExpressionType.InstanceOf: expressionType = ExpressionType.And; break;
-            */
-
-            return Expression.Dynamic(
-                _context.Convert(typeof(JsInstance), true),
-                typeof(JsInstance),
-                Expression.Dynamic(
-                    _context.BinaryOperation(expressionType),
-                    typeof(object),
-                    syntax.Left.Accept(this),
-                    syntax.Right.Accept(this)
-                )
-            );
         }
 
         public Expression VisitTernary(TernarySyntax syntax)
         {
             return Expression.Condition(
-                Expression.Dynamic(
-                    _context.Convert(typeof(bool), true),
-                    typeof(bool),
-                    syntax.Test.Accept(this)
-                ),
+                BuildToBoolean(syntax.Test.Accept(this)),
                 syntax.Then.Accept(this),
                 syntax.Else.Accept(this),
                 typeof(JsInstance)
@@ -1321,16 +1198,10 @@ namespace Jint.Backend.Dlr
                         "tmp"
                     );
 
-                    var calculationExpression = Expression.Dynamic(
-                        _context.Convert(typeof(JsInstance), true),
-                        typeof(JsInstance),
+                    var calculationExpression = BuildNewNumber(
                         Expression.MakeBinary(
                             isIncrement ? ExpressionType.Add : ExpressionType.Subtract,
-                            Expression.Dynamic(
-                                _context.Convert(typeof(double), true),
-                                typeof(double),
-                                tmp
-                            ),
+                            BuildToNumber(tmp),
                             Expression.Constant(1d)
                         )
                     );
@@ -1363,61 +1234,31 @@ namespace Jint.Backend.Dlr
                         Expression.Constant(JsUndefined.Instance)
                     );
 
-                case SyntaxExpressionType.BitwiseNot:
-                case SyntaxExpressionType.TypeOf:
-                    return Expression.Call(
-                        _scope.Runtime,
-                        typeof(JintRuntime).GetMethod("UnaryOperation"),
-                        BuildGet(syntax.Operand),
-                        Expression.Constant(syntax.Operation)
-                    );
-
                 case SyntaxExpressionType.Delete:
                     var operand = (MemberSyntax)syntax.Operand;
 
                     if (operand.Type == SyntaxType.Property)
                     {
-                        return Expression.Block(
-                            Expression.Dynamic(
-                                _context.DeleteMember(((PropertySyntax)operand).Name),
-                                typeof(void),
-                                operand.Expression.Accept(this)
-                            ),
-                            Expression.Default(typeof(JsInstance))
+                        return BuildDeleteMember(
+                            operand.Expression.Accept(this),
+                            ((PropertySyntax)operand).Name
                         );
                     }
                     else
                     {
-                        return Expression.Block(
-                            Expression.Dynamic(
-                                _context.DeleteIndex(new CallInfo(0)),
-                                typeof(void),
-                                operand.Expression.Accept(this),
-                                ((IndexerSyntax)operand).Index.Accept(this)
-                            ),
-                            Expression.Default(typeof(JsInstance))
+                        return BuildDeleteIndex(
+                            operand.Expression.Accept(this),
+                            ((IndexerSyntax)operand).Index.Accept(this)
                         );
                     }
+
+                default:
+                    return Expression.Call(
+                        _scope.Runtime,
+                        typeof(JintRuntime).GetMethod("Operation_" + syntax.Operation),
+                        syntax.Operand.Accept(this)
+                    );
             }
-
-            ExpressionType operation;
-
-            switch (syntax.Operation)
-            {
-                case SyntaxExpressionType.UnaryPlus: operation = ExpressionType.UnaryPlus; break;
-                case SyntaxExpressionType.Not: operation = ExpressionType.Not; break;
-                case SyntaxExpressionType.Negate: operation = ExpressionType.Negate; break;
-                default: throw new NotImplementedException();
-            }
-
-            return Expression.Convert(
-                Expression.Dynamic(
-                    _context.UnaryOperation(operation),
-                    typeof(object),
-                    syntax.Operand.Accept(this)
-                ),
-                typeof(JsInstance)
-            );
         }
 
         public Expression VisitValue(ValueSyntax syntax)
@@ -1514,26 +1355,17 @@ namespace Jint.Backend.Dlr
                 case SyntaxType.Property:
                     var property = (PropertySyntax)syntax;
 
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _context.GetMember(property.Name),
-                            typeof(object),
-                            property.Expression.Accept(this)
-                        ),
-                        typeof(JsInstance)
+                    return BuildGetMember(
+                        property.Expression.Accept(this),
+                        property.Name
                     );
 
                 case SyntaxType.Indexer:
                     var indexer = (IndexerSyntax)syntax;
 
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _context.GetIndex(new CallInfo(0)),
-                            typeof(object),
-                            BuildGet(indexer.Expression, withTarget),
-                            indexer.Index.Accept(this)
-                        ),
-                        typeof(JsInstance)
+                    return BuildGetIndex(
+                        BuildGet(indexer.Expression, withTarget),
+                        indexer.Index.Accept(this)
                     );
 
                 default:
@@ -1554,28 +1386,19 @@ namespace Jint.Backend.Dlr
                 case SyntaxType.Property:
                     var property = (PropertySyntax)syntax;
 
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _context.SetMember(property.Name),
-                            typeof(object),
-                            property.Expression.Accept(this),
-                            value
-                        ),
-                        typeof(JsInstance)
+                    return BuildSetMember(
+                        property.Expression.Accept(this),
+                        property.Name,
+                        value
                     );
 
                 case SyntaxType.Indexer:
                     var indexer = (IndexerSyntax)syntax;
 
-                    return Expression.Convert(
-                        Expression.Dynamic(
-                            _context.SetIndex(new CallInfo(0)),
-                            typeof(object),
-                            BuildGet(indexer.Expression),
-                            indexer.Index.Accept(this),
-                            value
-                        ),
-                        typeof(JsInstance)
+                    return BuildSetIndex(
+                        BuildGet(indexer.Expression),
+                        indexer.Index.Accept(this),
+                        value
                     );
 
                 default:

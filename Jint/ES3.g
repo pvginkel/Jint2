@@ -814,7 +814,7 @@ unaryOperator returns [SyntaxExpressionType value]
 	| VOID { $value = SyntaxExpressionType.Void; }
 	| TYPEOF { $value = SyntaxExpressionType.TypeOf; }
 	| INC { $value = SyntaxExpressionType.PreIncrementAssign; }
-	| DEC { $value = SyntaxExpressionType.PostIncrementAssign; }
+	| DEC { $value = SyntaxExpressionType.PreDecrementAssign; }
 	| op=ADD { $op.Type = POS; $value = SyntaxExpressionType.UnaryPlus; }
 	| op=SUB { $op.Type = NEG; $value = SyntaxExpressionType.Negate; }
 	| INV { $value = SyntaxExpressionType.BitwiseNot; }

@@ -183,14 +183,14 @@ namespace Jint.Native
             }
         }
 
-        public virtual void Delete(JsInstance key)
+        public virtual bool Delete(JsInstance key)
         {
-            Delete(key.ToString());
+            return Delete(key.ToString());
         }
 
-        public virtual void Delete(string index)
+        public virtual bool Delete(string index)
         {
-            Descriptor d = null;
+            Descriptor d;
             if (TryGetDescriptor(index, out d) && d.Owner == this)
             {
                 if (d.Configurable)
@@ -204,6 +204,8 @@ namespace Jint.Native
                     throw new JintException("Property " + index + " isn't configurable");
                 }
             }
+
+            return true;
         }
 
         public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes propertyAttributes)

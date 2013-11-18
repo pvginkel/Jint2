@@ -183,21 +183,27 @@ namespace Jint.Native {
             return right;
         }
 
-        public override void Delete(JsInstance key) {
+        public override bool Delete(JsInstance key) {
             double keyNumber = key.ToNumber();
             int index = (int)keyNumber;
             if (index == keyNumber)
+            {
                 _data.Remove(index);
-            else
-                base.Delete(key.ToString());
+                return true;
+            }
+
+            return base.Delete(key.ToString());
         }
 
-        public override void Delete(string key) {
+        public override bool Delete(string key) {
             int index;
-            if(int.TryParse(key, out index))
+            if (int.TryParse(key, out index))
+            {
                 _data.Remove(index);
-            else
-                base.Delete(key);
+                return true;
+            }
+
+            return base.Delete(key);
         }
 
         #region array specific methods

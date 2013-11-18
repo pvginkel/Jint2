@@ -17,13 +17,12 @@ namespace Jint.Marshal
         private Delegate _impl;
 // ReSharper disable NotAccessedField.Local
         private readonly IJintBackend _backend;
-        private readonly JintContext _context;
         private JsFunction _function;
         private JsDictionaryObject _that;
 // ReSharper restore NotAccessedField.Local
         private readonly Type _delegateType;
 
-        public JsFunctionDelegate(IJintBackend backend, JintContext context, JsFunction function, JsDictionaryObject that, Type delegateType)
+        public JsFunctionDelegate(IJintBackend backend, JsFunction function, JsDictionaryObject that, Type delegateType)
         {
             if (backend == null)
                 throw new ArgumentNullException("backend");
@@ -35,7 +34,6 @@ namespace Jint.Marshal
                 throw new ArgumentException("A delegate type is required", "delegateType");
 
             _backend = backend;
-            _context = context;
             _function = function;
             _delegateType = delegateType;
             _that = that;
@@ -77,9 +75,9 @@ namespace Jint.Marshal
 
             if (invokeMethod.ReturnType != typeof(void))
             {
-                call = Expression.Dynamic(
-                    _context.Convert(invokeMethod.ReturnType, true),
-                    invokeMethod.ReturnType,
+                call = Expression.Call(
+                    Expression.Constant(_backend.Global.Marshaller),
+                    typeof(Marshaller).GetMethod("MarshalJsValue").MakeGenericMethod(invokeMethod.ReturnType),
                     Expression.Property(
                         call,
                         typeof(JsFunctionResult).GetProperty("Result")

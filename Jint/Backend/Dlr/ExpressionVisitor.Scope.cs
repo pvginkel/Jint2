@@ -94,28 +94,17 @@ namespace Jint.Backend.Dlr
                 switch (variable.Type)
                 {
                     case VariableType.Global:
-                        return Expression.Convert(
-                            Expression.Dynamic(
-                                _visitor._context.SetMember(variable.Name),
-                                typeof(object),
-                                Expression.Property(
-                                    Runtime,
-                                    JintRuntime.GlobalScopeName
-                                ),
-                                value
-                            ),
-                            typeof(JsInstance)
+                        return _visitor.BuildSetMember(
+                            Expression.Property(Runtime, JintRuntime.GlobalScopeName),
+                            variable.Name,
+                            value
                         );
 
                     case VariableType.Parameter:
-                        return Expression.Convert(
-                            Expression.Dynamic(
-                                _visitor._context.SetMember(variable.Index.ToString(CultureInfo.InvariantCulture)),
-                                typeof(object),
-                                ResolveArgumentsLocal(variable),
-                                value
-                            ),
-                            typeof(JsInstance)
+                        return _visitor.BuildSetMember(
+                            ResolveArgumentsLocal(variable),
+                            variable.Index.ToString(CultureInfo.InvariantCulture),
+                            value
                         );
 
                     case VariableType.WithScope:
@@ -144,10 +133,9 @@ namespace Jint.Backend.Dlr
                                         typeof(JsDictionaryObject).GetMethod("HasProperty", new[] { typeof(string) }),
                                         Expression.Constant(variable.FallbackVariable.Name)
                                     ),
-                                    Expression.Dynamic(
-                                        _visitor._context.SetMember(variable.FallbackVariable.Name),
-                                        typeof(object),
+                                    _visitor.BuildSetMember(
                                         withLocal,
+                                        variable.FallbackVariable.Name,
                                         resultParameter
                                     ),
                                     result,
@@ -191,26 +179,15 @@ namespace Jint.Backend.Dlr
                 switch (variable.Type)
                 {
                     case VariableType.Global:
-                        return Expression.Convert(
-                            Expression.Dynamic(
-                                _visitor._context.GetMember(variable.Name),
-                                typeof(object),
-                                Expression.Property(
-                                    Runtime,
-                                    JintRuntime.GlobalScopeName
-                                )
-                            ),
-                            typeof(JsInstance)
+                        return _visitor.BuildGetMember(
+                            Expression.Property(Runtime, JintRuntime.GlobalScopeName),
+                            variable.Name
                         );
 
                     case VariableType.Parameter:
-                        return Expression.Convert(
-                            Expression.Dynamic(
-                                _visitor._context.GetMember(variable.Index.ToString(CultureInfo.InvariantCulture)),
-                                typeof(object),
-                                ResolveArgumentsLocal(variable)
-                            ),
-                            typeof(JsInstance)
+                        return _visitor.BuildGetMember(
+                            ResolveArgumentsLocal(variable),
+                            variable.Index.ToString(CultureInfo.InvariantCulture)
                         );
 
                     case VariableType.WithScope:
@@ -222,13 +199,9 @@ namespace Jint.Backend.Dlr
                         {
                             var withLocal = Expression.Parameter(typeof(JsDictionaryObject), "with");
 
-                            Expression getter = Expression.Convert(
-                                Expression.Dynamic(
-                                    _visitor._context.GetMember(variable.FallbackVariable.Name),
-                                    typeof(object),
-                                    withLocal
-                                ),
-                                typeof(JsInstance)
+                            Expression getter = _visitor.BuildGetMember(
+                                withLocal,
+                                variable.FallbackVariable.Name
                             );
 
                             if (withTarget != null)
