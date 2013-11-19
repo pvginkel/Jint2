@@ -19,6 +19,16 @@ namespace Jint.Backend.Dlr
         private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors().Single();
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
 
+        private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a)
+        {
+            return GetOperationMethodKey(operation, a, ValueType.Unset);
+        }
+
+        private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a, ValueType b)
+        {
+            return GetOperationMethodKey(operation, a, b, ValueType.Unset);
+        }
+
         private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a, ValueType b, ValueType c)
         {
             return (int)operation << 24 | (int)a << 16 | (int)b << 8 | (int)c;
@@ -70,7 +80,6 @@ namespace Jint.Backend.Dlr
             MethodInfo result;
             _operationCache.TryGetValue(GetOperationMethodKey(operation, a, b, c), out result);
             return result;
-
         }
 
         private Scope _scope;

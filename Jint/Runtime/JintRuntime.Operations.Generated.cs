@@ -41,11 +41,6 @@ namespace Jint.Runtime
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(bool left, bool right)
-        {
-            return left == right;
-        }
-
         public static bool Operation_Equal(bool left, double right)
         {
             return CompareEquality(left, right);
@@ -66,11 +61,6 @@ namespace Jint.Runtime
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(double left, double right)
-        {
-            return left == right;
-        }
-
         public static bool Operation_Equal(double left, string right)
         {
             return CompareEquality(left, right);
@@ -89,11 +79,6 @@ namespace Jint.Runtime
         public static bool Operation_Equal(string left, double right)
         {
             return CompareEquality(left, right);
-        }
-
-        public static bool Operation_Equal(string left, string right)
-        {
-            return left == right;
         }
 
         public bool Operation_NotEqual(JsInstance left, JsInstance right)
@@ -121,11 +106,6 @@ namespace Jint.Runtime
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(bool left, bool right)
-        {
-            return left != right;
-        }
-
         public static bool Operation_NotEqual(bool left, double right)
         {
             return !CompareEquality(left, right);
@@ -146,11 +126,6 @@ namespace Jint.Runtime
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(double left, double right)
-        {
-            return left != right;
-        }
-
         public static bool Operation_NotEqual(double left, string right)
         {
             return !CompareEquality(left, right);
@@ -169,11 +144,6 @@ namespace Jint.Runtime
         public static bool Operation_NotEqual(string left, double right)
         {
             return !CompareEquality(left, right);
-        }
-
-        public static bool Operation_NotEqual(string left, string right)
-        {
-            return left != right;
         }
 
         public static bool Operation_LessThan(JsInstance left, JsInstance right)
@@ -227,11 +197,6 @@ namespace Jint.Runtime
         public static bool Operation_LessThan(double left, bool right)
         {
             return left < JsBoolean.BooleanToNumber(right);
-        }
-
-        public static bool Operation_LessThan(double left, double right)
-        {
-            return left < right;
         }
 
         public static bool Operation_LessThan(double left, string right)
@@ -312,11 +277,6 @@ namespace Jint.Runtime
             return left <= JsBoolean.BooleanToNumber(right);
         }
 
-        public static bool Operation_LessThanOrEqual(double left, double right)
-        {
-            return left <= right;
-        }
-
         public static bool Operation_LessThanOrEqual(double left, string right)
         {
             return left <= JsString.StringToNumber(right);
@@ -393,11 +353,6 @@ namespace Jint.Runtime
         public static bool Operation_GreaterThan(double left, bool right)
         {
             return left > JsBoolean.BooleanToNumber(right);
-        }
-
-        public static bool Operation_GreaterThan(double left, double right)
-        {
-            return left > right;
         }
 
         public static bool Operation_GreaterThan(double left, string right)
@@ -478,11 +433,6 @@ namespace Jint.Runtime
             return left >= JsBoolean.BooleanToNumber(right);
         }
 
-        public static bool Operation_GreaterThanOrEqual(double left, double right)
-        {
-            return left >= right;
-        }
-
         public static bool Operation_GreaterThanOrEqual(double left, string right)
         {
             return left >= JsString.StringToNumber(right);
@@ -533,11 +483,6 @@ namespace Jint.Runtime
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(bool left, bool right)
-        {
-            return left == right;
-        }
-
         public static bool Operation_Same(bool left, double right)
         {
             return CompareSame(left, right);
@@ -558,11 +503,6 @@ namespace Jint.Runtime
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(double left, double right)
-        {
-            return left == right;
-        }
-
         public static bool Operation_Same(double left, string right)
         {
             return CompareSame(left, right);
@@ -581,11 +521,6 @@ namespace Jint.Runtime
         public static bool Operation_Same(string left, double right)
         {
             return CompareSame(left, right);
-        }
-
-        public static bool Operation_Same(string left, string right)
-        {
-            return left == right;
         }
 
         public static bool Operation_NotSame(JsInstance left, JsInstance right)
@@ -613,11 +548,6 @@ namespace Jint.Runtime
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(bool left, bool right)
-        {
-            return left != right;
-        }
-
         public static bool Operation_NotSame(bool left, double right)
         {
             return !CompareSame(left, right);
@@ -638,11 +568,6 @@ namespace Jint.Runtime
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(double left, double right)
-        {
-            return left != right;
-        }
-
         public static bool Operation_NotSame(double left, string right)
         {
             return !CompareSame(left, right);
@@ -661,11 +586,6 @@ namespace Jint.Runtime
         public static bool Operation_NotSame(string left, double right)
         {
             return !CompareSame(left, right);
-        }
-
-        public static bool Operation_NotSame(string left, string right)
-        {
-            return left != right;
         }
 
     }

@@ -36,6 +36,27 @@ namespace Jint.Runtime
                     (left == "JsInstance" || right == "JsInstance")
                 )
                     isStatic = false;
+
+                bool skip = false;
+
+                switch (operation) {
+                    case Operation.Equal:
+                    case Operation.Same:
+                    case Operation.NotEqual:
+                    case Operation.NotSame:
+                        skip = left == right && left != "JsInstance";
+                        break;
+
+                    case Operation.LessThan:
+                    case Operation.LessThanOrEqual:
+                    case Operation.GreaterThan:
+                    case Operation.GreaterThanOrEqual:
+                        skip = left == "double" && right == "double";
+                        break;
+                }
+
+                if (skip)
+                    continue;
 #>
         public <#= isStatic ? "static " : "" #>bool Operation_<#= operation.ToString() #>(<#= left #> left, <#= right #> right)
         {

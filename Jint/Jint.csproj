@@ -60,6 +60,7 @@
     <Compile Include="Backend\Dlr\DlrBackend.cs" />
     <Compile Include="Backend\Dlr\DlrFunctionDelegate.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.Builders.cs" />
+    <Compile Include="Backend\Dlr\ExpressionVisitor.OperationBuilders.cs" />
     <Compile Include="Backend\Dlr\TypeMarkerPhase.cs" />
     <Compile Include="ExpressionExtensions\ConvertFromJsExpression.cs" />
     <Compile Include="ExpressionExtensions\ConvertToJsExpression.cs" />

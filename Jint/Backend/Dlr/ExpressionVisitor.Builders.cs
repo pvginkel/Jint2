@@ -152,13 +152,18 @@ namespace Jint.Backend.Dlr
             value = EnsureJs(value);
 
             var method = FindOperationMethod(operation, ValueType.Unknown, indexType, ValueType.Unknown);
+            var builder = FindOperationBuilder(operation, ValueType.Unknown, indexType, ValueType.Unknown);
 
-            if (method == null)
+            if (method == null && builder == null)
             {
                 method = FindOperationMethod(operation, ValueType.Unknown, ValueType.Unknown, ValueType.Unknown);
+                builder = FindOperationBuilder(operation, ValueType.Unknown, ValueType.Unknown, ValueType.Unknown);
 
                 index = EnsureJs(index);
             }
+
+            if (builder != null)
+                return builder(new[] { obj, index, value });
 
             return Expression.Call(
                 method.IsStatic ? null : _scope.Runtime,
@@ -175,29 +180,36 @@ namespace Jint.Backend.Dlr
             var rightType = SyntaxUtil.GetValueType(right.Type);
 
             var method = FindOperationMethod(operation, leftType, rightType);
+            var builder = FindOperationBuilder(operation, leftType, rightType);
 
-            if (method == null)
+            if (method == null && builder == null)
             {
                 method = FindOperationMethod(operation, leftType, ValueType.Unknown);
+                builder = FindOperationBuilder(operation, leftType, ValueType.Unknown);
 
-                if (method != null)
+                if (method != null || builder != null)
                     right = EnsureJs(right);
             }
 
-            if (method == null)
+            if (method == null && builder == null)
             {
                 method = FindOperationMethod(operation, ValueType.Unknown, rightType);
+                builder = FindOperationBuilder(operation, ValueType.Unknown, rightType);
 
-                if (method != null)
+                if (method != null || builder != null)
                     left = EnsureJs(left);
             }
 
-            if (method == null)
+            if (method == null && builder == null)
             {
                 method = FindOperationMethod(operation, ValueType.Unknown, ValueType.Unknown);
+                builder = FindOperationBuilder(operation, ValueType.Unknown, ValueType.Unknown);
                 left = EnsureJs(left);
                 right = EnsureJs(right);
             }
+
+            if (builder != null)
+                return builder(new[] { left, right });
 
             return Expression.Call(
                 method.IsStatic ? null : _scope.Runtime,
@@ -212,12 +224,17 @@ namespace Jint.Backend.Dlr
             var operandType = SyntaxUtil.GetValueType(operand.Type);
 
             var method = FindOperationMethod(operation, operandType);
+            var builder = FindOperationBuilder(operation, operandType);
 
-            if (method == null)
+            if (method == null && builder == null)
             {
                 method = FindOperationMethod(operation, ValueType.Unknown);
+                builder = FindOperationBuilder(operation, ValueType.Unknown);
                 operand = EnsureJs(operand);
             }
+
+            if (builder != null)
+                return builder(new[] { operand });
 
             return Expression.Call(
                 method.IsStatic ? null : _scope.Runtime,

@@ -30,11 +30,6 @@ namespace Jint.Runtime
             return left.ToPrimitive(Global).ToString() + right;
         }
 
-        public static string Operation_Add(string left, string right)
-        {
-            return left + right;
-        }
-
         public JsInstance Operation_Add(double left, JsInstance right)
         {
             var rightPrimitive = right.ToPrimitive(Global);
@@ -53,11 +48,6 @@ namespace Jint.Runtime
                 return _stringClass.New(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
 
             return _numberClass.New(leftPrimitive.ToNumber() + right);
-        }
-
-        public static double Operation_Add(double left, double right)
-        {
-            return left + right;
         }
 
         public static double Operation_BitwiseAnd(JsInstance left, JsInstance right)
@@ -82,11 +72,6 @@ namespace Jint.Runtime
                 return 0;
 
             return (long)left.ToNumber() & (long)right;
-        }
-
-        public static double Operation_BitwiseAnd(double left, double right)
-        {
-            return (long)left & (long)right;
         }
 
         public static double Operation_BitwiseExclusiveOr(JsInstance left, JsInstance right)
@@ -121,19 +106,9 @@ namespace Jint.Runtime
             return (long)left.ToNumber() ^ (long)right;
         }
 
-        public static double Operation_BitwiseExclusiveOr(double left, double right)
-        {
-            return (long)left ^ (long)right;
-        }
-
         public static double Operation_BitwiseNot(JsInstance operand)
         {
             return 0 - operand.ToNumber() - 1;
-        }
-
-        public static double Operation_BitwiseNot(double operand)
-        {
-            return 0 - operand - 1;
         }
 
         public static double Operation_BitwiseOr(JsInstance left, JsInstance right)
@@ -166,11 +141,6 @@ namespace Jint.Runtime
                 return (long)right;
 
             return (long)left.ToNumber() | (long)right;
-        }
-
-        public static double Operation_BitwiseOr(double left, double right)
-        {
-            return (long)left | (long)right;
         }
 
         public static double Operation_Divide(JsInstance left, JsInstance right)
@@ -243,11 +213,6 @@ namespace Jint.Runtime
             return (long)left.ToNumber() << (ushort)right;
         }
 
-        public static double Operation_LeftShift(double left, double right)
-        {
-            return (long)left << (ushort)right;
-        }
-
         public static double Operation_Modulo(JsInstance left, JsInstance right)
         {
             double rightNumber = right.ToNumber();
@@ -309,19 +274,9 @@ namespace Jint.Runtime
             return -operand.ToNumber();
         }
 
-        public static double Operation_Negate(double operand)
-        {
-            return -operand;
-        }
-
         public static bool Operation_Not(JsInstance operand)
         {
             return !operand.ToBoolean();
-        }
-
-        public static bool Operation_Not(bool operand)
-        {
-            return !operand;
         }
 
         public static double Operation_Power(JsInstance left, JsInstance right)
@@ -337,11 +292,6 @@ namespace Jint.Runtime
         public static double Operation_Power(JsInstance left, double right)
         {
             return Math.Pow(left.ToNumber(), right);
-        }
-
-        public static double Operation_Power(double left, double right)
-        {
-            return Math.Pow(left, right);
         }
 
         public static double Operation_RightShift(JsInstance left, JsInstance right)
@@ -367,11 +317,6 @@ namespace Jint.Runtime
             return (long)left.ToNumber() >> (ushort)right;
         }
 
-        public static double Operation_RightShift(double left, double right)
-        {
-            return (long)left >> (ushort)right;
-        }
-
         public static double Operation_Subtract(JsInstance left, JsInstance right)
         {
             return left.ToNumber() - right.ToNumber();
@@ -385,11 +330,6 @@ namespace Jint.Runtime
         public static double Operation_Subtract(JsInstance left, double right)
         {
             return left.ToNumber() - right;
-        }
-
-        public static double Operation_Subtract(double left, double right)
-        {
-            return left - right;
         }
 
         public static string Operation_TypeOf(JsInstance operand)
@@ -411,29 +351,9 @@ namespace Jint.Runtime
             }
         }
 
-        public static string Operation_TypeOf(bool operand)
-        {
-            return JsInstance.TypeBoolean;
-        }
-
-        public static string Operation_TypeOf(double operand)
-        {
-            return JsInstance.TypeNumber;
-        }
-
-        public static string Operation_TypeOf(string operand)
-        {
-            return JsInstance.TypeString;
-        }
-
         public static double Operation_UnaryPlus(JsInstance operand)
         {
             return operand.ToNumber();
-        }
-
-        public static double Operation_UnaryPlus(double operand)
-        {
-            return operand;
         }
 
         public static double Operation_UnsignedRightShift(JsInstance left, JsInstance right)
@@ -459,11 +379,6 @@ namespace Jint.Runtime
             return (long)left.ToNumber() >> (ushort)right;
         }
 
-        public static double Operation_UnsignedRightShift(double left, double right)
-        {
-            return (long)left >> (ushort)right;
-        }
-
         public JsInstance Operation_Index(JsInstance obj, JsInstance index)
         {
             var stringObj = obj as JsString;
@@ -479,11 +394,6 @@ namespace Jint.Runtime
             return ((JsDictionaryObject)obj)[index];
         }
 
-        public static string Operation_Index(string obj, double index)
-        {
-            return obj.Substring((int)index, 1);
-        }
-
         public JsInstance Operation_Index(JsInstance obj, double index)
         {
             var array = obj as JsArray;
@@ -497,11 +407,6 @@ namespace Jint.Runtime
             return Operation_Index(obj, _numberClass.New(index));
         }
 
-        public static JsInstance Operation_SetIndex(JsInstance obj, JsInstance index, JsInstance value)
-        {
-            return ((JsDictionaryObject)obj)[index] = value;
-        }
-
         public JsInstance Operation_SetIndex(JsInstance obj, double index, JsInstance value)
         {
             var array = obj as JsArray;
@@ -512,17 +417,7 @@ namespace Jint.Runtime
                     return array.Put(intIndex, value);
             }
 
-            return Operation_SetIndex(obj, _numberClass.New(index), value);
-        }
-
-        public static bool Operation_Delete(JsInstance obj, JsInstance index)
-        {
-            return ((JsDictionaryObject)obj).Delete(index);
-        }
-
-        public static bool Operation_Delete(JsInstance obj, string index)
-        {
-            return ((JsDictionaryObject)obj).Delete(index);
+            return ((JsDictionaryObject)obj)[_numberClass.New(index)] = value;
         }
     }
 }
