@@ -14,6 +14,11 @@ namespace Jint.Expressions
         public string Name { get; private set; }
         internal Variable Target { get; set; }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
+
         public PropertySyntax(ExpressionSyntax expression, string name)
             : base(expression)
         {

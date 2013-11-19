@@ -13,6 +13,11 @@ namespace Jint.Expressions
 
         public string Text { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
+
         public ClrIdentifierSyntax(string text)
         {
             if (text == null)

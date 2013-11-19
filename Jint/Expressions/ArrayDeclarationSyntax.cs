@@ -15,6 +15,11 @@ namespace Jint.Expressions
 
         public IList<SyntaxNode> Parameters { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
+
         public ArrayDeclarationSyntax(IEnumerable<SyntaxNode> parameters)
         {
             if (parameters == null)

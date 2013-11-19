@@ -9,6 +9,14 @@ namespace Jint.Native
     [Serializable]
     public class JsNumberConstructor : JsConstructor
     {
+        public JsNumber MinValue { get; private set; }
+        public JsNumber MaxValue { get; private set; }
+        public JsNumber NaN { get; private set; }
+        public JsNumber NegativeInfinity { get; private set; }
+        public JsNumber PositiveInfinity { get; private set; }
+        public JsNumber Zero { get; private set; }
+        public JsNumber One { get; private set; }
+
         public JsNumberConstructor(IGlobal global)
             : base(global)
         {
@@ -16,11 +24,18 @@ namespace Jint.Native
 
             DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontEnum | PropertyAttributes.DontDelete);
 
-            DefineOwnProperty("MAX_VALUE", New(Double.MaxValue));
-            DefineOwnProperty("MIN_VALUE", New(Double.MinValue));
-            DefineOwnProperty("NaN", New(Double.NaN));
-            DefineOwnProperty("NEGATIVE_INFINITY", New(Double.PositiveInfinity));
-            DefineOwnProperty("POSITIVE_INFINITY", New(Double.NegativeInfinity));
+            Zero = new JsNumber(0, PrototypeProperty);
+            One = new JsNumber(1, PrototypeProperty);
+            MaxValue = new JsNumber(Double.MaxValue, PrototypeProperty);
+            DefineOwnProperty("MAX_VALUE", MaxValue);
+            MinValue = new JsNumber(Double.MinValue, PrototypeProperty);
+            DefineOwnProperty("MIN_VALUE", MinValue);
+            NaN = new JsNumber(Double.NaN, PrototypeProperty);
+            DefineOwnProperty("NaN", NaN);
+            PositiveInfinity = new JsNumber(Double.PositiveInfinity, PrototypeProperty);
+            DefineOwnProperty("POSITIVE_INFINITY", PositiveInfinity);
+            NegativeInfinity = new JsNumber(Double.NegativeInfinity, PrototypeProperty);
+            DefineOwnProperty("NEGATIVE_INFINITY", NegativeInfinity);
         }
 
         public override void InitPrototype(IGlobal global)
@@ -36,6 +51,17 @@ namespace Jint.Native
 
         public JsNumber New(double value)
         {
+            if (Double.IsPositiveInfinity(value))
+                return PositiveInfinity;
+            if (Double.IsNegativeInfinity(value))
+                return NegativeInfinity;
+            if (Double.IsNaN(value))
+                return NaN;
+            if (value == 0)
+                return Zero;
+            if (value == 1)
+                return One;
+
             return new JsNumber(value, PrototypeProperty);
         }
 

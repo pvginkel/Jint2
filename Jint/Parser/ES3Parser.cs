@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-18 20:16:46
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-19 14:06:56
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -1117,7 +1117,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 				adaptor.AddChild(root_0, exp2.Tree);
 				DebugLocation(502, 24);
-				 retval.value = new ValueSyntax(exp2.value, TypeCode.Boolean); 
+				 retval.value = new ValueSyntax(exp2.value); 
 
 				}
 				break;
@@ -1134,7 +1134,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 				adaptor.AddChild(root_0, exp3.Tree);
 				DebugLocation(503, 24);
-				 retval.value = new ValueSyntax(exp3.value, TypeCode.Double); 
+				 retval.value = new ValueSyntax(exp3.value); 
 
 				}
 				break;
@@ -1150,7 +1150,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				adaptor.AddChild(root_0, exp4_tree);
 
 				DebugLocation(504, 24);
-				 retval.value = new ValueSyntax(extractString(exp4.Text), TypeCode.String); 
+				 retval.value = new ValueSyntax(extractString(exp4.Text)); 
 
 				}
 				break;

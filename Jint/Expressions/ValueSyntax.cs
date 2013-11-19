@@ -6,18 +6,27 @@ namespace Jint.Expressions
     [Serializable]
     public class ValueSyntax : ExpressionSyntax
     {
+        private readonly ValueType _valueType;
+
         public override SyntaxType Type
         {
             get { return SyntaxType.Value; }
         }
 
         public object Value { get; private set; }
-        public TypeCode TypeCode { get; private set; }
 
-        public ValueSyntax(object value, TypeCode typeCode)
+        internal override ValueType ValueType
         {
+            get { return _valueType; }
+        }
+
+        public ValueSyntax(object value)
+        {
+            if (value == null)
+                throw new ArgumentNullException("value");
+
             Value = value;
-            TypeCode = typeCode;
+            _valueType = SyntaxUtil.GetValueType(value.GetType());
         }
 
         [DebuggerStepThrough]

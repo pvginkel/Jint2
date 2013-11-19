@@ -15,6 +15,11 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Expression { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
+
         public NewSyntax(ExpressionSyntax expression)
         {
             if (expression == null)

@@ -15,6 +15,17 @@ namespace Jint.Expressions
         public ExpressionSyntax Then { get; private set; }
         public ExpressionSyntax Else { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get
+            {
+                if (Then.ValueType == Else.ValueType)
+                    return Then.ValueType;
+
+                return ValueType.Unknown;
+            }
+        }
+
         public TernarySyntax(ExpressionSyntax test, ExpressionSyntax @then, ExpressionSyntax @else)
         {
             if (test == null)

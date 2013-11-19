@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using Jint.Tests;
 
 namespace Jint.Play
 {
@@ -11,36 +13,22 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
+            const string prefix = "Jint.Tests.SunSpider.";
+            var script = prefix + "access-fannkuch.js";
 
-            var assembly = Assembly.Load("Jint.Tests");
-            Stopwatch sw = new Stopwatch();
+            var assembly = typeof(SunSpider).Assembly;
+            var program = new StreamReader(assembly.GetManifestResourceStream(script)).ReadToEnd();
 
-            // string script = new StreamReader(assembly.GetManifestResourceStream("Jint.Tests.Parse.coffeescript-debug.js")).ReadToEnd();
-            JintEngine jint = new JintEngine()
-                // .SetDebugMode(true)
-                .DisableSecurity()
-                .SetFunction("print", new Action<string>(Console.WriteLine))
-                .SetFunction("write", new Action<string>(t => Console.WriteLine(t)))
-                .SetFunction("stop", new Action(delegate() { Console.WriteLine(); }));
-            sw.Reset();
-            sw.Start();
+            var jint = new JintEngine();
 
-            try
+            for (int i = 0; i < 10; i++)
             {
-                Console.WriteLine(jint.Run("2+3"));
-                Console.WriteLine("after0");
-                Console.WriteLine(jint.Run(")(---"));
-                Console.WriteLine("after1");
-                Console.WriteLine(jint.Run("FOOBAR"));
-                Console.WriteLine("after2");
+                var sw = Stopwatch.StartNew();
 
-            }
-            catch (JintException e)
-            {
-                Console.WriteLine(e.Message);
-            }
+                jint.Run(program);
 
-            Console.WriteLine("{0}ms", sw.ElapsedMilliseconds);
+                Console.WriteLine(sw.Elapsed);
+            }
         }
     }
 }

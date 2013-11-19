@@ -38,9 +38,9 @@ namespace Jint.Native
             get { return ClassObject; }
         }
 
-        public override string Type
+        public override JsType Type
         {
-            get { return TypeObject; }
+            get { return JsType.Object; }
         }
 
         private object _value;

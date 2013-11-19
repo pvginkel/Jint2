@@ -55,9 +55,7 @@ namespace Jint.Backend.Dlr
             if (program == null)
                 throw new ArgumentNullException("program");
 
-            program.Accept(new VariableMarkerPhase(this));
-
-            ResetExpressionDump();
+            PrepareTree(program);
 
             var expression = program.Accept(new ExpressionVisitor());
 
@@ -71,6 +69,14 @@ namespace Jint.Backend.Dlr
                 : unwrap
                     ? Global.Marshaller.MarshalJsValue<object>(result)
                     : result;
+        }
+
+        private void PrepareTree(SyntaxNode node)
+        {
+            node.Accept(new VariableMarkerPhase(this));
+            node.Accept(new TypeMarkerPhase());
+
+            ResetExpressionDump();
         }
 
         public JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs)
@@ -105,9 +111,7 @@ namespace Jint.Backend.Dlr
 
             var function = new FunctionSyntax(null, newParameters, newBody);
 
-            function.Accept(new VariableMarkerPhase(this));
-
-            ResetExpressionDump();
+            PrepareTree(function);
 
             return _runtime.CreateFunction(
                 function.Name,

@@ -71,9 +71,9 @@ namespace Jint.Native
             get { return ClassScope; }
         }
 
-        public override string Type
+        public override JsType Type
         {
-            get { return TypeObject; }
+            get { return JsType.Object; }
         }
 
         public JsScope Global

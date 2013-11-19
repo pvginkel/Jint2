@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Native;
 
 namespace Jint.Expressions
 {
@@ -15,6 +17,7 @@ namespace Jint.Expressions
         public ClosedOverVariable ClosureField { get; set; }
         public WithScope WithScope { get; set; }
         public Variable FallbackVariable { get; set; }
+        public ValueType ValueType { get; set; }
 
         public Variable(string name, int index)
         {
@@ -45,6 +48,20 @@ namespace Jint.Expressions
         public override string ToString()
         {
             return Name + " [" + Type + (ClosureField != null ? "*" : "") + "]";
+        }
+
+        public Type NativeType
+        {
+            get
+            {
+                switch (ValueType)
+                {
+                    case Expressions.ValueType.Boolean: return typeof(bool);
+                    case Expressions.ValueType.Double: return typeof(double);
+                    case Expressions.ValueType.String: return typeof(string);
+                    default: return typeof(JsInstance);
+                }
+            }
         }
     }
 }

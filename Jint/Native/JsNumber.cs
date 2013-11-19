@@ -48,8 +48,14 @@ namespace Jint.Native {
             return _value;
         }
 
-        public override string ToString() {
-            return _value.ToString(CultureInfo.InvariantCulture);
+        public override string ToString()
+        {
+            return NumberToString(_value);
+        }
+
+        public static string NumberToString(double value)
+        {
+            return value.ToString(CultureInfo.InvariantCulture);
         }
 
         public override object ToObject() {
@@ -60,12 +66,9 @@ namespace Jint.Native {
             get { return ClassNumber; }
         }
 
-        public override string Type
+        public override JsType Type
         {
-            get
-            {
-                return TypeNumber;
-            }
+            get { return JsType.Number; }
         }
     }
 }

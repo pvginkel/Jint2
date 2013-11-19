@@ -17,6 +17,11 @@ namespace Jint.Expressions
         public ExpressionSyntax Expression { get; private set; }
         public PropertyExpressionType Mode { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
+
         public PropertyDeclarationSyntax(string name, ExpressionSyntax expression, PropertyExpressionType mode)
         {
             if (name == null)

@@ -19,12 +19,9 @@ namespace Jint.Native {
             }
         }
 
-        public override string Type
+        public override JsType Type
         {
-            get
-            {
-                return TypeNull;
-            }
+            get { return JsType.Null; }
         }
 
         public override string Class {

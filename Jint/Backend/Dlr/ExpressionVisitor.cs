@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,6 +9,7 @@ using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
 using Jint.Runtime;
+using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.Backend.Dlr
 {
@@ -19,7 +17,61 @@ namespace Jint.Backend.Dlr
     {
         private static readonly MethodInfo _defineAccessorProperty = typeof(JsDictionaryObject).GetMethod("DefineAccessorProperty");
         private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors().Single();
-        private static readonly MethodInfo _compareEquality = typeof(JintRuntime).GetMethod("CompareEquality");
+        private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
+
+        private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a, ValueType b, ValueType c)
+        {
+            return (int)operation << 24 | (int)a << 16 | (int)b << 8 | (int)c;
+        }
+
+        private static Dictionary<int, MethodInfo> BuildOperationCache()
+        {
+            var result = new Dictionary<int, MethodInfo>();
+
+            const string prefix = "Operation_";
+
+            foreach (var method in typeof(JintRuntime).GetMethods())
+            {
+                if (method.Name.StartsWith(prefix))
+                {
+                    var operation = (SyntaxExpressionType)Enum.Parse(typeof(SyntaxExpressionType), method.Name.Substring(prefix.Length));
+
+                    var parameters = method.GetParameters();
+
+                    var a = SyntaxUtil.GetValueType(parameters[0].ParameterType);
+                    var b =
+                        parameters.Length < 2
+                        ? ValueType.Unset
+                        : SyntaxUtil.GetValueType(parameters[1].ParameterType);
+                    var c =
+                        parameters.Length < 3
+                        ? ValueType.Unset
+                        : SyntaxUtil.GetValueType(parameters[2].ParameterType);
+
+                    result[GetOperationMethodKey(operation, a, b, c)] = method;
+                }
+            }
+
+            return result;
+        }
+
+        private static MethodInfo FindOperationMethod(SyntaxExpressionType operation, ValueType operand)
+        {
+            return FindOperationMethod(operation, operand, ValueType.Unset);
+        }
+
+        private static MethodInfo FindOperationMethod(SyntaxExpressionType operation, ValueType left, ValueType right)
+        {
+            return FindOperationMethod(operation, left, right, ValueType.Unset);
+        }
+
+        private static MethodInfo FindOperationMethod(SyntaxExpressionType operation, ValueType a, ValueType b, ValueType c)
+        {
+            MethodInfo result;
+            _operationCache.TryGetValue(GetOperationMethodKey(operation, a, b, c), out result);
+            return result;
+
+        }
 
         private Scope _scope;
         private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
@@ -95,7 +147,7 @@ namespace Jint.Backend.Dlr
             {
                 statements.Add(Expression.Label(
                     _scope.Return,
-                    body
+                    EnsureJs(body)
                 ));
             }
 
@@ -230,7 +282,7 @@ namespace Jint.Backend.Dlr
                     Expression.Label(continueTarget),
                     // At the end of every iteration, perform the test.
                     Expression.IfThenElse(
-                        BuildToBoolean(syntax.Test.Accept(this)),
+                        EnsureBoolean(syntax.Test.Accept(this)),
                         Expression.Empty(),
                         Expression.Goto(breakTarget)
                     )
@@ -345,7 +397,7 @@ namespace Jint.Backend.Dlr
             if (test != null)
             {
                 loopStatements.Add(Expression.IfThenElse(
-                    BuildToBoolean(test),
+                    EnsureBoolean(test),
                     Expression.Empty(),
                     Expression.Goto(breakTarget)
                 ));
@@ -395,7 +447,7 @@ namespace Jint.Backend.Dlr
         public Expression VisitIf(IfSyntax syntax)
         {
             return Expression.IfThenElse(
-                BuildToBoolean(syntax.Test.Accept(this)),
+                EnsureBoolean(syntax.Test.Accept(this)),
                 syntax.Then != null ? syntax.Then.Accept(this) : Expression.Empty(),
                 syntax.Else != null ? syntax.Else.Accept(this) : Expression.Empty()
             );
@@ -406,7 +458,7 @@ namespace Jint.Backend.Dlr
             return Expression.Goto(
                 _scope.Return,
                 syntax.Expression != null
-                ? syntax.Expression.Accept(this)
+                ? EnsureJs(syntax.Expression.Accept(this))
                 : Expression.Default(typeof(JsInstance))
             );
         }
@@ -419,11 +471,16 @@ namespace Jint.Backend.Dlr
 
             var statements = new List<Expression>();
 
-            var expression = Expression.Parameter(typeof(JsInstance), "expression");
+            var expression = syntax.Expression.Accept(this);
+
+            var expressionLocal = Expression.Parameter(
+                SyntaxUtil.GetTargetType(expression.Type),
+                "expression"
+            );
 
             statements.Add(Expression.Assign(
-                expression,
-                syntax.Expression.Accept(this)
+                expressionLocal,
+                expression
             ));
 
             var bodies = new List<Tuple<LabelTarget, Expression>>();
@@ -433,10 +490,9 @@ namespace Jint.Backend.Dlr
                 var target = Expression.Label("target" + bodies.Count);
 
                 statements.Add(Expression.IfThen(
-                    Expression.Call(
-                        _scope.Runtime,
-                        _compareEquality,
-                        expression,
+                    BuildOperationCall(
+                        SyntaxExpressionType.Equal,
+                        expressionLocal,
                         caseClause.Expression.Accept(this)
                     ),
                     Expression.Goto(target)
@@ -467,7 +523,7 @@ namespace Jint.Backend.Dlr
 
             return Expression.Block(
                 typeof(void),
-                new[] { expression },
+                new[] { expressionLocal },
                 statements
             );
         }
@@ -485,7 +541,7 @@ namespace Jint.Backend.Dlr
             return Expression.Throw(
                 Expression.New(
                     typeof(JsException).GetConstructor(new[] { typeof(JsInstance) }),
-                    syntax.Expression.Accept(this)
+                    EnsureJs(syntax.Expression.Accept(this))
                 )
             );
         }
@@ -575,7 +631,7 @@ namespace Jint.Backend.Dlr
                     typeof(void),
                     // At the beginning of every iteration, perform the test.
                     Expression.IfThenElse(
-                        BuildToBoolean(syntax.Test.Accept(this)),
+                        EnsureBoolean(syntax.Test.Accept(this)),
                         Expression.Empty(),
                         Expression.Goto(breakTarget)
                     ),
@@ -619,7 +675,7 @@ namespace Jint.Backend.Dlr
             {
                 statements.Add(BuildSetIndex(
                     array,
-                    BuildNewString(Expression.Constant(i.ToString(CultureInfo.InvariantCulture))),
+                    EnsureJs(Expression.Constant(i.ToString(CultureInfo.InvariantCulture))),
                     syntax.Parameters[i].Accept(this)
                 ));
             }
@@ -766,15 +822,18 @@ namespace Jint.Backend.Dlr
                     declaredVariable.ClosureField == null
                 ) {
                     var local = Expression.Parameter(
-                        typeof(JsInstance),
+                        declaredVariable.NativeType,
                         declaredVariable.Name
                     );
                     locals.Add(local);
 
-                    statements.Add(Expression.Assign(
-                        local,
-                        Expression.Constant(JsUndefined.Instance)
-                    ));
+                    if (local.Type == typeof(JsInstance))
+                    {
+                        statements.Add(Expression.Assign(
+                            local,
+                            Expression.Constant(JsUndefined.Instance)
+                        ));
+                    }
 
                     _scope.Variables.Add(declaredVariable, local);
                 }
@@ -866,7 +925,7 @@ namespace Jint.Backend.Dlr
                 else
                     getter = BuildGetIndex(target, BuildGet(((IndexerSyntax)memberSyntax).Index));
 
-                statements.Add(Expression.Assign(target, memberSyntax.Expression.Accept(this)));
+                statements.Add(Expression.Assign(target, EnsureJs(memberSyntax.Expression.Accept(this))));
                 parameters.Add((ParameterExpression)target);
             }
             else
@@ -934,7 +993,7 @@ namespace Jint.Backend.Dlr
             {
                 if (expression.IsAssignable)
                     anyAssignable = true;
-                expressions.Add(expression.Accept(this));
+                expressions.Add(EnsureJs(expression.Accept(this)));
             }
 
             statements.Add(Expression.Assign(
@@ -1116,7 +1175,7 @@ namespace Jint.Backend.Dlr
             if (initializers == null)
                 initializers = new SyntaxNode[0];
 
-            return MakeArrayInit(initializers.Select(p => p.Accept(this)), elementType, nullWhenEmpty);
+            return MakeArrayInit(initializers.Select(p => EnsureJs(p.Accept(this))), elementType, nullWhenEmpty);
         }
 
         public static Expression MakeArrayInit(IEnumerable<Expression> initializers, Type elementType, bool nullWhenEmpty)
@@ -1132,7 +1191,6 @@ namespace Jint.Backend.Dlr
             }
 
             return Expression.NewArrayInit(elementType, expressions);
-
         }
 
         public Expression VisitBinaryExpression(BinaryExpressionSyntax syntax)
@@ -1140,52 +1198,116 @@ namespace Jint.Backend.Dlr
             switch (syntax.Operation)
             {
                 case SyntaxExpressionType.And:
-                    var tmp = Expression.Parameter(typeof(JsInstance), "tmp");
-
-                    return Expression.Block(
-                        typeof(JsInstance),
-                        new[] { tmp },
-                        Expression.Assign(tmp, syntax.Left.Accept(this)),
-                        Expression.Condition(
-                            BuildToBoolean(tmp),
-                            syntax.Right.Accept(this),
-                            tmp,
-                            typeof(JsInstance)
-                        )
-                    );
-
                 case SyntaxExpressionType.Or:
-                    tmp = Expression.Parameter(typeof(JsInstance), "tmp");
+                    var left = syntax.Left.Accept(this);
+                    var leftType = SyntaxUtil.GetValueType(left.Type);
+                    var right = syntax.Right.Accept(this);
+                    var rightType = SyntaxUtil.GetValueType(right.Type);
 
-                    return Expression.Block(
-                        typeof(JsInstance),
-                        new[] { tmp },
-                        Expression.Assign(tmp, syntax.Left.Accept(this)),
-                        Expression.Condition(
-                            BuildToBoolean(tmp),
-                            tmp,
-                            syntax.Right.Accept(this),
-                            typeof(JsInstance)
-                        )
-                    );
+                    ValueType targetType;
+                    if (leftType == rightType)
+                    {
+                        targetType = leftType;
+                    }
+                    else
+                    {
+                        left = EnsureJs(left);
+                        right = EnsureJs(right);
+                        targetType = ValueType.Unknown;
+                    }
+
+                    var tmp = Expression.Parameter(targetType.ToType(), "tmp");
+
+                    if (syntax.Operation == SyntaxExpressionType.And)
+                    {
+                        return Expression.Block(
+                            tmp.Type,
+                            new[] { tmp },
+                            Expression.Assign(tmp, left),
+                            Expression.Condition(
+                                EnsureBoolean(tmp),
+                                right,
+                                tmp,
+                                tmp.Type
+                            )
+                        );
+                    }
+                    else
+                    {
+                        return Expression.Block(
+                            tmp.Type,
+                            new[] { tmp },
+                            Expression.Assign(tmp, left),
+                            Expression.Condition(
+                                EnsureBoolean(tmp),
+                                tmp,
+                                right,
+                                tmp.Type
+                            )
+                        );
+                    }
 
                 default:
-                    return Expression.Call(
-                        _scope.Runtime,
-                        typeof(JintRuntime).GetMethod("Operation_" + syntax.Operation),
-                        syntax.Left.Accept(this),
-                        syntax.Right.Accept(this)
-                    );
+                    return BuildOperationCall(syntax.Operation, syntax.Left.Accept(this), syntax.Right.Accept(this));
             }
+        }
+
+        private Expression EnsureJs(Expression expression)
+        {
+            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Unknown)
+                return expression;
+
+            return new ConvertToJsExpression(_scope.Runtime, expression);
+        }
+
+        private Expression EnsureBoolean(Expression expression)
+        {
+            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Boolean)
+                return expression;
+
+            return new ConvertFromJsExpression(expression, ValueType.Boolean);
+        }
+
+        private Expression EnsureString(Expression expression)
+        {
+            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.String)
+                return expression;
+
+            return new ConvertFromJsExpression(expression, ValueType.String);
+        }
+
+        private Expression EnsureNumber(Expression expression)
+        {
+            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Double)
+                return expression;
+
+            return new ConvertFromJsExpression(expression, ValueType.Double);
         }
 
         public Expression VisitTernary(TernarySyntax syntax)
         {
+            var then = syntax.Then.Accept(this);
+            var thenType = SyntaxUtil.GetValueType(then.Type);
+            var @else = syntax.Else.Accept(this);
+            var elseType = SyntaxUtil.GetValueType(@else.Type);
+
+            Type targetType;
+            if (thenType == elseType)
+            {
+                targetType = then.Type;
+            }
+            else
+            {
+                targetType = typeof(JsInstance);
+                then = EnsureJs(then);
+                @else = EnsureJs(@else);
+            }
+
             return Expression.Condition(
-                BuildToBoolean(syntax.Test.Accept(this)),
-                syntax.Then.Accept(this),
-                syntax.Else.Accept(this),
-                typeof(JsInstance)
+                EnsureBoolean(syntax.Test.Accept(this)),
+                then,
+                @else,
+                targetType
             );
         }
 
@@ -1200,25 +1322,28 @@ namespace Jint.Backend.Dlr
                     bool isIncrement = syntax.Operation == SyntaxExpressionType.PreIncrementAssign || syntax.Operation == SyntaxExpressionType.PostIncrementAssign;
                     bool isPrefix = syntax.Operation == SyntaxExpressionType.PreDecrementAssign || syntax.Operation == SyntaxExpressionType.PreIncrementAssign;
 
+                    var source = BuildGet(syntax.Operand);
+
                     var tmp = Expression.Parameter(
-                        typeof(JsInstance),
+                        SyntaxUtil.GetTargetType(source.Type),
                         "tmp"
                     );
 
-                    var calculationExpression = BuildNewNumber(
-                        Expression.MakeBinary(
-                            isIncrement ? ExpressionType.Add : ExpressionType.Subtract,
-                            BuildToNumber(tmp),
-                            Expression.Constant(1d)
-                        )
+                    var calculationExpression = BuildOperationCall(
+                        isIncrement ? SyntaxExpressionType.Add : SyntaxExpressionType.Subtract,
+                        tmp,
+                        Expression.Constant(1d)
                     );
+
+                    if (SyntaxUtil.GetValueType(tmp.Type) == ValueType.Unknown)
+                        calculationExpression = EnsureJs(calculationExpression);
 
                     if (isPrefix)
                     {
                         return Expression.Block(
-                            typeof(JsInstance),
+                            tmp.Type,
                             new[] { tmp },
-                            Expression.Assign(tmp, BuildGet(syntax.Operand)),
+                            Expression.Assign(tmp, source),
                             Expression.Assign(tmp, calculationExpression),
                             BuildSet(syntax.Operand, tmp),
                             tmp
@@ -1227,9 +1352,9 @@ namespace Jint.Backend.Dlr
                     else
                     {
                         return Expression.Block(
-                            typeof(JsInstance),
+                            tmp.Type,
                             new[] { tmp },
-                            Expression.Assign(tmp, BuildGet(syntax.Operand)),
+                            Expression.Assign(tmp, source),
                             BuildSet(syntax.Operand, calculationExpression),
                             tmp
                         );
@@ -1260,9 +1385,8 @@ namespace Jint.Backend.Dlr
                     }
 
                 default:
-                    return Expression.Call(
-                        _scope.Runtime,
-                        typeof(JintRuntime).GetMethod("Operation_" + syntax.Operation),
+                    return BuildOperationCall(
+                        syntax.Operation,
                         syntax.Operand.Accept(this)
                     );
             }
@@ -1271,51 +1395,9 @@ namespace Jint.Backend.Dlr
         public Expression VisitValue(ValueSyntax syntax)
         {
             if (syntax.Value == null)
-            {
-                return Expression.Property(
-                    null,
-                    typeof(JsNull).GetProperty("Instance")
-                );
-            }
+                return Expression.Constant(JsNull.Instance);
 
-            string klass;
-            MethodInfo method;
-
-            switch (syntax.TypeCode)
-            {
-                case TypeCode.Boolean:
-                    klass = "BooleanClass";
-                    method = typeof(JsBooleanConstructor).GetMethod("New", new[] { syntax.Value.GetType() });
-                    break;
-
-                case TypeCode.Int32:
-                case TypeCode.Single:
-                case TypeCode.Double:
-                    klass = "NumberClass";
-                    method = typeof(JsNumberConstructor).GetMethod("New", new[] { syntax.Value.GetType() });
-                    break;
-
-                case TypeCode.String:
-                    klass = "StringClass";
-                    method = typeof(JsStringConstructor).GetMethod("New", new[] { syntax.Value.GetType() });
-                    break;
-
-                default:
-                    Debug.Assert(syntax.Value is JsInstance);
-                    return Expression.Constant(syntax.Value);
-            }
-
-            return Expression.Call(
-                Expression.Property(
-                    Expression.Property(
-                        _scope.Runtime,
-                        JintRuntime.GlobalName
-                    ),
-                    klass
-                ),
-                method,
-                new Expression[] { Expression.Constant(syntax.Value) }
-            );
+            return Expression.Constant(syntax.Value);
         }
 
         public Expression VisitRegexp(RegexpSyntax syntax)

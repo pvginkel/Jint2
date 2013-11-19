@@ -17,6 +17,16 @@ namespace Jint.Expressions
 
         public IList<SyntaxNode> Expressions { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get
+            {
+                var expression = Expressions[Expressions.Count - 1] as ExpressionSyntax;
+
+                return expression != null ? expression.ValueType : ValueType.Unknown;
+            }
+        }
+
         public CommaOperatorSyntax(IEnumerable<SyntaxNode> expressions)
         {
             if (expressions == null)

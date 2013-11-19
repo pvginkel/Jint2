@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Jint.Native;
@@ -14,101 +15,199 @@ namespace Jint.Runtime
             var rightPrimitive = right.ToPrimitive(Global);
 
             if (leftPrimitive is JsString || rightPrimitive is JsString)
-                return _stringClass.New(String.Concat(leftPrimitive.ToString(), rightPrimitive.ToString()));
+                return _stringClass.New(leftPrimitive.ToString() + rightPrimitive.ToString());
 
             return _numberClass.New(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
         }
 
-        public JsInstance Operation_BitwiseAnd(JsInstance left, JsInstance right)
+        public string Operation_Add(string left, JsInstance right)
+        {
+            return left + right.ToPrimitive(Global).ToString();
+        }
+
+        public string Operation_Add(JsInstance left, string right)
+        {
+            return left.ToPrimitive(Global).ToString() + right;
+        }
+
+        public static string Operation_Add(string left, string right)
+        {
+            return left + right;
+        }
+
+        public JsInstance Operation_Add(double left, JsInstance right)
+        {
+            var rightPrimitive = right.ToPrimitive(Global);
+
+            if (rightPrimitive is JsString)
+                return _stringClass.New(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
+
+            return _numberClass.New(left + rightPrimitive.ToNumber());
+        }
+
+        public JsInstance Operation_Add(JsInstance left, double right)
+        {
+            var leftPrimitive = left.ToPrimitive(Global);
+
+            if (leftPrimitive is JsString)
+                return _stringClass.New(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
+
+            return _numberClass.New(leftPrimitive.ToNumber() + right);
+        }
+
+        public static double Operation_Add(double left, double right)
+        {
+            return left + right;
+        }
+
+        public static double Operation_BitwiseAnd(JsInstance left, JsInstance right)
         {
             if (left is JsUndefined || right is JsUndefined)
-                return _numberClass.New(0);
+                return 0;
 
-            return _numberClass.New(Convert.ToInt64(left.ToNumber()) & Convert.ToInt64(right.ToNumber()));
+            return (long)left.ToNumber() & (long)right.ToNumber();
         }
 
-        public JsInstance Operation_BitwiseExclusiveOr(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseAnd(double left, JsInstance right)
+        {
+            if (right is JsUndefined)
+                return 0;
+
+            return (long)left & (long)right.ToNumber();
+        }
+
+        public static double Operation_BitwiseAnd(JsInstance left, double right)
+        {
+            if (left is JsUndefined)
+                return 0;
+
+            return (long)left.ToNumber() & (long)right;
+        }
+
+        public static double Operation_BitwiseAnd(double left, double right)
+        {
+            return (long)left & (long)right;
+        }
+
+        public static double Operation_BitwiseExclusiveOr(JsInstance left, JsInstance right)
         {
             if (left is JsUndefined)
             {
                 if (right is JsUndefined)
-                    return _numberClass.New(1);
-                return _numberClass.New(Convert.ToInt64(right.ToNumber()));
+                    return 1;
+
+                return (long)right.ToNumber();
             }
 
             if (right is JsUndefined)
-                return _numberClass.New(Convert.ToInt64(left.ToNumber()));
+                return (long)left.ToNumber();
 
-            return _numberClass.New(Convert.ToInt64(left.ToNumber()) ^ Convert.ToInt64(right.ToNumber()));
+            return (long)left.ToNumber() ^ (long)right.ToNumber();
         }
 
-        public JsInstance Operation_BitwiseNot(JsInstance operand)
+        public static double Operation_BitwiseExclusiveOr(double left, JsInstance right)
         {
-            return _numberClass.New(0 - operand.ToNumber() - 1);
+            if (right is JsUndefined)
+                return (long)left;
+
+            return (long)left ^ (long)right.ToNumber();
         }
 
-        public JsInstance Operation_BitwiseOr(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseExclusiveOr(JsInstance left, double right)
+        {
+            if (left is JsUndefined)
+                return (long)right;
+
+            return (long)left.ToNumber() ^ (long)right;
+        }
+
+        public static double Operation_BitwiseExclusiveOr(double left, double right)
+        {
+            return (long)left ^ (long)right;
+        }
+
+        public static double Operation_BitwiseNot(JsInstance operand)
+        {
+            return 0 - operand.ToNumber() - 1;
+        }
+
+        public static double Operation_BitwiseNot(double operand)
+        {
+            return 0 - operand - 1;
+        }
+
+        public static double Operation_BitwiseOr(JsInstance left, JsInstance right)
         {
             if (left is JsUndefined)
             {
                 if (right is JsUndefined)
-                    return _numberClass.New(1);
+                    return 1;
 
-                return _numberClass.New(Convert.ToInt64(right.ToNumber()));
+                return (long)right.ToNumber();
             }
 
             if (right is JsUndefined)
-                return _numberClass.New(Convert.ToInt64(left.ToNumber()));
+                return (long)left.ToNumber();
 
-            return _numberClass.New(Convert.ToInt64(left.ToNumber()) | Convert.ToInt64(right.ToNumber()));
+            return (long)left.ToNumber() | (long)right.ToNumber();
         }
 
-        public JsInstance Operation_Divide(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseOr(double left, JsInstance right)
         {
-            var rightNumber = right.ToNumber();
-            var leftNumber = left.ToNumber();
+            if (right is JsUndefined)
+                return (long)left;
 
-            if (right == _numberClass["NEGATIVE_INFINITY"] || right == _numberClass["POSITIVE_INFINITY"])
-                return _numberClass.New(0);
-
-            if (rightNumber == 0)
-                return leftNumber > 0 ? _numberClass["POSITIVE_INFINITY"] : _numberClass["NEGATIVE_INFINITY"];
-
-            return _numberClass.New(leftNumber / rightNumber);
+            return (long)left | (long)right.ToNumber();
         }
 
-        public JsInstance Operation_Equal(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseOr(JsInstance left, double right)
         {
-            return _booleanClass.New(CompareEquality(left, right));
+            if (left is JsUndefined)
+                return (long)right;
+
+            return (long)left.ToNumber() | (long)right;
         }
 
-        public JsInstance Operation_GreaterThan(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseOr(double left, double right)
         {
-            double result;
-            if (TryCompareRange(left, right, out result))
-                return _booleanClass.New(result > 0);
-
-            return _booleanClass.False;
+            return (long)left | (long)right;
         }
 
-        public JsInstance Operation_GreaterThanOrEqual(JsInstance left, JsInstance right)
+        public static double Operation_Divide(JsInstance left, JsInstance right)
         {
-            double result;
-            if (TryCompareRange(left, right, out result))
-                return _booleanClass.New(result >= 0);
-
-            return _booleanClass.False;
+            return Operation_Divide(left.ToNumber(), right.ToNumber());
         }
 
-        public JsInstance Operation_In(JsInstance left, JsInstance right)
+        public static double Operation_Divide(double left, JsInstance right)
+        {
+            return Operation_Divide(left, right.ToNumber());
+        }
+
+        public static double Operation_Divide(JsInstance left, double right)
+        {
+            return Operation_Divide(left.ToNumber(), right);
+        }
+
+        public static double Operation_Divide(double left, double right)
+        {
+            if (Double.IsInfinity(right))
+                return 0;
+
+            if (right == 0)
+                return left > 0 ? Double.PositiveInfinity : Double.NegativeInfinity;
+
+            return left / right;
+        }
+
+        public bool Operation_In(JsInstance left, JsInstance right)
         {
             if (right is ILiteral)
                 throw new JsException(_errorClass.New("Cannot apply 'in' operator to the specified member."));
 
-            return _booleanClass.New(((JsDictionaryObject)right).HasProperty(left));
+            return ((JsDictionaryObject)right).HasProperty(left);
         }
 
-        public JsInstance Operation_InstanceOf(JsInstance left, JsInstance right)
+        public bool Operation_InstanceOf(JsInstance left, JsInstance right)
         {
             var function = right as JsFunction;
             var obj = left as JsObject;
@@ -118,202 +217,251 @@ namespace Jint.Runtime
             if (obj == null)
                 throw new JsException(_typeErrorClass.New("Left argument should be an object"));
 
-            return _booleanClass.New(function.HasInstance(obj));
+            return function.HasInstance(obj);
         }
 
-        public JsInstance Operation_LeftShift(JsInstance left, JsInstance right)
+        public static double Operation_LeftShift(JsInstance left, JsInstance right)
         {
             if (left is JsUndefined)
-                return _numberClass.New(0);
+                return 0;
             if (right is JsUndefined)
-                return _numberClass.New(Convert.ToInt64(left.ToNumber()));
-            return _numberClass.New(Convert.ToInt64(left.ToNumber()) << Convert.ToUInt16(right.ToNumber()));
+                return (long)left.ToNumber();
+            return (long)left.ToNumber() << (ushort)right.ToNumber();
         }
 
-        public JsInstance Operation_LessThan(JsInstance left, JsInstance right)
+        public static double Operation_LeftShift(double left, JsInstance right)
         {
-            double result;
-            if (TryCompareRange(left, right, out result))
-                return _booleanClass.New(result < 0);
-
-            return _booleanClass.False;
+            if (right is JsUndefined)
+                return (long)left;
+            return (long)left << (ushort)right.ToNumber();
         }
 
-        public JsInstance Operation_LessThanOrEqual(JsInstance left, JsInstance right)
-        {
-            double result;
-            if (TryCompareRange(left, right, out result))
-                return _booleanClass.New(result <= 0);
-
-            return _booleanClass.False;
-        }
-
-        public JsInstance Operation_Modulo(JsInstance left, JsInstance right)
-        {
-            if (right == _numberClass["NEGATIVE_INFINITY"] || right == _numberClass["POSITIVE_INFINITY"])
-                return _numberClass["POSITIVE_INFINITY"];
-            if (right.ToNumber() == 0)
-                return _numberClass["NaN"];
-            return _numberClass.New(left.ToNumber() % right.ToNumber());
-        }
-
-        public JsInstance Operation_Multiply(JsInstance left, JsInstance right)
-        {
-            return _numberClass.New(
-                left.ToNumber() * right.ToNumber()
-            );
-        }
-
-        public JsInstance Operation_Negate(JsInstance operand)
-        {
-            return _numberClass.New(-operand.ToNumber());
-        }
-
-        public JsInstance Operation_Not(JsInstance operand)
-        {
-            return _booleanClass.New(!operand.ToBoolean());
-        }
-
-        public JsInstance Operation_NotEqual(JsInstance left, JsInstance right)
-        {
-            return _booleanClass.New(!CompareEquality(left, right));
-        }
-
-        public JsInstance Operation_NotSame(JsInstance left, JsInstance right)
-        {
-            var result = JsInstance.StrictlyEquals(Global, left, right);
-            return _booleanClass.New(!result.ToBoolean());
-        }
-
-        public JsInstance Operation_Power(JsInstance left, JsInstance right)
-        {
-            return _numberClass.New(Math.Pow(left.ToNumber(), right.ToNumber()));
-        }
-
-        public JsInstance Operation_RightShift(JsInstance left, JsInstance right)
+        public static double Operation_LeftShift(JsInstance left, double right)
         {
             if (left is JsUndefined)
-                return _numberClass.New(0);
+                return 0;
+            return (long)left.ToNumber() << (ushort)right;
+        }
+
+        public static double Operation_LeftShift(double left, double right)
+        {
+            return (long)left << (ushort)right;
+        }
+
+        public static double Operation_Modulo(JsInstance left, JsInstance right)
+        {
+            double rightNumber = right.ToNumber();
+            if (Double.IsInfinity(rightNumber))
+                return Double.PositiveInfinity;
+            if (rightNumber == 0)
+                return Double.NaN;
+            return left.ToNumber() % rightNumber;
+        }
+
+        public static double Operation_Modulo(double left, JsInstance right)
+        {
+            double rightNumber = right.ToNumber();
+            if (Double.IsInfinity(rightNumber))
+                return Double.PositiveInfinity;
+            return left % rightNumber;
+        }
+
+        public static double Operation_Modulo(JsInstance left, double right)
+        {
+            if (Double.IsInfinity(right))
+                return Double.PositiveInfinity;
+            if (right == 0)
+                return Double.NaN;
+            return left.ToNumber() % right;
+        }
+
+        public static double Operation_Modulo(double left, double right)
+        {
+            if (Double.IsInfinity(right))
+                return Double.PositiveInfinity;
+            if (right == 0)
+                return Double.NaN;
+            return left % right;
+        }
+
+        public static double Operation_Multiply(JsInstance left, JsInstance right)
+        {
+            return left.ToNumber() * right.ToNumber();
+        }
+
+        public static double Operation_Multiply(double left, JsInstance right)
+        {
+            return left * right.ToNumber();
+        }
+
+        public static double Operation_Multiply(JsInstance left, double right)
+        {
+            return left.ToNumber() * right;
+        }
+
+        public static double Operation_Multiply(double left, double right)
+        {
+            return left * right;
+        }
+
+        public static double Operation_Negate(JsInstance operand)
+        {
+            return -operand.ToNumber();
+        }
+
+        public static double Operation_Negate(double operand)
+        {
+            return -operand;
+        }
+
+        public static bool Operation_Not(JsInstance operand)
+        {
+            return !operand.ToBoolean();
+        }
+
+        public static bool Operation_Not(bool operand)
+        {
+            return !operand;
+        }
+
+        public static double Operation_Power(JsInstance left, JsInstance right)
+        {
+            return Math.Pow(left.ToNumber(), right.ToNumber());
+        }
+
+        public static double Operation_Power(double left, JsInstance right)
+        {
+            return Math.Pow(left, right.ToNumber());
+        }
+
+        public static double Operation_Power(JsInstance left, double right)
+        {
+            return Math.Pow(left.ToNumber(), right);
+        }
+
+        public static double Operation_Power(double left, double right)
+        {
+            return Math.Pow(left, right);
+        }
+
+        public static double Operation_RightShift(JsInstance left, JsInstance right)
+        {
+            if (left is JsUndefined)
+                return 0;
             if (right is JsUndefined)
-                return _numberClass.New(Convert.ToInt64(left.ToNumber()));
-            return _numberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
+                return (long)left.ToNumber();
+            return (long)left.ToNumber() >> (ushort)right.ToNumber();
         }
 
-        public JsInstance Operation_Same(JsInstance left, JsInstance right)
+        public static double Operation_RightShift(double left, JsInstance right)
         {
-            return JsInstance.StrictlyEquals(Global, left, right);
+            if (right is JsUndefined)
+                return (long)left;
+            return (long)left >> (ushort)right.ToNumber();
         }
 
-        public JsInstance Operation_Subtract(JsInstance left, JsInstance right)
+        public static double Operation_RightShift(JsInstance left, double right)
         {
-            return _numberClass.New(
-                left.ToNumber() - right.ToNumber()
-            );
+            if (left is JsUndefined)
+                return 0;
+            return (long)left.ToNumber() >> (ushort)right;
         }
 
-        public JsInstance Operation_TypeOf(JsInstance operand)
+        public static double Operation_RightShift(double left, double right)
+        {
+            return (long)left >> (ushort)right;
+        }
+
+        public static double Operation_Subtract(JsInstance left, JsInstance right)
+        {
+            return left.ToNumber() - right.ToNumber();
+        }
+
+        public static double Operation_Subtract(double left, JsInstance right)
+        {
+            return left - right.ToNumber();
+        }
+
+        public static double Operation_Subtract(JsInstance left, double right)
+        {
+            return left.ToNumber() - right;
+        }
+
+        public static double Operation_Subtract(double left, double right)
+        {
+            return left - right;
+        }
+
+        public static string Operation_TypeOf(JsInstance operand)
         {
             if (operand == null)
-                return _stringClass.New(JsUndefined.Instance.Type);
+                return JsInstance.TypeUndefined;
             if (operand is JsNull)
-                return _stringClass.New(JsInstance.TypeObject);
+                return JsInstance.TypeObject;
             if (operand is JsFunction)
-                return _stringClass.New(JsInstance.TypeofFunction);
-            return _stringClass.New(operand.Type);
+                return JsInstance.TypeFunction;
+            switch (operand.Type)
+            {
+                case JsType.Boolean: return JsInstance.TypeBoolean;
+                case JsType.Number: return JsInstance.TypeNumber;
+                case JsType.Object: return JsInstance.TypeObject;
+                case JsType.String: return JsInstance.TypeString;
+                case JsType.Undefined: return JsInstance.TypeUndefined;
+                default: throw new InvalidOperationException();
+            }
         }
 
-        public JsInstance Operation_UnaryPlus(JsInstance operand)
+        public static string Operation_TypeOf(bool operand)
         {
-            return _numberClass.New(operand.ToNumber());
+            return JsInstance.TypeBoolean;
         }
 
-        public JsInstance Operation_UnsignedRightShift(JsInstance left, JsInstance right)
+        public static string Operation_TypeOf(double operand)
+        {
+            return JsInstance.TypeNumber;
+        }
+
+        public static string Operation_TypeOf(string operand)
+        {
+            return JsInstance.TypeString;
+        }
+
+        public static double Operation_UnaryPlus(JsInstance operand)
+        {
+            return operand.ToNumber();
+        }
+
+        public static double Operation_UnaryPlus(double operand)
+        {
+            return operand;
+        }
+
+        public static double Operation_UnsignedRightShift(JsInstance left, JsInstance right)
         {
             if (left is JsUndefined)
-                return _numberClass.New(0);
+                return 0;
             if (right is JsUndefined)
-                return _numberClass.New(Convert.ToInt64(left.ToNumber()));
-            return _numberClass.New(Convert.ToInt64(left.ToNumber()) >> Convert.ToUInt16(right.ToNumber()));
+                return (long)left.ToNumber();
+            return (long)left.ToNumber() >> (ushort)right.ToNumber();
         }
 
-        private bool TryCompareRange(JsInstance left, JsInstance right, out double result)
+        public static double Operation_UnsignedRightShift(double left, JsInstance right)
         {
-            result = 0;
-
-            if (left.IsClr && right.IsClr)
-            {
-                var comparer = left.Value as IComparable;
-
-                if (comparer == null || right.Value == null || comparer.GetType() != right.Value.GetType())
-                    return false;
-
-                result = comparer.CompareTo(right.Value);
-            }
-            else
-            {
-
-                double leftNumber = left.ToNumber();
-                double rightNumber = right.ToNumber();
-
-                if (Double.IsNaN(leftNumber) || Double.IsNaN(rightNumber))
-                    return false;
-
-                if (leftNumber < rightNumber)
-                    result = -1;
-                else if (leftNumber > rightNumber)
-                    result = 1;
-                else
-                    result = 0;
-            }
-
-            return true;
+            if (right is JsUndefined)
+                return (long)left;
+            return (long)left >> (ushort)right.ToNumber();
         }
 
-        public bool CompareEquality(JsInstance left, JsInstance right)
+        public static double Operation_UnsignedRightShift(JsInstance left, double right)
         {
-            if (left.IsClr && right.IsClr)
-                return left.Value.Equals(right.Value);
-            if (left.Type == right.Type)
-            {
-                // if both are Objects but then only one is Clrs
-                if (left is JsUndefined)
-                    return true;
-                if (left == JsNull.Instance)
-                    return true;
+            if (left is JsUndefined)
+                return 0;
+            return (long)left.ToNumber() >> (ushort)right;
+        }
 
-                if (left.Type == JsInstance.TypeNumber)
-                {
-                    if (left.ToNumber() == double.NaN)
-                        return false;
-                    if (right.ToNumber() == double.NaN)
-                        return false;
-                    if (left.ToNumber() == right.ToNumber())
-                        return true;
-                    return false;
-                }
-                if (left.Type == JsInstance.TypeString)
-                    return left.ToString() == right.ToString();
-                if (left.Type == JsInstance.TypeBoolean)
-                    return left.ToBoolean() == right.ToBoolean();
-                if (left.Type == JsInstance.TypeObject)
-                    return left == right;
-                return left.Value.Equals(right.Value);
-            }
-            if (left == JsNull.Instance && right is JsUndefined)
-                return true;
-            if (left is JsUndefined && right == JsNull.Instance)
-                return true;
-            if (left.Type == JsInstance.TypeNumber && right.Type == JsInstance.TypeString)
-                return left.ToNumber() == right.ToNumber();
-            if (left.Type == JsInstance.TypeString && right.Type == JsInstance.TypeNumber)
-                return left.ToNumber() == right.ToNumber();
-            if (left.Type == JsInstance.TypeBoolean || right.Type == JsInstance.TypeBoolean)
-                return left.ToNumber() == right.ToNumber();
-            if (right.Type == JsInstance.TypeObject && (left.Type == JsInstance.TypeString || left.Type == JsInstance.TypeNumber))
-                return CompareEquality(left, right.ToPrimitive(Global));
-            if (left.Type == JsInstance.TypeObject && (right.Type == JsInstance.TypeString || right.Type == JsInstance.TypeNumber))
-                return CompareEquality(left.ToPrimitive(Global), right);
-            return false;
+        public static double Operation_UnsignedRightShift(double left, double right)
+        {
+            return (long)left >> (ushort)right;
         }
 
         public JsInstance Operation_Index(JsInstance obj, JsInstance index)
@@ -329,6 +477,52 @@ namespace Jint.Runtime
             }
 
             return ((JsDictionaryObject)obj)[index];
+        }
+
+        public static string Operation_Index(string obj, double index)
+        {
+            return obj.Substring((int)index, 1);
+        }
+
+        public JsInstance Operation_Index(JsInstance obj, double index)
+        {
+            var array = obj as JsArray;
+            if (array != null)
+            {
+                int intIndex = (int)index;
+                if (index == intIndex)
+                    return array.Get(intIndex);
+            }
+
+            return Operation_Index(obj, _numberClass.New(index));
+        }
+
+        public static JsInstance Operation_SetIndex(JsInstance obj, JsInstance index, JsInstance value)
+        {
+            return ((JsDictionaryObject)obj)[index] = value;
+        }
+
+        public JsInstance Operation_SetIndex(JsInstance obj, double index, JsInstance value)
+        {
+            var array = obj as JsArray;
+            if (array != null)
+            {
+                int intIndex = (int)index;
+                if (index == intIndex)
+                    return array.Put(intIndex, value);
+            }
+
+            return Operation_SetIndex(obj, _numberClass.New(index), value);
+        }
+
+        public static bool Operation_Delete(JsInstance obj, JsInstance index)
+        {
+            return ((JsDictionaryObject)obj).Delete(index);
+        }
+
+        public static bool Operation_Delete(JsInstance obj, string index)
+        {
+            return ((JsDictionaryObject)obj).Delete(index);
         }
     }
 }

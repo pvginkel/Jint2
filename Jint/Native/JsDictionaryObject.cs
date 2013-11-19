@@ -234,27 +234,28 @@ namespace Jint.Native
                             case DescriptorType.Value:
                                 _properties.Get(key).Set(this, currentDescriptor.Get(this));
                                 break;
+
                             case DescriptorType.Accessor:
                                 _properties.Delete(key);
                                 _properties.Put(key, currentDescriptor);
                                 break;
+
                             case DescriptorType.Clr:
                                 throw new NotSupportedException();
-                            default:
-                                break;
                         }
                         break;
+
                     case DescriptorType.Accessor:
-                        PropertyDescriptor propDesc = (PropertyDescriptor)desc;
+                        var propDesc = (PropertyDescriptor)desc;
                         if (currentDescriptor.DescriptorType == DescriptorType.Accessor)
                         {
                             propDesc.GetFunction = ((PropertyDescriptor)currentDescriptor).GetFunction ?? propDesc.GetFunction;
                             propDesc.SetFunction = ((PropertyDescriptor)currentDescriptor).SetFunction ?? propDesc.SetFunction;
                         }
                         else
+                        {
                             propDesc.Set(this, currentDescriptor.Get(this));
-                        break;
-                    default:
+                        }
                         break;
                 }
             }

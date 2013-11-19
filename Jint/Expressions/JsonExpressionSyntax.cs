@@ -25,6 +25,10 @@ namespace Jint.Expressions
             get { return SyntaxType.Json; }
         }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
 
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)

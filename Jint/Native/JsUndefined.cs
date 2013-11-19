@@ -51,12 +51,9 @@ namespace Jint.Native
             get { return ClassObject; }
         }
 
-        public override string Type
+        public override JsType Type
         {
-            get
-            {
-                return TypeUndefined;
-            }
+            get { return JsType.Undefined; }
         }
 
         public override string ToString()

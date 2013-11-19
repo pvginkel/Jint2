@@ -71,19 +71,16 @@ namespace Jint.Native {
         }
 
         public override string ToString() {
-            return _value.ToString();
+            return _value;
         }
 
         public override string Class {
             get { return ClassString; }
         }
 
-        public override string Type
+        public override JsType Type
         {
-            get
-            {
-                return TypeString;
-            }
+            get { return JsType.String; }
         }
 
         public override int GetHashCode() {

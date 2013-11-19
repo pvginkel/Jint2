@@ -38,7 +38,7 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in syntax.DeclaredVariables)
             {
-                variable.Type = Expressions.VariableType.Global;
+                variable.Type = VariableType.Global;
             }
 
             _main = syntax;
@@ -87,7 +87,7 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in block.ClosedOverVariables)
             {
-                if (variable.Type == Expressions.VariableType.Local)
+                if (variable.Type == VariableType.Local)
                     fields.Add(variable.Name, typeof(JsInstance));
                 else if (!fields.ContainsKey(Closure.ArgumentsFieldName))
                     fields.Add(Closure.ArgumentsFieldName, typeof(JsArguments));
@@ -113,7 +113,7 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in block.ClosedOverVariables)
             {
-                if (variable.Type == Expressions.VariableType.Parameter)
+                if (variable.Type == VariableType.Parameter)
                 {
                     if (block.ArgumentsVariable.ClosureField == null)
                     {
@@ -175,7 +175,7 @@ namespace Jint.Backend.Dlr
             {
                 argumentsVariable = new Variable(JsScope.Arguments, -1)
                 {
-                    Type = Expressions.VariableType.Arguments
+                    Type = VariableType.Arguments
                 };
 
                 declaredVariables.Add(argumentsVariable);
@@ -192,16 +192,16 @@ namespace Jint.Backend.Dlr
             {
                 var variable = body.DeclaredVariables.AddOrGet(function.Parameters[i], i);
 
-                if (variable.Type == Expressions.VariableType.Unknown)
-                    variable.Type = Expressions.VariableType.Parameter;
+                if (variable.Type == VariableType.Unknown)
+                    variable.Type = VariableType.Parameter;
             }
 
             // Mark the rest of the declared variables as locals.
 
             foreach (var item in declaredVariables)
             {
-                if (item.Type == Expressions.VariableType.Unknown)
-                    item.Type = Expressions.VariableType.Local;
+                if (item.Type == VariableType.Unknown)
+                    item.Type = VariableType.Local;
             }
 
             // Add ourselves to the top of the block stack.
@@ -241,7 +241,7 @@ namespace Jint.Backend.Dlr
 
             syntax.Target = new Variable(WithPrefix + (_nextWithScopeIndex++).ToString(CultureInfo.InvariantCulture), -1)
             {
-                Type = Expressions.VariableType.Local
+                Type = VariableType.Local
             };
 
             var block = _blocks[_blocks.Count - 1];
@@ -276,12 +276,12 @@ namespace Jint.Backend.Dlr
             {
                 if (_blocks[i].Block.DeclaredVariables.TryGetItem(identifier, out variable))
                 {
-                    if (variable.Type != Expressions.VariableType.Global && i < count - 1)
+                    if (variable.Type != VariableType.Global && i < count - 1)
                     {
-                        Debug.Assert(variable.Type != Expressions.VariableType.Unknown);
+                        Debug.Assert(variable.Type != VariableType.Unknown);
                         Debug.Assert(
-                            variable.Type == Expressions.VariableType.Local ||
-                            variable.Type == Expressions.VariableType.Parameter
+                            variable.Type == VariableType.Local ||
+                            variable.Type == VariableType.Parameter
                         );
 
                         _blocks[i].ClosedOverVariables.Add(variable);
@@ -307,10 +307,10 @@ namespace Jint.Backend.Dlr
 
             variable = _main.DeclaredVariables.AddOrGet(identifier);
 
-            if (variable.Type == Expressions.VariableType.Unknown)
-                variable.Type = Expressions.VariableType.Global;
+            if (variable.Type == VariableType.Unknown)
+                variable.Type = VariableType.Global;
             else
-                Debug.Assert(variable.Type == Expressions.VariableType.Global);
+                Debug.Assert(variable.Type == VariableType.Global);
 
             if (_withScope != null)
             {

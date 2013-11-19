@@ -18,6 +18,11 @@ namespace Jint.Expressions
         public IList<string> Parameters { get; private set; }
         public BlockSyntax Body { get; private set; }
 
+        internal override ValueType ValueType
+        {
+            get { return ValueType.Unknown; }
+        }
+
         public FunctionSyntax(string name, IEnumerable<string> parameters, BlockSyntax body)
         {
             if (parameters == null)

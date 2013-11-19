@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Jint.Expressions;
+using Jint.Runtime;
 
 namespace Jint.Native
 {
@@ -73,7 +74,7 @@ namespace Jint.Native
 
         public const string TypeDescriptor = "descriptor";
 
-        public const string TypeofFunction = "function"; // used only in typeof operator!!!
+        public const string TypeFunction = "function"; // used only in typeof operator!!!
 
         // embed classes ecma262.3 15
 
@@ -102,7 +103,7 @@ namespace Jint.Native
         /// <summary>
         /// A type of a JsObject
         /// </summary>
-        public abstract string Type { get; }
+        public abstract JsType Type { get; }
 
         /// <summary>
         /// This is a shortcut to a function call by name.
@@ -123,51 +124,10 @@ namespace Jint.Native
         }
 
         // 11.9.6 The Strict Equality Comparison Algorithm
-        public static JsInstance StrictlyEquals(IGlobal global, JsInstance left, JsInstance right)
+        public static bool StrictlyEquals(JsInstance left, JsInstance right)
         {
-            if (left.Type != right.Type)
-            {
-                return global.BooleanClass.False;
-            }
-            else if (left is JsUndefined)
-            {
-                return global.BooleanClass.True;
-            }
-            else if (left is JsNull)
-            {
-                return global.BooleanClass.True;
-            }
-            else if (left.Type == JsInstance.TypeNumber)
-            {
-                if (left == global.NumberClass["NaN"] || right == global.NumberClass["NaN"])
-                {
-                    return global.BooleanClass.False;
-                }
-                else if (left.ToNumber() == right.ToNumber())
-                {
-                    return global.BooleanClass.True;
-                }
-                else
-                    return global.BooleanClass.False;
-            }
-            else if (left.Type == JsInstance.TypeString)
-            {
-                return global.BooleanClass.New(left.ToString() == right.ToString());
-            }
-            else if (left.Type == JsInstance.TypeBoolean)
-            {
-                return global.BooleanClass.New(left.ToBoolean() == right.ToBoolean());
-            }
-            else if (left == right)
-            {
-                return global.BooleanClass.True;
-            }
-            else
-            {
-                return global.BooleanClass.False;
-            }
+            return JintRuntime.CompareSame(left, right);
         }
-
 
         #region IComparable<JsInstance> Members
 

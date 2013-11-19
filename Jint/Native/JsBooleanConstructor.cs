@@ -18,8 +18,8 @@ namespace Jint.Native
 
             DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
 
-            True = New(true);
-            False = New(false);
+            True = new JsBoolean(true, PrototypeProperty);
+            False = new JsBoolean(false, PrototypeProperty);
         }
 
         public override void InitPrototype(IGlobal global)
@@ -37,7 +37,7 @@ namespace Jint.Native
 
         public JsBoolean New(bool value)
         {
-            return new JsBoolean(value, PrototypeProperty);
+            return value ? True : False;
         }
 
         public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)

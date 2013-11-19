@@ -499,9 +499,9 @@ punctuator
 
 literal returns [ExpressionSyntax value]
 	: exp1=NULL { $value = new IdentifierSyntax(exp1.Text); }
-	| exp2=booleanLiteral { $value = new ValueSyntax(exp2.value, TypeCode.Boolean); }
-	| exp3=numericLiteral { $value = new ValueSyntax(exp3.value, TypeCode.Double); }
-	| exp4=StringLiteral  { $value = new ValueSyntax(extractString(exp4.Text), TypeCode.String); }
+	| exp2=booleanLiteral { $value = new ValueSyntax(exp2.value); }
+	| exp3=numericLiteral { $value = new ValueSyntax(exp3.value); }
+	| exp4=StringLiteral  { $value = new ValueSyntax(extractString(exp4.Text)); }
 	| exp5=RegularExpressionLiteral { $value = new RegexpSyntax(extractRegExpPattern(exp5.Text), extractRegExpOption(exp5.Text)); }
 	;
 

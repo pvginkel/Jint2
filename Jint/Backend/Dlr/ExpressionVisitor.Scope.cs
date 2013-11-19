@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
 using Jint.Runtime;
@@ -46,11 +47,7 @@ namespace Jint.Backend.Dlr
                 Function = function;
                 ClosureLocal = closureLocal;
                 ArgumentsVariable = argumentsVariable;
-                Runtime = Expression.Parameter(
-                    typeof(JintRuntime),
-                    RuntimeParameterName
-                );
-
+                Runtime = Expression.Parameter(typeof(JintRuntime), RuntimeParameterName);
                 Variables = new Dictionary<Variable, ParameterExpression>();
                 Parent = parent;
                 Return = Expression.Label(typeof(JsInstance), "return");
@@ -62,18 +59,18 @@ namespace Jint.Backend.Dlr
             private Expression FindVariable(Variable variable)
             {
                 Debug.Assert(
-                    variable.Type == Expressions.VariableType.Local ||
-                    variable.Type == Expressions.VariableType.Arguments ||
-                    variable.Type == Expressions.VariableType.This
+                    variable.Type == VariableType.Local ||
+                    variable.Type == VariableType.Arguments ||
+                    variable.Type == VariableType.This
                 );
 
                 switch (variable.Type)
                 {
-                    case Expressions.VariableType.This:
+                    case VariableType.This:
                         return This;
 
-                    case Expressions.VariableType.Local:
-                    case Expressions.VariableType.Arguments:
+                    case VariableType.Local:
+                    case VariableType.Arguments:
                         var closureField = variable.ClosureField;
 
                         if (closureField == null)
@@ -93,22 +90,25 @@ namespace Jint.Backend.Dlr
             {
                 switch (variable.Type)
                 {
-                    case Expressions.VariableType.Global:
+                    case VariableType.Global:
                         return _visitor.BuildSetMember(
                             Expression.Property(Runtime, JintRuntime.GlobalScopeName),
                             variable.Name,
                             value
                         );
 
-                    case Expressions.VariableType.Parameter:
+                    case VariableType.Parameter:
                         return _visitor.BuildSetMember(
                             ResolveArgumentsLocal(variable),
                             variable.Index.ToString(CultureInfo.InvariantCulture),
                             value
                         );
 
-                    case Expressions.VariableType.WithScope:
-                        var resultParameter = Expression.Parameter(typeof(JsInstance), "result");
+                    case VariableType.WithScope:
+                        var resultParameter = Expression.Parameter(
+                            variable.FallbackVariable.NativeType,
+                            "result"
+                        );
 
                         var result = BuildSet(variable.FallbackVariable, resultParameter);
 
@@ -148,22 +148,19 @@ namespace Jint.Backend.Dlr
 
                         return Expression.Block(
                             new[] { resultParameter },
-                            Expression.Assign(resultParameter, value),
+                            _visitor.BuildAssign(resultParameter, value),
                             result,
                             resultParameter
                         );
 
                     default:
-                        return Expression.Assign(
-                            FindVariable(variable),
-                            value
-                        );
+                        return _visitor.BuildAssign(FindVariable(variable), value);
                 }
             }
 
             private Expression ResolveArgumentsLocal(Variable variable)
             {
-                Debug.Assert(variable.Type == Expressions.VariableType.Parameter);
+                Debug.Assert(variable.Type == VariableType.Parameter);
 
                 if (variable.ClosureField == null)
                     return FindVariable(ArgumentsVariable);
@@ -178,19 +175,19 @@ namespace Jint.Backend.Dlr
             {
                 switch (variable.Type)
                 {
-                    case Expressions.VariableType.Global:
+                    case VariableType.Global:
                         return _visitor.BuildGetMember(
                             Expression.Property(Runtime, JintRuntime.GlobalScopeName),
                             variable.Name
                         );
 
-                    case Expressions.VariableType.Parameter:
+                    case VariableType.Parameter:
                         return _visitor.BuildGetMember(
                             ResolveArgumentsLocal(variable),
                             variable.Index.ToString(CultureInfo.InvariantCulture)
                         );
 
-                    case Expressions.VariableType.WithScope:
+                    case VariableType.WithScope:
                         var result = BuildGet(variable.FallbackVariable, null);
 
                         var scope = variable.WithScope;
