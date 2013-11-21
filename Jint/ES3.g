@@ -706,7 +706,6 @@ propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
     PropertyExpressionType mode;
     BlockSyntax body;
     List<string> parameters = null;
-    ExpressionSyntax expression;
     string name;
 }
 @after {
@@ -1082,13 +1081,13 @@ followed by the right recursive call.
 */
 assignmentExpression returns [ExpressionSyntax value]
 @init {
-    bool? isLhs = null;
+    bool isLhs;
 }
 	:
         lhs=conditionalExpression
-        { $value = $lhs.value; }
+        { $value = $lhs.value; isLhs = IsLeftHandSideAssign($lhs.value); }
 	    (
-            { IsLeftHandSideAssign($lhs.value, ref isLhs) }?
+            { isLhs }?
             ass=assignmentOperator^
             exp=assignmentExpression
             {
@@ -1119,13 +1118,13 @@ assignmentOperator
 assignmentExpressionNoIn returns [ExpressionSyntax value]
 @init
 {
-	bool? isLhs = null;
+	bool isLhs;
 }
 	:
         lhs=conditionalExpressionNoIn
-        { $value = $lhs.value; } 
+        { $value = $lhs.value; isLhs = IsLeftHandSideAssign($lhs.value); } 
 	    (
-            { IsLeftHandSideAssign($lhs.value, ref isLhs) }?
+            { isLhs }?
             ass=assignmentOperator^
             exp=assignmentExpressionNoIn
             {
@@ -1574,13 +1573,13 @@ forControlExpression returns [ForBuilder value]
 @init
 {
     $value = new ForBuilder();
-	bool? isLhs = null;
+	bool isLhs;
 }
 	:
         ex1=expressionNoIn
-        { $value.Initialization = $ex1.value; }
+        { $value.Initialization = $ex1.value; isLhs = IsLeftHandSideIn($ex1.value); }
 	    ( 
-		    { IsLeftHandSideIn($ex1.value, ref isLhs) }?
+		    { isLhs }?
             (
 			    IN ex2=expression
                 { $value.Expression = $ex2.value; }

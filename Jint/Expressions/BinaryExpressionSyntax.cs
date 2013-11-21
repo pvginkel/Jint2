@@ -6,8 +6,6 @@ namespace Jint.Expressions
     [Serializable]
     public class BinaryExpressionSyntax : ExpressionSyntax
     {
-        private ValueType _valueType;
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Binary; }
