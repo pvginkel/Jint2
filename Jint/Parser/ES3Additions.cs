@@ -123,12 +123,12 @@ namespace Jint.Parser
 
         public ProgramSyntax Execute()
         {
-            return program().value;
+            return program();
         }
 
         public BlockSyntax ExecuteBlockStatements()
         {
-            return blockStatements().value;
+            return blockStatements();
         }
 
         // References the upper level block currently parsed. 
@@ -173,7 +173,7 @@ namespace Jint.Parser
             return IsLeftHandSideExpression(lhs) && input.LA(1) == IN;
         }
 
-        private void PromoteEOL(ParserRuleReturnScope<IToken> rule)
+        private IToken PromoteEol()
         {
             // Get current token and its type (the possibly offending token).
             IToken lt = input.LT(1);
@@ -199,24 +199,25 @@ namespace Jint.Parser
                         // We found our EOL: promote the token to on channel, position the input on it and reset the rule start.
                         lt.Channel = DefaultTokenChannel;
                         input.Seek(lt.TokenIndex);
-                        if (rule != null)
-                        {
-                            rule.Start = lt;
-                        }
-                        break;
+                        return lt;
                     }
                 }
             }
+
+            return null;
         }
 
-        private static NumberFormatInfo numberFormatInfo = new NumberFormatInfo();
+        private static readonly NumberFormatInfo _numberFormatInfo = new NumberFormatInfo
+        {
+            NumberDecimalSeparator = "."
+        };
 
-        private string extractRegExpPattern(string text)
+        private string ExtractRegExpPattern(string text)
         {
             return text.Substring(1, text.LastIndexOf('/') - 1);
         }
 
-        private string extractRegExpOption(string text)
+        private string ExtractRegExpOption(string text)
         {
             if (text[text.Length - 1] != '/')
             {
@@ -225,9 +226,9 @@ namespace Jint.Parser
             return String.Empty;
         }
 
-        private static Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
+        private static readonly Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
 
-        private string extractString(string text)
+        private string ExtractString(string text)
         {
 
             // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Literals#String Literals    
@@ -310,12 +311,9 @@ namespace Jint.Parser
             Errors.Add(msg + " at " + hdr);
         }
 
-        // TODO: Why is this there? Did we remove something that should use this?
-        private string[] script = new string[0];
-
-        private SourceCodeDescriptor ExtractSourceCode(CommonToken start, CommonToken stop)
+        private SourceCodeDescriptor ExtractSourceCode(IToken start, IToken stop)
         {
-            return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine, "No source code available.");
+            return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine);
         }
 
         public AssignmentOperator ResolveAssignmentOperator(string op)

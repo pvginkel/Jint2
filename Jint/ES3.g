@@ -42,7 +42,6 @@ grammar ES3 ;
 
 options
 {
-	output = AST ;
 	language = CSharp3 ;
 }
 
@@ -199,10 +198,6 @@ using System.Text;
 using System.Globalization;
 using Jint.Expressions;
 using Jint.Debugger;
-}
-
-@init {
-    numberFormatInfo.NumberDecimalSeparator = ".";
 }
 
 //
@@ -499,10 +494,10 @@ punctuator
 
 literal returns [ExpressionSyntax value]
 	: exp1=NULL { $value = new IdentifierSyntax(exp1.Text); }
-	| exp2=booleanLiteral { $value = new ValueSyntax(exp2.value); }
-	| exp3=numericLiteral { $value = new ValueSyntax(exp3.value); }
-	| exp4=StringLiteral  { $value = new ValueSyntax(extractString(exp4.Text)); }
-	| exp5=RegularExpressionLiteral { $value = new RegexpSyntax(extractRegExpPattern(exp5.Text), extractRegExpOption(exp5.Text)); }
+	| exp2=booleanLiteral { $value = new ValueSyntax(exp2); }
+	| exp3=numericLiteral { $value = new ValueSyntax(exp3); }
+	| exp4=StringLiteral  { $value = new ValueSyntax(ExtractString(exp4.Text)); }
+	| exp5=RegularExpressionLiteral { $value = new RegexpSyntax(ExtractRegExpPattern(exp5.Text), ExtractRegExpOption(exp5.Text)); }
 	;
 
 booleanLiteral returns [bool value]
@@ -553,7 +548,7 @@ HexIntegerLiteral
 	;
 
 numericLiteral returns [double value]
-	: ex1=DecimalLiteral { $value = double.Parse(ex1.Text, NumberStyles.Float, numberFormatInfo); }
+	: ex1=DecimalLiteral { $value = double.Parse(ex1.Text, NumberStyles.Float, _numberFormatInfo); }
 	| ex2=OctalIntegerLiteral { $value = System.Convert.ToInt64(ex2.Text, 8); }
 	| ex3=HexIntegerLiteral { $value = System.Convert.ToInt64(ex3.Text, 16); }
 	;
@@ -644,10 +639,10 @@ RegularExpressionLiteral
 primaryExpression returns [ExpressionSyntax value]
 	: ex1=THIS { $value = new IdentifierSyntax(ex1.Text); }
 	| ex2=Identifier { $value = new IdentifierSyntax(ex2.Text); }
-	| ex3=literal { $value = ex3.value; }
-	| ex4=arrayLiteral { $value = ex4.value; }
-	| ex5=objectLiteral { $value = ex5.value; }
-	| lpar=LPAREN ex6=expression  RPAREN  { $value = ex6.value; } 
+	| ex3=literal { $value = ex3; }
+	| ex4=arrayLiteral { $value = ex4; }
+	| ex5=objectLiteral { $value = ex5; }
+	| lpar=LPAREN ex6=expression  RPAREN  { $value = ex6; } 
 	;
 
 arrayLiteral returns [ArrayDeclarationSyntax value]
@@ -661,17 +656,17 @@ arrayLiteral returns [ArrayDeclarationSyntax value]
         lb=LBRACK
 		(
             first=arrayItem
-            { if(first.value != null) parameters.Add(first.value); }
+            { if(first != null) parameters.Add(first); }
             (
                 COMMA follow=arrayItem
-                { if(follow.value != null) parameters.Add(follow.value); }
+                { if(follow != null) parameters.Add(follow); }
             )*
         )?
         RBRACK
 	;
 
 arrayItem returns [SyntaxNode value]
-	: ( expr=assignmentExpression  { $value = expr.value; } | { input.LA(1) == COMMA }? { $value = new IdentifierSyntax("undefined"); } | { input.LA(1) == RBRACK }? { $value = null; }  )
+	: ( expr=assignmentExpression  { $value = expr; } | { input.LA(1) == COMMA }? { $value = new IdentifierSyntax("undefined"); } | { input.LA(1) == RBRACK }? { $value = null; }  )
 	
 	;
 
@@ -684,9 +679,9 @@ objectLiteral returns [JsonExpressionSyntax value]
 }
 	:
       lb=LBRACE (
-        first=propertyAssignment { builder.AddProperty(first.value); } (
+        first=propertyAssignment { builder.AddProperty(first); } (
           COMMA
-          follow=propertyAssignment { builder.AddProperty(follow.value); }
+          follow=propertyAssignment { builder.AddProperty(follow); }
         )*
       )?
       RBRACE
@@ -695,10 +690,10 @@ objectLiteral returns [JsonExpressionSyntax value]
 propertyAssignment returns [PropertyDeclarationSyntax value]
 	:
         func=propertyFunctionAssignment
-        { $value = $func.value; }
+        { $value = func; }
 	|
         data=propertyValueAssignment
-        { $value = $data.value; }
+        { $value = data; }
 	;
 
 propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
@@ -721,15 +716,15 @@ propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
 }
     :
         acc=accessor
-        { mode = $acc.value; }
+        { mode = acc; }
         prop2=propertyName
-        { name = $prop2.value; }
+        { name = prop2; }
         (
             parms=formalParameterList
-            { parameters = $parms.value; }
+            { parameters = parms; }
         )?
         statements=functionBody
-        { body = $statements.value; } 
+        { body = statements; } 
     ;
 
 propertyValueAssignment returns [PropertyDeclarationSyntax value]
@@ -746,10 +741,10 @@ propertyValueAssignment returns [PropertyDeclarationSyntax value]
 }
     :
         prop1=propertyName
-        { name = $prop1.value; }
+        { name = prop1; }
         COLON
         ass=assignmentExpression
-        { expression = $ass.value; }
+        { expression = ass; }
     ;        
 
 accessor returns [PropertyExpressionType value]
@@ -758,8 +753,8 @@ accessor returns [PropertyExpressionType value]
 
 propertyName returns [string value]
 	: ex1=Identifier { $value = ex1.Text; }
-	| ex2=StringLiteral { $value = extractString(ex2.Text); }
-	| ex3=numericLiteral { $value = ex3.value.ToString(); }
+	| ex2=StringLiteral { $value = ExtractString(ex2.Text); }
+	| ex3=numericLiteral { $value = ex3.ToString(); }
 	;
 
 // $>
@@ -772,15 +767,15 @@ all the expressions surrounding member selection and calls have been moved to le
 */
 
 memberExpression returns [ExpressionSyntax value]
-	: prim=primaryExpression { $value = prim.value; }
-	| func=functionExpression { $value = func.value; }
+	: prim=primaryExpression { $value = prim; }
+	| func=functionExpression { $value = func; }
 	;
 	
 arguments returns [List<ExpressionSyntax> value]
 @init {
 	$value = new List<ExpressionSyntax>();
 }
-	: LPAREN ( first=assignmentExpression { $value.Add(first.value); } ( COMMA follow=assignmentExpression { $value.Add(follow.value); })* )? RPAREN
+	: LPAREN ( first=assignmentExpression { $value.Add(first); } ( COMMA follow=assignmentExpression { $value.Add(follow); })* )? RPAREN
 	
 	;
 
@@ -788,7 +783,7 @@ generics returns [List<ExpressionSyntax> value]
 @init {
 	$value = new List<ExpressionSyntax>();
 }
-	: LBRACE ( first=assignmentExpression { $value.Add(first.value); } ( COMMA follow=assignmentExpression { $value.Add(follow.value); })* )? RBRACE
+	: LBRACE ( first=assignmentExpression { $value.Add(first); } ( COMMA follow=assignmentExpression { $value.Add(follow); })* )? RBRACE
 	
 	;
 	
@@ -796,12 +791,13 @@ leftHandSideExpression returns [ExpressionSyntax value]
 @init {
 	List<ExpressionSyntax> gens = new List<ExpressionSyntax>();
     bool isNew = false;
+    var start = input.LT(1);
 }
 @after{
     if (isNew)
         $value = new NewSyntax($value);
 
-	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
+	$value.Source = ExtractSourceCode(start, input.LT(-1));
 }
 	:
         (
@@ -809,17 +805,17 @@ leftHandSideExpression returns [ExpressionSyntax value]
             { isNew = true; }
         )?
 	    mem=memberExpression
-        { $value = mem.value; }
+        { $value = mem; }
 	    (
 		    (
                 gen=generics
-                { gens = $gen.value; }
+                { gens = gen; }
             )?
             arg=arguments
             {
                 $value = new MethodCallSyntax(
                     $value,
-                    $arg.value,
+                    arg,
                     gens
                 );
 
@@ -835,7 +831,7 @@ leftHandSideExpression returns [ExpressionSyntax value]
             {
                 $value = new IndexerSyntax(
                     $value,
-                    $exp.value
+                    exp
                 );
             } 
 			
@@ -861,7 +857,7 @@ We only must promote EOLs when the la is INC or DEC because this production is c
 In other words: only promote EOL when we are really in a postfix expression. A check on the la will ensure this.
 */
 postfixExpression returns [ExpressionSyntax value]
-	: left=leftHandSideExpression { $value = left.value; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEOL(null);  } ( post=postfixOperator^ { $value = new UnaryExpressionSyntax(post.value, $value); })?
+	: left=leftHandSideExpression { $value = left; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEol();  } ( post=postfixOperator { $value = new UnaryExpressionSyntax(post, $value); })?
 	;
 	
 postfixOperator returns [SyntaxExpressionType value]
@@ -874,8 +870,8 @@ postfixOperator returns [SyntaxExpressionType value]
 // $<Unary operators (11.4)
 
 unaryExpression returns [ExpressionSyntax value]
-	: post=postfixExpression { $value = post.value; }
-	| op=unaryOperator^ exp=unaryExpression { $value = new UnaryExpressionSyntax(op.value, exp.value); }
+	: post=postfixExpression { $value = post; }
+	| op=unaryOperator exp=unaryExpression { $value = new UnaryExpressionSyntax(op, exp); }
 	;
 	
 unaryOperator returns [SyntaxExpressionType value]
@@ -898,11 +894,11 @@ multiplicativeExpression returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=unaryExpression { $value = left.value; } ( 
+	: left=unaryExpression { $value = left; } ( 
 		( MUL { type= SyntaxExpressionType.Multiply; } 
 		| DIV { type= SyntaxExpressionType.Divide; }
-		| MOD { type= SyntaxExpressionType.Modulo; })^ 
-		right=unaryExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| MOD { type= SyntaxExpressionType.Modulo; }) 
+		right=unaryExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 // $>
@@ -913,10 +909,10 @@ additiveExpression returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=multiplicativeExpression { $value = left.value; } ( 
+	: left=multiplicativeExpression { $value = left; } ( 
 		( ADD { type= SyntaxExpressionType.Add; }
-		| SUB { type= SyntaxExpressionType.Subtract; })^ 
-		right=multiplicativeExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| SUB { type= SyntaxExpressionType.Subtract; }) 
+		right=multiplicativeExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 // $>
@@ -927,11 +923,11 @@ shiftExpression returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=additiveExpression { $value = left.value; } ( 
+	: left=additiveExpression { $value = left; } ( 
 		( SHL { type= SyntaxExpressionType.LeftShift; }
 		| SHR { type= SyntaxExpressionType.RightShift; }
-		| SHU { type= SyntaxExpressionType.UnsignedRightShift; })^ 
-		right=additiveExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| SHU { type= SyntaxExpressionType.UnsignedRightShift; }) 
+		right=additiveExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 // $>
@@ -942,27 +938,27 @@ relationalExpression returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=shiftExpression { $value = left.value; } ( 
+	: left=shiftExpression { $value = left; } ( 
 		( LT { type= SyntaxExpressionType.LessThan; }
 		| GT { type= SyntaxExpressionType.GreaterThan; }
 		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
 		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
 		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  }
-		| IN { type= SyntaxExpressionType.In;  })^ 
-		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| IN { type= SyntaxExpressionType.In;  }) 
+		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 relationalExpressionNoIn returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=shiftExpression { $value = left.value; } ( 
+	: left=shiftExpression { $value = left; } ( 
 		( LT { type= SyntaxExpressionType.LessThan; }
 		| GT { type= SyntaxExpressionType.GreaterThan; }
 		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
 		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
-		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  } )^ 
-		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  } ) 
+		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 // $>
@@ -973,24 +969,24 @@ equalityExpression returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=relationalExpression { $value = left.value; } ( 
+	: left=relationalExpression { $value = left; } ( 
 		( EQ { type= SyntaxExpressionType.Equal; }
 		| NEQ { type= SyntaxExpressionType.NotEqual; }
 		| SAME { type= SyntaxExpressionType.Same; }
-		| NSAME { type= SyntaxExpressionType.NotSame; })^ 
-		right=relationalExpression { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| NSAME { type= SyntaxExpressionType.NotSame; }) 
+		right=relationalExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 equalityExpressionNoIn returns [ExpressionSyntax value]
 @init {
 	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 }
-	: left=relationalExpressionNoIn { $value = left.value; } ( 
+	: left=relationalExpressionNoIn { $value = left; } ( 
 		( EQ { type= SyntaxExpressionType.Equal; }
 		| NEQ { type= SyntaxExpressionType.NotEqual; }
 		| SAME { type= SyntaxExpressionType.Same; }
-		| NSAME { type= SyntaxExpressionType.NotSame; })^ 
-		right=relationalExpressionNoIn { $value = new BinaryExpressionSyntax(type, $value, right.value); })*
+		| NSAME { type= SyntaxExpressionType.NotSame; }) 
+		right=relationalExpressionNoIn { $value = new BinaryExpressionSyntax(type, $value, right); })*
 	;
 
 // $>
@@ -998,27 +994,27 @@ equalityExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary bitwise operators (11.10)
 
 bitwiseANDExpression returns [ExpressionSyntax value]
-	: left=equalityExpression { $value = left.value; } ( AND^ right=equalityExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right.value); })*
+	: left=equalityExpression { $value = left; } ( AND right=equalityExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
 	;
 
 bitwiseANDExpressionNoIn returns [ExpressionSyntax value]
-	: left=equalityExpressionNoIn { $value = left.value; } ( AND^ right=equalityExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right.value); })*
+	: left=equalityExpressionNoIn { $value = left; } ( AND right=equalityExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
 	;
 		
 bitwiseXORExpression returns [ExpressionSyntax value]
-	: left=bitwiseANDExpression { $value = left.value; } ( XOR^ right=bitwiseANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right.value); })*
+	: left=bitwiseANDExpression { $value = left; } ( XOR right=bitwiseANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
 	;
 		
 bitwiseXORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseANDExpressionNoIn { $value = left.value; } ( XOR^ right=bitwiseANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right.value); })*
+	: left=bitwiseANDExpressionNoIn { $value = left; } ( XOR right=bitwiseANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
 	;
 	
 bitwiseORExpression returns [ExpressionSyntax value]
-	: left=bitwiseXORExpression { $value = left.value; } ( OR^ right=bitwiseXORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right.value); })*
+	: left=bitwiseXORExpression { $value = left; } ( OR right=bitwiseXORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
 	;
 	
 bitwiseORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseXORExpressionNoIn { $value = left.value; } ( OR^ right=bitwiseXORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right.value); })*
+	: left=bitwiseXORExpressionNoIn { $value = left; } ( OR right=bitwiseXORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
 	;
 
 // $>
@@ -1026,19 +1022,19 @@ bitwiseORExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary logical operators (11.11)
 
 logicalANDExpression returns [ExpressionSyntax value]
-	:left= bitwiseORExpression { $value = left.value; } ( LAND^ right=bitwiseORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right.value); })*
+	:left= bitwiseORExpression { $value = left; } ( LAND right=bitwiseORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right); })*
 	;
 
 logicalANDExpressionNoIn returns [ExpressionSyntax value]
-	:left= bitwiseORExpressionNoIn { $value = left.value; } ( LAND^ right=bitwiseORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right.value); })*
+	:left= bitwiseORExpressionNoIn { $value = left; } ( LAND right=bitwiseORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right); })*
 	;
 	
 logicalORExpression returns [ExpressionSyntax value]
-	: left=logicalANDExpression { $value = left.value; } ( LOR^ right=logicalANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right.value); })*
+	: left=logicalANDExpression { $value = left; } ( LOR right=logicalANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right); })*
 	;
 	
 logicalORExpressionNoIn returns [ExpressionSyntax value]
-	: left=logicalANDExpressionNoIn { $value = left.value; } ( LOR^ right=logicalANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right.value); } )*
+	: left=logicalANDExpressionNoIn { $value = left; } ( LOR right=logicalANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right); } )*
 	;
 
 // $>
@@ -1046,11 +1042,11 @@ logicalORExpressionNoIn returns [ExpressionSyntax value]
 // $<Conditional operator (11.12)
 
 conditionalExpression returns [ExpressionSyntax value]
-	: expr1=logicalORExpression { $value = expr1.value; } ( QUE^ expr2=assignmentExpression COLON! expr3=assignmentExpression { $value = new TernarySyntax(expr1.value, expr2.value, expr3.value); })?
+	: expr1=logicalORExpression { $value = expr1; } ( QUE expr2=assignmentExpression COLON expr3=assignmentExpression { $value = new TernarySyntax(expr1, expr2, expr3); })?
 	;
 
 conditionalExpressionNoIn returns [ExpressionSyntax value]
-	: expr1=logicalORExpressionNoIn { $value = expr1.value; } ( QUE^ expr2=assignmentExpressionNoIn COLON! expr3=assignmentExpressionNoIn { $value = new TernarySyntax(expr1.value, expr2.value, expr3.value); })?
+	: expr1=logicalORExpressionNoIn { $value = expr1; } ( QUE expr2=assignmentExpressionNoIn COLON expr3=assignmentExpressionNoIn { $value = new TernarySyntax(expr1, expr2, expr3); })?
 	;
 	
 // $>
@@ -1065,7 +1061,7 @@ AssignmentSyntax :
 This rule has a LL(*) conflict. Resolving this with a syntactical predicate will yield something like this:
 
 assignmentExpression
-	: ( leftHandSideExpression assignmentOperator )=> leftHandSideExpression assignmentOperator^ assignmentExpression
+	: ( leftHandSideExpression assignmentOperator )=> leftHandSideExpression assignmentOperator assignmentExpression
 	| conditionalExpression
 	;
 assignmentOperator
@@ -1085,16 +1081,16 @@ assignmentExpression returns [ExpressionSyntax value]
 }
 	:
         lhs=conditionalExpression
-        { $value = $lhs.value; isLhs = IsLeftHandSideAssign($lhs.value); }
+        { $value = lhs; isLhs = IsLeftHandSideAssign(lhs); }
 	    (
             { isLhs }?
-            ass=assignmentOperator^
+            ass=assignmentOperator
             exp=assignmentExpression
             {
                 $value = new AssignmentSyntax(
                     ResolveAssignmentOperator($ass.text),
                     $value,
-                    $exp.value
+                    exp
                 );
             }
         )?
@@ -1122,16 +1118,16 @@ assignmentExpressionNoIn returns [ExpressionSyntax value]
 }
 	:
         lhs=conditionalExpressionNoIn
-        { $value = $lhs.value; isLhs = IsLeftHandSideAssign($lhs.value); } 
+        { $value = lhs; isLhs = IsLeftHandSideAssign(lhs); } 
 	    (
             { isLhs }?
-            ass=assignmentOperator^
+            ass=assignmentOperator
             exp=assignmentExpressionNoIn
             {
                 $value = new AssignmentSyntax(
                     ResolveAssignmentOperator($ass.text),
                     $value,
-                    $exp.value
+                    exp
                 );
             }
         )?
@@ -1151,7 +1147,7 @@ expression returns [ExpressionSyntax value]
 }
 	:
         first=assignmentExpression
-        { $value = $first.value; }
+        { $value = first; }
         (
             COMMA
             follow=assignmentExpression
@@ -1159,7 +1155,7 @@ expression returns [ExpressionSyntax value]
                 if (nodes == null)
                     nodes = new List<SyntaxNode> { $value };
 
-                nodes.Add($follow.value);
+                nodes.Add(follow);
             }
         )*
 	;
@@ -1174,7 +1170,7 @@ expressionNoIn returns [ExpressionSyntax value]
 }
 	:
         first=assignmentExpressionNoIn
-        { $value = first.value; }
+        { $value = first; }
         (
             COMMA
             follow=assignmentExpressionNoIn
@@ -1182,7 +1178,7 @@ expressionNoIn returns [ExpressionSyntax value]
                 if (nodes == null)
                     nodes = new List<SyntaxNode> { $value };
 
-                nodes.Add($follow.value);
+                nodes.Add(follow);
             }
         )* 
 	;
@@ -1214,13 +1210,14 @@ semic
 {
 	// Mark current position so we can unconsume a RBRACE.
 	int marker = input.Mark();
-	// Promote EOL if appropriate	
-	PromoteEOL(retval);
+	// Promote EOL if appropriate
+	PromoteEol();
 }
 	: SEMIC
 	| EOF
 	| RBRACE { input.Rewind(marker); }
-	| EOL | MultiLineComment // (with EOL in it)
+	| EOL
+    | MultiLineComment // (with EOL in it)
 	;
 
 /*
@@ -1234,36 +1231,40 @@ options
 	k = 1 ;
 }
 
-	: { input.LA(1) == LBRACE }? block { $value = $block.value; }
-	| { input.LA(1) == FUNCTION }? func=functionDeclaration { $value = func.value; }
-	| statementTail { $value = $statementTail.value; }
+	: { input.LA(1) == LBRACE }? b=block { $value = b; }
+	| { input.LA(1) == FUNCTION }? func=functionDeclaration { $value = func; }
+	| st=statementTail { $value = st; }
 	;
 	
 statementTail returns [SyntaxNode value] 
-@after{
-        if (!(retval.value is ForSyntax ||
-            retval.value is BlockSyntax ||
-            retval.value is WhileSyntax ||
-            retval.value is DoWhileSyntax ||
-            retval.value is SwitchSyntax ||
-            retval.value is TrySyntax ||
-            retval.value is IfSyntax)) {
-            retval.value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
-        }
+@init {
+    var start = input.LT(1);
 }
-	: variableStatement { $value = $variableStatement.value; }
-	| emptyStatement { $value = $emptyStatement.value; }
-	| expressionStatement { $value = $expressionStatement.value; }
-	| ifStatement { $value = $ifStatement.value; }
-	| iterationStatement { $value = $iterationStatement.value; }
-	| continueStatement { $value = $continueStatement.value; }
-	| breakStatement { $value = $breakStatement.value; }
-	| returnStatement { $value = $returnStatement.value; }
-	| withStatement { $value = $withStatement.value; }
-	| labelledStatement { $value = $labelledStatement.value; }
-	| switchStatement { $value = $switchStatement.value; }
-	| throwStatement { $value = $throwStatement.value; }
-	| tryStatement { $value = $tryStatement.value; }
+@after{
+    if (!(
+        $value is ForSyntax ||
+        $value is BlockSyntax ||
+        $value is WhileSyntax ||
+        $value is DoWhileSyntax ||
+        $value is SwitchSyntax ||
+        $value is TrySyntax ||
+        $value is IfSyntax
+    ))
+        $value.Source = ExtractSourceCode(start, input.LT(-1));
+}
+	: vst=variableStatement { $value = vst; }
+	| est=emptyStatement { $value = est; }
+	| exst=expressionStatement { $value = exst; }
+	| ifst=ifStatement { $value = ifst; }
+	| itst=iterationStatement { $value = itst; }
+	| cost=continueStatement { $value = cost; }
+	| brst=breakStatement { $value = brst; }
+	| rst=returnStatement { $value = rst; }
+	| wist=withStatement { $value = wist; }
+	| last=labelledStatement { $value = last; }
+	| swst=switchStatement { $value = swst; }
+	| thst=throwStatement { $value = thst; }
+	| trst=tryStatement { $value = trst; }
 	;
 
 // $<Block (12.1)
@@ -1271,18 +1272,19 @@ statementTail returns [SyntaxNode value]
 block returns [BlockSyntax value] 
 @init {
     var statements = new List<SyntaxNode>();
+    var start = input.LT(1);
 }
 @after{
     $value = new BlockSyntax(statements)
     {
-        Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop)
+        Source = ExtractSourceCode(start, input.LT(-1))
     };
 }
 	:
         lb=LBRACE
         (
-            statement
-            { statements.Add($statement.value); }
+            st=statement
+            { statements.Add(st); }
         )*
         RBRACE
 	;
@@ -1291,18 +1293,19 @@ block returns [BlockSyntax value]
 
 blockStatements returns [BlockSyntax value]
 @init{
+    var start = input.LT(1);
     var tempBody = _currentBody;
     _currentBody = new BlockBuilder();
 }
 @after{
     $value = _currentBody.CreateBlock();
-	$value.Source = ExtractSourceCode((CommonToken)retval.Start, (CommonToken)retval.Stop);
+	$value.Source = ExtractSourceCode(start, input.LT(-1));
     _currentBody = tempBody;
 }
 	:
         (
-            statement
-            { _currentBody.Statements.Add($statement.value); }
+            st=statement
+            { _currentBody.Statements.Add(st); }
         )*
 	;
 
@@ -1323,12 +1326,12 @@ variableStatement returns [SyntaxNode value]
         VAR first=variableDeclaration
         {
             $value = new VariableDeclarationSyntax(
-                $first.value.Identifier,
-                $first.value.Expression,
+                first.Identifier,
+                first.Expression,
                 false
             )
             {
-                Target = _currentBody.DeclaredVariables.AddOrGet($first.value.Identifier)
+                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier)
             };
         }
         (
@@ -1339,12 +1342,12 @@ variableStatement returns [SyntaxNode value]
 
                 statements.Add(
                     new VariableDeclarationSyntax(
-                        $follow.value.Identifier,
-                        $follow.value.Expression,
+                        follow.Identifier,
+                        follow.Expression,
                         false
                     )
                     {
-                        Target = _currentBody.DeclaredVariables.AddOrGet($follow.value.Identifier)
+                        Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier)
                     }
                 );
             }
@@ -1359,8 +1362,8 @@ variableDeclaration returns [VariableDeclarationSyntax value]
 	:
         id=Identifier
         (
-            ASSIGN^ ass=assignmentExpression
-            { expression = $ass.value; }
+            ASSIGN ass=assignmentExpression
+            { expression = ass; }
         )?
         { $value = new VariableDeclarationSyntax($id.Text, expression, true); }
 	;
@@ -1372,8 +1375,8 @@ variableDeclarationNoIn returns [VariableDeclarationSyntax value]
 	:
         id=Identifier
         (
-            ASSIGN^ ass=assignmentExpressionNoIn
-            { expression = $ass.value; }
+            ASSIGN ass=assignmentExpressionNoIn
+            { expression = ass; }
         )?
         { $value = new VariableDeclarationSyntax($id.Text, expression, true); }
 	;
@@ -1383,7 +1386,7 @@ variableDeclarationNoIn returns [VariableDeclarationSyntax value]
 // $<Empty statement (12.3)
 
 emptyStatement returns [SyntaxNode value]
-	: SEMIC! { $value = new EmptySyntax(); }
+	: SEMIC { $value = new EmptySyntax(); }
 	;
 
 // $>
@@ -1397,7 +1400,7 @@ The look ahead check on LBRACE and FUNCTION the specification mentions has been 
 are moved to the statement and sourceElement rules.
 */
 expressionStatement returns [SyntaxNode value]
-	: expression semic! { $value = new ExpressionStatementSyntax($expression.value); }
+	: e=expression semic { $value = new ExpressionStatementSyntax(e); }
 	;
 
 // $>
@@ -1410,13 +1413,13 @@ ifStatement returns [SyntaxNode value]
 }
 // The predicate is there just to get rid of the warning. ANTLR will handle the dangling else just fine.
 	:
-        IF LPAREN expression RPAREN then=statement
+        IF LPAREN e=expression RPAREN then=statement
         (
             { input.LA(1) == ELSE }?
             ELSE els=statement
-            { elseStatement = $els.value; }
+            { elseStatement = els; }
         )?
-        { $value = new IfSyntax($expression.value, $then.value, elseStatement); }
+        { $value = new IfSyntax(e, then, elseStatement); }
 	;
 
 // $>
@@ -1424,18 +1427,21 @@ ifStatement returns [SyntaxNode value]
 // $<Iteration statements (12.6)
 
 iterationStatement returns [SyntaxNode value]
-	: dos=doStatement { $value = dos.value; }
-	| wh=whileStatement  { $value = wh.value; }
-	| fo=forStatement  { $value = fo.value; }
+	: dos=doStatement { $value = dos; }
+	| wh=whileStatement  { $value = wh; }
+	| fo=forStatement  { $value = fo; }
 	;
 	
 doStatement returns [SyntaxNode value]
-	: DO statement WHILE LPAREN expression RPAREN semic { $value = new DoWhileSyntax($expression.value, $statement.value); }
-	
+	:
+        DO st=statement WHILE LPAREN e=expression RPAREN semic
+        { $value = new DoWhileSyntax(e, st); }
 	;
 	
 whileStatement returns [SyntaxNode value]
-	: WHILE^ LPAREN! expression RPAREN! statement { $value = new WhileSyntax($expression.value, $statement.value); }
+	:
+        WHILE LPAREN e=expression RPAREN st=statement
+        { $value = new WhileSyntax(e, st); }
 	;
 
 /*
@@ -1444,7 +1450,7 @@ contains a very none LL(*) compliant definition.
 The initial version was like this:	
 
 forStatement
-	: FOR^ LPAREN! forControl RPAREN! statement
+	: FOR LPAREN forControl RPAREN statement
 	;
 forControl
 options
@@ -1461,8 +1467,8 @@ options
 	memoize = true ;
 }
 	: ( ex1=expressionNoIn | var=VAR variableDeclarationNoIn ( COMMA variableDeclarationNoIn )* )? SEMIC ex2=expression? SEMIC ex3=expression?
-	-> { $var != null }? ^( FORSTEP ^( VAR[$var] variableDeclarationNoIn+ ) ^( EXPR $ex2? ) ^( EXPR $ex3? ) )
-	-> ^( FORSTEP ^( EXPR $ex1? ) ^( EXPR $ex2? ) ^( EXPR $ex3? ) )
+	-> { $var != null }? ( FORSTEP ( VAR[$var] variableDeclarationNoIn+ ) ( EXPR $ex2? ) ( EXPR $ex3? ) )
+	-> ( FORSTEP ( EXPR $ex1? ) ( EXPR $ex2? ) ( EXPR $ex3? ) )
 	;
 iterationClause
 options
@@ -1470,8 +1476,8 @@ options
 	memoize = true ;
 }
 	: ( leftHandSideExpression | var=VAR variableDeclarationNoIn ) IN expression
-	-> { $var != null }? ^( FORITER ^( VAR[$var] variableDeclarationNoIn ) ^( EXPR expression ) )
-	-> ^( FORITER ^( EXPR leftHandSideExpression ) ^( EXPR expression ) )
+	-> { $var != null }? ( FORITER ( VAR[$var] variableDeclarationNoIn ) ( EXPR expression ) )
+	-> ( FORITER ( EXPR leftHandSideExpression ) ( EXPR expression ) )
 	;
 	
 But this completely relies on the backtrack feature and capabilities of ANTLR. 
@@ -1488,24 +1494,24 @@ forStatement returns [SyntaxNode value]
     $value = builder.CreateFor();
 }
 	:
-        FOR^
-        LPAREN!
+        FOR
+        LPAREN
         fo=forControl
-        { builder = $fo.value; }
-        RPAREN! st=statement
-        { builder.Body = $st.value; }
+        { builder = fo; }
+        RPAREN st=statement
+        { builder.Body = st; }
 	;
 
 forControl returns [ForBuilder value]
 	:
         ex1=forControlVar
-        { $value = $ex1.value; }
+        { $value = ex1; }
 	|
         ex2=forControlExpression
-        { $value = $ex2.value; }
+        { $value = ex2; }
 	|
         ex3=forControlSemic
-        { $value = $ex3.value; }
+        { $value = ex3; }
 	;
 
 forControlVar returns [ForBuilder value]
@@ -1522,18 +1528,18 @@ forControlVar returns [ForBuilder value]
         VAR first=variableDeclarationNoIn
         {
             $value.Initialization = new VariableDeclarationSyntax(
-                $first.value.Identifier,
-                $first.value.Expression,
+                first.Identifier,
+                first.Expression,
                 false
             )
             {
-                Target = _currentBody.DeclaredVariables.AddOrGet($first.value.Identifier)
+                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier)
             };
         }
 	    (
 		    (
 			    IN ex=expression
-                { $value.Expression = $ex.value; }
+                { $value.Expression = ex; }
 		    )
 		    |
 		    (
@@ -1545,12 +1551,12 @@ forControlVar returns [ForBuilder value]
                         
                         statements.Add(
                             new VariableDeclarationSyntax(
-                                $follow.value.Identifier,
-                                $follow.value.Expression,
+                                follow.Identifier,
+                                follow.Expression,
                                 false
                             )
                             {
-                                Target = _currentBody.DeclaredVariables.AddOrGet($follow.value.Identifier)
+                                Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier)
                             }
                         );
                     }
@@ -1558,12 +1564,12 @@ forControlVar returns [ForBuilder value]
 			    SEMIC
                 (
                     ex1=expression
-                    { $value.Test = $ex1.value;}
+                    { $value.Test = ex1;}
                 )?
                 SEMIC
                 (
                     ex2=expression
-                    { $value.Increment = $ex2.value; }
+                    { $value.Increment = ex2; }
                 )?
 		    )
 	    )
@@ -1577,24 +1583,24 @@ forControlExpression returns [ForBuilder value]
 }
 	:
         ex1=expressionNoIn
-        { $value.Initialization = $ex1.value; isLhs = IsLeftHandSideIn($ex1.value); }
+        { $value.Initialization = ex1; isLhs = IsLeftHandSideIn(ex1); }
 	    ( 
 		    { isLhs }?
             (
 			    IN ex2=expression
-                { $value.Expression = $ex2.value; }
+                { $value.Expression = ex2; }
 		    )
 		    |
 		    (
 			    SEMIC
                 (
                     ex2=expression
-                    { $value.Test = $ex2.value;}
+                    { $value.Test = ex2;}
                 )?
                 SEMIC
                 (
                     ex3=expression
-                    { $value.Increment = $ex3.value; }
+                    { $value.Increment = ex3; }
                 )?
 		    )
 	    )
@@ -1608,12 +1614,12 @@ forControlSemic returns [ForBuilder value]
         SEMIC
         (
             ex1=expression
-            { $value.Test = $ex1.value;}
+            { $value.Test = ex1;}
         )?
         SEMIC
         (
             ex2=expression
-            { $value.Increment = $ex2.value; }
+            { $value.Increment = ex2; }
         )?
 	;
 
@@ -1631,13 +1637,13 @@ continueStatement returns [SyntaxNode value]
 	string label = null;
 }
 	:
-        CONTINUE^
-        { if (input.LA(1) == Identifier) PromoteEOL(null); }
+        CONTINUE
+        { if (input.LA(1) == Identifier) PromoteEol(); }
         (
             lb=Identifier
             { label = $lb.Text; }
         )?
-        semic!
+        semic
         { $value = new ContinueSyntax(label); }
 	;
 
@@ -1655,12 +1661,12 @@ breakStatement returns [SyntaxNode value]
 	string label = null; 
 }
 	:
-        BREAK^
-        { if (input.LA(1) == Identifier) PromoteEOL(null); }
+        BREAK
+        { if (input.LA(1) == Identifier) PromoteEol(); }
         (
             lb=Identifier { label = $lb.Text; }
         )?
-        semic!
+        semic
         { $value = new BreakSyntax(label); }
 	;
 
@@ -1686,13 +1692,13 @@ returnStatement returns [ReturnSyntax value]
     ExpressionSyntax returnExpression = null;
 }
 	:
-        RETURN^
-        { PromoteEOL(null); }
+        RETURN
+        { PromoteEol(); }
         (
             expr=expression
-            { returnExpression = $expr.value; }
+            { returnExpression = expr; }
         )?
-        semic!
+        semic
         { $value = new ReturnSyntax(returnExpression); }
 	;
 
@@ -1701,7 +1707,7 @@ returnStatement returns [ReturnSyntax value]
 // $<The with statement (12.10)
 
 withStatement returns [SyntaxNode value]
-	: WITH^ LPAREN! exp=expression RPAREN! smt=statement { $value = new WithSyntax(exp.value, smt.value); }
+	: WITH LPAREN exp=expression RPAREN smt=statement { $value = new WithSyntax(exp, smt); }
 	;
 
 // $>
@@ -1714,17 +1720,17 @@ switchStatement returns [SyntaxNode value]
     var cases = new List<CaseClause>();
 }
 	:
-        SWITCH LPAREN expression RPAREN LBRACE
+        SWITCH LPAREN e=expression RPAREN LBRACE
         (
             { block == null }?=>
             def=defaultClause
-            { block = $def.value; }
+            { block = def; }
         |
-            caseClause
-            { cases.Add($caseClause.value); }
+            cc=caseClause
+            { cases.Add(cc); }
         )*
         RBRACE
-        { $value = new SwitchSyntax($expression.value, cases, block); }
+        { $value = new SwitchSyntax(e, cases, block); }
 	;
 
 caseClause returns [CaseClause value]
@@ -1732,12 +1738,12 @@ caseClause returns [CaseClause value]
     var statements = new List<SyntaxNode>();
 }
 	:
-        CASE^ expression COLON!
+        CASE e=expression COLON
         (
-            statement
-            { statements.Add($statement.value); }
+            st=statement
+            { statements.Add(st); }
         )*
-        { $value = new CaseClause($expression.value, new BlockSyntax(statements)); }
+        { $value = new CaseClause(e, new BlockSyntax(statements)); }
 	;
 	
 defaultClause returns [BlockSyntax value]
@@ -1745,10 +1751,10 @@ defaultClause returns [BlockSyntax value]
     var statements = new List<SyntaxNode>();
 }
 	:
-        DEFAULT^ COLON!
+        DEFAULT COLON
         (
-            statement
-            { statements.Add($statement.value); }
+            st=statement
+            { statements.Add(st); }
         ) *
         { $value = new BlockSyntax(statements); }
 	;
@@ -1760,7 +1766,7 @@ defaultClause returns [BlockSyntax value]
 labelledStatement returns [SyntaxNode value]
 	:
         lb=Identifier COLON st=statement
-        { $value = new LabelSyntax($lb.Text, $st.value); }
+        { $value = new LabelSyntax($lb.Text, st); }
 	;
 
 // $>
@@ -1783,7 +1789,7 @@ new Error();
 which will yield a recognition exception!
 */
 throwStatement returns [SyntaxNode value]
-	: THROW^ { PromoteEOL(null); } exp=expression { $value = new ThrowSyntax(exp.value); } semic!
+	: THROW { PromoteEol(); } exp=expression { $value = new ThrowSyntax(exp); } semic
 	;
 
 // $>
@@ -1796,19 +1802,19 @@ tryStatement returns [TrySyntax value]
     FinallyClause @finally = null;
 }
 	:
-        TRY^ b=block
+        TRY b=block
         (
             c=catchClause
-            { @catch = c.value; }
+            { @catch = c; }
             (
                 first=finallyClause
-                { @finally = first.value; }
+                { @finally = first; }
             )?
         |
             last=finallyClause
-            { @finally = last.value; }
+            { @finally = last; }
         )
-        { $value = new TrySyntax($b.value, @catch, @finally); }
+        { $value = new TrySyntax(b, @catch, @finally); }
 	;
 	
 catchClause returns [CatchClause value]
@@ -1816,14 +1822,14 @@ catchClause returns [CatchClause value]
     $value.Target = _currentBody.DeclaredVariables.AddOrGet($value.Identifier);
 }
 	:
-        CATCH^ LPAREN! id=Identifier RPAREN! block
-        { $value = new CatchClause($id.text, $block.value); }
+        CATCH LPAREN id=Identifier RPAREN b=block
+        { $value = new CatchClause($id.text, b); }
 	;
 	
 finallyClause returns [FinallyClause value]
 	:
-        FINALLY^ block
-        { $value = new FinallyClause($block.value); }
+        FINALLY b=block
+        { $value = new FinallyClause(b); }
 	;
 
 // $>
@@ -1860,9 +1866,9 @@ functionDeclaration returns [SyntaxNode value]
         FUNCTION id=Identifier
         { name = $id.Text; } 
 		parms=formalParameterList
-        { parameters = $parms.value; }
-		functionBody
-        { body = $functionBody.value; }
+        { parameters = parms; }
+		fb=functionBody
+        { body = fb; }
 	;
 
 functionExpression returns [FunctionSyntax value]
@@ -1880,10 +1886,10 @@ functionExpression returns [FunctionSyntax value]
             id=Identifier
             { name = $id.Text; }
         )?
-        formalParameterList
-        { parameters = $formalParameterList.value; }
-        functionBody
-        { body = $functionBody.value; }
+        fpl=formalParameterList
+        { parameters = fpl; }
+        fb=functionBody
+        { body = fb; }
 	;
 
 formalParameterList returns [List<string> value]
@@ -1916,8 +1922,8 @@ functionBody returns [BlockSyntax value]
 	:
         lb=LBRACE
         (
-            sourceElement
-            { _currentBody.Statements.Add($sourceElement.value); }
+            se=sourceElement
+            { _currentBody.Statements.Add(se); }
         )*
         RBRACE
 	;
@@ -1928,13 +1934,12 @@ functionBody returns [BlockSyntax value]
 
 program returns [ProgramSyntax value]
 @init{
-    script = input.ToString().Split('\n');
     _currentBody = new BlockBuilder();
 }
 	:
         (
             follow=sourceElement
-            { _currentBody.Statements.Add($follow.value); }
+            { _currentBody.Statements.Add(follow); }
         )*
         { $value = _currentBody.CreateProgram(); }
 	;
@@ -1950,8 +1955,8 @@ options
 	k = 1 ;
 }
 
-	: { input.LA(1) == FUNCTION }? func=functionDeclaration { $value = func.value; }
-	| stat=statement { $value = stat.value; }
+	: { input.LA(1) == FUNCTION }? func=functionDeclaration { $value = func; }
+	| stat=statement { $value = stat; }
 	;
 
 // $>

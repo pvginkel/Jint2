@@ -22,11 +22,9 @@ namespace Jint.Debugger
 
         public Location Start { get; set; }
         public Location Stop { get; set; }
-        public string Code { get; private set; }
 
-        public SourceCodeDescriptor(int startLine, int startChar, int stopLine, int stopChar, string code)
+        public SourceCodeDescriptor(int startLine, int startChar, int stopLine, int stopChar)
         {
-            Code = code;
             Start = new Location(startLine, startChar);
             Stop = new Location(stopLine, stopChar);
         }
