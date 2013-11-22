@@ -1,0 +1,1 @@
+﻿a = b = 1; assert(1, a); assert(1, b);

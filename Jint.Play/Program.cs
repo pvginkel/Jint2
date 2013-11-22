@@ -6,6 +6,7 @@ using System.Text;
 using System.Reflection;
 using System.Diagnostics;
 using Jint.Tests;
+using Jint.Tests.Support;
 
 namespace Jint.Play
 {
@@ -16,7 +17,7 @@ namespace Jint.Play
             const string prefix = "Jint.Tests.SunSpider.";
             var script = prefix + "access-fannkuch.js";
 
-            var assembly = typeof(SunSpider).Assembly;
+            var assembly = typeof(TestBase).Assembly;
             var program = new StreamReader(assembly.GetManifestResourceStream(script)).ReadToEnd();
 
             var jint = new JintEngine();

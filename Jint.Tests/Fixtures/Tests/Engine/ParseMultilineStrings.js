@@ -1,0 +1,3 @@
+﻿assert('foobar', 'foo\
+\
+bar');
