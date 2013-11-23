@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-23 06:15:19
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-23 06:43:24
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -5304,7 +5304,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = Identifier;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:432:2: ( IdentifierNameASCIIStart |)
+			// ..\\ES3.g:440:2: ( IdentifierNameASCIIStart |)
 			int alt9=2;
 			try { DebugEnterDecision(9, false);
 			int LA9_0 = input.LA(1);
@@ -5321,18 +5321,18 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:432:4: IdentifierNameASCIIStart
+				// ..\\ES3.g:440:4: IdentifierNameASCIIStart
 				{
-				DebugLocation(432, 4);
+				DebugLocation(440, 4);
 				mIdentifierNameASCIIStart(); 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:433:4: 
+				// ..\\ES3.g:441:4: 
 				{
-				DebugLocation(433, 4);
+				DebugLocation(441, 4);
 				 ConsumeIdentifierUnicodeStart(); 
 
 				}
@@ -5341,6 +5341,8 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			}
 			state.type = _type;
 			state.channel = _channel;
+
+			    Text = ExtractIdentifier(Text);
 		}
 		finally
 		{
@@ -5363,11 +5365,11 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("DecimalDigit", 130);
 		try
 		{
-			// ..\\ES3.g:516:2: ( '0' .. '9' )
+			// ..\\ES3.g:524:2: ( '0' .. '9' )
 			DebugEnterAlt(1);
 			// ..\\ES3.g:
 			{
-			DebugLocation(516, 2);
+			DebugLocation(524, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='9'))
 			{
 				input.Consume();
@@ -5405,11 +5407,11 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("HexDigit", 131);
 		try
 		{
-			// ..\\ES3.g:520:2: ( DecimalDigit | 'a' .. 'f' | 'A' .. 'F' )
+			// ..\\ES3.g:528:2: ( DecimalDigit | 'a' .. 'f' | 'A' .. 'F' )
 			DebugEnterAlt(1);
 			// ..\\ES3.g:
 			{
-			DebugLocation(520, 2);
+			DebugLocation(528, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='F')||(input.LA(1)>='a' && input.LA(1)<='f'))
 			{
 				input.Consume();
@@ -5447,11 +5449,11 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("OctalDigit", 132);
 		try
 		{
-			// ..\\ES3.g:524:2: ( '0' .. '7' )
+			// ..\\ES3.g:532:2: ( '0' .. '7' )
 			DebugEnterAlt(1);
 			// ..\\ES3.g:
 			{
-			DebugLocation(524, 2);
+			DebugLocation(532, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='7'))
 			{
 				input.Consume();
@@ -5489,11 +5491,11 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("ExponentPart", 133);
 		try
 		{
-			// ..\\ES3.g:528:2: ( ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+ )
+			// ..\\ES3.g:536:2: ( ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:528:4: ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+
+			// ..\\ES3.g:536:4: ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+
 			{
-			DebugLocation(528, 4);
+			DebugLocation(536, 4);
 			if (input.LA(1)=='E'||input.LA(1)=='e')
 			{
 				input.Consume();
@@ -5506,8 +5508,8 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				Recover(mse);
 				throw mse;}
 
-			DebugLocation(528, 18);
-			// ..\\ES3.g:528:18: ( '+' | '-' )?
+			DebugLocation(536, 18);
+			// ..\\ES3.g:536:18: ( '+' | '-' )?
 			int alt10=2;
 			try { DebugEnterSubRule(10);
 			try { DebugEnterDecision(10, false);
@@ -5524,7 +5526,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				DebugEnterAlt(1);
 				// ..\\ES3.g:
 				{
-				DebugLocation(528, 18);
+				DebugLocation(536, 18);
 				input.Consume();
 
 
@@ -5534,8 +5536,8 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			}
 			} finally { DebugExitSubRule(10); }
 
-			DebugLocation(528, 33);
-			// ..\\ES3.g:528:33: ( DecimalDigit )+
+			DebugLocation(536, 33);
+			// ..\\ES3.g:536:33: ( DecimalDigit )+
 			int cnt11=0;
 			try { DebugEnterSubRule(11);
 			while (true)
@@ -5557,7 +5559,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 					DebugEnterAlt(1);
 					// ..\\ES3.g:
 					{
-					DebugLocation(528, 33);
+					DebugLocation(536, 33);
 					input.Consume();
 
 
@@ -5604,7 +5606,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("DecimalIntegerLiteral", 134);
 		try
 		{
-			// ..\\ES3.g:532:2: ( '0' | '1' .. '9' ( DecimalDigit )* )
+			// ..\\ES3.g:540:2: ( '0' | '1' .. '9' ( DecimalDigit )* )
 			int alt13=2;
 			try { DebugEnterDecision(13, false);
 			int LA13_0 = input.LA(1);
@@ -5628,21 +5630,21 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:532:4: '0'
+				// ..\\ES3.g:540:4: '0'
 				{
-				DebugLocation(532, 4);
+				DebugLocation(540, 4);
 				Match('0'); 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:533:4: '1' .. '9' ( DecimalDigit )*
+				// ..\\ES3.g:541:4: '1' .. '9' ( DecimalDigit )*
 				{
-				DebugLocation(533, 4);
+				DebugLocation(541, 4);
 				MatchRange('1','9'); 
-				DebugLocation(533, 13);
-				// ..\\ES3.g:533:13: ( DecimalDigit )*
+				DebugLocation(541, 13);
+				// ..\\ES3.g:541:13: ( DecimalDigit )*
 				try { DebugEnterSubRule(12);
 				while (true)
 				{
@@ -5663,7 +5665,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 						DebugEnterAlt(1);
 						// ..\\ES3.g:
 						{
-						DebugLocation(533, 13);
+						DebugLocation(541, 13);
 						input.Consume();
 
 
@@ -5709,7 +5711,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DecimalLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:537:2: ( DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )? | '.' ( DecimalDigit )+ ( ExponentPart )? | DecimalIntegerLiteral ( ExponentPart )? )
+			// ..\\ES3.g:545:2: ( DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )? | '.' ( DecimalDigit )+ ( ExponentPart )? | DecimalIntegerLiteral ( ExponentPart )? )
 			int alt19=3;
 			try { DebugEnterDecision(19, false);
 			try
@@ -5726,14 +5728,14 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:537:4: DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )?
+				// ..\\ES3.g:545:4: DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )?
 				{
-				DebugLocation(537, 4);
+				DebugLocation(545, 4);
 				mDecimalIntegerLiteral(); 
-				DebugLocation(537, 26);
+				DebugLocation(545, 26);
 				Match('.'); 
-				DebugLocation(537, 30);
-				// ..\\ES3.g:537:30: ( DecimalDigit )*
+				DebugLocation(545, 30);
+				// ..\\ES3.g:545:30: ( DecimalDigit )*
 				try { DebugEnterSubRule(14);
 				while (true)
 				{
@@ -5754,7 +5756,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 						DebugEnterAlt(1);
 						// ..\\ES3.g:
 						{
-						DebugLocation(537, 30);
+						DebugLocation(545, 30);
 						input.Consume();
 
 
@@ -5771,8 +5773,8 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 
 				} finally { DebugExitSubRule(14); }
 
-				DebugLocation(537, 44);
-				// ..\\ES3.g:537:44: ( ExponentPart )?
+				DebugLocation(545, 44);
+				// ..\\ES3.g:545:44: ( ExponentPart )?
 				int alt15=2;
 				try { DebugEnterSubRule(15);
 				try { DebugEnterDecision(15, false);
@@ -5787,9 +5789,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:537:44: ExponentPart
+					// ..\\ES3.g:545:44: ExponentPart
 					{
-					DebugLocation(537, 44);
+					DebugLocation(545, 44);
 					mExponentPart(); 
 
 					}
@@ -5803,12 +5805,12 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:538:4: '.' ( DecimalDigit )+ ( ExponentPart )?
+				// ..\\ES3.g:546:4: '.' ( DecimalDigit )+ ( ExponentPart )?
 				{
-				DebugLocation(538, 4);
+				DebugLocation(546, 4);
 				Match('.'); 
-				DebugLocation(538, 8);
-				// ..\\ES3.g:538:8: ( DecimalDigit )+
+				DebugLocation(546, 8);
+				// ..\\ES3.g:546:8: ( DecimalDigit )+
 				int cnt16=0;
 				try { DebugEnterSubRule(16);
 				while (true)
@@ -5830,7 +5832,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 						DebugEnterAlt(1);
 						// ..\\ES3.g:
 						{
-						DebugLocation(538, 8);
+						DebugLocation(546, 8);
 						input.Consume();
 
 
@@ -5852,8 +5854,8 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 
 				} finally { DebugExitSubRule(16); }
 
-				DebugLocation(538, 22);
-				// ..\\ES3.g:538:22: ( ExponentPart )?
+				DebugLocation(546, 22);
+				// ..\\ES3.g:546:22: ( ExponentPart )?
 				int alt17=2;
 				try { DebugEnterSubRule(17);
 				try { DebugEnterDecision(17, false);
@@ -5868,9 +5870,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:538:22: ExponentPart
+					// ..\\ES3.g:546:22: ExponentPart
 					{
-					DebugLocation(538, 22);
+					DebugLocation(546, 22);
 					mExponentPart(); 
 
 					}
@@ -5884,12 +5886,12 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:539:4: DecimalIntegerLiteral ( ExponentPart )?
+				// ..\\ES3.g:547:4: DecimalIntegerLiteral ( ExponentPart )?
 				{
-				DebugLocation(539, 4);
+				DebugLocation(547, 4);
 				mDecimalIntegerLiteral(); 
-				DebugLocation(539, 26);
-				// ..\\ES3.g:539:26: ( ExponentPart )?
+				DebugLocation(547, 26);
+				// ..\\ES3.g:547:26: ( ExponentPart )?
 				int alt18=2;
 				try { DebugEnterSubRule(18);
 				try { DebugEnterDecision(18, false);
@@ -5904,9 +5906,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:539:26: ExponentPart
+					// ..\\ES3.g:547:26: ExponentPart
 					{
-					DebugLocation(539, 26);
+					DebugLocation(547, 26);
 					mExponentPart(); 
 
 					}
@@ -5946,14 +5948,14 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = OctalIntegerLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:543:2: ( '0' ( OctalDigit )+ )
+			// ..\\ES3.g:551:2: ( '0' ( OctalDigit )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:543:4: '0' ( OctalDigit )+
+			// ..\\ES3.g:551:4: '0' ( OctalDigit )+
 			{
-			DebugLocation(543, 4);
+			DebugLocation(551, 4);
 			Match('0'); 
-			DebugLocation(543, 8);
-			// ..\\ES3.g:543:8: ( OctalDigit )+
+			DebugLocation(551, 8);
+			// ..\\ES3.g:551:8: ( OctalDigit )+
 			int cnt20=0;
 			try { DebugEnterSubRule(20);
 			while (true)
@@ -5975,7 +5977,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 					DebugEnterAlt(1);
 					// ..\\ES3.g:
 					{
-					DebugLocation(543, 8);
+					DebugLocation(551, 8);
 					input.Consume();
 
 
@@ -6026,12 +6028,12 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = HexIntegerLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:547:2: ( ( '0x' | '0X' ) ( HexDigit )+ )
+			// ..\\ES3.g:555:2: ( ( '0x' | '0X' ) ( HexDigit )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:547:4: ( '0x' | '0X' ) ( HexDigit )+
+			// ..\\ES3.g:555:4: ( '0x' | '0X' ) ( HexDigit )+
 			{
-			DebugLocation(547, 4);
-			// ..\\ES3.g:547:4: ( '0x' | '0X' )
+			DebugLocation(555, 4);
+			// ..\\ES3.g:555:4: ( '0x' | '0X' )
 			int alt21=2;
 			try { DebugEnterSubRule(21);
 			try { DebugEnterDecision(21, false);
@@ -6067,9 +6069,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:547:6: '0x'
+				// ..\\ES3.g:555:6: '0x'
 				{
-				DebugLocation(547, 6);
+				DebugLocation(555, 6);
 				Match("0x"); 
 
 
@@ -6077,9 +6079,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:547:13: '0X'
+				// ..\\ES3.g:555:13: '0X'
 				{
-				DebugLocation(547, 13);
+				DebugLocation(555, 13);
 				Match("0X"); 
 
 
@@ -6089,8 +6091,8 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			}
 			} finally { DebugExitSubRule(21); }
 
-			DebugLocation(547, 20);
-			// ..\\ES3.g:547:20: ( HexDigit )+
+			DebugLocation(555, 20);
+			// ..\\ES3.g:555:20: ( HexDigit )+
 			int cnt22=0;
 			try { DebugEnterSubRule(22);
 			while (true)
@@ -6112,7 +6114,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 					DebugEnterAlt(1);
 					// ..\\ES3.g:
 					{
-					DebugLocation(547, 20);
+					DebugLocation(555, 20);
 					input.Consume();
 
 
@@ -6161,11 +6163,11 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("CharacterEscapeSequence", 138);
 		try
 		{
-			// ..\\ES3.g:566:2: (~ ( DecimalDigit | 'x' | 'u' | LineTerminator ) )
+			// ..\\ES3.g:574:2: (~ ( DecimalDigit | 'x' | 'u' | LineTerminator ) )
 			DebugEnterAlt(1);
 			// ..\\ES3.g:
 			{
-			DebugLocation(566, 2);
+			DebugLocation(574, 2);
 			if ((input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='/')||(input.LA(1)>=':' && input.LA(1)<='t')||(input.LA(1)>='v' && input.LA(1)<='w')||(input.LA(1)>='y' && input.LA(1)<='\u2027')||(input.LA(1)>='\u202A' && input.LA(1)<='\uFFFF'))
 			{
 				input.Consume();
@@ -6203,11 +6205,11 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("ZeroToThree", 139);
 		try
 		{
-			// ..\\ES3.g:570:2: ( '0' .. '3' )
+			// ..\\ES3.g:578:2: ( '0' .. '3' )
 			DebugEnterAlt(1);
 			// ..\\ES3.g:
 			{
-			DebugLocation(570, 2);
+			DebugLocation(578, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='3'))
 			{
 				input.Consume();
@@ -6245,7 +6247,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("OctalEscapeSequence", 140);
 		try
 		{
-			// ..\\ES3.g:574:2: ( OctalDigit | ZeroToThree OctalDigit | '4' .. '7' OctalDigit | ZeroToThree OctalDigit OctalDigit )
+			// ..\\ES3.g:582:2: ( OctalDigit | ZeroToThree OctalDigit | '4' .. '7' OctalDigit | ZeroToThree OctalDigit OctalDigit )
 			int alt23=4;
 			try { DebugEnterDecision(23, false);
 			int LA23_0 = input.LA(1);
@@ -6293,44 +6295,44 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:574:4: OctalDigit
+				// ..\\ES3.g:582:4: OctalDigit
 				{
-				DebugLocation(574, 4);
+				DebugLocation(582, 4);
 				mOctalDigit(); 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:575:4: ZeroToThree OctalDigit
+				// ..\\ES3.g:583:4: ZeroToThree OctalDigit
 				{
-				DebugLocation(575, 4);
+				DebugLocation(583, 4);
 				mZeroToThree(); 
-				DebugLocation(575, 16);
+				DebugLocation(583, 16);
 				mOctalDigit(); 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:576:4: '4' .. '7' OctalDigit
+				// ..\\ES3.g:584:4: '4' .. '7' OctalDigit
 				{
-				DebugLocation(576, 4);
+				DebugLocation(584, 4);
 				MatchRange('4','7'); 
-				DebugLocation(576, 13);
+				DebugLocation(584, 13);
 				mOctalDigit(); 
 
 				}
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:577:4: ZeroToThree OctalDigit OctalDigit
+				// ..\\ES3.g:585:4: ZeroToThree OctalDigit OctalDigit
 				{
-				DebugLocation(577, 4);
+				DebugLocation(585, 4);
 				mZeroToThree(); 
-				DebugLocation(577, 16);
+				DebugLocation(585, 16);
 				mOctalDigit(); 
-				DebugLocation(577, 27);
+				DebugLocation(585, 27);
 				mOctalDigit(); 
 
 				}
@@ -6359,15 +6361,15 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("HexEscapeSequence", 141);
 		try
 		{
-			// ..\\ES3.g:581:2: ( 'x' HexDigit HexDigit )
+			// ..\\ES3.g:589:2: ( 'x' HexDigit HexDigit )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:581:4: 'x' HexDigit HexDigit
+			// ..\\ES3.g:589:4: 'x' HexDigit HexDigit
 			{
-			DebugLocation(581, 4);
+			DebugLocation(589, 4);
 			Match('x'); 
-			DebugLocation(581, 8);
+			DebugLocation(589, 8);
 			mHexDigit(); 
-			DebugLocation(581, 17);
+			DebugLocation(589, 17);
 			mHexDigit(); 
 
 			}
@@ -6394,19 +6396,19 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("UnicodeEscapeSequence", 142);
 		try
 		{
-			// ..\\ES3.g:585:2: ( 'u' HexDigit HexDigit HexDigit HexDigit )
+			// ..\\ES3.g:593:2: ( 'u' HexDigit HexDigit HexDigit HexDigit )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:585:4: 'u' HexDigit HexDigit HexDigit HexDigit
+			// ..\\ES3.g:593:4: 'u' HexDigit HexDigit HexDigit HexDigit
 			{
-			DebugLocation(585, 4);
+			DebugLocation(593, 4);
 			Match('u'); 
-			DebugLocation(585, 8);
+			DebugLocation(593, 8);
 			mHexDigit(); 
-			DebugLocation(585, 17);
+			DebugLocation(593, 17);
 			mHexDigit(); 
-			DebugLocation(585, 26);
+			DebugLocation(593, 26);
 			mHexDigit(); 
-			DebugLocation(585, 35);
+			DebugLocation(593, 35);
 			mHexDigit(); 
 
 			}
@@ -6433,14 +6435,14 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("EscapeSequence", 143);
 		try
 		{
-			// ..\\ES3.g:589:2: ( BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF ) )
+			// ..\\ES3.g:597:2: ( BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:590:2: BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
+			// ..\\ES3.g:598:2: BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
 			{
-			DebugLocation(590, 2);
+			DebugLocation(598, 2);
 			mBSLASH(); 
-			DebugLocation(591, 2);
-			// ..\\ES3.g:591:2: ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
+			DebugLocation(599, 2);
+			// ..\\ES3.g:599:2: ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
 			int alt25=6;
 			try { DebugEnterSubRule(25);
 			try { DebugEnterDecision(25, false);
@@ -6481,48 +6483,48 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:592:3: CharacterEscapeSequence
+				// ..\\ES3.g:600:3: CharacterEscapeSequence
 				{
-				DebugLocation(592, 3);
+				DebugLocation(600, 3);
 				mCharacterEscapeSequence(); 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:593:5: OctalEscapeSequence
+				// ..\\ES3.g:601:5: OctalEscapeSequence
 				{
-				DebugLocation(593, 5);
+				DebugLocation(601, 5);
 				mOctalEscapeSequence(); 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:594:5: HexEscapeSequence
+				// ..\\ES3.g:602:5: HexEscapeSequence
 				{
-				DebugLocation(594, 5);
+				DebugLocation(602, 5);
 				mHexEscapeSequence(); 
 
 				}
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:595:5: UnicodeEscapeSequence
+				// ..\\ES3.g:603:5: UnicodeEscapeSequence
 				{
-				DebugLocation(595, 5);
+				DebugLocation(603, 5);
 				mUnicodeEscapeSequence(); 
 
 				}
 				break;
 			case 5:
 				DebugEnterAlt(5);
-				// ..\\ES3.g:596:5: CR ( LF )?
+				// ..\\ES3.g:604:5: CR ( LF )?
 				{
-				DebugLocation(596, 5);
+				DebugLocation(604, 5);
 				mCR(); 
-				DebugLocation(596, 8);
-				// ..\\ES3.g:596:8: ( LF )?
+				DebugLocation(604, 8);
+				// ..\\ES3.g:604:8: ( LF )?
 				int alt24=2;
 				try { DebugEnterSubRule(24);
 				try { DebugEnterDecision(24, false);
@@ -6539,7 +6541,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 					DebugEnterAlt(1);
 					// ..\\ES3.g:
 					{
-					DebugLocation(596, 8);
+					DebugLocation(604, 8);
 					input.Consume();
 
 
@@ -6554,9 +6556,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 6:
 				DebugEnterAlt(6);
-				// ..\\ES3.g:597:11: LF
+				// ..\\ES3.g:605:11: LF
 				{
-				DebugLocation(597, 11);
+				DebugLocation(605, 11);
 				mLF(); 
 
 				}
@@ -6592,7 +6594,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = StringLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:602:2: ( SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE | DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE )
+			// ..\\ES3.g:610:2: ( SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE | DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE )
 			int alt28=2;
 			try { DebugEnterDecision(28, false);
 			int LA28_0 = input.LA(1);
@@ -6616,12 +6618,12 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:602:4: SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE
+				// ..\\ES3.g:610:4: SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE
 				{
-				DebugLocation(602, 4);
+				DebugLocation(610, 4);
 				mSQUOTE(); 
-				DebugLocation(602, 11);
-				// ..\\ES3.g:602:11: (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
+				DebugLocation(610, 11);
+				// ..\\ES3.g:610:11: (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
 				try { DebugEnterSubRule(26);
 				while (true)
 				{
@@ -6644,9 +6646,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:602:13: ~ ( SQUOTE | BSLASH | LineTerminator )
+						// ..\\ES3.g:610:13: ~ ( SQUOTE | BSLASH | LineTerminator )
 						{
-						DebugLocation(602, 13);
+						DebugLocation(610, 13);
 						input.Consume();
 
 
@@ -6654,9 +6656,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:602:53: EscapeSequence
+						// ..\\ES3.g:610:53: EscapeSequence
 						{
-						DebugLocation(602, 53);
+						DebugLocation(610, 53);
 						mEscapeSequence(); 
 
 						}
@@ -6672,19 +6674,19 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 
 				} finally { DebugExitSubRule(26); }
 
-				DebugLocation(602, 71);
+				DebugLocation(610, 71);
 				mSQUOTE(); 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:603:4: DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE
+				// ..\\ES3.g:611:4: DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE
 				{
-				DebugLocation(603, 4);
+				DebugLocation(611, 4);
 				mDQUOTE(); 
-				DebugLocation(603, 11);
-				// ..\\ES3.g:603:11: (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
+				DebugLocation(611, 11);
+				// ..\\ES3.g:611:11: (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
 				try { DebugEnterSubRule(27);
 				while (true)
 				{
@@ -6707,9 +6709,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:603:13: ~ ( DQUOTE | BSLASH | LineTerminator )
+						// ..\\ES3.g:611:13: ~ ( DQUOTE | BSLASH | LineTerminator )
 						{
-						DebugLocation(603, 13);
+						DebugLocation(611, 13);
 						input.Consume();
 
 
@@ -6717,9 +6719,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:603:53: EscapeSequence
+						// ..\\ES3.g:611:53: EscapeSequence
 						{
-						DebugLocation(603, 53);
+						DebugLocation(611, 53);
 						mEscapeSequence(); 
 
 						}
@@ -6735,7 +6737,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 
 				} finally { DebugExitSubRule(27); }
 
-				DebugLocation(603, 71);
+				DebugLocation(611, 71);
 				mDQUOTE(); 
 
 				}
@@ -6766,13 +6768,13 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("BackslashSequence", 145);
 		try
 		{
-			// ..\\ES3.g:611:2: ( BSLASH ~ ( LineTerminator ) )
+			// ..\\ES3.g:619:2: ( BSLASH ~ ( LineTerminator ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:611:4: BSLASH ~ ( LineTerminator )
+			// ..\\ES3.g:619:4: BSLASH ~ ( LineTerminator )
 			{
-			DebugLocation(611, 4);
+			DebugLocation(619, 4);
 			mBSLASH(); 
-			DebugLocation(611, 11);
+			DebugLocation(619, 11);
 			if ((input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\u2027')||(input.LA(1)>='\u202A' && input.LA(1)<='\uFFFF'))
 			{
 				input.Consume();
@@ -6810,7 +6812,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("RegularExpressionFirstChar", 146);
 		try
 		{
-			// ..\\ES3.g:615:2: (~ ( LineTerminator | MUL | BSLASH | DIV ) | BackslashSequence )
+			// ..\\ES3.g:623:2: (~ ( LineTerminator | MUL | BSLASH | DIV ) | BackslashSequence )
 			int alt29=2;
 			try { DebugEnterDecision(29, false);
 			int LA29_0 = input.LA(1);
@@ -6834,9 +6836,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:615:4: ~ ( LineTerminator | MUL | BSLASH | DIV )
+				// ..\\ES3.g:623:4: ~ ( LineTerminator | MUL | BSLASH | DIV )
 				{
-				DebugLocation(615, 4);
+				DebugLocation(623, 4);
 				input.Consume();
 
 
@@ -6844,9 +6846,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:616:4: BackslashSequence
+				// ..\\ES3.g:624:4: BackslashSequence
 				{
-				DebugLocation(616, 4);
+				DebugLocation(624, 4);
 				mBackslashSequence(); 
 
 				}
@@ -6875,7 +6877,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("RegularExpressionChar", 147);
 		try
 		{
-			// ..\\ES3.g:620:2: (~ ( LineTerminator | BSLASH | DIV ) | BackslashSequence )
+			// ..\\ES3.g:628:2: (~ ( LineTerminator | BSLASH | DIV ) | BackslashSequence )
 			int alt30=2;
 			try { DebugEnterDecision(30, false);
 			int LA30_0 = input.LA(1);
@@ -6899,9 +6901,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:620:4: ~ ( LineTerminator | BSLASH | DIV )
+				// ..\\ES3.g:628:4: ~ ( LineTerminator | BSLASH | DIV )
 				{
-				DebugLocation(620, 4);
+				DebugLocation(628, 4);
 				input.Consume();
 
 
@@ -6909,9 +6911,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:621:4: BackslashSequence
+				// ..\\ES3.g:629:4: BackslashSequence
 				{
-				DebugLocation(621, 4);
+				DebugLocation(629, 4);
 				mBackslashSequence(); 
 
 				}
@@ -6942,21 +6944,21 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = RegularExpressionLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:625:2: ({...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )* )
+			// ..\\ES3.g:633:2: ({...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:625:4: {...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )*
+			// ..\\ES3.g:633:4: {...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )*
 			{
-			DebugLocation(625, 4);
+			DebugLocation(633, 4);
 			if (!(( AreRegularExpressionsEnabled() )))
 			{
 				throw new FailedPredicateException(input, "RegularExpressionLiteral", " AreRegularExpressionsEnabled() ");
 			}
-			DebugLocation(625, 42);
+			DebugLocation(633, 42);
 			mDIV(); 
-			DebugLocation(625, 46);
+			DebugLocation(633, 46);
 			mRegularExpressionFirstChar(); 
-			DebugLocation(625, 73);
-			// ..\\ES3.g:625:73: ( RegularExpressionChar )*
+			DebugLocation(633, 73);
+			// ..\\ES3.g:633:73: ( RegularExpressionChar )*
 			try { DebugEnterSubRule(31);
 			while (true)
 			{
@@ -6975,9 +6977,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:625:73: RegularExpressionChar
+					// ..\\ES3.g:633:73: RegularExpressionChar
 					{
-					DebugLocation(625, 73);
+					DebugLocation(633, 73);
 					mRegularExpressionChar(); 
 
 					}
@@ -6993,10 +6995,10 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 
 			} finally { DebugExitSubRule(31); }
 
-			DebugLocation(625, 96);
+			DebugLocation(633, 96);
 			mDIV(); 
-			DebugLocation(625, 100);
-			// ..\\ES3.g:625:100: ( IdentifierPart )*
+			DebugLocation(633, 100);
+			// ..\\ES3.g:633:100: ( IdentifierPart )*
 			try { DebugEnterSubRule(32);
 			while (true)
 			{
@@ -7019,9 +7021,9 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:625:100: IdentifierPart
+					// ..\\ES3.g:633:100: IdentifierPart
 					{
-					DebugLocation(625, 100);
+					DebugLocation(633, 100);
 					mIdentifierPart(); 
 
 					}
@@ -8195,7 +8197,7 @@ public partial class ES3Lexer : Antlr.Runtime.Lexer
 			this.transition = DFA19_transition;
 		}
 
-		public override string Description { get { return "536:1: DecimalLiteral : ( DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )? | '.' ( DecimalDigit )+ ( ExponentPart )? | DecimalIntegerLiteral ( ExponentPart )? );"; } }
+		public override string Description { get { return "544:1: DecimalLiteral : ( DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )? | '.' ( DecimalDigit )+ ( ExponentPart )? | DecimalIntegerLiteral ( ExponentPart )? );"; } }
 
 		public override void Error(NoViableAltException nvae)
 		{

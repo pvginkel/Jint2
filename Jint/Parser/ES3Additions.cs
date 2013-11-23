@@ -95,12 +95,15 @@ namespace Jint.Parser
 
         public override IToken NextToken()
         {
-            IToken result = base.NextToken();
+            var result = base.NextToken();
             if (result.Channel == DefaultTokenChannel)
-            {
                 last = result;
-            }
             return result;
+        }
+
+        private string ExtractIdentifier(string text)
+        {
+            return ES3Util.ExtractString(text, false);
         }
     }
 
@@ -134,8 +137,6 @@ namespace Jint.Parser
         // References the upper level block currently parsed. 
         // This is used to add variable declarations at the top of the body while parsing.
         private BlockBuilder _currentBody;
-
-        private const char BS = '\\';
 
         private bool IsLeftHandSideAssign(ExpressionSyntax lhs)
         {
@@ -226,72 +227,9 @@ namespace Jint.Parser
             return String.Empty;
         }
 
-        private static readonly Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
-
         private string ExtractString(string text)
         {
-
-            // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Literals#String Literals    
-            StringBuilder sb = new StringBuilder(text.Length);
-            int startIndex = 1; // Skip initial quote
-            int slashIndex = -1;
-
-            while ((slashIndex = text.IndexOf(BS, startIndex)) != -1)
-            {
-                sb.Append(text.Substring(startIndex, slashIndex - startIndex));
-                char escapeType = text[slashIndex + 1];
-                switch (escapeType)
-                {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        string octalCode = text.Substring(slashIndex + 1, 3);
-                        char octalChar = Latin1.GetChars(new byte[] { System.Convert.ToByte(octalCode, 8) })[0];
-                        // insert decoded char
-                        sb.Append(octalChar);
-                        // skip encoded char
-                        slashIndex += 4;
-                        break;
-                    case 'x':
-                        string asciiCode = text.Substring(slashIndex + 2, 2); ;
-                        char asciiChar = Latin1.GetChars(new byte[] { System.Convert.ToByte(asciiCode, 16) })[0];
-                        sb.Append(asciiChar);
-                        slashIndex += 4;
-                        break;
-                    case 'u':
-                        char unicodeChar = System.Convert.ToChar(Int32.Parse(text.Substring(slashIndex + 2, 4), System.Globalization.NumberStyles.AllowHexSpecifier));
-                        sb.Append(unicodeChar);
-                        slashIndex += 6;
-                        break;
-                    case 'b': sb.Append('\b'); slashIndex += 2; break;
-                    case 'f': sb.Append('\f'); slashIndex += 2; break;
-                    case 'n': sb.Append('\n'); slashIndex += 2; break;
-                    case 'r': sb.Append('\r'); slashIndex += 2; break;
-                    case 't': sb.Append('\t'); slashIndex += 2; break;
-                    case 'v': sb.Append('\v'); slashIndex += 2; break;
-                    case '\'': sb.Append('\''); slashIndex += 2; break;
-                    case '"': sb.Append('"'); slashIndex += 2; break;
-                    case '\\': sb.Append('\\'); slashIndex += 2; break;
-                    case '\r': if (text[slashIndex + 2] == '\n') slashIndex += 3; break;
-                    case '\n': slashIndex += 2; break;
-                    default: sb.Append(escapeType); slashIndex += 2; break;
-                }
-
-                startIndex = slashIndex;
-            }
-
-            if (sb.Length == 0)
-                return text.Substring(1, text.Length - 2);
-
-            sb.Append(text.Substring(startIndex, text.Length - startIndex - 1));
-            return sb.ToString();
+            return ES3Util.ExtractString(text, true);
         }
 
         public List<string> Errors { get; private set; }

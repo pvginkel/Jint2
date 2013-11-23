@@ -421,14 +421,22 @@ fragment IdentifierNameASCIIStart
 	;
 
 /*
-The second alternative acts as an action driven fallback to evaluate other characters in the unicode range than the ones in the ASCII subset.
-Due to the first alternative this grammar defines enough so that ANTLR can generate a lexer that correctly predicts identifiers with characters in the ASCII range.
-In that way keywords, other reserved words and ASCII identifiers are recognized with standard ANTLR driven logic. When the first character for an identifier fails to 
-match this ASCII definition, the lexer calls ConsumeIdentifierUnicodeStart because of the action in the alternative. This method checks whether the character matches 
-as first character in ranges other than ASCII and consumes further characters belonging to the identifier with help of mIdentifierPart generated out of the 
+The second alternative acts as an action driven fallback to evaluate other
+characters in the unicode range than the ones in the ASCII subset.
+Due to the first alternative this grammar defines enough so that ANTLR can
+generate a lexer that correctly predicts identifiers with characters in the ASCII range.
+In that way keywords, other reserved words and ASCII identifiers are recognized
+with standard ANTLR driven logic. When the first character for an identifier fails to 
+match this ASCII definition, the lexer calls ConsumeIdentifierUnicodeStart because
+of the action in the alternative. This method checks whether the character matches 
+as first character in ranges other than ASCII and consumes further characters
+belonging to the identifier with help of mIdentifierPart generated out of the 
 IdentifierPart rule above.
 */
 Identifier
+@after {
+    $text = ExtractIdentifier($text);
+}
 	: IdentifierNameASCIIStart
 	| { ConsumeIdentifierUnicodeStart(); }
 	;
