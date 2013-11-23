@@ -18,6 +18,16 @@ namespace Jint.Expressions
             return AddOrGet(variableName, -1);
         }
 
+        public Variable AddOrGet(string variableName, bool isDeclared)
+        {
+            var variable = AddOrGet(variableName);
+
+            if (isDeclared)
+                variable.IsDeclared = true;
+
+            return variable;
+        }
+
         public Variable AddOrGet(string variableName, int index)
         {
             if (variableName == null)

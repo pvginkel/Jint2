@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace Jint.Tests.Fixtures
 {
-    [Ignore("These take very long to run and currently fail")]
+    [Explicit("These take very long to run and currently fail")]
     public class CoffeeScriptTests : FixturesFixture
     {
         public CoffeeScriptTests()

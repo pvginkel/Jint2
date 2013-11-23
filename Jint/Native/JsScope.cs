@@ -89,14 +89,17 @@ namespace Jint.Native
                     return _thisDescriptor.Get(this);
                 if (index == Arguments && _argumentsDescriptor != null)
                     return _argumentsDescriptor.Get(this);
-                var result = base[index]; // will use overriden GetDescriptor
+
+                var descriptor = GetDescriptor(index);
+                if (descriptor != null)
+                    return descriptor.Get(this);
 
                 // If we're the global scope, perform special handling on JsUndefined.
 
-                if (_globalScope == null && result is JsUndefined)
+                if (_globalScope == null)
                     return ((JsGlobal)Global._bag).Backend.ResolveUndefined(index, null);
 
-                return result;
+                throw new JsException(((JsGlobal)Global._bag).ReferenceErrorClass.New());
             }
             set
             {

@@ -170,16 +170,24 @@ namespace Jint.Native
         {
             get
             {
-                Descriptor d = GetDescriptor(index);
-                return d != null ? d.Get(this) : JsUndefined.Instance;
+                var descriptor = GetDescriptor(index);
+                return
+                    descriptor != null
+                    ? descriptor.Get(this)
+                    : JsUndefined.Instance;
             }
             set
             {
-                Descriptor d = GetDescriptor(index);
-                if (d == null || (d.Owner != this && d.DescriptorType == DescriptorType.Value))
+                var descriptor = GetDescriptor(index);
+                if (
+                    descriptor == null || (
+                        descriptor.Owner != this &&
+                        descriptor.DescriptorType == DescriptorType.Value
+                    )
+                )
                     DefineOwnProperty(new ValueDescriptor(this, index, value));
                 else
-                    d.Set(this, value);
+                    descriptor.Set(this, value);
             }
         }
 

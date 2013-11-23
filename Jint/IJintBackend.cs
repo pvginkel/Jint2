@@ -33,6 +33,6 @@ namespace Jint
 
         JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs);
 
-        JsInstance ResolveUndefined(string typeFullname, Type[] generics);
+        JsInstance ResolveUndefined(string typeFullName, Type[] generics);
     }
 }

@@ -65,6 +65,7 @@
     <Compile Include="Fixtures\ClrTests.cs" />
     <Compile Include="Fixtures\CoffeeScriptTests.cs" />
     <Compile Include="Fixtures\CommentsTests.cs" />
+    <Compile Include="Fixtures\DeclarationTests.cs" />
     <Compile Include="Fixtures\EngineTests.cs" />
     <Compile Include="Fixtures\FixtureSupportClasses.cs" />
     <Compile Include="Fixtures\ParsingTests.cs" />

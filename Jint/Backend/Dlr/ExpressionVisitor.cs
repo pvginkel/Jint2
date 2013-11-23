@@ -177,7 +177,7 @@ namespace Jint.Backend.Dlr
 
             foreach (var variable in syntax.DeclaredVariables)
             {
-                if (variable.Type == Expressions.VariableType.Local)
+                if (variable.Type == VariableType.Local)
                 {
                     var parameter = Expression.Parameter(
                         typeof(JsInstance),
@@ -830,7 +830,10 @@ namespace Jint.Backend.Dlr
             foreach (var declaredVariable in body.DeclaredVariables)
             {
                 if (
-                    (declaredVariable.Type == Expressions.VariableType.Local || declaredVariable.Type == Expressions.VariableType.Arguments) &&
+                    (
+                        declaredVariable.Type == VariableType.Local ||
+                        declaredVariable.Type == VariableType.Arguments
+                    ) &&
                     declaredVariable.ClosureField == null
                 ) {
                     var local = Expression.Parameter(

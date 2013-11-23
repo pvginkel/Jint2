@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace Jint.Tests.Fixtures
 {
-    [Ignore("These take very long to run and don't work at the moment")]
+    [Explicit("These take very long to run and don't work at the moment")]
     public class ParsingTests : FixturesFixture
     {
         public ParsingTests()

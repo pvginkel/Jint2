@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
@@ -19,7 +18,6 @@ namespace Jint.Backend.Dlr
 {
     internal class DlrBackend : IJintBackend
     {
-        private readonly JintEngine _engine;
         private readonly JintRuntime _runtime;
         private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
 
@@ -43,7 +41,6 @@ namespace Jint.Backend.Dlr
             if (engine == null)
                 throw new ArgumentNullException("engine");
 
-            _engine = engine;
             Options = options;
             PermissionSet = new PermissionSet(PermissionState.None);
 
@@ -61,6 +58,8 @@ namespace Jint.Backend.Dlr
 
             PrintExpression(expression);
 
+            EnsureGlobalsDeclared(program);
+
             var result = ((Func<JintRuntime, JsInstance>)((LambdaExpression)expression).Compile())(_runtime);
 
             return
@@ -69,6 +68,19 @@ namespace Jint.Backend.Dlr
                 : unwrap
                     ? Global.Marshaller.MarshalJsValue<object>(result)
                     : result;
+        }
+
+        private void EnsureGlobalsDeclared(ProgramSyntax program)
+        {
+            foreach (var declaredVariable in program.DeclaredVariables)
+            {
+                if (
+                    declaredVariable.IsDeclared &&
+                    !GlobalScope.HasOwnProperty(declaredVariable.Name) &&
+                    !((JsGlobal)Global).HasOwnProperty(declaredVariable.Name)
+                )
+                    GlobalScope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
+            }
         }
 
         private void PrepareTree(SyntaxNode node)
@@ -243,18 +255,21 @@ namespace Jint.Backend.Dlr
             throw new NotImplementedException();
         }
 
-        public JsInstance ResolveUndefined(string typeFullname, Type[] generics)
+        public JsInstance ResolveUndefined(string typeFullName, Type[] generics)
         {
-            if (AllowClr && !String.IsNullOrEmpty(typeFullname))
+            if (!AllowClr)
+                throw new JsException(Global.ReferenceErrorClass.New());
+
+            if (AllowClr && !String.IsNullOrEmpty(typeFullName))
             {
                 EnsureClrAllowed();
 
                 bool haveGenerics = generics != null && generics.Length > 0;
 
                 if (haveGenerics)
-                    typeFullname += "`" + generics.Length.ToString(CultureInfo.InvariantCulture);
+                    typeFullName += "`" + generics.Length.ToString(CultureInfo.InvariantCulture);
 
-                var type = _typeResolver.ResolveType(typeFullname);
+                var type = _typeResolver.ResolveType(typeFullName);
 
                 if (haveGenerics && type != null)
                     type = type.MakeGenericType(generics);
@@ -263,7 +278,7 @@ namespace Jint.Backend.Dlr
                     return Global.WrapClr(type);
             }
 
-            return new JsUndefined(Global, typeFullname);
+            return new JsUndefined(Global, typeFullName);
         }
 
         private void EnsureClrAllowed()

@@ -1340,7 +1340,7 @@ variableStatement returns [SyntaxNode value]
                 false
             )
             {
-                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier)
+                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
             };
         }
         (
@@ -1356,7 +1356,7 @@ variableStatement returns [SyntaxNode value]
                         false
                     )
                     {
-                        Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier)
+                        Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
                     }
                 );
             }
@@ -1542,7 +1542,7 @@ forControlVar returns [ForBuilder value]
                 false
             )
             {
-                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier)
+                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
             };
         }
 	    (
@@ -1565,7 +1565,7 @@ forControlVar returns [ForBuilder value]
                                 false
                             )
                             {
-                                Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier)
+                                Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
                             }
                         );
                     }
@@ -1828,7 +1828,7 @@ tryStatement returns [TrySyntax value]
 	
 catchClause returns [CatchClause value]
 @after{
-    $value.Target = _currentBody.DeclaredVariables.AddOrGet($value.Identifier);
+    $value.Target = _currentBody.DeclaredVariables.AddOrGet($value.Identifier, true);
 }
 	:
         CATCH LPAREN id=Identifier RPAREN b=block
@@ -1865,7 +1865,7 @@ functionDeclaration returns [SyntaxNode value]
             body
         )
         {
-            Target = _currentBody.DeclaredVariables.AddOrGet(name)
+            Target = _currentBody.DeclaredVariables.AddOrGet(name, true)
         }
     );
 
@@ -1890,7 +1890,7 @@ functionExpression returns [FunctionSyntax value]
 	$value = new FunctionSyntax(name, parameters, body);
 
     if (name != null)
-        $value.Target = _currentBody.DeclaredVariables.AddOrGet(name);
+        $value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
 }
 	:
         FUNCTION

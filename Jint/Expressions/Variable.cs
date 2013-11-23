@@ -18,6 +18,7 @@ namespace Jint.Expressions
         public WithScope WithScope { get; set; }
         public Variable FallbackVariable { get; set; }
         public ValueType ValueType { get; set; }
+        public bool IsDeclared { get; set; }
 
         public Variable(string name, int index)
         {

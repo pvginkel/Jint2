@@ -47,9 +47,16 @@ namespace Jint.Tests.Fixtures
 
         protected override JintEngine CreateContext(Action<string> errorAction)
         {
+            return CreateContext(errorAction, true);
+        }
+
+        protected JintEngine CreateContext(Action<string> errorAction, bool allowClr)
+        {
             var ctx = base.CreateContext(errorAction);
 
-            ctx.AllowClr();
+            if (allowClr)
+                ctx.AllowClr();
+
             ctx.SetFunction("assert", new Action<object, object>(Assert.AreEqual));
             ctx.SetFunction("fail", new Action<string>(Assert.Fail));
             ctx.SetFunction("istrue", new Action<bool>(Assert.IsTrue));

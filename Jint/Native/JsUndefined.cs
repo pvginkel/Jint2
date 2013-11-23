@@ -15,7 +15,7 @@ namespace Jint.Native
             Attributes = PropertyAttributes.DontEnum | PropertyAttributes.DontDelete
         };
 
-        public JsUndefined()
+        private JsUndefined()
         {
         }
 

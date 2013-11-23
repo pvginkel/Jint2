@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-23 06:43:23
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-23 08:09:31
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -7038,7 +7038,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 			                false
 			            )
 			            {
-			                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier)
+			                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
 			            };
 			        
 			DebugLocation(1346, 9);
@@ -7082,7 +7082,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					                        false
 					                    )
 					                    {
-					                        Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier)
+					                        Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
 					                    }
 					                );
 					            
@@ -8038,7 +8038,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 			                false
 			            )
 			            {
-			                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier)
+			                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
 			            };
 			        
 			DebugLocation(1548, 6);
@@ -8139,7 +8139,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 						                                false
 						                            )
 						                            {
-						                                Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier)
+						                                Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
 						                            }
 						                        );
 						                    
@@ -9564,7 +9564,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 			}
 
 
-			    value.Target = _currentBody.DeclaredVariables.AddOrGet(value.Identifier);
+			    value.Target = _currentBody.DeclaredVariables.AddOrGet(value.Identifier, true);
 
 		}
 		catch (RecognitionException re)
@@ -9702,7 +9702,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 			            body
 			        )
 			        {
-			            Target = _currentBody.DeclaredVariables.AddOrGet(name)
+			            Target = _currentBody.DeclaredVariables.AddOrGet(name, true)
 			        }
 			    );
 
@@ -9810,7 +9810,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				value = new FunctionSyntax(name, parameters, body);
 
 			    if (name != null)
-			        value.Target = _currentBody.DeclaredVariables.AddOrGet(name);
+			        value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
 
 		}
 		catch (RecognitionException re)
