@@ -11,8 +11,8 @@ namespace Jint.Runtime
     {
         public JsInstance Operation_Add(JsInstance left, JsInstance right)
         {
-            var leftPrimitive = left.ToPrimitive(Global);
-            var rightPrimitive = right.ToPrimitive(Global);
+            var leftPrimitive = left.ToPrimitive(Global, PrimitiveHint.None);
+            var rightPrimitive = right.ToPrimitive(Global, PrimitiveHint.None);
 
             if (leftPrimitive is JsString || rightPrimitive is JsString)
                 return _stringClass.New(leftPrimitive.ToString() + rightPrimitive.ToString());
@@ -22,17 +22,17 @@ namespace Jint.Runtime
 
         public string Operation_Add(string left, JsInstance right)
         {
-            return left + right.ToPrimitive(Global).ToString();
+            return left + right.ToPrimitive(Global, PrimitiveHint.None).ToString();
         }
 
         public string Operation_Add(JsInstance left, string right)
         {
-            return left.ToPrimitive(Global).ToString() + right;
+            return left.ToPrimitive(Global, PrimitiveHint.None).ToString() + right;
         }
 
         public JsInstance Operation_Add(double left, JsInstance right)
         {
-            var rightPrimitive = right.ToPrimitive(Global);
+            var rightPrimitive = right.ToPrimitive(Global, PrimitiveHint.None);
 
             if (rightPrimitive is JsString)
                 return _stringClass.New(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
@@ -42,7 +42,7 @@ namespace Jint.Runtime
 
         public JsInstance Operation_Add(JsInstance left, double right)
         {
-            var leftPrimitive = left.ToPrimitive(Global);
+            var leftPrimitive = left.ToPrimitive(Global, PrimitiveHint.None);
 
             if (leftPrimitive is JsString)
                 return _stringClass.New(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
@@ -108,7 +108,7 @@ namespace Jint.Runtime
 
         public double Operation_BitwiseNot(JsInstance operand)
         {
-            var number = operand.ToPrimitive(Global).ToNumber();
+            var number = operand.ToPrimitive(Global, PrimitiveHint.None).ToNumber();
 
             if (Double.IsNaN(number) || Double.IsInfinity(number))
                 number = 0;

@@ -111,6 +111,7 @@
     <Compile Include="Native\NativeMethod.cs" />
     <Compile Include="Native\NativeGenericType.cs" />
     <Compile Include="Native\NativeTypeConstructor.cs" />
+    <Compile Include="Native\PrimitiveHint.cs" />
     <Compile Include="Parser\ES3Additions.Builders.cs" />
     <Compile Include="Parser\ES3Lexer.cs" />
     <Compile Include="Parser\ES3Additions.cs" />

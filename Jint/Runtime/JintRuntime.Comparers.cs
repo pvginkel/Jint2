@@ -75,9 +75,9 @@ namespace Jint.Runtime
             if (left.Type == JsType.Boolean || right.Type == JsType.Boolean)
                 return left.ToNumber() == right.ToNumber();
             if (right.Type == JsType.Object && (left.Type == JsType.String || left.Type == JsType.Number))
-                return CompareEquality(left, right.ToPrimitive(Global));
+                return CompareEquality(left, right.ToPrimitive(Global, PrimitiveHint.None));
             if (left.Type == JsType.Object && (right.Type == JsType.String || right.Type == JsType.Number))
-                return CompareEquality(left.ToPrimitive(Global), right);
+                return CompareEquality(left.ToPrimitive(Global, PrimitiveHint.None), right);
             return false;
         }
 
@@ -95,7 +95,7 @@ namespace Jint.Runtime
             if (left.Type == JsType.Boolean)
                 return left.ToNumber() == right;
             if (left.Type == JsType.Object)
-                return CompareEquality(left.ToPrimitive(Global), right);
+                return CompareEquality(left.ToPrimitive(Global, PrimitiveHint.None), right);
             return false;
         }
 
@@ -108,7 +108,7 @@ namespace Jint.Runtime
             if (left.Type == JsType.Boolean)
                 return left.ToNumber() == JsString.StringToNumber(right);
             if (left.Type == JsType.Object)
-                return CompareEquality(left.ToPrimitive(Global), right);
+                return CompareEquality(left.ToPrimitive(Global, PrimitiveHint.None), right);
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace Jint.Runtime
             if (right.Type == JsType.String)
                 return left == right.ToNumber();
             if (right.Type == JsType.Object)
-                return CompareEquality(left, right.ToPrimitive(Global));
+                return CompareEquality(left, right.ToPrimitive(Global, PrimitiveHint.None));
             return false;
         }
 
@@ -159,7 +159,7 @@ namespace Jint.Runtime
             if (right.Type == JsType.Boolean)
                 return JsString.StringToNumber(left) == right.ToNumber();
             if (right.Type == JsType.Object)
-                return CompareEquality(left, right.ToPrimitive(Global));
+                return CompareEquality(left, right.ToPrimitive(Global, PrimitiveHint.None));
             return false;
         }
 

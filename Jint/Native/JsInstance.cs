@@ -25,7 +25,7 @@ namespace Jint.Native
 
         public PropertyAttributes Attributes { get; set; }
 
-        public virtual JsInstance ToPrimitive(JsGlobal global)
+        public virtual JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
         {
             return JsUndefined.Instance;
         }

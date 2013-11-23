@@ -95,7 +95,7 @@ namespace Jint.Native
             return "[native code]";
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global)
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
         {
             return global.StringClass.New(ToString());
         }

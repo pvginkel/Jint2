@@ -61,7 +61,7 @@ namespace Jint.Native
         //15.3.5.3
         public virtual bool HasInstance(JsObject inst)
         {
-            if (inst != null && inst != JsNull.Instance && inst != JsNull.Instance)
+            if (inst != null && inst != JsNull.Instance && !(inst is JsUndefined))
             {
                 return PrototypeProperty.IsPrototypeOf(inst);
             }

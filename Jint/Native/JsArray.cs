@@ -266,7 +266,7 @@ namespace Jint.Native {
             return String.Join(",", values);
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global) {
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint) {
             if (global == null)
                 throw new ArgumentNullException();
             return global.StringClass.New(ToString());

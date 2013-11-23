@@ -28,6 +28,12 @@ namespace Jint.Native
 
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsObject>(ValueOfImpl), PropertyAttributes.DontEnum);
+        }
+
+        public JsInstance ValueOfImpl(JsObject target, JsInstance[] parameters)
+        {
+            return Global.BooleanClass.New((bool)target.Value);
         }
 
         public JsBoolean New()

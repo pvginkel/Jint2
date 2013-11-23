@@ -32,7 +32,7 @@ namespace Jint.Native
             prototype.DefineOwnProperty("substring", global.FunctionClass.New<JsDictionaryObject>(SubstringImpl, 2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("substr", global.FunctionClass.New<JsDictionaryObject>(SubstrImpl, 2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("search", global.FunctionClass.New<JsDictionaryObject>(SearchImpl), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsString>(ValueOfImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsObject>(ValueOfImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsDictionaryObject>(ConcatImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("charAt", global.FunctionClass.New<JsDictionaryObject>(CharAtImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("charCodeAt", global.FunctionClass.New<JsDictionaryObject>(CharCodeAtImpl), PropertyAttributes.DontEnum);
@@ -134,7 +134,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ValueOfImpl(JsString target, JsInstance[] parameters)
+        public JsInstance ValueOfImpl(JsObject target, JsInstance[] parameters)
         {
             return Global.StringClass.New(target.ToString());
         }

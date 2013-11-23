@@ -56,75 +56,107 @@ namespace Jint.Native
             return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
         }
 
-        #region primitive operations
-        public override JsInstance ToPrimitive(JsGlobal global)
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
         {
-            if (Value == null)
-                return global.StringClass.New(ToString());
+            // 9.1
+            if (
+                this == JsNull.Instance ||
+                this is JsUndefined ||
+                this is JsBoolean ||
+                this is JsNumber ||
+                this is JsString
+            )
+                return this;
 
-            if (Value != null && !(Value is IComparable))
-                return global.StringClass.New(Value.ToString());
-
-            switch (Convert.GetTypeCode(Value))
+            if (hint == PrimitiveHint.None)
             {
-                case TypeCode.Boolean:
-                    return global.BooleanClass.New((bool)Value);
-
-                case TypeCode.Char:
-                case TypeCode.String:
-                case TypeCode.Object:
-                    return global.StringClass.New(Value.ToString());
-
-                case TypeCode.DateTime:
-                    return global.StringClass.New(JsDate.DateToString((DateTime)Value));
-
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                    return global.NumberClass.New(Convert.ToDouble(Value));
-
-                default:
-                    var valueOf = GetDescriptor("valueOf");
-
-                    if (valueOf != null && valueOf.Enumerable)
-                    {
-                        var result = global.Backend.ExecuteFunction(
-                            (JsFunction)valueOf.Get(this),
-                            this,
-                            Empty,
-                            null
-                        ).Result;
-
-                        if (result.IsPrimitive)
-                            return result;
-                    }
-
-                    var toString = GetDescriptor("toString");
-
-                    if (toString != null && toString.Enumerable)
-                    {
-                        var result = global.Backend.ExecuteFunction(
-                               (JsFunction)toString.Get(this),
-                               this,
-                               Empty,
-                               null
-                           ).Result;
-
-                        if (result.IsPrimitive)
-                            return result;
-                    }
-
-                    throw new JsException(global.TypeErrorClass.New("Invalid type"));
+                // 8.6.2.6
+                if (this is JsDate)
+                    hint = PrimitiveHint.String;
             }
 
+            JsInstance primitive;
+
+            var toString = GetDescriptor("toString");
+            var valueOf = GetDescriptor("valueOf");
+
+            var first = hint == PrimitiveHint.String ? toString : valueOf;
+            var second = hint == PrimitiveHint.String ? valueOf : toString;
+
+            if (
+                first != null &&
+                TryExecuteToPrimitiveFunction(global, first, out primitive)
+            )
+                return primitive;
+
+            if (
+                second != null &&
+                TryExecuteToPrimitiveFunction(global, second, out primitive)
+            )
+                return primitive;
+
+            if (IsClr && Value != null)
+            {
+                if (!(Value is IComparable))
+                    return global.StringClass.New(Value.ToString());
+
+                switch (Convert.GetTypeCode(Value))
+                {
+                    case TypeCode.Boolean:
+                        return global.BooleanClass.New((bool)Value);
+
+                    case TypeCode.Char:
+                    case TypeCode.String:
+                    case TypeCode.Object:
+                        return global.StringClass.New(Value.ToString());
+
+                    case TypeCode.DateTime:
+                        return global.StringClass.New(JsDate.DateToString((DateTime)Value));
+
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.SByte:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                    case TypeCode.Decimal:
+                    case TypeCode.Double:
+                    case TypeCode.Single:
+                        return global.NumberClass.New(Convert.ToDouble(Value));
+
+                    default:
+                        return global.StringClass.New(Value.ToString());
+                }
+            }
+
+            throw new JsException(global.TypeErrorClass.New("Invalid type"));
+        }
+
+        private bool TryExecuteToPrimitiveFunction(JsGlobal global, Descriptor descriptor, out JsInstance primitive)
+        {
+            primitive = null;
+
+            var function = descriptor.Get(this) as JsFunction;
+
+            if (function == null)
+                return false;
+
+            var result = global.Backend.ExecuteFunction(
+                function,
+                this,
+                Empty,
+                null
+            ).Result;
+
+            if (result.IsPrimitive)
+            {
+                primitive = result;
+                return true;
+            }
+
+            return false;
         }
 
         public override bool ToBoolean()
@@ -220,7 +252,5 @@ namespace Jint.Native
                     base[key] = value;
             }
         }
-
-        #endregion
     }
 }

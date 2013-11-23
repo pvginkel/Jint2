@@ -47,6 +47,12 @@ namespace Jint.Native
             prototype.DefineOwnProperty("toFixed", global.FunctionClass.New<JsInstance>(ToFixedImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toExponential", global.FunctionClass.New<JsInstance>(ToExponentialImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toPrecision", global.FunctionClass.New<JsInstance>(ToPrecisionImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsObject>(ValueOfImpl), PropertyAttributes.DontEnum);
+        }
+
+        public JsInstance ValueOfImpl(JsObject target, JsInstance[] parameters)
+        {
+            return Global.NumberClass.New(Convert.ToDouble(target.Value));
         }
 
         public JsNumber New(double value)
