@@ -132,15 +132,21 @@ namespace Jint.Native
             if (Value != null && !(Value is IConvertible))
                 return true;
 
+            if (Type == JsType.Object)
+                return true;
+
             switch (Convert.GetTypeCode(Value))
             {
                 case TypeCode.Boolean:
                     return (bool)Value;
+
                 case TypeCode.Char:
                 case TypeCode.String:
                     return JsString.StringToBoolean((string)Value);
+
                 case TypeCode.DateTime:
                     return JsNumber.NumberToBoolean(JsDate.DateToDouble((DateTime)Value));
+
                 case TypeCode.Byte:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
@@ -153,8 +159,10 @@ namespace Jint.Native
                 case TypeCode.Double:
                 case TypeCode.Single:
                     return JsNumber.NumberToBoolean(Convert.ToDouble(Value));
+
                 case TypeCode.Object:
                     return Convert.ToBoolean(Value);
+
                 default:
                     return true;
             }
