@@ -820,7 +820,7 @@ namespace Jint.Backend.Dlr
 
                     foreach (var field in body.Closure.Type.GetFields())
                     {
-                        if (typeof(JsInstance).IsAssignableFrom(field.FieldType))
+                        if (field.FieldType == typeof(JsInstance))
                         {
                             statements.Add(Expression.Assign(
                                 Expression.Field(closureLocal, field),
