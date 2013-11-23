@@ -108,6 +108,19 @@ namespace Jint.Backend.Dlr
             base.VisitIdentifier(syntax);
         }
 
+        public override void VisitUnaryExpression(UnaryExpressionSyntax syntax)
+        {
+            // We can only delete identifiers that are JsInstance.
+
+            if (
+                syntax.Operation == SyntaxExpressionType.Delete &&
+                syntax.Operand.Type == SyntaxType.Identifier
+            )
+                MarkAssign(((IdentifierSyntax)syntax.Operand).Target, ValueType.Unknown);
+
+            base.VisitUnaryExpression(syntax);
+        }
+
         private void MarkAssign(Variable variable, ValueType valueType)
         {
             if (variable.ValueType == ValueType.Unset)

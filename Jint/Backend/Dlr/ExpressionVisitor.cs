@@ -1379,21 +1379,34 @@ namespace Jint.Backend.Dlr
                     );
 
                 case SyntaxExpressionType.Delete:
-                    var operand = (MemberSyntax)syntax.Operand;
+                    switch (syntax.Operand.Type)
+                    {
+                        case SyntaxType.Property:
+                            var propertySyntax = (PropertySyntax)syntax.Operand;
 
-                    if (operand.Type == SyntaxType.Property)
-                    {
-                        return BuildDeleteMember(
-                            operand.Expression.Accept(this),
-                            ((PropertySyntax)operand).Name
-                        );
-                    }
-                    else
-                    {
-                        return BuildDeleteIndex(
-                            operand.Expression.Accept(this),
-                            ((IndexerSyntax)operand).Index.Accept(this)
-                        );
+                            return BuildDeleteMember(
+                                propertySyntax.Expression.Accept(this),
+                                propertySyntax.Name
+                            );
+
+                        case SyntaxType.Indexer:
+                            var indexerSyntax = (IndexerSyntax)syntax.Operand;
+
+                            return BuildDeleteIndex(
+                                indexerSyntax.Expression.Accept(this),
+                                indexerSyntax.Index.Accept(this)
+                            );
+
+                        case SyntaxType.Identifier:
+                            var identifierSyntax = (IdentifierSyntax)syntax.Operand;
+
+                            return BuildDeleteMember(
+                                _scope.This,
+                                identifierSyntax.Name
+                            );
+
+                        default:
+                            throw new InvalidOperationException();
                     }
 
                 default:
