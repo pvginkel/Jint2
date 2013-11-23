@@ -29,9 +29,9 @@ namespace Jint.Native {
                 _that = sourceLink._that;
             } else
                 _descriptor = source;
-            Enumerable = true;
-            Writable = true;
-            Configurable = true;
+            Enumerable = source.Enumerable;
+            Writable = source.Writable;
+            Configurable = source.Configurable;
             _that = that;
         }
 

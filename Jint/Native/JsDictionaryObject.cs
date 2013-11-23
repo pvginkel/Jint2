@@ -335,7 +335,6 @@ namespace Jint.Native
                 if (descriptor.Enumerable)
                     yield return descriptor.Get(this);
             }
-            yield break;
         }
 
         public virtual IEnumerable<string> GetKeys()

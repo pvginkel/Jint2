@@ -7,9 +7,11 @@ using System.Globalization;
 using System.Web;
 using System.Text.RegularExpressions;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsGlobal : JsObject, IGlobal {
+    public class JsGlobal : JsObject, IGlobal
+    {
         /// <summary>
         /// Useful for eval()
         /// </summary>
@@ -18,15 +20,18 @@ namespace Jint.Native {
         public Options Options { get; set; }
 
         public JsGlobal(IJintBackend backend, Options options)
-            : base(JsNull.Instance) {
+            : base(JsNull.Instance)
+        {
             Options = options;
             Backend = backend;
 
             this["null"] = JsNull.Instance;
+            GetDescriptor("null").Enumerable = false;
             JsObject objectProrotype = new JsObject(JsNull.Instance);
 
             JsFunction functionPrototype = new JsFunctionWrapper(
-                delegate(JsInstance[] arguments) {
+                delegate(JsInstance[] arguments)
+                {
                     return JsUndefined.Instance;
                 },
                 objectProrotype
@@ -36,56 +41,100 @@ namespace Jint.Native {
 
             #region Global Classes
             this["Function"] = FunctionClass = new JsFunctionConstructor(this, functionPrototype);
+            GetDescriptor("Function").Enumerable = false;
             this["Object"] = ObjectClass = new JsObjectConstructor(this, functionPrototype, objectProrotype);
+            GetDescriptor("Object").Enumerable = false;
             ObjectClass.InitPrototype(this);
 
 
             this["Array"] = ArrayClass = new JsArrayConstructor(this);
+            GetDescriptor("Array").Enumerable = false;
             this["Boolean"] = BooleanClass = new JsBooleanConstructor(this);
+            GetDescriptor("Boolean").Enumerable = false;
             this["Date"] = DateClass = new JsDateConstructor(this);
+            GetDescriptor("Date").Enumerable = false;
 
             this["Error"] = ErrorClass = new JsErrorConstructor(this, "Error");
+            GetDescriptor("Error").Enumerable = false;
             this["EvalError"] = EvalErrorClass = new JsErrorConstructor(this, "EvalError");
+            GetDescriptor("EvalError").Enumerable = false;
             this["RangeError"] = RangeErrorClass = new JsErrorConstructor(this, "RangeError");
+            GetDescriptor("RangeError").Enumerable = false;
             this["ReferenceError"] = ReferenceErrorClass = new JsErrorConstructor(this, "ReferenceError");
+            GetDescriptor("ReferenceError").Enumerable = false;
             this["SyntaxError"] = SyntaxErrorClass = new JsErrorConstructor(this, "SyntaxError");
+            GetDescriptor("SyntaxError").Enumerable = false;
             this["TypeError"] = TypeErrorClass = new JsErrorConstructor(this, "TypeError");
+            GetDescriptor("TypeError").Enumerable = false;
             this["URIError"] = URIErrorClass = new JsErrorConstructor(this, "URIError");
+            GetDescriptor("URIError").Enumerable = false;
 
             this["Number"] = NumberClass = new JsNumberConstructor(this);
+            GetDescriptor("Number").Enumerable = false;
             this["RegExp"] = RegExpClass = new JsRegExpConstructor(this);
+            GetDescriptor("RegExp").Enumerable = false;
             this["String"] = StringClass = new JsStringConstructor(this);
+            GetDescriptor("String").Enumerable = false;
             this["Math"] = MathClass = new JsMathConstructor(this);
+            GetDescriptor("Math").Enumerable = false;
 
             // 15.1 prototype of the global object varies on the implementation
             //Prototype = ObjectClass.PrototypeProperty;
             #endregion
 
 
-            foreach (JsInstance c in GetValues()) {
-                if (c is JsConstructor) {
-                    ((JsConstructor)c).InitPrototype(this);
-                }
+            foreach (var constructor in new JsConstructor[]
+            {
+                FunctionClass,
+                ObjectClass,
+                ArrayClass,
+                BooleanClass,
+                DateClass,
+                ErrorClass,
+                EvalErrorClass,
+                RangeErrorClass,
+                ReferenceErrorClass,
+                SyntaxErrorClass,
+                TypeErrorClass,
+                URIErrorClass,
+                NumberClass,
+                RegExpClass,
+                StringClass
+            })
+            {
+                constructor.InitPrototype(this);
             }
 
             #region Global Properties
             this["NaN"] = NumberClass["NaN"];  // 15.1.1.1
+            GetDescriptor("NaN").Enumerable = false;
             this["Infinity"] = NumberClass["POSITIVE_INFINITY"]; // // 15.1.1.2
+            GetDescriptor("Infinity").Enumerable = false;
             this["undefined"] = JsUndefined.Instance; // 15.1.1.3
+            GetDescriptor("undefined").Enumerable = false;
             this[JsScope.This] = this;
             #endregion
 
             #region Global Functions
             // every embed function should have a prototype FunctionClass.PrototypeProperty - 15.
             this["eval"] = new JsFunctionWrapper(Eval, FunctionClass.PrototypeProperty); // 15.1.2.1
+            GetDescriptor("eval").Enumerable = false;
             this["parseInt"] = new JsFunctionWrapper(ParseInt, FunctionClass.PrototypeProperty); // 15.1.2.2
+            GetDescriptor("parseInt").Enumerable = false;
             this["parseFloat"] = new JsFunctionWrapper(ParseFloat, FunctionClass.PrototypeProperty); // 15.1.2.3
+            GetDescriptor("parseFloat").Enumerable = false;
             this["isNaN"] = new JsFunctionWrapper(IsNaN, FunctionClass.PrototypeProperty);
+            GetDescriptor("isNaN").Enumerable = false;
             this["isFinite"] = new JsFunctionWrapper(IsFinite, FunctionClass.PrototypeProperty);
+            GetDescriptor("isFinite").Enumerable = false;
             this["decodeURI"] = new JsFunctionWrapper(DecodeURI, FunctionClass.PrototypeProperty);
+            GetDescriptor("decodeURI").Enumerable = false;
             this["encodeURI"] = new JsFunctionWrapper(EncodeURI, FunctionClass.PrototypeProperty);
+            GetDescriptor("encodeURI").Enumerable = false;
             this["decodeURIComponent"] = new JsFunctionWrapper(DecodeURIComponent, FunctionClass.PrototypeProperty);
+            GetDescriptor("decodeURIComponent").Enumerable = false;
             this["encodeURIComponent"] = new JsFunctionWrapper(EncodeURIComponent, FunctionClass.PrototypeProperty);
+            GetDescriptor("encodeURIComponent").Enumerable = false;
             #endregion
 
             Marshaller.InitTypes();
@@ -124,8 +173,10 @@ namespace Jint.Native {
         /// <summary>
         /// 15.1.2.1
         /// </summary>
-        public JsInstance Eval(JsInstance[] arguments) {
-            if (JsInstance.ClassString != arguments[0].Class) {
+        public JsInstance Eval(JsInstance[] arguments)
+        {
+            if (JsInstance.ClassString != arguments[0].Class)
+            {
                 return arguments[0];
             }
 
@@ -135,8 +186,10 @@ namespace Jint.Native {
         /// <summary>
         /// 15.1.2.2
         /// </summary>
-        public JsInstance ParseInt(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        public JsInstance ParseInt(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return JsUndefined.Instance;
             }
 
@@ -148,52 +201,66 @@ namespace Jint.Native {
             int sign = 1;
             int radix = 10;
 
-            if (number == String.Empty) {
+            if (number == String.Empty)
+            {
                 return this["NaN"];
             }
 
-            if (number.StartsWith("-")) {
+            if (number.StartsWith("-"))
+            {
                 number = number.Substring(1);
                 sign = -1;
             }
-            else if (number.StartsWith("+")) {
+            else if (number.StartsWith("+"))
+            {
                 number = number.Substring(1);
             }
 
-            if (arguments.Length >= 2) {
-                if (!(arguments[1] is JsUndefined) && !0.Equals(arguments[1])) {
+            if (arguments.Length >= 2)
+            {
+                if (!(arguments[1] is JsUndefined) && !0.Equals(arguments[1]))
+                {
                     radix = Convert.ToInt32(arguments[1].Value);
                 }
             }
 
-            if (radix == 0) {
+            if (radix == 0)
+            {
                 radix = 10;
             }
-            else if (radix < 2 || radix > 36) {
+            else if (radix < 2 || radix > 36)
+            {
                 return this["NaN"];
             }
 
-            if (number.ToLower().StartsWith("0x")) {
+            if (number.ToLower().StartsWith("0x"))
+            {
                 radix = 16;
             }
 
-            try {
-                if (radix == 10) {
+            try
+            {
+                if (radix == 10)
+                {
                     // most common case
                     double result;
-                    if(double.TryParse(number,NumberStyles.Any, CultureInfo.InvariantCulture, out result)) {
+                    if (double.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
+                    {
                         // parseInt(12.42) == 42
                         return NumberClass.New(sign * Math.Floor(result));
                     }
-                    else {
+                    else
+                    {
                         return this["NaN"];
                     }
                 }
-                else {
+                else
+                {
                     return NumberClass.New(sign * Convert.ToInt32(number, radix));
                 }
             }
-            catch {
+            catch
+            {
                 return this["NaN"];
             }
         }
@@ -201,8 +268,10 @@ namespace Jint.Native {
         /// <summary>
         /// 15.1.2.3
         /// </summary>
-        public JsInstance ParseFloat(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        public JsInstance ParseFloat(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return JsUndefined.Instance;
             }
 
@@ -213,10 +282,12 @@ namespace Jint.Native {
             Match match = regexp.Match(number);
 
             double result;
-            if (match.Success && double.TryParse(match.Value, NumberStyles.Float, new CultureInfo("en-US"), out result)) {
+            if (match.Success && double.TryParse(match.Value, NumberStyles.Float, new CultureInfo("en-US"), out result))
+            {
                 return NumberClass.New(result);
             }
-            else {
+            else
+            {
                 return this["NaN"];
             }
         }
@@ -224,8 +295,10 @@ namespace Jint.Native {
         /// <summary>
         /// 15.1.2.4
         /// </summary>
-        public JsInstance IsNaN(JsInstance[] arguments) {
-            if (arguments.Length < 1) {
+        public JsInstance IsNaN(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1)
+            {
                 return BooleanClass.New(false);
             }
 
@@ -235,8 +308,10 @@ namespace Jint.Native {
         /// <summary>
         /// 15.1.2.5
         /// </summary>
-        protected JsInstance IsFinite(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        protected JsInstance IsFinite(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return BooleanClass.False;
             }
 
@@ -247,8 +322,10 @@ namespace Jint.Native {
             );
         }
 
-        protected JsInstance DecodeURI(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        protected JsInstance DecodeURI(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return StringClass.New();
             }
 
@@ -258,40 +335,49 @@ namespace Jint.Native {
         private static readonly char[] ReservedEncoded = new char[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
         private static readonly char[] ReservedEncodedComponent = new char[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
 
-        protected JsInstance EncodeURI(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        protected JsInstance EncodeURI(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return StringClass.New();
             }
 
             string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
-            foreach (char c in ReservedEncoded) {
+            foreach (char c in ReservedEncoded)
+            {
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString());
             }
 
-            foreach (char c in ReservedEncodedComponent) {
+            foreach (char c in ReservedEncodedComponent)
+            {
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString());
             }
 
             return StringClass.New(encoded.ToUpper());
         }
 
-        protected JsInstance DecodeURIComponent(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        protected JsInstance DecodeURIComponent(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return StringClass.New();
             }
 
             return StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
         }
 
-        protected JsInstance EncodeURIComponent(JsInstance[] arguments) {
-            if (arguments.Length < 1 || arguments[0] is JsUndefined) {
+        protected JsInstance EncodeURIComponent(JsInstance[] arguments)
+        {
+            if (arguments.Length < 1 || arguments[0] is JsUndefined)
+            {
                 return StringClass.New();
             }
 
             string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
-            foreach (char c in ReservedEncodedComponent) {
+            foreach (char c in ReservedEncodedComponent)
+            {
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString().ToUpper());
             }
 
@@ -300,8 +386,10 @@ namespace Jint.Native {
 
         #endregion
         [Obsolete]
-        public JsObject Wrap(object value) {
-            switch (Convert.GetTypeCode(value)) {
+        public JsObject Wrap(object value)
+        {
+            switch (Convert.GetTypeCode(value))
+            {
                 case TypeCode.Boolean:
                     return BooleanClass.New((bool)value);
                 case TypeCode.Char:
@@ -330,18 +418,21 @@ namespace Jint.Native {
             }
         }
 
-        public JsObject WrapClr(object value) {
+        public JsObject WrapClr(object value)
+        {
             return (JsObject)Marshaller.MarshalClrValue(value);
         }
 
-        public bool HasOption(Options options) {
+        public bool HasOption(Options options)
+        {
             return (Options & options) == options;
         }
 
         #region IGlobal Members
 
 
-        public JsInstance NaN {
+        public JsInstance NaN
+        {
             get { return this["NaN"]; }
         }
 
