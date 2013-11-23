@@ -288,7 +288,7 @@ fragment LineTerminator
 	;
 		
 EOL
-	: ( ( CR LF ) | LF | LS | PS ) { $channel = Hidden; }
+	: ( ( CR LF? ) | LF | LS | PS ) { $channel = Hidden; }
 	;
 // $>
 
@@ -593,7 +593,8 @@ fragment EscapeSequence
 		| OctalEscapeSequence
 		| HexEscapeSequence
 		| UnicodeEscapeSequence
-		| CR? LF // allow string continuations over a new line
+		| CR LF?
+        | LF // allow string continuations over a new line
 	)
 	;
 
