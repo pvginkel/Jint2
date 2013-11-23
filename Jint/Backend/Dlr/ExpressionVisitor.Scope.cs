@@ -209,7 +209,23 @@ namespace Jint.Backend.Dlr
                                 );
                             }
 
+                            var getterType = SyntaxUtil.GetValueType(getter.Type);
+                            var resultType = SyntaxUtil.GetValueType(result.Type);
+                            Type targetType;
+
+                            if (getterType == resultType)
+                            {
+                                targetType = getterType.ToType();
+                            }
+                            else
+                            {
+                                targetType = typeof(JsInstance);
+                                getter = _visitor.EnsureJs(getter);
+                                result = _visitor.EnsureJs(result);
+                            }
+
                             result = Expression.Block(
+                                targetType,
                                 new[] { withLocal },
                                 Expression.Assign(
                                     withLocal,

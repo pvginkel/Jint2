@@ -22,8 +22,6 @@ namespace Jint.Native
         {
             var prototype = PrototypeProperty;
 
-            // ((JsFunction)prototype).Scope = global.ObjectClass.Scope;
-
             prototype.DefineOwnProperty("constructor", this, PropertyAttributes.DontEnum);
 
             prototype.DefineOwnProperty(CallName, new JsCallFunction(this), PropertyAttributes.DontEnum);

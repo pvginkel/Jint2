@@ -59,6 +59,9 @@ namespace Jint.Native
         #region primitive operations
         public override JsInstance ToPrimitive(IGlobal global)
         {
+            if (Value == null)
+                return global.StringClass.New(ToString());
+
             if (Value != null && !(Value is IComparable))
                 return global.StringClass.New(Value.ToString());
 
@@ -66,12 +69,15 @@ namespace Jint.Native
             {
                 case TypeCode.Boolean:
                     return global.BooleanClass.New((bool)Value);
+
                 case TypeCode.Char:
                 case TypeCode.String:
                 case TypeCode.Object:
                     return global.StringClass.New(Value.ToString());
+
                 case TypeCode.DateTime:
                     return global.StringClass.New(JsDate.DateToString((DateTime)Value));
+
                 case TypeCode.Byte:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
@@ -84,8 +90,39 @@ namespace Jint.Native
                 case TypeCode.Double:
                 case TypeCode.Single:
                     return global.NumberClass.New(Convert.ToDouble(Value));
+
                 default:
-                    return JsUndefined.Instance;
+                    var valueOf = GetDescriptor("valueOf");
+
+                    if (valueOf != null && valueOf.Enumerable)
+                    {
+                        var result = global.Backend.ExecuteFunction(
+                            (JsFunction)valueOf.Get(this),
+                            this,
+                            Empty,
+                            null
+                        ).Result;
+
+                        if (result.IsPrimitive)
+                            return result;
+                    }
+
+                    var toString = GetDescriptor("toString");
+
+                    if (toString != null && toString.Enumerable)
+                    {
+                        var result = global.Backend.ExecuteFunction(
+                               (JsFunction)toString.Get(this),
+                               this,
+                               Empty,
+                               null
+                           ).Result;
+
+                        if (result.IsPrimitive)
+                            return result;
+                    }
+
+                    throw new JsException(global.TypeErrorClass.New("Invalid type"));
             }
 
         }

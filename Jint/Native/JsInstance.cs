@@ -65,6 +65,11 @@ namespace Jint.Native
             return Value != null ? Value.GetHashCode() : base.GetHashCode();
         }
 
+        public virtual bool IsPrimitive
+        {
+            get { return false; }
+        }
+
         public const string TypeObject = "object";
         public const string TypeBoolean = "boolean";
         public const string TypeString = "string";

@@ -106,9 +106,22 @@ namespace Jint.Runtime
             return (long)left.ToNumber() ^ (long)right;
         }
 
-        public static double Operation_BitwiseNot(JsInstance operand)
+        public double Operation_BitwiseNot(JsInstance operand)
         {
-            return 0 - operand.ToNumber() - 1;
+            var number = operand.ToPrimitive(Global).ToNumber();
+
+            if (Double.IsNaN(number) || Double.IsInfinity(number))
+                number = 0;
+
+            return -((long)number + 1);
+        }
+
+        public double Operation_BitwiseNot(double operand)
+        {
+            if (Double.IsNaN(operand) || Double.IsInfinity(operand))
+                operand = 0;
+
+            return -((long)operand + 1);
         }
 
         public static double Operation_BitwiseOr(JsInstance left, JsInstance right)

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using Jint.Delegates;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsError : JsObject {
+    public class JsError : JsObject
+    {
         private string Message
         {
             get { return this["message"].ToString(); }
@@ -20,29 +22,42 @@ namespace Jint.Native {
             }
         }
 
-        public override object Value {
-            get {
+        public override object Value
+        {
+            get
+            {
                 return Message;
             }
         }
 
-        private readonly IGlobal _global;
-
-        public JsError(IGlobal global)
-            : this(global, string.Empty) {
+        public JsObject PrototypeProperty
+        {
+            get { return this[JsFunction.PrototypeName] as JsObject; }
+            set { this[JsFunction.PrototypeName] = value; }
         }
 
-        public JsError(IGlobal global, string message)
-            : base(global.ErrorClass.PrototypeProperty) {
+        private readonly IGlobal _global;
+
+        public JsError(IGlobal global, JsObject prototype)
+            : this(global, prototype, string.Empty)
+        {
+            PrototypeProperty = global.ObjectClass.New(PrototypeProperty);
+        }
+
+        public JsError(IGlobal global, JsObject prototype, string message)
+            : base(prototype)
+        {
             _global = global;
             Message = message;
         }
 
-        public override string Class {
+        public override string Class
+        {
             get { return ClassError; }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Value.ToString();
         }
     }

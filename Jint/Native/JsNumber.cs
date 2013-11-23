@@ -70,5 +70,10 @@ namespace Jint.Native {
         {
             get { return JsType.Number; }
         }
+
+        public override bool IsPrimitive
+        {
+            get { return true; }
+        }
     }
 }

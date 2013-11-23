@@ -21,7 +21,6 @@ namespace Jint.Native
 
         public override void InitPrototype(IGlobal global)
         {
-            //prototype = global.FunctionClass;
             var prototype = PrototypeProperty;
 
             prototype.DefineOwnProperty("name", global.StringClass.New(_errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
@@ -31,7 +30,7 @@ namespace Jint.Native
 
         public JsError New(string message)
         {
-            var error = new JsError(Global);
+            var error = new JsError(Global, PrototypeProperty);
             error["message"] = Global.StringClass.New(message);
             return error;
         }

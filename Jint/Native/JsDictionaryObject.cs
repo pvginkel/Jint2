@@ -191,21 +191,20 @@ namespace Jint.Native
         public virtual bool Delete(string index)
         {
             Descriptor d;
-            if (TryGetDescriptor(index, out d) && d.Owner == this)
+            if (!TryGetDescriptor(index, out d) || d.Owner != this)
+                return true;
+
+            if (d.Configurable)
             {
-                if (d.Configurable)
-                {
-                    _properties.Delete(index);
-                    d.Delete();
-                    _length--;
-                }
-                else
-                {
-                    throw new JintException("Property " + index + " isn't configurable");
-                }
+                _properties.Delete(index);
+                d.Delete();
+                _length--;
+                return true;
             }
 
-            return true;
+            // TODO: In non-strict, this returns false.
+            
+            throw new JintException("Property " + index + " isn't configurable");
         }
 
         public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes propertyAttributes)

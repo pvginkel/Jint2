@@ -68,5 +68,10 @@ namespace Jint.Native
         {
             return BooleanToNumber(_value);
         }
+
+        public override bool IsPrimitive
+        {
+            get { return true; }
+        }
     }
 }

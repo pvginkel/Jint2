@@ -56,15 +56,6 @@ namespace Jint.Backend.Dlr
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseNot, ValueType.Double)] =
-                p => Expression.Subtract(
-                    Expression.Subtract(
-                        Expression.Constant(0d),
-                        p[0]
-                    ),
-                    Expression.Constant(1d)
-                );
-
             result[GetOperationMethodKey(SyntaxExpressionType.BitwiseOr, ValueType.Double, ValueType.Double)] =
                 p => Expression.Convert(
                         Expression.Or(

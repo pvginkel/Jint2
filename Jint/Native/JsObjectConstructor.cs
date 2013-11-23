@@ -134,23 +134,11 @@ namespace Jint.Native
         public JsInstance IsPrototypeOfImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (target.Class != JsInstance.ClassObject)
-            {
                 return Global.BooleanClass.False;
-            }
+            if (parameters.Length == 0)
+                return Global.BooleanClass.False;
 
-            while (true)
-            {
-                IsPrototypeOf(target);
-                if (target == null)
-                {
-                    return Global.BooleanClass.True;
-                }
-
-                if (target == this)
-                {
-                    return Global.BooleanClass.True;
-                }
-            }
+            return Global.BooleanClass.New(target.IsPrototypeOf(parameters[0] as JsDictionaryObject));
         }
 
         // 15.2.4.7
