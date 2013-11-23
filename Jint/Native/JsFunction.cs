@@ -74,9 +74,13 @@ namespace Jint.Native
         {
             var instance = global.ObjectClass.New(PrototypeProperty);
 
-            var result = global.Backend.ExecuteFunction(this, instance, parameters, generics).This;
+            var result = global.Backend.ExecuteFunction(this, instance, parameters, generics);
 
-            var obj = result as JsObject;
+            var obj = result.Result as JsObject;
+            if (obj != null && !(obj is JsUndefined))
+                return obj;
+
+            obj = result.This as JsObject;
             if (obj != null && !(obj is JsUndefined))
                 return obj;
 
