@@ -39,7 +39,7 @@ namespace Jint.Native
                 Arguments.Add(item.Name);
         }
 
-        public NativeMethod(MethodInfo info, JsObject prototype, IGlobal global) :
+        public NativeMethod(MethodInfo info, JsObject prototype, JsGlobal global) :
             base(prototype)
         {
             if (info == null)
@@ -68,7 +68,7 @@ namespace Jint.Native
             return _nativeMethod;
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             var original = new JsInstance[parameters.Length];
             Array.Copy(parameters, original, parameters.Length);
@@ -85,7 +85,7 @@ namespace Jint.Native
             return new JsFunctionResult(result, that, outParameters);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
         {
             throw new JintException("This method can't be used as a constructor");
         }
@@ -95,7 +95,7 @@ namespace Jint.Native
             return "[native code]";
         }
 
-        public override JsInstance ToPrimitive(IGlobal global)
+        public override JsInstance ToPrimitive(JsGlobal global)
         {
             return global.StringClass.New(ToString());
         }

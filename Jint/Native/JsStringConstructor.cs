@@ -10,7 +10,7 @@ namespace Jint.Native
     [Serializable]
     public class JsStringConstructor : JsConstructor
     {
-        public JsStringConstructor(IGlobal global)
+        public JsStringConstructor(JsGlobal global)
             : base(global)
         {
             DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.ReadOnly | PropertyAttributes.DontDelete | PropertyAttributes.DontEnum);
@@ -19,7 +19,7 @@ namespace Jint.Native
             this["fromCharCode"] = global.FunctionClass.New<JsDictionaryObject>(FromCharCodeImpl);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
 
@@ -59,9 +59,9 @@ namespace Jint.Native
             return new JsString(value, PrototypeProperty);
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as IGlobal) == global)
+            if (that == null || (that as JsGlobal) == global)
             {
                 JsInstance result;
 

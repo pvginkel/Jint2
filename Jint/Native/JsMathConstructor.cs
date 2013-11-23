@@ -4,9 +4,9 @@ using Jint.Delegates;
 namespace Jint.Native {
     [Serializable]
     public class JsMathConstructor : JsObject {
-        public IGlobal Global { get; set; }
+        public JsGlobal Global { get; set; }
 
-        public JsMathConstructor(IGlobal global)
+        public JsMathConstructor(JsGlobal global)
             : base(global.ObjectClass.PrototypeProperty) {
             Global = global;
             var random = new Random();

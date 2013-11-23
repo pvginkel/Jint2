@@ -24,7 +24,7 @@ namespace Jint
     /// </remarks>
     public class Marshaller
     {
-        private readonly IGlobal _global;
+        private readonly JsGlobal _global;
         private readonly Dictionary<Type, NativeConstructor> _typeCache = new Dictionary<Type, NativeConstructor>();
         private readonly Dictionary<Type, Delegate> _arrayMarshallers = new Dictionary<Type, Delegate>();
         private NativeTypeConstructor _typeType;
@@ -59,7 +59,7 @@ namespace Jint
         /// Constaructs a new marshaller object.
         /// </summary>
         /// <param name="global">A global object which can be used for constructing new JsObjects while marshalling.</param>
-        public Marshaller(IGlobal global)
+        public Marshaller(JsGlobal global)
         {
             _global = global;
         }
@@ -296,7 +296,7 @@ namespace Jint
         /// </summary>
         /// <param name="info">A method to wrap</param>
         /// <param name="passGlobal">If this paramerter is true and the first argument of the constructor
-        /// is IGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
+        /// is JsGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
         /// <returns>A wrapper delegate</returns>
         public JsMethodImpl WrapMethod(MethodInfo info, bool passGlobal)
         {
@@ -308,7 +308,7 @@ namespace Jint
         /// </summary>
         /// <param name="info">A constructor to wrap</param>
         /// <param name="passGlobal">If this paramerter is true and the first argument of the constructor
-        /// is IGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
+        /// is JsGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
         /// <returns>A wrapper delegate</returns>
         public ConstructorImpl WrapConstructor(ConstructorInfo info, bool passGlobal) {
             return ProxyHelper.Default.WrapConstructor(info, passGlobal);

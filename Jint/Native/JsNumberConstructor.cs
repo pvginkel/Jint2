@@ -17,7 +17,7 @@ namespace Jint.Native
         public JsNumber Zero { get; private set; }
         public JsNumber One { get; private set; }
 
-        public JsNumberConstructor(IGlobal global)
+        public JsNumberConstructor(JsGlobal global)
             : base(global)
         {
             Name = "Number";
@@ -38,7 +38,7 @@ namespace Jint.Native
             DefineOwnProperty("NEGATIVE_INFINITY", NegativeInfinity);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
 
@@ -70,9 +70,9 @@ namespace Jint.Native
             return New(0d);
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as IGlobal) == global)
+            if (that == null || (that as JsGlobal) == global)
             {
                 JsInstance result;
 

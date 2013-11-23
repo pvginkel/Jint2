@@ -7,7 +7,7 @@ namespace Jint.Native
     [Serializable]
     public class JsUndefined : JsObject
     {
-        private readonly IGlobal _global;
+        private readonly JsGlobal _global;
         internal string Name { get; private set; }
 
         public static JsUndefined Instance = new JsUndefined
@@ -19,7 +19,7 @@ namespace Jint.Native
         {
         }
 
-        internal JsUndefined(IGlobal global, string name)
+        internal JsUndefined(JsGlobal global, string name)
         {
             if (global == null)
                 throw new ArgumentNullException("global");

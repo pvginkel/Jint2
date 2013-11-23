@@ -209,7 +209,7 @@ namespace Jint.Native {
         #region array specific methods
 
         [RawJsMethod]
-        public JsArray Concat(IGlobal global, JsInstance[] args) {
+        public JsArray Concat(JsGlobal global, JsInstance[] args) {
             var newData = new SortedList<int, JsInstance>(_data);
             int offset = _length;
             foreach (var item in args) {
@@ -238,7 +238,7 @@ namespace Jint.Native {
         }
 
         [RawJsMethod]
-        public JsString Join(IGlobal global, JsInstance separator) {
+        public JsString Join(JsGlobal global, JsInstance separator) {
             if (_length == 0)
                 return global.StringClass.New();
 
@@ -266,7 +266,7 @@ namespace Jint.Native {
             return String.Join(",", values);
         }
 
-        public override JsInstance ToPrimitive(IGlobal global) {
+        public override JsInstance ToPrimitive(JsGlobal global) {
             if (global == null)
                 throw new ArgumentNullException();
             return global.StringClass.New(ToString());

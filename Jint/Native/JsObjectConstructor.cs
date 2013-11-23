@@ -8,14 +8,14 @@ namespace Jint.Native
     [Serializable]
     public class JsObjectConstructor : JsConstructor
     {
-        public JsObjectConstructor(IGlobal global, JsObject prototype, JsObject rootPrototype)
+        public JsObjectConstructor(JsGlobal global, JsObject prototype, JsObject rootPrototype)
             : base(global)
         {
             Name = "Object";
             DefineOwnProperty(PrototypeName, rootPrototype, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
 
@@ -92,7 +92,7 @@ namespace Jint.Native
         /// <summary>
         /// 15.2.2.1
         /// </summary>
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (parameters.Length > 0)
             {

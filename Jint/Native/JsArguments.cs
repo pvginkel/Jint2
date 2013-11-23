@@ -12,7 +12,7 @@ namespace Jint.Native
         public const string CalleeName = "callee";
         private const string LengthPropertyName = "length";
 
-        public JsArguments(IGlobal global, JsFunction callee, JsInstance[] arguments)
+        public JsArguments(JsGlobal global, JsFunction callee, JsInstance[] arguments)
             : base(global.ObjectClass.New())
         {
             int length;

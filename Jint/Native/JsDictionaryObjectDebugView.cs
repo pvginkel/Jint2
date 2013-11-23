@@ -9,9 +9,9 @@ namespace Jint.Native
 {
     internal class JsDictionaryObjectDebugView
     {
-        private readonly JsScope _container;
+        private readonly JsDictionaryObject _container;
 
-        public JsDictionaryObjectDebugView(JsScope container)
+        public JsDictionaryObjectDebugView(JsDictionaryObject container)
         {
             _container = container;
         }

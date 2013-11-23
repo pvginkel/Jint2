@@ -93,7 +93,7 @@ namespace Jint.Expressions
         JsInstance Result { get; set; }
         JsDictionaryObject CallTarget { get; }
 
-        IGlobal Global { get; }
+        JsGlobal Global { get; }
 
         JsInstance Returned { get; }
 

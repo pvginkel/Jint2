@@ -24,7 +24,7 @@ namespace Jint.Native
             Parameters = d.Method.GetParameters();
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             int clrParameterCount = Delegate.Method.GetParameters().Length;
             object[] clrParameters = new object[clrParameterCount];

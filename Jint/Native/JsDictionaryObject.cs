@@ -281,7 +281,7 @@ namespace Jint.Native
             }
         }
 
-        public void DefineAccessorProperty(IGlobal global, string name, JsFunction get, JsFunction set)
+        public void DefineAccessorProperty(JsGlobal global, string name, JsFunction get, JsFunction set)
         {
             if (global == null)
                 throw new ArgumentNullException("global");

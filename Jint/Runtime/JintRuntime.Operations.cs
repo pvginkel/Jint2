@@ -364,7 +364,7 @@ namespace Jint.Runtime
             }
         }
 
-        public static string Operation_TypeOf(JsScope scope, string identifier)
+        public static string Operation_TypeOf(JsGlobal scope, string identifier)
         {
             Descriptor descriptor;
             if (!scope.TryGetDescriptor(identifier, out descriptor))

@@ -25,17 +25,17 @@ namespace Jint.Native
         private readonly NativeOverloadImpl<ConstructorInfo, ConstructorImpl> _overloads;
 
         // TODO: native constructors should have an own prototype rather then the function prototype
-        public NativeConstructor(Type type, IGlobal global) :
+        public NativeConstructor(Type type, JsGlobal global) :
             this(type, global, null, global.FunctionClass.PrototypeProperty)
         {
         }
 
-        public NativeConstructor(Type type, IGlobal global, JsObject prototypePrototype) :
+        public NativeConstructor(Type type, JsGlobal global, JsObject prototypePrototype) :
             this(type, global, prototypePrototype, global.FunctionClass.PrototypeProperty)
         {
         }
 
-        public NativeConstructor(Type type, IGlobal global, JsObject prototypePrototype, JsObject prototype) :
+        public NativeConstructor(Type type, JsGlobal global, JsObject prototypePrototype, JsObject prototype) :
             base(global, prototype)
         {
             if (type == null)
@@ -197,7 +197,7 @@ namespace Jint.Native
             }
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var proto = PrototypeProperty;
 
@@ -227,7 +227,7 @@ namespace Jint.Native
         /// <param name="global">global object</param>
         /// <param name="args">Constructor args, ignored</param>
         /// <returns>A new boxed value objec of type T</returns>
-        static object CreateStruct<T>(IGlobal global, JsInstance[] args) where T : struct
+        static object CreateStruct<T>(JsGlobal global, JsInstance[] args) where T : struct
         {
             return new T();
         }
@@ -242,9 +242,9 @@ namespace Jint.Native
         /// <param name="outParameters"></param>
         /// <param name="visitor"></param>
         /// <returns></returns>
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || that is JsUndefined || that == JsNull.Instance || (that as IGlobal) == global)
+            if (that == null || that is JsUndefined || that == JsNull.Instance || (that as JsGlobal) == global)
                 throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
             if (that.Value != null)
@@ -266,7 +266,7 @@ namespace Jint.Native
         /// <param name="genericArgs">Ignored since this class represents a non-generic types</param>
         /// <param name="visitor">Execution visitor</param>
         /// <returns>A newly created js object</returns>
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
         {
             return (JsObject)Wrap(CreateInstance(global, parameters));
         }
@@ -277,7 +277,7 @@ namespace Jint.Native
         /// <param name="visitor">Execution visitor</param>
         /// <param name="parameters">Parameters for a constructor</param>
         /// <returns>A newly created native object</returns>
-        private object CreateInstance(IGlobal global, JsInstance[] parameters)
+        private object CreateInstance(JsGlobal global, JsInstance[] parameters)
         {
             if (parameters == null)
                 parameters = JsInstance.Empty;

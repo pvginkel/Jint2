@@ -9,14 +9,14 @@ namespace Jint.Native
     [Serializable]
     public class JsRegExpConstructor : JsConstructor
     {
-        public JsRegExpConstructor(IGlobal global)
+        public JsRegExpConstructor(JsGlobal global)
             : base(global)
         {
             Name = "RegExp";
             DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
             //prototype = global.ObjectClass.New(this);
@@ -87,7 +87,7 @@ namespace Jint.Native
             return Global.BooleanClass.New(array != null && array.Length > 0);
         }
 
-        public override JsFunctionResult Execute(IGlobal globa, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal globa, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 

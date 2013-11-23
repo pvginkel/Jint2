@@ -166,14 +166,14 @@ namespace Jint.Backend.Dlr
             // Setup the "arguments" and "this" variables.
 
             Variable argumentsVariable;
-            if (declaredVariables.TryGetItem(JsScope.Arguments, out argumentsVariable))
+            if (declaredVariables.TryGetItem(JsNames.Arguments, out argumentsVariable))
             {
                 if (_isStrict)
                     throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
             }
             else
             {
-                argumentsVariable = new Variable(JsScope.Arguments, -1)
+                argumentsVariable = new Variable(JsNames.Arguments, -1)
                 {
                     Type = VariableType.Arguments
                 };
@@ -260,7 +260,7 @@ namespace Jint.Backend.Dlr
             // Arguments can be re-declared (if not strict). Because of this,
             // we check arguments after resolving in a scope.
 
-            if (identifier == JsScope.This)
+            if (identifier == JsNames.This)
                 return Variable.This;
 
             Variable variable;
@@ -301,7 +301,7 @@ namespace Jint.Backend.Dlr
 
             // Check for arguments.
 
-            Debug.Assert(identifier != JsScope.Arguments);
+            Debug.Assert(identifier != JsNames.Arguments);
 
             // Else, it's a reference to a global variable.
 

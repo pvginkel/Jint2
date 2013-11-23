@@ -11,7 +11,7 @@ namespace Jint.Native
     [Serializable]
     public class JsDateConstructor : JsConstructor
     {
-        protected JsDateConstructor(IGlobal global, bool initializeUTC)
+        protected JsDateConstructor(JsGlobal global, bool initializeUTC)
             : base(global)
         {
             Name = "Date";
@@ -23,7 +23,7 @@ namespace Jint.Native
             DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             //Prototype = global.FunctionClass;
             var prototype = PrototypeProperty;
@@ -82,7 +82,7 @@ namespace Jint.Native
             prototype.DefineOwnProperty("toUTCString", global.FunctionClass.New<JsDictionaryObject>(ToUTCStringImpl), PropertyAttributes.DontEnum);
             #endregion
         }
-        public JsDateConstructor(IGlobal global)
+        public JsDateConstructor(JsGlobal global)
             : this(global, true)
         {
         }
@@ -193,11 +193,11 @@ namespace Jint.Native
             return result;
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsDate date = Construct(parameters);
 
-            if (that == null || (that as IGlobal) == global)
+            if (that == null || (that as JsGlobal) == global)
             {
                 var result = ToStringImpl(date, Empty);
                 return new JsFunctionResult(result, result);

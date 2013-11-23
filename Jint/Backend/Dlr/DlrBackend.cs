@@ -23,14 +23,9 @@ namespace Jint.Backend.Dlr
 
         public Options Options { get; private set; }
 
-        public IGlobal Global
+        public JsGlobal Global
         {
             get { return _runtime.Global; }
-        }
-
-        public JsScope GlobalScope
-        {
-            get { return _runtime.GlobalScope; }
         }
 
         public PermissionSet PermissionSet { get; set; }
@@ -77,12 +72,11 @@ namespace Jint.Backend.Dlr
                 if (declaredVariable.IsDeclared)
                 {
                     Descriptor descriptor;
-                    if (
-                        !GlobalScope.TryGetDescriptor(declaredVariable.Name, out descriptor) ||
-                        !((JsGlobal)Global).TryGetDescriptor(declaredVariable.Name, out descriptor)
-                    )
-                        GlobalScope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
-                        descriptor = GlobalScope.GetDescriptor(declaredVariable.Name);
+                    if (!Global.TryGetDescriptor(declaredVariable.Name, out descriptor))
+                    {
+                        Global.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
+                        descriptor = Global.GetDescriptor(declaredVariable.Name);
+                    }
 
                     descriptor.Configurable = false;
                 }
@@ -167,7 +161,7 @@ namespace Jint.Backend.Dlr
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            return CallFunction((JsFunction)GlobalScope[name], args);
+            return CallFunction((JsFunction)Global[name], args);
         }
 
         public object CallFunction(JsFunction function, object[] args)

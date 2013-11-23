@@ -6,7 +6,7 @@ namespace Jint.Native
 {
     class NativeTypeConstructor: NativeConstructor
     {
-        protected NativeTypeConstructor(IGlobal global, JsObject typePrototype)
+        protected NativeTypeConstructor(JsGlobal global, JsObject typePrototype)
             : base(typeof(Type), global,typePrototype,typePrototype)
         {
             // redefine prototype
@@ -20,7 +20,7 @@ namespace Jint.Native
         /// the same function object.</remarks>
         /// <param name="global">Global object</param>
         /// <returns>A js constructor function</returns>
-        public static NativeTypeConstructor CreateNativeTypeConstructor(IGlobal global)
+        public static NativeTypeConstructor CreateNativeTypeConstructor(JsGlobal global)
         {
             if (global == null)
                 throw new ArgumentNullException("global");

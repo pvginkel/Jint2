@@ -92,7 +92,7 @@ namespace Jint.Backend.Dlr
                 {
                     case VariableType.Global:
                         return _visitor.BuildSetMember(
-                            Expression.Property(Runtime, JintRuntime.GlobalScopeName),
+                            Expression.Property(Runtime, "Global"),
                             variable.Name,
                             value
                         );
@@ -177,7 +177,7 @@ namespace Jint.Backend.Dlr
                 {
                     case VariableType.Global:
                         return _visitor.BuildGetMember(
-                            Expression.Property(Runtime, JintRuntime.GlobalScopeName),
+                            Expression.Property(Runtime, "Global"),
                             variable.Name
                         );
 

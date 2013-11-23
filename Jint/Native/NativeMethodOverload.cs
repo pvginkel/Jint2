@@ -18,7 +18,7 @@ namespace Jint.Native
         // a list of generics
         private readonly LinkedList<MethodInfo> _generics = new LinkedList<MethodInfo>();
 
-        public NativeMethodOverload(ICollection<MethodInfo> methods, JsObject prototype, IGlobal global)
+        public NativeMethodOverload(ICollection<MethodInfo> methods, JsObject prototype, JsGlobal global)
             : base(prototype)
         {
             if (global == null)
@@ -65,7 +65,7 @@ namespace Jint.Native
             }
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
                 return base.Execute(global, that, parameters, genericArguments);

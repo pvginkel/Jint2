@@ -14,13 +14,12 @@ namespace Jint.Native
 
         public string Name { get; set; }
         public List<string> Arguments { get; set; }
-        public JsScope Scope { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="global"></param>
-        public JsFunction(IGlobal global)
+        public JsFunction(JsGlobal global)
             : this(global.FunctionClass.PrototypeProperty)
         {
         }
@@ -70,7 +69,7 @@ namespace Jint.Native
         }
 
         //13.2.2
-        public virtual JsObject Construct(JsInstance[] parameters, Type[] generics, IGlobal global)
+        public virtual JsObject Construct(JsInstance[] parameters, Type[] generics, JsGlobal global)
         {
             var instance = global.ObjectClass.New(PrototypeProperty);
 
@@ -101,12 +100,12 @@ namespace Jint.Native
             set { }
         }
 
-        public JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters)
+        public JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters)
         {
             return Execute(global, that, parameters, null);
         }
 
-        public virtual JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public virtual JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (genericArguments != null)
                 throw new JintException("This method can't be called as a generic");

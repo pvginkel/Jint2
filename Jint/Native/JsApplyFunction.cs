@@ -19,7 +19,7 @@ namespace Jint.Native
             DefineOwnProperty("length", constructor.Global.NumberClass.New(2), PropertyAttributes.ReadOnly);
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             var function = that as JsFunction;
 

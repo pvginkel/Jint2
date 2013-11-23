@@ -11,7 +11,7 @@ namespace Jint.Native
         public JsBoolean False { get; private set; }
         public JsBoolean True { get; private set; }
 
-        public JsBooleanConstructor(IGlobal global)
+        public JsBooleanConstructor(JsGlobal global)
             : base(global)
         {
             Name = "Boolean";
@@ -22,7 +22,7 @@ namespace Jint.Native
             False = new JsBoolean(false, PrototypeProperty);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
 
@@ -40,12 +40,12 @@ namespace Jint.Native
             return value ? True : False;
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 
             // e.g., var foo = Boolean(true);
-            if (that == null || (that as IGlobal) == global)
+            if (that == null || (that as JsGlobal) == global)
             {
                 result = parameters.Length > 0 ? new JsBoolean(parameters[0].ToBoolean(), PrototypeProperty) : new JsBoolean(PrototypeProperty);
             }

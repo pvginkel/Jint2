@@ -57,7 +57,7 @@ namespace Jint.Native
         }
 
         #region primitive operations
-        public override JsInstance ToPrimitive(IGlobal global)
+        public override JsInstance ToPrimitive(JsGlobal global)
         {
             if (Value == null)
                 return global.StringClass.New(ToString());

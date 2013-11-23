@@ -67,7 +67,7 @@ namespace Jint.Native {
         /// <param name="global"></param>
         /// <param name="obj"></param>
         /// <returns></returns>
-        internal static Descriptor ToPropertyDesciptor(IGlobal global, JsDictionaryObject owner, string name, JsInstance jsInstance) {
+        internal static Descriptor ToPropertyDesciptor(JsGlobal global, JsDictionaryObject owner, string name, JsInstance jsInstance) {
             if (jsInstance.Class != JsInstance.ClassObject) {
                 throw new JsException(global.TypeErrorClass.New("The target object has to be an instance of an object"));
             }

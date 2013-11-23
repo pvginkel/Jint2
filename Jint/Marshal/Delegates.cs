@@ -12,7 +12,7 @@ namespace Jint.Marshal
     /// <param name="that">A target object</param>
     /// <param name="arguments">A list of arguments</param>
     /// <returns>A result of a function invocation</returns>
-    public delegate JsInstance JsMethodImpl(IGlobal global, JsInstance that, JsInstance[] arguments);
+    public delegate JsInstance JsMethodImpl(JsGlobal global, JsInstance that, JsInstance[] arguments);
 
     /// <summary>
     /// A wrapper around native constructor
@@ -20,7 +20,7 @@ namespace Jint.Marshal
     /// <param name="global">A reference to the global object</param>
     /// <param name="parameters">A list of arguments</param>
     /// <returns>A newly created object</returns>
-    public delegate object ConstructorImpl(IGlobal global, JsInstance[] parameters);
+    public delegate object ConstructorImpl(JsGlobal global, JsInstance[] parameters);
 
     /// <summary>
     /// A wrapper around native property getter.

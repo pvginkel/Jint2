@@ -36,15 +36,15 @@ namespace Jint.Native
             set { this[JsFunction.PrototypeName] = value; }
         }
 
-        private readonly IGlobal _global;
+        private readonly JsGlobal _global;
 
-        public JsError(IGlobal global, JsObject prototype)
+        public JsError(JsGlobal global, JsObject prototype)
             : this(global, prototype, string.Empty)
         {
             PrototypeProperty = global.ObjectClass.New(PrototypeProperty);
         }
 
-        public JsError(IGlobal global, JsObject prototype, string message)
+        public JsError(JsGlobal global, JsObject prototype, string message)
             : base(prototype)
         {
             _global = global;

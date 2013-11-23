@@ -136,7 +136,7 @@ namespace Jint.Backend.Dlr
                 that,
                 Expression.Property(
                     _scope.Runtime,
-                    "GlobalScope"
+                    "Global"
                 )
             ));
 
@@ -1421,7 +1421,7 @@ namespace Jint.Backend.Dlr
                                 return BuildDeleteMember(
                                     Expression.Property(
                                         _scope.Runtime,
-                                        "GlobalScope"
+                                        "Global"
                                     ),
                                     identifierSyntax.Name
                                 );
@@ -1450,10 +1450,10 @@ namespace Jint.Backend.Dlr
                         if (identifierSyntax.Target.Type == VariableType.Global)
                         {
                             return Expression.Call(
-                                typeof(JintRuntime).GetMethod("Operation_TypeOf", new[] { typeof(JsScope), typeof(string) }),
+                                typeof(JintRuntime).GetMethod("Operation_TypeOf", new[] { typeof(JsGlobal), typeof(string) }),
                                 Expression.Property(
                                     _scope.Runtime,
-                                    "GlobalScope"
+                                    "Global"
                                 ),
                                 Expression.Constant(identifierSyntax.Name)
                             );

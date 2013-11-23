@@ -11,14 +11,14 @@ namespace Jint.Native
     [Serializable]
     public class JsFunctionConstructor : JsConstructor
     {
-        public JsFunctionConstructor(IGlobal global, JsObject prototype)
+        public JsFunctionConstructor(JsGlobal global, JsObject prototype)
             : base(global, prototype)
         {
             Name = "Function";
             DefineOwnProperty(PrototypeName, prototype, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
 
@@ -110,13 +110,13 @@ namespace Jint.Native
             return function;
         }
 
-        public override JsFunctionResult Execute(IGlobal visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal visitor, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
             var result = Construct(parameters, null, null);
             return new JsFunctionResult(result, result);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
         {
             return Global.Backend.CompileFunction(parameters, genericArgs);
         }

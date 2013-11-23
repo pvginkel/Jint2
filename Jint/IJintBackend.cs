@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Security;
 using System.Text;
-using Jint.Backend.Dlr;
 using Jint.Expressions;
 using Jint.Native;
 
@@ -10,8 +9,7 @@ namespace Jint
 {
     public interface IJintBackend
     {
-        IGlobal Global { get; }
-        JsScope GlobalScope { get; }
+        JsGlobal Global { get; }
         PermissionSet PermissionSet { get; set; }
         bool AllowClr { get; set; }
 

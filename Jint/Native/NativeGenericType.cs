@@ -30,7 +30,7 @@ namespace Jint.Native
             }
         }
 
-        JsConstructor MakeType(Type[] args, IGlobal global)
+        JsConstructor MakeType(Type[] args, JsGlobal global)
         {
             return global.Marshaller.MarshalType( _reflectedType.MakeGenericType(args) );
         }

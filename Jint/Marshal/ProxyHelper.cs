@@ -47,7 +47,7 @@ namespace Jint.Marshal {
         /// </summary>
         /// <param name="info">A method to wrap</param>
         /// <param name="passGlobal">If this paramerter is true and the first argument of the constructor
-        /// is IGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
+        /// is JsGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
         /// <returns>A wrapper delegate</returns>
         public JsMethodImpl WrapMethod(MethodInfo info, bool passGlobal) {
             if (info == null)
@@ -64,14 +64,14 @@ namespace Jint.Marshal {
             LinkedList<ParameterInfo> parameters = new LinkedList<ParameterInfo>(info.GetParameters());
             LinkedList<MarshaledParameter> outParams = new LinkedList<MarshaledParameter>();
 
-            DynamicMethod jsWrapper = new DynamicMethod("jsWrapper", typeof(JsInstance), new Type[] { typeof(IGlobal), typeof(JsInstance), typeof(JsInstance[]) }, GetType());
+            DynamicMethod jsWrapper = new DynamicMethod("jsWrapper", typeof(JsInstance), new Type[] { typeof(JsGlobal), typeof(JsInstance), typeof(JsInstance[]) }, GetType());
             var code = jsWrapper.GetILGenerator();
 
             code.DeclareLocal(typeof(int)); // local #0: count of the passed arguments
             code.DeclareLocal(typeof(Marshaller));
 
             code.Emit(OpCodes.Ldarg_0);
-            code.Emit(OpCodes.Call, typeof(IGlobal).GetProperty("Marshaller").GetGetMethod());
+            code.Emit(OpCodes.Call, typeof(JsGlobal).GetProperty("Marshaller").GetGetMethod());
 
             if (!info.ReturnType.Equals(typeof(void))) {
                 // push the global.Marshaller object
@@ -117,11 +117,11 @@ namespace Jint.Marshal {
                     code.Emit(OpCodes.Unbox, info.DeclaringType);
             }
 
-            // if the first parameter is IGlobal and passGlobal is enabled
-            if (passGlobal && parameters.First != null && typeof(IGlobal).IsAssignableFrom(parameters.First.Value.ParameterType)) {
+            // if the first parameter is JsGlobal and passGlobal is enabled
+            if (passGlobal && parameters.First != null && typeof(JsGlobal).IsAssignableFrom(parameters.First.Value.ParameterType)) {
                 parameters.RemoveFirst();
                 code.Emit(OpCodes.Ldarg_0);
-                code.Emit(OpCodes.Isinst, typeof(IGlobal));
+                code.Emit(OpCodes.Isinst, typeof(JsGlobal));
             }
 
             // argsCount = arguments.Length
@@ -233,7 +233,7 @@ namespace Jint.Marshal {
         /// </summary>
         /// <param name="info">A constructor to wrap</param>
         /// <param name="passGlobal">If this paramerter is true and the first argument of the constructor
-        /// is IGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
+        /// is JsGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
         /// <returns>A wrapper delegate</returns>
         public ConstructorImpl WrapConstructor(ConstructorInfo info, bool passGlobal) {
             if (info == null)
@@ -247,15 +247,15 @@ namespace Jint.Marshal {
 
             LinkedList<ParameterInfo> parameters = new LinkedList<ParameterInfo>(info.GetParameters());
 
-            DynamicMethod dm = new DynamicMethod("clrConstructor", typeof(object), new Type[] { typeof(IGlobal), typeof(JsInstance[]) }, GetType());
+            DynamicMethod dm = new DynamicMethod("clrConstructor", typeof(object), new Type[] { typeof(JsGlobal), typeof(JsInstance[]) }, GetType());
             var code = dm.GetILGenerator();
 
             code.DeclareLocal(typeof(int)); // local #0: count of the passed arguments
 
-            if (passGlobal && parameters.First != null && typeof(IGlobal).IsAssignableFrom(parameters.First.Value.ParameterType)) {
+            if (passGlobal && parameters.First != null && typeof(JsGlobal).IsAssignableFrom(parameters.First.Value.ParameterType)) {
                 parameters.RemoveFirst();
                 code.Emit(OpCodes.Ldarg_0);
-                code.Emit(OpCodes.Isinst, typeof(IGlobal));
+                code.Emit(OpCodes.Isinst, typeof(JsGlobal));
             }
 
             // argsCount = arguments.Length
@@ -269,7 +269,7 @@ namespace Jint.Marshal {
 
                 // push the global.Marshaller object
                 code.Emit(OpCodes.Ldarg_0);
-                code.EmitCall(OpCodes.Call, typeof(IGlobal).GetProperty("Marshaller").GetGetMethod(), null);
+                code.EmitCall(OpCodes.Call, typeof(JsGlobal).GetProperty("Marshaller").GetGetMethod(), null);
 
                 // if ( argsCount > i )
                 var lblDefaultValue = code.DefineLabel();

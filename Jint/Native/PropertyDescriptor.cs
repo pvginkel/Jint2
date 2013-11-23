@@ -8,14 +8,14 @@ namespace Jint.Native
     [Serializable]
     public class PropertyDescriptor : Descriptor
     {
-        public PropertyDescriptor(IGlobal global, JsDictionaryObject owner, string name)
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name)
             : base(owner, name)
         {
             _global = global;
             Enumerable = false;
         }
 
-        private readonly IGlobal _global;
+        private readonly JsGlobal _global;
 
         public JsFunction GetFunction { get; set; }
         public JsFunction SetFunction { get; set; }
@@ -61,13 +61,13 @@ namespace Jint.Native
     public class PropertyDescriptor<T> : PropertyDescriptor
         where T : JsInstance
     {
-        public PropertyDescriptor(IGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get)
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get)
             : base(global, owner, name)
         {
             GetFunction = global.FunctionClass.New<T>(get);
         }
 
-        public PropertyDescriptor(IGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
             : this(global, owner, name, get)
         {
             SetFunction = global.FunctionClass.New<T>(set);

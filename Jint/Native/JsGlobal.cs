@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Delegates;
-using Jint.Expressions;
 using System.Globalization;
-using System.Web;
 using System.Text.RegularExpressions;
 
 namespace Jint.Native
 {
     [Serializable]
-    public class JsGlobal : JsObject, IGlobal
+    public class JsGlobal : JsObject
     {
         /// <summary>
         /// Useful for eval()
@@ -30,10 +27,7 @@ namespace Jint.Native
             JsObject objectProrotype = new JsObject(JsNull.Instance);
 
             JsFunction functionPrototype = new JsFunctionWrapper(
-                delegate(JsInstance[] arguments)
-                {
-                    return JsUndefined.Instance;
-                },
+                p => JsUndefined.Instance,
                 objectProrotype
             );
 
@@ -112,7 +106,7 @@ namespace Jint.Native
             GetDescriptor("Infinity").Enumerable = false;
             this["undefined"] = JsUndefined.Instance; // 15.1.1.3
             GetDescriptor("undefined").Enumerable = false;
-            this[JsScope.This] = this;
+            this[JsNames.This] = this;
             #endregion
 
             #region Global Functions
@@ -392,11 +386,14 @@ namespace Jint.Native
             {
                 case TypeCode.Boolean:
                     return BooleanClass.New((bool)value);
+
                 case TypeCode.Char:
                 case TypeCode.String:
                     return StringClass.New(Convert.ToString(value));
+
                 case TypeCode.DateTime:
                     return DateClass.New((DateTime)value);
+
                 case TypeCode.Byte:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
@@ -409,10 +406,10 @@ namespace Jint.Native
                 case TypeCode.Double:
                 case TypeCode.Single:
                     return NumberClass.New(Convert.ToDouble(value));
+
                 case TypeCode.Object:
                     return ObjectClass.New(value);
-                case TypeCode.DBNull:
-                case TypeCode.Empty:
+
                 default:
                     throw new ArgumentNullException("value");
             }
@@ -428,14 +425,27 @@ namespace Jint.Native
             return (Options & options) == options;
         }
 
-        #region IGlobal Members
-
-
         public JsInstance NaN
         {
             get { return this["NaN"]; }
         }
 
-        #endregion
+        public override JsInstance this[string index]
+        {
+            get
+            {
+                var descriptor = GetDescriptor(index);
+                if (descriptor != null)
+                    return descriptor.Get(this);
+
+                // If we're the global scope, perform special handling on JsUndefined.
+
+                return Backend.ResolveUndefined(index, null);
+            }
+            set
+            {
+                base[index] = value;
+            }
+        }
     }
 }

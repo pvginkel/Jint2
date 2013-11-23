@@ -98,6 +98,7 @@
     <Compile Include="Marshal\RawJsMethodAttribute.cs" />
     <Compile Include="Native\ClrFunction.cs" />
     <Compile Include="Native\INativeIndexer.cs" />
+    <Compile Include="Native\JsNames.cs" />
     <Compile Include="Native\JsType.cs" />
     <Compile Include="Native\NativeArrayIndexer.cs" />
     <Compile Include="Native\NativeIndexer.cs" />
@@ -108,7 +109,6 @@
     <Compile Include="Native\NativeMethodOverload.cs" />
     <Compile Include="Native\ILiteral.cs" />
     <Compile Include="Native\NativeMethod.cs" />
-    <Compile Include="Native\LinkedDescriptor.cs" />
     <Compile Include="Native\NativeGenericType.cs" />
     <Compile Include="Native\NativeTypeConstructor.cs" />
     <Compile Include="Parser\ES3Additions.Builders.cs" />
@@ -125,7 +125,6 @@
     <Compile Include="IConstructorInvoker.cs" />
     <Compile Include="PropertyBags\HashedPropertyBag.cs" />
     <Compile Include="PropertyBags\IPropertyBag.cs" />
-    <Compile Include="Native\IGlobal.cs" />
     <Compile Include="Native\JsApplyFunction.cs" />
     <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />
@@ -148,7 +147,6 @@
     <Compile Include="Native\JsException.cs" />
     <Compile Include="Native\JsFunctionWrapper.cs" />
     <Compile Include="Native\JsArguments.cs" />
-    <Compile Include="Native\JsScope.cs" />
     <Compile Include="Native\JsCallFunction.cs" />
     <Compile Include="Native\JsDateConstructor.cs" />
     <Compile Include="Native\JsFunctionConstructor.cs" />

@@ -13,9 +13,6 @@ namespace Jint.Runtime
 {
     public partial class JintRuntime
     {
-        internal const string GlobalName = "Global";
-        internal const string GlobalScopeName = "GlobalScope";
-
         private readonly IJintBackend _backend;
         private readonly Options _options;
         private readonly JsFunctionConstructor _functionClass;
@@ -26,7 +23,6 @@ namespace Jint.Runtime
         private readonly JsBooleanConstructor _booleanClass;
         private readonly JsStringConstructor _stringClass;
 
-        public JsScope GlobalScope { get; private set; }
         public JsGlobal Global { get; private set; }
 
         public JintRuntime(IJintBackend backend, Options options)
@@ -40,7 +36,6 @@ namespace Jint.Runtime
             var global = new JsGlobal(backend, options);
 
             Global = global;
-            GlobalScope = new JsScope(global);
 
             _functionClass = Global.FunctionClass;
             _errorClass = Global.ErrorClass;
@@ -119,82 +114,6 @@ namespace Jint.Runtime
 
         public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
         {
-            /*
-            if (function == null)
-                return null;
-
-            // ecma chapter 10.
-            // TODO: move creation of the activation object to the JsFunction
-            // create new argument object and instantinate arguments into it
-            var args = new JsArguments(Global, function, parameters);
-
-            // create new activation object and copy instantinated arguments to it
-            // Activation should be before the function.Scope hierarchy
-            var functionScope = new JsScope(function.Scope ?? GlobalScope);
-
-            for (int i = 0; i < function.Arguments.Count; i++)
-            {
-                if (i < parameters.Length)
-                {
-                    functionScope.DefineOwnProperty(
-                        new LinkedDescriptor(
-                            functionScope,
-                            function.Arguments[i],
-                            args.GetDescriptor(i.ToString()),
-                            args
-                        )
-                    );
-                }
-                else
-                {
-                    functionScope.DefineOwnProperty(
-                        new ValueDescriptor(
-                            functionScope,
-                            function.Arguments[i],
-                            JsUndefined.Instance
-                        )
-                    );
-                }
-            }
-
-            // define arguments variable
-            if (_isStrict)
-                functionScope.DefineOwnProperty(JsScope.Arguments, args);
-            else
-                args.DefineOwnProperty(JsScope.Arguments, args);
-
-            if (that == null)
-                that = Global;
-
-            functionScope.DefineOwnProperty(JsScope.This, that);
-
-            try
-            {
-                if (_backend.AllowClr)
-                    _backend.PermissionSet.PermitOnly();
-
-                //var previousScope = _program.EnterScope(functionScope);
-
-                try
-                {
-                    if (!_backend.AllowClr || (genericParameters != null && genericParameters.Length == 0))
-                        genericParameters = null;
-
-                    var result = function.Execute(Global, that, parameters);
-
-                    return result.Result;
-                }
-                finally
-                {
-                    //_program.ExitScope(previousScope);
-                }
-            }
-            finally
-            {
-                if (_backend.AllowClr)
-                    CodeAccessPermission.RevertPermitOnly();
-            }
-            */
             if (function == null)
                 throw new ArgumentNullException("function");
 

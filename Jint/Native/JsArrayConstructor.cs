@@ -9,14 +9,14 @@ namespace Jint.Native
     [Serializable]
     public class JsArrayConstructor : JsConstructor
     {
-        public JsArrayConstructor(IGlobal global)
+        public JsArrayConstructor(JsGlobal global)
             : base(global)
         {
             Name = "Array";
             DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(IGlobal global)
+        public override void InitPrototype(JsGlobal global)
         {
             var prototype = PrototypeProperty;
 
@@ -47,7 +47,7 @@ namespace Jint.Native
             return array;
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, IGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
         {
             JsArray array = New();
 
@@ -60,9 +60,9 @@ namespace Jint.Native
             return array;
         }
 
-        public override JsFunctionResult Execute(IGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as IGlobal) == global)
+            if (that == null || (that as JsGlobal) == global)
             {
                 var result = Construct(parameters, null, null);
                 return new JsFunctionResult(result, result);

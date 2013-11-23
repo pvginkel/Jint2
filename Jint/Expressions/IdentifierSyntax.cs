@@ -18,8 +18,8 @@ namespace Jint.Expressions
             {
                 return
                     Name != JsInstance.TypeUndefined &&
-                    Name != JsScope.This &&
-                    Name != JsScope.Arguments;
+                    Name != JsNames.This &&
+                    Name != JsNames.Arguments;
             }
         }
 
