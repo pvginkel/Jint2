@@ -1880,6 +1880,9 @@ functionExpression returns [FunctionSyntax value]
 }
 @after {
 	$value = new FunctionSyntax(name, parameters, body);
+
+    if (name != null)
+        $value.Target = _currentBody.DeclaredVariables.AddOrGet(name);
 }
 	:
         FUNCTION

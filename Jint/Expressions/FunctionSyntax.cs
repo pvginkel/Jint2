@@ -17,6 +17,7 @@ namespace Jint.Expressions
         public string Name { get; private set; }
         public IList<string> Parameters { get; private set; }
         public BlockSyntax Body { get; private set; }
+        internal Variable Target { get; set; }
 
         internal override ValueType ValueType
         {

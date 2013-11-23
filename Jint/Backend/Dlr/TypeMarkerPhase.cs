@@ -35,6 +35,9 @@ namespace Jint.Backend.Dlr
 
         public override void VisitFunction(FunctionSyntax syntax)
         {
+            if (syntax.Target != null)
+                MarkAssign(syntax.Target, ValueType.Unknown);
+
             foreach (var variable in syntax.Body.DeclaredVariables)
             {
                 if (variable.Type == VariableType.Parameter)

@@ -445,11 +445,9 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
         {
-            var compiledFunction = DeclareFunction(syntax);
-
             return _scope.BuildSet(
                 syntax.Target,
-                CreateFunctionSyntax(syntax, compiledFunction)
+                CreateFunctionSyntax(syntax, DeclareFunction(syntax))
             );
         }
 
@@ -707,7 +705,12 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitFunction(FunctionSyntax syntax)
         {
-            return CreateFunctionSyntax(syntax, DeclareFunction(syntax));
+            var compiledFunction = CreateFunctionSyntax(syntax, DeclareFunction(syntax));
+
+            if (syntax.Target != null)
+                return _scope.BuildSet(syntax.Target, compiledFunction);
+            else
+                return compiledFunction;
         }
 
         private Expression CreateFunctionSyntax(IFunctionDeclaration function, DlrFunctionDelegate compiledFunction)
