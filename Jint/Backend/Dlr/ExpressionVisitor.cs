@@ -815,6 +815,19 @@ namespace Jint.Backend.Dlr
                             Expression.Convert(closureParameter, parentField.FieldType)
                         ));
                     }
+
+                    // Initialize all fields of the closure.
+
+                    foreach (var field in body.Closure.Type.GetFields())
+                    {
+                        if (typeof(JsInstance).IsAssignableFrom(field.FieldType))
+                        {
+                            statements.Add(Expression.Assign(
+                                Expression.Field(closureLocal, field),
+                                Expression.Constant(JsUndefined.Instance)
+                            ));
+                        }
+                    }
                 }
                 else
                 {
