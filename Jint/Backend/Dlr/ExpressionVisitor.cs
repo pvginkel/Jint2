@@ -136,7 +136,7 @@ namespace Jint.Backend.Dlr
                 that,
                 Expression.Property(
                     _scope.Runtime,
-                    "Global"
+                    "GlobalScope"
                 )
             ));
 
@@ -1403,13 +1403,28 @@ namespace Jint.Backend.Dlr
                         case SyntaxType.Identifier:
                             var identifierSyntax = (IdentifierSyntax)syntax.Operand;
 
-                            return BuildDeleteMember(
-                                _scope.This,
-                                identifierSyntax.Name
-                            );
+                            if (identifierSyntax.Target.Type == VariableType.Global)
+                            {
+                                return BuildDeleteMember(
+                                    Expression.Property(
+                                        _scope.Runtime,
+                                        "GlobalScope"
+                                    ),
+                                    identifierSyntax.Name
+                                );
+                            }
+                            else
+                            {
+                                // Locals are never configurable.
+
+                                return Expression.Constant(false);
+                            }
 
                         default:
-                            throw new InvalidOperationException();
+                            return Expression.Block(
+                                syntax.Operand.Accept(this),
+                                Expression.Constant(true)
+                            );
                     }
 
                 default:

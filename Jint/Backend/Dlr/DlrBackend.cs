@@ -74,12 +74,18 @@ namespace Jint.Backend.Dlr
         {
             foreach (var declaredVariable in program.DeclaredVariables)
             {
-                if (
-                    declaredVariable.IsDeclared &&
-                    !GlobalScope.HasOwnProperty(declaredVariable.Name) &&
-                    !((JsGlobal)Global).HasOwnProperty(declaredVariable.Name)
-                )
-                    GlobalScope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
+                if (declaredVariable.IsDeclared)
+                {
+                    Descriptor descriptor;
+                    if (
+                        !GlobalScope.TryGetDescriptor(declaredVariable.Name, out descriptor) ||
+                        !((JsGlobal)Global).TryGetDescriptor(declaredVariable.Name, out descriptor)
+                    )
+                        GlobalScope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
+                        descriptor = GlobalScope.GetDescriptor(declaredVariable.Name);
+
+                    descriptor.Configurable = false;
+                }
             }
         }
 

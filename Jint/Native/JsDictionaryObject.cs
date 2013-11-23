@@ -115,16 +115,18 @@ namespace Jint.Native
 
         public virtual Descriptor GetDescriptor(string index)
         {
-
             Descriptor result;
             if (_properties.TryGet(index, out result))
+            {
                 if (!result.IsDeleted)
                     return result;
-                else
-                    _properties.Delete(index); // remove from cache
+
+                _properties.Delete(index); // remove from cache
+            }
 
             // Prototype always a JsObject, (JsNull.Instance is also an object and next call will return null in case of null)
-            if ((result = Prototype.GetDescriptor(index)) != null)
+            result = Prototype.GetDescriptor(index);
+            if (result != null)
                 _properties.Put(index, result); // cache descriptior
 
             return result;
@@ -210,9 +212,11 @@ namespace Jint.Native
                 return true;
             }
 
-            // TODO: In non-strict, this returns false.
+            return false;
+
+            // TODO: This should throw in strict mode.
             
-            throw new JintException("Property " + index + " isn't configurable");
+            // throw new JintException("Property " + index + " isn't configurable");
         }
 
         public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes propertyAttributes)
