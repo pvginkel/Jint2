@@ -188,7 +188,7 @@ namespace Jint.Backend.Dlr
 
             // Add or mark the parameters.
 
-            for (int i = 0; i < function.Parameters.Count; i++)
+            for (int i = function.Parameters.Count - 1; i >= 0; i--)
             {
                 var variable = body.DeclaredVariables.AddOrGet(function.Parameters[i], i);
 
