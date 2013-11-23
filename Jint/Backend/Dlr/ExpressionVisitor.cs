@@ -1428,6 +1428,25 @@ namespace Jint.Backend.Dlr
                     }
 
                 default:
+                    if (
+                        syntax.Operation == SyntaxExpressionType.TypeOf &&
+                        syntax.Operand.Type == SyntaxType.Identifier
+                    ) {
+                        var identifierSyntax = (IdentifierSyntax)syntax.Operand;
+
+                        if (identifierSyntax.Target.Type == VariableType.Global)
+                        {
+                            return Expression.Call(
+                                typeof(JintRuntime).GetMethod("Operation_TypeOf", new[] { typeof(JsScope), typeof(string) }),
+                                Expression.Property(
+                                    _scope.Runtime,
+                                    "GlobalScope"
+                                ),
+                                Expression.Constant(identifierSyntax.Name)
+                            );
+                        }
+                    }
+
                     return BuildOperationCall(
                         syntax.Operation,
                         syntax.Operand.Accept(this)

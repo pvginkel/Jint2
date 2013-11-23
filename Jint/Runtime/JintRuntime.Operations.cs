@@ -364,6 +364,15 @@ namespace Jint.Runtime
             }
         }
 
+        public static string Operation_TypeOf(JsScope scope, string identifier)
+        {
+            Descriptor descriptor;
+            if (!scope.TryGetDescriptor(identifier, out descriptor))
+                return JsInstance.TypeUndefined;
+
+            return Operation_TypeOf(descriptor.Get(scope));
+        }
+
         public static double Operation_UnaryPlus(JsInstance operand)
         {
             return operand.ToNumber();
