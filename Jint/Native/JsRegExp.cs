@@ -73,5 +73,10 @@ namespace Jint.Native
         {
             get { return ClassRegexp; }
         }
+
+        public override bool IsClr
+        {
+            get { return false; }
+        }
     }
 }

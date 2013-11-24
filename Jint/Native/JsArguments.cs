@@ -36,6 +36,11 @@ namespace Jint.Native
             DefineOwnProperty(new ValueDescriptor(this, LengthPropertyName, JsNumber.Create(length)) { Enumerable = false, Configurable = true });
         }
 
+        public override bool IsClr
+        {
+            get { return false; }
+        }
+
         public override bool ToBoolean()
         {
             return false;

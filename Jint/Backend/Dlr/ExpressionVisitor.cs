@@ -1011,20 +1011,12 @@ namespace Jint.Backend.Dlr
                 "result"
             );
             parameters.Add(result);
-            var outParameters = Expression.Parameter(
-                typeof(bool[]),
-                "outParameters"
-            );
-            parameters.Add(outParameters);
 
             var expressions = new List<Expression>();
-            bool anyAssignable = false;
 
-            foreach (var expression in syntax.Arguments)
+            foreach (var argument in syntax.Arguments)
             {
-                if (expression.IsAssignable)
-                    anyAssignable = true;
-                expressions.Add(EnsureJs(expression.Accept(this)));
+                expressions.Add(EnsureJs(argument.Expression.Accept(this)));
             }
 
             statements.Add(Expression.Assign(
@@ -1040,48 +1032,27 @@ namespace Jint.Backend.Dlr
                     target,
                     getter,
                     arguments,
-                    MakeArrayInit(syntax.Generics, typeof(JsInstance), true),
-                    outParameters
+                    MakeArrayInit(syntax.Generics, typeof(JsInstance), true)
                 )
             ));
 
             // We need to read the arguments back for when the ExecuteFunction
             // has out parameters for native calls.
 
-            if (anyAssignable)
+            for (int i = 0; i < syntax.Arguments.Count; i++)
             {
-                var writeBackStatements = new List<Expression>();
+                var argument = syntax.Arguments[i];
 
-                for (int i = 0; i < syntax.Arguments.Count; i++)
+                if (argument.IsRef && argument.Expression.IsAssignable)
                 {
-                    var argument = syntax.Arguments[i];
-
-                    if (argument.IsAssignable)
-                    {
-                        writeBackStatements.Add(Expression.IfThen(
-                            Expression.IsTrue(
-                                Expression.ArrayIndex(outParameters, Expression.Constant(i))
-                            ),
-                            BuildSet(
-                                argument,
-                                Expression.ArrayIndex(
-                                    arguments,
-                                    Expression.Constant(i)
-                                )
-                            )
-                        ));
-                    }
+                    statements.Add(BuildSet(
+                        argument.Expression,
+                        Expression.ArrayIndex(
+                            arguments,
+                            Expression.Constant(i)
+                        )
+                    ));
                 }
-
-                statements.Add(Expression.IfThen(
-                    Expression.NotEqual(
-                        outParameters,
-                        Expression.Constant(null)
-                    ),
-                    Expression.Block(
-                        writeBackStatements
-                    )
-                ));
             }
 
             statements.Add(result);
@@ -1180,7 +1151,7 @@ namespace Jint.Backend.Dlr
         {
             var methodCall = syntax.Expression as MethodCallSyntax;
 
-            IList<ExpressionSyntax> arguments = null;
+            IList<MethodArgument> arguments = null;
             IList<ExpressionSyntax> generics = null;
             var expression = syntax.Expression;
 
@@ -1195,7 +1166,11 @@ namespace Jint.Backend.Dlr
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("New"),
                 expression.Accept(this),
-                MakeArrayInit(arguments, typeof(JsInstance), true),
+                MakeArrayInit(
+                    arguments == null ? null : arguments.Select(p => p.Expression),
+                    typeof(JsInstance),
+                    true
+                ),
                 MakeArrayInit(generics, typeof(JsInstance), true)
             );
         }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 
@@ -15,7 +14,7 @@ namespace Jint.Expressions
         }
 
         public ExpressionSyntax Expression { get; private set; }
-        public IList<ExpressionSyntax> Arguments { get; private set; }
+        public IList<MethodArgument> Arguments { get; private set; }
         public IList<ExpressionSyntax> Generics { get; private set; }
 
         internal override ValueType ValueType
@@ -23,7 +22,7 @@ namespace Jint.Expressions
             get { return ValueType.Unknown; }
         }
 
-        public MethodCallSyntax(ExpressionSyntax expression, IEnumerable<ExpressionSyntax> arguments, IEnumerable<ExpressionSyntax> generics)
+        public MethodCallSyntax(ExpressionSyntax expression, IEnumerable<MethodArgument> arguments, IEnumerable<ExpressionSyntax> generics)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");

@@ -53,7 +53,7 @@ var map = new System.Collections.Generic.Dictionary{System.String,System.String}
 map["cat"] = "Tom";
 
 var catName;
-assert(true,map.TryGetValue("cat",catName));
+assert(true,map.TryGetValue("cat",ref catName));
 assert("Tom",catName);
 
 // IEnumerable

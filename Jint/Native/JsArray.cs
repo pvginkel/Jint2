@@ -34,6 +34,11 @@ namespace Jint.Native
             }
         }
 
+        public override bool IsClr
+        {
+            get { return false; }
+        }
+
         public override bool ToBoolean()
         {
             return true;

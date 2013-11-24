@@ -115,5 +115,10 @@ namespace Jint.Native
         {
             return 1;
         }
+
+        public override bool IsClr
+        {
+            get { return false; }
+        }
     }
 }

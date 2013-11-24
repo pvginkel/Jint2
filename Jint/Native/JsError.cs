@@ -39,5 +39,10 @@ namespace Jint.Native
         {
             return Value.ToString();
         }
+
+        public override bool IsClr
+        {
+            get { return false; }
+        }
     }
 }

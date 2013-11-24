@@ -186,15 +186,15 @@ namespace Jint.Backend.Dlr
                 }
             }
 
+            var original = new JsInstance[arguments.Length];
+            Array.Copy(arguments, original, arguments.Length);
+
             var result = ExecuteFunction(function, JsNull.Instance, arguments, null);
 
-            if (result.OutParameters != null)
+            for (int i = 0; i < args.Length; i++)
             {
-                for (int i = 0; i < args.Length; i++)
-                {
-                    if (result.OutParameters[i])
-                        args[i] = Global.Marshaller.MarshalJsValue<object>(arguments[i]);
-                }
+                if (!ReferenceEquals(arguments[i], original[i]))
+                    args[i] = Global.Marshaller.MarshalJsValue<object>(arguments[i]);
             }
 
             return Global.Marshaller.MarshalJsValue<object>(result.Result);

@@ -47,7 +47,7 @@ namespace Jint.Runtime
             };
         }
 
-        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments, out bool[] outParameters)
+        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments)
         {
             Type[] genericParameters = null;
 
@@ -78,8 +78,6 @@ namespace Jint.Runtime
                 parameters ?? JsInstance.EmptyArray,
                 genericParameters
             );
-
-            outParameters = result.OutParameters;
 
             return result.Result;
         }

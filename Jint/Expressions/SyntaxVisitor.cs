@@ -159,7 +159,7 @@ namespace Jint.Expressions
             syntax.Expression.Accept(this);
             foreach (var argument in syntax.Arguments)
             {
-                argument.Accept(this);
+                argument.Expression.Accept(this);
             }
             foreach (var generic in syntax.Generics)
             {

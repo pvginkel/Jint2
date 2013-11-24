@@ -73,6 +73,7 @@
     <Compile Include="Expressions\JsonDataProperty.cs" />
     <Compile Include="Expressions\LabelSyntax.cs" />
     <Compile Include="Expressions\MemberSyntax.cs" />
+    <Compile Include="Expressions\MethodArgument.cs" />
     <Compile Include="Expressions\ValueType.cs" />
     <Compile Include="Expressions\SyntaxExpressionType.cs" />
     <Compile Include="Expressions\SyntaxType.cs" />
@@ -172,7 +173,6 @@
     <Compile Include="Expressions\JsonExpressionSyntax.cs" />
     <Compile Include="Expressions\FunctionSyntax.cs" />
     <Compile Include="Native\JsFunction.cs" />
-    <Compile Include="Expressions\MemberAccessSyntax.cs" />
     <Compile Include="Expressions\NewSyntax.cs" />
     <Compile Include="Expressions\MethodCallSyntax.cs" />
     <Compile Include="ITypeResolver.cs" />

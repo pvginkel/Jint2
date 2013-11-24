@@ -112,6 +112,7 @@ tokens
 	THROWS 		= 'throws' ;
 	TRANSIENT 	= 'transient' ;
 	VOLATILE 	= 'volatile' ;
+    REF         = 'ref' ;
 
 // Punctuators
 	LBRACE		= '{' ;
@@ -780,13 +781,33 @@ memberExpression returns [ExpressionSyntax value]
 	| func=functionExpression { $value = func; }
 	;
 	
-arguments returns [List<ExpressionSyntax> value]
+arguments returns [List<MethodArgument> value]
 @init {
-	$value = new List<ExpressionSyntax>();
+	$value = new List<MethodArgument>();
 }
-	: LPAREN ( first=assignmentExpression { $value.Add(first); } ( COMMA follow=assignmentExpression { $value.Add(follow); })* )? RPAREN
-	
+	:
+        LPAREN
+        (
+            first=argument
+            { $value.Add(first); }
+            (
+                COMMA
+                follow=argument
+                { $value.Add(follow); }
+            )*
+        )?
+        RPAREN
 	;
+
+argument returns [MethodArgument value]
+@init {
+    bool isRef = false;
+}
+    :
+        ( REF { isRef = true; } )?
+        ex=assignmentExpression
+        { $value = new MethodArgument(ex, isRef); }
+    ;
 
 generics returns [List<ExpressionSyntax> value]
 @init {

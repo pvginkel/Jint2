@@ -67,19 +67,9 @@ namespace Jint.Native
 
         public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
-            var original = new JsInstance[parameters.Length];
-            Array.Copy(parameters, original, parameters.Length);
-
             var result = _impl(Global, that, parameters);
 
-            var outParameters = new bool[parameters.Length];
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                outParameters[i] = !ReferenceEquals(parameters[i], original[i]);
-            }
-
-            return new JsFunctionResult(result, that, outParameters);
+            return new JsFunctionResult(result, that);
         }
 
         public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs)
