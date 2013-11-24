@@ -402,6 +402,8 @@ namespace Jint.Native
 
                     return Prototype;
                 }
+                if (index == "__proto__")
+                    return Prototype;
 
                 descriptor = GetDescriptor(index);
                 return
@@ -411,16 +413,25 @@ namespace Jint.Native
             }
             set
             {
-                var descriptor = GetDescriptor(index);
-                if (
-                    descriptor == null || (
-                        descriptor.Owner != this &&
-                        descriptor.DescriptorType == DescriptorType.Value
-                    )
-                )
-                    DefineOwnProperty(new ValueDescriptor(this, index, value));
+                if (index == "__proto__")
+                {
+                    var jsObject = value as JsObject;
+                    if (jsObject != null)
+                        Prototype = jsObject;
+                }
                 else
-                    descriptor.Set(this, value);
+                {
+                    var descriptor = GetDescriptor(index);
+                    if (
+                        descriptor == null || (
+                            descriptor.Owner != this &&
+                            descriptor.DescriptorType == DescriptorType.Value
+                        )
+                    )
+                        DefineOwnProperty(new ValueDescriptor(this, index, value));
+                    else
+                        descriptor.Set(this, value);
+                }
             }
         }
 
