@@ -12,7 +12,7 @@ namespace Jint.Native
         private class Scope : JsObject
         {
             public Scope(JsGlobal global)
-                : base(global)
+                : base(global, global.ObjectClass)
             {
                 this["null"] = JsNull.Instance;
                 GetDescriptor("null").Enumerable = false;

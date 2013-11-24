@@ -67,10 +67,5 @@ namespace Jint.Native
 
             return new JsFunctionResult((JsInstance)result, null);
         }
-
-        public override string ToString()
-        {
-            return String.Format("function {0}() {{ [native code] }}", Delegate.Method.Name);
-        }
     }
 }

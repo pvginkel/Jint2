@@ -41,16 +41,6 @@ namespace Jint.Native
             get { return false; }
         }
 
-        public override bool ToBoolean()
-        {
-            return false;
-        }
-
-        public override double ToNumber()
-        {
-            return this[LengthPropertyName].ToNumber();
-        }
-
         public override string Class
         {
             get { return ClassArguments; }

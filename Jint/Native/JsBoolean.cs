@@ -45,22 +45,12 @@ namespace Jint.Native
 
         public override string ToString()
         {
-            return BooleanToString(_value);
-        }
-
-        public static string BooleanToString(bool value)
-        {
-            return value ? "true" : "false";
-        }
-
-        public static double BooleanToNumber(bool value)
-        {
-            return value ? 1 : 0;
+            return JsConvert.ToString(_value);
         }
 
         public override double ToNumber()
         {
-            return BooleanToNumber(_value);
+            return JsConvert.ToNumber(_value);
         }
 
         public override bool IsPrimitive
@@ -68,7 +58,7 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PreferredType preferredType)
         {
             return this;
         }

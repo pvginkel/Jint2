@@ -47,21 +47,25 @@ namespace Jint.Native
 
         public PropertyAttributes Attributes { get; set; }
 
-        public abstract JsInstance ToPrimitive(PrimitiveHint hint);
-
-        public virtual bool ToBoolean()
+        public JsInstance ToPrimitive()
         {
-            return true;
+            return ToPrimitive(PreferredType.None);
         }
 
-        public virtual double ToNumber()
-        {
-            return 0;
-        }
+        public abstract JsInstance ToPrimitive(PreferredType preferredType);
+
+        public abstract bool ToBoolean();
+
+        public abstract double ToNumber();
 
         public virtual int ToInteger()
         {
-            return (int)ToNumber();
+            double result = ToNumber();
+
+            if (Double.IsNaN(result))
+                return 0;
+
+            return (int)result;
         }
 
         public virtual object ToObject()
@@ -74,10 +78,7 @@ namespace Jint.Native
             return ToString();
         }
 
-        public override string ToString()
-        {
-            return (Value ?? Class).ToString();
-        }
+        public abstract override string ToString();
 
         public override int GetHashCode()
         {

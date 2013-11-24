@@ -103,7 +103,7 @@ namespace Jint.Native
         // 15.2.4.3 and 15.2.4.4
         public static JsInstance ToStringImpl(JsInstance target, JsInstance[] parameters)
         {
-            return JsString.Create(String.Concat("[object ", target.Class, "]"));
+            return JsString.Create("[object " + target.Class + "]");
         }
 
         // 15.2.4.4
@@ -133,12 +133,14 @@ namespace Jint.Native
         public static JsInstance PropertyIsEnumerableImpl(JsObject target, JsInstance[] parameters)
         {
             throw new NotImplementedException();
-            //if (!HasOwnProperty(parameters[0]))
-            //    return JsBoolean.False;
+            /*
+            if (!HasOwnProperty(parameters[0]))
+                return JsBoolean.False;
 
             var v = target[parameters[0]];
 
             return JsBoolean.Create((v.Attributes & PropertyAttributes.DontEnum) == PropertyAttributes.None);
+             * */
         }
 
         /// <summary>

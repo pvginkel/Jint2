@@ -95,7 +95,11 @@ namespace Jint.Runtime
                 if (!_backend.AllowClr)
                     genericParameters = null;
 
-                return function.Execute(that ?? Global.GlobalScope, parameters ?? JsInstance.EmptyArray, genericParameters);
+                return function.Execute(
+                    that ?? Global.GlobalScope,
+                    parameters ?? JsInstance.EmptyArray,
+                    genericParameters
+                );
             }
             finally
             {

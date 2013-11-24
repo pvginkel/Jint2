@@ -44,10 +44,5 @@ namespace Jint.Native
                 throw;
             }
         }
-
-        public override string ToString()
-        {
-            return String.Format("function {0}() {{ [native code] }}", ((Delegate)_delegate ?? _globalDelegate).Method.Name);
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace Jint.Native
         {
             Name = "Date";
 
-            DefineOwnProperty("now", new ClrFunction(Global, new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            DefineOwnProperty("now", new ClrFunction(Global, new Func<JsDate>(() => Global.DateClass.New(DateTime.Now)), global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
             DefineOwnProperty("parse", new JsFunctionWrapper(Global, ParseImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
             DefineOwnProperty("parseLocale", new JsFunctionWrapper(Global, ParseLocaleImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
             DefineOwnProperty("UTC", new JsFunctionWrapper(Global, UTCImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
@@ -244,10 +244,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
+            return JsString.Create(((DateTime)target.Value).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -258,10 +255,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToLocaleStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
+            return JsString.Create(((DateTime)target.Value).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -272,10 +266,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToDateStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
+            return JsString.Create(((DateTime)target.Value).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -286,10 +277,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToTimeStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
+            return JsString.Create(((DateTime)target.Value).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -300,10 +288,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToLocaleDateStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat));
+            return JsString.Create(((DateTime)target.Value).ToLocalTime().ToString(JsDate.DateFormat));
         }
 
         /// <summary>
@@ -314,10 +299,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToLocaleTimeStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat));
+            return JsString.Create(((DateTime)target.Value).ToLocalTime().ToString(JsDate.TimeFormat));
         }
 
         /// <summary>
@@ -328,10 +310,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ValueOfImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(target.ToNumber());
+            return JsNumber.Create(JsConvert.ToNumber((DateTime)target.Value));
         }
 
         /// <summary>
@@ -342,10 +321,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetTimeImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(target.ToNumber());
+            return JsNumber.Create(JsConvert.ToNumber((DateTime)target.Value));
         }
 
         /// <summary>
@@ -356,10 +332,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetFullYearImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Year);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Year);
         }
 
         /// <summary>
@@ -370,10 +343,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCFullYearImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Year);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Year);
         }
 
         /// <summary>
@@ -384,12 +354,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetMonthImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-            {
-                return JsNumber.NaN;
-            }
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Month - 1);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Month - 1);
         }
 
         /// <summary>
@@ -400,10 +365,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCMonthImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Month - 1);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Month - 1);
 
         }
 
@@ -415,10 +377,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetDateImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Day);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Day);
         }
 
         /// <summary>
@@ -429,10 +388,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCDateImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Day);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Day);
         }
 
         /// <summary>
@@ -443,10 +399,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetDayImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create((int)CreateDateTime(target.ToNumber()).ToLocalTime().DayOfWeek);
+            return JsNumber.Create((int)((DateTime)target.Value).ToLocalTime().DayOfWeek);
         }
 
         /// <summary>
@@ -457,10 +410,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCDayImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create((int)CreateDateTime(target.ToNumber()).ToUniversalTime().DayOfWeek);
+            return JsNumber.Create((int)((DateTime)target.Value).ToUniversalTime().DayOfWeek);
         }
 
         /// <summary>
@@ -471,10 +421,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetHoursImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Hour);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Hour);
         }
 
         /// <summary>
@@ -485,10 +432,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCHoursImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Hour);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Hour);
         }
 
         /// <summary>
@@ -499,10 +443,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetMinutesImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Minute);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Minute);
         }
 
         /// <summary>
@@ -513,12 +454,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCMinutesImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-            {
-                return JsNumber.NaN;
-            }
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Minute);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Minute);
         }
 
         /// <summary>
@@ -529,10 +465,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToUTCStringImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsString.Create(double.NaN.ToString());
-
-            return JsString.Create(CreateDateTime(target.ToNumber()).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
+            return JsString.Create(((DateTime)target.Value).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -543,10 +476,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetSecondsImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Second);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Second);
         }
 
         /// <summary>
@@ -557,10 +487,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCSecondsImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Second);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Second);
         }
 
         /// <summary>
@@ -571,10 +498,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetMillisecondsImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Millisecond);
+            return JsNumber.Create(((DateTime)target.Value).ToLocalTime().Millisecond);
         }
 
         /// <summary>
@@ -585,10 +509,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance GetUTCMillisecondsImpl(JsObject target, JsInstance[] parameters)
         {
-            if (double.IsNaN(target.ToNumber()))
-                return JsNumber.NaN;
-
-            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Millisecond);
+            return JsNumber.Create(((DateTime)target.Value).ToUniversalTime().Millisecond);
         }
 
         /// <summary>
@@ -611,9 +532,10 @@ namespace Jint.Native
         public static JsInstance SetTimeImpl(JsObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
-                throw new ArgumentException("There was no tiem specified");
+                throw new ArgumentException("There was no time specified");
 
-            target.Value = parameters[0].ToNumber();
+            target.Value = JsConvert.ToNumber((DateTime)parameters[0].Value);
+
             return target;
         }
 
@@ -628,7 +550,7 @@ namespace Jint.Native
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no millisecond specified");
 
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
             valueOf = valueOf.AddMilliseconds(parameters[0].ToNumber());
             target.Value = target.Global.DateClass.New(valueOf).ToNumber();
@@ -646,7 +568,7 @@ namespace Jint.Native
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no millisecond specified");
 
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
             valueOf = valueOf.AddMilliseconds(parameters[0].ToNumber());
             target.Value = target.Global.DateClass.New(valueOf).ToNumber();
@@ -663,16 +585,18 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no second specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             valueOf = valueOf.AddSeconds(-valueOf.Second);
             valueOf = valueOf.AddSeconds(parameters[0].ToNumber());
             target.Value = valueOf;
             if (parameters.Length > 1)
             {
-                JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
+                var innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetMillisecondsImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -686,16 +610,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no second specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddSeconds(-valueOf.Second);
             valueOf = valueOf.AddSeconds(parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetMillisecondsImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -709,16 +636,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no minute specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             valueOf = valueOf.AddMinutes(-valueOf.Minute);
             valueOf = valueOf.AddMinutes(parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetSecondsImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -732,16 +662,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no minute specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddMinutes(-valueOf.Minute);
             valueOf = valueOf.AddMinutes(parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetSecondsImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -755,16 +688,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no hour specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             valueOf = valueOf.AddHours(-valueOf.Hour);
             valueOf = valueOf.AddHours(parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetMinutesImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -778,16 +714,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no hour specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddHours(-valueOf.Hour);
             valueOf = valueOf.AddHours(parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetMinutesImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -801,10 +740,12 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no date specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             valueOf = valueOf.AddDays(-valueOf.Day);
             valueOf = valueOf.AddDays(parameters[0].ToNumber());
             target.Value = valueOf;
+
             return target;
 
         }
@@ -819,10 +760,12 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no date specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddDays(-valueOf.Day);
             valueOf = valueOf.AddDays(parameters[0].ToNumber());
             target.Value = valueOf;
+
             return target;
         }
 
@@ -836,16 +779,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no month specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             valueOf = valueOf.AddMonths(-valueOf.Month);
             valueOf = valueOf.AddMonths((int)parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
-                JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
+                var innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetDateImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -859,16 +805,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no month specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddMonths(-valueOf.Month);
             valueOf = valueOf.AddMonths((int)parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
-                JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
+                var innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetDateImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -882,16 +831,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no year specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
+
+            var valueOf = ((DateTime)target.Value).ToLocalTime();
             int diff = valueOf.Year - (int)parameters[0].ToNumber();
             valueOf = valueOf.AddYears(-diff);
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
-                JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
+                var innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetMonthImpl(target, innerParams);
             }
+
             return target;
 
         }
@@ -906,16 +858,19 @@ namespace Jint.Native
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no year specified");
-            DateTime valueOf = CreateDateTime(target.ToNumber());
+
+            var valueOf = ((DateTime)target.Value);
             valueOf = valueOf.AddYears(-valueOf.Year);
             valueOf = valueOf.AddYears((int)parameters[0].ToNumber());
             target.Value = valueOf;
+
             if (parameters.Length > 1)
             {
-                JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
+                var innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
                 target = (JsDate)SetMonthImpl(target, innerParams);
             }
+
             return target;
         }
 
@@ -927,13 +882,11 @@ namespace Jint.Native
                     || (parameters[i].Class == ClassNumber && double.IsNaN(parameters[i].ToNumber())) // NaN
                     || (parameters[i].Class == ClassNumber && double.IsInfinity(parameters[i].ToNumber())) // Infinity
                     //|| parameters[i].Class == JsInstance.CLASS_OBJECT // don't accept objects ???!
-                    )
-                {
+                )
                     return JsNumber.NaN;
-                }
             }
 
-            JsDate result = global.DateClass.Construct(parameters);
+            var result = global.DateClass.Construct(parameters);
             double offset = result.ToNumber() + TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMilliseconds;
             return JsNumber.Create(offset);
         }

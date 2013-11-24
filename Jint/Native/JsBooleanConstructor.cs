@@ -18,15 +18,19 @@ namespace Jint.Native
         {
             var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
-            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("valueOf", global.FunctionClass.New<JsObject>(ValueOfImpl), PropertyAttributes.DontEnum);
 
             return prototype;
         }
 
-        public static JsInstance ValueOfImpl(JsObject target, JsInstance[] parameters)
+        public static JsInstance ValueOfImpl(JsInstance target, JsInstance[] parameters)
         {
+            var jsBoolean = target as JsBoolean;
+            if (jsBoolean != null)
+                return jsBoolean;
+
             return JsBoolean.Create((bool)target.Value);
         }
 
@@ -53,9 +57,9 @@ namespace Jint.Native
         }
 
 
-        public static JsInstance ToString2(JsObject target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsObject target, JsInstance[] parameters)
         {
-            return JsString.Create(target.ToString());
+            return JsString.Create(JsConvert.ToString((bool)target.Value));
         }
     }
 }

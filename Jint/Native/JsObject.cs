@@ -99,13 +99,18 @@ namespace Jint.Native
             return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
         }
 
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PreferredType preferredType)
         {
-            if (hint == PrimitiveHint.None)
+            return DefaultValue(preferredType);
+        }
+
+        public JsInstance DefaultValue(PreferredType hint)
+        {
+            if (hint == PreferredType.None)
             {
                 // 8.6.2.6
                 if (this is JsDate)
-                    hint = PrimitiveHint.String;
+                    hint = PreferredType.String;
             }
 
             JsInstance primitive;
@@ -113,8 +118,8 @@ namespace Jint.Native
             var toString = GetDescriptor("toString");
             var valueOf = GetDescriptor("valueOf");
 
-            var first = hint == PrimitiveHint.String ? toString : valueOf;
-            var second = hint == PrimitiveHint.String ? valueOf : toString;
+            var first = hint == PreferredType.String ? toString : valueOf;
+            var second = hint == PreferredType.String ? valueOf : toString;
 
             if (
                 first != null &&
@@ -144,7 +149,7 @@ namespace Jint.Native
                         return JsString.Create(Value.ToString());
 
                     case TypeCode.DateTime:
-                        return JsString.Create(JsDate.DateToString((DateTime)Value));
+                        return JsString.Create(JsConvert.ToString((DateTime)Value));
 
                     case TypeCode.Byte:
                     case TypeCode.Int16:
@@ -194,10 +199,10 @@ namespace Jint.Native
 
         public override bool ToBoolean()
         {
-            if (Value != null && !(Value is IConvertible))
-                return true;
-
-            if (Type == JsType.Object)
+            if (
+                Type == JsType.Object ||
+                (Value != null && !(Value is IConvertible))
+            )
                 return true;
 
             switch (Convert.GetTypeCode(Value))
@@ -207,10 +212,10 @@ namespace Jint.Native
 
                 case TypeCode.Char:
                 case TypeCode.String:
-                    return JsString.StringToBoolean((string)Value);
+                    return JsConvert.ToBoolean((string)Value);
 
                 case TypeCode.DateTime:
-                    return JsNumber.NumberToBoolean(JsDate.DateToDouble((DateTime)Value));
+                    return JsConvert.ToBoolean(JsConvert.ToNumber((DateTime)Value));
 
                 case TypeCode.Byte:
                 case TypeCode.Int16:
@@ -223,7 +228,7 @@ namespace Jint.Native
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                 case TypeCode.Single:
-                    return JsNumber.NumberToBoolean(Convert.ToDouble(Value));
+                    return JsConvert.ToBoolean(Convert.ToDouble(Value));
 
                 case TypeCode.Object:
                     return Convert.ToBoolean(Value);
@@ -235,35 +240,12 @@ namespace Jint.Native
 
         public override double ToNumber()
         {
-            if (Value == null)
-                return 0;
-
-            if (!(Value is IConvertible))
-                return double.NaN;
-
-            switch (Convert.GetTypeCode(Value))
-            {
-                case TypeCode.Boolean:
-                    return JsBoolean.BooleanToNumber((bool)Value);
-                case TypeCode.Char:
-                case TypeCode.String:
-                    return JsString.StringToNumber((string)Value);
-                case TypeCode.DateTime:
-                    return JsDate.DateToDouble((DateTime)Value);
-                default:
-                    return Convert.ToDouble(Value);
-            }
+            return ToPrimitive(PreferredType.Number).ToNumber();
         }
 
         public override string ToString()
         {
-            if (_value == null)
-                return null;
-
-            if (_value is IConvertible)
-                return Convert.ToString(Value);
-
-            return _value.ToString();
+            return ToPrimitive(PreferredType.String).ToString();
         }
 
         /// <summary>

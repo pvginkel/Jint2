@@ -81,10 +81,5 @@ namespace Jint.Native
         {
             return "[native code]";
         }
-
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
-        {
-            return JsString.Create(ToString());
-        }
     }
 }

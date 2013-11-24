@@ -30,10 +30,5 @@ namespace Jint.Backend.Dlr
 
             return new JsFunctionResult(result, @this);
         }
-
-        public override string ToString()
-        {
-            return String.Format("function {0}() {{ [compiled code] }}", _function.Method.Name);
-        }
     }
 }

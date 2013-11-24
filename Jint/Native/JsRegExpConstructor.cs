@@ -117,7 +117,16 @@ namespace Jint.Native
 
         public static JsInstance ToStringImpl(JsObject target, JsInstance[] parameters)
         {
-            return JsString.Create(target.ToString());
+            var regexp = (JsRegExp)target;
+
+            return JsString.Create(
+                "/" +
+                regexp.Pattern +
+                "/" +
+                (regexp.IsGlobal ? "g" : String.Empty) +
+                (regexp.IsIgnoreCase ? "i" : String.Empty) +
+                (regexp.IsMultiLine ? "m" : String.Empty)
+            );
         }
     }
 }

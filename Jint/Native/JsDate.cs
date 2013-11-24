@@ -43,30 +43,10 @@ namespace Jint.Native
         {
         }
 
-        public override double ToNumber()
-        {
-            return DateToDouble(_value);
-        }
-
         public static string Format = "ddd, dd MMM yyyy HH':'mm':'ss 'GMT'zzz";
         public static string FormatUtc = "ddd, dd MMM yyyy HH':'mm':'ss 'UTC'";
         public static string DateFormat = "ddd, dd MMM yyyy";
         public static string TimeFormat = "HH':'mm':'ss 'GMT'zzz";
-
-        public static double DateToDouble(DateTime date)
-        {
-            return (date.ToUniversalTime().Ticks - Offset1970) / TicksFactor;
-        }
-
-        public static string DateToString(DateTime date)
-        {
-            return date.ToLocalTime().ToString(Format, CultureInfo.InvariantCulture);
-        }
-
-        public override string ToString()
-        {
-            return DateToString(_value);
-        }
 
         public override object ToObject()
         {

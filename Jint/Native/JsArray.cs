@@ -39,11 +39,6 @@ namespace Jint.Native
             get { return false; }
         }
 
-        public override bool ToBoolean()
-        {
-            return true;
-        }
-
         public override int Length
         {
             get
@@ -236,8 +231,6 @@ namespace Jint.Native
             return base.Delete(key);
         }
 
-        #region array specific methods
-
         [RawJsMethod]
         public JsArray Concat(JsInstance[] args)
         {
@@ -294,27 +287,6 @@ namespace Jint.Native
             return JsString.Create(String.Join(sep, map));
         }
 
-        #endregion
-
-
-        public override string ToString()
-        {
-            var list = _data.Values;
-            string[] values = new string[list.Count];
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i] != null)
-                    values[i] = list[i].ToString();
-            }
-
-            return String.Join(",", values);
-        }
-
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
-        {
-            return JsString.Create(ToString());
-        }
-
         private IEnumerable<string> BaseGetKeys()
         {
             return base.GetKeys();
@@ -351,11 +323,6 @@ namespace Jint.Native
                 return index >= 0 && index < _length ? _data.ContainsKey(index) : false;
             else
                 return base.HasOwnProperty(key);
-        }
-
-        public override double ToNumber()
-        {
-            return Length;
         }
     }
 }

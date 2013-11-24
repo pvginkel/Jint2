@@ -39,14 +39,9 @@ namespace Jint.Native
             _value = value;
         }
 
-        public static bool NumberToBoolean(double value)
-        {
-            return value != 0 && !Double.IsNaN(value);
-        }
-
         public override bool ToBoolean()
         {
-            return NumberToBoolean(_value);
+            return JsConvert.ToBoolean(_value);
         }
 
         public override double ToNumber()
@@ -56,12 +51,7 @@ namespace Jint.Native
 
         public override string ToString()
         {
-            return NumberToString(_value);
-        }
-
-        public static string NumberToString(double value)
-        {
-            return value.ToString(CultureInfo.InvariantCulture);
+            return JsConvert.ToString(_value);
         }
 
         public override object ToObject()
@@ -84,7 +74,7 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PreferredType preferredType)
         {
             return this;
         }

@@ -113,10 +113,5 @@ namespace Jint.Native
         {
             get { return _length.GetValueOrDefault(base.Length); }
         }
-
-        public override string ToString()
-        {
-            return String.Format("function {0}() {{ [native code] }}", _impl.Method.Name);
-        }
     }
 }

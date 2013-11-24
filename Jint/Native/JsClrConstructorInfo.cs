@@ -23,21 +23,6 @@ namespace Jint.Native
             _value = clr;
         }
 
-        public override bool ToBoolean()
-        {
-            return false;
-        }
-
-        public override double ToNumber()
-        {
-            return 0;
-        }
-
-        public override string ToString()
-        {
-            return _value.Name;
-        }
-
         public override string Class
         {
             get { return "clrMethodInfo"; }

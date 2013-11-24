@@ -15,12 +15,12 @@ namespace Jint.ExpressionExtensions
         private static readonly MethodInfo _toBoolean = typeof(JsInstance).GetMethod("ToBoolean");
         private static readonly MethodInfo _toNumber = typeof(JsInstance).GetMethod("ToNumber");
         private static readonly MethodInfo _toString = typeof(object).GetMethod("ToString");
-        private static readonly MethodInfo _numberToBoolean = typeof(JsNumber).GetMethod("NumberToBoolean");
-        private static readonly MethodInfo _numberToString = typeof(JsNumber).GetMethod("NumberToString");
-        private static readonly MethodInfo _stringToBoolean = typeof(JsString).GetMethod("StringToBoolean");
-        private static readonly MethodInfo _stringToNumber = typeof(JsString).GetMethod("StringToNumber");
-        private static readonly MethodInfo _booleanToNumber = typeof(JsBoolean).GetMethod("BooleanToNumber");
-        private static readonly MethodInfo _booleanToString = typeof(JsBoolean).GetMethod("BooleanToString");
+        private static readonly MethodInfo _numberToBoolean = typeof(JsConvert).GetMethod("ToBoolean", new[] { typeof(double) });
+        private static readonly MethodInfo _numberToString = typeof(JsConvert).GetMethod("ToString", new[] { typeof(double) });
+        private static readonly MethodInfo _stringToBoolean = typeof(JsConvert).GetMethod("ToBoolean", new[] { typeof(string) });
+        private static readonly MethodInfo _stringToNumber = typeof(JsConvert).GetMethod("ToNumber", new[] { typeof(string) });
+        private static readonly MethodInfo _booleanToNumber = typeof(JsConvert).GetMethod("ToNumber", new[] { typeof(bool) });
+        private static readonly MethodInfo _booleanToString = typeof(JsConvert).GetMethod("ToString", new[] { typeof(bool) });
 
         private readonly Type _type;
 

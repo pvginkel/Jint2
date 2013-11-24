@@ -101,21 +101,6 @@ namespace Jint.Native
             return "/* js code */";
         }
 
-        public override string ToString()
-        {
-            return ToSource();
-        }
-
-        public override bool ToBoolean()
-        {
-            return true;
-        }
-
-        public override double ToNumber()
-        {
-            return 1;
-        }
-
         public override bool IsClr
         {
             get { return false; }

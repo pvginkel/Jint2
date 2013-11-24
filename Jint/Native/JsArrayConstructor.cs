@@ -88,32 +88,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToStringImpl(JsArray target, JsInstance[] parameters)
         {
-            var global = target.Global;
-            var result = global.ArrayClass.New();
-
-            for (int i = 0; i < target.Length; i++)
-            {
-                var obj = target[i.ToString()];
-                if (IsNullOrUndefined(obj) || (obj.IsClr && obj.Value == null))
-                {
-                    result[i.ToString()] = JsString.Create();
-                }
-                else
-                {
-                    var jsObject = obj as JsObject;
-                    if (jsObject == null)
-                        jsObject = global.GetPrototype(obj);
-
-                    var function = jsObject["toString"] as JsFunction;
-                    if (function != null)
-                        result[i.ToString()] = global.Backend.ExecuteFunction(function, obj, parameters, null).Result;
-                    else
-                        result[i.ToString()] = JsString.Create();
-                }
-            }
-
-            return JsString.Create(result.ToString());
-
+            return Join(target, EmptyArray);
         }
 
         /// <summary>
@@ -188,7 +163,9 @@ namespace Jint.Native
         {
             if (target is JsArray)
                 return ((JsArray)target).Join(parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
-            string separator = (parameters.Length == 0 || IsUndefined(parameters[0]))
+
+            string separator =
+                parameters.Length == 0 || IsUndefined(parameters[0])
                 ? ","
                 : parameters[0].ToString();
 
@@ -197,24 +174,24 @@ namespace Jint.Native
             if (jsObject == null || jsObject.Length == 0)
                 return JsString.Create();
 
-            JsInstance element0 = jsObject[0.ToString()];
+            JsInstance firstElement = jsObject[0.ToString()];
 
-            StringBuilder r;
-            if (IsNullOrUndefined(element0))
-                r = new StringBuilder(string.Empty);
+            StringBuilder result;
+            if (IsNullOrUndefined(firstElement))
+                result = new StringBuilder(string.Empty);
             else
-                r = new StringBuilder(element0.ToString());
+                result = new StringBuilder(firstElement.ToString());
 
             var length = jsObject["length"].ToNumber();
 
-            for (int k = 1; k < length; k++)
+            for (int i = 1; i < length; i++)
             {
-                r.Append(separator);
-                JsInstance element = jsObject[k.ToString()];
+                result.Append(separator);
+                JsInstance element = jsObject[i.ToString()];
                 if (!IsNullOrUndefined(element))
-                    r.Append(element);
+                    result.Append(element);
             }
-            return JsString.Create(r.ToString());
+            return JsString.Create(result.ToString());
         }
 
         /// <summary>
@@ -267,23 +244,23 @@ namespace Jint.Native
             for (int lower = 0; lower != middle; lower++)
             {
                 int upper = len - lower - 1;
-                string upperP = upper.ToString();
-                string lowerP = lower.ToString();
+                string upperString = upper.ToString();
+                string lowerString = lower.ToString();
 
-                JsInstance lowerValue = null;
-                JsInstance upperValue = null;
-                bool lowerExists = target.TryGetProperty(lowerP, out lowerValue);
-                bool upperExists = target.TryGetProperty(upperP, out upperValue);
+                JsInstance lowerValue;
+                bool lowerExists = target.TryGetProperty(lowerString, out lowerValue);
+                JsInstance upperValue;
+                bool upperExists = target.TryGetProperty(upperString, out upperValue);
 
                 if (lowerExists)
-                    target[upperP] = lowerValue;
+                    target[upperString] = lowerValue;
                 else
-                    target.Delete(upperP);
+                    target.Delete(upperString);
 
                 if (upperExists)
-                    target[lowerP] = upperValue;
+                    target[lowerString] = upperValue;
                 else
-                    target.Delete(lowerP);
+                    target.Delete(lowerString);
             }
             return target;
         }

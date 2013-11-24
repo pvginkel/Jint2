@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Native
 {
-    public enum PrimitiveHint
+    public enum PreferredType
     {
         None,
         String,

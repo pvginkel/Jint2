@@ -38,7 +38,7 @@ namespace Jint.Native
             return "null";
         }
 
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PreferredType preferredType)
         {
             return this;
         }

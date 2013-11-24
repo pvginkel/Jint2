@@ -27,36 +27,13 @@ namespace Jint.Native
 
             public override int Length
             {
-                get
-                {
-                    return 0;
-                }
+                get { return 0; }
                 set { }
             }
 
             public Sink(JsGlobal global)
                 : base(global, null, null)
             {
-            }
-
-            public override bool ToBoolean()
-            {
-                return false;
-            }
-
-            public override double ToNumber()
-            {
-                return 0d;
-            }
-
-            public override string ToString()
-            {
-                return "null";
-            }
-
-            public override JsInstance ToPrimitive(PrimitiveHint hint)
-            {
-                return this;
             }
 
             public override Descriptor GetDescriptor(string index)
@@ -67,12 +44,6 @@ namespace Jint.Native
             public override IEnumerable<string> GetKeys()
             {
                 return new string[0];
-            }
-
-            public override object Value
-            {
-                get { return null; }
-                set { }
             }
 
             public override void DefineOwnProperty(Descriptor value)
@@ -92,6 +63,32 @@ namespace Jint.Native
             public override JsInstance this[string index]
             {
                 get { return JsUndefined.Instance; }
+                set { }
+            }
+
+            public override bool ToBoolean()
+            {
+                return false;
+            }
+
+            public override double ToNumber()
+            {
+                return 0d;
+            }
+
+            public override string ToString()
+            {
+                return "null";
+            }
+
+            public override JsInstance ToPrimitive(PreferredType preferredType)
+            {
+                return this;
+            }
+
+            public override object Value
+            {
+                get { return null; }
                 set { }
             }
         }

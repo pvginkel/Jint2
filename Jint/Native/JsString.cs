@@ -38,44 +38,19 @@ namespace Jint.Native
             return new JsString(value);
         }
 
-        public static bool StringToBoolean(string value)
-        {
-            if (value == null)
-                return false;
-            if (value == "true" || value.Length > 0)
-                return true;
-
-            return false;
-        }
-
         public override bool ToBoolean()
         {
-            return StringToBoolean(_value);
-        }
-
-        public static double StringToNumber(string value)
-        {
-            if (value == null)
-            {
-                return double.NaN;
-            }
-
-            double result;
-
-            if (Double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result))
-                return result;
-
-            return Double.NaN;
+            return JsConvert.ToBoolean(_value);
         }
 
         public override double ToNumber()
         {
-            return StringToNumber(_value);
+            return JsConvert.ToNumber(_value);
         }
 
         public override string ToSource()
         {
-            /// TODO: subsitute escape sequences
+            // TODO: Subsitute escape sequences
             return _value == null ? "null" : "'" + ToString() + "'";
         }
 
@@ -104,7 +79,7 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PreferredType preferredType)
         {
             return this;
         }

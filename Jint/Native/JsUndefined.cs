@@ -53,10 +53,10 @@ namespace Jint.Native
 
         public override double ToNumber()
         {
-            return double.NaN;
+            return Double.NaN;
         }
 
-        public override JsInstance ToPrimitive(PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PreferredType preferredType)
         {
             return this;
         }

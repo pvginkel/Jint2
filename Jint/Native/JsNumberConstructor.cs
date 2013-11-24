@@ -35,8 +35,12 @@ namespace Jint.Native
             return prototype;
         }
 
-        public static JsInstance ValueOfImpl(JsObject target, JsInstance[] parameters)
+        public static JsInstance ValueOfImpl(JsInstance target, JsInstance[] parameters)
         {
+            var jsNumber = target as JsNumber;
+            if (jsNumber != null)
+                return target;
+
             return JsNumber.Create(Convert.ToDouble(target.Value));
         }
 
@@ -92,6 +96,7 @@ namespace Jint.Native
                 return JsString.Create("Infinity");
 
             int radix = 10;
+            double value = Convert.ToDouble(target.Value);
 
             // is radix defined ?
             if (parameters.Length > 0)
@@ -102,17 +107,17 @@ namespace Jint.Native
                 }
             }
 
-            var longToBeFormatted = (long)target.ToNumber();
+            var longToBeFormatted = (long)value;
 
             if (radix == 10)
             {
-                return JsString.Create(target.ToNumber().ToString(CultureInfo.InvariantCulture).ToLower());
+                return JsString.Create(value.ToString(CultureInfo.InvariantCulture).ToLower());
             }
             else
             {
                 // Extract the magnitude for conversion.
                 long longPositive = Math.Abs(longToBeFormatted);
-                int digitIndex = 0;
+                int digitIndex;
 
                 char[] outDigits = new char[63];
                 // Convert the magnitude to a digit string.
@@ -152,7 +157,7 @@ namespace Jint.Native
             if (target == JsNumber.NaN)
                 return JsString.Create(target.ToString());
 
-            return JsString.Create(target.ToNumber().ToString("f" + fractions, CultureInfo.InvariantCulture));
+            return JsString.Create(Convert.ToDouble(target.Value).ToString("f" + fractions, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -163,7 +168,9 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToExponentialImpl(JsGlobal global, JsInstance target, JsInstance[] parameters)
         {
-            if (double.IsInfinity(target.ToNumber()) || double.IsNaN(target.ToNumber()))
+            double value = Convert.ToDouble(target.Value);
+
+            if (Double.IsInfinity(value) || Double.IsNaN(value))
                 return ToStringImpl(target, new JsInstance[0]);
 
             int fractions = 16;
@@ -178,7 +185,7 @@ namespace Jint.Native
             }
 
             string format = String.Concat("#.", new String('0', fractions), "e+0");
-            return JsString.Create(target.ToNumber().ToString(format, CultureInfo.InvariantCulture));
+            return JsString.Create(value.ToString(format, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -189,7 +196,9 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToPrecisionImpl(JsGlobal global, JsInstance target, JsInstance[] parameters)
         {
-            if (double.IsInfinity(target.ToNumber()) || double.IsNaN(target.ToNumber()))
+            double value = Convert.ToDouble(target.Value);
+
+            if (Double.IsInfinity(value) || Double.IsNaN(value))
                 return ToStringImpl(target, new JsInstance[0]);
 
             if (parameters.Length == 0)
@@ -210,14 +219,14 @@ namespace Jint.Native
             }
 
             // Get the number of decimals
-            string str = target.ToNumber().ToString("e23", CultureInfo.InvariantCulture);
-            int decimals = str.IndexOfAny(new char[] { '.', 'e' });
+            string str = value.ToString("e23", CultureInfo.InvariantCulture);
+            int decimals = str.IndexOfAny(new[] { '.', 'e' });
             decimals = decimals == -1 ? str.Length : decimals;
 
             precision -= decimals;
             precision = precision < 1 ? 1 : precision;
 
-            return JsString.Create(target.ToNumber().ToString("f" + precision, CultureInfo.InvariantCulture));
+            return JsString.Create(value.ToString("f" + precision, CultureInfo.InvariantCulture));
         }
     }
 }

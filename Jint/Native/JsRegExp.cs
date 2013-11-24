@@ -64,11 +64,6 @@ namespace Jint.Native
             return "/" + _pattern.ToString() + "/";
         }
 
-        public override string ToString()
-        {
-            return "/" + _pattern.ToString() + "/" + (IsGlobal ? "g" : String.Empty) + (IsIgnoreCase ? "i" : String.Empty) + (IsMultiLine ? "m" : String.Empty);
-        }
-
         public override string Class
         {
             get { return ClassRegexp; }

@@ -114,7 +114,7 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ToStringImpl(JsInstance target, JsInstance[] parameters)
         {
-            return JsString.Create(target.ToString());
+            return ValueOfImpl(target, parameters);
         }
 
         /// <summary>
@@ -125,7 +125,11 @@ namespace Jint.Native
         /// <returns></returns>
         public static JsInstance ValueOfImpl(JsInstance target, JsInstance[] parameters)
         {
-            return JsString.Create(target.ToString());
+            var jsString = target as JsString;
+            if (jsString != null)
+                return jsString;
+
+            return JsString.Create((string)target.Value);
         }
 
         /// <summary>

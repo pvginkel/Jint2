@@ -35,11 +35,6 @@ namespace Jint.Native
             get { return ClassError; }
         }
 
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
-
         public override bool IsClr
         {
             get { return false; }

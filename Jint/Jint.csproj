@@ -79,6 +79,7 @@
     <Compile Include="Expressions\SyntaxType.cs" />
     <Compile Include="Expressions\SyntaxUtil.cs" />
     <Compile Include="Expressions\WithScope.cs" />
+    <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsFunctionResult.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
     <Compile Include="Expressions\Closure.cs" />
@@ -114,7 +115,7 @@
     <Compile Include="Native\NativeMethod.cs" />
     <Compile Include="Native\NativeGenericType.cs" />
     <Compile Include="Native\NativeTypeConstructor.cs" />
-    <Compile Include="Native\PrimitiveHint.cs" />
+    <Compile Include="Native\PreferredType.cs" />
     <Compile Include="Parser\ES3Additions.Builders.cs" />
     <Compile Include="Parser\ES3Lexer.cs" />
     <Compile Include="Parser\ES3Additions.cs" />

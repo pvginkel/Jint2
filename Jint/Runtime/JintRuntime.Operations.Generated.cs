@@ -156,7 +156,7 @@ namespace Jint.Runtime
 
         public static bool Operation_LessThan(JsInstance left, bool right)
         {
-            return left.ToNumber() < JsBoolean.BooleanToNumber(right);
+            return left.ToNumber() < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(JsInstance left, double right)
@@ -166,27 +166,27 @@ namespace Jint.Runtime
 
         public static bool Operation_LessThan(JsInstance left, string right)
         {
-            return left.ToNumber() < JsString.StringToNumber(right);
+            return left.ToNumber() < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(bool left, JsInstance right)
         {
-            return JsBoolean.BooleanToNumber(left) < right.ToNumber();
+            return JsConvert.ToNumber(left) < right.ToNumber();
         }
 
         public static bool Operation_LessThan(bool left, bool right)
         {
-            return JsBoolean.BooleanToNumber(left) < JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(bool left, double right)
         {
-            return JsBoolean.BooleanToNumber(left) < right;
+            return JsConvert.ToNumber(left) < right;
         }
 
         public static bool Operation_LessThan(bool left, string right)
         {
-            return JsBoolean.BooleanToNumber(left) < JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(double left, JsInstance right)
@@ -196,32 +196,32 @@ namespace Jint.Runtime
 
         public static bool Operation_LessThan(double left, bool right)
         {
-            return left < JsBoolean.BooleanToNumber(right);
+            return left < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(double left, string right)
         {
-            return left < JsString.StringToNumber(right);
+            return left < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(string left, JsInstance right)
         {
-            return JsString.StringToNumber(left) < right.ToNumber();
+            return JsConvert.ToNumber(left) < right.ToNumber();
         }
 
         public static bool Operation_LessThan(string left, bool right)
         {
-            return JsString.StringToNumber(left) < JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThan(string left, double right)
         {
-            return JsString.StringToNumber(left) < right;
+            return JsConvert.ToNumber(left) < right;
         }
 
         public static bool Operation_LessThan(string left, string right)
         {
-            return JsString.StringToNumber(left) < JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) < JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(JsInstance left, JsInstance right)
@@ -234,7 +234,7 @@ namespace Jint.Runtime
 
         public static bool Operation_LessThanOrEqual(JsInstance left, bool right)
         {
-            return left.ToNumber() <= JsBoolean.BooleanToNumber(right);
+            return left.ToNumber() <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(JsInstance left, double right)
@@ -244,27 +244,27 @@ namespace Jint.Runtime
 
         public static bool Operation_LessThanOrEqual(JsInstance left, string right)
         {
-            return left.ToNumber() <= JsString.StringToNumber(right);
+            return left.ToNumber() <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(bool left, JsInstance right)
         {
-            return JsBoolean.BooleanToNumber(left) <= right.ToNumber();
+            return JsConvert.ToNumber(left) <= right.ToNumber();
         }
 
         public static bool Operation_LessThanOrEqual(bool left, bool right)
         {
-            return JsBoolean.BooleanToNumber(left) <= JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(bool left, double right)
         {
-            return JsBoolean.BooleanToNumber(left) <= right;
+            return JsConvert.ToNumber(left) <= right;
         }
 
         public static bool Operation_LessThanOrEqual(bool left, string right)
         {
-            return JsBoolean.BooleanToNumber(left) <= JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(double left, JsInstance right)
@@ -274,32 +274,32 @@ namespace Jint.Runtime
 
         public static bool Operation_LessThanOrEqual(double left, bool right)
         {
-            return left <= JsBoolean.BooleanToNumber(right);
+            return left <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(double left, string right)
         {
-            return left <= JsString.StringToNumber(right);
+            return left <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(string left, JsInstance right)
         {
-            return JsString.StringToNumber(left) <= right.ToNumber();
+            return JsConvert.ToNumber(left) <= right.ToNumber();
         }
 
         public static bool Operation_LessThanOrEqual(string left, bool right)
         {
-            return JsString.StringToNumber(left) <= JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_LessThanOrEqual(string left, double right)
         {
-            return JsString.StringToNumber(left) <= right;
+            return JsConvert.ToNumber(left) <= right;
         }
 
         public static bool Operation_LessThanOrEqual(string left, string right)
         {
-            return JsString.StringToNumber(left) <= JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) <= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(JsInstance left, JsInstance right)
@@ -312,7 +312,7 @@ namespace Jint.Runtime
 
         public static bool Operation_GreaterThan(JsInstance left, bool right)
         {
-            return left.ToNumber() > JsBoolean.BooleanToNumber(right);
+            return left.ToNumber() > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(JsInstance left, double right)
@@ -322,27 +322,27 @@ namespace Jint.Runtime
 
         public static bool Operation_GreaterThan(JsInstance left, string right)
         {
-            return left.ToNumber() > JsString.StringToNumber(right);
+            return left.ToNumber() > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(bool left, JsInstance right)
         {
-            return JsBoolean.BooleanToNumber(left) > right.ToNumber();
+            return JsConvert.ToNumber(left) > right.ToNumber();
         }
 
         public static bool Operation_GreaterThan(bool left, bool right)
         {
-            return JsBoolean.BooleanToNumber(left) > JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(bool left, double right)
         {
-            return JsBoolean.BooleanToNumber(left) > right;
+            return JsConvert.ToNumber(left) > right;
         }
 
         public static bool Operation_GreaterThan(bool left, string right)
         {
-            return JsBoolean.BooleanToNumber(left) > JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(double left, JsInstance right)
@@ -352,32 +352,32 @@ namespace Jint.Runtime
 
         public static bool Operation_GreaterThan(double left, bool right)
         {
-            return left > JsBoolean.BooleanToNumber(right);
+            return left > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(double left, string right)
         {
-            return left > JsString.StringToNumber(right);
+            return left > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(string left, JsInstance right)
         {
-            return JsString.StringToNumber(left) > right.ToNumber();
+            return JsConvert.ToNumber(left) > right.ToNumber();
         }
 
         public static bool Operation_GreaterThan(string left, bool right)
         {
-            return JsString.StringToNumber(left) > JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThan(string left, double right)
         {
-            return JsString.StringToNumber(left) > right;
+            return JsConvert.ToNumber(left) > right;
         }
 
         public static bool Operation_GreaterThan(string left, string right)
         {
-            return JsString.StringToNumber(left) > JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) > JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(JsInstance left, JsInstance right)
@@ -390,7 +390,7 @@ namespace Jint.Runtime
 
         public static bool Operation_GreaterThanOrEqual(JsInstance left, bool right)
         {
-            return left.ToNumber() >= JsBoolean.BooleanToNumber(right);
+            return left.ToNumber() >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(JsInstance left, double right)
@@ -400,27 +400,27 @@ namespace Jint.Runtime
 
         public static bool Operation_GreaterThanOrEqual(JsInstance left, string right)
         {
-            return left.ToNumber() >= JsString.StringToNumber(right);
+            return left.ToNumber() >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(bool left, JsInstance right)
         {
-            return JsBoolean.BooleanToNumber(left) >= right.ToNumber();
+            return JsConvert.ToNumber(left) >= right.ToNumber();
         }
 
         public static bool Operation_GreaterThanOrEqual(bool left, bool right)
         {
-            return JsBoolean.BooleanToNumber(left) >= JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(bool left, double right)
         {
-            return JsBoolean.BooleanToNumber(left) >= right;
+            return JsConvert.ToNumber(left) >= right;
         }
 
         public static bool Operation_GreaterThanOrEqual(bool left, string right)
         {
-            return JsBoolean.BooleanToNumber(left) >= JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(double left, JsInstance right)
@@ -430,32 +430,32 @@ namespace Jint.Runtime
 
         public static bool Operation_GreaterThanOrEqual(double left, bool right)
         {
-            return left >= JsBoolean.BooleanToNumber(right);
+            return left >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(double left, string right)
         {
-            return left >= JsString.StringToNumber(right);
+            return left >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(string left, JsInstance right)
         {
-            return JsString.StringToNumber(left) >= right.ToNumber();
+            return JsConvert.ToNumber(left) >= right.ToNumber();
         }
 
         public static bool Operation_GreaterThanOrEqual(string left, bool right)
         {
-            return JsString.StringToNumber(left) >= JsBoolean.BooleanToNumber(right);
+            return JsConvert.ToNumber(left) >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_GreaterThanOrEqual(string left, double right)
         {
-            return JsString.StringToNumber(left) >= right;
+            return JsConvert.ToNumber(left) >= right;
         }
 
         public static bool Operation_GreaterThanOrEqual(string left, string right)
         {
-            return JsString.StringToNumber(left) >= JsString.StringToNumber(right);
+            return JsConvert.ToNumber(left) >= JsConvert.ToNumber(right);
         }
 
         public static bool Operation_Same(JsInstance left, JsInstance right)
