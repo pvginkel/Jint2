@@ -19,8 +19,8 @@ namespace Jint.Native
             var prototype = new JsObject(global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("name", JsString.Create(errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
-            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
 
             return prototype;
         }
@@ -62,7 +62,7 @@ namespace Jint.Native
             return new JsFunctionResult(result, that);
         }
 
-        public static JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsObject target, JsInstance[] parameters)
         {
             return JsString.Create(target["name"] + ": " + target["message"]);
         }

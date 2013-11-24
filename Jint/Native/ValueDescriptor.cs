@@ -5,7 +5,7 @@ using System.Text;
 namespace Jint.Native {
     [Serializable]
     public class ValueDescriptor : Descriptor {
-        public ValueDescriptor(JsDictionaryObject owner, string name)
+        public ValueDescriptor(JsObject owner, string name)
             : base(owner, name) {
             Enumerable = true;
             Writable = true;
@@ -14,7 +14,7 @@ namespace Jint.Native {
 
         private JsInstance _value;
 
-        public ValueDescriptor(JsDictionaryObject owner, string name, JsInstance value)
+        public ValueDescriptor(JsObject owner, string name, JsInstance value)
             : this(owner, name) {
             Set(null, value);
         }
@@ -35,7 +35,7 @@ namespace Jint.Native {
             return _value ?? JsUndefined.Instance;
         }
 
-        public override void Set(JsDictionaryObject that, JsInstance value) {
+        public override void Set(JsObject that, JsInstance value) {
             if (!Writable)
                 throw new JintException("This property is not writable");
             _value = value;

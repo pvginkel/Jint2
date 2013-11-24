@@ -116,7 +116,7 @@ namespace Jint.Backend.Dlr
 
                         while (scope != null)
                         {
-                            var withLocal = Expression.Parameter(typeof(JsDictionaryObject), "with");
+                            var withLocal = Expression.Parameter(typeof(JsObject), "with");
 
                             result = Expression.Block(
                                 new[] { withLocal },
@@ -124,13 +124,13 @@ namespace Jint.Backend.Dlr
                                     withLocal,
                                     Expression.Convert(
                                         BuildGet(scope.Variable, null),
-                                        typeof(JsDictionaryObject)
+                                        typeof(JsObject)
                                     )
                                 ),
                                 Expression.Condition(
                                     Expression.Call(
                                         withLocal,
-                                        typeof(JsDictionaryObject).GetMethod("HasProperty", new[] { typeof(string) }),
+                                        typeof(JsObject).GetMethod("HasProperty", new[] { typeof(string) }),
                                         Expression.Constant(variable.FallbackVariable.Name)
                                     ),
                                     _visitor.BuildSetMember(
@@ -194,7 +194,7 @@ namespace Jint.Backend.Dlr
 
                         while (scope != null)
                         {
-                            var withLocal = Expression.Parameter(typeof(JsDictionaryObject), "with");
+                            var withLocal = Expression.Parameter(typeof(JsObject), "with");
 
                             Expression getter = _visitor.BuildGetMember(
                                 withLocal,
@@ -231,16 +231,16 @@ namespace Jint.Backend.Dlr
                                     withLocal,
                                     Expression.Convert(
                                         BuildGet(scope.Variable, null),
-                                        typeof(JsDictionaryObject)
+                                        typeof(JsObject)
                                     )
                                 ),
                                 Expression.Condition(
                                     Expression.Call(
                                         Expression.Convert(
                                             withLocal,
-                                            typeof(JsDictionaryObject)
+                                            typeof(JsObject)
                                         ),
-                                        typeof(JsDictionaryObject).GetMethod("HasProperty", new[] { typeof(string) }),
+                                        typeof(JsObject).GetMethod("HasProperty", new[] { typeof(string) }),
                                         Expression.Constant(variable.FallbackVariable.Name)
                                     ),
                                     getter,

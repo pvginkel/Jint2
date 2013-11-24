@@ -25,12 +25,12 @@ namespace Jint.Native
             if (function == null)
                 throw new ArgumentException("the target of call() must be a function");
 
-            JsDictionaryObject @this;
+            JsObject @this;
 
             if (parameters.Length >= 1 && !(parameters[0] is JsUndefined) && parameters[0] != JsNull.Instance)
-                @this = parameters[0] as JsDictionaryObject;
+                @this = parameters[0] as JsObject;
             else
-                @this = global as JsDictionaryObject;
+                @this = global as JsObject;
 
             JsInstance[] parametersCopy;
 

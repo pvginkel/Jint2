@@ -153,7 +153,6 @@
     <Compile Include="Native\JsStringConstructor.cs" />
     <Compile Include="Native\JsBooleanConstructor.cs" />
     <Compile Include="Native\JsArrayConstructor.cs" />
-    <Compile Include="Native\JsDictionaryObject.cs" />
     <Compile Include="Native\JsNull.cs" />
     <Compile Include="Native\JsObjectConstructor.cs" />
     <Compile Include="Expressions\RegexpSyntax.cs" />
@@ -209,7 +208,7 @@
     <Compile Include="Number.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyBags\MiniCachedPropertyBag.cs" />
-    <Compile Include="Native\JsDictionaryObjectDebugView.cs" />
+    <Compile Include="Native\JsObjectDebugView.cs" />
     <Compile Include="Runtime\JintRuntime.Comparers.cs" />
     <Compile Include="Runtime\JintRuntime.cs" />
     <Compile Include="Runtime\JintRuntime.Operations.cs" />

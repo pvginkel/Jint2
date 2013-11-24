@@ -138,7 +138,7 @@ namespace Jint.Runtime
             }
             else
             {
-                foreach (string key in new List<string>(((JsDictionaryObject)obj).GetKeys()))
+                foreach (string key in new List<string>(((JsObject)obj).GetKeys()))
                 {
                     yield return JsString.Create(key);
                 }

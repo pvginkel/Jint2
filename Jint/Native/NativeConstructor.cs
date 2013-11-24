@@ -38,7 +38,7 @@ namespace Jint.Native
             if (!type.IsAbstract)
                 _constructors = type.GetConstructors();
 
-            ((JsDictionaryObject)this).Prototype = global.ObjectClass.New(this, basePrototype);
+            Prototype = global.ObjectClass.New(this, basePrototype);
 
             _overloads = new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>(_marshaller, GetMembers, WrapMember);
 
@@ -137,7 +137,7 @@ namespace Jint.Native
 
         public void InitPrototype(JsGlobal global)
         {
-            var prototype = ((JsDictionaryObject)this).Prototype;
+            var prototype = Prototype;
 
             Dictionary<string, LinkedList<MethodInfo>> members = new Dictionary<string, LinkedList<MethodInfo>>();
 
@@ -222,7 +222,7 @@ namespace Jint.Native
                 throw new JintException("Can't apply the constructor '" + _reflectedType.FullName + "' to already initialized '" + that.Value + "'");
 
             that.Value = CreateInstance(global, parameters);
-            SetupNativeProperties((JsDictionaryObject)that);
+            SetupNativeProperties((JsObject)that);
             ((JsObject)that).Indexer = _indexer;
             return new JsFunctionResult(null, that);
         }
@@ -265,7 +265,7 @@ namespace Jint.Native
             return impl(global, parameters);
         }
 
-        public void SetupNativeProperties(JsDictionaryObject target)
+        public void SetupNativeProperties(JsObject target)
         {
             if (target == null || target == JsNull.Instance || target is JsUndefined)
                 throw new ArgumentException("A valid js object is required", "target");

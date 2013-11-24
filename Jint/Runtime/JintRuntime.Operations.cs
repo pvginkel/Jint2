@@ -187,7 +187,7 @@ namespace Jint.Runtime
             if (right is ILiteral)
                 throw new JsException(_errorClass.New("Cannot apply 'in' operator to the specified member."));
 
-            return ((JsDictionaryObject)right).HasProperty(left);
+            return ((JsObject)right).HasProperty(left);
         }
 
         public bool Operation_InstanceOf(JsInstance left, JsInstance right)
@@ -443,7 +443,7 @@ namespace Jint.Runtime
                     return array.Put(intIndex, value);
             }
 
-            return ((JsDictionaryObject)obj)[JsNumber.Create(index)] = value;
+            return ((JsObject)obj)[JsNumber.Create(index)] = value;
         }
 
         public JsInstance Operation_Member(JsInstance obj, string name)
@@ -464,7 +464,7 @@ namespace Jint.Runtime
 
         public static JsInstance Operation_SetMember(JsInstance obj, string name, JsInstance value)
         {
-            var dictionary = obj as JsDictionaryObject;
+            var dictionary = obj as JsObject;
 
             if (dictionary != null)
                 return dictionary[name] = value;

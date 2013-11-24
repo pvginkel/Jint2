@@ -12,11 +12,11 @@ namespace Jint.Marshal
 // ReSharper disable NotAccessedField.Local
         private readonly IJintBackend _backend;
         private JsFunction _function;
-        private JsDictionaryObject _that;
+        private JsObject _that;
 // ReSharper restore NotAccessedField.Local
         private readonly Type _delegateType;
 
-        public JsFunctionDelegate(IJintBackend backend, JsFunction function, JsDictionaryObject that, Type delegateType)
+        public JsFunctionDelegate(IJintBackend backend, JsFunction function, JsObject that, Type delegateType)
         {
             if (backend == null)
                 throw new ArgumentNullException("backend");

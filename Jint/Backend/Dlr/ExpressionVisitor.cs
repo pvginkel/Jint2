@@ -15,7 +15,7 @@ namespace Jint.Backend.Dlr
 {
     internal partial class ExpressionVisitor : ISyntaxVisitor<Expression>
     {
-        private static readonly MethodInfo _defineAccessorProperty = typeof(JsDictionaryObject).GetMethod("DefineAccessorProperty");
+        private static readonly MethodInfo _defineAccessorProperty = typeof(JsObject).GetMethod("DefineAccessorProperty");
         private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors().Single();
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
 

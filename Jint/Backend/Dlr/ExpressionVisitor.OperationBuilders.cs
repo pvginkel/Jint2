@@ -15,9 +15,9 @@ namespace Jint.Backend.Dlr
         private static readonly MethodInfo _concat = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
         private static readonly MethodInfo _pow = typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) });
         private static readonly MethodInfo _substring = typeof(string).GetMethod("Substring", new[] { typeof(int), typeof(int) });
-        private static readonly PropertyInfo _indexByInstance = typeof(JsDictionaryObject).GetProperty("Item", new[] { typeof(JsInstance) });
-        private static readonly MethodInfo _deleteByString = typeof(JsDictionaryObject).GetMethod("Delete", new[] { typeof(string) });
-        private static readonly MethodInfo _deleteByInstance = typeof(JsDictionaryObject).GetMethod("Delete", new[] { typeof(JsInstance) });
+        private static readonly PropertyInfo _indexByInstance = typeof(JsObject).GetProperty("Item", new[] { typeof(JsInstance) });
+        private static readonly MethodInfo _deleteByString = typeof(JsObject).GetMethod("Delete", new[] { typeof(string) });
+        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("Delete", new[] { typeof(JsInstance) });
         private static readonly MethodInfo _stringEquals = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(string) });
 
         private static readonly Dictionary<int, Func<Expression[], Expression>> _operationBuilders = CreateOperationBuilders();
@@ -130,7 +130,7 @@ namespace Jint.Backend.Dlr
             result[GetOperationMethodKey(SyntaxExpressionType.SetIndex, ValueType.Unknown, ValueType.Unknown, ValueType.Unknown)] =
                 p => Expression.Assign(
                     Expression.MakeIndex(
-                        Expression.Convert(p[0], typeof(JsDictionaryObject)),
+                        Expression.Convert(p[0], typeof(JsObject)),
                         _indexByInstance,
                         new[] { p[1] }
                     ),
@@ -139,14 +139,14 @@ namespace Jint.Backend.Dlr
 
             result[GetOperationMethodKey(SyntaxExpressionType.Delete, ValueType.Unknown, ValueType.String)] =
                 p => Expression.Call(
-                    Expression.Convert(p[0], typeof(JsDictionaryObject)),
+                    Expression.Convert(p[0], typeof(JsObject)),
                     _deleteByString,
                     p[1]
                 );
 
             result[GetOperationMethodKey(SyntaxExpressionType.Delete, ValueType.Unknown, ValueType.Unknown)] =
                 p => Expression.Call(
-                    Expression.Convert(p[0], typeof(JsDictionaryObject)),
+                    Expression.Convert(p[0], typeof(JsObject)),
                     _deleteByInstance,
                     p[1]
                 );

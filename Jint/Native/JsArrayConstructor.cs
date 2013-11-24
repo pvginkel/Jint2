@@ -26,7 +26,7 @@ namespace Jint.Native
             prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsInstance>(Concat), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("join", global.FunctionClass.New<JsInstance>(Join, 1), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("pop", global.FunctionClass.New<JsInstance>(Pop), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("push", global.FunctionClass.New<JsDictionaryObject>(Push, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("push", global.FunctionClass.New<JsObject>(Push, 1), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("reverse", global.FunctionClass.New<JsObject>(Reverse), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("shift", global.FunctionClass.New<JsInstance>(Shift), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("slice", global.FunctionClass.New<JsObject>(Slice, 2), PropertyAttributes.DontEnum);
@@ -73,7 +73,7 @@ namespace Jint.Native
                 // When called as part of a new expression, it is a constructor: it initialises the newly created object.
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    ((JsDictionaryObject)that)[i.ToString()] = parameters[i];
+                    ((JsObject)that)[i.ToString()] = parameters[i];
                 }
 
                 return new JsFunctionResult(that, that);
@@ -127,7 +127,7 @@ namespace Jint.Native
 
             for (int i = 0; i < target.Length; i++)
             {
-                var obj = (JsDictionaryObject)target[i.ToString()];
+                var obj = (JsObject)target[i.ToString()];
                 result[i.ToString()] = global.Backend.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters, null).Result;
             }
 
@@ -240,7 +240,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static JsInstance Push(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance Push(JsObject target, JsInstance[] parameters)
         {
             int length = (int)target["length"].ToNumber();
             foreach (var arg in parameters)

@@ -91,7 +91,7 @@ namespace Jint.Expressions
     public interface IJintVisitor
     {
         JsInstance Result { get; set; }
-        JsDictionaryObject CallTarget { get; }
+        JsObject CallTarget { get; }
 
         JsGlobal Global { get; }
 

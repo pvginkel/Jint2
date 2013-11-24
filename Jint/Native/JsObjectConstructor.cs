@@ -16,21 +16,21 @@ namespace Jint.Native
         internal void InitPrototype()
         {
             // We need to keep this because the prototype is passed to the constructor rather than created in it
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("constructor", Global.FunctionClass.New<JsInstance>(GetConstructor), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("constructor", Global.FunctionClass.New<JsInstance>(GetConstructor), PropertyAttributes.DontEnum);
 
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("toString", Global.FunctionClass.New<JsInstance>(ToStringImpl), PropertyAttributes.DontEnum);
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("toLocaleString", Global.FunctionClass.New<JsInstance>(ToStringImpl), PropertyAttributes.DontEnum);
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("valueOf", Global.FunctionClass.New<JsInstance>(ValueOfImpl), PropertyAttributes.DontEnum);
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("hasOwnProperty", Global.FunctionClass.New<JsDictionaryObject>(HasOwnPropertyImpl), PropertyAttributes.DontEnum);
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("isPrototypeOf", Global.FunctionClass.New<JsInstance>(IsPrototypeOfImpl), PropertyAttributes.DontEnum);
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("propertyIsEnumerable", Global.FunctionClass.New<JsDictionaryObject>(PropertyIsEnumerableImpl), PropertyAttributes.DontEnum);
-            ((JsDictionaryObject)this).Prototype.DefineOwnProperty("getPrototypeOf", new JsFunctionWrapper(GetPrototypeOfImpl, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("toString", Global.FunctionClass.New<JsInstance>(ToStringImpl), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("toLocaleString", Global.FunctionClass.New<JsInstance>(ToStringImpl), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("valueOf", Global.FunctionClass.New<JsInstance>(ValueOfImpl), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("hasOwnProperty", Global.FunctionClass.New<JsObject>(HasOwnPropertyImpl), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("isPrototypeOf", Global.FunctionClass.New<JsInstance>(IsPrototypeOfImpl), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("propertyIsEnumerable", Global.FunctionClass.New<JsObject>(PropertyIsEnumerableImpl), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("getPrototypeOf", new JsFunctionWrapper(GetPrototypeOfImpl, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
 
             if (Global.HasOption(Options.EcmaScript5))
             {
-                ((JsDictionaryObject)this).Prototype.DefineOwnProperty("defineProperty", new JsFunctionWrapper(DefineProperty, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
-                ((JsDictionaryObject)this).Prototype.DefineOwnProperty("__lookupGetter__", Global.FunctionClass.New<JsDictionaryObject>(GetGetFunction), PropertyAttributes.DontEnum);
-                ((JsDictionaryObject)this).Prototype.DefineOwnProperty("__lookupSetter__", Global.FunctionClass.New<JsDictionaryObject>(GetSetFunction), PropertyAttributes.DontEnum);
+                Prototype.DefineOwnProperty("defineProperty", new JsFunctionWrapper(DefineProperty, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+                Prototype.DefineOwnProperty("__lookupGetter__", Global.FunctionClass.New<JsObject>(GetGetFunction), PropertyAttributes.DontEnum);
+                Prototype.DefineOwnProperty("__lookupSetter__", Global.FunctionClass.New<JsObject>(GetSetFunction), PropertyAttributes.DontEnum);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Jint.Native
         }
 
         // 15.2.4.5
-        public static JsInstance HasOwnPropertyImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance HasOwnPropertyImpl(JsObject target, JsInstance[] parameters)
         {
             return JsBoolean.Create(target.HasOwnProperty(parameters[0]));
         }
@@ -126,11 +126,11 @@ namespace Jint.Native
             if (parameters.Length == 0)
                 return JsBoolean.False;
 
-            return JsBoolean.Create(((JsObject)target).IsPrototypeOf(parameters[0] as JsDictionaryObject));
+            return JsBoolean.Create(((JsObject)target).IsPrototypeOf(parameters[0] as JsObject));
         }
 
         // 15.2.4.7
-        public static JsInstance PropertyIsEnumerableImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance PropertyIsEnumerableImpl(JsObject target, JsInstance[] parameters)
         {
             throw new NotImplementedException();
             //if (!HasOwnProperty(parameters[0]))
@@ -165,13 +165,13 @@ namespace Jint.Native
         {
             JsInstance instance = parameters[0];
 
-            if (!(instance is JsDictionaryObject))
+            if (!(instance is JsObject))
                 throw new JsException(global.TypeErrorClass.New());
 
             string name = parameters[1].ToString();
-            Descriptor desc = Descriptor.ToPropertyDesciptor(global, (JsDictionaryObject)instance, name, parameters[2]);
+            Descriptor desc = Descriptor.ToPropertyDesciptor(global, (JsObject)instance, name, parameters[2]);
 
-            ((JsDictionaryObject)instance).DefineOwnProperty(desc);
+            ((JsObject)instance).DefineOwnProperty(desc);
 
             return instance;
         }

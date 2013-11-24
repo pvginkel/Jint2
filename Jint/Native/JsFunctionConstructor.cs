@@ -24,8 +24,8 @@ namespace Jint.Native
             prototype.DefineOwnProperty(CallName, new JsCallFunction(prototype), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty(ApplyName, new JsApplyFunction(prototype), PropertyAttributes.DontEnum);
 
-            prototype.DefineOwnProperty("toString", Global.FunctionClass.New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("toLocaleString", Global.FunctionClass.New<JsDictionaryObject>(ToString2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toString", Global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("toLocaleString", Global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(Global, prototype, "length", GetLengthImpl, SetLengthImpl));
         }
 
@@ -34,7 +34,7 @@ namespace Jint.Native
             throw new NotImplementedException();
         }
 
-        public static JsInstance GetLengthImpl(JsDictionaryObject target)
+        public static JsInstance GetLengthImpl(JsObject target)
         {
             return JsNumber.Create(target.Length);
         }
@@ -46,13 +46,13 @@ namespace Jint.Native
             if (length < 0 || double.IsNaN(length) || double.IsInfinity(length))
                 throw new JsException(global.RangeErrorClass.New("invalid length"));
 
-            var obj = (JsDictionaryObject)target;
+            var obj = (JsObject)target;
             obj.Length = length;
 
             return parameters[0];
         }
 
-        public static JsInstance GetLength(JsDictionaryObject target)
+        public static JsInstance GetLength(JsObject target)
         {
             return JsNumber.Create(target.Length);
         }
@@ -125,7 +125,7 @@ namespace Jint.Native
             return Global.Backend.CompileFunction(parameters, genericArgs);
         }
 
-        public static JsInstance ToString2(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToString2(JsObject target, JsInstance[] parameters)
         {
             return JsString.Create(target.ToSource());
         }

@@ -344,7 +344,7 @@ namespace Jint.Marshal {
             }
 
             if (dm == null) {
-                dm = new DynamicMethod("dynamicPropertyGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsDictionaryObject) }, GetType());
+                dm = new DynamicMethod("dynamicPropertyGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsObject) }, GetType());
 
                 MethodInfo info = prop.GetGetMethod();
 
@@ -392,7 +392,7 @@ namespace Jint.Marshal {
                 _fieldGetCache.TryGetValue(field, out dm);
             }
             if (dm == null) {
-                dm = new DynamicMethod("dynamicFieldGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsDictionaryObject) }, GetType());
+                dm = new DynamicMethod("dynamicFieldGetter", typeof(JsInstance), new Type[] { typeof(Marshaller), typeof(JsObject) }, GetType());
                 var code = dm.GetILGenerator();
 
                 code.Emit(OpCodes.Ldarg_0);
@@ -434,7 +434,7 @@ namespace Jint.Marshal {
                 _propSetCache.TryGetValue(prop, out dm);
             }
             if (dm == null) {
-                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsDictionaryObject), typeof(JsInstance) }, GetType());
+                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsObject), typeof(JsInstance) }, GetType());
                 MethodInfo info = prop.GetSetMethod();
 
                 var code = dm.GetILGenerator();
@@ -484,7 +484,7 @@ namespace Jint.Marshal {
             }
 
             if (dm == null) {
-                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsDictionaryObject), typeof(JsInstance) }, GetType());
+                dm = new DynamicMethod("dynamicPropertySetter", null, new Type[] { typeof(Marshaller), typeof(JsObject), typeof(JsInstance) }, GetType());
 
                 var code = dm.GetILGenerator();
 

@@ -7,7 +7,7 @@ namespace Jint.Native
     [Serializable]
     public class PropertyDescriptor : Descriptor
     {
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name)
             : base(owner, name)
         {
             _global = global;
@@ -38,11 +38,11 @@ namespace Jint.Native
 
         public override JsInstance Get(JsInstance that)
         {
-            //JsDictionaryObject that = _global._visitor.CallTarget;
+            //JsObject that = _global._visitor.CallTarget;
             return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.Empty, null).Result;
         }
 
-        public override void Set(JsDictionaryObject that, JsInstance value)
+        public override void Set(JsObject that, JsInstance value)
         {
             if (SetFunction == null)
                 throw new JsException(_global.TypeErrorClass.New());
@@ -60,37 +60,37 @@ namespace Jint.Native
     public class PropertyDescriptor<T> : PropertyDescriptor
         where T : JsInstance
     {
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<T, JsInstance> get)
             : base(global, owner, name)
         {
             GetFunction = global.FunctionClass.New(get);
         }
 
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<JsGlobal, T, JsInstance> get)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<JsGlobal, T, JsInstance> get)
             : base(global, owner, name)
         {
             GetFunction = global.FunctionClass.New(get);
         }
 
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
             : this(global, owner, name, get)
         {
             SetFunction = global.FunctionClass.New(set);
         }
 
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
             : this(global, owner, name, get)
         {
             SetFunction = global.FunctionClass.New(set);
         }
 
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
             : this(global, owner, name, get)
         {
             SetFunction = global.FunctionClass.New(set);
         }
 
-        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
             : this(global, owner, name, get)
         {
             SetFunction = global.FunctionClass.New(set);

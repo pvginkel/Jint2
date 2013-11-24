@@ -334,7 +334,7 @@ namespace Jint
         /// <param name="prop">Property to marshal</param>
         /// <param name="owner">Owner of the returned descriptor</param>
         /// <returns>A descriptor</returns>
-        public NativeDescriptor MarshalPropertyInfo(PropertyInfo prop, JsDictionaryObject owner)
+        public NativeDescriptor MarshalPropertyInfo(PropertyInfo prop, JsObject owner)
         {
             JsGetter getter;
             JsSetter setter = null;
@@ -358,7 +358,7 @@ namespace Jint
         /// <param name="prop">Field info to marshal</param>
         /// <param name="owner">Owner for the descriptor</param>
         /// <returns>Descriptor</returns>
-        public NativeDescriptor MarshalFieldInfo(FieldInfo prop, JsDictionaryObject owner)
+        public NativeDescriptor MarshalFieldInfo(FieldInfo prop, JsObject owner)
         {
             JsGetter getter;
             JsSetter setter;

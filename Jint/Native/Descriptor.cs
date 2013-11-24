@@ -11,7 +11,7 @@ namespace Jint.Native {
 
     [Serializable]
     public abstract class Descriptor {
-        public Descriptor(JsDictionaryObject owner, string name) {
+        public Descriptor(JsObject owner, string name) {
             Owner = owner;
             Name = name;
         }
@@ -21,7 +21,7 @@ namespace Jint.Native {
         public bool Enumerable { get; set; }
         public bool Configurable { get; set; }
         public bool Writable { get; set; }
-        public JsDictionaryObject Owner { get; set; }
+        public JsObject Owner { get; set; }
 
         public virtual bool IsDeleted { get; protected set; }
 
@@ -57,7 +57,7 @@ namespace Jint.Native {
         /// <param name="that">A target object. This has a meaning in case of descriptors which helds an accessors,
         /// in value descriptors this parameter is ignored.</param>
         /// <param name="value">A new value which should be stored in the descriptor.</param>
-        public abstract void Set(JsDictionaryObject that, JsInstance value);
+        public abstract void Set(JsObject that, JsInstance value);
 
         internal abstract DescriptorType DescriptorType { get; }
 
@@ -67,7 +67,7 @@ namespace Jint.Native {
         /// <param name="global"></param>
         /// <param name="obj"></param>
         /// <returns></returns>
-        internal static Descriptor ToPropertyDesciptor(JsGlobal global, JsDictionaryObject owner, string name, JsInstance jsInstance) {
+        internal static Descriptor ToPropertyDesciptor(JsGlobal global, JsObject owner, string name, JsInstance jsInstance) {
             if (jsInstance.Class != JsInstance.ClassObject) {
                 throw new JsException(global.TypeErrorClass.New("The target object has to be an instance of an object"));
             }

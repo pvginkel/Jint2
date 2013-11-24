@@ -27,14 +27,14 @@ namespace Jint.Marshal
     /// </summary>
     /// <param name="that">A target object</param>
     /// <returns>A value of a property</returns>
-    public delegate JsInstance JsGetter(JsDictionaryObject that);
+    public delegate JsInstance JsGetter(JsObject that);
 
     /// <summary>
     /// A wrapper around native property setter
     /// </summary>
     /// <param name="that">A target object</param>
     /// <param name="value">A new value for the property</param>
-    public delegate void JsSetter(JsDictionaryObject that, JsInstance value);
+    public delegate void JsSetter(JsObject that, JsInstance value);
 
     /// <summary>
     /// A wrapper around native indexer getter

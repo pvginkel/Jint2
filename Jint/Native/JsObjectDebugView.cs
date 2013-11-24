@@ -7,11 +7,11 @@ using Jint.Native;
 
 namespace Jint.Native
 {
-    internal class JsDictionaryObjectDebugView
+    internal class JsObjectDebugView
     {
-        private readonly JsDictionaryObject _container;
+        private readonly JsObject _container;
 
-        public JsDictionaryObjectDebugView(JsDictionaryObject container)
+        public JsObjectDebugView(JsObject container)
         {
             _container = container;
         }
