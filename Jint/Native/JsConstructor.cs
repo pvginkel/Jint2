@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public abstract class JsConstructor : JsFunction {
+    public abstract class JsConstructor : JsFunction
+    {
         /// <summary>
         /// Stores Global object used for creating this function.
         /// This property may be used in the InitProtype method.
@@ -15,8 +17,9 @@ namespace Jint.Native {
         /// Constructs JsContructor, setting [[Prototype]] property to global.FunctionClass.PrototypeProperty
         /// </summary>
         /// <param name="global">Global</param>
-        public JsConstructor(JsGlobal global)
-            : base(global) {
+        protected JsConstructor(JsGlobal global)
+            : base(global)
+        {
             Global = global;
         }
 
@@ -27,11 +30,10 @@ namespace Jint.Native {
         /// <param name="global">Global</param>
         /// <param name="prototype">Prototype</param>
         protected JsConstructor(JsGlobal global, JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
             Global = global;
         }
-
-        public abstract void InitPrototype(JsGlobal global);
 
         /// <summary>
         /// This method is used to wrap an native value with a js object of the specified type.
@@ -44,7 +46,7 @@ namespace Jint.Native {
         /// <returns>A js instance</returns>
         public virtual JsInstance Wrap<T>(T value)
         {
-            return new JsObject(value,PrototypeProperty);
+            return new JsObject(value, Prototype);
         }
 
         public override string GetBody()

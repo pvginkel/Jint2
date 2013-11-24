@@ -730,7 +730,7 @@ namespace Jint.Backend.Dlr
             var body = function.Body;
 
             var thisParameter = Expression.Parameter(
-                typeof(JsDictionaryObject),
+                typeof(JsInstance),
                 "this"
             );
 

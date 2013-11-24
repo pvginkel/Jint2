@@ -3,28 +3,29 @@ using System.Collections.Generic;
 using System.Text;
 using Jint.Marshal;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public sealed class JsArray : JsObject {
+    public sealed class JsArray : JsObject
+    {
         private int _length;
         private SortedList<int, JsInstance> _data = new SortedList<int, JsInstance>();
 
         public JsArray(JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
         }
 
         private JsArray(SortedList<int, JsInstance> data, int len, JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
             _data = data;
             _length = len;
         }
 
         public override bool IsClr
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         /// <summary>
@@ -38,31 +39,38 @@ namespace Jint.Native {
             }
         }
 
-        public override bool ToBoolean() {
+        public override bool ToBoolean()
+        {
             return true;
         }
 
-        public override int Length {
-            get {
+        public override int Length
+        {
+            get
+            {
                 return _length;
             }
-            set {
+            set
+            {
                 SetLength(value);
             }
         }
 
-        public override JsInstance this[string index] {
-            get {
+        public override JsInstance this[string index]
+        {
+            get
+            {
                 int i;
                 if (Int32.TryParse(index, out i))
                     return Get(i);
                 else
                     return base[index];
             }
-            set {
+            set
+            {
                 int i;
-                if (Int32.TryParse(index,out i))
-                    Put(i,value);
+                if (Int32.TryParse(index, out i))
+                    Put(i, value);
                 else
                     base[index] = value;
             }
@@ -73,57 +81,70 @@ namespace Jint.Native {
         /// </summary>
         /// <param name="key">index</param>
         /// <returns>value</returns>
-        public override JsInstance this[JsInstance key] {
-            get {
+        public override JsInstance this[JsInstance key]
+        {
+            get
+            {
                 double keyNumber = key.ToNumber();
                 int i = (int)keyNumber;
-                if (i == keyNumber && i >= 0) {
+                if (i == keyNumber && i >= 0)
+                {
                     // we have got an index
                     return Get(i);
                 }
-                else {
+                else
+                {
                     return base[key.ToString()];
                 }
             }
-            set {
+            set
+            {
                 double keyNumber = key.ToNumber();
                 int i = (int)keyNumber;
-                if (i == keyNumber && i >= 0) {
+                if (i == keyNumber && i >= 0)
+                {
                     // we have got an index
                     Put(i, value);
                 }
-                else {
+                else
+                {
                     base[key.ToString()] = value;
                 }
             }
         }
 
-        public override void DefineOwnProperty(Descriptor d) {
+        public override void DefineOwnProperty(Descriptor d)
+        {
             int index;
-            if(int.TryParse(d.Name, out index))
+            if (int.TryParse(d.Name, out index))
                 Put(index, d.Get(this));
             else
                 base.DefineOwnProperty(d);
         }
 
-        public JsInstance Get(int i) {
+        public JsInstance Get(int i)
+        {
             JsInstance value;
             return _data.TryGetValue(i, out value) && value != null ? value : JsUndefined.Instance;
         }
 
-        public JsInstance Put(int i, JsInstance value) {
+        public JsInstance Put(int i, JsInstance value)
+        {
             if (i >= _length)
                 _length = i + 1;
             return _data[i] = value;
         }
 
-        private void SetLength(int newLength) {
+        private void SetLength(int newLength)
+        {
             if (newLength < 0)
                 throw new ArgumentOutOfRangeException("New length is out of range");
 
-            if (newLength < _length) {
+            if (newLength < _length)
+            {
                 int keyIndex = FindKeyOrNext(newLength);
-                if (keyIndex >= 0) {
+                if (keyIndex >= 0)
+                {
                     for (int i = _data.Count - 1; i >= keyIndex; i--)
                         _data.RemoveAt(i);
                 }
@@ -131,25 +152,29 @@ namespace Jint.Native {
             _length = newLength;
         }
 
-        public override bool TryGetProperty(string key, out JsInstance result) {
+        public override bool TryGetProperty(string key, out JsInstance result)
+        {
             result = JsUndefined.Instance;
 
             int index;
-            if(int.TryParse(key, out index))
+            if (int.TryParse(key, out index))
                 return _data.TryGetValue(Convert.ToInt32(index), out result);
             else
                 return base.TryGetProperty(key, out result);
-            
+
         }
 
-        private int FindKeyOrNext(int key) {
+        private int FindKeyOrNext(int key)
+        {
             int left = 0, right = _data.Count - 1;
             int index = 0;
-            while (left <= right) {
+            while (left <= right)
+            {
                 int current = _data.Keys[index];
                 if (current == key)
                     return index;
-                else {
+                else
+                {
                     if (current > key)
                         right = index - 1;
                     else
@@ -163,14 +188,17 @@ namespace Jint.Native {
 
         }
 
-        private int FindKeyOrPrev(int key) {
+        private int FindKeyOrPrev(int key)
+        {
             int left = 0, right = _data.Count - 1;
             int index = 0;
-            while (left <= right) {
+            while (left <= right)
+            {
                 int current = _data.Keys[index];
                 if (current == key)
                     return index;
-                else {
+                else
+                {
                     if (current > key)
                         right = index - 1;
                     else
@@ -183,7 +211,8 @@ namespace Jint.Native {
             return right;
         }
 
-        public override bool Delete(JsInstance key) {
+        public override bool Delete(JsInstance key)
+        {
             double keyNumber = key.ToNumber();
             int index = (int)keyNumber;
             if (index == keyNumber)
@@ -195,7 +224,8 @@ namespace Jint.Native {
             return base.Delete(key.ToString());
         }
 
-        public override bool Delete(string key) {
+        public override bool Delete(string key)
+        {
             int index;
             if (int.TryParse(key, out index))
             {
@@ -209,38 +239,45 @@ namespace Jint.Native {
         #region array specific methods
 
         [RawJsMethod]
-        public JsArray Concat(JsGlobal global, JsInstance[] args) {
+        public JsArray Concat(JsGlobal global, JsInstance[] args)
+        {
             var newData = new SortedList<int, JsInstance>(_data);
             int offset = _length;
-            foreach (var item in args) {
-                if (item is JsArray) {
+            foreach (var item in args)
+            {
+                if (item is JsArray)
+                {
                     foreach (var pair in ((JsArray)item)._data)
                         newData.Add(pair.Key + offset, pair.Value);
                     offset += ((JsArray)item).Length;
                 }
-                else if (global.ArrayClass.HasInstance(item as JsObject)) {
+                else if (global.ArrayClass.HasInstance(item as JsObject))
+                {
                     // Array subclass
                     JsObject obj = (JsObject)item;
 
-                    for (int i = 0; i < obj.Length; i++) {
+                    for (int i = 0; i < obj.Length; i++)
+                    {
                         JsInstance value;
                         if (obj.TryGetProperty(i.ToString(), out value))
                             newData.Add(offset + i, value);
                     }
                 }
-                else {
+                else
+                {
                     newData.Add(offset, item);
                     offset++;
                 }
             }
 
-            return new JsArray(newData, offset, global.ArrayClass.PrototypeProperty);
+            return new JsArray(newData, offset, global.ArrayClass.Prototype);
         }
 
         [RawJsMethod]
-        public JsString Join(JsGlobal global, JsInstance separator) {
+        public JsString Join(JsInstance separator)
+        {
             if (_length == 0)
-                return global.StringClass.New();
+                return JsString.Create();
 
             string sep = (separator is JsUndefined) ? "," : separator.ToString();
             string[] map = new string[_length];
@@ -249,16 +286,18 @@ namespace Jint.Native {
             for (int i = 0; i < _length; i++)
                 map[i] = _data.TryGetValue(i, out item) && item != JsNull.Instance && !(item is JsUndefined) ? item.ToString() : "";
 
-            return global.StringClass.New(String.Join(sep, map));
+            return JsString.Create(String.Join(sep, map));
         }
 
         #endregion
 
 
-        public override string ToString() {
+        public override string ToString()
+        {
             var list = _data.Values;
             string[] values = new string[list.Count];
-            for (int i = 0; i < list.Count; i++) {
+            for (int i = 0; i < list.Count; i++)
+            {
                 if (list[i] != null)
                     values[i] = list[i].ToString();
             }
@@ -266,10 +305,9 @@ namespace Jint.Native {
             return String.Join(",", values);
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint) {
-            if (global == null)
-                throw new ArgumentNullException();
-            return global.StringClass.New(ToString());
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        {
+            return JsString.Create(ToString());
         }
 
         private IEnumerable<string> BaseGetKeys()
@@ -277,12 +315,13 @@ namespace Jint.Native {
             return base.GetKeys();
         }
 
-        public override IEnumerable<string> GetKeys() {
+        public override IEnumerable<string> GetKeys()
+        {
             var keys = _data.Keys;
             for (int i = 0; i < keys.Count; i++)
                 yield return keys[i].ToString();
 
-            foreach (var key in BaseGetKeys()) 
+            foreach (var key in BaseGetKeys())
                 yield return key;
         }
 
@@ -291,7 +330,8 @@ namespace Jint.Native {
             return base.GetValues();
         }
 
-        public override IEnumerable<JsInstance> GetValues() {
+        public override IEnumerable<JsInstance> GetValues()
+        {
             var vals = _data.Values;
             for (int i = 0; i < vals.Count; i++)
                 yield return vals[i];
@@ -299,15 +339,17 @@ namespace Jint.Native {
                 yield return val;
         }
 
-        public override bool HasOwnProperty(string key) {
+        public override bool HasOwnProperty(string key)
+        {
             int index;
-            if(int.TryParse(key, out index))
+            if (int.TryParse(key, out index))
                 return index >= 0 && index < _length ? _data.ContainsKey(index) : false;
             else
                 return base.HasOwnProperty(key);
         }
 
-        public override double ToNumber() {
+        public override double ToNumber()
+        {
             return Length;
         }
     }

@@ -20,8 +20,8 @@ namespace Jint.Tests.Fixtures
         public void ShouldHandleDictionaryObjects()
         {
             var dic = new JsObject();
-            dic["prop1"] = new JsNumber(1, JsNull.Instance);
-            Assert.IsTrue(dic.HasProperty(new JsString("prop1", JsNull.Instance)));
+            dic["prop1"] = JsNumber.Create(1);
+            Assert.IsTrue(dic.HasProperty(JsString.Create("prop1")));
             Assert.IsTrue(dic.HasProperty("prop1"));
             Assert.AreEqual(1, dic["prop1"].ToNumber());
         }
@@ -220,7 +220,7 @@ namespace Jint.Tests.Fixtures
 
         private static JsString GiveMeJavascript(JsNumber number, JsInstance instance)
         {
-            return new JsString(number + instance.ToString(), JsNull.Instance);
+            return JsString.Create(number + instance.ToString());
         }
 
         [Test]
@@ -405,7 +405,7 @@ namespace Jint.Tests.Fixtures
         {
 
             var jint = new JintEngine()
-            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
             .SetFunction("print", new Action<string>(System.Console.WriteLine))
             .SetParameter("foo", "native string");
 
@@ -419,7 +419,7 @@ namespace Jint.Tests.Fixtures
         {
 
             var jint = new JintEngine()
-            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
             .SetFunction("print", new Action<string>(System.Console.WriteLine))
             .SetParameter("foo", null);
 
@@ -435,7 +435,7 @@ namespace Jint.Tests.Fixtures
         {
             //Strict mode enabled
             var engine = new JintEngine(Options.Strict)
-            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
             ;
             engine.Run(@"
             try{
@@ -459,7 +459,7 @@ namespace Jint.Tests.Fixtures
 
             //Strict mode disabled
             engine = new JintEngine(Options.EcmaScript3)
-            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
             ;
             engine.Run(@"
             try{
@@ -484,7 +484,7 @@ namespace Jint.Tests.Fixtures
         public void ShouldHandleMultipleRunsInSameScope()
         {
             var jint = new JintEngine()
-                .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
+                .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
                 .SetFunction("print", new Action<string>(System.Console.WriteLine));
 
             jint.Run(@" var g = []; function foo() { assert(0, g.length); }");
@@ -567,7 +567,7 @@ namespace Jint.Tests.Fixtures
             var box = new Box { Width = 10, Height = 20 };
 
             var jint = new Jint.JintEngine()
-            .SetFunction("assert", new Action<object, object>(Assert.AreEqual))
+            .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
             .SetParameter("box", box);
 
             jint.Run(@"

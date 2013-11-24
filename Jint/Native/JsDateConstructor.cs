@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Delegates;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using Jint.Expressions;
 
 namespace Jint.Native
 {
@@ -12,28 +9,26 @@ namespace Jint.Native
     public class JsDateConstructor : JsConstructor
     {
         protected JsDateConstructor(JsGlobal global, bool initializeUTC)
-            : base(global)
+            : base(global, BuildPrototype(global))
         {
             Name = "Date";
-            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
 
-            DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            DefineOwnProperty("parseLocale", new JsFunctionWrapper(ParseLocaleImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            DefineOwnProperty("parseLocale", new JsFunctionWrapper(ParseLocaleImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
         }
 
-        public override void InitPrototype(JsGlobal global)
+        private static JsObject BuildPrototype(JsGlobal global)
         {
-            //Prototype = global.FunctionClass;
-            var prototype = PrototypeProperty;
+            var prototype = new JsObject(global.FunctionClass.Prototype);
 
-            prototype.DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("UTC", new JsFunctionWrapper(UTCImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
 
             #region Static Methods
-            prototype.DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return Global.DateClass.New(DateTime.Now); }), global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("parseLocale", new JsFunctionWrapper(ParseLocaleImpl, global.FunctionClass.PrototypeProperty), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("now", new ClrFunction(new Func<JsDate>(() => { return global.DateClass.New(DateTime.Now); }), global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("parse", new JsFunctionWrapper(ParseImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("parseLocale", new JsFunctionWrapper(ParseLocaleImpl, global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
             #endregion
 
             #region Methods
@@ -81,6 +76,8 @@ namespace Jint.Native
 
             prototype.DefineOwnProperty("toUTCString", global.FunctionClass.New<JsDictionaryObject>(ToUTCStringImpl), PropertyAttributes.DontEnum);
             #endregion
+
+            return prototype;
         }
         public JsDateConstructor(JsGlobal global)
             : this(global, true)
@@ -89,17 +86,17 @@ namespace Jint.Native
 
         public JsDate New()
         {
-            return new JsDate(PrototypeProperty);
+            return new JsDate(Prototype);
         }
 
         public JsDate New(double value)
         {
-            return new JsDate(value, PrototypeProperty);
+            return new JsDate(value, Prototype);
         }
 
         public JsDate New(DateTime value)
         {
-            return new JsDate(value.ToUniversalTime(), PrototypeProperty);
+            return new JsDate(value.ToUniversalTime(), Prototype);
         }
 
         public JsDate New(DateTime value, JsObject prototype)
@@ -109,91 +106,54 @@ namespace Jint.Native
 
         public JsDate Construct(JsInstance[] parameters)
         {
-            JsDate result = null;
-
-            if (parameters.Length == 1)
+            switch (parameters.Length)
             {
-                if ((parameters[0].Class == JsInstance.ClassNumber || parameters[0].Class == JsInstance.ClassObject) && double.IsNaN(parameters[0].ToNumber()))
-                {
-                    result = New(double.NaN);
-                }
-                else if (parameters[0].Class == JsInstance.ClassNumber)
-                {
-                    result = New(parameters[0].ToNumber());
-                }
-                else
-                {
+                case 0:
+                    return New(DateTime.UtcNow);
+
+                case 1:
+                    if ((parameters[0].Class == JsInstance.ClassNumber || parameters[0].Class == JsInstance.ClassObject) && double.IsNaN(parameters[0].ToNumber()))
+                        return New(double.NaN);
+                    if (parameters[0].Class == JsInstance.ClassNumber)
+                        return New(parameters[0].ToNumber());
+
                     double d;
-                    if (ParseDate(parameters[0].ToString(), CultureInfo.InvariantCulture, out d))
+                    if (ParseDate(Global, parameters[0].ToString(), CultureInfo.InvariantCulture, out d))
+                        return New(d);
+                    if (ParseDate(Global, parameters[0].ToString(), CultureInfo.CurrentCulture, out d))
+                        return New(d);
+                    return New(0);
+
+                default:
+                    var date = new DateTime(0, DateTimeKind.Local);
+
+                    if (parameters.Length > 0)
                     {
-                        result = New(d);
+                        int year = (int)parameters[0].ToNumber() - 1;
+                        if (year < 100)
+                            year += 1900;
+
+                        date = date.AddYears(year);
                     }
-                    else if (ParseDate(parameters[0].ToString(), CultureInfo.CurrentCulture, out d))
-                    {
-                        result = New(d);
-                    }
-                    else
-                    {
-                        result = New(0);
-                    }
-                }
+
+                    if (parameters.Length > 1)
+                        date = date.AddMonths((int)parameters[1].ToNumber());
+                    if (parameters.Length > 2)
+                        date = date.AddDays((int)parameters[2].ToNumber() - 1);
+                    if (parameters.Length > 3)
+                        date = date.AddHours((int)parameters[3].ToNumber());
+                    if (parameters.Length > 4)
+                        date = date.AddMinutes((int)parameters[4].ToNumber());
+                    if (parameters.Length > 5)
+                        date = date.AddSeconds((int)parameters[5].ToNumber());
+                    if (parameters.Length > 6)
+                        date = date.AddMilliseconds((int)parameters[6].ToNumber());
+
+                    return New(date);
             }
-            else if (parameters.Length > 1)
-            {
-                DateTime d = new DateTime(0, DateTimeKind.Local);
-
-                if (parameters.Length > 0)
-                {
-                    int year = (int)parameters[0].ToNumber() - 1;
-                    if (year < 100)
-                    {
-                        year += 1900;
-                    }
-
-                    d = d.AddYears(year);
-                }
-
-                if (parameters.Length > 1)
-                {
-                    d = d.AddMonths((int)parameters[1].ToNumber());
-                }
-
-                if (parameters.Length > 2)
-                {
-                    d = d.AddDays((int)parameters[2].ToNumber() - 1);
-                }
-
-                if (parameters.Length > 3)
-                {
-                    d = d.AddHours((int)parameters[3].ToNumber());
-                }
-
-                if (parameters.Length > 4)
-                {
-                    d = d.AddMinutes((int)parameters[4].ToNumber());
-                }
-
-                if (parameters.Length > 5)
-                {
-                    d = d.AddSeconds((int)parameters[5].ToNumber());
-                }
-
-                if (parameters.Length > 6)
-                {
-                    d = d.AddMilliseconds((int)parameters[6].ToNumber());
-                }
-
-                result = New(d);
-            }
-            else
-            {
-                result = New(DateTime.UtcNow);
-            }
-
-            return result;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsDate date = Construct(parameters);
 
@@ -206,20 +166,20 @@ namespace Jint.Native
             return new JsFunctionResult(null, date);
         }
 
-        private bool ParseDate(string p, IFormatProvider culture, out double result)
+        private static bool ParseDate(JsGlobal global, string p, IFormatProvider culture, out double result)
         {
-            DateTime d = new DateTime(0, DateTimeKind.Utc); ;
             result = 0;
 
-            if (DateTime.TryParse(p, culture, DateTimeStyles.None, out d))
+            DateTime date;
+            if (DateTime.TryParse(p, culture, DateTimeStyles.None, out date))
             {
-                result = New(d).ToNumber();
+                result = global.DateClass.New(date).ToNumber();
                 return true;
             }
 
-            if (DateTime.TryParseExact(p, JsDate.Format, culture, DateTimeStyles.None, out d))
+            if (DateTime.TryParseExact(p, JsDate.Format, culture, DateTimeStyles.None, out date))
             {
-                result = New(d).ToNumber();
+                result = global.DateClass.New(date).ToNumber();
                 return true;
             }
 
@@ -227,17 +187,17 @@ namespace Jint.Native
 
             if (DateTime.TryParseExact(p, JsDate.DateFormat, culture, DateTimeStyles.None, out ld))
             {
-                d = d.AddTicks(ld.Ticks);
+                date = date.AddTicks(ld.Ticks);
             }
 
             if (DateTime.TryParseExact(p, JsDate.TimeFormat, culture, DateTimeStyles.None, out ld))
             {
-                d = d.AddTicks(ld.Ticks);
+                date = date.AddTicks(ld.Ticks);
             }
 
-            if (d.Ticks > 0)
+            if (date.Ticks > 0)
             {
-                result = New(d).ToNumber();
+                result = global.DateClass.New(date).ToNumber();
                 return true;
             }
 
@@ -249,17 +209,13 @@ namespace Jint.Native
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public JsInstance ParseImpl(JsInstance[] parameters)
+        public static JsInstance ParseImpl(JsGlobal global, JsInstance[] parameters)
         {
             double d;
-            if (ParseDate(parameters[0].ToString(), CultureInfo.InvariantCulture, out d))
-            {
-                return Global.NumberClass.New(d);
-            }
+            if (ParseDate(global, parameters[0].ToString(), CultureInfo.InvariantCulture, out d))
+                return JsNumber.Create(d);
             else
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
         }
 
         /// <summary>
@@ -267,17 +223,12 @@ namespace Jint.Native
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public JsInstance ParseLocaleImpl(JsInstance[] parameters)
+        public static JsInstance ParseLocaleImpl(JsGlobal global, JsInstance[] parameters)
         {
             double d;
-            if (ParseDate(parameters[0].ToString(), CultureInfo.CurrentCulture, out d))
-            {
-                return Global.NumberClass.New(d);
-            }
-            else
-            {
-                return Global.NaN;
-            }
+            if (ParseDate(global, parameters[0].ToString(), CultureInfo.CurrentCulture, out d))
+                return JsNumber.Create(d);
+            return JsNumber.NaN;
         }
 
         internal static DateTime CreateDateTime(double number)
@@ -291,14 +242,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -307,14 +256,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLocaleStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToLocaleStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -323,14 +270,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToDateStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToDateStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -339,14 +284,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToTimeStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToTimeStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -355,14 +298,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLocaleDateStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToLocaleDateStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.DateFormat));
         }
 
         /// <summary>
@@ -371,14 +312,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLocaleTimeStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToLocaleTimeStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToLocalTime().ToString(JsDate.TimeFormat));
         }
 
         /// <summary>
@@ -387,14 +326,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ValueOfImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ValueOfImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(target.ToNumber());
+            return JsNumber.Create(target.ToNumber());
         }
 
         /// <summary>
@@ -403,14 +340,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetTimeImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetTimeImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(target.ToNumber());
+            return JsNumber.Create(target.ToNumber());
         }
 
         /// <summary>
@@ -419,14 +354,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Year);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Year);
         }
 
         /// <summary>
@@ -435,14 +368,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Year);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Year);
         }
 
         /// <summary>
@@ -451,14 +382,14 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
             {
-                return Global.NaN;
+                return JsNumber.NaN;
             }
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Month - 1);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Month - 1);
         }
 
         /// <summary>
@@ -467,14 +398,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Month - 1);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Month - 1);
 
         }
 
@@ -484,14 +413,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetDateImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetDateImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Day);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Day);
         }
 
         /// <summary>
@@ -500,14 +427,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCDateImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCDateImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Day);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Day);
         }
 
         /// <summary>
@@ -516,14 +441,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetDayImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetDayImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New((int)CreateDateTime(target.ToNumber()).ToLocalTime().DayOfWeek);
+            return JsNumber.Create((int)CreateDateTime(target.ToNumber()).ToLocalTime().DayOfWeek);
         }
 
         /// <summary>
@@ -532,14 +455,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCDayImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCDayImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New((int)CreateDateTime(target.ToNumber()).ToUniversalTime().DayOfWeek);
+            return JsNumber.Create((int)CreateDateTime(target.ToNumber()).ToUniversalTime().DayOfWeek);
         }
 
         /// <summary>
@@ -548,14 +469,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetHoursImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetHoursImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Hour);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Hour);
         }
 
         /// <summary>
@@ -564,14 +483,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCHoursImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCHoursImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Hour);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Hour);
         }
 
         /// <summary>
@@ -580,14 +497,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetMinutesImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetMinutesImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Minute);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Minute);
         }
 
         /// <summary>
@@ -596,14 +511,14 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCMinutesImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCMinutesImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
             {
-                return Global.NaN;
+                return JsNumber.NaN;
             }
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Minute);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Minute);
         }
 
         /// <summary>
@@ -612,14 +527,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToUTCStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToUTCStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.StringClass.New(double.NaN.ToString());
-            }
+                return JsString.Create(double.NaN.ToString());
 
-            return Global.StringClass.New(CreateDateTime(target.ToNumber()).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
+            return JsString.Create(CreateDateTime(target.ToNumber()).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -628,14 +541,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetSecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetSecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Second);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Second);
         }
 
         /// <summary>
@@ -644,14 +555,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCSecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCSecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Second);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Second);
         }
 
         /// <summary>
@@ -660,14 +569,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetMillisecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetMillisecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToLocalTime().Millisecond);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToLocalTime().Millisecond);
         }
 
         /// <summary>
@@ -676,14 +583,12 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetUTCMillisecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetUTCMillisecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (double.IsNaN(target.ToNumber()))
-            {
-                return Global.NaN;
-            }
+                return JsNumber.NaN;
 
-            return Global.NumberClass.New(CreateDateTime(target.ToNumber()).ToUniversalTime().Millisecond);
+            return JsNumber.Create(CreateDateTime(target.ToNumber()).ToUniversalTime().Millisecond);
         }
 
         /// <summary>
@@ -692,9 +597,9 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance GetTimezoneOffsetImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetTimezoneOffsetImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
-            return Global.NumberClass.New(-TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes);
+            return JsNumber.Create(-TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes);
         }
 
         /// <summary>
@@ -703,7 +608,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetTimeImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetTimeImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no tiem specified");
@@ -718,7 +623,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetMillisecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetMillisecondsImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no millisecond specified");
@@ -726,7 +631,7 @@ namespace Jint.Native
             DateTime valueOf = CreateDateTime(target.ToNumber()).ToLocalTime();
             valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
             valueOf = valueOf.AddMilliseconds(parameters[0].ToNumber());
-            target.Value = New(valueOf).ToNumber();
+            target.Value = global.DateClass.New(valueOf).ToNumber();
             return target;
         }
 
@@ -736,7 +641,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCMillisecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCMillisecondsImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no millisecond specified");
@@ -744,7 +649,7 @@ namespace Jint.Native
             DateTime valueOf = CreateDateTime(target.ToNumber());
             valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
             valueOf = valueOf.AddMilliseconds(parameters[0].ToNumber());
-            target.Value = New(valueOf).ToNumber();
+            target.Value = global.DateClass.New(valueOf).ToNumber();
             return target;
         }
 
@@ -754,7 +659,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetSecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetSecondsImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no second specified");
@@ -766,7 +671,7 @@ namespace Jint.Native
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
-                target = (JsDate)SetMillisecondsImpl(target, innerParams);
+                target = (JsDate)SetMillisecondsImpl(global, target, innerParams);
             }
             return target;
         }
@@ -777,7 +682,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCSecondsImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCSecondsImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no second specified");
@@ -789,7 +694,7 @@ namespace Jint.Native
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
-                target = (JsDate)SetMillisecondsImpl(target, innerParams);
+                target = (JsDate)SetMillisecondsImpl(global, target, innerParams);
             }
             return target;
         }
@@ -800,7 +705,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetMinutesImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetMinutesImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no minute specified");
@@ -812,7 +717,7 @@ namespace Jint.Native
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
-                target = (JsDate)SetSecondsImpl(target, innerParams);
+                target = (JsDate)SetSecondsImpl(global, target, innerParams);
             }
             return target;
         }
@@ -823,7 +728,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCMinutesImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCMinutesImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no minute specified");
@@ -835,7 +740,7 @@ namespace Jint.Native
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
-                target = (JsDate)SetSecondsImpl(target, innerParams);
+                target = (JsDate)SetSecondsImpl(global, target, innerParams);
             }
             return target;
         }
@@ -846,7 +751,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetHoursImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetHoursImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no hour specified");
@@ -858,7 +763,7 @@ namespace Jint.Native
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
-                target = (JsDate)SetMinutesImpl(target, innerParams);
+                target = (JsDate)SetMinutesImpl(global, target, innerParams);
             }
             return target;
         }
@@ -869,7 +774,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCHoursImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCHoursImpl(JsGlobal global, JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no hour specified");
@@ -881,7 +786,7 @@ namespace Jint.Native
             {
                 JsInstance[] innerParams = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, innerParams, 0, innerParams.Length);
-                target = (JsDate)SetMinutesImpl(target, innerParams);
+                target = (JsDate)SetMinutesImpl(global, target, innerParams);
             }
             return target;
         }
@@ -892,7 +797,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetDateImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetDateImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no date specified");
@@ -910,7 +815,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCDateImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCDateImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no date specified");
@@ -927,7 +832,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no month specified");
@@ -950,7 +855,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCMonthImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no month specified");
@@ -973,7 +878,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no year specified");
@@ -997,7 +902,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance SetUTCFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance SetUTCFullYearImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("There was no year specified");
@@ -1014,7 +919,7 @@ namespace Jint.Native
             return target;
         }
 
-        public JsInstance UTCImpl(JsInstance[] parameters)
+        public static JsInstance UTCImpl(JsGlobal global, JsInstance[] parameters)
         {
             for (int i = 0; i < parameters.Length; i++)
             {
@@ -1024,14 +929,13 @@ namespace Jint.Native
                     //|| parameters[i].Class == JsInstance.CLASS_OBJECT // don't accept objects ???!
                     )
                 {
-                    return Global.NaN;
+                    return JsNumber.NaN;
                 }
             }
 
-            JsDate result = Construct(parameters);
+            JsDate result = global.DateClass.Construct(parameters);
             double offset = result.ToNumber() + TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMilliseconds;
-            return Global.NumberClass.New(offset);
+            return JsNumber.Create(offset);
         }
-
     }
 }

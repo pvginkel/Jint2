@@ -236,7 +236,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, double value)
         {
-            _backend.Global[name] = _backend.Global.NumberClass.New(value);
+            _backend.Global[name] = JsNumber.Create(value);
             return this;
         }
 
@@ -251,7 +251,7 @@ namespace Jint
             if (value == null)
                 _backend.Global[name] = JsNull.Instance;
             else
-                _backend.Global[name] = _backend.Global.StringClass.New(value);
+                _backend.Global[name] = JsString.Create(value);
             return this;
         }
 
@@ -275,7 +275,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, bool value)
         {
-            _backend.Global[name] = _backend.Global.BooleanClass.New(value);
+            _backend.Global[name] = JsBoolean.Create(value);
             return this;
         }
 

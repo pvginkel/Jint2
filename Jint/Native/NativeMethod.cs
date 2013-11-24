@@ -68,7 +68,7 @@ namespace Jint.Native
             return _nativeMethod;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             var original = new JsInstance[parameters.Length];
             Array.Copy(parameters, original, parameters.Length);
@@ -97,7 +97,7 @@ namespace Jint.Native
 
         public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
         {
-            return global.StringClass.New(ToString());
+            return JsString.Create(ToString());
         }
     }
 

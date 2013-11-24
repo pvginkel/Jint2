@@ -14,67 +14,96 @@ namespace Jint.Native
     public class ClrImplDefinition<T> : JsFunction
         where T : JsInstance
     {
-        private readonly Delegate _impl;
-        private readonly int _length;
-        private readonly bool _hasParameters;
+        private readonly int? _length;
+        private readonly Func<T, JsInstance[], JsInstance> _parameterImpl;
+        private readonly Func<JsGlobal, T, JsInstance[], JsInstance> _parameterGlobalImpl;
+        private readonly Func<JsGlobal, T, JsInstance> _globalImpl;
+        private readonly Func<T, JsInstance> _impl;
 
-        private ClrImplDefinition(bool hasParameters, JsObject prototype)
+        private ClrImplDefinition(int? length, JsObject prototype)
             : base(prototype)
         {
-            _hasParameters = hasParameters;
+            _length = length;
         }
 
         public ClrImplDefinition(Func<T, JsInstance[], JsInstance> impl, JsObject prototype)
-            : this(impl, -1, prototype)
+            : this((int?)null, prototype)
         {
+            _parameterImpl = impl;
         }
 
         public ClrImplDefinition(Func<T, JsInstance[], JsInstance> impl, int length, JsObject prototype)
-            : this(true, prototype)
+            : this(length, prototype)
         {
-            _impl = impl;
-            _length = length;
+            _parameterImpl = impl;
         }
 
         public ClrImplDefinition(Func<T, JsInstance> impl, JsObject prototype)
-            : this(impl, -1, prototype)
+            : this((int?)null, prototype)
         {
+            _impl = impl;
         }
 
         public ClrImplDefinition(Func<T, JsInstance> impl, int length, JsObject prototype)
-            : this(false, prototype)
+            : this(length, prototype)
         {
             _impl = impl;
-            _length = length;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public ClrImplDefinition(Func<JsGlobal, T, JsInstance[], JsInstance> impl, JsObject prototype)
+            : this((int?)null, prototype)
         {
+            _parameterGlobalImpl = impl;
+        }
+
+        public ClrImplDefinition(Func<JsGlobal, T, JsInstance[], JsInstance> impl, int length, JsObject prototype)
+            : this(length, prototype)
+        {
+            _parameterGlobalImpl = impl;
+        }
+
+        public ClrImplDefinition(Func<JsGlobal, T, JsInstance> impl, JsObject prototype)
+            : this((int?)null, prototype)
+        {
+            _globalImpl = impl;
+        }
+
+        public ClrImplDefinition(Func<JsGlobal, T, JsInstance> impl, int length, JsObject prototype)
+            : this(length, prototype)
+        {
+            _globalImpl = impl;
+        }
+
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        {
+            var casted = that as T;
+            if (casted == null)
+            {
+                var jsObject = that as JsObject;
+                JsFunction constructor = null;
+                if (jsObject != null)
+                    constructor = jsObject["constructor"] as JsFunction;
+                throw new JsException(global.TypeErrorClass.New("incompatible type: " + (constructor == null ? "<unknown>" : constructor.Name)));
+            }
+
             try
             {
                 JsInstance result;
-                if (_hasParameters)
-                    result = _impl.DynamicInvoke(new object[] { that, parameters }) as JsInstance;
+                if (_impl != null)
+                    result = _impl(casted);
+                else if (_parameterImpl != null)
+                    result = _parameterImpl(casted, parameters);
+                else if (_globalImpl != null)
+                    result = _globalImpl(global, casted);
                 else
-                    result = _impl.DynamicInvoke(new object[] { that }) as JsInstance;
+                    result = _parameterGlobalImpl(global, casted, parameters);
 
                 return new JsFunctionResult(result, result);
-            }
-            catch (TargetInvocationException e)
-            {
-                throw e.InnerException;
-            }
-            catch (ArgumentException)
-            {
-                var constructor = that["constructor"] as JsFunction;
-                throw new JsException(global.TypeErrorClass.New("incompatible type: " + constructor == null ? "<unknown>" : constructor.Name));
             }
             catch (Exception e)
             {
                 if (e.InnerException is JsException)
-                {
                     throw e.InnerException;
-                }
 
                 throw;
             }
@@ -82,18 +111,12 @@ namespace Jint.Native
 
         public override int Length
         {
-            get
-            {
-                if (_length == -1)
-                    return base.Length;
-                return _length;
-            }
+            get { return _length.GetValueOrDefault(base.Length); }
         }
 
         public override string ToString()
         {
-            return String.Format("function {0}() { [native code] }", _impl.Method.Name);
+            return String.Format("function {0}() {{ [native code] }}", _impl.Method.Name);
         }
-
     }
 }

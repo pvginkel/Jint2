@@ -31,7 +31,7 @@ namespace Jint.Native {
             };
         }
 
-        public override JsInstance Get(JsDictionaryObject that) {
+        public override JsInstance Get(JsInstance that) {
             return _value ?? JsUndefined.Instance;
         }
 

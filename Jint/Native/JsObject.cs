@@ -58,16 +58,6 @@ namespace Jint.Native
 
         public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
         {
-            // 9.1
-            if (
-                this == JsNull.Instance ||
-                this is JsUndefined ||
-                this is JsBoolean ||
-                this is JsNumber ||
-                this is JsString
-            )
-                return this;
-
             if (hint == PrimitiveHint.None)
             {
                 // 8.6.2.6
@@ -98,20 +88,20 @@ namespace Jint.Native
             if (IsClr && Value != null)
             {
                 if (!(Value is IComparable))
-                    return global.StringClass.New(Value.ToString());
+                    return JsString.Create(Value.ToString());
 
                 switch (Convert.GetTypeCode(Value))
                 {
                     case TypeCode.Boolean:
-                        return global.BooleanClass.New((bool)Value);
+                        return JsBoolean.Create((bool)Value);
 
                     case TypeCode.Char:
                     case TypeCode.String:
                     case TypeCode.Object:
-                        return global.StringClass.New(Value.ToString());
+                        return JsString.Create(Value.ToString());
 
                     case TypeCode.DateTime:
-                        return global.StringClass.New(JsDate.DateToString((DateTime)Value));
+                        return JsString.Create(JsDate.DateToString((DateTime)Value));
 
                     case TypeCode.Byte:
                     case TypeCode.Int16:
@@ -124,10 +114,10 @@ namespace Jint.Native
                     case TypeCode.Decimal:
                     case TypeCode.Double:
                     case TypeCode.Single:
-                        return global.NumberClass.New(Convert.ToDouble(Value));
+                        return JsNumber.Create(Convert.ToDouble(Value));
 
                     default:
-                        return global.StringClass.New(Value.ToString());
+                        return JsString.Create(Value.ToString());
                 }
             }
 
@@ -225,9 +215,7 @@ namespace Jint.Native
         public override string ToString()
         {
             if (_value == null)
-            {
                 return null;
-            }
 
             if (_value is IConvertible)
                 return Convert.ToString(Value);

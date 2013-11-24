@@ -10,25 +10,25 @@ namespace Jint.Native
     public class JsRegExpConstructor : JsConstructor
     {
         public JsRegExpConstructor(JsGlobal global)
-            : base(global)
+            : base(global, BuildPrototype(global))
         {
             Name = "RegExp";
-            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(JsGlobal global)
+        private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = PrototypeProperty;
-            //prototype = global.ObjectClass.New(this);
+            var prototype = new JsObject(global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("lastIndex", global.FunctionClass.New<JsRegExp>(GetLastIndex), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("exec", global.FunctionClass.New<JsRegExp>(ExecImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("test", global.FunctionClass.New<JsRegExp>(TestImpl), PropertyAttributes.DontEnum);
+
+            return prototype;
         }
 
-        public JsInstance GetLastIndex(JsRegExp regex, JsInstance[] parameters)
+        public static JsInstance GetLastIndex(JsRegExp regex, JsInstance[] parameters)
         {
             return regex["lastIndex"];
         }
@@ -40,36 +40,36 @@ namespace Jint.Native
 
         public JsRegExp New(string pattern, bool g, bool i, bool m)
         {
-            var ret = new JsRegExp(pattern, g, i, m, PrototypeProperty);
-            ret["source"] = Global.StringClass.New(pattern);
-            ret["lastIndex"] = Global.NumberClass.New(0);
-            ret["global"] = Global.BooleanClass.New(g);
+            var ret = new JsRegExp(pattern, g, i, m, Prototype);
+            ret["source"] = JsString.Create(pattern);
+            ret["lastIndex"] = JsNumber.Create(0);
+            ret["global"] = JsBoolean.Create(g);
 
             return ret;
         }
 
-        public JsInstance ExecImpl(JsRegExp regexp, JsInstance[] parameters)
+        public static JsInstance ExecImpl(JsGlobal global, JsRegExp regexp, JsInstance[] parameters)
         {
-            JsArray a = Global.ArrayClass.New();
+            JsArray a = global.ArrayClass.New();
             string input = parameters[0].ToString();
-            a["input"] = Global.StringClass.New(input);
+            a["input"] = JsString.Create(input);
 
             int i = 0;
             var lastIndex = regexp.IsGlobal ? regexp["lastIndex"].ToNumber() : 0;
             MatchCollection matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
             if (matches.Count > 0)
             {
-                // A[Global.NumberClass.New(i++)] = Global.StringClass.New(matches[0].Value);
-                a["index"] = Global.NumberClass.New(matches[0].Index);
+                // A[JsNumber.Create(i++)] = JsString.Create(matches[0].Value);
+                a["index"] = JsNumber.Create(matches[0].Index);
 
                 if (regexp.IsGlobal)
                 {
-                    regexp["lastIndex"] = Global.NumberClass.New(lastIndex + matches[0].Index + matches[0].Value.Length);
+                    regexp["lastIndex"] = JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length);
                 }
 
                 foreach (Group g in matches[0].Groups)
                 {
-                    a[Global.NumberClass.New(i++)] = Global.StringClass.New(g.Value);
+                    a[JsNumber.Create(i++)] = JsString.Create(g.Value);
                 }
 
                 return a;
@@ -81,13 +81,13 @@ namespace Jint.Native
 
         }
 
-        public JsInstance TestImpl(JsRegExp regex, JsInstance[] parameters)
+        public static JsInstance TestImpl(JsGlobal global, JsRegExp regex, JsInstance[] parameters)
         {
-            var array = ExecImpl(regex, parameters) as JsArray;
-            return Global.BooleanClass.New(array != null && array.Length > 0);
+            var array = ExecImpl(global, regex, parameters) as JsArray;
+            return JsBoolean.Create(array != null && array.Length > 0);
         }
 
-        public override JsFunctionResult Execute(JsGlobal globa, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal globa, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 
@@ -115,9 +115,9 @@ namespace Jint.Native
             return new JsFunctionResult(result, result);
         }
 
-        public JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
-            return Global.StringClass.New(target.ToString());
+            return JsString.Create(target.ToString());
         }
     }
 }

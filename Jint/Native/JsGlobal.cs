@@ -24,22 +24,26 @@ namespace Jint.Native
 
             this["null"] = JsNull.Instance;
             GetDescriptor("null").Enumerable = false;
-            JsObject objectProrotype = new JsObject(JsNull.Instance);
+            JsObject objectPrototype = new JsObject(JsNull.Instance);
 
-            JsFunction functionPrototype = new JsFunctionWrapper(
+            var functionPrototype = new JsFunctionWrapper(
                 p => JsUndefined.Instance,
-                objectProrotype
+                objectPrototype
             );
 
             Marshaller = new Marshaller(this);
 
             #region Global Classes
-            this["Function"] = FunctionClass = new JsFunctionConstructor(this, functionPrototype);
-            GetDescriptor("Function").Enumerable = false;
-            this["Object"] = ObjectClass = new JsObjectConstructor(this, functionPrototype, objectProrotype);
-            GetDescriptor("Object").Enumerable = false;
-            ObjectClass.InitPrototype(this);
 
+            // These two must be initialized special because they depend on
+            // each other being available.
+
+            this["Function"] = FunctionClass = new JsFunctionConstructor(this, functionPrototype);
+            this["Object"] = ObjectClass = new JsObjectConstructor(this, objectPrototype);
+            FunctionClass.InitPrototype();
+            ObjectClass.InitPrototype();
+            GetDescriptor("Function").Enumerable = false;
+            GetDescriptor("Object").Enumerable = false;
 
             this["Array"] = ArrayClass = new JsArrayConstructor(this);
             GetDescriptor("Array").Enumerable = false;
@@ -74,32 +78,11 @@ namespace Jint.Native
 
             // 15.1 prototype of the global object varies on the implementation
             //Prototype = ObjectClass.PrototypeProperty;
+
             #endregion
 
-
-            foreach (var constructor in new JsConstructor[]
-            {
-                FunctionClass,
-                ObjectClass,
-                ArrayClass,
-                BooleanClass,
-                DateClass,
-                ErrorClass,
-                EvalErrorClass,
-                RangeErrorClass,
-                ReferenceErrorClass,
-                SyntaxErrorClass,
-                TypeErrorClass,
-                URIErrorClass,
-                NumberClass,
-                RegExpClass,
-                StringClass
-            })
-            {
-                constructor.InitPrototype(this);
-            }
-
             #region Global Properties
+
             this["NaN"] = NumberClass["NaN"];  // 15.1.1.1
             GetDescriptor("NaN").Enumerable = false;
             this["Infinity"] = NumberClass["POSITIVE_INFINITY"]; // // 15.1.1.2
@@ -107,28 +90,31 @@ namespace Jint.Native
             this["undefined"] = JsUndefined.Instance; // 15.1.1.3
             GetDescriptor("undefined").Enumerable = false;
             this[JsNames.This] = this;
+
             #endregion
 
             #region Global Functions
+
             // every embed function should have a prototype FunctionClass.PrototypeProperty - 15.
-            this["eval"] = new JsFunctionWrapper(Eval, FunctionClass.PrototypeProperty); // 15.1.2.1
+            this["eval"] = new JsFunctionWrapper(Eval, FunctionClass.Prototype); // 15.1.2.1
             GetDescriptor("eval").Enumerable = false;
-            this["parseInt"] = new JsFunctionWrapper(ParseInt, FunctionClass.PrototypeProperty); // 15.1.2.2
+            this["parseInt"] = new JsFunctionWrapper(ParseInt, FunctionClass.Prototype); // 15.1.2.2
             GetDescriptor("parseInt").Enumerable = false;
-            this["parseFloat"] = new JsFunctionWrapper(ParseFloat, FunctionClass.PrototypeProperty); // 15.1.2.3
+            this["parseFloat"] = new JsFunctionWrapper(ParseFloat, FunctionClass.Prototype); // 15.1.2.3
             GetDescriptor("parseFloat").Enumerable = false;
-            this["isNaN"] = new JsFunctionWrapper(IsNaN, FunctionClass.PrototypeProperty);
+            this["isNaN"] = new JsFunctionWrapper(IsNaN, FunctionClass.Prototype);
             GetDescriptor("isNaN").Enumerable = false;
-            this["isFinite"] = new JsFunctionWrapper(IsFinite, FunctionClass.PrototypeProperty);
+            this["isFinite"] = new JsFunctionWrapper(IsFinite, FunctionClass.Prototype);
             GetDescriptor("isFinite").Enumerable = false;
-            this["decodeURI"] = new JsFunctionWrapper(DecodeURI, FunctionClass.PrototypeProperty);
+            this["decodeURI"] = new JsFunctionWrapper(DecodeURI, FunctionClass.Prototype);
             GetDescriptor("decodeURI").Enumerable = false;
-            this["encodeURI"] = new JsFunctionWrapper(EncodeURI, FunctionClass.PrototypeProperty);
+            this["encodeURI"] = new JsFunctionWrapper(EncodeURI, FunctionClass.Prototype);
             GetDescriptor("encodeURI").Enumerable = false;
-            this["decodeURIComponent"] = new JsFunctionWrapper(DecodeURIComponent, FunctionClass.PrototypeProperty);
+            this["decodeURIComponent"] = new JsFunctionWrapper(DecodeURIComponent, FunctionClass.Prototype);
             GetDescriptor("decodeURIComponent").Enumerable = false;
-            this["encodeURIComponent"] = new JsFunctionWrapper(EncodeURIComponent, FunctionClass.PrototypeProperty);
+            this["encodeURIComponent"] = new JsFunctionWrapper(EncodeURIComponent, FunctionClass.Prototype);
             GetDescriptor("encodeURIComponent").Enumerable = false;
+
             #endregion
 
             Marshaller.InitTypes();
@@ -189,16 +175,14 @@ namespace Jint.Native
 
             //in case of an enum, just cast it to an integer
             if (arguments[0].IsClr && arguments[0].Value.GetType().IsEnum)
-                return NumberClass.New((int)arguments[0].Value);
+                return JsNumber.Create((int)arguments[0].Value);
 
             string number = arguments[0].ToString().Trim();
             int sign = 1;
             int radix = 10;
 
             if (number == String.Empty)
-            {
-                return this["NaN"];
-            }
+                return JsNumber.NaN;
 
             if (number.StartsWith("-"))
             {
@@ -224,7 +208,7 @@ namespace Jint.Native
             }
             else if (radix < 2 || radix > 36)
             {
-                return this["NaN"];
+                return JsNumber.NaN;
             }
 
             if (number.ToLower().StartsWith("0x"))
@@ -241,21 +225,21 @@ namespace Jint.Native
                     if (double.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
                     {
                         // parseInt(12.42) == 42
-                        return NumberClass.New(sign * Math.Floor(result));
+                        return JsNumber.Create(sign * Math.Floor(result));
                     }
                     else
                     {
-                        return this["NaN"];
+                        return JsNumber.NaN;
                     }
                 }
                 else
                 {
-                    return NumberClass.New(sign * Convert.ToInt32(number, radix));
+                    return JsNumber.Create(sign * Convert.ToInt32(number, radix));
                 }
             }
             catch
             {
-                return this["NaN"];
+                return JsNumber.NaN;
             }
         }
 
@@ -278,11 +262,11 @@ namespace Jint.Native
             double result;
             if (match.Success && double.TryParse(match.Value, NumberStyles.Float, new CultureInfo("en-US"), out result))
             {
-                return NumberClass.New(result);
+                return JsNumber.Create(result);
             }
             else
             {
-                return this["NaN"];
+                return JsNumber.NaN;
             }
         }
 
@@ -293,10 +277,10 @@ namespace Jint.Native
         {
             if (arguments.Length < 1)
             {
-                return BooleanClass.New(false);
+                return JsBoolean.Create(false);
             }
 
-            return BooleanClass.New(double.NaN.Equals(arguments[0].ToNumber()));
+            return JsBoolean.Create(double.NaN.Equals(arguments[0].ToNumber()));
         }
 
         /// <summary>
@@ -305,25 +289,22 @@ namespace Jint.Native
         protected JsInstance IsFinite(JsInstance[] arguments)
         {
             if (arguments.Length < 1 || arguments[0] is JsUndefined)
-            {
-                return BooleanClass.False;
-            }
+                return JsBoolean.False;
 
             var value = arguments[0];
-            return BooleanClass.New((value != NumberClass["NaN"]
-                && value != NumberClass["POSITIVE_INFINITY"]
-                && value != NumberClass["NEGATIVE_INFINITY"])
+            return JsBoolean.Create(
+                value != JsNumber.NaN &&
+                value != JsNumber.PositiveInfinity &&
+                value != JsNumber.NegativeInfinity
             );
         }
 
         protected JsInstance DecodeURI(JsInstance[] arguments)
         {
             if (arguments.Length < 1 || arguments[0] is JsUndefined)
-            {
-                return StringClass.New();
-            }
+                return JsString.Create();
 
-            return StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
+            return JsString.Create(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
         }
 
         private static readonly char[] ReservedEncoded = new char[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
@@ -332,9 +313,7 @@ namespace Jint.Native
         protected JsInstance EncodeURI(JsInstance[] arguments)
         {
             if (arguments.Length < 1 || arguments[0] is JsUndefined)
-            {
-                return StringClass.New();
-            }
+                return JsString.Create();
 
             string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
@@ -348,25 +327,21 @@ namespace Jint.Native
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString());
             }
 
-            return StringClass.New(encoded.ToUpper());
+            return JsString.Create(encoded.ToUpper());
         }
 
         protected JsInstance DecodeURIComponent(JsInstance[] arguments)
         {
             if (arguments.Length < 1 || arguments[0] is JsUndefined)
-            {
-                return StringClass.New();
-            }
+                return JsString.Create();
 
-            return StringClass.New(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
+            return JsString.Create(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
         }
 
         protected JsInstance EncodeURIComponent(JsInstance[] arguments)
         {
             if (arguments.Length < 1 || arguments[0] is JsUndefined)
-            {
-                return StringClass.New();
-            }
+                return JsString.Create();
 
             string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
@@ -375,21 +350,21 @@ namespace Jint.Native
                 encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString().ToUpper());
             }
 
-            return StringClass.New(encoded);
+            return JsString.Create(encoded);
         }
 
         #endregion
         [Obsolete]
-        public JsObject Wrap(object value)
+        public JsInstance Wrap(object value)
         {
             switch (Convert.GetTypeCode(value))
             {
                 case TypeCode.Boolean:
-                    return BooleanClass.New((bool)value);
+                    return JsBoolean.Create((bool)value);
 
                 case TypeCode.Char:
                 case TypeCode.String:
-                    return StringClass.New(Convert.ToString(value));
+                    return JsString.Create(Convert.ToString(value));
 
                 case TypeCode.DateTime:
                     return DateClass.New((DateTime)value);
@@ -405,7 +380,7 @@ namespace Jint.Native
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                 case TypeCode.Single:
-                    return NumberClass.New(Convert.ToDouble(value));
+                    return JsNumber.Create(Convert.ToDouble(value));
 
                 case TypeCode.Object:
                     return ObjectClass.New(value);
@@ -425,11 +400,6 @@ namespace Jint.Native
             return (Options & options) == options;
         }
 
-        public JsInstance NaN
-        {
-            get { return this["NaN"]; }
-        }
-
         public override JsInstance this[string index]
         {
             get
@@ -445,6 +415,22 @@ namespace Jint.Native
             set
             {
                 base[index] = value;
+            }
+        }
+
+        internal JsObject GetPrototype(JsInstance instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException("instance");
+
+            switch (instance.Type)
+            {
+                case JsType.Boolean: return BooleanClass.Prototype;
+                case JsType.Null: throw new InvalidOperationException();
+                case JsType.Number: return NumberClass.Prototype;
+                case JsType.String: return StringClass.Prototype;
+                case JsType.Undefined: throw new InvalidOperationException();
+                default: return ((JsObject)instance).Prototype;
             }
         }
     }

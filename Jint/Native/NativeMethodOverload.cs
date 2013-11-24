@@ -65,7 +65,7 @@ namespace Jint.Native
             }
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
                 return base.Execute(global, that, parameters, genericArguments);

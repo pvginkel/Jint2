@@ -4,9 +4,11 @@ using System.Text;
 using Jint.Delegates;
 using System.Text.RegularExpressions;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsRegExp : JsObject {
+    public class JsRegExp : JsObject
+    {
         public bool IsGlobal { get { return this["global"].ToBoolean(); } }
         public bool IsIgnoreCase { get { return (_options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase; } }
         public bool IsMultiLine { get { return (_options & RegexOptions.Multiline) == RegexOptions.Multiline; } }
@@ -15,63 +17,68 @@ namespace Jint.Native {
         private readonly RegexOptions _options;
 
         public JsRegExp(JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
         }
 
         public JsRegExp(string pattern, JsObject prototype)
-            : this(pattern, false, false, false, prototype) {
+            : this(pattern, false, false, false, prototype)
+        {
         }
 
         public JsRegExp(string pattern, bool g, bool i, bool m, JsObject prototype)
-            : base(prototype) {
+            : base(prototype)
+        {
             _options = RegexOptions.ECMAScript;
 
-            if (m) {
+            if (m)
                 _options |= RegexOptions.Multiline;
-            }
-
-            if (i) {
+            if (i)
                 _options |= RegexOptions.IgnoreCase;
-            }
 
             _pattern = pattern;
         }
 
-        public string Pattern {
+        public string Pattern
+        {
             get { return _pattern; }
         }
 
-        public Regex Regex {
+        public Regex Regex
+        {
             get { return new Regex(_pattern, _options); }
         }
 
-        public RegexOptions Options {
+        public RegexOptions Options
+        {
             get { return _options; }
         }
 
         public override bool IsClr
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
-        public override object Value {
-            get {
+        public override object Value
+        {
+            get
+            {
                 return null;
             }
         }
 
-        public override string ToSource() {
+        public override string ToSource()
+        {
             return "/" + _pattern.ToString() + "/";
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "/" + _pattern.ToString() + "/" + (IsGlobal ? "g" : String.Empty) + (IsIgnoreCase ? "i" : String.Empty) + (IsMultiLine ? "m" : String.Empty);
         }
 
-        public override string Class {
+        public override string Class
+        {
             get { return ClassRegexp; }
         }
     }

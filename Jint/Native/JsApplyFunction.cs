@@ -13,25 +13,25 @@ namespace Jint.Native
     [Serializable]
     public class JsApplyFunction : JsFunction
     {
-        public JsApplyFunction(JsFunctionConstructor constructor)
-            : base(constructor.PrototypeProperty)
+        public JsApplyFunction(JsObject prototype)
+            : base(prototype)
         {
-            DefineOwnProperty("length", constructor.Global.NumberClass.New(2), PropertyAttributes.ReadOnly);
+            DefineOwnProperty("length", JsNumber.Create(2), PropertyAttributes.ReadOnly);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             var function = that as JsFunction;
 
             if (function == null)
                 throw new ArgumentException("The target of call() must be a function");
 
-            JsDictionaryObject @this;
+            JsInstance @this;
 
             if (parameters.Length >= 1 && !(parameters[0] is JsUndefined) && parameters[0] != JsNull.Instance)
-                @this = parameters[0] as JsDictionaryObject;
+                @this = parameters[0];
             else
-                @this = global as JsDictionaryObject;
+                @this = global;
 
             JsInstance[] parametersCopy;
 

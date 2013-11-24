@@ -49,7 +49,7 @@ namespace Jint.Native {
         /// <param name="that">A target object. This has a meaning in case of descriptors which helds an accessors,
         /// in value descriptors this parameter is ignored.</param>
         /// <returns>A value stored in the descriptor</returns>
-        public abstract JsInstance Get(JsDictionaryObject that);
+        public abstract JsInstance Get(JsInstance that);
 
         /// <summary>
         /// Sets a value.

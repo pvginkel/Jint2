@@ -7,5 +7,5 @@ using Jint.Runtime;
 
 namespace Jint.Backend.Dlr
 {
-    public delegate JsInstance DlrFunctionDelegate(JintRuntime runtime, JsDictionaryObject @this, JsFunction function, object closure, JsInstance[] arguments);
+    public delegate JsInstance DlrFunctionDelegate(JintRuntime runtime, JsInstance @this, JsFunction function, object closure, JsInstance[] arguments);
 }

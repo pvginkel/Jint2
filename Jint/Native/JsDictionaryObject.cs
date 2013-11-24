@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
-using System.Runtime.InteropServices;
-using Jint.Expressions;
 using Jint.PropertyBags;
 
 namespace Jint.Native
@@ -15,10 +12,12 @@ namespace Jint.Native
     /// Implements generic property storing mechanism
     /// </remarks>
     [Serializable]
+#if !DEBUG
     [DebuggerTypeProxy(typeof(JsDictionaryObjectDebugView))]
+#endif
     public abstract class JsDictionaryObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
     {
-        private readonly IPropertyBag _properties = new MiniCachedPropertyBag();
+        private readonly MiniCachedPropertyBag _properties = new MiniCachedPropertyBag();
 
         /// <summary>
         /// Determines wheater object is extensible or not. Extensible object allows defining new own properties.
@@ -53,17 +52,18 @@ namespace Jint.Native
         /// Creates new object with an specified prototype
         /// </summary>
         /// <param name="prototype">Prototype</param>
-        public JsDictionaryObject(JsDictionaryObject prototype)
+        public JsDictionaryObject(JsObject prototype)
         {
             Prototype = prototype;
+            if (Prototype != null)
+                Prototype.HasChildren = true;
             Extensible = true;
-            prototype.HasChildren = true;
         }
 
         /// <summary>
         /// ecma262 [[prototype]] property
         /// </summary>
-        protected JsDictionaryObject Prototype { get; set; }
+        internal JsObject Prototype { get; set; }
 
         /// <summary>
         /// Checks whether an object or it's [[prototype]] has the specified property.
@@ -113,7 +113,7 @@ namespace Jint.Native
             return HasOwnProperty(key.ToString());
         }
 
-        public virtual Descriptor GetDescriptor(string index)
+        public virtual Descriptor GetOwnDescriptor(string index)
         {
             Descriptor result;
             if (_properties.TryGet(index, out result))
@@ -123,6 +123,15 @@ namespace Jint.Native
 
                 _properties.Delete(index); // remove from cache
             }
+
+            return null;
+        }
+
+        public virtual Descriptor GetDescriptor(string index)
+        {
+            var result = GetOwnDescriptor(index);
+            if (result != null)
+                return result;
 
             // Prototype always a JsObject, (JsNull.Instance is also an object and next call will return null in case of null)
             result = Prototype.GetDescriptor(index);
@@ -172,7 +181,21 @@ namespace Jint.Native
         {
             get
             {
-                var descriptor = GetDescriptor(index);
+                Descriptor descriptor;
+
+                if (index == "prototype")
+                {
+                    descriptor = GetOwnDescriptor("prototype");
+                    if (descriptor != null)
+                        return descriptor.Get(this);
+
+                    return Prototype;
+                }
+
+                descriptor = GetDescriptor(index);
+                if (descriptor == null)
+                {
+                }
                 return
                     descriptor != null
                     ? descriptor.Get(this)
@@ -364,7 +387,7 @@ namespace Jint.Native
         /// <param name="instance"></param>
         /// <param name="p"></param>
         /// <param name="currentDescriptor"></param>
-        public virtual JsInstance GetGetFunction(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetGetFunction(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
                 throw new ArgumentException("propertyName");
@@ -377,7 +400,6 @@ namespace Jint.Native
                 return JsUndefined.Instance;
 
             return (JsInstance)descriptor.GetFunction ?? JsUndefined.Instance;
-
         }
 
         /// <summary>
@@ -386,7 +408,7 @@ namespace Jint.Native
         /// <param name="instance"></param>
         /// <param name="p"></param>
         /// <param name="currentDescriptor"></param>
-        public virtual JsInstance GetSetFunction(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance GetSetFunction(JsDictionaryObject target, JsInstance[] parameters)
         {
             if (parameters.Length <= 0)
             {
@@ -405,14 +427,6 @@ namespace Jint.Native
             }
 
             return (JsInstance)desc.SetFunction ?? JsUndefined.Instance;
-
-        }
-
-        [Obsolete("will be removed in 1.2", true)]
-        public override object Call(IJintVisitor visitor, string function, params JsInstance[] parameters)
-        {
-            visitor.ExecuteFunction(this[function] as JsFunction, this, parameters);
-            return visitor.Returned;
         }
 
         public override bool IsClr

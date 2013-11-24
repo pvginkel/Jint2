@@ -18,10 +18,6 @@ namespace Jint.Runtime
         private readonly JsFunctionConstructor _functionClass;
         private readonly JsErrorConstructor _errorClass;
         private readonly JsErrorConstructor _typeErrorClass;
-        private readonly JsObjectConstructor _objectClass;
-        private readonly JsNumberConstructor _numberClass;
-        private readonly JsBooleanConstructor _booleanClass;
-        private readonly JsStringConstructor _stringClass;
 
         public JsGlobal Global { get; private set; }
 
@@ -40,10 +36,6 @@ namespace Jint.Runtime
             _functionClass = Global.FunctionClass;
             _errorClass = Global.ErrorClass;
             _typeErrorClass = Global.TypeErrorClass;
-            _objectClass = Global.ObjectClass;
-            _numberClass = Global.NumberClass;
-            _booleanClass = Global.BooleanClass;
-            _stringClass = Global.StringClass;
 
             global["ToBoolean"] = _functionClass.New(new Func<object, Boolean>(Convert.ToBoolean));
             global["ToByte"] = _functionClass.New(new Func<object, Byte>(Convert.ToByte));
@@ -64,15 +56,11 @@ namespace Jint.Runtime
 
         public JsFunction CreateFunction(string name, DlrFunctionDelegate function, object closure, string[] parameters)
         {
-            var result = new DlrFunction(function, _functionClass.PrototypeProperty, closure, this)
+            return new DlrFunction(function, new JsObject(_functionClass.Prototype), closure, this)
             {
                 Name = name,
                 Arguments = new List<string>(parameters ?? new string[0])
             };
-
-            result.PrototypeProperty = _objectClass.New(result);
-
-            return result;
         }
 
         public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments, out bool[] outParameters)
@@ -102,7 +90,7 @@ namespace Jint.Runtime
 
             var result = ExecuteFunctionCore(
                 function,
-                (JsObject)that,
+                that,
                 parameters ?? JsInstance.Empty,
                 genericParameters
             );
@@ -112,7 +100,7 @@ namespace Jint.Runtime
             return result.Result;
         }
 
-        public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsDictionaryObject that, JsInstance[] parameters, Type[] genericParameters)
+        public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsInstance that, JsInstance[] parameters, Type[] genericParameters)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
@@ -152,7 +140,7 @@ namespace Jint.Runtime
             {
                 foreach (string key in new List<string>(((JsDictionaryObject)obj).GetKeys()))
                 {
-                    yield return _stringClass.New(key);
+                    yield return JsString.Create(key);
                 }
             }
         }

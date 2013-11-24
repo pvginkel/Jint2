@@ -52,6 +52,11 @@ namespace Jint.Native
             return "null";
         }
 
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        {
+            return this;
+        }
+
         public override Descriptor GetDescriptor(string index)
         {
             return null;

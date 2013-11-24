@@ -10,39 +10,40 @@ namespace Jint.Native
     public class JsArrayConstructor : JsConstructor
     {
         public JsArrayConstructor(JsGlobal global)
-            : base(global)
+            : base(global, BuildPrototype(global))
         {
             Name = "Array";
-            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontDelete | PropertyAttributes.DontEnum | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(JsGlobal global)
+        private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = PrototypeProperty;
+            var prototype = new JsObject(global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, prototype, "length", GetLengthImpl, SetLengthImpl) { Enumerable = false });
 
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsArray>(ToStringImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsArray>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsObject>(Concat), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("join", global.FunctionClass.New<JsObject>(Join, 1), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("pop", global.FunctionClass.New<JsObject>(Pop), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("push", global.FunctionClass.New<JsObject>(Push, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("concat", global.FunctionClass.New<JsInstance>(Concat), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("join", global.FunctionClass.New<JsInstance>(Join, 1), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("pop", global.FunctionClass.New<JsInstance>(Pop), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("push", global.FunctionClass.New<JsDictionaryObject>(Push, 1), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("reverse", global.FunctionClass.New<JsObject>(Reverse), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("shift", global.FunctionClass.New<JsObject>(Shift), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("shift", global.FunctionClass.New<JsInstance>(Shift), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("slice", global.FunctionClass.New<JsObject>(Slice, 2), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty("sort", global.FunctionClass.New<JsObject>(Sort), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty("sort", global.FunctionClass.New<JsInstance>(Sort), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("splice", global.FunctionClass.New<JsObject>(Splice, 2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("unshift", global.FunctionClass.New<JsObject>(UnShift, 1), PropertyAttributes.DontEnum);
 
             prototype.DefineOwnProperty("indexOf", global.FunctionClass.New<JsObject>(IndexOfImpl, 1), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("lastIndexOf", global.FunctionClass.New<JsObject>(LastIndexOfImpl, 1), PropertyAttributes.DontEnum);
+
+            return prototype;
         }
 
 
         public JsArray New()
         {
-            JsArray array = new JsArray(PrototypeProperty);
+            JsArray array = new JsArray(Prototype);
             //array.DefineOwnProperty("constructor", new ValueDescriptor(this) { Enumerable = false });
             return array;
         }
@@ -60,7 +61,7 @@ namespace Jint.Native
             return array;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (that == null || (that as JsGlobal) == global)
             {
@@ -72,7 +73,7 @@ namespace Jint.Native
                 // When called as part of a new expression, it is a constructor: it initialises the newly created object.
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    that[i.ToString()] = parameters[i];
+                    ((JsDictionaryObject)that)[i.ToString()] = parameters[i];
                 }
 
                 return new JsFunctionResult(that, that);
@@ -85,28 +86,32 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToStringImpl(JsArray target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsGlobal global, JsArray target, JsInstance[] parameters)
         {
-            JsArray result = Global.ArrayClass.New();
+            JsArray result = global.ArrayClass.New();
 
             for (int i = 0; i < target.Length; i++)
             {
-                var obj = (JsDictionaryObject)target[i.ToString()];
+                var obj = target[i.ToString()];
                 if (IsNullOrUndefined(obj))
                 {
-                    result[i.ToString()] = Global.StringClass.New();
+                    result[i.ToString()] = JsString.Create();
                 }
                 else
                 {
-                    var function = obj["toString"] as JsFunction;
+                    var jsObject = obj as JsObject;
+                    if (jsObject == null)
+                        jsObject = global.GetPrototype(obj);
+
+                    var function = jsObject["toString"] as JsFunction;
                     if (function != null)
-                        result[i.ToString()] = Global.Backend.ExecuteFunction(function, obj, parameters, null).Result;
+                        result[i.ToString()] = global.Backend.ExecuteFunction(function, obj, parameters, null).Result;
                     else
-                        result[i.ToString()] = Global.StringClass.New();
+                        result[i.ToString()] = JsString.Create();
                 }
             }
 
-            return Global.StringClass.New(result.ToString());
+            return JsString.Create(result.ToString());
 
         }
 
@@ -116,17 +121,17 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance ToLocaleStringImpl(JsArray target, JsInstance[] parameters)
+        public static JsInstance ToLocaleStringImpl(JsGlobal global, JsArray target, JsInstance[] parameters)
         {
-            JsArray result = Global.ArrayClass.New();
+            JsArray result = global.ArrayClass.New();
 
             for (int i = 0; i < target.Length; i++)
             {
                 var obj = (JsDictionaryObject)target[i.ToString()];
-                result[i.ToString()] = Global.Backend.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters, null).Result;
+                result[i.ToString()] = global.Backend.ExecuteFunction((JsFunction)obj["toLocaleString"], obj, parameters, null).Result;
             }
 
-            return Global.StringClass.New(result.ToString());
+            return JsString.Create(result.ToString());
         }
 
         /// <summary>
@@ -135,11 +140,11 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Concat(JsObject target, JsInstance[] parameters)
+        public static JsInstance Concat(JsGlobal global, JsInstance target, JsInstance[] parameters)
         {
             if (target is JsArray)
-                return ((JsArray)target).Concat(Global, parameters);
-            JsArray array = Global.ArrayClass.New();
+                return ((JsArray)target).Concat(global, parameters);
+            JsArray array = global.ArrayClass.New();
             List<JsInstance> items = new List<JsInstance>();
             items.Add(target);
             items.AddRange(parameters);
@@ -148,7 +153,7 @@ namespace Jint.Native
             {
                 JsInstance e = items[0];
                 items.RemoveAt(0);
-                if (Global.ArrayClass.HasInstance(e as JsObject))
+                if (global.ArrayClass.HasInstance(e as JsObject))
                 {
                     for (int k = 0; k < ((JsObject)e).Length; k++)
                     {
@@ -174,20 +179,20 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Join(JsObject target, JsInstance[] parameters)
+        public static JsInstance Join(JsInstance target, JsInstance[] parameters)
         {
             if (target is JsArray)
-                return ((JsArray)target).Join(Global, parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
+                return ((JsArray)target).Join(parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
             string separator = (parameters.Length == 0 || parameters[0] is JsUndefined)
                 ? ","
                 : parameters[0].ToString();
 
-            if (target.Length == 0)
-            {
-                return Global.StringClass.New();
-            }
+            var jsObject = target as JsObject;
 
-            JsInstance element0 = target[0.ToString()];
+            if (jsObject == null || jsObject.Length == 0)
+                return JsString.Create();
+
+            JsInstance element0 = jsObject[0.ToString()];
 
             StringBuilder r;
             if (element0 is JsUndefined || element0 == JsNull.Instance)
@@ -199,16 +204,16 @@ namespace Jint.Native
                 r = new StringBuilder(element0.ToString());
             }
 
-            var length = target["length"].ToNumber();
+            var length = jsObject["length"].ToNumber();
 
             for (int k = 1; k < length; k++)
             {
                 r.Append(separator);
-                JsInstance element = target[k.ToString()];
+                JsInstance element = jsObject[k.ToString()];
                 if (!(element is JsUndefined) && element != JsNull.Instance)
                     r.Append(element);
             }
-            return Global.StringClass.New(r.ToString());
+            return JsString.Create(r.ToString());
         }
 
         /// <summary>
@@ -217,15 +222,15 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Pop(JsObject target, JsInstance[] parameters)
+        public static JsInstance Pop(JsInstance target, JsInstance[] parameters)
         {
-            var length = Convert.ToUInt32(target.Length);
-            if (length == 0)
+            var jsObject = target as JsObject;
+            if (jsObject == null || jsObject.Length <= 0)
                 return JsUndefined.Instance;
-            var key = (length - 1).ToString();
-            var result = target[key];
-            target.Delete(key);
-            target.Length--;
+            var key = (jsObject.Length - 1).ToString();
+            var result = jsObject[key];
+            jsObject.Delete(key);
+            jsObject.Length--;
             return result;
         }
 
@@ -235,16 +240,16 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Push(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance Push(JsDictionaryObject target, JsInstance[] parameters)
         {
             int length = (int)target["length"].ToNumber();
             foreach (var arg in parameters)
             {
-                target[Global.NumberClass.New(length)] = arg;
+                target[JsNumber.Create(length)] = arg;
                 length++;
             }
 
-            return Global.NumberClass.New(length);
+            return JsNumber.Create(length);
         }
 
         /// <summary>
@@ -253,7 +258,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Reverse(JsObject target, JsInstance[] parameters)
+        public static JsInstance Reverse(JsObject target, JsInstance[] parameters)
         {
             int len = target.Length;
             int middle = len / 2;
@@ -270,22 +275,14 @@ namespace Jint.Native
                 bool upperExists = target.TryGetProperty(upperP, out upperValue);
 
                 if (lowerExists)
-                {
                     target[upperP] = lowerValue;
-                }
                 else
-                {
                     target.Delete(upperP);
-                }
 
                 if (upperExists)
-                {
                     target[lowerP] = upperValue;
-                }
                 else
-                {
                     target.Delete(lowerP);
-                }
             }
             return target;
         }
@@ -296,31 +293,30 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Shift(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance Shift(JsInstance target, JsInstance[] parameters)
         {
-            if (target.Length == 0)
-            {
+            var jsObject = target as JsObject;
+            if (jsObject == null || jsObject.Length == 0)
                 return JsUndefined.Instance;
-            }
 
-            JsInstance first = target[0.ToString()];
-            for (int k = 1; k < target.Length; k++)
+            JsInstance first = jsObject[0.ToString()];
+            for (int k = 1; k < jsObject.Length; k++)
             {
                 JsInstance result = null;
 
                 string from = k.ToString();
                 string to = (k - 1).ToString();
-                if (target.TryGetProperty(from, out result))
+                if (jsObject.TryGetProperty(from, out result))
                 {
-                    target[to] = result;
+                    jsObject[to] = result;
                 }
                 else
                 {
-                    target.Delete(to);
+                    jsObject.Delete(to);
                 }
             }
-            target.Delete((target.Length - 1).ToString());
-            target.Length--;
+            jsObject.Delete((jsObject.Length - 1).ToString());
+            jsObject.Length--;
 
             return first;
         }
@@ -331,7 +327,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Slice(JsObject target, JsInstance[] parameters)
+        public static JsInstance Slice(JsGlobal global, JsObject target, JsInstance[] parameters)
         {
             var start = parameters.Length > 0 ? (int)parameters[0].ToNumber() : 0;
             var end = parameters.Length > 1 ? (int)parameters[1].ToNumber() : target.Length;
@@ -344,9 +340,9 @@ namespace Jint.Native
                 start = target.Length;
             if (end > target.Length)
                 end = target.Length;
-            JsArray result = Global.ArrayClass.New();
+            JsArray result = global.ArrayClass.New();
             for (int i = start; i < end; i++)
-                Push(result, new JsInstance[] { target[Global.NumberClass.New(i)] });
+                Push(result, new JsInstance[] { target[JsNumber.Create(i)] });
 
             return result;
         }
@@ -357,12 +353,11 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Sort(JsObject target, JsInstance[] parameters)
+        public static JsInstance Sort(JsGlobal global, JsInstance target, JsInstance[] parameters)
         {
-            if (target.Length <= 1)
-            {
+            var jsObject = target as JsObject;
+            if (jsObject == null || jsObject.Length <= 1)
                 return target;
-            }
 
             JsFunction compare = null;
 
@@ -373,18 +368,18 @@ namespace Jint.Native
             }
 
             var values = new List<JsInstance>();
-            var length = (int)target["length"].ToNumber();
+            var length = (int)jsObject["length"].ToNumber();
 
             for (int i = 0; i < length; i++)
             {
-                values.Add(target[i.ToString()]);
+                values.Add(jsObject[i.ToString()]);
             }
 
             if (compare != null)
             {
                 try
                 {
-                    values.Sort(new JsComparer(Global.Backend, compare));
+                    values.Sort(new JsComparer(global.Backend, compare));
                 }
                 catch (Exception e)
                 {
@@ -403,10 +398,10 @@ namespace Jint.Native
 
             for (int i = 0; i < length; i++)
             {
-                target[i.ToString()] = values[i];
+                jsObject[i.ToString()] = values[i];
             }
 
-            return target;
+            return jsObject;
         }
 
         /// <summary>
@@ -415,9 +410,9 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance Splice(JsObject target, JsInstance[] parameters)
+        public static JsInstance Splice(JsGlobal global, JsObject target, JsInstance[] parameters)
         {
-            JsArray array = Global.ArrayClass.New();
+            JsArray array = global.ArrayClass.New();
             int relativeStart = Convert.ToInt32(parameters[0].ToNumber());
             int actualStart = relativeStart < 0 ? Math.Max(target.Length + relativeStart, 0) : Math.Min(relativeStart, target.Length);
             int actualDeleteCount = Math.Min(Math.Max(Convert.ToInt32(parameters[1].ToNumber()), 0), target.Length - actualStart);
@@ -494,7 +489,7 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance UnShift(JsObject target, JsInstance[] parameters)
+        public static JsInstance UnShift(JsObject target, JsInstance[] parameters)
         {
             for (int k = target.Length; k > 0; k--)
             {
@@ -517,7 +512,7 @@ namespace Jint.Native
                 items.RemoveAt(0);
                 target[j.ToString()] = e;
             }
-            return Global.NumberClass.New(target.Length);
+            return JsNumber.Create(target.Length);
         }
 
         /// <summary>
@@ -526,16 +521,16 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance LastIndexOfImpl(JsObject target, JsInstance[] parameters)
+        public static JsInstance LastIndexOfImpl(JsObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
             {
-                return Global.NumberClass.New(-1);
+                return JsNumber.Create(-1);
             }
 
             int len = target.Length;
             if (len == 0)
-                return Global.NumberClass.New(-1);
+                return JsNumber.Create(-1);
             int n = len;
             if (parameters.Length > 1)
                 n = Convert.ToInt32(parameters[1].ToNumber());
@@ -552,12 +547,12 @@ namespace Jint.Native
                 {
                     if (result == searchParameter)
                     {
-                        return Global.NumberClass.New(k);
+                        return JsNumber.Create(k);
                     }
                 }
                 k--;
             }
-            return Global.NumberClass.New(-1);
+            return JsNumber.Create(-1);
         }
 
         /// <summary>
@@ -566,22 +561,22 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public JsInstance IndexOfImpl(JsObject target, JsInstance[] parameters)
+        public static JsInstance IndexOfImpl(JsObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0)
             {
-                return Global.NumberClass.New(-1);
+                return JsNumber.Create(-1);
             }
 
             int len = (int)target["length"].ToNumber();
             if (len == 0)
-                return Global.NumberClass.New(-1);
+                return JsNumber.Create(-1);
             int n = 0;
             if (parameters.Length > 1)
                 n = Convert.ToInt32(parameters[1].ToNumber());
             int k;
             if (n >= len)
-                return Global.NumberClass.New(-1);
+                return JsNumber.Create(-1);
 
             JsInstance searchParameter = parameters[0];
             if (n >= 0)
@@ -595,19 +590,18 @@ namespace Jint.Native
                     target.TryGetProperty(k.ToString(), out result) &&
                     StrictlyEquals(result, searchParameter)
                 )
-                    return Global.NumberClass.New(k);
+                    return JsNumber.Create(k);
                 k++;
             }
-            return Global.NumberClass.New(-1);
+            return JsNumber.Create(-1);
         }
 
-        JsInstance GetLengthImpl(JsObject that)
+        private static JsInstance GetLengthImpl(JsObject that)
         {
-            return Global.NumberClass.New(that.Length);
-
+            return JsNumber.Create(that.Length);
         }
 
-        JsInstance SetLengthImpl(JsObject that, JsInstance[] parameters)
+        private static JsInstance SetLengthImpl(JsObject that, JsInstance[] parameters)
         {
             if (that is JsArray)
             {
@@ -619,7 +613,7 @@ namespace Jint.Native
                 that.Length = (int)parameters[0].ToNumber();
 
                 for (int i = that.Length; i < oldLen; i++)
-                    that.Delete(Global.NumberClass.New(i));
+                    that.Delete(JsNumber.Create(i));
             }
 
             return parameters[0];

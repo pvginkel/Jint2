@@ -72,7 +72,7 @@ namespace Jint
             _typeCache[typeof(Type)] = _typeType;
 
             //TODO: replace a native contructors with apropriate js constructors
-            foreach (var t in new Type[] {
+            foreach (var t in new[] {
                 typeof(Int16),
                 typeof(Int32),
                 typeof(Int64),
@@ -84,13 +84,15 @@ namespace Jint
                 typeof(Byte),
                 typeof(SByte)
             })
-                _typeCache[t] = CreateConstructor(t, _global.NumberClass.PrototypeProperty);
+            {
+                _typeCache[t] = CreateConstructor(t, _global.NumberClass.Prototype);
+            }
 
-            _typeCache[typeof(String)] = CreateConstructor(typeof(String), _global.StringClass.PrototypeProperty);
-            _typeCache[typeof(Char)] = CreateConstructor(typeof(Char), _global.StringClass.PrototypeProperty);
-            _typeCache[typeof(Boolean)] = CreateConstructor(typeof(Boolean), _global.BooleanClass.PrototypeProperty);
-            _typeCache[typeof(DateTime)] = CreateConstructor(typeof(DateTime), _global.DateClass.PrototypeProperty);
-            _typeCache[typeof(Regex)] = CreateConstructor(typeof(Regex), _global.RegExpClass.PrototypeProperty);
+            _typeCache[typeof(String)] = CreateConstructor(typeof(String), _global.StringClass.Prototype);
+            _typeCache[typeof(Char)] = CreateConstructor(typeof(Char), _global.StringClass.Prototype);
+            _typeCache[typeof(Boolean)] = CreateConstructor(typeof(Boolean), _global.BooleanClass.Prototype);
+            _typeCache[typeof(DateTime)] = CreateConstructor(typeof(DateTime), _global.DateClass.Prototype);
+            _typeCache[typeof(Regex)] = CreateConstructor(typeof(Regex), _global.RegExpClass.Prototype);
 
         }
 
@@ -110,18 +112,18 @@ namespace Jint
 
             if (value is Type)
             {
-                Type t = value as Type;
-                if (t.IsGenericTypeDefinition)
+                var type = value as Type;
+                if (type.IsGenericTypeDefinition)
                 {
                     // Generic defenitions aren't types in the meaning of js
                     // but they are instances of System.Type
-                    var res = new NativeGenericType(t, _typeType.PrototypeProperty);
+                    var res = new NativeGenericType(type, _typeType.Prototype);
                     _typeType.SetupNativeProperties(res);
                     return res;
                 }
                 else
                 {
-                    return MarshalType(value as Type);
+                    return MarshalType(type);
                 }
             }
             else
@@ -139,15 +141,8 @@ namespace Jint
             return _typeCache[t] = CreateConstructor(t);
         }
 
-        NativeConstructor CreateConstructor(Type t)
+        private NativeConstructor CreateConstructor(Type t)
         {
-            // TODO: Move this code to NativeTypeConstructor.Wrap
-            /* NativeConstructor res;
-            res = new NativeConstructor(t, _global);
-            res.InitPrototype(_global);
-            _typeType.SetupNativeProperties(res);
-            return res;
-            */
             return (NativeConstructor)_typeType.Wrap(t);
         }
 
@@ -162,13 +157,8 @@ namespace Jint
         /// <param name="t"></param>
         /// <param name="prototypePropertyPrototype"></param>
         /// <returns></returns>
-        NativeConstructor CreateConstructor(Type t, JsObject prototypePropertyPrototype)
+        private NativeConstructor CreateConstructor(Type t, JsObject prototypePropertyPrototype)
         {
-            /* NativeConstructor res;
-            res = new NativeConstructor(t, _global,prototypeProperty);
-            res.InitPrototype(_global);
-            _typeType.SetupNativeProperties(res);
-            return res; */
             return (NativeConstructor)_typeType.WrapSpecialType(t, prototypePropertyPrototype);
         }
 
@@ -180,7 +170,7 @@ namespace Jint
 
             TElem[] res = new TElem[len];
             for (int i = 0; i < len; i++)
-                res[i] = MarshalJsValue<TElem>(value[new JsNumber(i, JsUndefined.Instance)]);
+                res[i] = MarshalJsValue<TElem>(value[JsNumber.Create(i)]);
 
             return res;
         }
@@ -350,20 +340,13 @@ namespace Jint
             JsSetter setter = null;
 
             if (prop.CanRead && prop.GetGetMethod() != null)
-            {
                 getter = WrapGetProperty(prop);
-            }
             else
-            {
-                getter = delegate(JsDictionaryObject that)
-                {
-                    return JsUndefined.Instance;
-                };
-            }
+                getter = that => JsUndefined.Instance;
 
             if (prop.CanWrite && prop.GetSetMethod() != null)
             {
-                setter = (JsSetter)WrapSetProperty(prop);
+                setter = WrapSetProperty(prop);
             }
 
             return setter == null ? new NativeDescriptor(owner, prop.Name, getter) { Enumerable = true } : new NativeDescriptor(owner, prop.Name, getter, setter) { Enumerable = true };
@@ -382,8 +365,8 @@ namespace Jint
 
             if (prop.IsLiteral)
             {
-                JsInstance value = null; // this demand initization should prevent a stack overflow while reflecting types
-                getter = delegate(JsDictionaryObject that) {
+                JsInstance value = null; // This demand initization should prevent a stack overflow while reflecting types
+                getter = that => {
                     if (value == null)
                         value = (JsInstance)typeof(Marshaller)
                             .GetMethod("MarshalClrValue")
@@ -391,12 +374,12 @@ namespace Jint
                             .Invoke(this, new object[] { prop.GetValue(null) });
                     return value;
                 };
-                setter = delegate(JsDictionaryObject that, JsInstance v) { };
+                setter = (that, v) => { };
             }
             else
             {
-                getter = (JsGetter)WrapGetField(prop);
-                setter = (JsSetter)WrapSetField(prop);
+                getter = WrapGetField(prop);
+                setter = WrapSetField(prop);
             }
 
             return new NativeDescriptor(owner, prop.Name, getter, setter) { Enumerable = true };
@@ -407,8 +390,11 @@ namespace Jint
         public bool IsAssignable(Type target, Type source)
         {
             return
-                (typeof(IConvertible).IsAssignableFrom(source) && IntegralTypeConversions[(int)Type.GetTypeCode(source), (int)Type.GetTypeCode(target)])
-                || target.IsAssignableFrom(source);
+                (
+                    typeof(IConvertible).IsAssignableFrom(source) &&
+                    IntegralTypeConversions[(int)Type.GetTypeCode(source), (int)Type.GetTypeCode(target)]
+                ) ||
+                target.IsAssignableFrom(source);
         }
     }
 }

@@ -8,27 +8,34 @@ using Jint.Delegates;
 namespace Jint.Native
 {
     [Serializable]
-    public sealed class JsString : JsObject, ILiteral
+    public sealed class JsString : JsInstance, ILiteral
     {
+        public static readonly JsString EmptyString = new JsString(String.Empty);
+
         private readonly string _value;
 
         public override object Value
         {
-            get
-            {
-                return _value;
-            }
-        }
-        public JsString(JsObject prototype)
-            : base(prototype)
-        {
-            _value = String.Empty;
+            get { return _value; }
+            set { throw new InvalidOperationException(); }
         }
 
-        public JsString(string str, JsObject prototype)
-            : base(prototype)
+        private JsString(string value)
         {
-            _value = str;
+            _value = value;
+        }
+
+        public static JsString Create()
+        {
+            return EmptyString;
+        }
+
+        public static JsString Create(string value)
+        {
+            if (String.IsNullOrEmpty(value))
+                return EmptyString;
+
+            return new JsString(value);
         }
 
         public static bool StringToBoolean(string value)
@@ -36,19 +43,14 @@ namespace Jint.Native
             if (value == null)
                 return false;
             if (value == "true" || value.Length > 0)
-            {
                 return true;
-            }
 
             return false;
         }
 
         public override bool IsClr
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         public override bool ToBoolean()
@@ -105,6 +107,11 @@ namespace Jint.Native
         public override bool IsPrimitive
         {
             get { return true; }
+        }
+
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        {
+            return this;
         }
     }
 }

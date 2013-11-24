@@ -1,30 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Expressions;
-using Jint.Delegates;
 
 namespace Jint.Native
 {
     [Serializable]
     public class JsFunctionWrapper : JsFunction
     {
-        public Func<JsInstance[], JsInstance> Delegate { get; set; }
+        private readonly Func<JsInstance[], JsInstance> _delegate;
+        private readonly Func<JsGlobal, JsInstance[], JsInstance> _globalDelegate;
 
-        public JsFunctionWrapper(Func<JsInstance[], JsInstance> d, JsObject prototype)
+        public JsFunctionWrapper(Func<JsInstance[], JsInstance> @delegate, JsObject prototype)
             : base(prototype)
         {
-            Delegate = d;
+            _delegate = @delegate;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public JsFunctionWrapper(Func<JsGlobal, JsInstance[], JsInstance> @delegate, JsObject prototype)
+            : base(prototype)
+        {
+            _globalDelegate = @delegate;
+        }
+
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             try
             {
-                //visitor.CurrentScope["this"] = visitor.Global;
-                var result = Delegate(parameters) ?? JsUndefined.Instance;
+                JsInstance result;
+                if (_delegate != null)
+                    result = _delegate(parameters);
+                else
+                    result = _globalDelegate(global, parameters);
 
-                return new JsFunctionResult(result, that);
+                return new JsFunctionResult(result ?? JsUndefined.Instance, that);
             }
             catch (Exception e)
             {
@@ -39,7 +47,7 @@ namespace Jint.Native
 
         public override string ToString()
         {
-            return String.Format("function {0}() {{ [native code] }}", Delegate.Method.Name);
+            return String.Format("function {0}() {{ [native code] }}", ((Delegate)_delegate ?? _globalDelegate).Method.Name);
         }
     }
 }

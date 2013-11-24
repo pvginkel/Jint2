@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using Jint.Native;
 
 namespace Jint.PropertyBags
 {
-    public class MiniCachedPropertyBag : IPropertyBag
+    internal class MiniCachedPropertyBag : IEnumerable<KeyValuePair<string, Descriptor>>
     {
-        private readonly IPropertyBag _bag;
+        private readonly DictionaryPropertyBag _bag;
         private Descriptor _lastAccessed;
 
         public MiniCachedPropertyBag()
@@ -16,9 +16,7 @@ namespace Jint.PropertyBags
             _bag = new DictionaryPropertyBag();
         }
 
-        #region IPropertyBag Members
-
-        public Jint.Native.Descriptor Put(string name, Jint.Native.Descriptor descriptor)
+        public Descriptor Put(string name, Descriptor descriptor)
         {
             _bag.Put(name, descriptor);
             return _lastAccessed = descriptor;
@@ -31,7 +29,7 @@ namespace Jint.PropertyBags
                 _lastAccessed = null;
         }
 
-        public Jint.Native.Descriptor Get(string name)
+        public Descriptor Get(string name)
         {
             if (_lastAccessed != null && _lastAccessed.Name == name)
                 return _lastAccessed;
@@ -41,7 +39,7 @@ namespace Jint.PropertyBags
             return descriptor;
         }
 
-        public bool TryGet(string name, out Jint.Native.Descriptor descriptor)
+        public bool TryGet(string name, out Descriptor descriptor)
         {
             if (_lastAccessed != null && _lastAccessed.Name == name)
             {
@@ -59,29 +57,68 @@ namespace Jint.PropertyBags
             get { return _bag.Count; }
         }
 
-        public IEnumerable<Jint.Native.Descriptor> Values
+        public IEnumerable<Descriptor> Values
         {
             get { return _bag.Values; }
         }
 
-        #endregion
-
-        #region IEnumerable<KeyValuePair<string,Descriptor>> Members
-
-        public IEnumerator<KeyValuePair<string, Jint.Native.Descriptor>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator()
         {
             return _bag.GetEnumerator();
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
 
-        #endregion
+        private class DictionaryPropertyBag : IEnumerable<KeyValuePair<string, Descriptor>>
+        {
+            private readonly Dictionary<string, Descriptor> _bag = new Dictionary<string, Descriptor>(5);
+
+            public Descriptor Put(string name, Descriptor descriptor)
+            {
+                // replace existing without any exception
+                _bag[name] = descriptor;
+                return descriptor;
+            }
+
+            public void Delete(string name)
+            {
+                _bag.Remove(name);
+            }
+
+            public Descriptor Get(string name)
+            {
+                Descriptor desc;
+                TryGet(name, out desc);
+                return desc;
+            }
+
+            public bool TryGet(string name, out Descriptor descriptor)
+            {
+                return _bag.TryGetValue(name, out descriptor);
+            }
+
+            public int Count
+            {
+                get { return _bag.Count; }
+            }
+
+            public IEnumerable<Descriptor> Values
+            {
+                get { return _bag.Values; }
+            }
+
+            public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator()
+            {
+                return _bag.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
     }
 }

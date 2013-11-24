@@ -16,7 +16,7 @@ namespace Jint.Native
 
         public static bool IsNullOrUndefined(JsInstance o)
         {
-            return (o is JsUndefined) || (o == JsNull.Instance) || (o.IsClr && o.Value == null);
+            return (o is JsUndefined) || o == JsNull.Instance || (o.IsClr && o.Value == null);
         }
 
         public abstract bool IsClr { get; }
@@ -25,10 +25,7 @@ namespace Jint.Native
 
         public PropertyAttributes Attributes { get; set; }
 
-        public virtual JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
-        {
-            return JsUndefined.Instance;
-        }
+        public abstract JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint);
 
         public virtual bool ToBoolean()
         {
@@ -109,24 +106,6 @@ namespace Jint.Native
         /// A type of a JsObject
         /// </summary>
         public abstract JsType Type { get; }
-
-        /// <summary>
-        /// This is a shortcut to a function call by name.
-        /// </summary>
-        /// <remarks>
-        /// Since this method requires a visitor it's not a very usefull, so this method is deprecated.
-        /// </remarks>
-        /// <param name="visitor"></param>
-        /// <param name="function"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        [Obsolete("will be removed in the 1.0 version", true)]
-        public virtual object Call(IJintVisitor visitor, string function, params JsInstance[] parameters)
-        {
-            if (function == "toString")
-                return visitor.Global.StringClass.New(ToString());
-            return JsUndefined.Instance;
-        }
 
         // 11.9.6 The Strict Equality Comparison Algorithm
         public static bool StrictlyEquals(JsInstance left, JsInstance right)

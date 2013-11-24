@@ -57,7 +57,7 @@ namespace Jint.Tests.Fixtures
             if (allowClr)
                 ctx.AllowClr();
 
-            ctx.SetFunction("assert", new Action<object, object>(Assert.AreEqual));
+            ctx.SetFunction("assert", new Action<object, object, string>(Assert.AreEqual));
             ctx.SetFunction("fail", new Action<string>(Assert.Fail));
             ctx.SetFunction("istrue", new Action<bool>(Assert.IsTrue));
             ctx.SetFunction("isfalse", new Action<bool>(Assert.IsFalse));

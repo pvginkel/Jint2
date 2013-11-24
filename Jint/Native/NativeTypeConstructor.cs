@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Jint.Native
 {
-    class NativeTypeConstructor: NativeConstructor
+    class NativeTypeConstructor : NativeConstructor
     {
         protected NativeTypeConstructor(JsGlobal global, JsObject typePrototype)
-            : base(typeof(Type), global,typePrototype,typePrototype)
+            : base(typeof(Type), global, typePrototype)
         {
             // redefine prototype
-            DefineOwnProperty(PrototypeName, typePrototype);
+            Prototype = typePrototype;
         }
 
         /// <summary>
@@ -39,8 +39,7 @@ namespace Jint.Native
 
             if (value is Type)
             {
-                NativeConstructor res;
-                res = new NativeConstructor(value as Type, Global,null,PrototypeProperty);
+                var res = new NativeConstructor(value as Type, Global, Prototype);
                 res.InitPrototype(Global);
                 SetupNativeProperties(res);
                 return res;
@@ -49,14 +48,12 @@ namespace Jint.Native
                 throw new JintException("Attempt to wrap '" + value.GetType().FullName + "' with '" + typeof(Type).FullName + "'");
         }
 
-        public JsInstance WrapSpecialType(Type value, JsObject prototypePropertyPrototype)
+        public JsInstance WrapSpecialType(Type value, JsObject prototype)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
 
-            
-            NativeConstructor res;
-            res = new NativeConstructor(value as Type, Global, prototypePropertyPrototype, PrototypeProperty);
+            var res = new NativeConstructor(value, Global, prototype);
             res.InitPrototype(Global);
             SetupNativeProperties(res);
             return res;

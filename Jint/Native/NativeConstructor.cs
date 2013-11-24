@@ -15,52 +15,32 @@ namespace Jint.Native
     /// </remarks>
     public class NativeConstructor : JsConstructor
     {
-        private readonly Type _reflectedType;
-
         private readonly LinkedList<NativeDescriptor> _properties = new LinkedList<NativeDescriptor>();
         private readonly INativeIndexer _indexer;
 
         private readonly ConstructorInfo[] _constructors;
         private readonly Marshaller _marshaller;
         private readonly NativeOverloadImpl<ConstructorInfo, ConstructorImpl> _overloads;
+        private readonly Type _reflectedType;
 
-        // TODO: native constructors should have an own prototype rather then the function prototype
-        public NativeConstructor(Type type, JsGlobal global) :
-            this(type, global, null, global.FunctionClass.PrototypeProperty)
-        {
-        }
-
-        public NativeConstructor(Type type, JsGlobal global, JsObject prototypePrototype) :
-            this(type, global, prototypePrototype, global.FunctionClass.PrototypeProperty)
-        {
-        }
-
-        public NativeConstructor(Type type, JsGlobal global, JsObject prototypePrototype, JsObject prototype) :
-            base(global, prototype)
+        public NativeConstructor(Type type, JsGlobal global, JsObject basePrototype)
+            : base(global, null)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
-
             if (type.IsGenericType && type.ContainsGenericParameters)
                 throw new InvalidOperationException("A native constructor can't be built against an open generic");
 
             _marshaller = global.Marshaller;
-
             _reflectedType = type;
             Name = type.FullName;
 
             if (!type.IsAbstract)
-            {
                 _constructors = type.GetConstructors();
-            }
 
-            DefineOwnProperty(PrototypeName, prototypePrototype == null ? Global.ObjectClass.New(this) : Global.ObjectClass.New(this, prototypePrototype), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            ((JsDictionaryObject)this).Prototype = global.ObjectClass.New(this, basePrototype);
 
-            _overloads = new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>(
-                _marshaller,
-                new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>.GetMembersDelegate(GetMembers),
-                new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>.WrapMemberDelegate(WrapMember)
-            );
+            _overloads = new NativeOverloadImpl<ConstructorInfo, ConstructorImpl>(_marshaller, GetMembers, WrapMember);
 
             // if this is a value type, define a default constructor
             if (type.IsValueType)
@@ -78,7 +58,7 @@ namespace Jint.Native
             // now we should find all static members and add them as a properties
 
             // members are grouped by their names
-            Dictionary<string, LinkedList<MethodInfo>> members = new Dictionary<string, LinkedList<MethodInfo>>();
+            var members = new Dictionary<string, LinkedList<MethodInfo>>();
 
             foreach (var info in type.GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public))
             {
@@ -92,7 +72,7 @@ namespace Jint.Native
 
             // add the members to the object
             foreach (var pair in members)
-                DefineOwnProperty(pair.Key, ReflectOverload(pair.Value));
+                DefineOwnProperty(pair.Key, ReflectOverload(global, pair.Value));
 
             // find and add all static properties and fields
             foreach (var info in type.GetProperties(BindingFlags.Static | BindingFlags.Public))
@@ -108,7 +88,7 @@ namespace Jint.Native
                 Enum.GetValues(type).CopyTo(values, 0);
 
                 for (int i = 0; i < names.Length; i++)
-                    DefineOwnProperty(names[i], Global.ObjectClass.New(values[i], PrototypeProperty));
+                    DefineOwnProperty(names[i], new JsObject(values[i], Prototype));
 
             }
 
@@ -143,63 +123,21 @@ namespace Jint.Native
                 _indexer = new NativeIndexer(_marshaller, getters, setters);
             }
 
-            if (_reflectedType.IsArray)
+            if (type.IsArray)
             {
                 _indexer = (INativeIndexer)typeof(NativeArrayIndexer<>)
-                    .MakeGenericType(_reflectedType.GetElementType())
-                    .GetConstructor(new Type[] { typeof(Marshaller) })
+                    .MakeGenericType(type.GetElementType())
+                    .GetConstructor(new[] { typeof(Marshaller) })
                     .Invoke(new object[] { _marshaller });
             }
 
             foreach (var info in type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
                 _properties.AddLast(global.Marshaller.MarshalFieldInfo(info, this));
-
         }
 
-        JsFunction ReflectOverload(ICollection<MethodInfo> methods)
+        public void InitPrototype(JsGlobal global)
         {
-            if (methods.Count == 0)
-                throw new ArgumentException("At least one method is required", "methods");
-
-            if (methods.Count == 1)
-            {
-                foreach (MethodInfo info in methods)
-                    if (info.ContainsGenericParameters)
-                        return new NativeMethodOverload(methods, Global.FunctionClass.PrototypeProperty, Global);
-                    else
-                        return new NativeMethod(info, Global.FunctionClass.PrototypeProperty, Global);
-            }
-            else
-            {
-                return new NativeMethodOverload(methods, Global.FunctionClass.PrototypeProperty, Global);
-            }
-            // we should never come here
-            throw new ApplicationException("Unexpected error");
-        }
-
-        public override bool IsClr
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public override object Value
-        {
-            get
-            {
-                return _reflectedType;
-            }
-            set
-            {
-                ;
-            }
-        }
-
-        public override void InitPrototype(JsGlobal global)
-        {
-            var proto = PrototypeProperty;
+            var prototype = ((JsDictionaryObject)this).Prototype;
 
             Dictionary<string, LinkedList<MethodInfo>> members = new Dictionary<string, LinkedList<MethodInfo>>();
 
@@ -215,9 +153,42 @@ namespace Jint.Native
             }
 
             foreach (var pair in members)
-                proto[pair.Key] = ReflectOverload(pair.Value);
+                prototype[pair.Key] = ReflectOverload(global, pair.Value);
 
-            proto["toString"] = new NativeMethod(_reflectedType.GetMethod("ToString", new Type[0]), Global.FunctionClass.PrototypeProperty, Global);
+            prototype["toString"] = new NativeMethod(_reflectedType.GetMethod("ToString", new Type[0]), global.FunctionClass.Prototype, global);
+        }
+
+        private static JsFunction ReflectOverload(JsGlobal global, ICollection<MethodInfo> methods)
+        {
+            if (methods.Count == 0)
+                throw new ArgumentException("At least one method is required", "methods");
+
+            if (methods.Count == 1)
+            {
+                foreach (MethodInfo info in methods)
+                    if (info.ContainsGenericParameters)
+                        return new NativeMethodOverload(methods, global.FunctionClass.Prototype, global);
+                    else
+                        return new NativeMethod(info, global.FunctionClass.Prototype, global);
+            }
+            else
+            {
+                return new NativeMethodOverload(methods, global.FunctionClass.Prototype, global);
+            }
+
+            // we should never come here
+            throw new ApplicationException("Unexpected error");
+        }
+
+        public override bool IsClr
+        {
+            get { return true; }
+        }
+
+        public override object Value
+        {
+            get { return _reflectedType; }
+            set { }
         }
 
         /// <summary>
@@ -242,7 +213,7 @@ namespace Jint.Native
         /// <param name="outParameters"></param>
         /// <param name="visitor"></param>
         /// <returns></returns>
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (that == null || that is JsUndefined || that == JsNull.Instance || (that as JsGlobal) == global)
                 throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
@@ -251,7 +222,7 @@ namespace Jint.Native
                 throw new JintException("Can't apply the constructor '" + _reflectedType.FullName + "' to already initialized '" + that.Value + "'");
 
             that.Value = CreateInstance(global, parameters);
-            SetupNativeProperties(that);
+            SetupNativeProperties((JsDictionaryObject)that);
             ((JsObject)that).Indexer = _indexer;
             return new JsFunctionResult(null, that);
         }
@@ -304,9 +275,9 @@ namespace Jint.Native
 
         public override JsInstance Wrap<T>(T value)
         {
-            if (!_reflectedType.IsAssignableFrom(value.GetType()))
+            if (!_reflectedType.IsInstanceOfType(value))
                 throw new JintException("Attempt to wrap '" + typeof(T).FullName + "' with '" + _reflectedType.FullName + "'");
-            JsObject inst = Global.ObjectClass.New(PrototypeProperty);
+            JsObject inst = new JsObject(Prototype);
             inst.Value = value;
             inst.Indexer = _indexer;
             SetupNativeProperties(inst);
@@ -325,7 +296,6 @@ namespace Jint.Native
                 return new ConstructorInfo[0];
 
             return Array.FindAll(_constructors, con => con.GetParameters().Length == argCount);
-
         }
     }
 }

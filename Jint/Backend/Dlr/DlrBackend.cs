@@ -146,7 +146,8 @@ namespace Jint.Backend.Dlr
             {
                 File.AppendAllText(
                     "Dump.txt",
-                    (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null)
+                    (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null),
+                    Encoding.UTF8
                 );
             }
             catch
@@ -228,7 +229,7 @@ namespace Jint.Backend.Dlr
             }
         }
 
-        public JsFunctionResult ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters)
+        public JsFunctionResult ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, Type[] genericParameters)
         {
             return _runtime.ExecuteFunctionCore(function, that, arguments, genericParameters);
         }

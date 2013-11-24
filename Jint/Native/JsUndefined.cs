@@ -76,6 +76,11 @@ namespace Jint.Native
             return double.NaN;
         }
 
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        {
+            return this;
+        }
+
         public override JsInstance this[string index]
         {
             get

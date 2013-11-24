@@ -12,8 +12,6 @@ namespace Jint.Backend.Dlr
 {
     partial class ExpressionVisitor
     {
-        private static readonly PropertyInfo _itemByString = typeof(JsDictionaryObject).GetProperty("Item", new[] { typeof(string) });
-
         public Expression BuildGet(SyntaxNode syntax)
         {
             return BuildGet(syntax, null);
@@ -88,9 +86,9 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildGetMember(Expression expression, string name)
         {
-            return Expression.Property(
-                Expression.Convert(EnsureJs(expression), typeof(JsDictionaryObject)),
-                _itemByString,
+            return BuildOperationCall(
+                SyntaxExpressionType.Member,
+                expression,
                 Expression.Constant(name)
             );
         }
@@ -116,13 +114,11 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildSetMember(Expression expression, string name, Expression value)
         {
-            return Expression.Assign(
-                Expression.Property(
-                    Expression.Convert(EnsureJs(expression), typeof(JsDictionaryObject)),
-                    _itemByString,
-                    Expression.Constant(name)
-                ),
-                EnsureJs(value)
+            return BuildOperationCall(
+                SyntaxExpressionType.SetMember,
+                expression,
+                Expression.Constant(name),
+                value
             );
         }
 

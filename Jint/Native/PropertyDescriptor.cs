@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Delegates;
 
 namespace Jint.Native
 {
@@ -37,7 +36,7 @@ namespace Jint.Native
             };
         }
 
-        public override JsInstance Get(JsDictionaryObject that)
+        public override JsInstance Get(JsInstance that)
         {
             //JsDictionaryObject that = _global._visitor.CallTarget;
             return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.Empty, null).Result;
@@ -64,13 +63,37 @@ namespace Jint.Native
         public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get)
             : base(global, owner, name)
         {
-            GetFunction = global.FunctionClass.New<T>(get);
+            GetFunction = global.FunctionClass.New(get);
+        }
+
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<JsGlobal, T, JsInstance> get)
+            : base(global, owner, name)
+        {
+            GetFunction = global.FunctionClass.New(get);
         }
 
         public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
             : this(global, owner, name, get)
         {
-            SetFunction = global.FunctionClass.New<T>(set);
+            SetFunction = global.FunctionClass.New(set);
+        }
+
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
+            : this(global, owner, name, get)
+        {
+            SetFunction = global.FunctionClass.New(set);
+        }
+
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
+            : this(global, owner, name, get)
+        {
+            SetFunction = global.FunctionClass.New(set);
+        }
+
+        public PropertyDescriptor(JsGlobal global, JsDictionaryObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
+            : this(global, owner, name, get)
+        {
+            SetFunction = global.FunctionClass.New(set);
         }
     }
 }

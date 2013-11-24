@@ -5,33 +5,32 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public sealed class JsBoolean : JsObject, ILiteral
+    public sealed class JsBoolean : JsInstance, ILiteral
     {
         private readonly bool _value;
+
+        public static readonly JsBoolean True = new JsBoolean(true);
+        public static readonly JsBoolean False = new JsBoolean(false);
 
         public override object Value
         {
             get { return _value; }
+            set { throw new InvalidOperationException(); }
         }
 
-        public JsBoolean(JsObject prototype)
-            : this(false, prototype)
+        public static JsBoolean Create(bool value)
         {
-            _value = false;
+            return value ? True : False;
         }
 
-        public JsBoolean(bool boolean, JsObject prototype)
-            : base(prototype)
+        private JsBoolean(bool boolean)
         {
             _value = boolean;
         }
 
         public override bool IsClr
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         public override JsType Type
@@ -72,6 +71,11 @@ namespace Jint.Native
         public override bool IsPrimitive
         {
             get { return true; }
+        }
+
+        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        {
+            return this;
         }
     }
 }

@@ -65,30 +65,6 @@ namespace Jint.Backend.Dlr
             base.VisitVariableDeclaration(syntax);
         }
 
-        public override void VisitIndexer(IndexerSyntax syntax)
-        {
-            // TODO: This can be optimized. If we only do a get index,
-            // we can go to the prototype manually.
-
-            var identifier = syntax.Expression as IdentifierSyntax;
-            if (identifier != null)
-                MarkAssign(identifier.Target, ValueType.Unknown);
-
-            base.VisitIndexer(syntax);
-        }
-
-        public override void VisitProperty(PropertySyntax syntax)
-        {
-            // TODO: This can be optimized. If we only do a get property,
-            // we can go to the prototype manually.
-
-            var identifier = syntax.Expression as IdentifierSyntax;
-            if (identifier != null)
-                MarkAssign(identifier.Target, ValueType.Unknown);
-
-            base.VisitProperty(syntax);
-        }
-
         public override void VisitTry(TrySyntax syntax)
         {
             if (syntax.Catch != null)

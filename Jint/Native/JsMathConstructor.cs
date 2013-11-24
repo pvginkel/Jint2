@@ -7,38 +7,38 @@ namespace Jint.Native {
         public JsGlobal Global { get; set; }
 
         public JsMathConstructor(JsGlobal global)
-            : base(global.ObjectClass.PrototypeProperty) {
+            : base(global.ObjectClass.Prototype) {
             Global = global;
             var random = new Random();
 
             #region Functions
-            this["abs"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Abs(d))));
-            this["acos"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Acos(d))));
-            this["asin"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Asin(d))));
-            this["atan"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Atan(d))));
-            this["atan2"] = global.FunctionClass.New((Delegate)new Func<double, double, JsNumber>((y, x) => Global.NumberClass.New(Math.Atan2(y, x))));
-            this["ceil"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Ceiling(d))));
-            this["cos"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Cos(d))));
-            this["exp"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Exp(d))));
-            this["floor"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Floor(d))));
-            this["log"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Log(d))));
+            this["abs"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Abs(d))));
+            this["acos"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Acos(d))));
+            this["asin"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Asin(d))));
+            this["atan"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Atan(d))));
+            this["atan2"] = global.FunctionClass.New((Delegate)new Func<double, double, JsNumber>((y, x) => JsNumber.Create(Math.Atan2(y, x))));
+            this["ceil"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Ceiling(d))));
+            this["cos"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Cos(d))));
+            this["exp"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Exp(d))));
+            this["floor"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Floor(d))));
+            this["log"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Log(d))));
             this["max"] = global.FunctionClass.New<JsObject>(MaxImpl);
             this["min"] = global.FunctionClass.New<JsObject>(MinImpl);
-            this["pow"] = global.FunctionClass.New((Delegate)new Func<double, double, JsNumber>((a, b) => Global.NumberClass.New(Math.Pow(a, b))));
+            this["pow"] = global.FunctionClass.New((Delegate)new Func<double, double, JsNumber>((a, b) => JsNumber.Create(Math.Pow(a, b))));
             this["random"] = global.FunctionClass.New((Delegate)new Func<double>(random.NextDouble));
-            this["round"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Round(d))));
-            this["sin"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Sin(d))));
-            this["sqrt"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Sqrt(d))));
-            this["tan"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => Global.NumberClass.New(Math.Tan(d))));
+            this["round"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Round(d))));
+            this["sin"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Sin(d))));
+            this["sqrt"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Sqrt(d))));
+            this["tan"] = global.FunctionClass.New((Delegate)new Func<double, JsNumber>(d => JsNumber.Create(Math.Tan(d))));
             #endregion
 
-            this["E"] = global.NumberClass.New(Math.E);
-            this["LN2"] = global.NumberClass.New(Math.Log(2));
-            this["LN10"] = global.NumberClass.New(Math.Log(10));
-            this["LOG2E"] = global.NumberClass.New(Math.Log(Math.E, 2));
-            this["PI"] = global.NumberClass.New(Math.PI);
-            this["SQRT1_2"] = global.NumberClass.New(Math.Sqrt(0.5));
-            this["SQRT2"] = global.NumberClass.New(Math.Sqrt(2));
+            this["E"] = JsNumber.Create(Math.E);
+            this["LN2"] = JsNumber.Create(Math.Log(2));
+            this["LN10"] = JsNumber.Create(Math.Log(10));
+            this["LOG2E"] = JsNumber.Create(Math.Log(Math.E, 2));
+            this["PI"] = JsNumber.Create(Math.PI);
+            this["SQRT1_2"] = JsNumber.Create(Math.Sqrt(0.5));
+            this["SQRT2"] = JsNumber.Create(Math.Sqrt(2));
         }
 
         public const string MathType = "object";
@@ -50,7 +50,7 @@ namespace Jint.Native {
         public JsInstance MaxImpl(JsObject target, JsInstance[] parameters)
         {
             if (parameters.Length == 0) {
-                return Global.NumberClass["NEGATIVE_INFINITY"];
+                return JsNumber.NegativeInfinity;
             }
 
             var result = parameters[0].ToNumber();
@@ -60,7 +60,7 @@ namespace Jint.Native {
                 result = Math.Max(p.ToNumber(), result);
             }
 
-            return Global.NumberClass.New(result);
+            return JsNumber.Create(result);
         }
 
 
@@ -68,7 +68,7 @@ namespace Jint.Native {
         {
             if (parameters.Length == 0)
             {
-                return Global.NumberClass["POSITIVE_INFINITY"];
+                return JsNumber.PositiveInfinity;
             }
 
             var result = parameters[0].ToNumber();
@@ -78,7 +78,7 @@ namespace Jint.Native {
                 result = Math.Min(p.ToNumber(), result);
             }
 
-            return Global.NumberClass.New(result);
+            return JsNumber.Create(result);
         }
     }
 }

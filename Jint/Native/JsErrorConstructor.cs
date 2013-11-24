@@ -8,30 +8,27 @@ namespace Jint.Native
     [Serializable]
     public class JsErrorConstructor : JsConstructor
     {
-        private readonly string _errorType;
-
         public JsErrorConstructor(JsGlobal global, string errorType)
-            : base(global)
+            : base(global, BuildPrototype(global, errorType))
         {
-            _errorType = errorType;
             Name = errorType;
-
-            DefineOwnProperty(PrototypeName, global.ObjectClass.New(this), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
         }
 
-        public override void InitPrototype(JsGlobal global)
+        private static JsObject BuildPrototype(JsGlobal global, string errorType)
         {
-            var prototype = PrototypeProperty;
+            var prototype = new JsObject(global.FunctionClass.Prototype);
 
-            prototype.DefineOwnProperty("name", global.StringClass.New(_errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            prototype.DefineOwnProperty("name", JsString.Create(errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsDictionaryObject>(ToStringImpl), PropertyAttributes.DontEnum);
+
+            return prototype;
         }
 
         public JsError New(string message)
         {
-            var error = new JsError(Global, PrototypeProperty);
-            error["message"] = Global.StringClass.New(message);
+            var error = new JsError(Global, Prototype);
+            error["message"] = JsString.Create(message);
             return error;
         }
 
@@ -40,7 +37,7 @@ namespace Jint.Native
             return New(String.Empty);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 
@@ -65,9 +62,9 @@ namespace Jint.Native
             return new JsFunctionResult(result, that);
         }
 
-        public JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsDictionaryObject target, JsInstance[] parameters)
         {
-            return Global.StringClass.New(target["name"] + ": " + target["message"]);
+            return JsString.Create(target["name"] + ": " + target["message"]);
         }
 
         public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)

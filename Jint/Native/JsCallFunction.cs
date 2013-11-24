@@ -12,13 +12,13 @@ namespace Jint.Native
     [Serializable]
     public class JsCallFunction : JsFunction
     {
-        public JsCallFunction(JsFunctionConstructor constructor)
-            : base(constructor.PrototypeProperty)
+        public JsCallFunction(JsObject prototype)
+            : base(prototype)
         {
-            DefineOwnProperty("length", constructor.Global.NumberClass.New(1), PropertyAttributes.ReadOnly);
+            DefineOwnProperty("length", JsNumber.Create(1), PropertyAttributes.ReadOnly);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             var function = that as JsFunction;
 

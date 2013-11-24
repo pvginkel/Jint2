@@ -15,9 +15,9 @@ namespace Jint.Runtime
             var rightPrimitive = right.ToPrimitive(Global, PrimitiveHint.None);
 
             if (leftPrimitive is JsString || rightPrimitive is JsString)
-                return _stringClass.New(leftPrimitive.ToString() + rightPrimitive.ToString());
+                return JsString.Create(leftPrimitive.ToString() + rightPrimitive.ToString());
 
-            return _numberClass.New(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
+            return JsNumber.Create(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
         }
 
         public string Operation_Add(string left, JsInstance right)
@@ -35,9 +35,9 @@ namespace Jint.Runtime
             var rightPrimitive = right.ToPrimitive(Global, PrimitiveHint.None);
 
             if (rightPrimitive is JsString)
-                return _stringClass.New(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
+                return JsString.Create(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
 
-            return _numberClass.New(left + rightPrimitive.ToNumber());
+            return JsNumber.Create(left + rightPrimitive.ToNumber());
         }
 
         public JsInstance Operation_Add(JsInstance left, double right)
@@ -45,9 +45,9 @@ namespace Jint.Runtime
             var leftPrimitive = left.ToPrimitive(Global, PrimitiveHint.None);
 
             if (leftPrimitive is JsString)
-                return _stringClass.New(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
+                return JsString.Create(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
 
-            return _numberClass.New(leftPrimitive.ToNumber() + right);
+            return JsNumber.Create(leftPrimitive.ToNumber() + right);
         }
 
         public static double Operation_BitwiseAnd(JsInstance left, JsInstance right)
@@ -116,7 +116,7 @@ namespace Jint.Runtime
             return -((long)number + 1);
         }
 
-        public double Operation_BitwiseNot(double operand)
+        public static double Operation_BitwiseNot(double operand)
         {
             if (Double.IsNaN(operand) || Double.IsInfinity(operand))
                 operand = 0;
@@ -408,12 +408,16 @@ namespace Jint.Runtime
 
             if (stringObj != null && numberIndex != null)
             {
-                return _stringClass.New(
+                return JsString.Create(
                     ((string)stringObj.Value).Substring((int)numberIndex.ToNumber(), 1)
                 );
             }
 
-            return ((JsDictionaryObject)obj)[index];
+            var jsObject = obj as JsObject;
+            if (jsObject == null)
+                jsObject = Global.GetPrototype(obj);
+
+            return jsObject[index];
         }
 
         public JsInstance Operation_Index(JsInstance obj, double index)
@@ -426,10 +430,10 @@ namespace Jint.Runtime
                     return array.Get(intIndex);
             }
 
-            return Operation_Index(obj, _numberClass.New(index));
+            return Operation_Index(obj, JsNumber.Create(index));
         }
 
-        public JsInstance Operation_SetIndex(JsInstance obj, double index, JsInstance value)
+        public static JsInstance Operation_SetIndex(JsInstance obj, double index, JsInstance value)
         {
             var array = obj as JsArray;
             if (array != null)
@@ -439,7 +443,33 @@ namespace Jint.Runtime
                     return array.Put(intIndex, value);
             }
 
-            return ((JsDictionaryObject)obj)[_numberClass.New(index)] = value;
+            return ((JsDictionaryObject)obj)[JsNumber.Create(index)] = value;
+        }
+
+        public JsInstance Operation_Member(JsInstance obj, string name)
+        {
+            var jsObject = obj as JsObject;
+
+            if (jsObject == null)
+            {
+                jsObject = Global.GetPrototype(obj);
+                var descriptor = jsObject.GetDescriptor(name);
+                if (descriptor == null)
+                    return JsUndefined.Instance;
+                return descriptor.Get(obj);
+            }
+
+            return jsObject[name];
+        }
+
+        public static JsInstance Operation_SetMember(JsInstance obj, string name, JsInstance value)
+        {
+            var dictionary = obj as JsDictionaryObject;
+
+            if (dictionary != null)
+                return dictionary[name] = value;
+
+            return value;
         }
     }
 }

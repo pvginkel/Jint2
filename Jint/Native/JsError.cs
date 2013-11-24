@@ -11,7 +11,7 @@ namespace Jint.Native
         private string Message
         {
             get { return this["message"].ToString(); }
-            set { this["message"] = _global.StringClass.New(value); }
+            set { this["message"] = JsString.Create(value); }
         }
 
         public override bool IsClr
@@ -30,18 +30,11 @@ namespace Jint.Native
             }
         }
 
-        public JsObject PrototypeProperty
-        {
-            get { return this[JsFunction.PrototypeName] as JsObject; }
-            set { this[JsFunction.PrototypeName] = value; }
-        }
-
         private readonly JsGlobal _global;
 
         public JsError(JsGlobal global, JsObject prototype)
             : this(global, prototype, string.Empty)
         {
-            PrototypeProperty = global.ObjectClass.New(PrototypeProperty);
         }
 
         public JsError(JsGlobal global, JsObject prototype, string message)

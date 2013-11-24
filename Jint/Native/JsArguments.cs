@@ -33,7 +33,7 @@ namespace Jint.Native
             }
 
             DefineOwnProperty(new ValueDescriptor(this, CalleeName, callee) { Enumerable = false });
-            DefineOwnProperty(new ValueDescriptor(this, LengthPropertyName, global.NumberClass.New(length)) { Enumerable = false, Configurable = true });
+            DefineOwnProperty(new ValueDescriptor(this, LengthPropertyName, JsNumber.Create(length)) { Enumerable = false, Configurable = true });
         }
 
         public override bool IsClr

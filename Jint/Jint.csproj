@@ -118,14 +118,11 @@
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="Parser\ES3Util.cs" />
     <Compile Include="PropertyBags\DictionaryPropertyBag.cs" />
-    <Compile Include="PropertyBags\DoubleListPropertyBag.cs" />
     <Compile Include="Debugger\SourceCodeDescriptor.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Expressions\PropertyDeclarationSyntax.cs" />
     <Compile Include="IConstructorInvoker.cs" />
-    <Compile Include="PropertyBags\HashedPropertyBag.cs" />
-    <Compile Include="PropertyBags\IPropertyBag.cs" />
     <Compile Include="Native\JsApplyFunction.cs" />
     <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />
@@ -213,10 +210,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyBags\MiniCachedPropertyBag.cs" />
     <Compile Include="Native\JsDictionaryObjectDebugView.cs" />
-    <Compile Include="PropertyBags\ScopedPropertyBag.cs" />
     <Compile Include="Runtime\JintRuntime.Comparers.cs" />
     <Compile Include="Runtime\JintRuntime.cs" />
-    <Compile Include="Runtime\JintRuntime.New.cs" />
     <Compile Include="Runtime\JintRuntime.Operations.cs" />
     <Compile Include="Runtime\JintRuntime.Operations.Generated.cs">
       <AutoGen>True</AutoGen>

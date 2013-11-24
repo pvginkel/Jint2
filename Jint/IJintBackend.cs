@@ -21,7 +21,7 @@ namespace Jint
 
         JsInstance Eval(JsInstance[] arguments);
 
-        JsFunctionResult ExecuteFunction(JsFunction function, JsDictionaryObject that, JsInstance[] arguments, Type[] genericParameters);
+        JsFunctionResult ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, Type[] genericParameters);
 
         int Compare(JsFunction function, JsInstance x, JsInstance y);
 

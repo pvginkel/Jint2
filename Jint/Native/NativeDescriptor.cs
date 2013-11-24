@@ -47,9 +47,9 @@ namespace Jint.Native
             return new NativeDescriptor(Owner, this);
         }
 
-        public override JsInstance Get(JsDictionaryObject that)
+        public override JsInstance Get(JsInstance that)
         {
-            return _getter != null ? _getter(that) : JsUndefined.Instance ;
+            return _getter != null ? _getter((JsDictionaryObject)that) : JsUndefined.Instance ;
         }
 
         public override void Set(JsDictionaryObject that, JsInstance value)

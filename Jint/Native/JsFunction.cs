@@ -20,7 +20,7 @@ namespace Jint.Native
         /// </summary>
         /// <param name="global"></param>
         public JsFunction(JsGlobal global)
-            : this(global.FunctionClass.PrototypeProperty)
+            : this(global.FunctionClass.Prototype)
         {
         }
 
@@ -32,46 +32,28 @@ namespace Jint.Native
             : base(prototype)
         {
             Arguments = new List<string>();
-            DefineOwnProperty(PrototypeName, JsNull.Instance, PropertyAttributes.DontEnum);
         }
 
         public override int Length
         {
-            get
-            {
-                return Arguments.Count;
-            }
-            set
-            {
-            }
-        }
-
-        public JsObject PrototypeProperty
-        {
-            get
-            {
-                return this[PrototypeName] as JsObject;
-            }
-            set
-            {
-                this[PrototypeName] = value;
-            }
+            get { return Arguments.Count; }
+            set { }
         }
 
         //15.3.5.3
         public virtual bool HasInstance(JsObject inst)
         {
-            if (inst != null && inst != JsNull.Instance && !(inst is JsUndefined))
-            {
-                return PrototypeProperty.IsPrototypeOf(inst);
-            }
-            return false;
+            return
+                inst != null &&
+                inst != JsNull.Instance &&
+                !(inst is JsUndefined) &&
+                Prototype.IsPrototypeOf(inst);
         }
 
         //13.2.2
         public virtual JsObject Construct(JsInstance[] parameters, Type[] generics, JsGlobal global)
         {
-            var instance = global.ObjectClass.New(PrototypeProperty);
+            var instance = new JsObject((JsObject)this["prototype"]);
 
             var result = global.Backend.ExecuteFunction(this, instance, parameters, generics);
 
@@ -100,12 +82,12 @@ namespace Jint.Native
             set { }
         }
 
-        public JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters)
+        public JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters)
         {
             return Execute(global, that, parameters, null);
         }
 
-        public virtual JsFunctionResult Execute(JsGlobal global, JsDictionaryObject that, JsInstance[] parameters, Type[] genericArguments)
+        public virtual JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (genericArguments != null)
                 throw new JintException("This method can't be called as a generic");

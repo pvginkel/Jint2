@@ -12,9 +12,9 @@ namespace Jint.ExpressionExtensions
 {
     internal class ConvertToJsExpression : Expression
     {
-        private static readonly MethodInfo _newBoolean = typeof(JintRuntime).GetMethod("New_Boolean");
-        private static readonly MethodInfo _newNumber = typeof(JintRuntime).GetMethod("New_Number");
-        private static readonly MethodInfo _newString = typeof(JintRuntime).GetMethod("New_String");
+        private static readonly MethodInfo _newBoolean = typeof(JsBoolean).GetMethod("Create", new[] { typeof(bool) });
+        private static readonly MethodInfo _newNumber = typeof(JsNumber).GetMethod("Create", new[] { typeof(double) });
+        private static readonly MethodInfo _newString = typeof(JsString).GetMethod("Create", new[] { typeof(string) });
 
         public override Type Type
         {
@@ -58,7 +58,6 @@ namespace Jint.ExpressionExtensions
             }
 
             return Call(
-                Runtime,
                 method,
                 Expression
             );
