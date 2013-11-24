@@ -13,7 +13,7 @@ namespace Jint.Native
         private const string LengthPropertyName = "length";
 
         public JsArguments(JsGlobal global, JsFunction callee, JsInstance[] arguments)
-            : base(global.ObjectClass.New())
+            : base(global, global.ObjectClass.New())
         {
             int length;
 
@@ -34,11 +34,6 @@ namespace Jint.Native
 
             DefineOwnProperty(new ValueDescriptor(this, CalleeName, callee) { Enumerable = false });
             DefineOwnProperty(new ValueDescriptor(this, LengthPropertyName, JsNumber.Create(length)) { Enumerable = false, Configurable = true });
-        }
-
-        public override bool IsClr
-        {
-            get { return false; }
         }
 
         public override bool ToBoolean()

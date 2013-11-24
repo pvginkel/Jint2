@@ -11,21 +11,16 @@ namespace Jint.Native
         private int _length;
         private SortedList<int, JsInstance> _data = new SortedList<int, JsInstance>();
 
-        public JsArray(JsObject prototype)
-            : base(prototype)
+        public JsArray(JsGlobal global, JsObject prototype)
+            : base(global, prototype)
         {
         }
 
-        private JsArray(SortedList<int, JsInstance> data, int len, JsObject prototype)
-            : base(prototype)
+        private JsArray(JsGlobal global, SortedList<int, JsInstance> data, int len, JsObject prototype)
+            : base(global, prototype)
         {
             _data = data;
             _length = len;
-        }
-
-        public override bool IsClr
-        {
-            get { return false; }
         }
 
         /// <summary>
@@ -239,7 +234,7 @@ namespace Jint.Native
         #region array specific methods
 
         [RawJsMethod]
-        public JsArray Concat(JsGlobal global, JsInstance[] args)
+        public JsArray Concat(JsInstance[] args)
         {
             var newData = new SortedList<int, JsInstance>(_data);
             int offset = _length;
@@ -251,7 +246,7 @@ namespace Jint.Native
                         newData.Add(pair.Key + offset, pair.Value);
                     offset += ((JsArray)item).Length;
                 }
-                else if (global.ArrayClass.HasInstance(item as JsObject))
+                else if (Global.ArrayClass.HasInstance(item as JsObject))
                 {
                     // Array subclass
                     JsObject obj = (JsObject)item;
@@ -270,7 +265,7 @@ namespace Jint.Native
                 }
             }
 
-            return new JsArray(newData, offset, global.ArrayClass.Prototype);
+            return new JsArray(Global, newData, offset, Global.ArrayClass.Prototype);
         }
 
         [RawJsMethod]
@@ -279,12 +274,17 @@ namespace Jint.Native
             if (_length == 0)
                 return JsString.Create();
 
-            string sep = (separator is JsUndefined) ? "," : separator.ToString();
+            string sep = IsUndefined(separator) ? "," : separator.ToString();
             string[] map = new string[_length];
 
-            JsInstance item;
             for (int i = 0; i < _length; i++)
-                map[i] = _data.TryGetValue(i, out item) && item != JsNull.Instance && !(item is JsUndefined) ? item.ToString() : "";
+            {
+                JsInstance item;
+                map[i] =
+                    _data.TryGetValue(i, out item) && !IsNullOrUndefined(item)
+                    ? item.ToString()
+                    : "";
+            }
 
             return JsString.Create(String.Join(sep, map));
         }
@@ -305,7 +305,7 @@ namespace Jint.Native
             return String.Join(",", values);
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             return JsString.Create(ToString());
         }

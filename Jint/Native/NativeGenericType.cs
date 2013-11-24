@@ -11,8 +11,8 @@ namespace Jint.Native
     {
         private Type _reflectedType;
 
-        public NativeGenericType(Type reflectedType, JsObject prototype)
-            : base(prototype)
+        public NativeGenericType(JsGlobal global, Type reflectedType, JsObject prototype)
+            : base(global, prototype)
         {
             if (reflectedType == null)
                 throw new ArgumentNullException("reflectedType");
@@ -20,19 +20,13 @@ namespace Jint.Native
 
         public override object Value
         {
-            get
-            {
-                return _reflectedType;
-            }
-            set
-            {
-                _reflectedType = (Type)value;
-            }
+            get { return _reflectedType; }
+            set { _reflectedType = (Type)value; }
         }
 
-        JsConstructor MakeType(Type[] args, JsGlobal global)
+        JsConstructor MakeType(Type[] args)
         {
-            return global.Marshaller.MarshalType( _reflectedType.MakeGenericType(args) );
+            return Global.Marshaller.MarshalType( _reflectedType.MakeGenericType(args) );
         }
     }
 }

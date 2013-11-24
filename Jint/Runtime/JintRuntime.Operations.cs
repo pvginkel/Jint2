@@ -9,10 +9,10 @@ namespace Jint.Runtime
 {
     partial class JintRuntime
     {
-        public JsInstance Operation_Add(JsInstance left, JsInstance right)
+        public static JsInstance Operation_Add(JsInstance left, JsInstance right)
         {
-            var leftPrimitive = left.ToPrimitive(Global, PrimitiveHint.None);
-            var rightPrimitive = right.ToPrimitive(Global, PrimitiveHint.None);
+            var leftPrimitive = left.ToPrimitive(PrimitiveHint.None);
+            var rightPrimitive = right.ToPrimitive(PrimitiveHint.None);
 
             if (leftPrimitive is JsString || rightPrimitive is JsString)
                 return JsString.Create(leftPrimitive.ToString() + rightPrimitive.ToString());
@@ -20,19 +20,19 @@ namespace Jint.Runtime
             return JsNumber.Create(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
         }
 
-        public string Operation_Add(string left, JsInstance right)
+        public static string Operation_Add(string left, JsInstance right)
         {
-            return left + right.ToPrimitive(Global, PrimitiveHint.None).ToString();
+            return left + right.ToPrimitive(PrimitiveHint.None).ToString();
         }
 
-        public string Operation_Add(JsInstance left, string right)
+        public static string Operation_Add(JsInstance left, string right)
         {
-            return left.ToPrimitive(Global, PrimitiveHint.None).ToString() + right;
+            return left.ToPrimitive(PrimitiveHint.None).ToString() + right;
         }
 
-        public JsInstance Operation_Add(double left, JsInstance right)
+        public static JsInstance Operation_Add(double left, JsInstance right)
         {
-            var rightPrimitive = right.ToPrimitive(Global, PrimitiveHint.None);
+            var rightPrimitive = right.ToPrimitive(PrimitiveHint.None);
 
             if (rightPrimitive is JsString)
                 return JsString.Create(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
@@ -40,9 +40,9 @@ namespace Jint.Runtime
             return JsNumber.Create(left + rightPrimitive.ToNumber());
         }
 
-        public JsInstance Operation_Add(JsInstance left, double right)
+        public static JsInstance Operation_Add(JsInstance left, double right)
         {
-            var leftPrimitive = left.ToPrimitive(Global, PrimitiveHint.None);
+            var leftPrimitive = left.ToPrimitive(PrimitiveHint.None);
 
             if (leftPrimitive is JsString)
                 return JsString.Create(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
@@ -52,7 +52,7 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseAnd(JsInstance left, JsInstance right)
         {
-            if (left is JsUndefined || right is JsUndefined)
+            if (JsInstance.IsUndefined(left) || JsInstance.IsUndefined(right))
                 return 0;
 
             return (long)left.ToNumber() & (long)right.ToNumber();
@@ -60,7 +60,7 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseAnd(double left, JsInstance right)
         {
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return 0;
 
             return (long)left & (long)right.ToNumber();
@@ -68,7 +68,7 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseAnd(JsInstance left, double right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
 
             return (long)left.ToNumber() & (long)right;
@@ -76,15 +76,15 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseExclusiveOr(JsInstance left, JsInstance right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
             {
-                if (right is JsUndefined)
+                if (JsInstance.IsUndefined(right))
                     return 1;
 
                 return (long)right.ToNumber();
             }
 
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left.ToNumber();
 
             return (long)left.ToNumber() ^ (long)right.ToNumber();
@@ -92,7 +92,7 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseExclusiveOr(double left, JsInstance right)
         {
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left;
 
             return (long)left ^ (long)right.ToNumber();
@@ -100,15 +100,15 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseExclusiveOr(JsInstance left, double right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return (long)right;
 
             return (long)left.ToNumber() ^ (long)right;
         }
 
-        public double Operation_BitwiseNot(JsInstance operand)
+        public static double Operation_BitwiseNot(JsInstance operand)
         {
-            var number = operand.ToPrimitive(Global, PrimitiveHint.None).ToNumber();
+            var number = operand.ToPrimitive(PrimitiveHint.None).ToNumber();
 
             if (Double.IsNaN(number) || Double.IsInfinity(number))
                 number = 0;
@@ -126,15 +126,15 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseOr(JsInstance left, JsInstance right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
             {
-                if (right is JsUndefined)
+                if (JsInstance.IsUndefined(right))
                     return 1;
 
                 return (long)right.ToNumber();
             }
 
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left.ToNumber();
 
             return (long)left.ToNumber() | (long)right.ToNumber();
@@ -142,7 +142,7 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseOr(double left, JsInstance right)
         {
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left;
 
             return (long)left | (long)right.ToNumber();
@@ -150,7 +150,7 @@ namespace Jint.Runtime
 
         public static double Operation_BitwiseOr(JsInstance left, double right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return (long)right;
 
             return (long)left.ToNumber() | (long)right;
@@ -205,23 +205,23 @@ namespace Jint.Runtime
 
         public static double Operation_LeftShift(JsInstance left, JsInstance right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left.ToNumber();
             return (long)left.ToNumber() << (ushort)right.ToNumber();
         }
 
         public static double Operation_LeftShift(double left, JsInstance right)
         {
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left;
             return (long)left << (ushort)right.ToNumber();
         }
 
         public static double Operation_LeftShift(JsInstance left, double right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
             return (long)left.ToNumber() << (ushort)right;
         }
@@ -309,23 +309,23 @@ namespace Jint.Runtime
 
         public static double Operation_RightShift(JsInstance left, JsInstance right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left.ToNumber();
             return (long)left.ToNumber() >> (ushort)right.ToNumber();
         }
 
         public static double Operation_RightShift(double left, JsInstance right)
         {
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left;
             return (long)left >> (ushort)right.ToNumber();
         }
 
         public static double Operation_RightShift(JsInstance left, double right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
             return (long)left.ToNumber() >> (ushort)right;
         }
@@ -364,7 +364,7 @@ namespace Jint.Runtime
             }
         }
 
-        public static string Operation_TypeOf(JsGlobal scope, string identifier)
+        public static string Operation_TypeOf(JsObject scope, string identifier)
         {
             Descriptor descriptor;
             if (!scope.TryGetDescriptor(identifier, out descriptor))
@@ -380,23 +380,23 @@ namespace Jint.Runtime
 
         public static double Operation_UnsignedRightShift(JsInstance left, JsInstance right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left.ToNumber();
             return (long)left.ToNumber() >> (ushort)right.ToNumber();
         }
 
         public static double Operation_UnsignedRightShift(double left, JsInstance right)
         {
-            if (right is JsUndefined)
+            if (JsInstance.IsUndefined(right))
                 return (long)left;
             return (long)left >> (ushort)right.ToNumber();
         }
 
         public static double Operation_UnsignedRightShift(JsInstance left, double right)
         {
-            if (left is JsUndefined)
+            if (JsInstance.IsUndefined(left))
                 return 0;
             return (long)left.ToNumber() >> (ushort)right;
         }
@@ -448,14 +448,23 @@ namespace Jint.Runtime
 
         public JsInstance Operation_Member(JsInstance obj, string name)
         {
-            var jsObject = obj as JsObject;
+            var undefined = obj as JsUndefined;
+            if (undefined != null)
+            {
+                if (undefined.Name != null)
+                    name = undefined.Name + "." + name;
 
+                return Global.Backend.ResolveUndefined(name, null);
+            }
+
+            var jsObject = obj as JsObject;
             if (jsObject == null)
             {
                 jsObject = Global.GetPrototype(obj);
                 var descriptor = jsObject.GetDescriptor(name);
                 if (descriptor == null)
                     return JsUndefined.Instance;
+
                 return descriptor.Get(obj);
             }
 

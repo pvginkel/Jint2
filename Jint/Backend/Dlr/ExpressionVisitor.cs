@@ -136,7 +136,7 @@ namespace Jint.Backend.Dlr
                 that,
                 Expression.Property(
                     _scope.Runtime,
-                    "Global"
+                    "GlobalScope"
                 )
             ));
 
@@ -873,7 +873,10 @@ namespace Jint.Backend.Dlr
                 _scope.ArgumentsVariable,
                 Expression.New(
                     _argumentsConstructor,
-                    Expression.Property(_scope.Runtime, typeof(JintRuntime).GetProperty("Global")),
+                    Expression.Property(
+                        _scope.Runtime,
+                        typeof(JintRuntime).GetProperty("Global")
+                    ),
                     functionParameter,
                     argumentsParameter
                 )
@@ -1156,7 +1159,6 @@ namespace Jint.Backend.Dlr
                         _defineAccessorProperty,
                         new[]
                         {
-                            global,
                             Expression.Constant(accessorProperty.Name),
                             accessorProperty.GetExpression != null ? accessorProperty.GetExpression.Accept(this) : Expression.Default(typeof(JsFunction)),
                             accessorProperty.SetExpression != null ? accessorProperty.SetExpression.Accept(this) : Expression.Default(typeof(JsFunction))
@@ -1421,7 +1423,7 @@ namespace Jint.Backend.Dlr
                                 return BuildDeleteMember(
                                     Expression.Property(
                                         _scope.Runtime,
-                                        "Global"
+                                        "GlobalScope"
                                     ),
                                     identifierSyntax.Name
                                 );
@@ -1450,10 +1452,10 @@ namespace Jint.Backend.Dlr
                         if (identifierSyntax.Target.Type == VariableType.Global)
                         {
                             return Expression.Call(
-                                typeof(JintRuntime).GetMethod("Operation_TypeOf", new[] { typeof(JsGlobal), typeof(string) }),
+                                typeof(JintRuntime).GetMethod("Operation_TypeOf", new[] { typeof(JsObject), typeof(string) }),
                                 Expression.Property(
                                     _scope.Runtime,
-                                    "Global"
+                                    "GlobalScope"
                                 ),
                                 Expression.Constant(identifierSyntax.Name)
                             );

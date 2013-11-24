@@ -72,10 +72,10 @@ namespace Jint.Backend.Dlr
                 if (declaredVariable.IsDeclared)
                 {
                     Descriptor descriptor;
-                    if (!Global.TryGetDescriptor(declaredVariable.Name, out descriptor))
+                    if (!Global.GlobalScope.TryGetDescriptor(declaredVariable.Name, out descriptor))
                     {
-                        Global.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
-                        descriptor = Global.GetDescriptor(declaredVariable.Name);
+                        Global.GlobalScope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
+                        descriptor = Global.GlobalScope.GetDescriptor(declaredVariable.Name);
                     }
 
                     descriptor.Configurable = false;
@@ -94,7 +94,7 @@ namespace Jint.Backend.Dlr
         public JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs)
         {
             if (parameters == null)
-                parameters = JsInstance.Empty;
+                parameters = JsInstance.EmptyArray;
 
             var newParameters = new List<string>();
 
@@ -162,7 +162,7 @@ namespace Jint.Backend.Dlr
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            return CallFunction((JsFunction)Global[name], args);
+            return CallFunction((JsFunction)Global.GlobalScope[name], args);
         }
 
         public object CallFunction(JsFunction function, object[] args)
@@ -174,7 +174,7 @@ namespace Jint.Backend.Dlr
 
             if (args == null || args.Length == 0)
             {
-                arguments = JsInstance.Empty;
+                arguments = JsInstance.EmptyArray;
             }
             else
             {
@@ -248,7 +248,7 @@ namespace Jint.Backend.Dlr
 
         public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
         {
-            return new JsFunctionDelegate(this, func, JsNull.Instance, delegateType).GetDelegate();
+            return new JsFunctionDelegate(this, func, Global.PrototypeSink, delegateType).GetDelegate();
         }
 
         public JsInstance Construct(JsFunction function, JsInstance[] parameters)
@@ -279,7 +279,7 @@ namespace Jint.Backend.Dlr
                     return Global.WrapClr(type);
             }
 
-            return new JsUndefined(Global, typeFullName);
+            return new JsUndefined(typeFullName);
         }
 
         private void EnsureClrAllowed()

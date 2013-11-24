@@ -17,7 +17,7 @@ namespace Jint.Native
 
         private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = new JsObject(global.FunctionClass.Prototype);
+            var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty(new PropertyDescriptor<JsObject>(global, prototype, "length", GetLengthImpl, SetLengthImpl) { Enumerable = false });
 
@@ -43,12 +43,12 @@ namespace Jint.Native
 
         public JsArray New()
         {
-            JsArray array = new JsArray(Prototype);
+            JsArray array = new JsArray(Global, Prototype);
             //array.DefineOwnProperty("constructor", new ValueDescriptor(this) { Enumerable = false });
             return array;
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs)
         {
             JsArray array = New();
 
@@ -61,11 +61,11 @@ namespace Jint.Native
             return array;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as JsGlobal) == global)
+            if (that == null || that == Global.GlobalScope)
             {
-                var result = Construct(parameters, null, null);
+                var result = Construct(parameters, null);
                 return new JsFunctionResult(result, result);
             }
             else
@@ -86,14 +86,15 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static JsInstance ToStringImpl(JsGlobal global, JsArray target, JsInstance[] parameters)
+        public static JsInstance ToStringImpl(JsArray target, JsInstance[] parameters)
         {
-            JsArray result = global.ArrayClass.New();
+            var global = target.Global;
+            var result = global.ArrayClass.New();
 
             for (int i = 0; i < target.Length; i++)
             {
                 var obj = target[i.ToString()];
-                if (IsNullOrUndefined(obj))
+                if (IsNullOrUndefined(obj) || (obj.IsClr && obj.Value == null))
                 {
                     result[i.ToString()] = JsString.Create();
                 }
@@ -121,9 +122,10 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static JsInstance ToLocaleStringImpl(JsGlobal global, JsArray target, JsInstance[] parameters)
+        public static JsInstance ToLocaleStringImpl(JsArray target, JsInstance[] parameters)
         {
-            JsArray result = global.ArrayClass.New();
+            var global = target.Global;
+            var result = global.ArrayClass.New();
 
             for (int i = 0; i < target.Length; i++)
             {
@@ -143,10 +145,13 @@ namespace Jint.Native
         public static JsInstance Concat(JsGlobal global, JsInstance target, JsInstance[] parameters)
         {
             if (target is JsArray)
-                return ((JsArray)target).Concat(global, parameters);
-            JsArray array = global.ArrayClass.New();
-            List<JsInstance> items = new List<JsInstance>();
-            items.Add(target);
+                return ((JsArray)target).Concat(parameters);
+
+            var array = global.ArrayClass.New();
+            var items = new List<JsInstance>
+            {
+                target
+            };
             items.AddRange(parameters);
             int n = 0;
             while (items.Count > 0)
@@ -183,7 +188,7 @@ namespace Jint.Native
         {
             if (target is JsArray)
                 return ((JsArray)target).Join(parameters.Length > 0 ? parameters[0] : JsUndefined.Instance);
-            string separator = (parameters.Length == 0 || parameters[0] is JsUndefined)
+            string separator = (parameters.Length == 0 || IsUndefined(parameters[0]))
                 ? ","
                 : parameters[0].ToString();
 
@@ -195,14 +200,10 @@ namespace Jint.Native
             JsInstance element0 = jsObject[0.ToString()];
 
             StringBuilder r;
-            if (element0 is JsUndefined || element0 == JsNull.Instance)
-            {
+            if (IsNullOrUndefined(element0))
                 r = new StringBuilder(string.Empty);
-            }
             else
-            {
                 r = new StringBuilder(element0.ToString());
-            }
 
             var length = jsObject["length"].ToNumber();
 
@@ -210,7 +211,7 @@ namespace Jint.Native
             {
                 r.Append(separator);
                 JsInstance element = jsObject[k.ToString()];
-                if (!(element is JsUndefined) && element != JsNull.Instance)
+                if (!IsNullOrUndefined(element))
                     r.Append(element);
             }
             return JsString.Create(r.ToString());
@@ -327,8 +328,9 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static JsInstance Slice(JsGlobal global, JsObject target, JsInstance[] parameters)
+        public static JsInstance Slice(JsObject target, JsInstance[] parameters)
         {
+            var global = target.Global;
             var start = parameters.Length > 0 ? (int)parameters[0].ToNumber() : 0;
             var end = parameters.Length > 1 ? (int)parameters[1].ToNumber() : target.Length;
 
@@ -410,9 +412,10 @@ namespace Jint.Native
         /// <param name="target"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static JsInstance Splice(JsGlobal global, JsObject target, JsInstance[] parameters)
+        public static JsInstance Splice(JsObject target, JsInstance[] parameters)
         {
-            JsArray array = global.ArrayClass.New();
+            var global = target.Global;
+            var array = global.ArrayClass.New();
             int relativeStart = Convert.ToInt32(parameters[0].ToNumber());
             int actualStart = relativeStart < 0 ? Math.Max(target.Length + relativeStart, 0) : Math.Min(relativeStart, target.Length);
             int actualDeleteCount = Math.Min(Math.Max(Convert.ToInt32(parameters[1].ToNumber()), 0), target.Length - actualStart);

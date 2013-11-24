@@ -18,7 +18,7 @@ namespace Jint.Native
 
         private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = new JsObject(global.FunctionClass.Prototype);
+            var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("split", global.FunctionClass.New<JsInstance>(SplitImpl, 2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("replace", global.FunctionClass.New<JsInstance>(ReplaceImpl, 2), PropertyAttributes.DontEnum);
@@ -48,9 +48,9 @@ namespace Jint.Native
             return prototype;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as JsGlobal) == global)
+            if (that == null || that == Global.GlobalScope)
             {
                 JsInstance result;
 
@@ -273,7 +273,7 @@ namespace Jint.Native
 
             if (!regexp.IsGlobal)
             {
-                return JsRegExpConstructor.ExecImpl(global, regexp, new JsInstance[] { target });
+                return JsRegExpConstructor.ExecImpl(regexp, new JsInstance[] { target });
             }
             else
             {
@@ -479,7 +479,7 @@ namespace Jint.Native
             JsObject a = global.ArrayClass.New();
             string s = target.ToString();
 
-            if (parameters.Length == 0 || parameters[0] is JsUndefined)
+            if (parameters.Length == 0 || IsUndefined(parameters[0]))
             {
                 a["0"] = JsString.Create(s);
             }
@@ -522,7 +522,7 @@ namespace Jint.Native
                 start = Convert.ToInt32(parameters[0].ToNumber());
             }
 
-            if (parameters.Length > 1 && !(parameters[1] is JsUndefined) && !double.IsNaN(parameters[1].ToNumber()))
+            if (parameters.Length > 1 && !IsUndefined(parameters[1]) && !double.IsNaN(parameters[1].ToNumber()))
             {
                 end = Convert.ToInt32(parameters[1].ToNumber());
             }
@@ -544,7 +544,7 @@ namespace Jint.Native
                 start = Convert.ToInt32(parameters[0].ToNumber());
             }
 
-            if (parameters.Length > 1 && !(parameters[1] is JsUndefined) && !double.IsNaN(parameters[1].ToNumber()))
+            if (parameters.Length > 1 && !IsUndefined(parameters[1]) && !double.IsNaN(parameters[1].ToNumber()))
             {
                 end = Convert.ToInt32(parameters[1].ToNumber());
             }

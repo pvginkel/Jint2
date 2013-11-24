@@ -117,7 +117,7 @@ namespace Jint
                 {
                     // Generic defenitions aren't types in the meaning of js
                     // but they are instances of System.Type
-                    var res = new NativeGenericType(type, _typeType.Prototype);
+                    var res = new NativeGenericType(_global, type, _typeType.Prototype);
                     _typeType.SetupNativeProperties(res);
                     return res;
                 }
@@ -196,7 +196,7 @@ namespace Jint
             {
                 if (typeof(T).IsArray)
                 {
-                    if (value == null || value is JsUndefined || value == JsNull.Instance)
+                    if (value == null || JsInstance.IsNullOrUndefined(value))
                         return default(T);
                     if (_global.ArrayClass.HasInstance(value as JsObject))
                     {
@@ -219,14 +219,14 @@ namespace Jint
                 }
                 else if (typeof(Delegate).IsAssignableFrom(typeof(T)))
                 {
-                    if (value == null || value is JsUndefined || value == JsNull.Instance)
+                    if (value == null || JsInstance.IsNullOrUndefined(value))
                         return default(T);
 
                     if (! (value is JsFunction) )
                         throw new JintException("Can't convert a non function object to a delegate type");
                     return (T)MarshalJsFunctionHelper(value as JsFunction, typeof(T));
                 }
-                else if (value != JsNull.Instance && !(value is JsUndefined) && value is T)
+                else if (!JsInstance.IsNullOrUndefined(value) && value is T)
                 {
                     return (T)(object)value;
                 }
@@ -270,7 +270,7 @@ namespace Jint
         /// <returns>A Type object</returns>
         public Type GetInstanceType(JsInstance value)
         {
-            if (value == null || value is JsUndefined || value == JsNull.Instance )
+            if (value == null || JsInstance.IsNullOrUndefined(value))
                 return null;
 
             if (value.Value != null )

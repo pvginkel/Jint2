@@ -20,7 +20,7 @@ namespace Jint.Native
         /// </summary>
         /// <param name="global"></param>
         public JsFunction(JsGlobal global)
-            : this(global.FunctionClass.Prototype)
+            : this(global, global.FunctionClass.Prototype)
         {
         }
 
@@ -28,8 +28,8 @@ namespace Jint.Native
         /// Init new function object with a specified prototype
         /// </summary>
         /// <param name="prototype">prototype for this object</param>
-        public JsFunction(JsObject prototype)
-            : base(prototype)
+        public JsFunction(JsGlobal global, JsObject prototype)
+            : base(global, prototype)
         {
             Arguments = new List<string>();
         }
@@ -41,39 +41,30 @@ namespace Jint.Native
         }
 
         //15.3.5.3
-        public virtual bool HasInstance(JsObject inst)
+        public virtual bool HasInstance(JsObject instance)
         {
             return
-                inst != null &&
-                inst != JsNull.Instance &&
-                !(inst is JsUndefined) &&
-                Prototype.IsPrototypeOf(inst);
+                instance != null &&
+                !IsNull(instance) &&
+                Prototype.IsPrototypeOf(instance);
         }
 
         //13.2.2
-        public virtual JsObject Construct(JsInstance[] parameters, Type[] generics, JsGlobal global)
+        public virtual JsObject Construct(JsInstance[] parameters, Type[] generics)
         {
-            var instance = new JsObject((JsObject)this["prototype"]);
+            var instance = new JsObject(Global, (JsObject)this["prototype"]);
 
-            var result = global.Backend.ExecuteFunction(this, instance, parameters, generics);
+            var result = Global.Backend.ExecuteFunction(this, instance, parameters, generics);
 
             var obj = result.Result as JsObject;
-            if (obj != null && !(obj is JsUndefined))
+            if (obj != null)
                 return obj;
 
             obj = result.This as JsObject;
-            if (obj != null && !(obj is JsUndefined))
+            if (obj != null)
                 return obj;
 
             return instance;
-        }
-
-        public override bool IsClr
-        {
-            get
-            {
-                return false;
-            }
         }
 
         public override object Value
@@ -82,12 +73,12 @@ namespace Jint.Native
             set { }
         }
 
-        public JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters)
+        public JsFunctionResult Execute(JsInstance that, JsInstance[] parameters)
         {
-            return Execute(global, that, parameters, null);
+            return Execute(that, parameters, null);
         }
 
-        public virtual JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public virtual JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (genericArguments != null)
                 throw new JintException("This method can't be called as a generic");

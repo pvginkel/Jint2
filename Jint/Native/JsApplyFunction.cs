@@ -13,13 +13,13 @@ namespace Jint.Native
     [Serializable]
     public class JsApplyFunction : JsFunction
     {
-        public JsApplyFunction(JsObject prototype)
-            : base(prototype)
+        public JsApplyFunction(JsGlobal global, JsObject prototype)
+            : base(global, prototype)
         {
             DefineOwnProperty("length", JsNumber.Create(2), PropertyAttributes.ReadOnly);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             var function = that as JsFunction;
 
@@ -28,18 +28,18 @@ namespace Jint.Native
 
             JsInstance @this;
 
-            if (parameters.Length >= 1 && !(parameters[0] is JsUndefined) && parameters[0] != JsNull.Instance)
+            if (parameters.Length >= 1 && !IsNullOrUndefined(parameters[0]))
                 @this = parameters[0];
             else
-                @this = global;
+                @this = Global.GlobalScope;
 
             JsInstance[] parametersCopy;
 
-            if (parameters.Length >= 2 && parameters[1] != JsNull.Instance)
+            if (parameters.Length >= 2 && !IsNull(parameters[1]))
             {
                 JsObject arguments = parameters[1] as JsObject;
                 if (arguments == null)
-                    throw new JsException(global.TypeErrorClass.New("Second argument must be an array"));
+                    throw new JsException(Global.TypeErrorClass.New("Second argument must be an array"));
 
                 parametersCopy = new JsInstance[arguments.Length];
 
@@ -50,11 +50,11 @@ namespace Jint.Native
             }
             else
             {
-                parametersCopy = Empty;
+                parametersCopy = EmptyArray;
             }
 
             // Executes the statements in 'that' and use _this as the target of the call
-            return global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
+            return Global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
         }
     }
 }

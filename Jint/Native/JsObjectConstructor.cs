@@ -24,11 +24,11 @@ namespace Jint.Native
             Prototype.DefineOwnProperty("hasOwnProperty", Global.FunctionClass.New<JsObject>(HasOwnPropertyImpl), PropertyAttributes.DontEnum);
             Prototype.DefineOwnProperty("isPrototypeOf", Global.FunctionClass.New<JsInstance>(IsPrototypeOfImpl), PropertyAttributes.DontEnum);
             Prototype.DefineOwnProperty("propertyIsEnumerable", Global.FunctionClass.New<JsObject>(PropertyIsEnumerableImpl), PropertyAttributes.DontEnum);
-            Prototype.DefineOwnProperty("getPrototypeOf", new JsFunctionWrapper(GetPrototypeOfImpl, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+            Prototype.DefineOwnProperty("getPrototypeOf", new JsFunctionWrapper(Global, GetPrototypeOfImpl, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
 
             if (Global.HasOption(Options.EcmaScript5))
             {
-                Prototype.DefineOwnProperty("defineProperty", new JsFunctionWrapper(DefineProperty, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
+                Prototype.DefineOwnProperty("defineProperty", new JsFunctionWrapper(Global, DefineProperty, Global.FunctionClass.Prototype), PropertyAttributes.DontEnum);
                 Prototype.DefineOwnProperty("__lookupGetter__", Global.FunctionClass.New<JsObject>(GetGetFunction), PropertyAttributes.DontEnum);
                 Prototype.DefineOwnProperty("__lookupSetter__", Global.FunctionClass.New<JsObject>(GetSetFunction), PropertyAttributes.DontEnum);
             }
@@ -57,7 +57,7 @@ namespace Jint.Native
         /// <returns>new object</returns>
         public JsObject New(JsFunction constructor, JsObject prototype)
         {
-            JsObject obj = new JsObject(prototype ?? Prototype);
+            JsObject obj = new JsObject(Global, prototype ?? Prototype);
             obj.DefineOwnProperty(new ValueDescriptor(obj, ConstructorName, constructor) { Enumerable = false });
             return obj;
         }
@@ -69,7 +69,7 @@ namespace Jint.Native
         /// <returns>new object</returns>
         public JsObject New(object value)
         {
-            return new JsObject(value, Prototype);
+            return new JsObject(Global, value, Prototype);
         }
 
         public JsObject New()
@@ -80,7 +80,7 @@ namespace Jint.Native
         /// <summary>
         /// 15.2.2.1
         /// </summary>
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (parameters.Length > 0)
             {
@@ -150,9 +150,15 @@ namespace Jint.Native
             if (parameters[0].Class != ClassObject)
                 throw new JsException(global.TypeErrorClass.New());
 
-            var constructor = (parameters[0] as JsObject ?? JsUndefined.Instance)[ConstructorName] as JsObject;
+            var jsObject = parameters[0] as JsObject;
+            if (jsObject != null)
+            {
+                var constructor = jsObject[ConstructorName] as JsObject;
+                if (constructor != null)
+                    return constructor[PrototypeName];
+            }
 
-            return (constructor ?? JsUndefined.Instance)[PrototypeName];
+            return JsNull.Instance;
         }
 
         /// <summary>
@@ -169,7 +175,7 @@ namespace Jint.Native
                 throw new JsException(global.TypeErrorClass.New());
 
             string name = parameters[1].ToString();
-            Descriptor desc = Descriptor.ToPropertyDesciptor(global, (JsObject)instance, name, parameters[2]);
+            Descriptor desc = Descriptor.ToPropertyDescriptor(global, (JsObject)instance, name, parameters[2]);
 
             ((JsObject)instance).DefineOwnProperty(desc);
 

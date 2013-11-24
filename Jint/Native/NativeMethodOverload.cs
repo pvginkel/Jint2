@@ -18,11 +18,9 @@ namespace Jint.Native
         // a list of generics
         private readonly LinkedList<MethodInfo> _generics = new LinkedList<MethodInfo>();
 
-        public NativeMethodOverload(ICollection<MethodInfo> methods, JsObject prototype, JsGlobal global)
-            : base(prototype)
+        public NativeMethodOverload(JsGlobal global, ICollection<MethodInfo> methods, JsObject prototype)
+            : base(global, prototype)
         {
-            if (global == null)
-                throw new ArgumentNullException("global");
             _marshaller = global.Marshaller;
 
             foreach (MethodInfo info in methods)
@@ -41,39 +39,31 @@ namespace Jint.Native
 
             _overloads = new NativeOverloadImpl<MethodInfo, JsMethodImpl>(
                 _marshaller,
-                new NativeOverloadImpl<MethodInfo, JsMethodImpl>.GetMembersDelegate(GetMembers),
-                new NativeOverloadImpl<MethodInfo, JsMethodImpl>.WrapMemberDelegate(WrapMember)
+                GetMembers,
+                WrapMember
             );
         }
 
         public override bool IsClr
         {
-            get
-            {
-                return true;
-            }
+            get { return true; }
         }
 
         public override object Value
         {
-            get
-            {
-                return true;
-            }
-            set
-            {
-            }
+            get { return true; }
+            set { }
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             if (_generics.Count == 0 && (genericArguments != null && genericArguments.Length > 0))
-                return base.Execute(global, that, parameters, genericArguments);
+                return base.Execute(that, parameters, genericArguments);
 
             JsMethodImpl impl = _overloads.ResolveOverload(parameters, genericArguments);
             if (impl == null)
                 throw new JintException(String.Format("No matching overload found {0}<{1}>", Name, genericArguments));
-            var result = impl(global, that, parameters);
+            var result = impl(Global, that, parameters);
             return new JsFunctionResult(result, that);
         }
 

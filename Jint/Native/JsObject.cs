@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Jint.PropertyBags;
 
@@ -46,26 +47,32 @@ namespace Jint.Native
             set { }
         }
 
+        public JsGlobal Global { get; private set; }
+
         /// <summary>
         /// ecma262 [[prototype]] property
         /// </summary>
-        internal JsObject Prototype { get; set; }
+        public JsObject Prototype { get; internal set; }
 
-        public JsObject()
-            : this(null, JsNull.Instance)
+        public JsObject(JsGlobal global)
+            : this(global, null, null)
         {
         }
 
-        public JsObject(object value, JsObject prototype)
+        public JsObject(JsGlobal global, JsObject prototype)
+            : this(global, null, prototype)
         {
+        }
+
+        public JsObject(JsGlobal global, object value, JsObject prototype)
+        {
+            if (global == null)
+                throw new ArgumentNullException("global");
+
+            Global = global;
             _value = value;
-            Prototype = prototype;
+            Prototype = prototype ?? global.PrototypeSink;
             Extensible = true;
-        }
-
-        public JsObject(JsObject prototype)
-            : this(null, prototype)
-        {
         }
 
         public override bool IsClr
@@ -92,7 +99,7 @@ namespace Jint.Native
             return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             if (hint == PrimitiveHint.None)
             {
@@ -111,13 +118,13 @@ namespace Jint.Native
 
             if (
                 first != null &&
-                TryExecuteToPrimitiveFunction(global, first, out primitive)
+                TryExecuteToPrimitiveFunction(first, out primitive)
             )
                 return primitive;
 
             if (
                 second != null &&
-                TryExecuteToPrimitiveFunction(global, second, out primitive)
+                TryExecuteToPrimitiveFunction(second, out primitive)
             )
                 return primitive;
 
@@ -157,10 +164,10 @@ namespace Jint.Native
                 }
             }
 
-            throw new JsException(global.TypeErrorClass.New("Invalid type"));
+            throw new JsException(Global.TypeErrorClass.New("Invalid type"));
         }
 
-        private bool TryExecuteToPrimitiveFunction(JsGlobal global, Descriptor descriptor, out JsInstance primitive)
+        private bool TryExecuteToPrimitiveFunction(Descriptor descriptor, out JsInstance primitive)
         {
             primitive = null;
 
@@ -169,10 +176,10 @@ namespace Jint.Native
             if (function == null)
                 return false;
 
-            var result = global.Backend.ExecuteFunction(
+            var result = Global.Backend.ExecuteFunction(
                 function,
                 this,
-                Empty,
+                EmptyArray,
                 null
             ).Result;
 
@@ -279,10 +286,8 @@ namespace Jint.Native
 
                 obj = obj.Prototype;
 
-                if (obj is JsUndefined || obj == JsNull.Instance)
-                {
+                if (IsNull(obj))
                     return false;
-                }
             }
         }
 
@@ -399,9 +404,6 @@ namespace Jint.Native
                 }
 
                 descriptor = GetDescriptor(index);
-                if (descriptor == null)
-                {
-                }
                 return
                     descriptor != null
                     ? descriptor.Get(this)
@@ -510,14 +512,12 @@ namespace Jint.Native
             }
         }
 
-        public void DefineAccessorProperty(JsGlobal global, string name, JsFunction get, JsFunction set)
+        public void DefineAccessorProperty(string name, JsFunction get, JsFunction set)
         {
-            if (global == null)
-                throw new ArgumentNullException("global");
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            DefineOwnProperty(new PropertyDescriptor(global, this, name)
+            DefineOwnProperty(new PropertyDescriptor(Global, this, name)
             {
                 GetFunction = get,
                 SetFunction = set,
@@ -562,7 +562,7 @@ namespace Jint.Native
         {
             var p = Prototype;
 
-            if (!(p is JsUndefined) && p != JsNull.Instance && p != null)
+            if (p != null && !IsNull(p))
             {
                 foreach (string key in p.GetKeys())
                 {
@@ -631,7 +631,7 @@ namespace Jint.Native
         {
             if (target == null)
                 return false;
-            if (target is JsUndefined || target == JsNull.Instance)
+            if (IsNull(target))
                 return false;
             if (target.Prototype == this)
                 return true;

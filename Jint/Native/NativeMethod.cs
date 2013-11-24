@@ -17,8 +17,8 @@ namespace Jint.Native
         private readonly MethodInfo _nativeMethod;
         private readonly JsMethodImpl _impl;
 
-        public NativeMethod(JsMethodImpl impl, MethodInfo nativeMethod, JsObject prototype) :
-            base(prototype)
+        public NativeMethod(JsGlobal global, JsMethodImpl impl, MethodInfo nativeMethod, JsObject prototype) :
+            base(global, prototype)
         {
             if (impl == null)
                 throw new ArgumentNullException("impl");
@@ -32,15 +32,15 @@ namespace Jint.Native
             }
         }
 
-        public NativeMethod(JsMethodImpl impl, JsObject prototype) :
-            this(impl, null, prototype)
+        public NativeMethod(JsGlobal global, JsMethodImpl impl, JsObject prototype)
+            : this(global, impl, null, prototype)
         {
             foreach (var item in impl.Method.GetParameters())
                 Arguments.Add(item.Name);
         }
 
-        public NativeMethod(MethodInfo info, JsObject prototype, JsGlobal global) :
-            base(prototype)
+        public NativeMethod(JsGlobal global, MethodInfo info, JsObject prototype)
+            : base(global, prototype)
         {
             if (info == null)
                 throw new ArgumentNullException("info");
@@ -57,10 +57,7 @@ namespace Jint.Native
 
         public override bool IsClr
         {
-            get
-            {
-                return true;
-            }
+            get { return true; }
         }
 
         public MethodInfo GetWrappedMethod()
@@ -68,12 +65,12 @@ namespace Jint.Native
             return _nativeMethod;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             var original = new JsInstance[parameters.Length];
             Array.Copy(parameters, original, parameters.Length);
 
-            var result = _impl(global, that, parameters);
+            var result = _impl(Global, that, parameters);
 
             var outParameters = new bool[parameters.Length];
 
@@ -85,7 +82,7 @@ namespace Jint.Native
             return new JsFunctionResult(result, that, outParameters);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs)
         {
             throw new JintException("This method can't be used as a constructor");
         }
@@ -95,10 +92,9 @@ namespace Jint.Native
             return "[native code]";
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             return JsString.Create(ToString());
         }
     }
-
 }

@@ -21,8 +21,8 @@ namespace Jint.Native
 
             prototype.DefineOwnProperty("constructor", Global.FunctionClass.New<JsInstance>(GetConstructor), PropertyAttributes.DontEnum);
 
-            prototype.DefineOwnProperty(CallName, new JsCallFunction(prototype), PropertyAttributes.DontEnum);
-            prototype.DefineOwnProperty(ApplyName, new JsApplyFunction(prototype), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty(CallName, new JsCallFunction(Global, prototype), PropertyAttributes.DontEnum);
+            prototype.DefineOwnProperty(ApplyName, new JsApplyFunction(Global, prototype), PropertyAttributes.DontEnum);
 
             prototype.DefineOwnProperty("toString", Global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", Global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
@@ -59,47 +59,47 @@ namespace Jint.Native
 
         public JsFunction New()
         {
-            return new JsFunction(new JsObject(Prototype));
+            return new JsFunction(Global, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<T, JsInstance> impl) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<T, JsInstance> impl, int length) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, length, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, length, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<T, JsInstance[], JsInstance> impl) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<T, JsInstance[], JsInstance> impl, int length) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, length, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, length, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<JsGlobal, T, JsInstance> impl) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<JsGlobal, T, JsInstance> impl, int length) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, length, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, length, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<JsGlobal, T, JsInstance[], JsInstance> impl) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, new JsObject(Global, Prototype));
         }
 
         public JsFunction New<T>(Func<JsGlobal, T, JsInstance[], JsInstance> impl, int length) where T : JsInstance
         {
-            return new ClrImplDefinition<T>(impl, length, new JsObject(Prototype));
+            return new ClrImplDefinition<T>(Global, impl, length, new JsObject(Global, Prototype));
         }
 
         public JsFunction New(Delegate @delegate)
@@ -109,18 +109,18 @@ namespace Jint.Native
 
             var impl = Global.Marshaller.WrapMethod(@delegate.GetType().GetMethod("Invoke"), false);
 
-            var wrapper = new JsObject(@delegate, JsNull.Instance);
+            var wrapper = new JsObject(Global, @delegate, Global.PrototypeSink);
 
             return New<JsInstance>((that, args) => impl(Global, wrapper, args));
         }
 
-        public override JsFunctionResult Execute(JsGlobal visitor, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
-            var result = Construct(parameters, null, null);
+            var result = Construct(parameters, null);
             return new JsFunctionResult(result, result);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs)
         {
             return Global.Backend.CompileFunction(parameters, genericArgs);
         }

@@ -10,7 +10,7 @@ namespace Jint.Native
     [Serializable]
     public sealed class JsString : JsInstance, ILiteral
     {
-        public static readonly JsString EmptyString = new JsString(String.Empty);
+        public static readonly JsString Empty = new JsString(String.Empty);
 
         private readonly string _value;
 
@@ -27,13 +27,13 @@ namespace Jint.Native
 
         public static JsString Create()
         {
-            return EmptyString;
+            return Empty;
         }
 
         public static JsString Create(string value)
         {
             if (String.IsNullOrEmpty(value))
-                return EmptyString;
+                return Empty;
 
             return new JsString(value);
         }
@@ -46,11 +46,6 @@ namespace Jint.Native
                 return true;
 
             return false;
-        }
-
-        public override bool IsClr
-        {
-            get { return false; }
         }
 
         public override bool ToBoolean()
@@ -109,7 +104,7 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             return this;
         }

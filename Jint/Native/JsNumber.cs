@@ -39,11 +39,6 @@ namespace Jint.Native
             _value = value;
         }
 
-        public override bool IsClr
-        {
-            get { return false; }
-        }
-
         public static bool NumberToBoolean(double value)
         {
             return value != 0 && !Double.IsNaN(value);
@@ -89,7 +84,7 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             return this;
         }

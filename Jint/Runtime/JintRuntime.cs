@@ -20,6 +20,7 @@ namespace Jint.Runtime
         private readonly JsErrorConstructor _typeErrorClass;
 
         public JsGlobal Global { get; private set; }
+        public JsObject GlobalScope { get; private set; }
 
         public JintRuntime(IJintBackend backend, Options options)
         {
@@ -29,34 +30,17 @@ namespace Jint.Runtime
             _backend = backend;
             _options = options;
 
-            var global = new JsGlobal(backend, options);
-
-            Global = global;
+            Global = new JsGlobal(backend, options);
+            GlobalScope = Global.GlobalScope;
 
             _functionClass = Global.FunctionClass;
             _errorClass = Global.ErrorClass;
             _typeErrorClass = Global.TypeErrorClass;
-
-            global["ToBoolean"] = _functionClass.New(new Func<object, Boolean>(Convert.ToBoolean));
-            global["ToByte"] = _functionClass.New(new Func<object, Byte>(Convert.ToByte));
-            global["ToChar"] = _functionClass.New(new Func<object, Char>(Convert.ToChar));
-            global["ToDateTime"] = _functionClass.New(new Func<object, DateTime>(Convert.ToDateTime));
-            global["ToDecimal"] = _functionClass.New(new Func<object, Decimal>(Convert.ToDecimal));
-            global["ToDouble"] = _functionClass.New(new Func<object, Double>(Convert.ToDouble));
-            global["ToInt16"] = _functionClass.New(new Func<object, Int16>(Convert.ToInt16));
-            global["ToInt32"] = _functionClass.New(new Func<object, Int32>(Convert.ToInt32));
-            global["ToInt64"] = _functionClass.New(new Func<object, Int64>(Convert.ToInt64));
-            global["ToSByte"] = _functionClass.New(new Func<object, SByte>(Convert.ToSByte));
-            global["ToSingle"] = _functionClass.New(new Func<object, Single>(Convert.ToSingle));
-            global["ToString"] = _functionClass.New(new Func<object, String>(Convert.ToString));
-            global["ToUInt16"] = _functionClass.New(new Func<object, UInt16>(Convert.ToUInt16));
-            global["ToUInt32"] = _functionClass.New(new Func<object, UInt32>(Convert.ToUInt32));
-            global["ToUInt64"] = _functionClass.New(new Func<object, UInt64>(Convert.ToUInt64));
         }
 
         public JsFunction CreateFunction(string name, DlrFunctionDelegate function, object closure, string[] parameters)
         {
-            return new DlrFunction(function, new JsObject(_functionClass.Prototype), closure, this)
+            return new DlrFunction(Global, function, new JsObject(Global, _functionClass.Prototype), closure, this)
             {
                 Name = name,
                 Arguments = new List<string>(parameters ?? new string[0])
@@ -91,7 +75,7 @@ namespace Jint.Runtime
             var result = ExecuteFunctionCore(
                 function,
                 that,
-                parameters ?? JsInstance.Empty,
+                parameters ?? JsInstance.EmptyArray,
                 genericParameters
             );
 
@@ -113,7 +97,7 @@ namespace Jint.Runtime
                 if (!_backend.AllowClr)
                     genericParameters = null;
 
-                return function.Execute(Global, that ?? Global, parameters ?? JsInstance.Empty, genericParameters);
+                return function.Execute(that ?? Global.GlobalScope, parameters ?? JsInstance.EmptyArray, genericParameters);
             }
             finally
             {
@@ -184,7 +168,7 @@ namespace Jint.Runtime
             if (function == null)
                 throw new JsException(_errorClass.New("Function expected."));
 
-            return function.Construct(arguments, null, Global);
+            return function.Construct(arguments, null);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Jint.Native
 
         private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = new JsObject(global.FunctionClass.Prototype);
+            var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsObject>(ToString2), PropertyAttributes.DontEnum);
@@ -30,12 +30,12 @@ namespace Jint.Native
             return JsBoolean.Create((bool)target.Value);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 
             // e.g., var foo = Boolean(true);
-            if (that == null || (that as JsGlobal) == global)
+            if (that == null || that == Global.GlobalScope)
             {
                 result = JsBoolean.Create(parameters.Length > 0 && parameters[0].ToBoolean());
             }

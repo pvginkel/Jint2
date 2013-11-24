@@ -12,20 +12,42 @@ namespace Jint.Native
     [Serializable]
     public abstract class JsInstance : IComparable<JsInstance>
     {
-        public static JsInstance[] Empty = new JsInstance[0];
+        public static JsInstance[] EmptyArray = new JsInstance[0];
 
-        public static bool IsNullOrUndefined(JsInstance o)
+        public static bool IsNullOrUndefined(JsInstance instance)
         {
-            return (o is JsUndefined) || o == JsNull.Instance || (o.IsClr && o.Value == null);
+            if (instance == null)
+                throw new ArgumentNullException("instance");
+
+            return instance.Type == JsType.Undefined || instance.Type == JsType.Null;
         }
 
-        public abstract bool IsClr { get; }
+        public static bool IsNull(JsInstance instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException("instance");
+
+            return instance.Type == JsType.Null;
+        }
+
+        public static bool IsUndefined(JsInstance instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException("instance");
+
+            return instance.Type == JsType.Undefined;
+        }
+
+        public virtual bool IsClr
+        {
+            get { return false; }
+        }
 
         public abstract object Value { get; set; }
 
         public PropertyAttributes Attributes { get; set; }
 
-        public abstract JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint);
+        public abstract JsInstance ToPrimitive(PrimitiveHint hint);
 
         public virtual bool ToBoolean()
         {
@@ -113,13 +135,9 @@ namespace Jint.Native
             return JintRuntime.CompareSame(left, right);
         }
 
-        #region IComparable<JsInstance> Members
-
         public int CompareTo(JsInstance other)
         {
             return ToString().CompareTo(other.ToString());
         }
-
-        #endregion
     }
 }

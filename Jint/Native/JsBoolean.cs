@@ -28,11 +28,6 @@ namespace Jint.Native
             _value = boolean;
         }
 
-        public override bool IsClr
-        {
-            get { return false; }
-        }
-
         public override JsType Type
         {
             get { return JsType.Boolean; }
@@ -73,7 +68,7 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             return this;
         }

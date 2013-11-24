@@ -5,9 +5,8 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public class JsUndefined : JsObject
+    public class JsUndefined : JsInstance
     {
-        private readonly JsGlobal _global;
         internal string Name { get; private set; }
 
         public static JsUndefined Instance = new JsUndefined
@@ -19,31 +18,12 @@ namespace Jint.Native
         {
         }
 
-        internal JsUndefined(JsGlobal global, string name)
+        internal JsUndefined(string name)
         {
-            if (global == null)
-                throw new ArgumentNullException("global");
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            _global = global;
             Name = name;
-        }
-
-        public override int Length
-        {
-            get { return 0; }
-            set { }
-        }
-
-        public override bool IsClr
-        {
-            get { return false; }
-        }
-
-        public override Descriptor GetDescriptor(string index)
-        {
-            return null;
         }
 
         public override string Class
@@ -76,24 +56,15 @@ namespace Jint.Native
             return double.NaN;
         }
 
-        public override JsInstance ToPrimitive(JsGlobal global, PrimitiveHint hint)
+        public override JsInstance ToPrimitive(PrimitiveHint hint)
         {
             return this;
         }
 
-        public override JsInstance this[string index]
+        public override object Value
         {
-            get
-            {
-                if (Name != null)
-                    return _global.Backend.ResolveUndefined(Name + "." + index, null);
-
-                return base[index];
-            }
-            set
-            {
-                base[index] = value;
-            }
+            get { return null; }
+            set { }
         }
     }
 }

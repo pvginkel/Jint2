@@ -14,11 +14,7 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            const string prefix = "Jint.Tests.SunSpider.";
-            var script = prefix + "access-fannkuch.js";
-
-            var assembly = typeof(TestBase).Assembly;
-            var program = new StreamReader(assembly.GetManifestResourceStream(script)).ReadToEnd();
+            var program = File.ReadAllText(@"..\..\..\Jint.Tests\SunSpider\Tests\access-fannkuch.js");
 
             var jint = new JintEngine();
 

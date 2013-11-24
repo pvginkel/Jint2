@@ -23,7 +23,7 @@ namespace Jint.Native
 
         private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = new JsObject(global.FunctionClass.Prototype);
+            var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsInstance>(ToStringImpl, 1), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsInstance>(ToLocaleStringImpl), PropertyAttributes.DontEnum);
@@ -40,9 +40,9 @@ namespace Jint.Native
             return JsNumber.Create(Convert.ToDouble(target.Value));
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || (that as JsGlobal) == global)
+            if (that == null || that == Global.GlobalScope)
             {
                 JsInstance result;
 
@@ -96,7 +96,7 @@ namespace Jint.Native
             // is radix defined ?
             if (parameters.Length > 0)
             {
-                if (!(parameters[0] is JsUndefined))
+                if (!IsUndefined(parameters[0]))
                 {
                     radix = (int)parameters[0].ToNumber();
                 }
@@ -195,7 +195,7 @@ namespace Jint.Native
             if (parameters.Length == 0)
                 throw new JsException(global.SyntaxErrorClass.New("precision missing"));
 
-            if (parameters[0] is JsUndefined)
+            if (IsUndefined(parameters[0]))
                 return ToStringImpl(target, new JsInstance[0]);
 
             int precision = 0;

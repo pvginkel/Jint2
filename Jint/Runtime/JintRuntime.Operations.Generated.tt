@@ -30,13 +30,6 @@ namespace Jint.Runtime
     foreach (var operation in new[] { Operation.Equal, Operation.NotEqual, Operation.LessThan, Operation.LessThanOrEqual, Operation.GreaterThan, Operation.GreaterThanOrEqual, Operation.Same, Operation.NotSame }) {
         foreach (var left in new[] { "JsInstance", "bool", "double", "string" }) {
             foreach (var right in new[] { "JsInstance", "bool", "double", "string" }) {
-                bool isStatic = true;
-                if (
-                    (operation == Operation.Equal || operation == Operation.NotEqual) &&
-                    (left == "JsInstance" || right == "JsInstance")
-                )
-                    isStatic = false;
-
                 bool skip = false;
 
                 switch (operation) {
@@ -58,7 +51,7 @@ namespace Jint.Runtime
                 if (skip)
                     continue;
 #>
-        public <#= isStatic ? "static " : "" #>bool Operation_<#= operation.ToString() #>(<#= left #> left, <#= right #> right)
+        public static bool Operation_<#= operation.ToString() #>(<#= left #> left, <#= right #> right)
         {
 <# switch (operation) { #>
 <#  case Operation.Equal: { #>

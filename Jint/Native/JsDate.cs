@@ -4,19 +4,21 @@ using System.Text;
 using Jint.Delegates;
 using System.Globalization;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public sealed class JsDate : JsObject {
+    public sealed class JsDate : JsObject
+    {
         internal static long Offset1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
         internal static int TicksFactor = 10000;
 
         private DateTime _value;
 
-        public override object Value {
-            get {
-                return _value;
-            }
-            set {
+        public override object Value
+        {
+            get { return _value; }
+            set
+            {
                 if (value is DateTime)
                     _value = (DateTime)value;
                 else if (value is double)
@@ -24,28 +26,25 @@ namespace Jint.Native {
             }
         }
 
-        public JsDate(JsObject prototype)
-            : base(prototype) {
-                _value = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public JsDate(JsGlobal global, JsObject prototype)
+            : base(global, prototype)
+        {
+            _value = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
-        public JsDate(DateTime date, JsObject prototype): base(prototype) {
+        public JsDate(JsGlobal global, DateTime date, JsObject prototype)
+            : base(global, prototype)
+        {
             _value = date;
         }
 
-        public JsDate(double value, JsObject prototype)
-            : this(JsDateConstructor.CreateDateTime(value), prototype) {
-        }
-
-        public override bool IsClr
+        public JsDate(JsGlobal global, double value, JsObject prototype)
+            : this(global, JsDateConstructor.CreateDateTime(value), prototype)
         {
-            get
-            {
-                return false;
-            }
         }
 
-        public override double ToNumber() {
+        public override double ToNumber()
+        {
             return DateToDouble(_value);
         }
 
@@ -54,23 +53,28 @@ namespace Jint.Native {
         public static string DateFormat = "ddd, dd MMM yyyy";
         public static string TimeFormat = "HH':'mm':'ss 'GMT'zzz";
 
-        public static double DateToDouble(DateTime date) {
+        public static double DateToDouble(DateTime date)
+        {
             return (date.ToUniversalTime().Ticks - Offset1970) / TicksFactor;
         }
 
-        public static string DateToString(DateTime date) {
+        public static string DateToString(DateTime date)
+        {
             return date.ToLocalTime().ToString(Format, CultureInfo.InvariantCulture);
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return DateToString(_value);
         }
 
-        public override object ToObject() {
+        public override object ToObject()
+        {
             return _value;
         }
 
-        public override string Class {
+        public override string Class
+        {
             get { return ClassDate; }
         }
     }

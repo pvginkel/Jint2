@@ -1,14 +1,14 @@
 ﻿using System;
 using Jint.Delegates;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsMathConstructor : JsObject {
-        public JsGlobal Global { get; set; }
-
+    public class JsMathConstructor : JsObject
+    {
         public JsMathConstructor(JsGlobal global)
-            : base(global.ObjectClass.Prototype) {
-            Global = global;
+            : base(global, global.ObjectClass.Prototype)
+        {
             var random = new Random();
 
             #region Functions
@@ -43,13 +43,15 @@ namespace Jint.Native {
 
         public const string MathType = "object";
 
-        public override string Class {
+        public override string Class
+        {
             get { return MathType; }
         }
 
         public JsInstance MaxImpl(JsObject target, JsInstance[] parameters)
         {
-            if (parameters.Length == 0) {
+            if (parameters.Length == 0)
+            {
                 return JsNumber.NegativeInfinity;
             }
 

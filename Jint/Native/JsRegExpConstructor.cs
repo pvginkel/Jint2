@@ -17,7 +17,7 @@ namespace Jint.Native
 
         private static JsObject BuildPrototype(JsGlobal global)
         {
-            var prototype = new JsObject(global.FunctionClass.Prototype);
+            var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
             prototype.DefineOwnProperty("toLocaleString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
@@ -40,7 +40,7 @@ namespace Jint.Native
 
         public JsRegExp New(string pattern, bool g, bool i, bool m)
         {
-            var ret = new JsRegExp(pattern, g, i, m, Prototype);
+            var ret = new JsRegExp(Global, pattern, g, i, m, Prototype);
             ret["source"] = JsString.Create(pattern);
             ret["lastIndex"] = JsNumber.Create(0);
             ret["global"] = JsBoolean.Create(g);
@@ -48,9 +48,9 @@ namespace Jint.Native
             return ret;
         }
 
-        public static JsInstance ExecImpl(JsGlobal global, JsRegExp regexp, JsInstance[] parameters)
+        public static JsInstance ExecImpl(JsRegExp regexp, JsInstance[] parameters)
         {
-            JsArray a = global.ArrayClass.New();
+            JsArray a = regexp.Global.ArrayClass.New();
             string input = parameters[0].ToString();
             a["input"] = JsString.Create(input);
 
@@ -81,13 +81,13 @@ namespace Jint.Native
 
         }
 
-        public static JsInstance TestImpl(JsGlobal global, JsRegExp regex, JsInstance[] parameters)
+        public static JsInstance TestImpl(JsRegExp regex, JsInstance[] parameters)
         {
-            var array = ExecImpl(global, regex, parameters) as JsArray;
+            var array = ExecImpl(regex, parameters) as JsArray;
             return JsBoolean.Create(array != null && array.Length > 0);
         }
 
-        public override JsFunctionResult Execute(JsGlobal globa, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 

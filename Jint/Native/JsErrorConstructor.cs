@@ -16,7 +16,7 @@ namespace Jint.Native
 
         private static JsObject BuildPrototype(JsGlobal global, string errorType)
         {
-            var prototype = new JsObject(global.FunctionClass.Prototype);
+            var prototype = new JsObject(global, global.FunctionClass.Prototype);
 
             prototype.DefineOwnProperty("name", JsString.Create(errorType), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
             prototype.DefineOwnProperty("toString", global.FunctionClass.New<JsObject>(ToStringImpl), PropertyAttributes.DontEnum);
@@ -37,11 +37,11 @@ namespace Jint.Native
             return New(String.Empty);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             JsInstance result;
 
-            if (that == null || (that as JsGlobal) == global)
+            if (that == null || that == Global.GlobalScope)
             {
                 result = parameters.Length > 0 ? New(parameters[0].ToString()) : New();
             }
@@ -67,11 +67,11 @@ namespace Jint.Native
             return JsString.Create(target["name"] + ": " + target["message"]);
         }
 
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs)
         {
             return parameters != null && parameters.Length > 0 ?
-                global.ErrorClass.New(parameters[0].ToString()) :
-                global.ErrorClass.New();
+                Global.ErrorClass.New(parameters[0].ToString()) :
+                Global.ErrorClass.New();
         }
     }
 }

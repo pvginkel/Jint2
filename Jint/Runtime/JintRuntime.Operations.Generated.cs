@@ -16,27 +16,27 @@ namespace Jint.Runtime
 {
     partial class JintRuntime
     {
-        public bool Operation_Equal(JsInstance left, JsInstance right)
+        public static bool Operation_Equal(JsInstance left, JsInstance right)
         {
             return CompareEquality(left, right);
         }
 
-        public bool Operation_Equal(JsInstance left, bool right)
+        public static bool Operation_Equal(JsInstance left, bool right)
         {
             return CompareEquality(left, right);
         }
 
-        public bool Operation_Equal(JsInstance left, double right)
+        public static bool Operation_Equal(JsInstance left, double right)
         {
             return CompareEquality(left, right);
         }
 
-        public bool Operation_Equal(JsInstance left, string right)
+        public static bool Operation_Equal(JsInstance left, string right)
         {
             return CompareEquality(left, right);
         }
 
-        public bool Operation_Equal(bool left, JsInstance right)
+        public static bool Operation_Equal(bool left, JsInstance right)
         {
             return CompareEquality(left, right);
         }
@@ -51,7 +51,7 @@ namespace Jint.Runtime
             return CompareEquality(left, right);
         }
 
-        public bool Operation_Equal(double left, JsInstance right)
+        public static bool Operation_Equal(double left, JsInstance right)
         {
             return CompareEquality(left, right);
         }
@@ -66,7 +66,7 @@ namespace Jint.Runtime
             return CompareEquality(left, right);
         }
 
-        public bool Operation_Equal(string left, JsInstance right)
+        public static bool Operation_Equal(string left, JsInstance right)
         {
             return CompareEquality(left, right);
         }
@@ -81,27 +81,27 @@ namespace Jint.Runtime
             return CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(JsInstance left, JsInstance right)
+        public static bool Operation_NotEqual(JsInstance left, JsInstance right)
         {
             return !CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(JsInstance left, bool right)
+        public static bool Operation_NotEqual(JsInstance left, bool right)
         {
             return !CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(JsInstance left, double right)
+        public static bool Operation_NotEqual(JsInstance left, double right)
         {
             return !CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(JsInstance left, string right)
+        public static bool Operation_NotEqual(JsInstance left, string right)
         {
             return !CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(bool left, JsInstance right)
+        public static bool Operation_NotEqual(bool left, JsInstance right)
         {
             return !CompareEquality(left, right);
         }
@@ -116,7 +116,7 @@ namespace Jint.Runtime
             return !CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(double left, JsInstance right)
+        public static bool Operation_NotEqual(double left, JsInstance right)
         {
             return !CompareEquality(left, right);
         }
@@ -131,7 +131,7 @@ namespace Jint.Runtime
             return !CompareEquality(left, right);
         }
 
-        public bool Operation_NotEqual(string left, JsInstance right)
+        public static bool Operation_NotEqual(string left, JsInstance right)
         {
             return !CompareEquality(left, right);
         }

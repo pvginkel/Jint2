@@ -8,19 +8,12 @@ namespace Jint.Native
     public abstract class JsConstructor : JsFunction
     {
         /// <summary>
-        /// Stores Global object used for creating this function.
-        /// This property may be used in the InitProtype method.
-        /// </summary>
-        public JsGlobal Global { get; set; }
-
-        /// <summary>
         /// Constructs JsContructor, setting [[Prototype]] property to global.FunctionClass.PrototypeProperty
         /// </summary>
         /// <param name="global">Global</param>
         protected JsConstructor(JsGlobal global)
             : base(global)
         {
-            Global = global;
         }
 
         /// <summary>
@@ -30,9 +23,8 @@ namespace Jint.Native
         /// <param name="global">Global</param>
         /// <param name="prototype">Prototype</param>
         protected JsConstructor(JsGlobal global, JsObject prototype)
-            : base(prototype)
+            : base(global, prototype)
         {
-            Global = global;
         }
 
         /// <summary>
@@ -46,7 +38,7 @@ namespace Jint.Native
         /// <returns>A js instance</returns>
         public virtual JsInstance Wrap<T>(T value)
         {
-            return new JsObject(value, Prototype);
+            return new JsObject(Global, value, Prototype);
         }
 
         public override string GetBody()

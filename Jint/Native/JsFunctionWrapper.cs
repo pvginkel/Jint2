@@ -10,19 +10,19 @@ namespace Jint.Native
         private readonly Func<JsInstance[], JsInstance> _delegate;
         private readonly Func<JsGlobal, JsInstance[], JsInstance> _globalDelegate;
 
-        public JsFunctionWrapper(Func<JsInstance[], JsInstance> @delegate, JsObject prototype)
-            : base(prototype)
+        public JsFunctionWrapper(JsGlobal global, Func<JsInstance[], JsInstance> @delegate, JsObject prototype)
+            : base(global, prototype)
         {
             _delegate = @delegate;
         }
 
-        public JsFunctionWrapper(Func<JsGlobal, JsInstance[], JsInstance> @delegate, JsObject prototype)
-            : base(prototype)
+        public JsFunctionWrapper(JsGlobal global, Func<JsGlobal, JsInstance[], JsInstance> @delegate, JsObject prototype)
+            : base(global, prototype)
         {
             _globalDelegate = @delegate;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace Jint.Native
                 if (_delegate != null)
                     result = _delegate(parameters);
                 else
-                    result = _globalDelegate(global, parameters);
+                    result = _globalDelegate(Global, parameters);
 
                 return new JsFunctionResult(result ?? JsUndefined.Instance, that);
             }

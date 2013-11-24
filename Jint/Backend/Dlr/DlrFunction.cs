@@ -13,8 +13,8 @@ namespace Jint.Backend.Dlr
         private readonly object _closure;
         private readonly JintRuntime _runtime;
 
-        public DlrFunction(DlrFunctionDelegate function, JsObject prototype, object closure, JintRuntime runtime)
-            : base(prototype)
+        public DlrFunction(JsGlobal global, DlrFunctionDelegate function, JsObject prototype, object closure, JintRuntime runtime)
+            : base(global, prototype)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
@@ -24,7 +24,7 @@ namespace Jint.Backend.Dlr
             _runtime = runtime;
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance @this, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance @this, JsInstance[] parameters, Type[] genericArguments)
         {
             var result = _function(_runtime, @this, this, _closure, parameters);
 

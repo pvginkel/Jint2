@@ -5,38 +5,47 @@ using System.Text.RegularExpressions;
 using Jint.Delegates;
 using System.Reflection;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     [Serializable]
-    public class JsClrMethodInfo : JsObject {
+    public class JsClrMethodInfo : JsObject
+    {
         private readonly string _value;
 
-        public JsClrMethodInfo() {
+        public JsClrMethodInfo(JsGlobal global)
+            : this(global, null)
+        {
         }
 
-        public JsClrMethodInfo(string method) {
+        public JsClrMethodInfo(JsGlobal global, string method)
+            : base(global)
+        {
             _value = method;
         }
 
-        public override bool ToBoolean() {
+        public override bool ToBoolean()
+        {
             return false;
         }
 
-        public override double ToNumber() {
+        public override double ToNumber()
+        {
             return 0;
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return String.Empty;
         }
 
-        public override string Class {
+        public override string Class
+        {
             get { return "clrMethodInfo"; }
         }
 
-        public override object Value {
-            get {
-                return _value;
-            }
+        public override object Value
+        {
+            get { return _value; }
         }
     }
 }

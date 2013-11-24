@@ -224,7 +224,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, object value)
         {
-            _backend.Global[name] = _backend.Global.WrapClr(value);
+            _backend.Global.GlobalScope[name] = _backend.Global.WrapClr(value);
             return this;
         }
 
@@ -236,7 +236,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, double value)
         {
-            _backend.Global[name] = JsNumber.Create(value);
+            _backend.Global.GlobalScope[name] = JsNumber.Create(value);
             return this;
         }
 
@@ -249,9 +249,9 @@ namespace Jint
         public JintEngine SetParameter(string name, string value)
         {
             if (value == null)
-                _backend.Global[name] = JsNull.Instance;
+                _backend.Global.GlobalScope[name] = JsNull.Instance;
             else
-                _backend.Global[name] = JsString.Create(value);
+                _backend.Global.GlobalScope[name] = JsString.Create(value);
             return this;
         }
 
@@ -263,7 +263,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, int value)
         {
-            _backend.Global[name] = _backend.Global.WrapClr(value);
+            _backend.Global.GlobalScope[name] = _backend.Global.WrapClr(value);
             return this;
         }
 
@@ -275,7 +275,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, bool value)
         {
-            _backend.Global[name] = JsBoolean.Create(value);
+            _backend.Global.GlobalScope[name] = JsBoolean.Create(value);
             return this;
         }
 
@@ -287,7 +287,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, DateTime value)
         {
-            _backend.Global[name] = _backend.Global.DateClass.New(value);
+            _backend.Global.GlobalScope[name] = _backend.Global.DateClass.New(value);
             return this;
         }
         #endregion
@@ -300,7 +300,7 @@ namespace Jint
 
         public JintEngine SetFunction(string name, JsFunction function)
         {
-            _backend.Global[name] = function;
+            _backend.Global.GlobalScope[name] = function;
             return this;
         }
 
@@ -316,7 +316,7 @@ namespace Jint
 
         public JintEngine SetFunction(string name, Delegate function)
         {
-            _backend.Global[name] = _backend.Global.FunctionClass.New(function);
+            _backend.Global.GlobalScope[name] = _backend.Global.FunctionClass.New(function);
             return this;
         }
 

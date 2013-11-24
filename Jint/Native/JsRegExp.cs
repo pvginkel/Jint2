@@ -16,18 +16,18 @@ namespace Jint.Native
         private readonly string _pattern;
         private readonly RegexOptions _options;
 
-        public JsRegExp(JsObject prototype)
-            : base(prototype)
+        public JsRegExp(JsGlobal global, JsObject prototype)
+            : base(global, prototype)
         {
         }
 
-        public JsRegExp(string pattern, JsObject prototype)
-            : this(pattern, false, false, false, prototype)
+        public JsRegExp(JsGlobal global, string pattern, JsObject prototype)
+            : this(global, pattern, false, false, false, prototype)
         {
         }
 
-        public JsRegExp(string pattern, bool g, bool i, bool m, JsObject prototype)
-            : base(prototype)
+        public JsRegExp(JsGlobal global, string pattern, bool g, bool i, bool m, JsObject prototype)
+            : base(global, prototype)
         {
             _options = RegexOptions.ECMAScript;
 
@@ -54,17 +54,9 @@ namespace Jint.Native
             get { return _options; }
         }
 
-        public override bool IsClr
-        {
-            get { return false; }
-        }
-
         public override object Value
         {
-            get
-            {
-                return null;
-            }
+            get { return null; }
         }
 
         public override string ToSource()

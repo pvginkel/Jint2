@@ -12,13 +12,13 @@ namespace Jint.Native
     [Serializable]
     public class JsCallFunction : JsFunction
     {
-        public JsCallFunction(JsObject prototype)
-            : base(prototype)
+        public JsCallFunction(JsGlobal global, JsObject prototype)
+            : base(global, prototype)
         {
             DefineOwnProperty("length", JsNumber.Create(1), PropertyAttributes.ReadOnly);
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             var function = that as JsFunction;
 
@@ -27,25 +27,25 @@ namespace Jint.Native
 
             JsObject @this;
 
-            if (parameters.Length >= 1 && !(parameters[0] is JsUndefined) && parameters[0] != JsNull.Instance)
+            if (parameters.Length >= 1 && !IsNullOrUndefined(parameters[0]))
                 @this = parameters[0] as JsObject;
             else
-                @this = global as JsObject;
+                @this = Global.GlobalScope;
 
             JsInstance[] parametersCopy;
 
-            if (parameters.Length >= 2 && parameters[1] != JsNull.Instance)
+            if (parameters.Length >= 2 && !IsNull(parameters[1]))
             {
                 parametersCopy = new JsInstance[parameters.Length - 1];
                 Array.Copy(parameters, 1, parametersCopy, 0, parametersCopy.Length);
             }
             else
             {
-                parametersCopy = Empty;
+                parametersCopy = EmptyArray;
             }
 
             // Executes the statements in 'that' and use _this as the target of the call
-            return global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
+            return Global.Backend.ExecuteFunction(function, @this, parametersCopy, null);
         }
     }
 }

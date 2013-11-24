@@ -98,6 +98,8 @@
     <Compile Include="Marshal\RawJsMethodAttribute.cs" />
     <Compile Include="Native\ClrFunction.cs" />
     <Compile Include="Native\INativeIndexer.cs" />
+    <Compile Include="Native\JsGlobal.Scope.cs" />
+    <Compile Include="Native\JsGlobal.Sink.cs" />
     <Compile Include="Native\JsNames.cs" />
     <Compile Include="Native\JsType.cs" />
     <Compile Include="Native\NativeArrayIndexer.cs" />

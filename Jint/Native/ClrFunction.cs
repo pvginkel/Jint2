@@ -17,14 +17,14 @@ namespace Jint.Native
         public Delegate Delegate { get; set; }
         public ParameterInfo[] Parameters { get; set; }
 
-        public ClrFunction(Delegate d, JsObject prototype)
-            : base(prototype)
+        public ClrFunction(JsGlobal global, Delegate d, JsObject prototype)
+            : base(global, prototype)
         {
             Delegate = d;
             Parameters = d.Method.GetParameters();
         }
 
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
             int clrParameterCount = Delegate.Method.GetParameters().Length;
             object[] clrParameters = new object[clrParameterCount];
@@ -37,7 +37,7 @@ namespace Jint.Native
                 else if (Parameters[i].ParameterType.IsInstanceOfType(parameters[i].Value))
                     clrParameters[i] = parameters[i].Value;
                 else
-                    clrParameters[i] = global.Marshaller.MarshalJsValue<object>(parameters[i]);
+                    clrParameters[i] = Global.Marshaller.MarshalJsValue<object>(parameters[i]);
             }
 
             object result;
@@ -63,7 +63,7 @@ namespace Jint.Native
             if (result == null)
                 result = JsUndefined.Instance;
             else if (!(result is JsInstance))
-                result = global.WrapClr(result);
+                result = Global.WrapClr(result);
 
             return new JsFunctionResult((JsInstance)result, null);
         }

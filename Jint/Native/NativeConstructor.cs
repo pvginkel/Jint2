@@ -88,7 +88,7 @@ namespace Jint.Native
                 Enum.GetValues(type).CopyTo(values, 0);
 
                 for (int i = 0; i < names.Length; i++)
-                    DefineOwnProperty(names[i], new JsObject(values[i], Prototype));
+                    DefineOwnProperty(names[i], new JsObject(Global, values[i], Prototype));
 
             }
 
@@ -155,7 +155,7 @@ namespace Jint.Native
             foreach (var pair in members)
                 prototype[pair.Key] = ReflectOverload(global, pair.Value);
 
-            prototype["toString"] = new NativeMethod(_reflectedType.GetMethod("ToString", new Type[0]), global.FunctionClass.Prototype, global);
+            prototype["toString"] = new NativeMethod(Global, _reflectedType.GetMethod("ToString", new Type[0]), global.FunctionClass.Prototype);
         }
 
         private static JsFunction ReflectOverload(JsGlobal global, ICollection<MethodInfo> methods)
@@ -167,13 +167,13 @@ namespace Jint.Native
             {
                 foreach (MethodInfo info in methods)
                     if (info.ContainsGenericParameters)
-                        return new NativeMethodOverload(methods, global.FunctionClass.Prototype, global);
+                        return new NativeMethodOverload(global, methods, global.FunctionClass.Prototype);
                     else
-                        return new NativeMethod(info, global.FunctionClass.Prototype, global);
+                        return new NativeMethod(global, info, global.FunctionClass.Prototype);
             }
             else
             {
-                return new NativeMethodOverload(methods, global.FunctionClass.Prototype, global);
+                return new NativeMethodOverload(global, methods, global.FunctionClass.Prototype);
             }
 
             // we should never come here
@@ -213,15 +213,15 @@ namespace Jint.Native
         /// <param name="outParameters"></param>
         /// <param name="visitor"></param>
         /// <returns></returns>
-        public override JsFunctionResult Execute(JsGlobal global, JsInstance that, JsInstance[] parameters, Type[] genericArguments)
+        public override JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
         {
-            if (that == null || that is JsUndefined || that == JsNull.Instance || (that as JsGlobal) == global)
+            if (that == null || IsNullOrUndefined(that) || that == Global.GlobalScope)
                 throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
             if (that.Value != null)
                 throw new JintException("Can't apply the constructor '" + _reflectedType.FullName + "' to already initialized '" + that.Value + "'");
 
-            that.Value = CreateInstance(global, parameters);
+            that.Value = CreateInstance(parameters);
             SetupNativeProperties((JsObject)that);
             ((JsObject)that).Indexer = _indexer;
             return new JsFunctionResult(null, that);
@@ -237,9 +237,9 @@ namespace Jint.Native
         /// <param name="genericArgs">Ignored since this class represents a non-generic types</param>
         /// <param name="visitor">Execution visitor</param>
         /// <returns>A newly created js object</returns>
-        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs, JsGlobal global)
+        public override JsObject Construct(JsInstance[] parameters, Type[] genericArgs)
         {
-            return (JsObject)Wrap(CreateInstance(global, parameters));
+            return (JsObject)Wrap(CreateInstance(parameters));
         }
 
         /// <summary>
@@ -248,10 +248,10 @@ namespace Jint.Native
         /// <param name="visitor">Execution visitor</param>
         /// <param name="parameters">Parameters for a constructor</param>
         /// <returns>A newly created native object</returns>
-        private object CreateInstance(JsGlobal global, JsInstance[] parameters)
+        private object CreateInstance(JsInstance[] parameters)
         {
             if (parameters == null)
-                parameters = JsInstance.Empty;
+                parameters = JsInstance.EmptyArray;
 
             ConstructorImpl impl = _overloads.ResolveOverload(parameters, null);
             if (impl == null)
@@ -262,12 +262,12 @@ namespace Jint.Native
                     )
                 );
 
-            return impl(global, parameters);
+            return impl(Global, parameters);
         }
 
         public void SetupNativeProperties(JsObject target)
         {
-            if (target == null || target == JsNull.Instance || target is JsUndefined)
+            if (target == null || IsNull(target))
                 throw new ArgumentException("A valid js object is required", "target");
             foreach (var prop in _properties)
                 target.DefineOwnProperty(new NativeDescriptor(target, prop));
@@ -277,7 +277,7 @@ namespace Jint.Native
         {
             if (!_reflectedType.IsInstanceOfType(value))
                 throw new JintException("Attempt to wrap '" + typeof(T).FullName + "' with '" + _reflectedType.FullName + "'");
-            JsObject inst = new JsObject(Prototype);
+            JsObject inst = new JsObject(Global, Prototype);
             inst.Value = value;
             inst.Indexer = _indexer;
             SetupNativeProperties(inst);

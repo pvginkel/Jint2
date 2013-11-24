@@ -14,23 +14,10 @@ namespace Jint.Native
             set { this["message"] = JsString.Create(value); }
         }
 
-        public override bool IsClr
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override object Value
         {
-            get
-            {
-                return Message;
-            }
+            get { return Message; }
         }
-
-        private readonly JsGlobal _global;
 
         public JsError(JsGlobal global, JsObject prototype)
             : this(global, prototype, string.Empty)
@@ -38,9 +25,8 @@ namespace Jint.Native
         }
 
         public JsError(JsGlobal global, JsObject prototype, string message)
-            : base(prototype)
+            : base(global, prototype)
         {
-            _global = global;
             Message = message;
         }
 

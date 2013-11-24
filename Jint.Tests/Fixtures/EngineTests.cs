@@ -19,7 +19,9 @@ namespace Jint.Tests.Fixtures
         [Test]
         public void ShouldHandleDictionaryObjects()
         {
-            var dic = new JsObject();
+            var ctx = CreateContext(Assert.Fail);
+
+            var dic = new JsObject(ctx.Global);
             dic["prop1"] = JsNumber.Create(1);
             Assert.IsTrue(dic.HasProperty(JsString.Create("prop1")));
             Assert.IsTrue(dic.HasProperty("prop1"));
