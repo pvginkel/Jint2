@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using Jint.Native;
 using System.Reflection;
-using System.Reflection.Emit;
-using Jint.Marshal;
-using Jint.Delegates;
 using System.Text.RegularExpressions;
-using System.Security;
-using System.Security.Permissions;
+using Jint.Native.Interop;
+using Jint.Runtime;
+using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint
 {
@@ -24,15 +22,17 @@ namespace Jint
     /// </remarks>
     public class Marshaller
     {
-        private readonly JsGlobal _global;
-        private readonly Dictionary<Type, NativeConstructor> _typeCache = new Dictionary<Type, NativeConstructor>();
+        private readonly JintRuntime _runtime;
+        private readonly Dictionary<Type, JsFunction> _typeCache = new Dictionary<Type, JsFunction>();
         private readonly Dictionary<Type, Delegate> _arrayMarshallers = new Dictionary<Type, Delegate>();
-        private NativeTypeConstructor _typeType;
+        private JsFunction _typeType;
 
-        /* Assuming that Object supports IConvertable
-         *
-         */
-        private static readonly bool[,] IntegralTypeConversions = {
+        public JsGlobal Global { get; private set; }
+
+        // Assuming that Object supports IConvertable.
+
+        private static readonly bool[,] IntegralTypeConversions =
+        {
         //      Empty   Object  DBNull  Boolean Char    SByte   Byte    Int16   UInt16  Int32   UInt32  Int64   UInt64  Single  Double  Decimal DateTim -----   String
 /*Empty*/   {   false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  false,  true    },
 /*Objec*/   {   false,  false,  false,  true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   false,  true    },
@@ -55,24 +55,32 @@ namespace Jint
 /*Strin*/   {   false,  false,  false,  true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   true,   false,  true    }
         };
 
-        /// <summary>
-        /// Constaructs a new marshaller object.
-        /// </summary>
-        /// <param name="global">A global object which can be used for constructing new JsObjects while marshalling.</param>
-        public Marshaller(JsGlobal global)
+        public Marshaller(JintRuntime runtime, JsGlobal global)
         {
-            _global = global;
+            if (runtime == null)
+                throw new ArgumentNullException("runtime");
+            if (global == null)
+                throw new ArgumentNullException("global");
+
+            _runtime = runtime;
+            Global = global;
         }
 
-        public void InitTypes()
+        internal void Initialize()
         {
-            // we cant initize a _typeType property since _global.Marshller should be initialized
-            _typeType = NativeTypeConstructor.CreateNativeTypeConstructor(_global);
+            // We can't initialize a _typeType property since _global.Marshaller should be initialized.
+            _typeType = NativeFactory.BuildNativeConstructor(
+                Global,
+                typeof(Type),
+                Global.FunctionClass.Prototype
+            );
 
             _typeCache[typeof(Type)] = _typeType;
 
-            //TODO: replace a native contructors with apropriate js constructors
-            foreach (var t in new[] {
+            // TODO: Replace a native constructors with appropriate JS constructors.
+
+            foreach (var type in new[]
+            {
                 typeof(Int16),
                 typeof(Int32),
                 typeof(Int64),
@@ -80,28 +88,24 @@ namespace Jint
                 typeof(UInt32),
                 typeof(UInt64),
                 typeof(Single),
-                typeof(Double), // NumberConstructor
+                typeof(Double),
                 typeof(Byte),
                 typeof(SByte)
             })
             {
-                _typeCache[t] = CreateConstructor(t, _global.NumberClass.Prototype);
+                _typeCache[type] = CreateConstructor(type, Global.NumberClass.Prototype);
             }
 
-            _typeCache[typeof(String)] = CreateConstructor(typeof(String), _global.StringClass.Prototype);
-            _typeCache[typeof(Char)] = CreateConstructor(typeof(Char), _global.StringClass.Prototype);
-            _typeCache[typeof(Boolean)] = CreateConstructor(typeof(Boolean), _global.BooleanClass.Prototype);
-            _typeCache[typeof(DateTime)] = CreateConstructor(typeof(DateTime), _global.DateClass.Prototype);
-            _typeCache[typeof(Regex)] = CreateConstructor(typeof(Regex), _global.RegExpClass.Prototype);
-
+            _typeCache[typeof(String)] = CreateConstructor(typeof(String), Global.StringClass.Prototype);
+            _typeCache[typeof(Char)] = CreateConstructor(typeof(Char), Global.StringClass.Prototype);
+            _typeCache[typeof(Boolean)] = CreateConstructor(typeof(Boolean), Global.BooleanClass.Prototype);
+            _typeCache[typeof(DateTime)] = CreateConstructor(typeof(DateTime), Global.DateClass.Prototype);
+            _typeCache[typeof(Regex)] = CreateConstructor(typeof(Regex), Global.RegExpClass.Prototype);
         }
 
         /// <summary>
-        /// Marshals a native value to a JsInstance
+        /// Marshals a native value to a JsInstance.
         /// </summary>
-        /// <typeparam name="T">A type of a native value</typeparam>
-        /// <param name="value">A native value</param>
-        /// <returns>A marshalled JsInstance</returns>
         public JsInstance MarshalClrValue<T>(T value)
         {
             if (value == null)
@@ -115,69 +119,74 @@ namespace Jint
                 var type = value as Type;
                 if (type.IsGenericTypeDefinition)
                 {
-                    // Generic defenitions aren't types in the meaning of js
-                    // but they are instances of System.Type
-                    var res = new NativeGenericType(_global, type, _typeType.Prototype);
-                    _typeType.SetupNativeProperties(res);
-                    return res;
+                    // Generic definitions aren't types in the meaning of JS
+                    // but they are instances of System.Type.
+
+                    return Wrap(_typeType, type);
                 }
-                else
-                {
-                    return MarshalType(type);
-                }
+
+                return MarshalType(type);
             }
-            else
+
+            return Wrap(MarshalType(value.GetType()), value);
+        }
+
+        private JsObject Wrap(JsFunction constructor, object value)
+        {
+            // We go through the real constructor because it needs to do some
+            // setup for us. However, the constructor tries to instantiate the
+            // object for us, but we don't want that. NativeFactory.WrappingMarker
+            // disables this functionality.
+
+            var @this = Global.CreateObject(NativeFactory.WrappingMarker, constructor.Prototype);
+
+            constructor.Execute(_runtime, @this, JsInstance.EmptyArray, null);
+
+            @this.Value = value;
+
+            return @this;
+        }
+
+        public JsFunction MarshalType(Type type)
+        {
+            JsFunction result;
+            if (!_typeCache.TryGetValue(type, out result))
             {
-                return MarshalType(value.GetType()).Wrap(value);
+                result = CreateConstructor(type);
+                _typeCache.Add(type, result);
             }
+
+            return result;
         }
 
-        public JsConstructor MarshalType(Type t)
+        private JsFunction CreateConstructor(Type type)
         {
-            NativeConstructor res;
-            if (_typeCache.TryGetValue(t, out res))
-                return res;
-            
-            return _typeCache[t] = CreateConstructor(t);
-        }
-
-        private NativeConstructor CreateConstructor(Type t)
-        {
-            return (NativeConstructor)_typeType.Wrap(t);
+            return NativeFactory.BuildNativeConstructor(
+                Global,
+                type,
+                _typeType.Prototype
+            );
         }
 
         /// <summary>
         /// Creates a constructor for a native type and sets its 'prototype' property to
-        /// the object derived from a <paramref name="prototypePropertyPrototype"/>.
+        /// the object derived from a rootPrototype.
         /// </summary>
         /// <remarks>
         /// For example native strings should be derived from <c>'String'</c> class i.e. they should
         /// contain a <c>String.prototype</c> object in theirs prototype chain.
         /// </remarks>
-        /// <param name="t"></param>
-        /// <param name="prototypePropertyPrototype"></param>
-        /// <returns></returns>
-        private NativeConstructor CreateConstructor(Type t, JsObject prototypePropertyPrototype)
+        private JsFunction CreateConstructor(Type type, JsObject rootPrototype)
         {
-            return (NativeConstructor)_typeType.WrapSpecialType(t, prototypePropertyPrototype);
-        }
+            // BUG: Instead of the normal SetupNativeProperties, this
+            // would call the SetupNativeProperties from _typeType and not from the
+            // type that we were provided.
 
-        TElem[] MarshalJsArrayHelper<TElem>(JsObject value)
-        {
-            int len = (int)value["length"].ToNumber();
-            if (len < 0)
-                len = 0;
-
-            TElem[] res = new TElem[len];
-            for (int i = 0; i < len; i++)
-                res[i] = MarshalJsValue<TElem>(value[JsNumber.Create(i)]);
-
-            return res;
-        }
-
-        private object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
-        {
-            return _global.Backend.MarshalJsFunctionHelper(func, delegateType);
+            return NativeFactory.BuildNativeConstructor(
+                Global,
+                type,
+                rootPrototype
+            );
         }
 
         /// <summary>
@@ -188,72 +197,52 @@ namespace Jint
         /// <returns>A converted native velue</returns>
         public T MarshalJsValue<T>(JsInstance value)
         {
-            if (value.Value is T)
+            object valueValue = value.Value;
+
+            if (valueValue is T)
+                return (T)valueValue;
+
+            if (typeof(T).IsArray)
             {
-                return (T)value.Value;
+                if (value == null || JsInstance.IsNullOrUndefined(value))
+                    return default(T);
+
+                if (Global.ArrayClass.HasInstance(value as JsObject))
+                {
+                    Delegate marshaller;
+                    if (!_arrayMarshallers.TryGetValue(typeof(T), out marshaller))
+                    {
+                        _arrayMarshallers[typeof(T)] = marshaller = Delegate.CreateDelegate(
+                            typeof(Func<JsObject, T>),
+                            this,
+                            typeof(Marshaller)
+                                .GetMethod("MarshalJsFunctionHelper")
+                                .MakeGenericMethod(typeof(T).GetElementType())
+                        );
+                    }
+
+                    return ((Func<JsObject, T>)marshaller)(value as JsObject);
+                }
+
+                throw new JintException("Array is required");
             }
-            else
+
+            if (typeof(Delegate).IsAssignableFrom(typeof(T)))
             {
-                if (typeof(T).IsArray)
-                {
-                    if (value == null || JsInstance.IsNullOrUndefined(value))
-                        return default(T);
-                    if (_global.ArrayClass.HasInstance(value as JsObject))
-                    {
-                        Delegate marshller;
-                        if (!_arrayMarshallers.TryGetValue(typeof(T), out marshller))
-                            _arrayMarshallers[typeof(T)] = marshller = Delegate.CreateDelegate(
-                                typeof(Func<JsObject, T>),
-                                this,
-                                typeof(Marshaller)
-                                    .GetMethod("MarshalJsFunctionHelper")
-                                    .MakeGenericMethod(typeof(T).GetElementType())
-                            );
+                if (value == null || JsInstance.IsNullOrUndefined(value))
+                    return default(T);
 
-                        return ((Func<JsObject, T>)marshller)(value as JsObject);
-                    }
-                    else
-                    {
-                        throw new JintException("Array is required");
-                    }
-                }
-                else if (typeof(Delegate).IsAssignableFrom(typeof(T)))
-                {
-                    if (value == null || JsInstance.IsNullOrUndefined(value))
-                        return default(T);
+                if (!(value is JsFunction))
+                    throw new JintException("Can't convert a non function object to a delegate type");
 
-                    if (! (value is JsFunction) )
-                        throw new JintException("Can't convert a non function object to a delegate type");
-                    return (T)MarshalJsFunctionHelper(value as JsFunction, typeof(T));
-                }
-                else if (!JsInstance.IsNullOrUndefined(value) && value is T)
-                {
-                    return (T)(object)value;
-                }
-                else
-                {
-                    // JsNull and JsUndefined will fall here and become a nulls
-                    return (T)Convert.ChangeType(value.Value, typeof(T));
-                }
+                return (T)(object)ProxyHelper.MarshalJsFunction(_runtime, value as JsFunction, Global.PrototypeSink, typeof(T));
             }
-        }
 
-        /// <summary>
-        /// This is a temporary solution... Used when calling a members on value types.
-        /// </summary>
-        /// <remarks>
-        /// This method used to get a reference to the boxed value type, then a reference is
-        /// unboxed to managed pointer and then is used as the first argument in a method call.
-        /// </remarks>
-        /// <typeparam name="T">Type of value type, which we desire to get</typeparam>
-        /// <param name="value">A js value which should be marshalled</param>
-        /// <returns>A reference to a boxed value</returns>
-        public object MarshalJsValueBoxed<T>(JsInstance value)
-        {
-            if (value.Value is T)
-                return value.Value;
-            else
-                return null;
+            if (!JsInstance.IsNullOrUndefined(value) && value is T)
+                return (T)(object)value;
+
+            // JsNull and JsUndefined will fall here and become a nulls
+            return (T)Convert.ChangeType(valueValue, typeof(T));
         }
 
         /// <summary>
@@ -273,119 +262,51 @@ namespace Jint
             if (value == null || JsInstance.IsNullOrUndefined(value))
                 return null;
 
-            if (value.Value != null )
-                return value.Value.GetType();
-
-            return value.GetType();
-        }
-
-        #region wrappers
-
-        /// <summary>
-        /// Converts a native method to a standard delegate.
-        /// </summary>
-        /// <param name="info">A method to wrap</param>
-        /// <param name="passGlobal">If this paramerter is true and the first argument of the constructor
-        /// is JsGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
-        /// <returns>A wrapper delegate</returns>
-        public JsMethodImpl WrapMethod(MethodInfo info, bool passGlobal)
-        {
-            return ProxyHelper.Default.WrapMethod(info, passGlobal);
-        }
-
-        /// <summary>
-        /// Converts a constructor to a standart delegate
-        /// </summary>
-        /// <param name="info">A constructor to wrap</param>
-        /// <param name="passGlobal">If this paramerter is true and the first argument of the constructor
-        /// is JsGlobal, a wrapper delegate will pass a Global JS object in the first parameter.</param>
-        /// <returns>A wrapper delegate</returns>
-        public ConstructorImpl WrapConstructor(ConstructorInfo info, bool passGlobal) {
-            return ProxyHelper.Default.WrapConstructor(info, passGlobal);
-        }
-
-        public JsGetter WrapGetProperty(PropertyInfo prop) {
-            return ProxyHelper.Default.WrapGetProperty(prop,this);
-        }
-
-        public JsGetter WrapGetField(FieldInfo field) {
-            return ProxyHelper.Default.WrapGetField(field,this);
-        }
-
-        public JsSetter WrapSetProperty(PropertyInfo prop) {
-            return ProxyHelper.Default.WrapSetProperty(prop, this);
-        }
-
-        public JsSetter WrapSetField(FieldInfo field) {
-            return ProxyHelper.Default.WrapSetField(field, this);
-        }
-
-        public JsIndexerGetter WrapIndexerGetter(MethodInfo getMethod) {
-            return ProxyHelper.Default.WrapIndexerGetter(getMethod, this);
-        }
-
-        public JsIndexerSetter WrapIndexerSetter(MethodInfo setMethod) {
-            return ProxyHelper.Default.WrapIndexerSetter(setMethod, this);
+            return (value.Value ?? value).GetType();
         }
 
         /// <summary>
         /// Marshals a native property to a descriptor
         /// </summary>
-        /// <param name="prop">Property to marshal</param>
+        /// <param name="property">Property to marshal</param>
         /// <param name="owner">Owner of the returned descriptor</param>
         /// <returns>A descriptor</returns>
-        public NativeDescriptor MarshalPropertyInfo(PropertyInfo prop, JsObject owner)
+        public NativeDescriptor MarshalPropertyInfo(PropertyInfo property, JsObject owner)
         {
-            JsGetter getter;
-            JsSetter setter = null;
+            WrappedGetter getter;
+            WrappedSetter setter = null;
 
-            if (prop.CanRead && prop.GetGetMethod() != null)
-                getter = WrapGetProperty(prop);
+            if (property.CanRead && property.GetGetMethod() != null)
+                getter = ProxyHelper.WrapGetProperty(property);
             else
-                getter = that => JsUndefined.Instance;
+                getter = (global, @this) => JsUndefined.Instance;
 
-            if (prop.CanWrite && prop.GetSetMethod() != null)
-            {
-                setter = WrapSetProperty(prop);
-            }
+            if (property.CanWrite && property.GetSetMethod() != null)
+                setter = ProxyHelper.WrapSetProperty(property);
 
-            return setter == null ? new NativeDescriptor(owner, prop.Name, getter) { Enumerable = true } : new NativeDescriptor(owner, prop.Name, getter, setter) { Enumerable = true };
+            var attributes = PropertyAttributes.None;
+            if (setter == null)
+                attributes |= PropertyAttributes.ReadOnly;
+
+            return new NativeDescriptor(owner, property.Name, getter, setter, attributes);
         }
 
         /// <summary>
         /// Marshals a native field to a JS Descriptor
         /// </summary>
-        /// <param name="prop">Field info to marshal</param>
+        /// <param name="field">Field info to marshal</param>
         /// <param name="owner">Owner for the descriptor</param>
         /// <returns>Descriptor</returns>
-        public NativeDescriptor MarshalFieldInfo(FieldInfo prop, JsObject owner)
+        public NativeDescriptor MarshalFieldInfo(FieldInfo field, JsObject owner)
         {
-            JsGetter getter;
-            JsSetter setter;
-
-            if (prop.IsLiteral)
-            {
-                JsInstance value = null; // This demand initization should prevent a stack overflow while reflecting types
-                getter = that => {
-                    if (value == null)
-                        value = (JsInstance)typeof(Marshaller)
-                            .GetMethod("MarshalClrValue")
-                            .MakeGenericMethod(prop.FieldType)
-                            .Invoke(this, new object[] { prop.GetValue(null) });
-                    return value;
-                };
-                setter = (that, v) => { };
-            }
-            else
-            {
-                getter = WrapGetField(prop);
-                setter = WrapSetField(prop);
-            }
-
-            return new NativeDescriptor(owner, prop.Name, getter, setter) { Enumerable = true };
+            return new NativeDescriptor(
+                owner,
+                field.Name,
+                ProxyHelper.WrapGetField(field),
+                ProxyHelper.WrapSetField(field),
+                PropertyAttributes.None
+            );
         }
-
-        #endregion
 
         public bool IsAssignable(Type target, Type source)
         {
@@ -395,6 +316,21 @@ namespace Jint
                     IntegralTypeConversions[(int)Type.GetTypeCode(source), (int)Type.GetTypeCode(target)]
                 ) ||
                 target.IsAssignableFrom(source);
+        }
+
+        public Type[] MarshalGenericArguments(JsInstance[] genericArguments)
+        {
+            if (genericArguments == null)
+                return Type.EmptyTypes;
+
+            var result = new Type[genericArguments.Length];
+
+            for (int i = 0; i < genericArguments.Length; i++)
+            {
+                result[i] = MarshalJsValue<Type>(genericArguments[i]);
+            }
+
+            return result;
         }
     }
 }

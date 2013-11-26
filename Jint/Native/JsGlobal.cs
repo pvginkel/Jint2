@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Globalization;
-using System.Text.RegularExpressions;
+using Jint.Runtime;
 
 namespace Jint.Native
 {
@@ -20,75 +19,45 @@ namespace Jint.Native
 
         internal JsObject PrototypeSink { get; private set; }
 
-        public JsGlobal(IJintBackend backend, Options options)
+        internal Random Random { get; private set; }
+
+        public JsGlobal(JintRuntime runtime, IJintBackend backend, Options options)
         {
             PrototypeSink = new Sink(this);
 
             Options = options;
             Backend = backend;
 
-            Marshaller = new Marshaller(this);
+            // The Random instance is used by Math to generate random numbers.
+            Random = new Random();
 
-            var objectPrototype = new JsObject(this, PrototypeSink);
-
-            var functionPrototype = new JsFunctionWrapper(
-                this,
-                p => JsUndefined.Instance,
-                objectPrototype
-            );
-
-            // These two must be initialized special because they depend on
-            // each other being available.
-
-            FunctionClass = new JsFunctionConstructor(this, functionPrototype);
-            ObjectClass = new JsObjectConstructor(this, objectPrototype);
-            FunctionClass.InitPrototype();
-            ObjectClass.InitPrototype();
-
-            ArrayClass = new JsArrayConstructor(this);
-            BooleanClass = new JsBooleanConstructor(this);
-            DateClass = new JsDateConstructor(this);
-
-            ErrorClass = new JsErrorConstructor(this, "Error");
-            EvalErrorClass = new JsErrorConstructor(this, "EvalError");
-            RangeErrorClass = new JsErrorConstructor(this, "RangeError");
-            ReferenceErrorClass = new JsErrorConstructor(this, "ReferenceError");
-            SyntaxErrorClass = new JsErrorConstructor(this, "SyntaxError");
-            TypeErrorClass = new JsErrorConstructor(this, "TypeError");
-            URIErrorClass = new JsErrorConstructor(this, "URIError");
-
-            NumberClass = new JsNumberConstructor(this);
-            RegExpClass = new JsRegExpConstructor(this);
-            StringClass = new JsStringConstructor(this);
-            MathClass = new JsMathConstructor(this);
+            BuildEnvironment();
 
             GlobalScope = new Scope(this);
 
-            Marshaller.InitTypes();
+            Marshaller = new Marshaller(runtime, this);
+            Marshaller.Initialize();
         }
 
-        #region Global Functions
+        public JsFunction ObjectClass { get; private set; }
+        public JsFunction FunctionClass { get; private set; }
+        public JsFunction ArrayClass { get; private set; }
+        public JsFunction BooleanClass { get; private set; }
+        public JsFunction DateClass { get; private set; }
+        public JsFunction ErrorClass { get; private set; }
+        public JsFunction EvalErrorClass { get; private set; }
+        public JsFunction RangeErrorClass { get; private set; }
+        public JsFunction ReferenceErrorClass { get; private set; }
+        public JsFunction SyntaxErrorClass { get; private set; }
+        public JsFunction TypeErrorClass { get; private set; }
+        public JsFunction URIErrorClass { get; private set; }
 
-        public JsObjectConstructor ObjectClass { get; private set; }
-        public JsFunctionConstructor FunctionClass { get; private set; }
-        public JsArrayConstructor ArrayClass { get; private set; }
-        public JsBooleanConstructor BooleanClass { get; private set; }
-        public JsDateConstructor DateClass { get; private set; }
-        public JsErrorConstructor ErrorClass { get; private set; }
-        public JsErrorConstructor EvalErrorClass { get; private set; }
-        public JsErrorConstructor RangeErrorClass { get; private set; }
-        public JsErrorConstructor ReferenceErrorClass { get; private set; }
-        public JsErrorConstructor SyntaxErrorClass { get; private set; }
-        public JsErrorConstructor TypeErrorClass { get; private set; }
-        public JsErrorConstructor URIErrorClass { get; private set; }
-
-        public JsMathConstructor MathClass { get; private set; }
-        public JsNumberConstructor NumberClass { get; private set; }
-        public JsRegExpConstructor RegExpClass { get; private set; }
-        public JsStringConstructor StringClass { get; private set; }
+        public JsObject MathClass { get; private set; }
+        public JsFunction NumberClass { get; private set; }
+        public JsFunction RegExpClass { get; private set; }
+        public JsFunction StringClass { get; private set; }
         public Marshaller Marshaller { get; private set; }
 
-        #endregion
         [Obsolete]
         public JsInstance Wrap(object value)
         {
@@ -102,7 +71,7 @@ namespace Jint.Native
                     return JsString.Create(Convert.ToString(value));
 
                 case TypeCode.DateTime:
-                    return DateClass.New((DateTime)value);
+                    return CreateDate((DateTime)value);
 
                 case TypeCode.Byte:
                 case TypeCode.Int16:
@@ -118,7 +87,7 @@ namespace Jint.Native
                     return JsNumber.Create(Convert.ToDouble(value));
 
                 case TypeCode.Object:
-                    return ObjectClass.New(value);
+                    return CreateObject(value, ObjectClass.Prototype);
 
                 default:
                     throw new ArgumentNullException("value");

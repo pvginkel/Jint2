@@ -2,25 +2,44 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Native {
-    internal enum DescriptorType {
+namespace Jint.Native
+{
+    internal enum DescriptorType
+    {
         Value,
         Accessor,
         Clr
     }
 
     [Serializable]
-    public abstract class Descriptor {
-        public Descriptor(JsObject owner, string name) {
+    public abstract class Descriptor
+    {
+        protected Descriptor(JsObject owner, string name, PropertyAttributes attributes)
+        {
+            Attributes = attributes;
             Owner = owner;
             Name = name;
         }
 
         public string Name { get; set; }
 
-        public bool Enumerable { get; set; }
-        public bool Configurable { get; set; }
-        public bool Writable { get; set; }
+        public PropertyAttributes Attributes { get; private set; }
+
+        public bool Enumerable
+        {
+            get { return (Attributes & PropertyAttributes.DontEnum) == 0; }
+        }
+
+        public bool Configurable
+        {
+            get { return (Attributes & PropertyAttributes.DontDelete) == 0; }
+        }
+
+        public bool Writable
+        {
+            get { return (Attributes & PropertyAttributes.ReadOnly) == 0; }
+        }
+
         public JsObject Owner { get; set; }
 
         public virtual bool IsDeleted { get; protected set; }
@@ -33,11 +52,13 @@ namespace Jint.Native {
         /// <remarks>
         /// A descriptor may be deleted to force a refresh of cached references.
         /// </remarks>
-        public virtual void Delete() {
+        public virtual void Delete()
+        {
             IsDeleted = true;
         }
 
-        public bool IsClr {
+        public bool IsClr
+        {
             get { return false; }
         }
 
@@ -67,53 +88,60 @@ namespace Jint.Native {
         /// <param name="global"></param>
         /// <param name="obj"></param>
         /// <returns></returns>
-        internal static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsInstance jsInstance) {
-            if (jsInstance.Class != JsInstance.ClassObject) {
-                throw new JsException(global.TypeErrorClass.New("The target object has to be an instance of an object"));
+        internal static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsInstance jsInstance)
+        {
+            if (jsInstance.Class != JsInstance.ClassObject)
+            {
+                throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
             }
 
             JsObject obj = (JsObject)jsInstance;
-            if ((obj.HasProperty("value") || obj.HasProperty("writable")) && (obj.HasProperty("set") || obj.HasProperty("get"))) {
-                throw new JsException(global.TypeErrorClass.New("The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined"));
-            }
+            if ((obj.HasProperty("value") || obj.HasProperty("writable")) && (obj.HasProperty("set") || obj.HasProperty("get")))
+                throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
 
-            Descriptor desc;
+            var attributes = PropertyAttributes.None;
+            JsFunction getFunction = null;
+            JsFunction setFunction = null;
             JsInstance result;
 
-            if (obj.HasProperty("value")) {
-                desc = new ValueDescriptor(owner, name, obj["value"]);
-            }
-            else {
-                desc = new PropertyDescriptor(global, owner, name);
-            }
+            if (
+                obj.TryGetProperty("enumerable", out result) &&
+                !result.ToBoolean()
+            )
+                attributes |= PropertyAttributes.DontEnum;
 
-            if (obj.TryGetProperty("enumerable", out result)) {
-                desc.Enumerable = result.ToBoolean();
-            }
+            if (
+                obj.TryGetProperty("configurable", out result) &&
+                !result.ToBoolean()
+            )
+                attributes |= PropertyAttributes.DontDelete;
 
-            if (obj.TryGetProperty("configurable", out result)) {
-                desc.Configurable = result.ToBoolean();
-            }
+            if (
+                obj.TryGetProperty("writable", out result) &&
+                !result.ToBoolean()
+            )
+                attributes |= PropertyAttributes.ReadOnly;
 
-            if (obj.TryGetProperty("writable", out result)) {
-                desc.Writable = result.ToBoolean();
-            }
-
-            if (obj.TryGetProperty("get", out result)) {
+            if (obj.TryGetProperty("get", out result))
+            {
                 if (!(result is JsFunction))
-                    throw new JsException(global.TypeErrorClass.New("The getter has to be a function"));
+                    throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
 
-                ((PropertyDescriptor)desc).GetFunction = (JsFunction)result;
+                getFunction = (JsFunction)result;
             }
 
-            if (obj.TryGetProperty("set", out result)) {
+            if (obj.TryGetProperty("set", out result))
+            {
                 if (!(result is JsFunction))
-                    throw new JsException(global.TypeErrorClass.New("The setter has to be a function"));
+                    throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
 
-                ((PropertyDescriptor)desc).SetFunction = (JsFunction)result;
+                setFunction = (JsFunction)result;
             }
 
-            return desc;
+            if (obj.HasProperty("value"))
+                return new ValueDescriptor(owner, name, obj["value"]);
+            else
+                return new PropertyDescriptor(global, owner, name, getFunction, setFunction, attributes);
         }
     }
 }

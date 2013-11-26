@@ -52,7 +52,12 @@ namespace Jint.Tests.Fixtures
 
         protected JintEngine CreateContext(Action<string> errorAction, bool allowClr)
         {
-            var ctx = base.CreateContext(errorAction);
+            return CreateContext(errorAction, allowClr, Options.EcmaScript5 | Options.Strict);
+        }
+
+        protected JintEngine CreateContext(Action<string> errorAction, bool allowClr, Options options)
+        {
+            var ctx = CreateContext(errorAction, options);
 
             if (allowClr)
                 ctx.AllowClr();

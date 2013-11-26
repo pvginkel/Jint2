@@ -21,15 +21,11 @@ namespace Jint
 
         JsInstance Eval(JsInstance[] arguments);
 
-        JsFunctionResult ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, Type[] genericParameters);
+        JsInstance ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters);
 
         int Compare(JsFunction function, JsInstance x, JsInstance y);
 
-        object MarshalJsFunctionHelper(JsFunction func, Type delegateType);
-
-        JsInstance Construct(JsFunction function, JsInstance[] parameters);
-
-        JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs);
+        JsFunction CompileFunction(JsInstance[] parameters);
 
         JsInstance ResolveUndefined(string typeFullName, Type[] generics);
     }

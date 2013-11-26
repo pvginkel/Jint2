@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using Jint.Delegates;
 
 namespace Jint.Native
 {
     [Serializable]
     public class JsArguments : JsObject
     {
-        public const string CalleeName = "callee";
-        private const string LengthPropertyName = "length";
-
-        public JsArguments(JsGlobal global, JsFunction callee, JsInstance[] arguments)
-            : base(global, global.ObjectClass.New())
+        internal JsArguments(JsGlobal global, JsFunction callee, JsInstance[] arguments)
+            : base(global, null, global.CreateObject())
         {
             int length;
 
@@ -22,7 +18,7 @@ namespace Jint.Native
             {
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    DefineOwnProperty(new ValueDescriptor(this, i.ToString(CultureInfo.InvariantCulture), arguments[i]) { Enumerable = false });
+                    DefineOwnProperty(new ValueDescriptor(this, i.ToString(CultureInfo.InvariantCulture), arguments[i], PropertyAttributes.DontEnum));
                 }
 
                 length = arguments.Length;
@@ -32,8 +28,8 @@ namespace Jint.Native
                 length = 0;
             }
 
-            DefineOwnProperty(new ValueDescriptor(this, CalleeName, callee) { Enumerable = false });
-            DefineOwnProperty(new ValueDescriptor(this, LengthPropertyName, JsNumber.Create(length)) { Enumerable = false, Configurable = true });
+            DefineOwnProperty(new ValueDescriptor(this, JsNames.Callee, callee, PropertyAttributes.DontEnum));
+            DefineOwnProperty(new ValueDescriptor(this, JsNames.Length, JsNumber.Create(length), PropertyAttributes.DontEnum));
         }
 
         public override bool IsClr

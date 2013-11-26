@@ -7,45 +7,39 @@ namespace Jint.Native
     [Serializable]
     public class PropertyDescriptor : Descriptor
     {
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name)
-            : base(owner, name)
-        {
-            _global = global;
-            Enumerable = false;
-        }
-
         private readonly JsGlobal _global;
 
-        public JsFunction GetFunction { get; set; }
-        public JsFunction SetFunction { get; set; }
+        public JsFunction GetFunction { get; internal set; }
+        public JsFunction SetFunction { get; internal set; }
 
         public override bool IsReference
         {
             get { return false; }
         }
 
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, JsFunction getFunction, JsFunction setFunction, PropertyAttributes attributes)
+            : base(owner, name, attributes)
+        {
+            GetFunction = getFunction;
+            SetFunction = setFunction;
+            _global = global;
+        }
+
         public override Descriptor Clone()
         {
-            return new PropertyDescriptor(_global, Owner, Name)
-            {
-                Enumerable = Enumerable,
-                Configurable = Configurable,
-                Writable = Writable,
-                GetFunction = GetFunction,
-                SetFunction = SetFunction
-            };
+            return new PropertyDescriptor(_global, Owner, Name, GetFunction, SetFunction, Attributes);
         }
 
         public override JsInstance Get(JsInstance that)
         {
             //JsObject that = _global._visitor.CallTarget;
-            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.EmptyArray, null).Result;
+            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.EmptyArray, null);
         }
 
         public override void Set(JsObject that, JsInstance value)
         {
             if (SetFunction == null)
-                throw new JsException(_global.TypeErrorClass.New());
+                throw new JsException(JsErrorType.TypeError);
 
             _global.Backend.ExecuteFunction(SetFunction, that, new[] { value }, null);
         }
@@ -53,47 +47,6 @@ namespace Jint.Native
         internal override DescriptorType DescriptorType
         {
             get { return DescriptorType.Accessor; }
-        }
-    }
-
-    [Serializable]
-    public class PropertyDescriptor<T> : PropertyDescriptor
-        where T : JsInstance
-    {
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<T, JsInstance> get)
-            : base(global, owner, name)
-        {
-            GetFunction = global.FunctionClass.New(get);
-        }
-
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<JsGlobal, T, JsInstance> get)
-            : base(global, owner, name)
-        {
-            GetFunction = global.FunctionClass.New(get);
-        }
-
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
-            : this(global, owner, name, get)
-        {
-            SetFunction = global.FunctionClass.New(set);
-        }
-
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<T, JsInstance[], JsInstance> set)
-            : this(global, owner, name, get)
-        {
-            SetFunction = global.FunctionClass.New(set);
-        }
-
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
-            : this(global, owner, name, get)
-        {
-            SetFunction = global.FunctionClass.New(set);
-        }
-
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, Func<JsGlobal, T, JsInstance> get, Func<JsGlobal, T, JsInstance[], JsInstance> set)
-            : this(global, owner, name, get)
-        {
-            SetFunction = global.FunctionClass.New(set);
         }
     }
 }

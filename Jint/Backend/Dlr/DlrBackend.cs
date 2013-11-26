@@ -10,9 +10,9 @@ using System.Security;
 using System.Security.Permissions;
 using System.Text;
 using Jint.Expressions;
-using Jint.Marshal;
 using Jint.Native;
 using Jint.Runtime;
+using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint.Backend.Dlr
 {
@@ -67,19 +67,15 @@ namespace Jint.Backend.Dlr
 
         private void EnsureGlobalsDeclared(ProgramSyntax program)
         {
+            var scope = Global.GlobalScope;
+
             foreach (var declaredVariable in program.DeclaredVariables)
             {
-                if (declaredVariable.IsDeclared)
-                {
-                    Descriptor descriptor;
-                    if (!Global.GlobalScope.TryGetDescriptor(declaredVariable.Name, out descriptor))
-                    {
-                        Global.GlobalScope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance);
-                        descriptor = Global.GlobalScope.GetDescriptor(declaredVariable.Name);
-                    }
-
-                    descriptor.Configurable = false;
-                }
+                if (
+                    declaredVariable.IsDeclared &&
+                    !scope.HasOwnProperty(declaredVariable.Name)
+                )
+                    scope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
             }
         }
 
@@ -91,7 +87,7 @@ namespace Jint.Backend.Dlr
             ResetExpressionDump();
         }
 
-        public JsFunction CompileFunction(JsInstance[] parameters, Type[] genericArgs)
+        public JsFunction CompileFunction(JsInstance[] parameters)
         {
             if (parameters == null)
                 parameters = JsInstance.EmptyArray;
@@ -189,7 +185,7 @@ namespace Jint.Backend.Dlr
             var original = new JsInstance[arguments.Length];
             Array.Copy(arguments, original, arguments.Length);
 
-            var result = ExecuteFunction(function, JsNull.Instance, arguments, null);
+            var result = _runtime.ExecuteFunction(function, JsNull.Instance, arguments, null);
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -197,7 +193,7 @@ namespace Jint.Backend.Dlr
                     args[i] = Global.Marshaller.MarshalJsValue<object>(arguments[i]);
             }
 
-            return Global.Marshaller.MarshalJsValue<object>(result.Result);
+            return Global.Marshaller.MarshalJsValue<object>(result);
         }
 
         public JsInstance Eval(JsInstance[] arguments)
@@ -213,7 +209,7 @@ namespace Jint.Backend.Dlr
             }
             catch (Exception e)
             {
-                throw new JsException(Global.SyntaxErrorClass.New(e.Message));
+                throw new JsException(JsErrorType.SyntaxError, e.Message);
             }
 
             if (program == null)
@@ -225,43 +221,33 @@ namespace Jint.Backend.Dlr
             }
             catch (Exception e)
             {
-                throw new JsException(Global.EvalErrorClass.New(e.Message));
+                throw new JsException(JsErrorType.EvalError, e.Message);
             }
         }
 
-        public JsFunctionResult ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, Type[] genericParameters)
+        public JsInstance ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters)
         {
-            return _runtime.ExecuteFunctionCore(function, that, arguments, genericParameters);
+            return _runtime.ExecuteFunction(function, that, arguments, genericParameters);
         }
 
         public int Compare(JsFunction function, JsInstance x, JsInstance y)
         {
-            var result = ExecuteFunction(
+            var result = _runtime.ExecuteFunction(
                 function,
                 JsNull.Instance,
                 new[] { x, y },
                 null
-            ).Result;
+            );
 
             return (int)result.ToNumber();
-        }
-
-        public object MarshalJsFunctionHelper(JsFunction func, Type delegateType)
-        {
-            return new JsFunctionDelegate(this, func, Global.PrototypeSink, delegateType).GetDelegate();
-        }
-
-        public JsInstance Construct(JsFunction function, JsInstance[] parameters)
-        {
-            throw new NotImplementedException();
         }
 
         public JsInstance ResolveUndefined(string typeFullName, Type[] generics)
         {
             if (!AllowClr)
-                throw new JsException(Global.ReferenceErrorClass.New());
-
-            if (AllowClr && !String.IsNullOrEmpty(typeFullName))
+                throw new JsException(JsErrorType.ReferenceError);
+            
+            if (!String.IsNullOrEmpty(typeFullName))
             {
                 EnsureClrAllowed();
 

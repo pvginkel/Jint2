@@ -185,7 +185,7 @@ namespace Jint.Runtime
         public bool Operation_In(JsInstance left, JsInstance right)
         {
             if (right is ILiteral)
-                throw new JsException(_errorClass.New("Cannot apply 'in' operator to the specified member."));
+                throw new JsException(JsErrorType.Error, "Cannot apply 'in' operator to the specified member.");
 
             return ((JsObject)right).HasProperty(left);
         }
@@ -196,9 +196,9 @@ namespace Jint.Runtime
             var obj = left as JsObject;
 
             if (function == null)
-                throw new JsException(_typeErrorClass.New("Right argument should be a function"));
+                throw new JsException(JsErrorType.TypeError, "Right argument should be a function");
             if (obj == null)
-                throw new JsException(_typeErrorClass.New("Left argument should be an object"));
+                throw new JsException(JsErrorType.TypeError, "Left argument should be an object");
 
             return function.HasInstance(obj);
         }

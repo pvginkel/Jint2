@@ -10,6 +10,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Jint.Native.Interop;
 using Jint.Parser;
 
 namespace Jint
@@ -191,9 +192,15 @@ namespace Jint
         /// <exception cref="Jint.JintException" />
         public object Run(ProgramSyntax program, bool unwrap)
         {
+            // Don't wrap exceptions while debugging to make stack traces
+            // easier to read.
+
+#if !DEBUG
             try
             {
+#endif
                 return _backend.Run(program, unwrap);
+#if !DEBUG
             }
             catch (SecurityException)
             {
@@ -201,17 +208,13 @@ namespace Jint
             }
             catch (JsException e)
             {
-                string message = e.Message;
-
-                if (e.Value is JsError)
-                    message = e.Value.Value.ToString();
-
-                throw new JintException(message, e);
+                throw new JintException(e.Message, e);
             }
             catch (Exception e)
             {
                 throw new JintException(e.Message, e);
             }
+#endif
         }
 
         #region SetParameter overloads
@@ -287,7 +290,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, DateTime value)
         {
-            _backend.Global.GlobalScope[name] = _backend.Global.DateClass.New(value);
+            _backend.Global.GlobalScope[name] = _backend.Global.CreateDate(value);
             return this;
         }
         #endregion
@@ -314,9 +317,16 @@ namespace Jint
             return _backend.CallFunction(function, args);
         }
 
-        public JintEngine SetFunction(string name, Delegate function)
+        public JintEngine SetFunction(string name, Delegate @delegate)
         {
-            _backend.Global.GlobalScope[name] = _backend.Global.FunctionClass.New(function);
+            if (@delegate == null)
+                throw new ArgumentNullException();
+
+            Global.GlobalScope[name] = ProxyHelper.BuildDelegateFunction(
+                Global,
+                @delegate
+            );
+
             return this;
         }
 
@@ -325,7 +335,7 @@ namespace Jint
         /// </summary>
         /// <param name="value">The string literal to espace</param>
         /// <returns>The escaped string literal, without sinlge quotes, back slashes and line breaks</returns>
-        public static string EscapteStringLiteral(string value)
+        public static string EscapeStringLiteral(string value)
         {
             return value.Replace("\\", "\\\\").Replace("'", "\\'").Replace(Environment.NewLine, "\\r\\n");
         }

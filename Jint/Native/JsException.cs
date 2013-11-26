@@ -7,15 +7,25 @@ namespace Jint.Native
     [Serializable]
     public class JsException : Exception
     {
-        public JsInstance Value { get; set; }
+        public JsErrorType Type { get; private set; }
+        public JsInstance Value { get; private set; }
 
-        public JsException()
+        public JsException(JsErrorType type)
+            : this(type, null)
         {
         }
 
-        public JsException(JsInstance value)
-            : base(value.ToSource())
+        public JsException(JsErrorType type, string message)
+            : base(message)
         {
+            Type = type;
+        }
+
+        public JsException(JsInstance value)
+        {
+            if (value == null)
+                throw new ArgumentNullException("value");
+
             Value = value;
         }
     }

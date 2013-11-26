@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Delegates;
-using System.Globalization;
 
 namespace Jint.Native
 {
@@ -22,25 +20,24 @@ namespace Jint.Native
                 if (value is DateTime)
                     _value = (DateTime)value;
                 else if (value is double)
-                    _value = JsDateConstructor.CreateDateTime((double)value);
+                    _value = CreateDateTime((double)value);
             }
         }
 
-        public JsDate(JsGlobal global, JsObject prototype)
-            : base(global, prototype)
-        {
-            _value = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        }
-
-        public JsDate(JsGlobal global, DateTime date, JsObject prototype)
-            : base(global, prototype)
+        internal JsDate(JsGlobal global, DateTime date, JsObject prototype)
+            : base(global, null, prototype)
         {
             _value = date;
         }
 
-        public JsDate(JsGlobal global, double value, JsObject prototype)
-            : this(global, JsDateConstructor.CreateDateTime(value), prototype)
+        internal JsDate(JsGlobal global, double value, JsObject prototype)
+            : this(global, CreateDateTime(value), prototype)
         {
+        }
+
+        public static DateTime CreateDateTime(double number)
+        {
+            return new DateTime((long)(number * JsDate.TicksFactor + JsDate.Offset1970), DateTimeKind.Utc);
         }
 
         public static string Format = "ddd, dd MMM yyyy HH':'mm':'ss 'GMT'zzz";

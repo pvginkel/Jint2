@@ -54,17 +54,7 @@ namespace Jint.Native
         /// </summary>
         public JsObject Prototype { get; internal set; }
 
-        public JsObject(JsGlobal global)
-            : this(global, null, null)
-        {
-        }
-
-        public JsObject(JsGlobal global, JsObject prototype)
-            : this(global, null, prototype)
-        {
-        }
-
-        public JsObject(JsGlobal global, object value, JsObject prototype)
+        internal JsObject(JsGlobal global, object value, JsObject prototype)
         {
             if (global == null)
                 throw new ArgumentNullException("global");
@@ -169,7 +159,7 @@ namespace Jint.Native
                 }
             }
 
-            throw new JsException(Global.TypeErrorClass.New("Invalid type"));
+            throw new JsException(JsErrorType.TypeError, "Invalid type");
         }
 
         private bool TryExecuteToPrimitiveFunction(Descriptor descriptor, out JsInstance primitive)
@@ -186,7 +176,7 @@ namespace Jint.Native
                 this,
                 EmptyArray,
                 null
-            ).Result;
+            );
 
             if (result.IsPrimitive)
             {
@@ -388,6 +378,16 @@ namespace Jint.Native
                     return Prototype;
 
                 descriptor = GetDescriptor(index);
+
+                if (descriptor == null)
+                {
+                    Trace.WriteLine(String.Format(
+                        "Unresolved identifier {0} of {1}",
+                        index,
+                        GetType()
+                    ));
+                }
+
                 return
                     descriptor != null
                     ? descriptor.Get(this)
@@ -443,9 +443,9 @@ namespace Jint.Native
             // throw new JintException("Property " + index + " isn't configurable");
         }
 
-        public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes propertyAttributes)
+        public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes attributes)
         {
-            DefineOwnProperty(new ValueDescriptor(this, key, value) { Writable = (propertyAttributes & PropertyAttributes.ReadOnly) == 0, Enumerable = (propertyAttributes & PropertyAttributes.DontEnum) == 0 });
+            DefineOwnProperty(new ValueDescriptor(this, key, value, attributes));
         }
 
         public void DefineOwnProperty(string key, JsInstance value)
@@ -456,12 +456,12 @@ namespace Jint.Native
         public virtual void DefineOwnProperty(Descriptor currentDescriptor)
         {
             string key = currentDescriptor.Name;
-            Descriptor desc;
-            if (_properties.TryGet(key, out desc) && desc.Owner == this)
+            Descriptor descriptor;
+            if (_properties.TryGet(key, out descriptor) && descriptor.Owner == this)
             {
+                // Updating an existing property.
 
-                // updating an existing property
-                switch (desc.DescriptorType)
+                switch (descriptor.DescriptorType)
                 {
                     case DescriptorType.Value:
                         switch (currentDescriptor.DescriptorType)
@@ -481,15 +481,19 @@ namespace Jint.Native
                         break;
 
                     case DescriptorType.Accessor:
-                        var propDesc = (PropertyDescriptor)desc;
+                        var propertyDescriptor = (PropertyDescriptor)descriptor;
+                        var currentPropertyDescriptor = (PropertyDescriptor)currentDescriptor;
+
                         if (currentDescriptor.DescriptorType == DescriptorType.Accessor)
                         {
-                            propDesc.GetFunction = ((PropertyDescriptor)currentDescriptor).GetFunction ?? propDesc.GetFunction;
-                            propDesc.SetFunction = ((PropertyDescriptor)currentDescriptor).SetFunction ?? propDesc.SetFunction;
+                            if (currentPropertyDescriptor.GetFunction != null)
+                                propertyDescriptor.GetFunction = currentPropertyDescriptor.GetFunction;
+                            if (currentPropertyDescriptor.SetFunction != null)
+                                propertyDescriptor.SetFunction = currentPropertyDescriptor.SetFunction;
                         }
                         else
                         {
-                            propDesc.Set(this, currentDescriptor.Get(this));
+                            propertyDescriptor.Set(this, currentDescriptor.Get(this));
                         }
                         break;
                 }
@@ -497,25 +501,20 @@ namespace Jint.Native
             else
             {
                 // add a new property
-                if (desc != null)
-                    desc.Owner.RedefineProperty(desc.Name); // if we have a cached property
+                if (descriptor != null)
+                    descriptor.Owner.RedefineProperty(descriptor.Name); // if we have a cached property
 
                 _properties.Put(key, currentDescriptor);
                 _length++;
             }
         }
 
-        public void DefineAccessorProperty(string name, JsFunction get, JsFunction set)
+        public void DefineAccessorProperty(string name, JsFunction getFunction, JsFunction setFunction)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            DefineOwnProperty(new PropertyDescriptor(Global, this, name)
-            {
-                GetFunction = get,
-                SetFunction = set,
-                Enumerable = true
-            });
+            DefineOwnProperty(new PropertyDescriptor(Global, this, name, getFunction, setFunction, PropertyAttributes.None));
         }
 
         void RedefineProperty(string name)
@@ -570,54 +569,6 @@ namespace Jint.Native
                     yield return descriptor.Key;
             }
             yield break;
-        }
-
-        /// <summary>
-        /// non standard
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="p"></param>
-        /// <param name="currentDescriptor"></param>
-        public static JsInstance GetGetFunction(JsObject target, JsInstance[] parameters)
-        {
-            if (parameters.Length == 0)
-                throw new ArgumentException("propertyName");
-
-            if (!target.HasOwnProperty(parameters[0].ToString()))
-                return GetGetFunction(target.Prototype, parameters);
-
-            var descriptor = target._properties.Get(parameters[0].ToString()) as PropertyDescriptor;
-            if (descriptor == null)
-                return JsUndefined.Instance;
-
-            return (JsInstance)descriptor.GetFunction ?? JsUndefined.Instance;
-        }
-
-        /// <summary>
-        /// non standard
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="p"></param>
-        /// <param name="currentDescriptor"></param>
-        public static JsInstance GetSetFunction(JsObject target, JsInstance[] parameters)
-        {
-            if (parameters.Length <= 0)
-            {
-                throw new ArgumentException("propertyName");
-            }
-
-            if (!target.HasOwnProperty(parameters[0].ToString()))
-            {
-                return GetSetFunction(target.Prototype, parameters);
-            }
-
-            PropertyDescriptor desc = target._properties.Get(parameters[0].ToString()) as PropertyDescriptor;
-            if (desc == null)
-            {
-                return JsUndefined.Instance;
-            }
-
-            return (JsInstance)desc.SetFunction ?? JsUndefined.Instance;
         }
 
         public bool IsPrototypeOf(JsObject target)

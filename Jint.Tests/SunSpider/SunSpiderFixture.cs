@@ -79,5 +79,12 @@ namespace Jint.Tests.SunSpider
         {
             RunFile(script);
         }
+
+        protected override JintEngine CreateContext(Action<string> errorAction)
+        {
+            var result = base.CreateContext(errorAction);
+            result.DisableSecurity();
+            return result;
+        }
     }
 }

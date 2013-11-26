@@ -59,7 +59,12 @@ namespace Jint.Tests.Support
 
         protected virtual JintEngine CreateContext(Action<string> errorAction)
         {
-            var ctx = new JintEngine();
+            return CreateContext(errorAction, Options.EcmaScript5 | Options.Strict);
+        }
+
+        protected JintEngine CreateContext(Action<string> errorAction, Options options)
+        {
+            var ctx = new JintEngine(options);
 
             Action<string> failAction = Assert.Fail;
             Action<string> printAction = message => Trace.WriteLine(message);
@@ -106,20 +111,11 @@ namespace Jint.Tests.Support
         {
             var errorText = new StringBuilder();
 
-            object result;
+            fileName = Path.Combine(_testsPath, fileName);
 
-            try
-            {
-                fileName = Path.Combine(_testsPath, fileName);
+            var ctx = CreateContext(e => errorText.AppendLine(e));
 
-                var ctx = CreateContext(e => errorText.AppendLine(e));
-
-                result = RunFile(ctx, fileName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Test threw an exception.", ex);
-            }
+            var result = RunFile(ctx, fileName);
 
             if (errorText.Length > 0)
                 Assert.Fail(errorText.ToString());

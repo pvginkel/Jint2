@@ -1874,6 +1874,7 @@ finallyClause returns [FinallyClause value]
 
 functionDeclaration returns [SyntaxNode value]
 @init {
+    var start = input.LT(1);
     string name;
     List<string> parameters;
     BlockSyntax body;
@@ -1886,7 +1887,8 @@ functionDeclaration returns [SyntaxNode value]
             body
         )
         {
-            Target = _currentBody.DeclaredVariables.AddOrGet(name, true)
+            Target = _currentBody.DeclaredVariables.AddOrGet(name, true),
+            Source = ExtractSourceCode(start, input.LT(-1))
         }
     );
 
@@ -1903,6 +1905,7 @@ functionDeclaration returns [SyntaxNode value]
 
 functionExpression returns [FunctionSyntax value]
 @init {
+    var start = input.LT(1);
     string name = null;
     List<string> parameters;
     BlockSyntax body;
@@ -1911,7 +1914,10 @@ functionExpression returns [FunctionSyntax value]
 	$value = new FunctionSyntax(name, parameters, body);
 
     if (name != null)
+    {
         $value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
+        $value.Source = ExtractSourceCode(start, input.LT(-1));
+    }
 }
 	:
         FUNCTION

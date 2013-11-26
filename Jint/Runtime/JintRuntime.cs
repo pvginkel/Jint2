@@ -2,11 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Security;
 using System.Text;
-using Jint.Backend.Dlr;
-using Jint.Expressions;
 using Jint.Native;
 
 namespace Jint.Runtime
@@ -14,10 +11,6 @@ namespace Jint.Runtime
     public partial class JintRuntime
     {
         private readonly IJintBackend _backend;
-        private readonly Options _options;
-        private readonly JsFunctionConstructor _functionClass;
-        private readonly JsErrorConstructor _errorClass;
-        private readonly JsErrorConstructor _typeErrorClass;
 
         public JsGlobal Global { get; private set; }
         public JsObject GlobalScope { get; private set; }
@@ -28,84 +21,32 @@ namespace Jint.Runtime
                 throw new ArgumentNullException("backend");
 
             _backend = backend;
-            _options = options;
 
-            Global = new JsGlobal(backend, options);
+            Global = new JsGlobal(this, backend, options);
             GlobalScope = Global.GlobalScope;
-
-            _functionClass = Global.FunctionClass;
-            _errorClass = Global.ErrorClass;
-            _typeErrorClass = Global.TypeErrorClass;
         }
 
-        public JsFunction CreateFunction(string name, DlrFunctionDelegate function, object closure, string[] parameters)
+        public JsFunction CreateFunction(string name, JsFunctionDelegate function, object closure, string[] parameters)
         {
-            return new DlrFunction(Global, function, new JsObject(Global, _functionClass.Prototype), closure, this)
-            {
-                Name = name,
-                Arguments = new List<string>(parameters ?? new string[0])
-            };
-        }
-
-        public JsInstance ExecuteFunction(JsInstance that, JsInstance target, JsInstance[] parameters, JsInstance[] genericArguments)
-        {
-            Type[] genericParameters = null;
-
-            if (_backend.AllowClr && genericArguments != null && genericArguments.Length > 0)
-            {
-                genericParameters = new Type[genericArguments.Length];
-
-                try
-                {
-                    for (int i = 0; i < genericArguments.Length; i++)
-                    {
-                        genericParameters[i] = (Type)genericArguments[i].Value;
-                    }
-                }
-                catch (Exception e)
-                {
-                    throw new JintException("A type parameter is required", e);
-                }
-            }
-
-            var function = target as JsFunction;
-            if (function == null)
-                throw new JsException(_errorClass.New("Function expected."));
-
-            var result = ExecuteFunctionCore(
+            return Global.CreateFunction(
+                name,
                 function,
-                that,
-                parameters ?? JsInstance.EmptyArray,
-                genericParameters
+                parameters == null ? 0 : parameters.Length,
+                closure
             );
-
-            return result.Result;
         }
 
-        public JsFunctionResult ExecuteFunctionCore(JsFunction function, JsInstance that, JsInstance[] parameters, Type[] genericParameters)
+        public JsInstance ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] parameters, JsInstance[] genericArguments)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
 
-            try
-            {
-                if (_backend.AllowClr)
-                    _backend.PermissionSet.PermitOnly();
-
-                if (!_backend.AllowClr)
-                    genericParameters = null;
-
-                return function.Execute(
-                    that ?? Global.GlobalScope,
-                    parameters ?? JsInstance.EmptyArray,
-                    genericParameters
-                );
-            }
-            finally
-            {
-                if (_backend.AllowClr)
-                    CodeAccessPermission.RevertPermitOnly();
-            }
+            return function.Execute(
+                this,
+                that ?? Global.GlobalScope,
+                parameters ?? JsInstance.EmptyArray,
+                genericArguments
+            );
         }
 
         public IEnumerable<JsInstance> GetForEachKeys(JsInstance obj)
@@ -136,11 +77,34 @@ namespace Jint.Runtime
             if (exception == null)
                 throw new ArgumentNullException("exception");
 
-            var jsException =
-                exception as JsException ??
-                new JsException(_errorClass.New(exception.Message));
+            // TODO: Be smart about how we wrap exceptions. E.g. a cast
+            // exception could be converted to a TypeError.
 
-            return jsException.Value;
+            var type = JsErrorType.Error;
+
+            var jsException = exception as JsException;
+            if (jsException != null)
+            {
+                if (jsException.Value != null)
+                    return jsException.Value;
+
+                type = jsException.Type;
+            }
+
+            JsObject errorClass;
+
+            switch (type)
+            {
+                case JsErrorType.EvalError: errorClass = Global.EvalErrorClass; break;
+                case JsErrorType.RangeError: errorClass = Global.RangeErrorClass; break;
+                case JsErrorType.ReferenceError: errorClass = Global.ReferenceErrorClass; break;
+                case JsErrorType.SyntaxError: errorClass = Global.SyntaxErrorClass; break;
+                case JsErrorType.TypeError: errorClass = Global.TypeErrorClass; break;
+                case JsErrorType.URIError: errorClass = Global.URIErrorClass; break;
+                default: errorClass = Global.ErrorClass; break;
+            }
+
+            return Global.CreateError(errorClass.Prototype, exception.Message);
         }
 
         public JsInstance New(JsInstance target, JsInstance[] arguments, JsInstance[] generics)
@@ -168,9 +132,9 @@ namespace Jint.Runtime
 
             var function = target as JsFunction;
             if (function == null)
-                throw new JsException(_errorClass.New("Function expected."));
+                throw new JsException(JsErrorType.Error, "Function expected.");
 
-            return function.Construct(arguments, null);
+            return function.Construct(this, arguments);
         }
     }
 }

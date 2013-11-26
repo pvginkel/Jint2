@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Delegates;
 
 namespace Jint.Native
 {
@@ -19,13 +18,8 @@ namespace Jint.Native
             get { return Message; }
         }
 
-        public JsError(JsGlobal global, JsObject prototype)
-            : this(global, prototype, string.Empty)
-        {
-        }
-
-        public JsError(JsGlobal global, JsObject prototype, string message)
-            : base(global, prototype)
+        internal JsError(JsGlobal global, JsObject prototype, string message)
+            : base(global, null, prototype)
         {
             Message = message;
         }

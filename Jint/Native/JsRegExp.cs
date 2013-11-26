@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Delegates;
 using System.Text.RegularExpressions;
 
 namespace Jint.Native
@@ -9,34 +8,42 @@ namespace Jint.Native
     [Serializable]
     public class JsRegExp : JsObject
     {
-        public bool IsGlobal { get { return this["global"].ToBoolean(); } }
-        public bool IsIgnoreCase { get { return (_options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase; } }
-        public bool IsMultiLine { get { return (_options & RegexOptions.Multiline) == RegexOptions.Multiline; } }
+        public bool IsGlobal
+        {
+            get { return (_options & JsRegExpOptions.Global) != 0; }
+        }
+
+        public bool IsIgnoreCase
+        {
+            get { return (_options & JsRegExpOptions.IgnoreCase) != 0; }
+        }
+
+        public bool IsMultiLine
+        {
+            get { return (_options & JsRegExpOptions.Multiline) != 0; }
+        }
+
 
         private readonly string _pattern;
-        private readonly RegexOptions _options;
+        private readonly RegexOptions _parsedOptions;
+        private readonly JsRegExpOptions _options;
 
-        public JsRegExp(JsGlobal global, JsObject prototype)
-            : base(global, prototype)
+        internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
+            : base(global, null, prototype)
         {
-        }
+            _options = options;
+            _parsedOptions = RegexOptions.ECMAScript;
 
-        public JsRegExp(JsGlobal global, string pattern, JsObject prototype)
-            : this(global, pattern, false, false, false, prototype)
-        {
-        }
-
-        public JsRegExp(JsGlobal global, string pattern, bool g, bool i, bool m, JsObject prototype)
-            : base(global, prototype)
-        {
-            _options = RegexOptions.ECMAScript;
-
-            if (m)
-                _options |= RegexOptions.Multiline;
-            if (i)
-                _options |= RegexOptions.IgnoreCase;
+            if (options.HasFlag(JsRegExpOptions.Multiline))
+                _parsedOptions |= RegexOptions.Multiline;
+            if (options.HasFlag(JsRegExpOptions.IgnoreCase))
+                _parsedOptions |= RegexOptions.IgnoreCase;
 
             _pattern = pattern;
+
+            this["source"] = JsString.Create(pattern);
+            this["lastIndex"] = JsNumber.Create(0);
+            this["global"] = JsBoolean.Create(options.HasFlag(JsRegExpOptions.Global));
         }
 
         public string Pattern
@@ -46,12 +53,12 @@ namespace Jint.Native
 
         public Regex Regex
         {
-            get { return new Regex(_pattern, _options); }
+            get { return new Regex(_pattern, _parsedOptions); }
         }
 
         public RegexOptions Options
         {
-            get { return _options; }
+            get { return _parsedOptions; }
         }
 
         public override object Value
@@ -61,7 +68,7 @@ namespace Jint.Native
 
         public override string ToSource()
         {
-            return "/" + _pattern.ToString() + "/";
+            return "/" + _pattern + "/";
         }
 
         public override string Class

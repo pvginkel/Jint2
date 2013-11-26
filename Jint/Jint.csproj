@@ -24,7 +24,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,9 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backend\Dlr\ClosureManager.cs" />
-    <Compile Include="Backend\Dlr\DlrFunction.cs" />
     <Compile Include="Backend\Dlr\DlrBackend.cs" />
-    <Compile Include="Backend\Dlr\DlrFunctionDelegate.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.Builders.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.OperationBuilders.cs" />
     <Compile Include="Backend\Dlr\TypeMarkerPhase.cs" />
@@ -79,8 +77,11 @@
     <Compile Include="Expressions\SyntaxType.cs" />
     <Compile Include="Expressions\SyntaxUtil.cs" />
     <Compile Include="Expressions\WithScope.cs" />
+    <Compile Include="Native\Interop\NativeFactory.cs" />
+    <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\JsConvert.cs" />
-    <Compile Include="Native\JsFunctionResult.cs" />
+    <Compile Include="Native\JsErrorType.cs" />
+    <Compile Include="Native\JsFunctionDelegate.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
     <Compile Include="Expressions\Closure.cs" />
     <Compile Include="Backend\Dlr\VariableMarkerPhase.cs" />
@@ -93,28 +94,33 @@
     <Compile Include="Expressions\VariableCollection.cs" />
     <Compile Include="Expressions\VariableType.cs" />
     <Compile Include="IJintBackend.cs" />
-    <Compile Include="Marshal\Delegates.cs" />
-    <Compile Include="Marshal\JsFunctionDelegate.cs" />
-    <Compile Include="Marshal\JsPropertyAttribute.cs" />
-    <Compile Include="Marshal\ProxyHelper.cs" />
-    <Compile Include="Marshal\RawJsMethodAttribute.cs" />
+    <Compile Include="Native\Interop\Delegates.cs" />
+    <Compile Include="Native\Interop\ProxyHelper.cs" />
     <Compile Include="Native\ClrFunction.cs" />
     <Compile Include="Native\INativeIndexer.cs" />
+    <Compile Include="Native\JsGlobal.ArrayFunctions.cs" />
+    <Compile Include="Native\JsGlobal.BooleanFunctions.cs" />
+    <Compile Include="Native\JsGlobal.Builders.cs" />
+    <Compile Include="Native\JsGlobal.DateFunctions.cs" />
+    <Compile Include="Native\JsGlobal.Environment.cs" />
+    <Compile Include="Native\JsGlobal.ErrorFunctions.cs" />
+    <Compile Include="Native\JsGlobal.MathFunctions.cs" />
+    <Compile Include="Native\JsGlobal.NumberFunctions.cs" />
+    <Compile Include="Native\JsGlobal.ObjectFunctions.cs" />
+    <Compile Include="Native\JsGlobal.RegExpFunctions.cs" />
     <Compile Include="Native\JsGlobal.Scope.cs" />
+    <Compile Include="Native\JsGlobal.Scope.Functions.cs" />
     <Compile Include="Native\JsGlobal.Sink.cs" />
     <Compile Include="Native\JsNames.cs" />
+    <Compile Include="Native\JsRegExpOptions.cs" />
     <Compile Include="Native\JsType.cs" />
-    <Compile Include="Native\NativeArrayIndexer.cs" />
-    <Compile Include="Native\NativeIndexer.cs" />
-    <Compile Include="Native\NativeOverloadImpl.cs" />
-    <Compile Include="Native\NativeDescriptor.cs" />
+    <Compile Include="Native\Interop\NativeArrayIndexer.cs" />
+    <Compile Include="Native\Interop\NativeMethodOverload.cs" />
+    <Compile Include="Native\Interop\NativeIndexer.cs" />
+    <Compile Include="Native\Interop\NativeOverloadImpl.cs" />
+    <Compile Include="Native\Interop\NativeDescriptor.cs" />
     <Compile Include="Marshal.cs" />
-    <Compile Include="Native\NativeConstructor.cs" />
-    <Compile Include="Native\NativeMethodOverload.cs" />
     <Compile Include="Native\ILiteral.cs" />
-    <Compile Include="Native\NativeMethod.cs" />
-    <Compile Include="Native\NativeGenericType.cs" />
-    <Compile Include="Native\NativeTypeConstructor.cs" />
     <Compile Include="Native\PreferredType.cs" />
     <Compile Include="Parser\ES3Additions.Builders.cs" />
     <Compile Include="Parser\ES3Lexer.cs" />
@@ -127,12 +133,9 @@
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Expressions\PropertyDeclarationSyntax.cs" />
     <Compile Include="IConstructorInvoker.cs" />
-    <Compile Include="Native\JsApplyFunction.cs" />
     <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />
-    <Compile Include="Native\JsConstructor.cs" />
     <Compile Include="Native\JsError.cs" />
-    <Compile Include="Native\JsErrorConstructor.cs" />
     <Compile Include="Native\PropertyDescriptor.cs" />
     <Compile Include="Native\ValueDescriptor.cs" />
     <Compile Include="Options.cs" />
@@ -143,27 +146,13 @@
     <Compile Include="Expressions\PropertySyntax.cs" />
     <Compile Include="Expressions\IForStatement.cs" />
     <Compile Include="JintException.cs" />
-    <Compile Include="Native\ClrImplDefinition.cs" />
-    <Compile Include="Native\JsClrConstructorInfo.cs" />
-    <Compile Include="Native\JsClrMethodInfo.cs" />
     <Compile Include="Native\JsException.cs" />
-    <Compile Include="Native\JsFunctionWrapper.cs" />
     <Compile Include="Native\JsArguments.cs" />
-    <Compile Include="Native\JsCallFunction.cs" />
-    <Compile Include="Native\JsDateConstructor.cs" />
-    <Compile Include="Native\JsFunctionConstructor.cs" />
-    <Compile Include="Native\JsNumberConstructor.cs" />
-    <Compile Include="Native\JsRegExpConstructor.cs" />
-    <Compile Include="Native\JsStringConstructor.cs" />
-    <Compile Include="Native\JsBooleanConstructor.cs" />
-    <Compile Include="Native\JsArrayConstructor.cs" />
     <Compile Include="Native\JsNull.cs" />
-    <Compile Include="Native\JsObjectConstructor.cs" />
     <Compile Include="Expressions\RegexpSyntax.cs" />
     <Compile Include="Native\JsInstance.cs" />
     <Compile Include="Native\JsUndefined.cs" />
     <Compile Include="Native\JsRegExp.cs" />
-    <Compile Include="Native\JsMathConstructor.cs" />
     <Compile Include="Native\JsBoolean.cs" />
     <Compile Include="Native\JsString.cs" />
     <Compile Include="Native\JsNumber.cs" />
@@ -215,6 +204,8 @@
     <Compile Include="Runtime\JintRuntime.Comparers.cs" />
     <Compile Include="Runtime\JintRuntime.cs" />
     <Compile Include="Runtime\JintRuntime.Operations.cs" />
+    <Compile Include="Native\JsGlobal.Setup.cs" />
+    <Compile Include="Native\JsGlobal.FunctionFunctions.cs" />
     <Compile Include="Runtime\JintRuntime.Operations.Generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -226,6 +217,7 @@
     <Compile Include="Backend\Dlr\ExpressionVisitor.Scope.cs" />
     <None Include="ES3.g" />
     <None Include="Key.snk" />
+    <Compile Include="Native\JsGlobal.StringFunctions.cs" />
     <None Include="Parser\Generate.bat" />
     <None Include="Runtime\JintRuntime.Operations.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -234,6 +226,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Marshal\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

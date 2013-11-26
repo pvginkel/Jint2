@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Jint.Marshal;
 
 namespace Jint.Native
 {
@@ -11,13 +10,13 @@ namespace Jint.Native
         private int _length;
         private SortedList<int, JsInstance> _data = new SortedList<int, JsInstance>();
 
-        public JsArray(JsGlobal global, JsObject prototype)
-            : base(global, prototype)
+        internal JsArray(JsGlobal global, JsObject prototype)
+            : base(global, null, prototype)
         {
         }
 
         private JsArray(JsGlobal global, SortedList<int, JsInstance> data, int len, JsObject prototype)
-            : base(global, prototype)
+            : base(global, null, prototype)
         {
             _data = data;
             _length = len;
@@ -231,7 +230,6 @@ namespace Jint.Native
             return base.Delete(key);
         }
 
-        [RawJsMethod]
         public JsArray Concat(JsInstance[] args)
         {
             var newData = new SortedList<int, JsInstance>(_data);
@@ -266,7 +264,6 @@ namespace Jint.Native
             return new JsArray(Global, newData, offset, Global.ArrayClass.Prototype);
         }
 
-        [RawJsMethod]
         public JsString Join(JsInstance separator)
         {
             if (_length == 0)

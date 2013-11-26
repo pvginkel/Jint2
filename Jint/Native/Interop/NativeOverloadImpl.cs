@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 
-namespace Jint.Native
+namespace Jint.Native.Interop
 {
     /// <summary>
     /// This class is used in the overload implementation for the NativeConstructor and NativeOverloadImplementation
@@ -19,84 +19,73 @@ namespace Jint.Native
 
         private readonly Dictionary<string, TImpl> _protoCache = new Dictionary<string, TImpl>();
         private readonly Dictionary<TMemberInfo, TImpl> _reflectCache = new Dictionary<TMemberInfo, TImpl>();
-        private readonly Marshaller _marshaller;
+        private readonly JsGlobal _global;
         private readonly GetMembersDelegate _getMembers;
         private readonly WrapMemberDelegate _wrapMember;
 
-
-        private class MethodMatch
+        public NativeOverloadImpl(JsGlobal global, GetMembersDelegate getMembers, WrapMemberDelegate wrapMember)
         {
-            public TMemberInfo Method;
-            public int Weight;
-            public Type[] Parameters;
-        }
-
-        public NativeOverloadImpl(Marshaller marshaller, GetMembersDelegate getMembers, WrapMemberDelegate wrapMember)
-        {
-            if (marshaller == null)
-                throw new ArgumentNullException("marshaller");
+            if (global == null)
+                throw new ArgumentNullException("global");
             if (getMembers == null)
                 throw new ArgumentNullException("getMembers");
             if (wrapMember == null)
                 throw new ArgumentNullException("wrapMember");
 
-            _marshaller = marshaller;
+            _global = global;
             _getMembers = getMembers;
             _wrapMember = wrapMember;
         }
 
         protected TMemberInfo MatchMethod(Type[] args, IEnumerable<TMemberInfo> members)
         {
-            LinkedList<MethodMatch> matches = new LinkedList<MethodMatch>();
+            var matches = new List<MethodMatch>();
 
-            foreach (var m in members)
-                matches.AddLast(
-                    new MethodMatch()
-                    {
-                        Method = m,
-                        Parameters = Array.ConvertAll<ParameterInfo, Type>(
-                            m.GetParameters(),
-                            p => p.ParameterType
-                        ),
-                        Weight = 0
-                    }
-                );
-
+            foreach (var member in members)
+            {
+                matches.Add(new MethodMatch
+                {
+                    Method = member,
+                    Parameters = Array.ConvertAll(
+                        member.GetParameters(),
+                        p => p.ParameterType
+                    ),
+                    Weight = 0
+                });
+            }
 
             if (args != null)
             {
                 for (int i = 0; i < args.Length; i++)
                 {
-                    Type t = args[i];
-                    for (var node = matches.First; node != null; )
-                    {
-                        var nextNode = node.Next;
-                        if (t != null)
-                        {
-                            Type paramType = node.Value.Parameters[i];
-                            if (t.Equals(paramType))
-                            {
-                                node.Value.Weight += 1;
-                            }
-                            else if (typeof(Delegate).IsAssignableFrom(paramType) && typeof(JsFunction).IsAssignableFrom(t))
-                            {
-                                // we can assing a js function to a delegate
-                            }
-                            else if (!_marshaller.IsAssignable(paramType, t))
-                            {
-                                matches.Remove(node);
-                            }
+                    Type type = args[i];
 
-                        }
-                        else
+                    foreach (var match in matches)
+                    {
+                        if (type != null)
                         {
-                            // we can't assign undefined or null values to a value types
-                            if (node.Value.Parameters[i].IsValueType)
+                            Type paramType = match.Parameters[i];
+                            if (type == paramType)
                             {
-                                matches.Remove(node);
+                                match.Weight++;
+                            }
+                            else if (
+                                !typeof(Delegate).IsAssignableFrom(paramType) && 
+                                !typeof(JsFunction).IsAssignableFrom(type) &&
+                                !_global.Marshaller.IsAssignable(paramType, type)
+                            ) {
+                                // Delegates can be assigned to a JsFunction,
+                                // so these don't invalidate a match.
+
+                                match.Weight = int.MinValue;
                             }
                         }
-                        node = nextNode;
+                        else if (match.Parameters[i].IsValueType)
+                        {
+                            // We can't assign undefined or null values to a value types
+
+                            match.Weight = int.MinValue;
+                        }
                     }
                 }
             }
@@ -104,26 +93,34 @@ namespace Jint.Native
             MethodMatch best = null;
 
             foreach (var match in matches)
-                best = best == null ? match : (best.Weight < match.Weight ? match : best);
+            {
+                best =
+                    best == null
+                    ? match
+                    : (best.Weight < match.Weight ? match : best);
+            }
 
-            return best == null ? null : best.Method;
+            return
+                best != null && best.Weight >= 0
+                ? best.Method
+                : null;
         }
 
         protected string MakeKey(Type[] types, Type[] genericArguments)
         {
             return
-                "<"
-                + String.Join(
+                "<" +
+                String.Join(
                     ",",
-                    Array.ConvertAll<Type, string>(
+                    Array.ConvertAll(
                         genericArguments ?? new Type[0],
                         t => t == null ? "<null>" : t.FullName
                     )
-                )
-                + ">"
-                + String.Join(
+                ) +
+                ">" +
+                String.Join(
                     ",",
-                    Array.ConvertAll<Type, String>(
+                    Array.ConvertAll(
                         types ?? new Type[0],
                         t => t == null ? "<null>" : t.FullName
                     )
@@ -137,7 +134,7 @@ namespace Jint.Native
 
         public TImpl ResolveOverload(JsInstance[] args, Type[] generics)
         {
-            Type[] argTypes = Array.ConvertAll(args, x => _marshaller.GetInstanceType(x));
+            Type[] argTypes = Array.ConvertAll(args, x => _global.Marshaller.GetInstanceType(x));
             string key = MakeKey(argTypes, generics);
             TImpl method;
             if (!_protoCache.TryGetValue(key, out method))
@@ -151,6 +148,13 @@ namespace Jint.Native
             }
 
             return method;
+        }
+
+        private class MethodMatch
+        {
+            public TMemberInfo Method;
+            public int Weight;
+            public Type[] Parameters;
         }
     }
 }

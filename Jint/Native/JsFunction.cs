@@ -1,47 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using Jint.Runtime;
 
 namespace Jint.Native
 {
     [Serializable]
     public class JsFunction : JsObject
     {
-        public static string CallName = "call";
-        public static string ApplyName = "apply";
-        public static string ConstructorName = "constructor";
-        public static string PrototypeName = "prototype";
+        private readonly bool _isClr;
 
-        public string Name { get; set; }
-        public List<string> Arguments { get; set; }
+        public JsFunctionDelegate Delegate { get; private set; }
+        public string Name { get; private set; }
+        public int ArgumentCount { get; set; }
+        public object Closure { get; private set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="global"></param>
-        public JsFunction(JsGlobal global)
-            : this(global, global.FunctionClass.Prototype)
+        internal JsFunction(JsGlobal global, string name, JsFunctionDelegate @delegate, int argumentCount, object closure, JsObject prototype, bool isClr)
+            : base(global, null, prototype)
         {
-        }
+            _isClr = isClr;
+            if (@delegate == null)
+                throw new ArgumentNullException("delegate");
 
-        /// <summary>
-        /// Init new function object with a specified prototype
-        /// </summary>
-        /// <param name="prototype">prototype for this object</param>
-        public JsFunction(JsGlobal global, JsObject prototype)
-            : base(global, prototype)
-        {
-            Arguments = new List<string>();
+            Name = name;
+            ArgumentCount = argumentCount;
+            Closure = closure;
+            Delegate = @delegate;
         }
 
         public override int Length
         {
-            get { return Arguments.Count; }
+            get { return ArgumentCount; }
             set { }
         }
 
-        //15.3.5.3
-        public virtual bool HasInstance(JsObject instance)
+        // 15.3.5.3
+        public bool HasInstance(JsObject instance)
         {
             return
                 instance != null &&
@@ -49,41 +44,31 @@ namespace Jint.Native
                 Prototype.IsPrototypeOf(instance);
         }
 
-        //13.2.2
-        public virtual JsObject Construct(JsInstance[] parameters, Type[] generics)
+        // 13.2.2
+        public JsObject Construct(JintRuntime runtime, JsInstance[] arguments)
         {
-            var instance = new JsObject(Global, (JsObject)this["prototype"]);
+            // TODO: Change this when we flatten the hierarchy further.
 
-            var result = Global.Backend.ExecuteFunction(this, instance, parameters, generics);
+            JsObject @this;
 
-            var obj = result.Result as JsObject;
-            if (obj != null)
-                return obj;
+            switch (Name)
+            {
+                case "Array": @this = Global.CreateArray(); break;
+                case "Date": @this = Global.CreateDate(0); break;
+                case "Error": @this = Global.CreateError((JsObject)this["prototype"]); break;
+                case "Function": @this = null; break;
+                case "RegExp": @this = null; break;
+                default: @this = Global.CreateObject((JsObject)this["prototype"]); break;
+            }
 
-            obj = result.This as JsObject;
-            if (obj != null)
-                return obj;
+            var result = Delegate(runtime, @this, this, Closure, arguments, null);
 
-            return instance;
+            return result as JsObject ?? @this;
         }
 
-        public override object Value
+        public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsInstance[] arguments, JsInstance[] genericArguments)
         {
-            get { return null; }
-            set { }
-        }
-
-        public JsFunctionResult Execute(JsInstance that, JsInstance[] parameters)
-        {
-            return Execute(that, parameters, null);
-        }
-
-        public virtual JsFunctionResult Execute(JsInstance that, JsInstance[] parameters, Type[] genericArguments)
-        {
-            if (genericArguments != null)
-                throw new JintException("This method can't be called as a generic");
-
-            throw new InvalidOperationException();
+            return Delegate(runtime, @this, this, Closure, arguments, genericArguments);
         }
 
         public override string Class
@@ -93,17 +78,12 @@ namespace Jint.Native
 
         public override string ToSource()
         {
-            return String.Format("function {0} ( {1} ) {{ {2} }}", Name, String.Join(", ", Arguments.ToArray()), GetBody());
-        }
-
-        public virtual string GetBody()
-        {
-            return "/* js code */";
+            return String.Format("function {0} () {{ /* js code */ }}", Name);
         }
 
         public override bool IsClr
         {
-            get { return false; }
+            get { return _isClr; }
         }
     }
 }

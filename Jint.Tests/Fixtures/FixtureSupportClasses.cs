@@ -14,8 +14,6 @@ namespace Jint.Tests.Fixtures
     public enum FooEnum
     {
         Name = 1,
-
-
         GetType = 2,
         IsEnum = 3,
         System = 4
