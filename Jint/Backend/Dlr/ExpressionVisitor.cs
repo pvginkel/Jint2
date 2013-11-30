@@ -725,8 +725,6 @@ namespace Jint.Backend.Dlr
 
         public JsFunctionDelegate DeclareFunction(IFunctionDeclaration function)
         {
-            var source = ((SyntaxNode)function).Source;
-
             var body = function.Body;
 
             var thisParameter = Expression.Parameter(
@@ -758,6 +756,8 @@ namespace Jint.Backend.Dlr
             var statements = new List<Expression>();
 
 #if TRACE_CALLSTACK
+            var source = ((SyntaxNode)function).Source;
+
             statements.Add(Expression.Call(
                 typeof(Trace).GetMethod("WriteLine", new[] { typeof(string) }),
                 Expression.Constant(String.Format("Entering {0}:{1}", source.Start.Line, source.Start.Char))
@@ -927,7 +927,7 @@ namespace Jint.Backend.Dlr
 
             var lambda = Expression.Lambda<JsFunctionDelegate>(
                 Expression.Block(
-                    typeof(JsInstance), // TODO: Switch to DlrFunctionResult
+                    typeof(JsInstance),
                     locals,
                     statements
                 ),
