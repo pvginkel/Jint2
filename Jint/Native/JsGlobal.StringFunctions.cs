@@ -58,7 +58,7 @@ namespace Jint.Native
             // 15.5.4.2
             public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsFunction)runtime.Operation_Member(@this, "valueOf")).Execute(runtime, @this, arguments, null);
+                return ((JsFunction)runtime.GetMember(@this, "valueOf")).Execute(runtime, @this, arguments, null);
             }
 
             // 15.5.4.3
@@ -74,7 +74,7 @@ namespace Jint.Native
             // 15.5.4.4
             public static JsInstance CharAt(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsFunction)runtime.Operation_Member(@this, "substring")).Execute(
+                return ((JsFunction)runtime.GetMember(@this, "substring")).Execute(
                     runtime,
                     @this,
                     new[] { arguments[0], JsNumber.Create(arguments[0].ToNumber() + 1) },

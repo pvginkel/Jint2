@@ -86,7 +86,7 @@ namespace Jint.Native
                     {
                         for (int k = 0; k < ((JsObject)e).Length; k++)
                         {
-                            string p = k.ToString();
+                            int p = k;
                             JsInstance result;
                             if (((JsObject)e).TryGetProperty(p, out result))
                                 propertyStore.SetByIndex(n, result);
@@ -178,23 +178,21 @@ namespace Jint.Native
                 for (int lower = 0; lower != middle; lower++)
                 {
                     int upper = len - lower - 1;
-                    string upperString = upper.ToString();
-                    string lowerString = lower.ToString();
 
                     JsInstance lowerValue;
-                    bool lowerExists = target.TryGetProperty(lowerString, out lowerValue);
+                    bool lowerExists = target.TryGetProperty(lower, out lowerValue);
                     JsInstance upperValue;
-                    bool upperExists = target.TryGetProperty(upperString, out upperValue);
+                    bool upperExists = target.TryGetProperty(upper, out upperValue);
 
                     if (lowerExists)
-                        target[upperString] = lowerValue;
+                        target.SetProperty(lower, lowerValue);
                     else
-                        target.Delete(upperString);
+                        target.Delete(upper);
 
                     if (upperExists)
-                        target[lowerString] = upperValue;
+                        target.SetProperty(lower, upperValue);
                     else
-                        target.Delete(lowerString);
+                        target.Delete(lower);
                 }
 
                 return target;
@@ -210,12 +208,12 @@ namespace Jint.Native
                 JsInstance first = jsObject[0.ToString()];
                 for (int k = 1; k < jsObject.Length; k++)
                 {
-                    string from = k.ToString();
-                    string to = (k - 1).ToString();
+                    int from = k;
+                    int to = k - 1;
 
                     JsInstance result;
                     if (jsObject.TryGetProperty(from, out result))
-                        jsObject[to] = result;
+                        jsObject.SetProperty(to, result);
                     else
                         jsObject.Delete(to);
                 }
@@ -320,7 +318,7 @@ namespace Jint.Native
 
                 for (int k = 0; k < actualDeleteCount; k++)
                 {
-                    string from = (relativeStart + k).ToString();
+                    int from = relativeStart + k;
                     JsInstance result;
                     if (target.TryGetProperty(from, out result))
                         propertyStore.SetByIndex(k, result);
@@ -336,11 +334,11 @@ namespace Jint.Native
                 {
                     for (int k = actualStart; k < len - actualDeleteCount; k++)
                     {
-                        string from = (k + actualDeleteCount).ToString();
-                        string to = (k + items.Count).ToString();
+                        int from = k + actualDeleteCount;
+                        int to = k + items.Count;
                         JsInstance result;
                         if (target.TryGetProperty(from, out result))
-                            target[to] = result;
+                            target.SetProperty(to, result);
                         else
                             target.Delete(to);
                     }
@@ -356,11 +354,11 @@ namespace Jint.Native
                 {
                     for (int k = len - actualDeleteCount; k > actualStart; k--)
                     {
-                        string from = (k + actualDeleteCount - 1).ToString();
-                        string to = (k + items.Count - 1).ToString();
+                        int from = k + actualDeleteCount - 1;
+                        int to = k + items.Count - 1;
                         JsInstance result;
                         if (target.TryGetProperty(from, out result))
-                            target[to] = result;
+                            target.SetProperty(to, result);
                         else
                             target.Delete(to);
                     }
@@ -368,7 +366,7 @@ namespace Jint.Native
 
                 for (int k = 0; k < items.Count; k++)
                 {
-                    target[k.ToString()] = items[k];
+                    target.SetProperty(k, items[k]);
                 }
 
                 return array;
@@ -380,11 +378,11 @@ namespace Jint.Native
                 var target = (JsObject)@this;
                 for (int k = target.Length; k > 0; k--)
                 {
-                    string from = (k - 1).ToString();
-                    string to = (k + arguments.Length - 1).ToString();
+                    int from = k - 1;
+                    int to = k + arguments.Length - 1;
                     JsInstance result;
                     if (target.TryGetProperty(from, out result))
-                        target[to] = result;
+                        target.SetProperty(to, result);
                     else
                         target.Delete(to);
                 }
@@ -394,7 +392,7 @@ namespace Jint.Native
                 {
                     JsInstance e = items[0];
                     items.RemoveAt(0);
-                    target[j.ToString()] = e;
+                    target.SetProperty(j, e);
                 }
 
                 return JsNumber.Create(target.Length);
@@ -426,7 +424,7 @@ namespace Jint.Native
                 {
                     JsInstance result;
                     if (
-                        target.TryGetProperty(k.ToString(), out result) &&
+                        target.TryGetProperty(k, out result) &&
                         JsInstance.StrictlyEquals(result, searchParameter)
                     )
                         return JsNumber.Create(k);
@@ -457,7 +455,7 @@ namespace Jint.Native
                 while (k >= 0)
                 {
                     JsInstance result;
-                    if (target.TryGetProperty(k.ToString(), out result))
+                    if (target.TryGetProperty(k, out result))
                     {
                         if (result == searchParameter)
                         {

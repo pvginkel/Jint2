@@ -10,6 +10,8 @@ namespace Jint.Native
     {
         private readonly CachedDictionary _properties = new CachedDictionary();
 
+        private JsGlobal _global;
+
         public JsObject Owner { get; private set; }
 
         public DictionaryPropertyStore(JsObject owner)
@@ -18,6 +20,7 @@ namespace Jint.Native
                 throw new ArgumentNullException("owner");
 
             Owner = owner;
+            _global = Owner.Global;
         }
 
         public void SetLength(int length)
@@ -26,10 +29,10 @@ namespace Jint.Native
 
         public bool HasOwnProperty(JsInstance index)
         {
-            return HasOwnProperty(index.ToString());
+            return HasOwnProperty(_global.ResolveIdentifier(index.ToString()));
         }
 
-        public bool HasOwnProperty(string index)
+        public bool HasOwnProperty(int index)
         {
             Descriptor descriptor;
             return _properties.TryGetValue(index, out descriptor);
@@ -37,10 +40,10 @@ namespace Jint.Native
 
         public Descriptor GetOwnDescriptor(JsInstance index)
         {
-            return GetOwnDescriptor(index.ToString());
+            return GetOwnDescriptor(_global.ResolveIdentifier(index.ToString()));
         }
 
-        public Descriptor GetOwnDescriptor(string index)
+        public Descriptor GetOwnDescriptor(int index)
         {
             Descriptor result;
             _properties.TryGetValue(index, out result);
@@ -49,10 +52,10 @@ namespace Jint.Native
 
         public bool Delete(JsInstance index)
         {
-            return Delete(index.ToString());
+            return Delete(_global.ResolveIdentifier(index.ToString()));
         }
 
-        public bool Delete(string index)
+        public bool Delete(int index)
         {
             Descriptor descriptor;
             if (!Owner.TryGetDescriptor(index, out descriptor))
@@ -74,7 +77,7 @@ namespace Jint.Native
 
         public void DefineOwnProperty(Descriptor currentDescriptor)
         {
-            string key = currentDescriptor.Name;
+            int key = currentDescriptor.Index;
             Descriptor descriptor;
             if (_properties.TryGetValue(key, out descriptor))
             {
@@ -124,22 +127,22 @@ namespace Jint.Native
             }
         }
 
-        public IEnumerable<string> GetKeys()
+        public IEnumerable<int> GetKeys()
         {
             var prototype = Owner.Prototype;
 
             Debug.Assert(prototype != null);
 
-            if (prototype != Owner.Global.PrototypeSink)
+            if (prototype != _global.PrototypeSink)
             {
-                foreach (string key in prototype.GetKeys())
+                foreach (int key in prototype.GetKeys())
                 {
                     if (!HasOwnProperty(key))
                         yield return key;
                 }
             }
 
-            foreach (KeyValuePair<string, Descriptor> descriptor in _properties)
+            foreach (KeyValuePair<int, Descriptor> descriptor in _properties)
             {
                 if (descriptor.Value.Enumerable)
                     yield return descriptor.Key;
@@ -154,12 +157,12 @@ namespace Jint.Native
                 select descriptor.Get(Owner);
         }
 
-        public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
+        public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
         {
             return (
                 from descriptor in _properties
                 where descriptor.Value.Enumerable
-                select new KeyValuePair<string, JsInstance>(descriptor.Key, descriptor.Value.Get(Owner))
+                select new KeyValuePair<int, JsInstance>(descriptor.Key, descriptor.Value.Get(Owner))
             ).GetEnumerator();
         }
 
@@ -176,7 +179,7 @@ namespace Jint.Native
             return false;
         }
 
-        public virtual bool TryGetProperty(string index, out JsInstance result)
+        public virtual bool TryGetProperty(int index, out JsInstance result)
         {
             var descriptor = Owner.GetDescriptor(index);
             if (descriptor != null)
@@ -189,7 +192,7 @@ namespace Jint.Native
             return false;
         }
 
-        public virtual bool TrySetProperty(string index, JsInstance value)
+        public virtual bool TrySetProperty(int index, JsInstance value)
         {
             return false;
         }
@@ -199,46 +202,46 @@ namespace Jint.Native
             return false;
         }
 
-        private class CachedDictionary : Dictionary<string, Descriptor>
+        private class CachedDictionary : Dictionary<int, Descriptor>
         {
             private Descriptor _lastAccessed;
 
-            public new Descriptor this[string name]
+            public new Descriptor this[int index]
             {
                 get
                 {
-                    if (_lastAccessed != null && _lastAccessed.Name == name)
+                    if (_lastAccessed != null && _lastAccessed.Index == index)
                         return _lastAccessed;
 
                     Descriptor descriptor;
-                    if (base.TryGetValue(name, out descriptor))
+                    if (base.TryGetValue(index, out descriptor))
                         _lastAccessed = descriptor;
 
                     return descriptor;
                 }
                 set
                 {
-                    base[name] = value;
+                    base[index] = value;
                     _lastAccessed = value;
                 }
             }
 
-            public new void Remove(string name)
+            public new void Remove(int index)
             {
-                base.Remove(name);
-                if (_lastAccessed != null && _lastAccessed.Name == name)
+                base.Remove(index);
+                if (_lastAccessed != null && _lastAccessed.Index == index)
                     _lastAccessed = null;
             }
 
-            public new bool TryGetValue(string name, out Descriptor descriptor)
+            public new bool TryGetValue(int index, out Descriptor descriptor)
             {
-                if (_lastAccessed != null && _lastAccessed.Name == name)
+                if (_lastAccessed != null && _lastAccessed.Index == index)
                 {
                     descriptor = _lastAccessed;
                     return true;
                 }
 
-                if (!base.TryGetValue(name, out descriptor))
+                if (!base.TryGetValue(index, out descriptor))
                     return false;
 
                 _lastAccessed = descriptor;

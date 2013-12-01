@@ -65,9 +65,9 @@ namespace Jint.Runtime
             }
             else
             {
-                foreach (string key in new List<string>(((JsObject)obj).GetKeys()))
+                foreach (int key in new List<int>(((JsObject)obj).GetKeys()))
                 {
-                    yield return JsString.Create(key);
+                    yield return JsString.Create(Global.GetIdentifier(key));
                 }
             }
         }

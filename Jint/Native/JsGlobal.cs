@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using Jint.Runtime;
 
@@ -8,9 +10,9 @@ namespace Jint.Native
     [Serializable]
     public partial class JsGlobal
     {
-        /// <summary>
-        /// Useful for eval()
-        /// </summary>
+        private readonly Dictionary<string, int> _identifiersByName = new Dictionary<string, int>();
+        private readonly Dictionary<int, string> _identifiersByIndex = new Dictionary<int, string>();
+
         public IJintBackend Backend { get; set; }
 
         public Options Options { get; set; }
@@ -23,6 +25,17 @@ namespace Jint.Native
 
         public JsGlobal(JintRuntime runtime, IJintBackend backend, Options options)
         {
+            SeedIdentifier(JsNames.Prototype, JsNames.PrototypeId);
+            SeedIdentifier(JsNames.Proto, JsNames.ProtoId);
+            SeedIdentifier("toString", JsNames.ToStringId);
+            SeedIdentifier("valueOf", JsNames.ValueOfId);
+            SeedIdentifier("value", JsNames.ValueId);
+            SeedIdentifier("writable", JsNames.WritableId);
+            SeedIdentifier("set", JsNames.SetId);
+            SeedIdentifier("get", JsNames.GetId);
+            SeedIdentifier("enumerable", JsNames.EnumerableId);
+            SeedIdentifier("configurable", JsNames.ConfigurableId);
+
             PrototypeSink = new Sink(this);
 
             Options = options;
@@ -37,6 +50,12 @@ namespace Jint.Native
 
             Marshaller = new Marshaller(runtime, this);
             Marshaller.Initialize();
+        }
+
+        private void SeedIdentifier(string name, int index)
+        {
+            int result = ResolveIdentifier(name);
+            Debug.Assert(result == index);
         }
 
         public JsFunction ObjectClass { get; private set; }
@@ -118,6 +137,38 @@ namespace Jint.Native
                 case JsType.Undefined: return PrototypeSink;
                 default: return ((JsObject)instance).Prototype;
             }
+        }
+
+        internal int ResolveIdentifier(string name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            // We don't cache indexes. These are passed verbatim.
+
+            int result;
+            if (int.TryParse(name, out result) && result >= 0)
+                return result;
+
+            if (!_identifiersByName.TryGetValue(name, out result))
+            {
+                result = _identifiersByName.Count + 1;
+                _identifiersByName.Add(name, result);
+                _identifiersByIndex.Add(result, name);
+            }
+
+            // Identifiers are negative so that they don't conflict with
+            // array indexes.
+
+            return -result;
+        }
+
+        internal string GetIdentifier(int index)
+        {
+            if (index >= 0)
+                return index.ToString(CultureInfo.InvariantCulture);
+
+            return _identifiersByIndex[-index];
         }
     }
 }

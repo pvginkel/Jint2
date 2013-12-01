@@ -367,7 +367,7 @@ namespace Jint.Runtime
         public static string Operation_TypeOf(JsObject scope, string identifier)
         {
             Descriptor descriptor;
-            if (!scope.TryGetDescriptor(identifier, out descriptor))
+            if (!scope.TryGetDescriptor(scope.Global.ResolveIdentifier(identifier), out descriptor))
                 return JsInstance.TypeUndefined;
 
             return Operation_TypeOf(descriptor.Get(scope));
@@ -451,6 +451,11 @@ namespace Jint.Runtime
 
         public JsInstance Operation_Member(JsInstance obj, string name)
         {
+            return GetMember(obj, name);
+        }
+
+        public JsInstance GetMember(JsInstance obj, string name)
+        {
             var undefined = obj as JsUndefined;
             if (undefined != null)
             {
@@ -464,7 +469,7 @@ namespace Jint.Runtime
             if (jsObject == null)
             {
                 jsObject = Global.GetPrototype(obj);
-                var descriptor = jsObject.GetDescriptor(name);
+                var descriptor = jsObject.GetDescriptor(Global.ResolveIdentifier(name));
                 if (descriptor == null)
                     return JsUndefined.Instance;
 
@@ -474,12 +479,57 @@ namespace Jint.Runtime
             return jsObject[name];
         }
 
+        public JsInstance GetMemberByIndex(JsInstance obj, int index)
+        {
+            var undefined = obj as JsUndefined;
+            if (undefined != null)
+            {
+                string name = Global.GetIdentifier(index);
+
+                if (undefined.Name != null)
+                    name = undefined.Name + "." + name;
+
+                return Global.Backend.ResolveUndefined(name, null);
+            }
+
+            var jsObject = obj as JsObject;
+            if (jsObject == null)
+            {
+                jsObject = Global.GetPrototype(obj);
+                var descriptor = jsObject.GetDescriptor(index);
+                if (descriptor == null)
+                    return JsUndefined.Instance;
+
+                return descriptor.Get(obj);
+            }
+
+            return jsObject.GetProperty(index);
+        }
+
         public static JsInstance Operation_SetMember(JsInstance obj, string name, JsInstance value)
+        {
+            return SetMember(obj, name, value);
+        }
+
+        public static JsInstance SetMember(JsInstance obj, string name, JsInstance value)
         {
             var dictionary = obj as JsObject;
 
             if (dictionary != null)
                 return dictionary[name] = value;
+
+            return value;
+        }
+
+        public static JsInstance SetMemberByIndex(JsInstance obj, int index, JsInstance value)
+        {
+            var dictionary = obj as JsObject;
+
+            if (dictionary != null)
+            {
+                dictionary.SetProperty(index, value);
+                return value;
+            }
 
             return value;
         }

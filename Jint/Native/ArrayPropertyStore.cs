@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -60,7 +59,7 @@ namespace Jint.Native
             return left < _data.Count ? left : -1;
         }
 
-        public bool HasOwnProperty(string index)
+        public bool HasOwnProperty(int index)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -84,7 +83,7 @@ namespace Jint.Native
             return false;
         }
 
-        public Descriptor GetOwnDescriptor(string index)
+        public Descriptor GetOwnDescriptor(int index)
         {
             if (_baseStore != null)
                 return _baseStore.GetOwnDescriptor(index);
@@ -100,9 +99,15 @@ namespace Jint.Native
             return null;
         }
 
-        private bool TryParseIndex(string index, out int result)
+        private bool TryParseIndex(int index, out int result)
         {
-            return int.TryParse(index, out result);
+            // Indexes are stored as negative numbers. However, when ResolveIndex
+            // can parse the index as an integer, it returns the parsed integer
+            // as a positive value. This allows us to have a simple >= 0 check
+            // here to be sure that we got a number.
+
+            result = index;
+            return index >= 0;
         }
 
         private bool TryParseIndex(JsInstance index, out int result)
@@ -127,7 +132,7 @@ namespace Jint.Native
             return false;
         }
 
-        public bool TryGetProperty(string index, out JsInstance result)
+        public bool TryGetProperty(int index, out JsInstance result)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -149,7 +154,7 @@ namespace Jint.Native
             return JsUndefined.Instance;
         }
 
-        public bool TrySetProperty(string index, JsInstance value)
+        public bool TrySetProperty(int index, JsInstance value)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -196,7 +201,7 @@ namespace Jint.Native
             return true;
         }
 
-        public bool Delete(string index)
+        public bool Delete(int index)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -214,7 +219,7 @@ namespace Jint.Native
         public void DefineOwnProperty(Descriptor descriptor)
         {
             int i;
-            if (TryParseIndex(descriptor.Name, out i))
+            if (TryParseIndex(descriptor.Index, out i))
                 SetByIndex(i, descriptor.Get(_owner));
 
             EnsureBaseStore();
@@ -227,7 +232,7 @@ namespace Jint.Native
                 _baseStore = new DictionaryPropertyStore(_owner);
         }
 
-        public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
+        public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
         {
             if (_baseStore != null)
                 return _baseStore.GetEnumerator();
@@ -252,17 +257,17 @@ namespace Jint.Native
             }
         }
 
-        public IEnumerable<string> GetKeys()
+        public IEnumerable<int> GetKeys()
         {
             var keys = _data.Keys;
             for (int i = 0; i < keys.Count; i++)
             {
-                yield return keys[i].ToString(CultureInfo.InvariantCulture);
+                yield return keys[i];
             }
 
             if (_baseStore != null)
             {
-                foreach (var key in _baseStore.GetKeys())
+                foreach (int key in _baseStore.GetKeys())
                 {
                     yield return key;
                 }
@@ -301,7 +306,7 @@ namespace Jint.Native
                         for (int i = 0; i < @object.Length; i++)
                         {
                             JsInstance value;
-                            if (@object.TryGetProperty(i.ToString(CultureInfo.InvariantCulture), out value))
+                            if (@object.TryGetProperty(i, out value))
                                 newData.Add(offset + i, value);
                         }
                     }

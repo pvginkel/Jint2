@@ -14,7 +14,7 @@ namespace Jint.Native
 #endif
     public class JsObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
     {
-        internal static readonly ReadOnlyCollection<KeyValuePair<string, JsInstance>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<string, JsInstance>>(new KeyValuePair<string, JsInstance>[0]);
+        internal static readonly ReadOnlyCollection<KeyValuePair<int, JsInstance>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, JsInstance>>(new KeyValuePair<int, JsInstance>[0]);
 
         private int _length;
         private object _value;
@@ -102,8 +102,8 @@ namespace Jint.Native
 
             JsInstance primitive;
 
-            var toString = GetDescriptor("toString");
-            var valueOf = GetDescriptor("valueOf");
+            var toString = GetDescriptor(JsNames.ToStringId);
+            var valueOf = GetDescriptor(JsNames.ValueOfId);
 
             var first = hint == PreferredType.String ? toString : valueOf;
             var second = hint == PreferredType.String ? valueOf : toString;
@@ -247,18 +247,23 @@ namespace Jint.Native
         /// <summary>
         /// Checks whether an object or it's [[prototype]] has the specified property.
         /// </summary>
-        /// <param name="key">property name</param>
+        /// <param name="index">property name</param>
         /// <returns>true or false indicating check result</returns>
         /// <remarks>
         /// This implementation uses a HasOwnProperty method while walking a prototypes chain.
         /// </remarks>
-        public bool HasProperty(string key)
+        public bool HasProperty(string index)
+        {
+            return HasProperty(Global.ResolveIdentifier(index));
+        }
+        
+        internal bool HasProperty(int index)
         {
             var @object = this;
 
             while (true)
             {
-                if (@object.HasOwnProperty(key))
+                if (@object.HasOwnProperty(index))
                     return true;
 
                 @object = @object.Prototype;
@@ -284,7 +289,7 @@ namespace Jint.Native
             }
         }
 
-        public bool HasOwnProperty(string index)
+        public bool HasOwnProperty(int index)
         {
             if (PropertyStore == null)
                 return false;
@@ -300,7 +305,7 @@ namespace Jint.Native
             return PropertyStore.HasOwnProperty(index);
         }
 
-        public Descriptor GetOwnDescriptor(string index)
+        public Descriptor GetOwnDescriptor(int index)
         {
             if (PropertyStore == null)
                 return null;
@@ -316,7 +321,7 @@ namespace Jint.Native
             return PropertyStore.GetOwnDescriptor(index);
         }
 
-        public Descriptor GetDescriptor(string index)
+        public Descriptor GetDescriptor(int index)
         {
             var result = GetOwnDescriptor(index);
             if (result != null)
@@ -346,7 +351,7 @@ namespace Jint.Native
             return result != null;
         }
 
-        public bool TryGetDescriptor(string index, out Descriptor result)
+        public bool TryGetDescriptor(int index, out Descriptor result)
         {
             result = GetDescriptor(index);
             return result != null;
@@ -361,7 +366,7 @@ namespace Jint.Native
             return false;
         }
 
-        public bool TryGetProperty(string index, out JsInstance result)
+        public bool TryGetProperty(int index, out JsInstance result)
         {
             if (PropertyStore != null)
                 return PropertyStore.TryGetProperty(index, out result);
@@ -378,8 +383,8 @@ namespace Jint.Native
 
         public JsInstance this[string index]
         {
-            get { return GetProperty(index); }
-            set { SetProperty(index, value); }
+            get { return GetProperty(Global.ResolveIdentifier(index)); }
+            set { SetProperty(Global.ResolveIdentifier(index), value); }
         }
 
         private JsInstance GetProperty(JsInstance index)
@@ -391,10 +396,10 @@ namespace Jint.Native
                     return result;
             }
 
-            return GetPropertyCore(index.ToString());
+            return GetPropertyCore(Global.ResolveIdentifier(index.ToString()));
         }
 
-        private JsInstance GetProperty(string index)
+        internal JsInstance GetProperty(int index)
         {
             if (PropertyStore != null)
             {
@@ -406,13 +411,13 @@ namespace Jint.Native
             return GetPropertyCore(index);
         }
 
-        private JsInstance GetPropertyCore(string index)
+        private JsInstance GetPropertyCore(int index)
         {
             Descriptor descriptor;
 
-            if (index == "prototype")
+            if (index == JsNames.PrototypeId)
             {
-                descriptor = GetOwnDescriptor("prototype");
+                descriptor = GetOwnDescriptor(index);
                 if (descriptor != null)
                     return descriptor.Get(this);
 
@@ -422,7 +427,7 @@ namespace Jint.Native
                 return Prototype;
             }
 
-            if (index == "__proto__")
+            if (index == JsNames.ProtoId)
             {
                 if (IsPrototypeNull)
                     return JsNull.Instance;
@@ -447,7 +452,7 @@ namespace Jint.Native
                 : JsUndefined.Instance;
         }
 
-        private void SetProperty(string index, JsInstance value)
+        internal void SetProperty(int index, JsInstance value)
         {
             EnsurePropertyStore();
             if (!PropertyStore.TrySetProperty(index, value))
@@ -458,12 +463,12 @@ namespace Jint.Native
         {
             EnsurePropertyStore();
             if (!PropertyStore.TrySetProperty(index, value))
-                SetPropertyCore(index.ToString(), value);
+                SetPropertyCore(Global.ResolveIdentifier(index.ToString()), value);
         }
 
-        private void SetPropertyCore(string index, JsInstance value)
+        private void SetPropertyCore(int index, JsInstance value)
         {
-            if (index == "__proto__")
+            if (index == JsNames.ProtoId)
             {
                 if (value.Type == JsType.Object)
                     Prototype = (JsObject)value;
@@ -477,7 +482,7 @@ namespace Jint.Native
                         descriptor.DescriptorType == DescriptorType.Value
                     )
                 )
-                    DefineOwnProperty(new ValueDescriptor(this, index, value));
+                    DefineOwnProperty(new ValueDescriptor(this, Global.GetIdentifier(index), value));
                 else
                     descriptor.Set(this, value);
             }
@@ -492,6 +497,11 @@ namespace Jint.Native
         }
 
         public bool Delete(string index)
+        {
+            return Delete(Global.ResolveIdentifier(index));
+        }
+
+        internal bool Delete(int index)
         {
             if (PropertyStore == null)
                 return true;
@@ -525,10 +535,21 @@ namespace Jint.Native
 
         public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
         {
-            if (PropertyStore == null)
-                return EmptyKeyValues.GetEnumerator();
+            var items =
+                PropertyStore == null
+                ? EmptyKeyValues.GetEnumerator()
+                : PropertyStore.GetEnumerator();
 
-            return PropertyStore.GetEnumerator();
+            using (items)
+            {
+                while (items.MoveNext())
+                {
+                    yield return new KeyValuePair<string, JsInstance>(
+                        Global.GetIdentifier(items.Current.Key),
+                        items.Current.Value
+                    );
+                }
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -544,11 +565,11 @@ namespace Jint.Native
             return PropertyStore.GetValues();
         }
 
-        public IEnumerable<string> GetKeys()
+        public IEnumerable<int> GetKeys()
         {
             if (!IsPrototypeNull)
             {
-                foreach (string key in Prototype.GetKeys())
+                foreach (int key in Prototype.GetKeys())
                 {
                     yield return key;
                 }
@@ -556,7 +577,7 @@ namespace Jint.Native
 
             if (PropertyStore != null)
             {
-                foreach (string key in PropertyStore.GetKeys())
+                foreach (int key in PropertyStore.GetKeys())
                 {
                     yield return key;
                 }

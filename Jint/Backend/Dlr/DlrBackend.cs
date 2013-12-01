@@ -49,7 +49,7 @@ namespace Jint.Backend.Dlr
 
             PrepareTree(program);
 
-            var expression = program.Accept(new ExpressionVisitor());
+            var expression = program.Accept(new ExpressionVisitor(Global));
 
             PrintExpression(expression);
 
@@ -73,7 +73,7 @@ namespace Jint.Backend.Dlr
             {
                 if (
                     declaredVariable.IsDeclared &&
-                    !scope.HasOwnProperty(declaredVariable.Name)
+                    !scope.HasOwnProperty(declaredVariable.Index)
                 )
                     scope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
             }
@@ -123,7 +123,7 @@ namespace Jint.Backend.Dlr
 
             return _runtime.CreateFunction(
                 function.Name,
-                new ExpressionVisitor().DeclareFunction(function),
+                new ExpressionVisitor(Global).DeclareFunction(function),
                 null,
                 function.Parameters.ToArray()
             );

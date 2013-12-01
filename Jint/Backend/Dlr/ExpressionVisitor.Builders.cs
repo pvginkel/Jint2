@@ -6,12 +6,27 @@ using System.Reflection;
 using System.Text;
 using Jint.Expressions;
 using Jint.Native;
+using Jint.Runtime;
 using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.Backend.Dlr
 {
     partial class ExpressionVisitor
     {
+        private readonly JsGlobal _global;
+        private static readonly MethodInfo _objectGetByIndex = typeof(JsObject).GetMethod("GetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int) }, null);
+        private static readonly MethodInfo _objectSetByIndex = typeof(JsObject).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int), typeof(JsInstance) }, null);
+        private static readonly MethodInfo _runtimeGetByIndex = typeof(JintRuntime).GetMethod("GetMemberByIndex");
+        private static readonly MethodInfo _runtimeSetByIndex = typeof(JintRuntime).GetMethod("SetMemberByIndex");
+
+        public ExpressionVisitor(JsGlobal global)
+        {
+            if (global == null)
+                throw new ArgumentNullException("global");
+
+            _global = global;
+        }
+
         public Expression BuildGet(SyntaxNode syntax)
         {
             return BuildGet(syntax, null);
@@ -86,15 +101,46 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildGetMember(Expression expression, string name)
         {
-            return BuildOperationCall(
-                SyntaxExpressionType.Member,
-                expression,
-                Expression.Constant(name)
+            return BuildGetMember(expression, _global.ResolveIdentifier(name));
+        }
+
+        private Expression BuildGetMember(Expression expression, int index)
+        {
+            if (typeof(JsObject).IsAssignableFrom(expression.Type))
+            {
+                return Expression.Call(
+                    expression,
+                    _objectGetByIndex,
+                    Expression.Constant(index)
+                );
+            }
+
+            return Expression.Call(
+                _scope.Runtime,
+                _runtimeGetByIndex,
+                EnsureJs(expression),
+                Expression.Constant(index)
             );
         }
 
         private Expression BuildGetIndex(Expression expression, Expression index)
         {
+            var constant = index as ConstantExpression;
+            if (constant != null)
+            {
+                if (constant.Type == typeof(double))
+                {
+                    double doubleValue = (double)constant.Value;
+                    int intValue = (int)doubleValue;
+                    if (intValue >= 0 && doubleValue == intValue)
+                        return BuildGetMember(expression, intValue);
+                }
+                else if (constant.Type == typeof(string))
+                {
+                    return BuildGetMember(expression, (string)constant.Value);
+                }
+            }
+
             return BuildOperationCall(
                 SyntaxExpressionType.Index,
                 expression,
@@ -104,6 +150,22 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildSetIndex(Expression expression, Expression index, Expression value)
         {
+            var constant = index as ConstantExpression;
+            if (constant != null)
+            {
+                if (constant.Type == typeof(double))
+                {
+                    double doubleValue = (double)constant.Value;
+                    int intValue = (int)doubleValue;
+                    if (intValue >= 0 && doubleValue == intValue)
+                        return BuildSetMember(expression, intValue, value);
+                }
+                else if (constant.Type == typeof(string))
+                {
+                    return BuildSetMember(expression, _global.ResolveIdentifier((string)constant.Value), value);
+                }
+            }
+
             return BuildOperationCall(
                 SyntaxExpressionType.SetIndex,
                 expression,
@@ -114,11 +176,27 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildSetMember(Expression expression, string name, Expression value)
         {
-            return BuildOperationCall(
-                SyntaxExpressionType.SetMember,
-                expression,
-                Expression.Constant(name),
-                value
+            return BuildSetMember(expression, _global.ResolveIdentifier(name), value);
+        }
+
+        private Expression BuildSetMember(Expression expression, int index, Expression value)
+        {
+            if (typeof(JsObject).IsAssignableFrom(expression.Type))
+            {
+                return Expression.Call(
+                    expression,
+                    _objectSetByIndex,
+                    Expression.Constant(index),
+                    EnsureJs(value)
+                );
+            }
+
+            return Expression.Call(
+                _scope.Runtime,
+                _runtimeSetByIndex,
+                EnsureJs(expression),
+                Expression.Constant(index),
+                EnsureJs(value)
             );
         }
 

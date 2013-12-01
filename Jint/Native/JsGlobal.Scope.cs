@@ -79,16 +79,16 @@ namespace Jint.Native
 
                 public override bool TryGetProperty(JsInstance index, out JsInstance result)
                 {
-                    return TryGetProperty(index.ToString(), out result);
+                    return TryGetProperty(_global.ResolveIdentifier(index.ToString()), out result);
                 }
 
-                public override bool TryGetProperty(string index, out JsInstance result)
+                public override bool TryGetProperty(int index, out JsInstance result)
                 {
                     var descriptor = Owner.GetDescriptor(index);
                     if (descriptor != null)
                         result = descriptor.Get(Owner);
                     else
-                        result = _global.Backend.ResolveUndefined(index, null);
+                        result = _global.Backend.ResolveUndefined(_global.GetIdentifier(index), null);
 
                     return true;
                 }

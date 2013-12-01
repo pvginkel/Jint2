@@ -30,7 +30,7 @@ namespace Jint.Native
             {
                 public static readonly SinkPropertyStore Instance = new SinkPropertyStore();
 
-                private static readonly string[] EmptyStrings = new string[0];
+                private static readonly int[] EmptyIntegers = new int[0];
 
                 private SinkPropertyStore()
                 {
@@ -40,7 +40,7 @@ namespace Jint.Native
                 {
                 }
 
-                public bool HasOwnProperty(string index)
+                public bool HasOwnProperty(int index)
                 {
                     return false;
                 }
@@ -50,7 +50,7 @@ namespace Jint.Native
                     return false;
                 }
 
-                public Descriptor GetOwnDescriptor(string index)
+                public Descriptor GetOwnDescriptor(int index)
                 {
                     return null;
                 }
@@ -66,13 +66,13 @@ namespace Jint.Native
                     return true;
                 }
 
-                public bool TryGetProperty(string index, out JsInstance result)
+                public bool TryGetProperty(int index, out JsInstance result)
                 {
                     result = JsUndefined.Instance;
                     return true;
                 }
 
-                public bool TrySetProperty(string index, JsInstance value)
+                public bool TrySetProperty(int index, JsInstance value)
                 {
                     return true;
                 }
@@ -87,7 +87,7 @@ namespace Jint.Native
                     return true;
                 }
 
-                public bool Delete(string index)
+                public bool Delete(int index)
                 {
                     return true;
                 }
@@ -96,7 +96,7 @@ namespace Jint.Native
                 {
                 }
 
-                public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
+                public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
                 {
                     return EmptyKeyValues.GetEnumerator();
                 }
@@ -106,9 +106,9 @@ namespace Jint.Native
                     return JsInstance.EmptyArray;
                 }
 
-                public IEnumerable<string> GetKeys()
+                public IEnumerable<int> GetKeys()
                 {
-                    return EmptyStrings;
+                    return EmptyIntegers;
                 }
             }
         }

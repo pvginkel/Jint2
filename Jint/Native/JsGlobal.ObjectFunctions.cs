@@ -131,10 +131,10 @@ namespace Jint.Native
                 if (arguments.Length == 0)
                     throw new ArgumentException("propertyName");
 
-                if (!target.HasOwnProperty(arguments[0].ToString()))
+                if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
                     return ((JsFunction)target.Prototype["__lookupGetter__"]).Execute(runtime, target.Prototype, arguments, null);
 
-                var descriptor = target.GetOwnDescriptor(arguments[0].ToSource()) as PropertyDescriptor;
+                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToSource())) as PropertyDescriptor;
                 if (descriptor == null)
                     return JsUndefined.Instance;
 
@@ -147,10 +147,10 @@ namespace Jint.Native
                 if (arguments.Length <= 0)
                     throw new ArgumentException("propertyName");
 
-                if (!target.HasOwnProperty(arguments[0].ToString()))
+                if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
                     return ((JsFunction)target.Prototype["__lookupSetter__"]).Execute(runtime, target.Prototype, arguments, null);
 
-                var descriptor = target.GetOwnDescriptor(arguments[0].ToSource()) as PropertyDescriptor;
+                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToSource())) as PropertyDescriptor;
                 if (descriptor == null)
                     return JsUndefined.Instance;
 
