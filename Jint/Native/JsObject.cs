@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
-using Jint.PropertyBags;
 
 namespace Jint.Native
 {
@@ -13,9 +14,12 @@ namespace Jint.Native
 #endif
     public class JsObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
     {
-        internal INativeIndexer Indexer { get; set; }
+        internal static readonly ReadOnlyCollection<KeyValuePair<string, JsInstance>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<string, JsInstance>>(new KeyValuePair<string, JsInstance>[0]);
 
+        private int _length;
         private object _value;
+
+        internal IPropertyStore PropertyStore { get; set; }
 
         public override object Value
         {
@@ -23,28 +27,21 @@ namespace Jint.Native
             set { _value = value; }
         }
 
-        private readonly MiniCachedPropertyBag _properties = new MiniCachedPropertyBag();
-
         /// <summary>
-        /// Determines whether object is extensible or not. Extensible object allows defining new own properties.
+        /// Gets or sets the number of an actually stored properties.
         /// </summary>
         /// <remarks>
-        /// When object becomes non-extensible it can not become extensible again
+        /// This is a non ecma262 standard property.
         /// </remarks>
-        public bool Extensible { get; set; }
-
-        private int _length;
-
-        /// <summary>
-        /// gets the number of an actually stored properties
-        /// </summary>
-        /// <remarks>
-        /// This is a non ecma262 standard property
-        /// </remarks>
-        public virtual int Length
+        public int Length
         {
             get { return _length; }
-            set { }
+            internal set
+            {
+                _length = value;
+                if (PropertyStore != null)
+                    PropertyStore.SetLength(value);
+            }
         }
 
         public JsGlobal Global { get; private set; }
@@ -62,7 +59,6 @@ namespace Jint.Native
             Global = global;
             _value = value;
             Prototype = prototype ?? global.PrototypeSink;
-            Extensible = true;
         }
 
         public override bool IsClr
@@ -70,13 +66,13 @@ namespace Jint.Native
             get
             {
                 // if this instance holds a native value
-                return Value != null;
+                return _value != null;
             }
         }
 
         public override string Class
         {
-            get { return ClassObject; }
+            get { return JsNames.ClassObject; }
         }
 
         public override JsType Type
@@ -84,9 +80,10 @@ namespace Jint.Native
             get { return JsType.Object; }
         }
 
-        public override int GetHashCode()
+        private void EnsurePropertyStore()
         {
-            return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
+            if (PropertyStore == null)
+                PropertyStore = new DictionaryPropertyStore(this);
         }
 
         public override JsInstance ToPrimitive(PreferredType preferredType)
@@ -174,7 +171,7 @@ namespace Jint.Native
             var result = Global.Backend.ExecuteFunction(
                 function,
                 this,
-                EmptyArray,
+                JsInstance.EmptyArray,
                 null
             );
 
@@ -238,6 +235,15 @@ namespace Jint.Native
             return ToPrimitive(PreferredType.String).ToString();
         }
 
+        public override string ToSource()
+        {
+            var function = this as JsFunction;
+            if (function != null)
+                return String.Format("function {0} () {{ /* js code */ }}", function.Name);
+
+            return ToString();
+        }
+
         /// <summary>
         /// Checks whether an object or it's [[prototype]] has the specified property.
         /// </summary>
@@ -246,201 +252,251 @@ namespace Jint.Native
         /// <remarks>
         /// This implementation uses a HasOwnProperty method while walking a prototypes chain.
         /// </remarks>
-        public virtual bool HasProperty(string key)
+        public bool HasProperty(string key)
         {
-            JsObject obj = this;
+            var @object = this;
+
             while (true)
             {
-                if (obj.HasOwnProperty(key))
-                {
+                if (@object.HasOwnProperty(key))
                     return true;
-                }
 
-                obj = obj.Prototype;
+                @object = @object.Prototype;
 
-                if (IsNull(obj))
+                if (@object.IsPrototypeNull)
                     return false;
             }
         }
 
-        /// <summary>
-        /// Checks whether object has an own property
-        /// </summary>
-        /// <param name="key">property name</param>
-        /// <returns>true of false</returns>
-        public virtual bool HasOwnProperty(string key)
+        public bool HasProperty(JsInstance index)
         {
-            Descriptor desc;
-            return _properties.TryGet(key, out desc) && desc.Owner == this;
-        }
+            var @object = this;
 
-        public virtual bool HasProperty(JsInstance key)
-        {
-            return HasProperty(key.ToString());
-        }
-
-        public virtual bool HasOwnProperty(JsInstance key)
-        {
-            return HasOwnProperty(key.ToString());
-        }
-
-        public virtual Descriptor GetOwnDescriptor(string index)
-        {
-            Descriptor result;
-            if (_properties.TryGet(index, out result))
+            while (true)
             {
-                if (!result.IsDeleted)
-                    return result;
+                if (@object.HasOwnProperty(index))
+                    return true;
 
-                _properties.Delete(index); // remove from cache
+                @object = @object.Prototype;
+
+                if (@object.IsPrototypeNull)
+                    return false;
             }
-
-            return null;
         }
 
-        public virtual Descriptor GetDescriptor(string index)
+        public bool HasOwnProperty(string index)
+        {
+            if (PropertyStore == null)
+                return false;
+
+            return PropertyStore.HasOwnProperty(index);
+        }
+
+        public bool HasOwnProperty(JsInstance index)
+        {
+            if (PropertyStore == null)
+                return false;
+
+            return PropertyStore.HasOwnProperty(index);
+        }
+
+        public Descriptor GetOwnDescriptor(string index)
+        {
+            if (PropertyStore == null)
+                return null;
+
+            return PropertyStore.GetOwnDescriptor(index);
+        }
+
+        public Descriptor GetOwnDescriptor(JsInstance index)
+        {
+            if (PropertyStore == null)
+                return null;
+
+            return PropertyStore.GetOwnDescriptor(index);
+        }
+
+        public Descriptor GetDescriptor(string index)
         {
             var result = GetOwnDescriptor(index);
             if (result != null)
                 return result;
 
-            // Prototype always a JsObject, (JsNull.Instance is also an object and next call will return null in case of null)
-            result = Prototype.GetDescriptor(index);
-            if (result != null)
-                _properties.Put(index, result); // cache descriptior
+            if (IsPrototypeNull)
+                return null;
 
-            return result;
+            return Prototype.GetDescriptor(index);
         }
 
-        public virtual bool TryGetDescriptor(JsInstance index, out Descriptor result)
+        public Descriptor GetDescriptor(JsInstance index)
         {
-            return TryGetDescriptor(index.ToString(), out result);
+            var result = GetOwnDescriptor(index);
+            if (result != null)
+                return result;
+
+            if (IsPrototypeNull)
+                return null;
+
+            return Prototype.GetDescriptor(index);
         }
 
-        public virtual bool TryGetDescriptor(string index, out Descriptor result)
+        public bool TryGetDescriptor(JsInstance index, out Descriptor result)
         {
             result = GetDescriptor(index);
             return result != null;
         }
 
-        public virtual bool TryGetProperty(JsInstance index, out JsInstance result)
+        public bool TryGetDescriptor(string index, out Descriptor result)
         {
-            return TryGetProperty(index.ToString(), out result);
+            result = GetDescriptor(index);
+            return result != null;
         }
 
-        public virtual bool TryGetProperty(string index, out JsInstance result)
+        public bool TryGetProperty(JsInstance index, out JsInstance result)
         {
-            Descriptor d = GetDescriptor(index);
-            if (d == null)
-            {
-                result = JsUndefined.Instance;
-                return false;
-            }
+            if (PropertyStore != null)
+                return PropertyStore.TryGetProperty(index, out result);
 
-            result = d.Get(this);
-
-            return true;
-        }
-
-        public virtual JsInstance this[JsInstance key]
-        {
-            get
-            {
-                if (Indexer != null)
-                    return Indexer.Get(this, key);
-
-                return this[key.ToString()];
-            }
-            set
-            {
-                if (Indexer != null)
-                    Indexer.Set(this, key, value);
-                else
-                    this[key.ToString()] = value;
-            }
-        }
-
-        public virtual JsInstance this[string index]
-        {
-            get
-            {
-                Descriptor descriptor;
-
-                if (index == "prototype")
-                {
-                    descriptor = GetOwnDescriptor("prototype");
-                    if (descriptor != null)
-                        return descriptor.Get(this);
-
-                    return Prototype;
-                }
-                if (index == "__proto__")
-                    return Prototype;
-
-                descriptor = GetDescriptor(index);
-
-                if (descriptor == null)
-                {
-                    Trace.WriteLine(String.Format(
-                        "Unresolved identifier {0} of {1}",
-                        index,
-                        GetType()
-                    ));
-                }
-
-                return
-                    descriptor != null
-                    ? descriptor.Get(this)
-                    : JsUndefined.Instance;
-            }
-            set
-            {
-                if (index == "__proto__")
-                {
-                    var jsObject = value as JsObject;
-                    if (jsObject != null)
-                        Prototype = jsObject;
-                }
-                else
-                {
-                    var descriptor = GetDescriptor(index);
-                    if (
-                        descriptor == null || (
-                            descriptor.Owner != this &&
-                            descriptor.DescriptorType == DescriptorType.Value
-                        )
-                    )
-                        DefineOwnProperty(new ValueDescriptor(this, index, value));
-                    else
-                        descriptor.Set(this, value);
-                }
-            }
-        }
-
-        public virtual bool Delete(JsInstance key)
-        {
-            return Delete(key.ToString());
-        }
-
-        public virtual bool Delete(string index)
-        {
-            Descriptor d;
-            if (!TryGetDescriptor(index, out d) || d.Owner != this)
-                return true;
-
-            if (d.Configurable)
-            {
-                _properties.Delete(index);
-                d.Delete();
-                _length--;
-                return true;
-            }
-
+            result = null;
             return false;
+        }
 
-            // TODO: This should throw in strict mode.
-            
-            // throw new JintException("Property " + index + " isn't configurable");
+        public bool TryGetProperty(string index, out JsInstance result)
+        {
+            if (PropertyStore != null)
+                return PropertyStore.TryGetProperty(index, out result);
+
+            result = null;
+            return false;
+        }
+
+        public JsInstance this[JsInstance index]
+        {
+            get { return GetProperty(index); }
+            set { SetProperty(index, value); }
+        }
+
+        public JsInstance this[string index]
+        {
+            get { return GetProperty(index); }
+            set { SetProperty(index, value); }
+        }
+
+        private JsInstance GetProperty(JsInstance index)
+        {
+            if (PropertyStore != null)
+            {
+                JsInstance result;
+                if (PropertyStore.TryGetProperty(index, out result))
+                    return result;
+            }
+
+            return GetPropertyCore(index.ToString());
+        }
+
+        private JsInstance GetProperty(string index)
+        {
+            if (PropertyStore != null)
+            {
+                JsInstance result;
+                if (PropertyStore.TryGetProperty(index, out result))
+                    return result;
+            }
+
+            return GetPropertyCore(index);
+        }
+
+        private JsInstance GetPropertyCore(string index)
+        {
+            Descriptor descriptor;
+
+            if (index == "prototype")
+            {
+                descriptor = GetOwnDescriptor("prototype");
+                if (descriptor != null)
+                    return descriptor.Get(this);
+
+                if (IsPrototypeNull)
+                    return JsNull.Instance;
+
+                return Prototype;
+            }
+
+            if (index == "__proto__")
+            {
+                if (IsPrototypeNull)
+                    return JsNull.Instance;
+
+                return Prototype;
+            }
+
+            descriptor = GetDescriptor(index);
+
+            if (descriptor == null)
+            {
+                Trace.WriteLine(String.Format(
+                    "Unresolved identifier {0} of {1}",
+                    index,
+                    GetType()
+                ));
+            }
+
+            return
+                descriptor != null
+                ? descriptor.Get(this)
+                : JsUndefined.Instance;
+        }
+
+        private void SetProperty(string index, JsInstance value)
+        {
+            EnsurePropertyStore();
+            if (!PropertyStore.TrySetProperty(index, value))
+                SetPropertyCore(index, value);
+        }
+
+        private void SetProperty(JsInstance index, JsInstance value)
+        {
+            EnsurePropertyStore();
+            if (!PropertyStore.TrySetProperty(index, value))
+                SetPropertyCore(index.ToString(), value);
+        }
+
+        private void SetPropertyCore(string index, JsInstance value)
+        {
+            if (index == "__proto__")
+            {
+                if (value.Type == JsType.Object)
+                    Prototype = (JsObject)value;
+            }
+            else
+            {
+                var descriptor = GetDescriptor(index);
+                if (
+                    descriptor == null || (
+                        descriptor.Owner != this &&
+                        descriptor.DescriptorType == DescriptorType.Value
+                    )
+                )
+                    DefineOwnProperty(new ValueDescriptor(this, index, value));
+                else
+                    descriptor.Set(this, value);
+            }
+        }
+
+        public bool Delete(JsInstance index)
+        {
+            if (PropertyStore == null)
+                return true;
+
+            return PropertyStore.Delete(index);
+        }
+
+        public bool Delete(string index)
+        {
+            if (PropertyStore == null)
+                return true;
+
+            return PropertyStore.Delete(index);
         }
 
         public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes attributes)
@@ -453,60 +509,10 @@ namespace Jint.Native
             DefineOwnProperty(new ValueDescriptor(this, key, value));
         }
 
-        public virtual void DefineOwnProperty(Descriptor currentDescriptor)
+        public void DefineOwnProperty(Descriptor currentDescriptor)
         {
-            string key = currentDescriptor.Name;
-            Descriptor descriptor;
-            if (_properties.TryGet(key, out descriptor) && descriptor.Owner == this)
-            {
-                // Updating an existing property.
-
-                switch (descriptor.DescriptorType)
-                {
-                    case DescriptorType.Value:
-                        switch (currentDescriptor.DescriptorType)
-                        {
-                            case DescriptorType.Value:
-                                _properties.Get(key).Set(this, currentDescriptor.Get(this));
-                                break;
-
-                            case DescriptorType.Accessor:
-                                _properties.Delete(key);
-                                _properties.Put(key, currentDescriptor);
-                                break;
-
-                            case DescriptorType.Clr:
-                                throw new NotSupportedException();
-                        }
-                        break;
-
-                    case DescriptorType.Accessor:
-                        var propertyDescriptor = (PropertyDescriptor)descriptor;
-                        var currentPropertyDescriptor = (PropertyDescriptor)currentDescriptor;
-
-                        if (currentDescriptor.DescriptorType == DescriptorType.Accessor)
-                        {
-                            if (currentPropertyDescriptor.GetFunction != null)
-                                propertyDescriptor.GetFunction = currentPropertyDescriptor.GetFunction;
-                            if (currentPropertyDescriptor.SetFunction != null)
-                                propertyDescriptor.SetFunction = currentPropertyDescriptor.SetFunction;
-                        }
-                        else
-                        {
-                            propertyDescriptor.Set(this, currentDescriptor.Get(this));
-                        }
-                        break;
-                }
-            }
-            else
-            {
-                // add a new property
-                if (descriptor != null)
-                    descriptor.Owner.RedefineProperty(descriptor.Name); // if we have a cached property
-
-                _properties.Put(key, currentDescriptor);
-                _length++;
-            }
+            EnsurePropertyStore();
+            PropertyStore.DefineOwnProperty(currentDescriptor);
         }
 
         public void DefineAccessorProperty(string name, JsFunction getFunction, JsFunction setFunction)
@@ -517,69 +523,64 @@ namespace Jint.Native
             DefineOwnProperty(new PropertyDescriptor(Global, this, name, getFunction, setFunction, PropertyAttributes.None));
         }
 
-        void RedefineProperty(string name)
-        {
-            Descriptor old;
-            if (_properties.TryGet(name, out old) && old.Owner == this)
-            {
-                _properties.Put(name, old.Clone());
-                old.Delete();
-            }
-        }
-
         public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
         {
-            foreach (KeyValuePair<string, Descriptor> descriptor in _properties)
-            {
-                if (descriptor.Value.Enumerable)
-                    yield return new KeyValuePair<string, JsInstance>(descriptor.Key, descriptor.Value.Get(this));
-            }
+            if (PropertyStore == null)
+                return EmptyKeyValues.GetEnumerator();
+
+            return PropertyStore.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _properties.GetEnumerator();
+            return GetEnumerator();
         }
 
-        public virtual IEnumerable<JsInstance> GetValues()
+        public IEnumerable<JsInstance> GetValues()
         {
-            foreach (Descriptor descriptor in _properties.Values)
-            {
-                if (descriptor.Enumerable)
-                    yield return descriptor.Get(this);
-            }
+            if (PropertyStore == null)
+                return EmptyArray;
+
+            return PropertyStore.GetValues();
         }
 
-        public virtual IEnumerable<string> GetKeys()
+        public IEnumerable<string> GetKeys()
         {
-            var p = Prototype;
-
-            if (p != null && !IsNull(p))
+            if (!IsPrototypeNull)
             {
-                foreach (string key in p.GetKeys())
+                foreach (string key in Prototype.GetKeys())
                 {
-                    if (!HasOwnProperty(key))
-                        yield return key;
+                    yield return key;
                 }
             }
 
-            foreach (KeyValuePair<string, Descriptor> descriptor in _properties)
+            if (PropertyStore != null)
             {
-                if (descriptor.Value.Enumerable && descriptor.Value.Owner == this)
-                    yield return descriptor.Key;
+                foreach (string key in PropertyStore.GetKeys())
+                {
+                    yield return key;
+                }
             }
-            yield break;
         }
 
         public bool IsPrototypeOf(JsObject target)
         {
             if (target == null)
                 return false;
-            if (IsNull(target))
+            if (target.IsPrototypeNull)
                 return false;
             if (target.Prototype == this)
                 return true;
             return IsPrototypeOf(target.Prototype);
+        }
+
+        private bool IsPrototypeNull
+        {
+            get
+            {
+                Debug.Assert(Prototype != null);
+                return Prototype == Global.PrototypeSink;
+            }
         }
     }
 }

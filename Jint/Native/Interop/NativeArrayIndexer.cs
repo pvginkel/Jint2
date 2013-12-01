@@ -4,26 +4,43 @@ using System.Text;
 
 namespace Jint.Native.Interop
 {
-    internal class NativeArrayIndexer<T> : INativeIndexer
+    internal class NativeArrayPropertyStore<T> : DictionaryPropertyStore
     {
         private readonly Marshaller _marshaller;
 
-        public NativeArrayIndexer(Marshaller marshaller)
+        public NativeArrayPropertyStore(JsObject owner, Marshaller marshaller)
+            : base(owner)
         {
-            if (marshaller == null)
-                throw new ArgumentNullException("marshaller");
-
             _marshaller = marshaller;
         }
 
-        public JsInstance Get(JsInstance that, JsInstance index)
+        public override bool TryGetProperty(JsInstance index, out JsInstance result)
         {
-            return _marshaller.MarshalClrValue(_marshaller.MarshalJsValue<T[]>(that)[_marshaller.MarshalJsValue<int>(index)]);
+            result = _marshaller.MarshalClrValue(
+                _marshaller.MarshalJsValue<T[]>(Owner)[_marshaller.MarshalJsValue<int>(index)]
+            );
+
+            return true;
         }
 
-        public void Set(JsInstance that, JsInstance index, JsInstance value)
+        public override bool TryGetProperty(string index, out JsInstance result)
         {
-            _marshaller.MarshalJsValue<T[]>(that)[_marshaller.MarshalJsValue<int>(index)] = _marshaller.MarshalJsValue<T>(value);
+            // TODO: Optimize.
+            return TryGetProperty(JsString.Create(index), out result);
+        }
+
+        public override bool TrySetProperty(JsInstance index, JsInstance value)
+        {
+            _marshaller.MarshalJsValue<T[]>(Owner)[_marshaller.MarshalJsValue<int>(index)] =
+                _marshaller.MarshalJsValue<T>(value);
+
+            return true;
+        }
+
+        public override bool TrySetProperty(string index, JsInstance value)
+        {
+            // TODO: Optimize.
+            return TrySetProperty(JsString.Create(index), value);
         }
     }
 }

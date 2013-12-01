@@ -427,7 +427,7 @@ namespace Jint.Runtime
             {
                 int intIndex = (int)index;
                 if (index == intIndex)
-                    return array.Get(intIndex);
+                    return ((ArrayPropertyStore)array.PropertyStore).GetByIndex(intIndex);
             }
 
             return Operation_Index(obj, JsNumber.Create(index));
@@ -440,7 +440,10 @@ namespace Jint.Runtime
             {
                 int intIndex = (int)index;
                 if (index == intIndex)
-                    return array.Put(intIndex, value);
+                {
+                    ((ArrayPropertyStore)array.PropertyStore).SetByIndex(intIndex, value);
+                    return value;
+                }
             }
 
             return ((JsObject)obj)[JsNumber.Create(index)] = value;

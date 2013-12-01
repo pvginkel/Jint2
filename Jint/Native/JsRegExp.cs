@@ -8,6 +8,10 @@ namespace Jint.Native
     [Serializable]
     public class JsRegExp : JsObject
     {
+        private readonly string _pattern;
+        private readonly RegexOptions _parsedOptions;
+        private readonly JsRegExpOptions _options;
+
         public bool IsGlobal
         {
             get { return (_options & JsRegExpOptions.Global) != 0; }
@@ -23,12 +27,7 @@ namespace Jint.Native
             get { return (_options & JsRegExpOptions.Multiline) != 0; }
         }
 
-
-        private readonly string _pattern;
-        private readonly RegexOptions _parsedOptions;
-        private readonly JsRegExpOptions _options;
-
-        internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
+       internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
             : base(global, null, prototype)
         {
             _options = options;
@@ -46,6 +45,11 @@ namespace Jint.Native
             this["global"] = JsBoolean.Create(options.HasFlag(JsRegExpOptions.Global));
         }
 
+       public override string Class
+       {
+           get { return JsNames.ClassRegexp; }
+       }
+
         public string Pattern
         {
             get { return _pattern; }
@@ -61,24 +65,9 @@ namespace Jint.Native
             get { return _parsedOptions; }
         }
 
-        public override object Value
-        {
-            get { return null; }
-        }
-
-        public override string ToSource()
+        public override string ToString()
         {
             return "/" + _pattern + "/";
-        }
-
-        public override string Class
-        {
-            get { return ClassRegexp; }
-        }
-
-        public override bool IsClr
-        {
-            get { return false; }
         }
     }
 }

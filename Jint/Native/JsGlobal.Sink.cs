@@ -15,81 +15,101 @@ namespace Jint.Native
         [Serializable]
         private class Sink : JsObject
         {
-            public override JsType Type
+            public Sink(JsGlobal global)
+                : base(global, null, null)
             {
-                get { return JsType.Null; }
+                PropertyStore = SinkPropertyStore.Instance;
             }
 
             public override string Class
             {
-                get { return ClassObject; }
+                get { return JsNames.ClassObject; }
             }
 
-            public override int Length
+            private class SinkPropertyStore : IPropertyStore
             {
-                get { return 0; }
-                set { }
-            }
+                public static readonly SinkPropertyStore Instance = new SinkPropertyStore();
 
-            public Sink(JsGlobal global)
-                : base(global, null, null)
-            {
-            }
+                private static readonly string[] EmptyStrings = new string[0];
 
-            public override Descriptor GetDescriptor(string index)
-            {
-                return null;
-            }
+                private SinkPropertyStore()
+                {
+                }
 
-            public override IEnumerable<string> GetKeys()
-            {
-                return new string[0];
-            }
+                public void SetLength(int length)
+                {
+                }
 
-            public override void DefineOwnProperty(Descriptor value)
-            {
-            }
+                public bool HasOwnProperty(string index)
+                {
+                    return false;
+                }
 
-            public override bool HasProperty(string key)
-            {
-                return false;
-            }
+                public bool HasOwnProperty(JsInstance index)
+                {
+                    return false;
+                }
 
-            public override bool HasOwnProperty(string key)
-            {
-                return false;
-            }
+                public Descriptor GetOwnDescriptor(string index)
+                {
+                    return null;
+                }
 
-            public override JsInstance this[string index]
-            {
-                get { return JsUndefined.Instance; }
-                set { }
-            }
+                public Descriptor GetOwnDescriptor(JsInstance index)
+                {
+                    return null;
+                }
 
-            public override bool ToBoolean()
-            {
-                return false;
-            }
+                public bool TryGetProperty(JsInstance index, out JsInstance result)
+                {
+                    result = JsUndefined.Instance;
+                    return true;
+                }
 
-            public override double ToNumber()
-            {
-                return 0d;
-            }
+                public bool TryGetProperty(string index, out JsInstance result)
+                {
+                    result = JsUndefined.Instance;
+                    return true;
+                }
 
-            public override string ToString()
-            {
-                return "null";
-            }
+                public bool TrySetProperty(string index, JsInstance value)
+                {
+                    return true;
+                }
 
-            public override JsInstance ToPrimitive(PreferredType preferredType)
-            {
-                return this;
-            }
+                public bool TrySetProperty(JsInstance index, JsInstance value)
+                {
+                    return true;
+                }
 
-            public override object Value
-            {
-                get { return null; }
-                set { }
+                public bool Delete(JsInstance index)
+                {
+                    return true;
+                }
+
+                public bool Delete(string index)
+                {
+                    return true;
+                }
+
+                public void DefineOwnProperty(Descriptor currentDescriptor)
+                {
+                }
+
+                public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
+                {
+                    return EmptyKeyValues.GetEnumerator();
+                }
+
+                public IEnumerable<JsInstance> GetValues()
+                {
+                    return JsInstance.EmptyArray;
+                }
+
+                public IEnumerable<string> GetKeys()
+                {
+                    return EmptyStrings;
+                }
             }
         }
     }

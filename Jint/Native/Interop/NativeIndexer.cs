@@ -8,52 +8,65 @@ namespace Jint.Native.Interop
     /// <summary>
     /// Represent a set of native overloads to set and get values using indexers.
     /// </summary>
-    public class NativeIndexer : INativeIndexer
+    internal class NativePropertyStore : DictionaryPropertyStore
     {
         private readonly JsGlobal _global;
         private readonly NativeOverloadImpl<MethodInfo, WrappedIndexerGetter> _getOverload;
         private readonly NativeOverloadImpl<MethodInfo, WrappedIndexerSetter> _setOverload;
 
-        public NativeIndexer(JsGlobal global, MethodInfo[] getters, MethodInfo[] setters)
+        public NativePropertyStore(JsObject owner, MethodInfo[] getters, MethodInfo[] setters)
+            : base(owner)
         {
-            if (global == null)
-                throw new ArgumentNullException("global");
             if (getters == null)
                 throw new ArgumentNullException("getters");
             if (setters == null)
                 throw new ArgumentNullException("setters");
 
-            _global = global;
+            _global = owner.Global;
 
             _getOverload = new NativeOverloadImpl<MethodInfo, WrappedIndexerGetter>(
-                global,
+                _global,
                 (genericArgs, length) => Array.FindAll(getters, mi => mi.GetParameters().Length == length),
                 ProxyHelper.WrapIndexerGetter
             );
 
             _setOverload = new NativeOverloadImpl<MethodInfo, WrappedIndexerSetter>(
-                global,
+                _global,
                 (genericArgs, length) => Array.FindAll(setters, mi => mi.GetParameters().Length == length),
                 ProxyHelper.WrapIndexerSetter
             );
         }
 
-        public JsInstance Get(JsInstance that, JsInstance index)
+        public override bool TryGetProperty(string index, out JsInstance result)
+        {
+            // TODO: Optimize.
+            return TryGetProperty(JsString.Create(index), out result);
+        }
+
+        public override bool TryGetProperty(JsInstance index, out JsInstance result)
         {
             var getter = _getOverload.ResolveOverload(new[] { index }, null);
             if (getter == null)
                 throw new JintException("No matching overload found");
 
-            return getter(_global, that, index);
+            result = getter(_global, Owner, index);
+            return true;
         }
 
-        public void Set(JsInstance that, JsInstance index, JsInstance value)
+        public override bool TrySetProperty(string index, JsInstance value)
+        {
+            // TODO: Optimize.
+            return TrySetProperty(JsString.Create(index), value);
+        }
+
+        public override bool TrySetProperty(JsInstance index, JsInstance value)
         {
             var setter = _setOverload.ResolveOverload(new[] { index, value }, null);
             if (setter == null)
                 throw new JintException("No matching overload found");
 
-            setter(_global, that, index, value);
+            setter(_global, Owner, index, value);
+            return true;
         }
     }
 }

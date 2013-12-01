@@ -110,17 +110,17 @@ namespace Jint.Native.Interop
                 }
             }
 
-            INativeIndexer indexer = null;
+            Func<JsObject, IPropertyStore> propertyStoreFactory = null;
 
             if (getMethods.Count > 0 || setMethods.Count > 0)
             {
-                indexer = new NativeIndexer(global, getMethods.ToArray(), setMethods.ToArray());
+                propertyStoreFactory = p => new NativePropertyStore(p, getMethods.ToArray(), setMethods.ToArray());
             }
             else if (type.IsArray)
             {
-                indexer = (INativeIndexer)Activator.CreateInstance(
-                    typeof(NativeArrayIndexer<>).MakeGenericType(type.GetElementType()),
-                    new object[] { marshaller }
+                propertyStoreFactory = p => (IPropertyStore)Activator.CreateInstance(
+                    typeof(NativeArrayPropertyStore<>).MakeGenericType(type.GetElementType()),
+                    new object[] { p, marshaller }
                 );
             }
 
@@ -143,7 +143,7 @@ namespace Jint.Native.Interop
 
             var result = global.CreateFunction(
                 type.FullName,
-                new Constructor(type, overloads, indexer, properties).Execute,
+                new Constructor(type, overloads, propertyStoreFactory, properties).Execute,
                 0,
                 null,
                 prototype,
@@ -230,20 +230,20 @@ namespace Jint.Native.Interop
         {
             private readonly Type _reflectedType;
             private readonly NativeOverloadImpl<ConstructorInfo, WrappedConstructor> _overloads;
-            private readonly INativeIndexer _indexer;
+            private readonly Func<JsObject, IPropertyStore> _propertyStoreFactory;
             private readonly List<NativeDescriptor> _properties;
 
-            public Constructor(Type reflectedType, NativeOverloadImpl<ConstructorInfo, WrappedConstructor> overloads, INativeIndexer indexer, List<NativeDescriptor> properties)
+            public Constructor(Type reflectedType, NativeOverloadImpl<ConstructorInfo, WrappedConstructor> overloads, Func<JsObject, IPropertyStore> propertyStoreFactory, List<NativeDescriptor> properties)
             {
                 _reflectedType = reflectedType;
                 _overloads = overloads;
-                _indexer = indexer;
+                _propertyStoreFactory = propertyStoreFactory;
                 _properties = properties;
             }
 
             public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                if (@this == null || JsInstance.IsNullOrUndefined(@this) || @this == runtime.Global.GlobalScope)
+                if (@this == null || @this == runtime.Global.GlobalScope)
                     throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
                 if (@this.Value != WrappingMarker)
@@ -254,16 +254,19 @@ namespace Jint.Native.Interop
                     @this.Value = CreateInstance(runtime.Global, arguments);
                 }
 
-                SetupNativeProperties((JsObject)@this);
+                var @object = (JsObject)@this;
 
-                ((JsObject)@this).Indexer = _indexer;
+                SetupNativeProperties(@object);
+
+                if (_propertyStoreFactory != null)
+                    @object.PropertyStore = _propertyStoreFactory(@object);
 
                 return @this;
             }
 
             private void SetupNativeProperties(JsObject target)
             {
-                if (target == null || JsInstance.IsNull(target))
+                if (target == null)
                     throw new ArgumentException("A valid js object is required", "target");
 
                 foreach (var prop in _properties)

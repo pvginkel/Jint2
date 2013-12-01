@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using Jint.Runtime;
 
@@ -10,10 +9,8 @@ namespace Jint.Native
     public class JsFunction : JsObject
     {
         private readonly bool _isClr;
-
         public JsFunctionDelegate Delegate { get; private set; }
         public string Name { get; private set; }
-        public int ArgumentCount { get; set; }
         public object Closure { get; private set; }
 
         internal JsFunction(JsGlobal global, string name, JsFunctionDelegate @delegate, int argumentCount, object closure, JsObject prototype, bool isClr)
@@ -24,15 +21,19 @@ namespace Jint.Native
                 throw new ArgumentNullException("delegate");
 
             Name = name;
-            ArgumentCount = argumentCount;
             Closure = closure;
             Delegate = @delegate;
+            Length = argumentCount;
         }
 
-        public override int Length
+        public override bool IsClr
         {
-            get { return ArgumentCount; }
-            set { }
+            get { return _isClr; }
+        }
+
+        public override string Class
+        {
+            get { return JsNames.ClassFunction; }
         }
 
         // 15.3.5.3
@@ -40,12 +41,11 @@ namespace Jint.Native
         {
             return
                 instance != null &&
-                !IsNull(instance) &&
                 Prototype.IsPrototypeOf(instance);
         }
 
         // 13.2.2
-        public JsObject Construct(JintRuntime runtime, JsInstance[] arguments)
+        public JsInstance Construct(JintRuntime runtime, JsInstance[] arguments)
         {
             // TODO: Change this when we flatten the hierarchy further.
 
@@ -61,29 +61,19 @@ namespace Jint.Native
                 default: @this = Global.CreateObject((JsObject)this["prototype"]); break;
             }
 
-            var result = Delegate(runtime, @this, this, Closure, arguments, null);
+            var boxedThis = @this;
 
-            return result as JsObject ?? @this;
+            var result = Delegate(runtime, boxedThis, this, Closure, arguments, null);
+
+            if (result is JsObject)
+                return result;
+
+            return boxedThis;
         }
 
         public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsInstance[] arguments, JsInstance[] genericArguments)
         {
             return Delegate(runtime, @this, this, Closure, arguments, genericArguments);
-        }
-
-        public override string Class
-        {
-            get { return ClassFunction; }
-        }
-
-        public override string ToSource()
-        {
-            return String.Format("function {0} () {{ /* js code */ }}", Name);
-        }
-
-        public override bool IsClr
-        {
-            get { return _isClr; }
         }
     }
 }

@@ -10,29 +10,20 @@ namespace Jint.Native
         internal static long Offset1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
         internal static int TicksFactor = 10000;
 
-        private DateTime _value;
-
-        public override object Value
-        {
-            get { return _value; }
-            set
-            {
-                if (value is DateTime)
-                    _value = (DateTime)value;
-                else if (value is double)
-                    _value = CreateDateTime((double)value);
-            }
-        }
-
         internal JsDate(JsGlobal global, DateTime date, JsObject prototype)
             : base(global, null, prototype)
         {
-            _value = date;
+            Value = date;
         }
 
         internal JsDate(JsGlobal global, double value, JsObject prototype)
             : this(global, CreateDateTime(value), prototype)
         {
+        }
+
+        public override string Class
+        {
+            get { return JsNames.ClassDate; }
         }
 
         public static DateTime CreateDateTime(double number)
@@ -44,20 +35,5 @@ namespace Jint.Native
         public static string FormatUtc = "ddd, dd MMM yyyy HH':'mm':'ss 'UTC'";
         public static string DateFormat = "ddd, dd MMM yyyy";
         public static string TimeFormat = "HH':'mm':'ss 'GMT'zzz";
-
-        public override object ToObject()
-        {
-            return _value;
-        }
-
-        public override string Class
-        {
-            get { return ClassDate; }
-        }
-
-        public override bool IsClr
-        {
-            get { return false; }
-        }
     }
 }

@@ -18,9 +18,11 @@ namespace Jint.Native
 
                     if (arguments != null)
                     {
+                        var propertyStore = (ArrayPropertyStore)result.PropertyStore;
+
                         for (int i = 0; i < arguments.Length; i++)
                         {
-                            result.Put(i, arguments[i]); // Fast version since it avoids a type conversion
+                            propertyStore.SetByIndex(i, arguments[i]); // Fast version since it avoids a type conversion
                         }
                     }
 
@@ -63,11 +65,13 @@ namespace Jint.Native
             // 15.4.4.4
             public static JsInstance Concat(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                if (@this is JsArray)
-                    return ((JsArray)@this).Concat(arguments);
+                var array = @this as JsArray;
+                if (array != null)
+                    return ((ArrayPropertyStore)array.PropertyStore).Concat(arguments);
 
                 var global = runtime.Global;
-                var array = global.CreateArray();
+                array = global.CreateArray();
+                var propertyStore = (ArrayPropertyStore)array.PropertyStore;
                 var items = new List<JsInstance>
                 {
                     @this
@@ -85,13 +89,13 @@ namespace Jint.Native
                             string p = k.ToString();
                             JsInstance result;
                             if (((JsObject)e).TryGetProperty(p, out result))
-                                array.Put(n, result);
+                                propertyStore.SetByIndex(n, result);
                             n++;
                         }
                     }
                     else
                     {
-                        array.Put(n, e);
+                        propertyStore.SetByIndex(n, e);
                         n++;
                     }
                 }
@@ -102,8 +106,9 @@ namespace Jint.Native
             // 15.4.4.5
             public static JsInstance Join(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                if (@this is JsArray)
-                    return ((JsArray)@this).Join(arguments.Length > 0 ? arguments[0] : JsUndefined.Instance);
+                var array = @this as JsArray;
+                if (array != null)
+                    return ((ArrayPropertyStore)array.PropertyStore).Join(arguments.Length > 0 ? arguments[0] : JsUndefined.Instance);
 
                 string separator =
                     arguments.Length == 0 || JsInstance.IsUndefined(arguments[0])
@@ -307,6 +312,7 @@ namespace Jint.Native
                 var target = (JsObject)@this;
                 var global = target.Global;
                 var array = global.CreateArray();
+                var propertyStore = (ArrayPropertyStore)array.PropertyStore;
                 int relativeStart = Convert.ToInt32(arguments[0].ToNumber());
                 int actualStart = relativeStart < 0 ? Math.Max(target.Length + relativeStart, 0) : Math.Min(relativeStart, target.Length);
                 int actualDeleteCount = Math.Min(Math.Max(Convert.ToInt32(arguments[1].ToNumber()), 0), target.Length - actualStart);
@@ -315,11 +321,9 @@ namespace Jint.Native
                 for (int k = 0; k < actualDeleteCount; k++)
                 {
                     string from = (relativeStart + k).ToString();
-                    JsInstance result = null;
+                    JsInstance result;
                     if (target.TryGetProperty(from, out result))
-                    {
-                        array.Put(k, result);
-                    }
+                        propertyStore.SetByIndex(k, result);
                 }
 
                 List<JsInstance> items = new List<JsInstance>();
@@ -332,9 +336,9 @@ namespace Jint.Native
                 {
                     for (int k = actualStart; k < len - actualDeleteCount; k++)
                     {
-                        JsInstance result = null;
                         string from = (k + actualDeleteCount).ToString();
                         string to = (k + items.Count).ToString();
+                        JsInstance result;
                         if (target.TryGetProperty(from, out result))
                             target[to] = result;
                         else
@@ -352,9 +356,9 @@ namespace Jint.Native
                 {
                     for (int k = len - actualDeleteCount; k > actualStart; k--)
                     {
-                        JsInstance result = null;
                         string from = (k + actualDeleteCount - 1).ToString();
                         string to = (k + items.Count - 1).ToString();
+                        JsInstance result;
                         if (target.TryGetProperty(from, out result))
                             target[to] = result;
                         else
@@ -452,7 +456,7 @@ namespace Jint.Native
                     k = len - Math.Abs(n - 1);
                 while (k >= 0)
                 {
-                    JsInstance result = null;
+                    JsInstance result;
                     if (target.TryGetProperty(k.ToString(), out result))
                     {
                         if (result == searchParameter)

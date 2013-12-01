@@ -32,14 +32,9 @@ namespace Jint.Native
             DefineOwnProperty(new ValueDescriptor(this, JsNames.Length, JsNumber.Create(length), PropertyAttributes.DontEnum));
         }
 
-        public override bool IsClr
-        {
-            get { return false; }
-        }
-
         public override string Class
         {
-            get { return ClassArguments; }
+            get { return JsNames.ClassArguments; }
         }
     }
 }

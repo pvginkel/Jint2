@@ -42,20 +42,7 @@ namespace Jint.Native
 
         public JsObject Owner { get; set; }
 
-        public virtual bool IsDeleted { get; protected set; }
-
         public abstract bool IsReference { get; }
-
-        /// <summary>
-        /// Marks a descriptor as a deleted.
-        /// </summary>
-        /// <remarks>
-        /// A descriptor may be deleted to force a refresh of cached references.
-        /// </remarks>
-        public virtual void Delete()
-        {
-            IsDeleted = true;
-        }
 
         public bool IsClr
         {

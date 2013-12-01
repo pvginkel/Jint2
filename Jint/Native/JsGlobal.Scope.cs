@@ -12,6 +12,8 @@ namespace Jint.Native
             public Scope(JsGlobal global)
                 : base(global, null, global.ObjectClass)
             {
+                PropertyStore = new GlobalScopePropertyStore(this);
+
                 DefineProperty(this, "null", JsNull.Instance, PropertyAttributes.DontEnum);
                 DefineProperty(this, "Function", global.FunctionClass, PropertyAttributes.DontEnum);
                 DefineProperty(this, "Object", global.ObjectClass, PropertyAttributes.DontEnum);
@@ -61,24 +63,34 @@ namespace Jint.Native
 
             public override string Class
             {
-                get { return ClassGlobal; }
+                get { return JsNames.ClassGlobal; }
             }
 
-            public override JsInstance this[string index]
+            // If we're the global scope, perform special handling on JsUndefined.
+            private class GlobalScopePropertyStore : DictionaryPropertyStore
             {
-                get
+                private readonly JsGlobal _global;
+
+                public GlobalScopePropertyStore(JsObject owner)
+                    : base(owner)
                 {
-                    var descriptor = GetDescriptor(index);
-                    if (descriptor != null)
-                        return descriptor.Get(this);
-
-                    // If we're the global scope, perform special handling on JsUndefined.
-
-                    return Global.Backend.ResolveUndefined(index, null);
+                    _global = owner.Global;
                 }
-                set
+
+                public override bool TryGetProperty(JsInstance index, out JsInstance result)
                 {
-                    base[index] = value;
+                    return TryGetProperty(index.ToString(), out result);
+                }
+
+                public override bool TryGetProperty(string index, out JsInstance result)
+                {
+                    var descriptor = Owner.GetDescriptor(index);
+                    if (descriptor != null)
+                        result = descriptor.Get(Owner);
+                    else
+                        result = _global.Backend.ResolveUndefined(index, null);
+
+                    return true;
                 }
             }
         }

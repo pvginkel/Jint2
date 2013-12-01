@@ -22,14 +22,18 @@ myArray.push(undefined);
 assert(4, myArray.length);
 
 myArray = [1, 2, 3, 4, 5];
+print('x');
 assert(2, myArray.slice(0, 2).length);
+print('x');
 assert(3, myArray.slice(0, -2).length);
 assert(1, myArray.slice(2, -2).length);
 
 assert(5, myArray.length);
 assert(1, myArray.shift());
 assert(4, myArray.length);
+print('x');
 assert(2, myArray.shift());
+print('x');
 assert(3, myArray.length);
 
 
@@ -70,7 +74,9 @@ assert(3, n);
 // set length
 var array = [1, 2, 3];
 array.length = 2;
+print('x');
 assert(2, array.length);
+print('x');
 
 
 //splice edge cases
