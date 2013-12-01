@@ -239,13 +239,188 @@ namespace Jint.Expressions
         {
         }
 
-        public virtual void VisitClrIdentifier(ClrIdentifierSyntax syntax)
-        {
-        }
-
         public virtual void VisitLabel(LabelSyntax syntax)
         {
             syntax.Expression.Accept(this);
         }
     }
+
+    public class SyntaxVisitor<T> : ISyntaxVisitor<T>
+    {
+        public virtual T VisitProgram(ProgramSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitAssignment(AssignmentSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitBlock(BlockSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitBreak(BreakSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitContinue(ContinueSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitDoWhile(DoWhileSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitEmpty(EmptySyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitExpressionStatement(ExpressionStatementSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitForEachIn(ForEachInSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitFor(ForSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitIf(IfSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitReturn(ReturnSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitSwitch(SwitchSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitWith(WithSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitThrow(ThrowSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitTry(TrySyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitVariableDeclaration(VariableDeclarationSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitWhile(WhileSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitCommaOperator(CommaOperatorSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitFunction(FunctionSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitMethodCall(MethodCallSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitIndexer(IndexerSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitProperty(PropertySyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitIdentifier(IdentifierSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitJsonExpression(JsonExpressionSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitNew(NewSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitBinaryExpression(BinaryExpressionSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitTernary(TernarySyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitUnaryExpression(UnaryExpressionSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitValue(ValueSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitRegexp(RegexpSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual T VisitLabel(LabelSyntax syntax)
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
 }

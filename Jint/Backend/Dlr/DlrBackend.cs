@@ -40,6 +40,8 @@ namespace Jint.Backend.Dlr
             PermissionSet = new PermissionSet(PermissionState.None);
 
             _runtime = new JintRuntime(this, Options);
+
+            ResetExpressionDump();
         }
 
         public object Run(ProgramSyntax program, bool unwrap)
@@ -49,13 +51,25 @@ namespace Jint.Backend.Dlr
 
             PrepareTree(program);
 
-            var expression = program.Accept(new ExpressionVisitor(Global));
+            JsInstance result;
 
-            PrintExpression(expression);
+            if (program.IsLiteral)
+            {
+                // If the whole program is a literal, there's no use in invoking
+                // the compiler.
 
-            EnsureGlobalsDeclared(program);
+                result = Global.BuildLiteral(program);
+            }
+            else
+            {
+                var expression = program.Accept(new ExpressionVisitor(Global));
 
-            var result = ((Func<JintRuntime, JsInstance>)((LambdaExpression)expression).Compile())(_runtime);
+                PrintExpression(expression);
+
+                EnsureGlobalsDeclared(program);
+
+                result = ((Func<JintRuntime, JsInstance>)((LambdaExpression)expression).Compile())(_runtime);
+            }
 
             return
                 result == null
@@ -83,8 +97,6 @@ namespace Jint.Backend.Dlr
         {
             node.Accept(new VariableMarkerPhase(this));
             node.Accept(new TypeMarkerPhase());
-
-            ResetExpressionDump();
         }
 
         public JsFunction CompileFunction(JsInstance[] parameters)

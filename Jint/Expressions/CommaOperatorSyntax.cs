@@ -15,6 +15,11 @@ namespace Jint.Expressions
             get { return SyntaxType.CommaOperator; }
         }
 
+        internal override bool IsLiteral
+        {
+            get { return Expressions.Count == 0 || (Expressions.Count == 1 && Expressions[0].IsLiteral); }
+        }
+
         public IList<SyntaxNode> Expressions { get; private set; }
 
         internal override ValueType ValueType

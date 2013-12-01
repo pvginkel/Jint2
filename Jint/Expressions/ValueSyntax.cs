@@ -20,6 +20,11 @@ namespace Jint.Expressions
             get { return _valueType; }
         }
 
+        internal override bool IsLiteral
+        {
+            get { return true; }
+        }
+
         public ValueSyntax(object value)
         {
             if (value == null)

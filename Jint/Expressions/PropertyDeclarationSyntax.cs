@@ -13,6 +13,11 @@ namespace Jint.Expressions
             get { return SyntaxType.PropertyDeclaration; }
         }
 
+        internal override bool IsLiteral
+        {
+            get { return Mode == PropertyExpressionType.Data && Expression.IsLiteral; }
+        }
+
         public string Name { get; private set; }
         public ExpressionSyntax Expression { get; private set; }
         public PropertyExpressionType Mode { get; private set; }

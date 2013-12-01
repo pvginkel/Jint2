@@ -13,6 +13,9 @@ namespace Jint.Expressions
             get { return SyntaxType.New; }
         }
 
+        // We specifically do not allow something like new Array to be a literal.
+        // The reason for this is that Array can be redefined; [] cannot.
+
         public ExpressionSyntax Expression { get; private set; }
 
         internal override ValueType ValueType

@@ -41,7 +41,6 @@ namespace Jint.Expressions
         void VisitUnaryExpression(UnaryExpressionSyntax syntax);
         void VisitValue(ValueSyntax syntax);
         void VisitRegexp(RegexpSyntax syntax);
-        void VisitClrIdentifier(ClrIdentifierSyntax syntax);
 
         void VisitLabel(LabelSyntax syntax);
     }
@@ -84,7 +83,6 @@ namespace Jint.Expressions
         T VisitUnaryExpression(UnaryExpressionSyntax syntax);
         T VisitValue(ValueSyntax syntax);
         T VisitRegexp(RegexpSyntax syntax);
-        T VisitClrIdentifier(ClrIdentifierSyntax syntax);
         T VisitLabel(LabelSyntax syntax);
     }
 

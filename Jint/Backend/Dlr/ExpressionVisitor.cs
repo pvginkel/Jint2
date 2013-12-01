@@ -19,6 +19,7 @@ namespace Jint.Backend.Dlr
         private static readonly MethodInfo _defineAccessorProperty = typeof(JsObject).GetMethod("DefineAccessorProperty");
         private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Single();
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
+        private static readonly MethodInfo _buildLiteral = typeof(JsGlobal).GetMethod("BuildLiteral", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
         private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a)
         {
@@ -661,6 +662,12 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
         {
+            // It's more efficient to build the array using compiled code if
+            // it doesn't have any contents.
+
+            if (syntax.IsLiteral && syntax.Parameters.Count > 0)
+                return BuildLiteralExpression(syntax);
+
             var statements = new List<Expression>();
 
             var array = Expression.Parameter(typeof(JsArray), "array");
@@ -696,6 +703,9 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitCommaOperator(CommaOperatorSyntax syntax)
         {
+            if (syntax.IsLiteral)
+                return BuildLiteralExpression(syntax);
+
             return Expression.Block(
                 syntax.Expressions.Select(p => p.Accept(this))
             );
@@ -1117,6 +1127,12 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitJsonExpression(JsonExpressionSyntax syntax)
         {
+            // It's more efficient to build the object using compiled code if
+            // it doesn't have any contents.
+
+            if (syntax.IsLiteral && syntax.Properties.Count > 0)
+                return BuildLiteralExpression(syntax);
+
             var global = Expression.Parameter(typeof(JsGlobal), "global");
             var obj = Expression.Parameter(typeof(JsObject), "obj");
 
@@ -1477,10 +1493,14 @@ namespace Jint.Backend.Dlr
 
         public Expression VisitValue(ValueSyntax syntax)
         {
+            // We don't handle literal here because this allows us to have
+            // the raw values in the expression tree; not the JsInstance's.
+
             if (syntax.Value == null)
                 return Expression.Constant(JsNull.Instance);
 
             return Expression.Constant(syntax.Value);
+
         }
 
         public Expression VisitRegexp(RegexpSyntax syntax)
@@ -1496,16 +1516,23 @@ namespace Jint.Backend.Dlr
             );
         }
 
-        public Expression VisitClrIdentifier(ClrIdentifierSyntax syntax)
-        {
-            throw new NotImplementedException();
-        }
-
         public Expression VisitLabel(LabelSyntax syntax)
         {
             _labels.Add(syntax.Expression, syntax.Label);
 
             return syntax.Expression.Accept(this);
+        }
+
+        private Expression BuildLiteralExpression(SyntaxNode node)
+        {
+            return Expression.Call(
+                Expression.Property(
+                    _scope.Runtime,
+                    "Global"
+                ),
+                _buildLiteral,
+                Expression.Constant(node)
+            );
         }
     }
 }

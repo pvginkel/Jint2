@@ -9,6 +9,11 @@ namespace Jint.Expressions
     {
         public ExpressionSyntax Expression { get; private set; }
 
+        public override bool IsLiteral
+        {
+            get { return Expression.IsLiteral; }
+        }
+
         public JsonDataProperty(string name, ExpressionSyntax expression)
             : base(name)
         {

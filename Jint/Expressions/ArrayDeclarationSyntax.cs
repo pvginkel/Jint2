@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
@@ -8,9 +9,22 @@ namespace Jint.Expressions
     [Serializable]
     public class ArrayDeclarationSyntax : ExpressionSyntax
     {
+        private bool? _isLiteral;
+
         public override SyntaxType Type
         {
             get { return SyntaxType.ArrayDeclaration; }
+        }
+
+        internal override bool IsLiteral
+        {
+            get
+            {
+                if (!_isLiteral.HasValue)
+                    _isLiteral = Parameters.All(p => p.IsLiteral);
+
+                return _isLiteral.Value;
+            }
         }
 
         public IList<SyntaxNode> Parameters { get; private set; }
