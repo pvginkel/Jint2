@@ -23,7 +23,7 @@ namespace Jint.Native
             _global = Owner.Global;
         }
 
-        public void SetLength(int length)
+        public void SetLength(int length, int oldLength)
         {
         }
 

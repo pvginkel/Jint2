@@ -2,68 +2,48 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Jint.Support;
 
 namespace Jint.Native
 {
-    internal class ArrayPropertyStore : IPropertyStore
+    internal class ArrayPropertyStore : SparseArray<JsInstance>, IPropertyStore
     {
         private readonly JsObject _owner;
         private DictionaryPropertyStore _baseStore;
-        private readonly SortedList<int, JsInstance> _data;
 
-        public ArrayPropertyStore(JsObject owner, SortedList<int, JsInstance> data)
+        public ArrayPropertyStore(JsObject owner)
         {
             if (owner == null)
                 throw new ArgumentNullException("owner");
 
             _owner = owner;
-            _data = data ?? new SortedList<int, JsInstance>();
         }
 
-        public void SetLength(int length)
+        public ArrayPropertyStore(JsObject owner, SparseArray<JsInstance> array)
+            : base(array)
+        {
+            if (owner == null)
+                throw new ArgumentNullException("owner");
+
+            _owner = owner;
+        }
+
+        public void SetLength(int length, int oldLength)
         {
             if (length < 0)
                 throw new ArgumentOutOfRangeException("length", "New length is out of range");
 
-            if (length < _owner.Length)
+            for (int i = length; i < oldLength; i++)
             {
-                int keyIndex = FindKeyOrNext(length);
-                if (keyIndex >= 0)
-                {
-                    for (int i = _data.Count - 1; i >= keyIndex; i--)
-                        _data.RemoveAt(i);
-                }
+                Remove(i);
             }
-        }
-
-        private int FindKeyOrNext(int key)
-        {
-            int left = 0, right = _data.Count - 1;
-            int index = 0;
-            while (left <= right)
-            {
-                int current = _data.Keys[index];
-                if (current == key)
-                    return index;
-                else
-                {
-                    if (current > key)
-                        right = index - 1;
-                    else
-                        left = index + 1;
-                    index = (left + right) / 2;
-                }
-            }
-
-            // not found, left will contain next after index if it's in range
-            return left < _data.Count ? left : -1;
         }
 
         public bool HasOwnProperty(int index)
         {
             int i;
             if (TryParseIndex(index, out i))
-                return i >= 0 && i < _owner.Length && _data.ContainsKey(i);
+                return i >= 0 && i < _owner.Length && ContainsKey(i);
 
             if (_baseStore != null)
                 return _baseStore.HasOwnProperty(index);
@@ -75,7 +55,7 @@ namespace Jint.Native
         {
             int i;
             if (TryParseIndex(index, out i))
-                return i >= 0 && i < _owner.Length && _data.ContainsKey(i);
+                return i >= 0 && i < _owner.Length && ContainsKey(i);
 
             if (_baseStore != null)
                 return _baseStore.HasOwnProperty(index);
@@ -147,11 +127,7 @@ namespace Jint.Native
 
         public JsInstance GetByIndex(int index)
         {
-            JsInstance value;
-            if (_data.TryGetValue(index, out value))
-                return value;
-
-            return JsUndefined.Instance;
+            return this[index] ?? JsUndefined.Instance;
         }
 
         public bool TrySetProperty(int index, JsInstance value)
@@ -183,7 +159,7 @@ namespace Jint.Native
             if (index >= _owner.Length)
                 _owner.Length = index + 1;
 
-            _data[index] = value;
+            this[index] = value;
         }
 
         public bool Delete(JsInstance index)
@@ -191,7 +167,7 @@ namespace Jint.Native
             int i;
             if (TryParseIndex(index, out i))
             {
-                _data.Remove(i);
+                Remove(i);
                 return true;
             }
 
@@ -206,7 +182,7 @@ namespace Jint.Native
             int i;
             if (TryParseIndex(index, out i))
             {
-                _data.Remove(i);
+                Remove(i);
                 return true;
             }
 
@@ -240,12 +216,11 @@ namespace Jint.Native
             return JsObject.EmptyKeyValues.GetEnumerator();
         }
 
-        public IEnumerable<JsInstance> GetValues()
+        public new IEnumerable<JsInstance> GetValues()
         {
-            var values = _data.Values;
-            for (int i = 0; i < values.Count; i++)
+            foreach (var value in base.GetValues())
             {
-                yield return values[i];
+                yield return value;
             }
 
             if (_baseStore != null)
@@ -257,12 +232,11 @@ namespace Jint.Native
             }
         }
 
-        public IEnumerable<int> GetKeys()
+        public new IEnumerable<int> GetKeys()
         {
-            var keys = _data.Keys;
-            for (int i = 0; i < keys.Count; i++)
+            foreach (var key in base.GetKeys())
             {
-                yield return keys[i];
+                yield return key;
             }
 
             if (_baseStore != null)
@@ -276,7 +250,7 @@ namespace Jint.Native
 
         public JsArray Concat(JsInstance[] args)
         {
-            var newData = new SortedList<int, JsInstance>(_data);
+            var newArray = new SparseArray<JsInstance>(this);
             int offset = _owner.Length;
 
             foreach (var item in args)
@@ -284,11 +258,11 @@ namespace Jint.Native
                 var array = item as JsArray;
                 if (array != null)
                 {
-                    var propertyStore = (ArrayPropertyStore)array.PropertyStore;
+                    var oldArray = (ArrayPropertyStore)array.PropertyStore;
 
-                    foreach (var pair in propertyStore._data)
+                    foreach (int key in oldArray.GetKeys())
                     {
-                        newData.Add(pair.Key + offset, pair.Value);
+                        newArray[key + offset] = oldArray[key];
                     }
 
                     offset += array.Length;
@@ -296,6 +270,7 @@ namespace Jint.Native
                 else
                 {
                     var @object = item as JsObject;
+
                     if (
                         @object != null &&
                         _owner.Global.ArrayClass.HasInstance(@object)
@@ -307,18 +282,18 @@ namespace Jint.Native
                         {
                             JsInstance value;
                             if (@object.TryGetProperty(i, out value))
-                                newData.Add(offset + i, value);
+                                newArray[offset + 1] = value;
                         }
                     }
                     else
                     {
-                        newData.Add(offset, item);
+                        newArray[offset] = item;
                         offset++;
                     }
                 }
             }
 
-            return new JsArray(_owner.Global, newData, offset, _owner.Global.ArrayClass.Prototype);
+            return new JsArray(_owner.Global, newArray, offset, _owner.Global.ArrayClass.Prototype);
         }
 
         public JsInstance Join(JsInstance separator)
@@ -332,11 +307,11 @@ namespace Jint.Native
 
             for (int i = 0; i < length; i++)
             {
-                JsInstance item;
-                map[i] =
-                    _data.TryGetValue(i, out item) && !JsInstance.IsNullOrUndefined(item)
-                    ? item.ToString()
-                    : "";
+                var item = this[i];
+                if (item != null && !JsInstance.IsNullOrUndefined(item))
+                    map[i] = item.ToSource();
+                else
+                    map[i] = String.Empty;
             }
 
             return JsString.Create(String.Join(separatorString, map));

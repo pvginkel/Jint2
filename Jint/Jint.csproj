@@ -213,6 +213,7 @@
       <DependentUpon>JintRuntime.Operations.Generated.tt</DependentUpon>
     </Compile>
     <Compile Include="Support\KeyedCollection.cs" />
+    <Compile Include="Support\SparseArray.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backend\Dlr\ExpressionVisitor.Scope.cs" />

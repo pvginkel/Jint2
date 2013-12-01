@@ -38,9 +38,10 @@ namespace Jint.Native
             get { return _length; }
             internal set
             {
+                int oldLength = _length;
                 _length = value;
                 if (PropertyStore != null)
-                    PropertyStore.SetLength(value);
+                    PropertyStore.SetLength(value, oldLength);
             }
         }
 
@@ -452,11 +453,13 @@ namespace Jint.Native
                 : JsUndefined.Instance;
         }
 
-        internal void SetProperty(int index, JsInstance value)
+        internal JsInstance SetProperty(int index, JsInstance value)
         {
             EnsurePropertyStore();
             if (!PropertyStore.TrySetProperty(index, value))
                 SetPropertyCore(index, value);
+
+            return value;
         }
 
         private void SetProperty(JsInstance index, JsInstance value)

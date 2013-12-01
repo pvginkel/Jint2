@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jint.Support;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,12 +13,15 @@ namespace Jint.Native
         {
         }
 
-        internal JsArray(JsGlobal global, SortedList<int, JsInstance> data, int length, JsObject prototype)
+        internal JsArray(JsGlobal global, SparseArray<JsInstance> array, int length, JsObject prototype)
             : base(global, null, prototype)
         {
             // We always create the property store because we expect it to be used
             // and it's easier for the array functions.
-            PropertyStore = new ArrayPropertyStore(this, data);
+            if (array != null)
+                PropertyStore = new ArrayPropertyStore(this, array);
+            else
+                PropertyStore = new ArrayPropertyStore(this);
             Length = length;
         }
 

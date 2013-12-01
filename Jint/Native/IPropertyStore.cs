@@ -7,7 +7,7 @@ namespace Jint.Native
 {
     internal interface IPropertyStore
     {
-        void SetLength(int length);
+        void SetLength(int length, int oldLength);
         bool HasOwnProperty(int index);
         bool HasOwnProperty(JsInstance index);
         Descriptor GetOwnDescriptor(int index);

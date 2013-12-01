@@ -117,6 +117,7 @@
     <Compile Include="Mozilla\StatementsTests.cs" />
     <Compile Include="Mozilla\StringTests.cs" />
     <Compile Include="Mozilla\UnicodeTests.cs" />
+    <Compile Include="SparseArrayFixture\Fixture.cs" />
     <Compile Include="SunSpider\SunSpiderFixture.cs" />
     <Compile Include="Support\TestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

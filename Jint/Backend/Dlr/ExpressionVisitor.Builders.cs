@@ -192,7 +192,6 @@ namespace Jint.Backend.Dlr
             }
 
             return Expression.Call(
-                _scope.Runtime,
                 _runtimeSetByIndex,
                 EnsureJs(expression),
                 Expression.Constant(index),
