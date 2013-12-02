@@ -29,7 +29,6 @@ namespace Jint.Expressions
         MethodCall,
         New,
         Property,
-        PropertyDeclaration,
         Regexp,
         Return,
         Switch,

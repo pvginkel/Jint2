@@ -141,7 +141,6 @@
     <Compile Include="Debugger\SourceCodeDescriptor.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
-    <Compile Include="Expressions\PropertyDeclarationSyntax.cs" />
     <Compile Include="IConstructorInvoker.cs" />
     <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />

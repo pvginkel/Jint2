@@ -697,7 +697,7 @@ objectLiteral returns [JsonExpressionSyntax value]
       RBRACE
 	;
 	
-propertyAssignment returns [PropertyDeclarationSyntax value]
+propertyAssignment returns [PropertyDeclaration value]
 	:
         func=propertyFunctionAssignment
         { $value = func; }
@@ -706,7 +706,7 @@ propertyAssignment returns [PropertyDeclarationSyntax value]
         { $value = data; }
 	;
 
-propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
+propertyFunctionAssignment returns [PropertyDeclaration value]
 @init {
     PropertyExpressionType mode;
     BlockSyntax body;
@@ -714,7 +714,7 @@ propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
     string name;
 }
 @after {
-    $value = new PropertyDeclarationSyntax(
+    $value = new PropertyDeclaration(
         name,
         new FunctionSyntax(
             name,
@@ -737,13 +737,13 @@ propertyFunctionAssignment returns [PropertyDeclarationSyntax value]
         { body = statements; } 
     ;
 
-propertyValueAssignment returns [PropertyDeclarationSyntax value]
+propertyValueAssignment returns [PropertyDeclaration value]
 @init {
     string name;
     ExpressionSyntax expression;
 }
 @after {
-    $value = new PropertyDeclarationSyntax(
+    $value = new PropertyDeclaration(
         name,
         expression,
         PropertyExpressionType.Data

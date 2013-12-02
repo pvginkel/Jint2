@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-11-30 14:57:03
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-02 21:40:12
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -1665,8 +1665,8 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 		JsonExpressionSyntax value = default(JsonExpressionSyntax);
 
 		IToken lb = default(IToken);
-		PropertyDeclarationSyntax first = default(PropertyDeclarationSyntax);
-		PropertyDeclarationSyntax follow = default(PropertyDeclarationSyntax);
+		PropertyDeclaration first = default(PropertyDeclaration);
+		PropertyDeclaration follow = default(PropertyDeclaration);
 
 
 		    var builder = new JsonPropertyBuilder();
@@ -1790,17 +1790,17 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_propertyAssignment();
 
 	// $ANTLR start "propertyAssignment"
-	// ..\\ES3.g:700:1: propertyAssignment returns [PropertyDeclarationSyntax value] : (func= propertyFunctionAssignment |data= propertyValueAssignment );
+	// ..\\ES3.g:700:1: propertyAssignment returns [PropertyDeclaration value] : (func= propertyFunctionAssignment |data= propertyValueAssignment );
 	[GrammarRule("propertyAssignment")]
-	private PropertyDeclarationSyntax propertyAssignment()
+	private PropertyDeclaration propertyAssignment()
 	{
 		EnterRule_propertyAssignment();
 		EnterRule("propertyAssignment", 13);
 		TraceIn("propertyAssignment", 13);
-		PropertyDeclarationSyntax value = default(PropertyDeclarationSyntax);
+		PropertyDeclaration value = default(PropertyDeclaration);
 
-		PropertyDeclarationSyntax func = default(PropertyDeclarationSyntax);
-		PropertyDeclarationSyntax data = default(PropertyDeclarationSyntax);
+		PropertyDeclaration func = default(PropertyDeclaration);
+		PropertyDeclaration data = default(PropertyDeclaration);
 
 		try { DebugEnterRule(GrammarFileName, "propertyAssignment");
 		DebugLocation(700, 1);
@@ -1897,14 +1897,14 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_propertyFunctionAssignment();
 
 	// $ANTLR start "propertyFunctionAssignment"
-	// ..\\ES3.g:709:1: propertyFunctionAssignment returns [PropertyDeclarationSyntax value] : acc= accessor prop2= propertyName (parms= formalParameterList )? statements= functionBody ;
+	// ..\\ES3.g:709:1: propertyFunctionAssignment returns [PropertyDeclaration value] : acc= accessor prop2= propertyName (parms= formalParameterList )? statements= functionBody ;
 	[GrammarRule("propertyFunctionAssignment")]
-	private PropertyDeclarationSyntax propertyFunctionAssignment()
+	private PropertyDeclaration propertyFunctionAssignment()
 	{
 		EnterRule_propertyFunctionAssignment();
 		EnterRule("propertyFunctionAssignment", 14);
 		TraceIn("propertyFunctionAssignment", 14);
-		PropertyDeclarationSyntax value = default(PropertyDeclarationSyntax);
+		PropertyDeclaration value = default(PropertyDeclaration);
 
 		PropertyExpressionType acc = default(PropertyExpressionType);
 		string prop2 = default(string);
@@ -1982,7 +1982,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 			}
 
 
-			    value = new PropertyDeclarationSyntax(
+			    value = new PropertyDeclaration(
 			        name,
 			        new FunctionSyntax(
 			            name,
@@ -2016,14 +2016,14 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_propertyValueAssignment();
 
 	// $ANTLR start "propertyValueAssignment"
-	// ..\\ES3.g:740:1: propertyValueAssignment returns [PropertyDeclarationSyntax value] : prop1= propertyName COLON ass= assignmentExpression ;
+	// ..\\ES3.g:740:1: propertyValueAssignment returns [PropertyDeclaration value] : prop1= propertyName COLON ass= assignmentExpression ;
 	[GrammarRule("propertyValueAssignment")]
-	private PropertyDeclarationSyntax propertyValueAssignment()
+	private PropertyDeclaration propertyValueAssignment()
 	{
 		EnterRule_propertyValueAssignment();
 		EnterRule("propertyValueAssignment", 15);
 		TraceIn("propertyValueAssignment", 15);
-		PropertyDeclarationSyntax value = default(PropertyDeclarationSyntax);
+		PropertyDeclaration value = default(PropertyDeclaration);
 
 		string prop1 = default(string);
 		ExpressionSyntax ass = default(ExpressionSyntax);
@@ -2060,7 +2060,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 			}
 
 
-			    value = new PropertyDeclarationSyntax(
+			    value = new PropertyDeclaration(
 			        name,
 			        expression,
 			        PropertyExpressionType.Data

@@ -101,7 +101,7 @@ namespace Jint.Parser
         {
             private readonly Dictionary<string, Assignment> _assignments = new Dictionary<string, Assignment>();
 
-            public void AddProperty(PropertyDeclarationSyntax propertyExpression)
+            public void AddProperty(PropertyDeclaration propertyExpression)
             {
                 string name = propertyExpression.Name;
                 var mode = propertyExpression.Mode;
@@ -174,6 +174,20 @@ namespace Jint.Parser
                 public ExpressionSyntax Expression { get; set; }
                 public ExpressionSyntax GetExpression { get; set; }
                 public ExpressionSyntax SetExpression { get; set; }
+            }
+        }
+
+        private class PropertyDeclaration
+        {
+            public string Name { get; private set; }
+            public ExpressionSyntax Expression { get; private set; }
+            public PropertyExpressionType Mode { get; private set; }
+
+            public PropertyDeclaration(string name, ExpressionSyntax expression, PropertyExpressionType mode)
+            {
+                Name = name;
+                Expression = expression;
+                Mode = mode;
             }
         }
     }

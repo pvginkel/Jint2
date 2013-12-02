@@ -1097,11 +1097,6 @@ namespace Jint.Backend.Dlr
             return BuildGet(syntax);
         }
 
-        public Expression VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)
-        {
-            throw new InvalidOperationException("Property declaration must be handled in VisitJsonExpression");
-        }
-
         public Expression VisitIdentifier(IdentifierSyntax syntax)
         {
             return BuildGet(syntax);

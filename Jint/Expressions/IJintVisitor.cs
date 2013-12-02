@@ -31,7 +31,6 @@ namespace Jint.Expressions
         void VisitMethodCall(MethodCallSyntax syntax);
         void VisitIndexer(IndexerSyntax syntax);
         void VisitProperty(PropertySyntax syntax);
-        void VisitPropertyDeclaration(PropertyDeclarationSyntax syntax);
         void VisitIdentifier(IdentifierSyntax syntax);
 
         void VisitJsonExpression(JsonExpressionSyntax syntax);
@@ -73,7 +72,6 @@ namespace Jint.Expressions
         T VisitMethodCall(MethodCallSyntax syntax);
         T VisitIndexer(IndexerSyntax syntax);
         T VisitProperty(PropertySyntax syntax);
-        T VisitPropertyDeclaration(PropertyDeclarationSyntax syntax);
         T VisitIdentifier(IdentifierSyntax syntax);
 
         T VisitJsonExpression(JsonExpressionSyntax syntax);

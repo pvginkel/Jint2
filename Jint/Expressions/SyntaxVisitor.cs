@@ -178,12 +178,6 @@ namespace Jint.Expressions
             syntax.Expression.Accept(this);
         }
 
-        public virtual void VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)
-        {
-            if (syntax.Expression != null)
-                syntax.Expression.Accept(this);
-        }
-
         public virtual void VisitIdentifier(IdentifierSyntax syntax)
         {
         }
@@ -368,11 +362,6 @@ namespace Jint.Expressions
         }
 
         public virtual T VisitProperty(PropertySyntax syntax)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public virtual T VisitPropertyDeclaration(PropertyDeclarationSyntax syntax)
         {
             throw new InvalidOperationException();
         }
