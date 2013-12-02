@@ -34,7 +34,7 @@ namespace Jint.Native
                 var target = (JsObject)@this;
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    target[i.ToString()] = arguments[i];
+                    target.SetProperty(i, arguments[i]);
                 }
 
                 return @this;
@@ -43,7 +43,7 @@ namespace Jint.Native
             // 15.4.4.2
             public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsFunction)runtime.Global.ArrayClass["join"]).Execute(runtime, @this, JsInstance.EmptyArray, null);
+                return ((JsFunction)runtime.Global.ArrayClass.GetProperty(Id.join)).Execute(runtime, @this, JsInstance.EmptyArray, null);
             }
 
             // 15.4.4.3
@@ -57,7 +57,7 @@ namespace Jint.Native
                 for (int i = 0; i < store.Length; i++)
                 {
                     var obj = (JsObject)store[i];
-                    resultStore[i] = ((JsFunction)obj["toLocaleString"]).Execute(runtime, obj, arguments, null);
+                    resultStore[i] = ((JsFunction)obj.GetProperty(Id.toLocaleString)).Execute(runtime, obj, arguments, null);
                 }
 
                 return JsString.Create(result.ToString());
@@ -121,7 +121,7 @@ namespace Jint.Native
                 {
                     var obj = (JsObject)@this;
 
-                    int length = (int)obj["length"].ToNumber();
+                    int length = (int)obj.GetProperty(Id.length).ToNumber();
 
                     foreach (var arg in arguments)
                     {
@@ -137,7 +137,7 @@ namespace Jint.Native
             public static JsInstance Reverse(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
-                int length = (int)target["length"].ToNumber();
+                int length = (int)target.GetProperty(Id.length).ToNumber();
                 int middle = length / 2;
 
                 for (int lower = 0; lower != middle; lower++)
@@ -194,7 +194,7 @@ namespace Jint.Native
             {
                 var global = runtime.Global;
                 var target = (JsObject)@this;
-                int length = (int)target["length"].ToNumber();
+                int length = (int)target.GetProperty(Id.length).ToNumber();
 
                 var start = arguments.Length > 0 ? (int)arguments[0].ToNumber() : 0;
                 var end = arguments.Length > 1 ? (int)arguments[1].ToNumber() : length;
@@ -209,7 +209,7 @@ namespace Jint.Native
                     end = length;
 
                 var result = global.CreateArray();
-                var push = (JsFunction)result["push"];
+                var push = (JsFunction)result.GetProperty(Id.push);
 
                 for (int i = start; i < end; i++)
                 {
@@ -230,7 +230,7 @@ namespace Jint.Native
                 var target = @this as JsObject;
                 int length = 0;
                 if (target != null)
-                    length = (int)target["length"].ToNumber();
+                    length = (int)target.GetProperty(Id.length).ToNumber();
                 if (length <= 1)
                     return @this;
 
@@ -246,7 +246,7 @@ namespace Jint.Native
 
                 for (int i = 0; i < length; i++)
                 {
-                    values.Add(target[i.ToString()]);
+                    values.Add(target.GetProperty(i));
                 }
 
                 if (compare != null)
@@ -270,7 +270,7 @@ namespace Jint.Native
 
                 for (int i = 0; i < length; i++)
                 {
-                    target[i.ToString()] = values[i];
+                    target.SetProperty(i, values[i]);
                 }
 
                 return target;
@@ -280,7 +280,7 @@ namespace Jint.Native
             public static JsInstance Splice(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
-                int length = (int)target["length"].ToNumber();
+                int length = (int)target.GetProperty(Id.length).ToNumber();
                 var global = target.Global;
 
                 var result = global.CreateArray();
@@ -335,7 +335,7 @@ namespace Jint.Native
                         target.Delete((k - 1).ToString());
                     }
 
-                    target["length"] = JsNumber.Create(length - actualDeleteCount + items.Count);
+                    target.SetProperty(Id.length, JsNumber.Create(length - actualDeleteCount + items.Count));
                 }
                 else
                 {
@@ -363,7 +363,7 @@ namespace Jint.Native
             public static JsInstance UnShift(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
-                int length = (int)target["length"].ToNumber();
+                int length = (int)target.GetProperty(Id.length).ToNumber();
 
                 for (int k = length; k > 0; k--)
                 {
@@ -384,7 +384,7 @@ namespace Jint.Native
                     target.SetProperty(j, e);
                 }
 
-                return target["length"];
+                return target.GetProperty(Id.length);
             }
 
             // 15.4.4.15
@@ -394,7 +394,7 @@ namespace Jint.Native
                     return JsNumber.Create(-1);
 
                 var target = (JsObject)@this;
-                int length = (int)target["length"].ToNumber();
+                int length = (int)target.GetProperty(Id.length).ToNumber();
                 if (length == 0)
                     return JsNumber.Create(-1);
 
@@ -434,7 +434,7 @@ namespace Jint.Native
                     return JsNumber.Create(-1);
 
                 var target = (JsObject)@this;
-                int length = (int)target["length"].ToNumber();
+                int length = (int)target.GetProperty(Id.length).ToNumber();
                 if (length == 0)
                     return JsNumber.Create(-1);
 
@@ -481,10 +481,10 @@ namespace Jint.Native
                 }
                 else
                 {
-                    int oldLen = (int)target["length"].ToNumber();
+                    int oldLen = (int)target.GetProperty(Id.length).ToNumber();
                     int newLength = (int)arguments[0].ToNumber();
 
-                    target["length"] = JsNumber.Create(newLength);
+                    target.SetProperty(Id.length, JsNumber.Create(newLength));
 
                     for (int i = newLength; i < oldLen; i++)
                     {

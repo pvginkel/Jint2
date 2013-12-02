@@ -94,8 +94,8 @@ namespace Jint.Native
 
             JsInstance primitive;
 
-            var toString = GetDescriptor(JsNames.ToStringId);
-            var valueOf = GetDescriptor(JsNames.ValueOfId);
+            var toString = GetDescriptor(Id.toString);
+            var valueOf = GetDescriptor(Id.valueOf);
 
             var first = hint == PreferredType.String ? toString : valueOf;
             var second = hint == PreferredType.String ? valueOf : toString;
@@ -407,7 +407,7 @@ namespace Jint.Native
         {
             Descriptor descriptor;
 
-            if (index == JsNames.PrototypeId)
+            if (index == Id.prototype)
             {
                 descriptor = GetOwnDescriptor(index);
                 if (descriptor != null)
@@ -419,7 +419,7 @@ namespace Jint.Native
                 return Prototype;
             }
 
-            if (index == JsNames.ProtoId)
+            if (index == Id.__proto__)
             {
                 if (IsPrototypeNull)
                     return JsNull.Instance;
@@ -462,7 +462,7 @@ namespace Jint.Native
 
         private void SetPropertyCore(int index, JsInstance value)
         {
-            if (index == JsNames.ProtoId)
+            if (index == Id.__proto__)
             {
                 if (value.Type == JsType.Object)
                     Prototype = (JsObject)value;

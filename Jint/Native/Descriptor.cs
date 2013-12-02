@@ -76,15 +76,15 @@ namespace Jint.Native
         /// </summary>
         internal static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsInstance jsInstance)
         {
-            if (jsInstance.Class != JsInstance.ClassObject)
+            if (jsInstance.Class != JsNames.ClassObject)
             {
                 throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
             }
 
             JsObject obj = (JsObject)jsInstance;
             if (
-                (obj.HasProperty(JsNames.ValueId) || obj.HasProperty(JsNames.WritableId)) &&
-                (obj.HasProperty(JsNames.SetId) || obj.HasProperty(JsNames.GetId)))
+                (obj.HasProperty(Id.value) || obj.HasProperty(Id.writable)) &&
+                (obj.HasProperty(Id.set) || obj.HasProperty(Id.get)))
                 throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
 
             var attributes = PropertyAttributes.None;
@@ -93,24 +93,24 @@ namespace Jint.Native
             JsInstance result;
 
             if (
-                obj.TryGetProperty(JsNames.EnumerableId, out result) &&
+                obj.TryGetProperty(Id.enumerable, out result) &&
                 !result.ToBoolean()
             )
                 attributes |= PropertyAttributes.DontEnum;
 
             if (
-                obj.TryGetProperty(JsNames.ConfigurableId, out result) &&
+                obj.TryGetProperty(Id.configurable, out result) &&
                 !result.ToBoolean()
             )
                 attributes |= PropertyAttributes.DontDelete;
 
             if (
-                obj.TryGetProperty(JsNames.WritableId, out result) &&
+                obj.TryGetProperty(Id.writable, out result) &&
                 !result.ToBoolean()
             )
                 attributes |= PropertyAttributes.ReadOnly;
 
-            if (obj.TryGetProperty(JsNames.GetId, out result))
+            if (obj.TryGetProperty(Id.get, out result))
             {
                 if (!(result is JsFunction))
                     throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
@@ -118,7 +118,7 @@ namespace Jint.Native
                 getFunction = (JsFunction)result;
             }
 
-            if (obj.TryGetProperty(JsNames.SetId, out result))
+            if (obj.TryGetProperty(Id.set, out result))
             {
                 if (!(result is JsFunction))
                     throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
@@ -126,8 +126,8 @@ namespace Jint.Native
                 setFunction = (JsFunction)result;
             }
 
-            if (obj.HasProperty(JsNames.ValueId))
-                return new ValueDescriptor(owner, name, obj.GetProperty(JsNames.ValueId));
+            if (obj.HasProperty(Id.value))
+                return new ValueDescriptor(owner, name, obj.GetProperty(Id.value));
 
             return new PropertyDescriptor(global, owner, name, getFunction, setFunction, attributes);
         }

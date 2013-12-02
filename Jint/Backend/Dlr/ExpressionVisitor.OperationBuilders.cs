@@ -108,13 +108,13 @@ namespace Jint.Backend.Dlr
                 );
 
             result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.String)] =
-                p => Expression.Constant(JsInstance.TypeString);
+                p => Expression.Constant(JsNames.TypeString);
 
             result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.Double)] =
-                p => Expression.Constant(JsInstance.TypeNumber);
+                p => Expression.Constant(JsNames.TypeNumber);
 
             result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.Boolean)] =
-                p => Expression.Constant(JsInstance.TypeBoolean);
+                p => Expression.Constant(JsNames.TypeBoolean);
 
             result[GetOperationMethodKey(SyntaxExpressionType.UnaryPlus, ValueType.Double)] =
                 p => p[0];

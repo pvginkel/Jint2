@@ -20,7 +20,7 @@ namespace Jint.Native
 
         public override string Class
         {
-            get { return ClassObject; }
+            get { return JsNames.ClassObject; }
         }
 
         public override bool ToBoolean()

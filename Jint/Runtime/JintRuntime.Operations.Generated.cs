@@ -4,9 +4,6 @@
 //
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
-//
-//     To update this file, extend CodeSetQueries.xml with a new code set,
-//     right click on CodeSetQueries.tt and select Run Custom Tool.
 // </auto-generated>
 //------------------------------------------------------------------------------
 

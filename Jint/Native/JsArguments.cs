@@ -28,8 +28,8 @@ namespace Jint.Native
                 length = 0;
             }
 
-            DefineOwnProperty(new ValueDescriptor(this, JsNames.Callee, callee, PropertyAttributes.DontEnum));
-            DefineOwnProperty(new ValueDescriptor(this, JsNames.Length, JsNumber.Create(length), PropertyAttributes.DontEnum));
+            DefineOwnProperty(new ValueDescriptor(this, "callee", callee, PropertyAttributes.DontEnum));
+            DefineOwnProperty(new ValueDescriptor(this, "length", JsNumber.Create(length), PropertyAttributes.DontEnum));
         }
 
         public override string Class

@@ -80,6 +80,11 @@
     <Compile Include="Expressions\WithScope.cs" />
     <Compile Include="Native\ArrayPropertyStore.cs" />
     <Compile Include="Native\DictionaryPropertyStore.cs" />
+    <Compile Include="Native\Id.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Id.tt</DependentUpon>
+    </Compile>
     <Compile Include="Native\Interop\NativeFactory.cs" />
     <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\IPropertyStore.cs" />
@@ -222,6 +227,10 @@
     <None Include="ES3.g" />
     <None Include="Key.snk" />
     <Compile Include="Native\JsGlobal.StringFunctions.cs" />
+    <None Include="Native\Id.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Id.cs</LastGenOutput>
+    </None>
     <None Include="Parser\Generate.bat" />
     <None Include="Runtime\JintRuntime.Operations.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -233,6 +242,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Marshal\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Native\Id.tokens" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

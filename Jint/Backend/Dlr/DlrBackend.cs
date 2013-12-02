@@ -210,7 +210,7 @@ namespace Jint.Backend.Dlr
 
         public JsInstance Eval(JsInstance[] arguments)
         {
-            if (JsInstance.ClassString != arguments[0].Class)
+            if (JsNames.ClassString != arguments[0].Class)
                 return arguments[0];
 
             ProgramSyntax program;

@@ -70,8 +70,8 @@ namespace Jint.Native
             var prototype = FunctionClass.Prototype;
 
             DefineFunction(prototype, "constructor", FunctionFunctions.GetConstructor, 0, PropertyAttributes.DontEnum);
-            DefineFunction(prototype, JsNames.Call, FunctionFunctions.Call, 1, PropertyAttributes.DontEnum);
-            DefineFunction(prototype, JsNames.Apply, FunctionFunctions.Apply, 2, PropertyAttributes.DontEnum);
+            DefineFunction(prototype, "call", FunctionFunctions.Call, 1, PropertyAttributes.DontEnum);
+            DefineFunction(prototype, "apply", FunctionFunctions.Apply, 2, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toString", FunctionFunctions.ToString, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toLocaleString", FunctionFunctions.ToString, 0, PropertyAttributes.DontEnum);
             DefineProperty(prototype, "length", FunctionFunctions.GetLength, FunctionFunctions.SetLength, PropertyAttributes.DontEnum);

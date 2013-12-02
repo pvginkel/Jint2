@@ -39,7 +39,7 @@ namespace Jint.Native
             public static JsInstance ToLocaleString(Runtime.JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 // Remove arguments
-                return ((JsFunction)((JsObject)@this)["toString"]).Execute(runtime, @this, JsInstance.EmptyArray, null);
+                return ((JsFunction)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsInstance.EmptyArray, null);
             }
 
             private static readonly char[] RDigits =
@@ -121,7 +121,7 @@ namespace Jint.Native
                 double value = Convert.ToDouble(@this.Value);
 
                 if (Double.IsInfinity(value) || Double.IsNaN(value))
-                    return ((JsFunction)((JsObject)@this)["toString"]).Execute(runtime, @this, JsInstance.EmptyArray, null);
+                    return ((JsFunction)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsInstance.EmptyArray, null);
 
                 int fractions = 16;
                 if (arguments.Length > 0)
@@ -144,13 +144,13 @@ namespace Jint.Native
                 double value = Convert.ToDouble(@this.Value);
 
                 if (Double.IsInfinity(value) || Double.IsNaN(value))
-                    return ((JsFunction)((JsObject)@this)["toString"]).Execute(runtime, @this, JsInstance.EmptyArray, null);
+                    return ((JsFunction)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsInstance.EmptyArray, null);
 
                 if (arguments.Length == 0)
                     throw new JsException(JsErrorType.SyntaxError, "Precision missing");
 
                 if (JsInstance.IsUndefined(arguments[0]))
-                    return ((JsFunction)((JsObject)@this)["toString"]).Execute(runtime, @this, JsInstance.EmptyArray, null);
+                    return ((JsFunction)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsInstance.EmptyArray, null);
 
                 int precision = 0;
                 if (arguments.Length > 0)

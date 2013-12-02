@@ -42,20 +42,20 @@ namespace Jint.Native
                 var regexp = (JsRegExp)@this;
                 var array = runtime.Global.CreateArray();
                 string input = arguments[0].ToString();
-                array["input"] = JsString.Create(input);
+                array.SetProperty(Id.input, JsString.Create(input));
 
                 int i = 0;
-                var lastIndex = regexp.IsGlobal ? regexp["lastIndex"].ToNumber() : 0;
+                var lastIndex = regexp.IsGlobal ? regexp.GetProperty(Id.lastIndex).ToNumber() : 0;
 
                 var matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
                 if (matches.Count == 0)
                     return JsNull.Instance;
 
                 // A[JsNumber.Create(i++)] = JsString.Create(matches[0].Value);
-                array["index"] = JsNumber.Create(matches[0].Index);
+                array.SetProperty(Id.index, JsNumber.Create(matches[0].Index));
 
                 if (regexp.IsGlobal)
-                    regexp["lastIndex"] = JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length);
+                    regexp.SetProperty(Id.lastIndex, JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length));
 
                 foreach (Group group in matches[0].Groups)
                 {
@@ -68,7 +68,7 @@ namespace Jint.Native
             public static JsInstance Test(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var regexp = (JsRegExp)@this;
-                var matches = ((JsFunction)regexp["exec"]).Execute(runtime, @this, arguments, null);
+                var matches = ((JsFunction)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments, null);
                 var store = matches.FindArrayStore();
 
                 return JsBoolean.Create(store != null && store.Length > 0);
@@ -90,7 +90,7 @@ namespace Jint.Native
 
             public static JsInstance GetLastIndex(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsRegExp)@this)["lastIndex"];
+                return ((JsRegExp)@this).GetProperty(Id.lastIndex);
             }
         }
     }

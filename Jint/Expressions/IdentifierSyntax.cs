@@ -17,7 +17,7 @@ namespace Jint.Expressions
             get
             {
                 return
-                    Name != JsInstance.TypeUndefined &&
+                    Name != JsNames.TypeUndefined &&
                     Name != JsNames.This &&
                     Name != JsNames.Arguments;
             }

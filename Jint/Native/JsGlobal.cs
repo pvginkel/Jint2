@@ -25,16 +25,7 @@ namespace Jint.Native
 
         public JsGlobal(JintRuntime runtime, IJintBackend backend, Options options)
         {
-            SeedIdentifier(JsNames.Prototype, JsNames.PrototypeId);
-            SeedIdentifier(JsNames.Proto, JsNames.ProtoId);
-            SeedIdentifier("toString", JsNames.ToStringId);
-            SeedIdentifier("valueOf", JsNames.ValueOfId);
-            SeedIdentifier("value", JsNames.ValueId);
-            SeedIdentifier("writable", JsNames.WritableId);
-            SeedIdentifier("set", JsNames.SetId);
-            SeedIdentifier("get", JsNames.GetId);
-            SeedIdentifier("enumerable", JsNames.EnumerableId);
-            SeedIdentifier("configurable", JsNames.ConfigurableId);
+            Id.SeedGlobal(this);
 
             PrototypeSink = new Sink(this);
 
@@ -50,12 +41,6 @@ namespace Jint.Native
 
             Marshaller = new Marshaller(runtime, this);
             Marshaller.Initialize();
-        }
-
-        private void SeedIdentifier(string name, int index)
-        {
-            int result = ResolveIdentifier(name);
-            Debug.Assert(result == index);
         }
 
         public JsFunction ObjectClass { get; private set; }

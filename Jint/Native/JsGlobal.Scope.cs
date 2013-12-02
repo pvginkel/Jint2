@@ -31,8 +31,8 @@ namespace Jint.Native
                 DefineProperty(this, "RegExp", global.RegExpClass, PropertyAttributes.DontEnum);
                 DefineProperty(this, "String", global.StringClass, PropertyAttributes.DontEnum);
                 DefineProperty(this, "Math", global.MathClass, PropertyAttributes.DontEnum);
-                DefineProperty(this, "NaN", global.NumberClass["NaN"], PropertyAttributes.DontEnum); // 15.1.1.1
-                DefineProperty(this, "Infinity", global.NumberClass["POSITIVE_INFINITY"], PropertyAttributes.DontEnum); // 15.1.1.2
+                DefineProperty(this, "NaN", global.NumberClass.GetProperty(Id.NaN), PropertyAttributes.DontEnum); // 15.1.1.1
+                DefineProperty(this, "Infinity", global.NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
                 DefineProperty(this, "undefined", JsUndefined.Instance, PropertyAttributes.DontEnum); // 15.1.1.3
                 DefineProperty(this, JsNames.This, this, PropertyAttributes.DontEnum);
                 global.DefineFunction(this, "ToBoolean", Functions.ToBoolean, 1, PropertyAttributes.DontEnum);

@@ -14,9 +14,6 @@
 //
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
-//
-//     To update this file, extend CodeSetQueries.xml with a new code set,
-//     right click on CodeSetQueries.tt and select Run Custom Tool.
 // </auto-generated>
 //------------------------------------------------------------------------------
 
@@ -142,8 +139,8 @@ private string MakeNumber(string type, string name)
     switch (type)
     {
         case "double": return name;
-        case "string": return "JsString.StringToNumber(" + name + ")";
-        case "bool": return "JsBoolean.BooleanToNumber(" + name + ")";
+        case "string": return "JsConvert.ToNumber(" + name + ")";
+        case "bool": return "JsConvert.ToNumber(" + name + ")";
         default: return name + ".ToNumber()";
     }
 }

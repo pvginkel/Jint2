@@ -10,7 +10,8 @@ namespace Jint.Native
         internal JsError(JsGlobal global, JsObject prototype, string message)
             : base(global, null, prototype, false)
         {
-            this["message"] = JsString.Create(message);
+            SetProperty(Id.message, JsString.Create(message));
+
             Value = message;
         }
 

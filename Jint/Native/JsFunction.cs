@@ -49,10 +49,10 @@ namespace Jint.Native
             {
                 case "Array": @this = Global.CreateArray(); break;
                 case "Date": @this = Global.CreateDate(0); break;
-                case "Error": @this = Global.CreateError((JsObject)this["prototype"]); break;
+                case "Error": @this = Global.CreateError((JsObject)GetProperty(Id.prototype)); break;
                 case "Function": @this = null; break;
                 case "RegExp": @this = null; break;
-                default: @this = Global.CreateObject((JsObject)this["prototype"]); break;
+                default: @this = Global.CreateObject((JsObject)GetProperty(Id.prototype)); break;
             }
 
             var boxedThis = @this;

@@ -348,18 +348,18 @@ namespace Jint.Runtime
         public static string Operation_TypeOf(JsInstance operand)
         {
             if (operand == null)
-                return JsInstance.TypeUndefined;
+                return JsNames.TypeUndefined;
             if (operand is JsNull)
-                return JsInstance.TypeObject;
+                return JsNames.TypeObject;
             if (operand is JsFunction)
-                return JsInstance.TypeFunction;
+                return JsNames.TypeFunction;
             switch (operand.Type)
             {
-                case JsType.Boolean: return JsInstance.TypeBoolean;
-                case JsType.Number: return JsInstance.TypeNumber;
-                case JsType.Object: return JsInstance.TypeObject;
-                case JsType.String: return JsInstance.TypeString;
-                case JsType.Undefined: return JsInstance.TypeUndefined;
+                case JsType.Boolean: return JsNames.TypeBoolean;
+                case JsType.Number: return JsNames.TypeNumber;
+                case JsType.Object: return JsNames.TypeObject;
+                case JsType.String: return JsNames.TypeString;
+                case JsType.Undefined: return JsNames.TypeUndefined;
                 default: throw new InvalidOperationException();
             }
         }
@@ -368,7 +368,7 @@ namespace Jint.Runtime
         {
             Descriptor descriptor;
             if (!scope.TryGetDescriptor(scope.Global.ResolveIdentifier(identifier), out descriptor))
-                return JsInstance.TypeUndefined;
+                return JsNames.TypeUndefined;
 
             return Operation_TypeOf(descriptor.Get(scope));
         }

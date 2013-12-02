@@ -85,13 +85,13 @@ namespace Jint.Native
                     var argument = arguments[1] as JsObject;
                     int length = 0;
                     if (argument != null)
-                        length = (int)argument["length"].ToNumber();
+                        length = (int)argument.GetProperty(Id.length).ToNumber();
 
                     argumentsCopy = new JsInstance[length];
 
                     for (int i = 0; i < length; i++)
                     {
-                        argumentsCopy[i] = argument[i.ToString()];
+                        argumentsCopy[i] = argument.GetProperty(i);
                     }
                 }
                 else

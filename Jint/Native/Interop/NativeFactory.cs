@@ -134,10 +134,10 @@ namespace Jint.Native.Interop
                 prototype[member.Key] = ReflectOverload(global, member.Value);
             }
 
-            prototype["toString"] = ProxyHelper.BuildMethodFunction(
+            prototype.SetProperty(Id.toString, ProxyHelper.BuildMethodFunction(
                 global,
                 typeof(object).GetMethod("ToString")
-            );
+            ));
 
             var result = global.CreateFunction(
                 type.FullName,

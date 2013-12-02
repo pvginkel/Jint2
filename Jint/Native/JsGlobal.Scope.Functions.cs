@@ -94,7 +94,7 @@ namespace Jint.Native
                 /// </summary>
                 public static JsInstance Eval(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
                 {
-                    if (ClassString != arguments[0].Class)
+                    if (JsNames.ClassString != arguments[0].Class)
                         return arguments[0];
 
                     return runtime.Global.Backend.Eval(arguments);

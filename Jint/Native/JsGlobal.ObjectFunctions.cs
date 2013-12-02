@@ -28,9 +28,9 @@ namespace Jint.Native
 
                     switch (arguments[0].Class)
                     {
-                        case JsInstance.ClassString: thatResult = JsString.Create(arguments[0].ToString()); break;
-                        case JsInstance.ClassNumber: thatResult = JsNumber.Create(arguments[0].ToNumber()); break;
-                        case JsInstance.ClassBoolean: thatResult = JsBoolean.Create(arguments[0].ToBoolean()); break;
+                        case JsNames.ClassString: thatResult = JsString.Create(arguments[0].ToString()); break;
+                        case JsNames.ClassNumber: thatResult = JsNumber.Create(arguments[0].ToNumber()); break;
+                        case JsNames.ClassBoolean: thatResult = JsBoolean.Create(arguments[0].ToBoolean()); break;
                         default: thatResult = arguments[0]; break;
                     }
 
@@ -39,7 +39,7 @@ namespace Jint.Native
 
                 JsObject obj = runtime.Global.CreateObject(callee.Prototype);
 
-                obj.DefineOwnProperty(new ValueDescriptor(obj, JsNames.Constructor, callee, PropertyAttributes.DontEnum));
+                obj.DefineOwnProperty(new ValueDescriptor(obj, "constructor", callee, PropertyAttributes.DontEnum));
 
                 return obj;
             }
@@ -70,7 +70,7 @@ namespace Jint.Native
             public static JsInstance IsPrototypeOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
-                if (target.Class != JsInstance.ClassObject)
+                if (target.Class != JsNames.ClassObject)
                     return JsBoolean.False;
                 if (arguments.Length == 0)
                     return JsBoolean.False;
@@ -95,15 +95,15 @@ namespace Jint.Native
             // 15.2.3.2
             public static JsInstance GetPrototypeOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                if (arguments[0].Class != JsInstance.ClassObject)
+                if (arguments[0].Class != JsNames.ClassObject)
                     throw new JsException(JsErrorType.TypeError);
 
                 var jsObject = arguments[0] as JsObject;
                 if (jsObject != null)
                 {
-                    var constructor = jsObject[JsNames.Constructor] as JsObject;
+                    var constructor = jsObject.GetProperty(Id.constructor) as JsObject;
                     if (constructor != null)
-                        return constructor[JsNames.Prototype];
+                        return constructor.GetProperty(Id.prototype);
                 }
 
                 return JsNull.Instance;
@@ -132,7 +132,7 @@ namespace Jint.Native
                     throw new ArgumentException("propertyName");
 
                 if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
-                    return ((JsFunction)target.Prototype["__lookupGetter__"]).Execute(runtime, target.Prototype, arguments, null);
+                    return ((JsFunction)target.Prototype.GetProperty(Id.__lookupGetter__)).Execute(runtime, target.Prototype, arguments, null);
 
                 var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToSource())) as PropertyDescriptor;
                 if (descriptor == null)
@@ -148,7 +148,7 @@ namespace Jint.Native
                     throw new ArgumentException("propertyName");
 
                 if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
-                    return ((JsFunction)target.Prototype["__lookupSetter__"]).Execute(runtime, target.Prototype, arguments, null);
+                    return ((JsFunction)target.Prototype.GetProperty(Id.__lookupSetter__)).Execute(runtime, target.Prototype, arguments, null);
 
                 var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToSource())) as PropertyDescriptor;
                 if (descriptor == null)

@@ -27,9 +27,9 @@ namespace Jint.Native
                         break;
 
                     case 1:
-                        if ((arguments[0].Class == JsInstance.ClassNumber || arguments[0].Class == JsInstance.ClassObject) && double.IsNaN(arguments[0].ToNumber()))
+                        if ((arguments[0].Class == JsNames.ClassNumber || arguments[0].Class == JsNames.ClassObject) && double.IsNaN(arguments[0].ToNumber()))
                             return runtime.Global.CreateDate(double.NaN);
-                        if (arguments[0].Class == JsInstance.ClassNumber)
+                        if (arguments[0].Class == JsNames.ClassNumber)
                             return runtime.Global.CreateDate(arguments[0].ToNumber());
 
                         double d;
@@ -71,7 +71,7 @@ namespace Jint.Native
                 }
 
                 if (@this == null || @this == runtime.Global.GlobalScope)
-                    return ((JsFunction)result["toString"]).Execute(runtime, result, JsInstance.EmptyArray, null);
+                    return ((JsFunction)result.GetProperty(Id.toString)).Execute(runtime, result, JsInstance.EmptyArray, null);
 
                 return result;
             }
@@ -340,7 +340,7 @@ namespace Jint.Native
                 {
                     var innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setMilliseconds"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setMilliseconds)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -362,7 +362,7 @@ namespace Jint.Native
                 {
                     JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setMilliseconds"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setMilliseconds)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -384,7 +384,7 @@ namespace Jint.Native
                 {
                     JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setSeconds"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setSeconds)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -406,7 +406,7 @@ namespace Jint.Native
                 {
                     JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setSeconds"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setSeconds)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -428,7 +428,7 @@ namespace Jint.Native
                 {
                     JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setMinutes"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setMinutes)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -450,7 +450,7 @@ namespace Jint.Native
                 {
                     JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setMinutes"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setMinutes)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -501,7 +501,7 @@ namespace Jint.Native
                 {
                     var innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setDate"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setDate)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -523,7 +523,7 @@ namespace Jint.Native
                 {
                     var innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setDate"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setDate)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -545,7 +545,7 @@ namespace Jint.Native
                 {
                     var innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setMonth"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setMonth)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -568,7 +568,7 @@ namespace Jint.Native
                 {
                     var innerParams = new JsInstance[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsFunction)target["setMonth"]).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsFunction)target.GetProperty(Id.setMonth)).Execute(runtime, @this, innerParams, null);
                 }
 
                 return @this;
@@ -580,7 +580,7 @@ namespace Jint.Native
                 {
                     if (
                         JsInstance.IsUndefined(arguments[i]) || (
-                            arguments[i].Class == JsInstance.ClassNumber && (
+                            arguments[i].Class == JsNames.ClassNumber && (
                                 Double.IsNaN(arguments[i].ToNumber()) ||
                                 Double.IsInfinity(arguments[i].ToNumber())
                             )

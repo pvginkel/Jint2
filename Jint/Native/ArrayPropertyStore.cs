@@ -299,7 +299,7 @@ namespace Jint.Native
                     {
                         // Array subclass.
 
-                        int objectLength = (int)@object["lenght"].ToNumber();
+                        int objectLength = (int)@object.GetProperty(Id.length).ToNumber();
 
                         for (int i = 0; i < objectLength; i++)
                         {

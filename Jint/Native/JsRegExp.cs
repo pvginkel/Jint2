@@ -27,7 +27,7 @@ namespace Jint.Native
             get { return (_options & JsRegExpOptions.Multiline) != 0; }
         }
 
-       internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
+        internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
             : base(global, null, prototype, false)
         {
             _options = options;
@@ -40,15 +40,15 @@ namespace Jint.Native
 
             _pattern = pattern;
 
-            this["source"] = JsString.Create(pattern);
-            this["lastIndex"] = JsNumber.Create(0);
-            this["global"] = JsBoolean.Create(options.HasFlag(JsRegExpOptions.Global));
+            SetProperty(Id.source, JsString.Create(pattern));
+            SetProperty(Id.lastIndex, JsNumber.Create(0));
+            SetProperty(Id.global, JsBoolean.Create(options.HasFlag(JsRegExpOptions.Global)));
         }
 
-       public override string Class
-       {
-           get { return JsNames.ClassRegexp; }
-       }
+        public override string Class
+        {
+            get { return JsNames.ClassRegexp; }
+        }
 
         public string Pattern
         {

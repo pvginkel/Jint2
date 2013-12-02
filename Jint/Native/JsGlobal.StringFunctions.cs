@@ -178,13 +178,13 @@ namespace Jint.Native
             // 15.5.4.10
             public static JsInstance Match(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                JsRegExp regexp = arguments[0].Class == JsInstance.ClassString
+                JsRegExp regexp = arguments[0].Class == JsNames.ClassString
                     ? runtime.Global.CreateRegExp(arguments[0].ToString(), JsRegExpOptions.None)
                     : (JsRegExp)arguments[0];
 
                 if (!regexp.IsGlobal)
                 {
-                    return ((JsFunction)regexp["exec"]).Execute(runtime, regexp, new[] { @this }, null);
+                    return ((JsFunction)regexp.GetProperty(Id.exec)).Execute(runtime, regexp, new[] { @this }, null);
                 }
                 else
                 {
@@ -226,15 +226,15 @@ namespace Jint.Native
                 string source = @this.ToString();
 
                 JsFunction function = replaceValue as JsFunction;
-                if (searchValue.Class == JsInstance.ClassRegexp)
+                if (searchValue.Class == JsNames.ClassRegexp)
                 {
                     int count = ((JsRegExp)arguments[0]).IsGlobal ? int.MaxValue : 1;
                     var regexp = ((JsRegExp)arguments[0]);
-                    int lastIndex = regexp.IsGlobal ? 0 : Math.Max(0, (int)regexp["lastIndex"].ToNumber() - 1);
+                    int lastIndex = regexp.IsGlobal ? 0 : Math.Max(0, (int)regexp.GetProperty(Id.lastIndex).ToNumber() - 1);
 
                     if (regexp.IsGlobal)
                     {
-                        regexp["lastIndex"] = JsNumber.Create(0);
+                        regexp.SetProperty(Id.lastIndex, JsNumber.Create(0));
                     }
 
                     if (replaceValue is JsFunction)
@@ -244,7 +244,7 @@ namespace Jint.Native
                             List<JsInstance> replaceParameters = new List<JsInstance>();
                             if (!regexp.IsGlobal)
                             {
-                                regexp["lastIndex"] = JsNumber.Create(m.Index + 1);
+                                regexp.SetProperty(Id.lastIndex, JsNumber.Create(m.Index + 1));
                             }
 
                             replaceParameters.Add(JsString.Create(m.Value));
@@ -276,7 +276,7 @@ namespace Jint.Native
                         {
                             if (!regexp.IsGlobal)
                             {
-                                regexp["lastIndex"] = JsNumber.Create(m.Index + 1);
+                                regexp.SetProperty(Id.lastIndex, JsNumber.Create(m.Index + 1));
                             }
 
                             string after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
@@ -326,7 +326,7 @@ namespace Jint.Native
                 // Converts the arguments to a regex
                 JsRegExp regExp;
 
-                if (arguments[0].Class == JsInstance.ClassString)
+                if (arguments[0].Class == JsNames.ClassString)
                     regExp = runtime.Global.CreateRegExp(arguments[0].ToString(), JsRegExpOptions.None);
                 else
                     regExp = ((JsRegExp)arguments[0]);
@@ -370,7 +370,7 @@ namespace Jint.Native
 
                 if (arguments.Length == 0 || JsInstance.IsUndefined(arguments[0]))
                 {
-                    a["0"] = JsString.Create(s);
+                    a.SetProperty(0, JsString.Create(s));
                 }
 
                 JsInstance separator = arguments[0];
@@ -378,7 +378,7 @@ namespace Jint.Native
                 int length = s.Length;
                 string[] result;
 
-                if (separator.Class == JsInstance.ClassRegexp)
+                if (separator.Class == JsNames.ClassRegexp)
                 {
                     result = ((JsRegExp)arguments[0]).Regex.Split(s, limit);
                 }
@@ -389,7 +389,7 @@ namespace Jint.Native
 
                 for (int i = 0; i < result.Length; i++)
                 {
-                    a[i.ToString()] = JsString.Create(result[i]);
+                    a.SetProperty(i, JsString.Create(result[i]));
                 }
 
                 return a;

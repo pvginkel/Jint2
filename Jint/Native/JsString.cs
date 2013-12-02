@@ -61,7 +61,7 @@ namespace Jint.Native
 
         public override string Class
         {
-            get { return ClassString; }
+            get { return JsNames.ClassString; }
         }
 
         public override JsType Type

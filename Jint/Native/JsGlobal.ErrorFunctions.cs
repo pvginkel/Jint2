@@ -33,7 +33,7 @@ namespace Jint.Native
             {
                 var target = (JsObject)@this;
 
-                return JsString.Create(target["name"] + ": " + target["message"]);
+                return JsString.Create(target.GetProperty(Id.name) + ": " + target.GetProperty(Id.message));
             }
         }
     }
