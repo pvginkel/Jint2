@@ -8,7 +8,7 @@ namespace Jint.Native
     public class JsError : JsObject
     {
         internal JsError(JsGlobal global, JsObject prototype, string message)
-            : base(global, null, prototype)
+            : base(global, null, prototype, false)
         {
             this["message"] = JsString.Create(message);
             Value = message;

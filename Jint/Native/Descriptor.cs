@@ -128,8 +128,13 @@ namespace Jint.Native
 
             if (obj.HasProperty(JsNames.ValueId))
                 return new ValueDescriptor(owner, name, obj.GetProperty(JsNames.ValueId));
-            else
-                return new PropertyDescriptor(global, owner, name, getFunction, setFunction, attributes);
+
+            return new PropertyDescriptor(global, owner, name, getFunction, setFunction, attributes);
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

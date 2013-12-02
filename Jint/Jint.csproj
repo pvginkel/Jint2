@@ -85,6 +85,7 @@
     <Compile Include="Native\IPropertyStore.cs" />
     <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsErrorType.cs" />
+    <Compile Include="Native\JsExtensions.cs" />
     <Compile Include="Native\JsFunctionDelegate.cs" />
     <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
     <Compile Include="Expressions\Closure.cs" />
@@ -121,7 +122,7 @@
     <Compile Include="Native\JsType.cs" />
     <Compile Include="Native\Interop\NativeArrayIndexer.cs" />
     <Compile Include="Native\Interop\NativeMethodOverload.cs" />
-    <Compile Include="Native\Interop\NativeIndexer.cs" />
+    <Compile Include="Native\Interop\NativePropertyStore.cs" />
     <Compile Include="Native\Interop\NativeOverloadImpl.cs" />
     <Compile Include="Native\Interop\NativeDescriptor.cs" />
     <Compile Include="Marshal.cs" />

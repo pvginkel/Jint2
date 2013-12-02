@@ -10,7 +10,7 @@ namespace Jint.Native
     {
         private readonly CachedDictionary _properties = new CachedDictionary();
 
-        private JsGlobal _global;
+        private readonly JsGlobal _global;
 
         public JsObject Owner { get; private set; }
 
@@ -21,10 +21,6 @@ namespace Jint.Native
 
             Owner = owner;
             _global = Owner.Global;
-        }
-
-        public void SetLength(int length, int oldLength)
-        {
         }
 
         public bool HasOwnProperty(JsInstance index)
@@ -64,7 +60,6 @@ namespace Jint.Native
             if (descriptor.Configurable)
             {
                 _properties.Remove(index);
-                Owner.Length--;
                 return true;
             }
 
@@ -123,7 +118,6 @@ namespace Jint.Native
             else
             {
                 _properties[key] = currentDescriptor;
-                Owner.Length++;
             }
         }
 

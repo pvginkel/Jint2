@@ -135,151 +135,151 @@ namespace Jint.Native
             // 15.9.5.2
             public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
+                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture));
             }
 
             public static JsInstance ToLocaleString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
+                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
             }
 
             // 15.9.5.3
             public static JsInstance ToDateString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
+                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsDate.DateFormat, CultureInfo.InvariantCulture));
             }
 
             // 15.9.5.4
             public static JsInstance ToTimeString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
+                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsDate.TimeFormat, CultureInfo.InvariantCulture));
             }
 
             // 15.9.5.6
             public static JsInstance ToLocaleDateString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToLocalTime().ToString(JsDate.DateFormat));
+                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsDate.DateFormat));
             }
 
             // 15.9.5.7
             public static JsInstance ToLocaleTimeString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToLocalTime().ToString(JsDate.TimeFormat));
+                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsDate.TimeFormat));
             }
 
             // 15.9.5.8
             public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(JsConvert.ToNumber((DateTime)@this.Value));
+                return JsNumber.Create(JsConvert.ToNumber(GetDateTimeValue(@this)));
             }
 
             // 15.9.5.9
             public static JsInstance GetTime(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(JsConvert.ToNumber((DateTime)@this.Value));
+                return JsNumber.Create(JsConvert.ToNumber(GetDateTimeValue(@this)));
             }
 
             // 15.9.5.10
             public static JsInstance GetFullYear(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Year);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Year);
             }
 
             // 15.9.5.11
             public static JsInstance GetUTCFullYear(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Year);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Year);
             }
 
             // 15.9.5.12
             public static JsInstance GetMonth(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Month - 1);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Month - 1);
             }
 
             // 15.9.5.13
             public static JsInstance GetUTCMonth(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Month - 1);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Month - 1);
 
             }
 
             // 15.9.5.14
             public static JsInstance GetDate(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Day);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Day);
             }
 
             // 15.9.5.15
             public static JsInstance GetUTCDate(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Day);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Day);
             }
 
             // 15.9.5.16
             public static JsInstance GetDay(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create((int)((DateTime)@this.Value).ToLocalTime().DayOfWeek);
+                return JsNumber.Create((int)GetDateTimeValue(@this).ToLocalTime().DayOfWeek);
             }
 
             // 15.9.5.17
             public static JsInstance GetUTCDay(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create((int)((DateTime)@this.Value).ToUniversalTime().DayOfWeek);
+                return JsNumber.Create((int)GetDateTimeValue(@this).ToUniversalTime().DayOfWeek);
             }
 
             // 15.9.5.18
             public static JsInstance GetHours(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Hour);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Hour);
             }
 
             // 15.9.5.19
             public static JsInstance GetUTCHours(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Hour);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Hour);
             }
 
             // 15.9.5.20
             public static JsInstance GetMinutes(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Minute);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Minute);
             }
 
             // 15.9.5.21
             public static JsInstance GetUTCMinutes(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Minute);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Minute);
             }
 
             // 15.9.5.
             public static JsInstance ToUTCString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(((DateTime)@this.Value).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
+                return JsString.Create(GetDateTimeValue(@this).ToString(JsDate.FormatUtc, CultureInfo.InvariantCulture));
             }
 
             // 15.9.5.22
             public static JsInstance GetSeconds(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Second);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Second);
             }
 
             // 15.9.5.23
             public static JsInstance GetUTCSeconds(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Second);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Second);
             }
 
             // 15.9.5.24
             public static JsInstance GetMilliseconds(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToLocalTime().Millisecond);
+                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Millisecond);
             }
 
             // 15.9.5.25
             public static JsInstance GetUTCMilliseconds(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((DateTime)@this.Value).ToUniversalTime().Millisecond);
+                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Millisecond);
             }
 
             // 15.9.5.26
@@ -299,21 +299,13 @@ namespace Jint.Native
                 return @this;
             }
 
-            private static DateTime GetDateTimeValue(JsInstance value)
-            {
-                if (value.Type == JsType.Number)
-                    return JsDate.CreateDateTime(value.ToNumber());
-
-                return (DateTime)value.Value;
-            }
-
             // 15.9.5.28
             public static JsInstance SetMilliseconds(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no millisecond specified");
 
-                var valueOf = ((DateTime)@this.Value).ToLocalTime();
+                var valueOf = GetDateTimeValue(@this).ToLocalTime();
                 valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
                 valueOf = valueOf.AddMilliseconds(arguments[0].ToNumber());
                 @this.Value = runtime.Global.CreateDate(valueOf).ToNumber();
@@ -326,7 +318,7 @@ namespace Jint.Native
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no millisecond specified");
 
-                var valueOf = ((DateTime)@this.Value);
+                var valueOf = GetDateTimeValue(@this);
                 valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
                 valueOf = valueOf.AddMilliseconds(arguments[0].ToNumber());
                 @this.Value = runtime.Global.CreateDate(valueOf).ToNumber();
@@ -470,7 +462,7 @@ namespace Jint.Native
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no date specified");
 
-                var valueOf = ((DateTime)@this.Value).ToLocalTime();
+                var valueOf = GetDateTimeValue(@this).ToLocalTime();
                 valueOf = valueOf.AddDays(-valueOf.Day);
                 valueOf = valueOf.AddDays(arguments[0].ToNumber());
                 @this.Value = valueOf;
@@ -485,7 +477,7 @@ namespace Jint.Native
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no date specified");
 
-                var valueOf = ((DateTime)@this.Value);
+                var valueOf = GetDateTimeValue(@this);
                 valueOf = valueOf.AddDays(-valueOf.Day);
                 valueOf = valueOf.AddDays(arguments[0].ToNumber());
                 @this.Value = valueOf;
@@ -603,6 +595,16 @@ namespace Jint.Native
                     TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMilliseconds;
 
                 return JsNumber.Create(offset);
+            }
+
+            private static DateTime GetDateTimeValue(JsInstance value)
+            {
+                if (value.Type == JsType.Number)
+                    return JsDate.CreateDateTime(value.ToNumber());
+                if (value.Value is double)
+                    return JsDate.CreateDateTime((double)value.Value);
+
+                return (DateTime)value.Value;
             }
         }
     }

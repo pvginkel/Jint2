@@ -20,7 +20,7 @@ namespace Jint.Expressions
 
         internal override ValueType ValueType
         {
-            get { return ValueType.Unknown; }
+            get { return ValueType.Object; }
         }
 
         public NewSyntax(ExpressionSyntax expression)

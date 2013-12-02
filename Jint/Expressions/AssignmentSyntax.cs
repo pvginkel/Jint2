@@ -19,7 +19,17 @@ namespace Jint.Expressions
 
         internal override ValueType ValueType
         {
-            get { return Right.ValueType; }
+            get
+            {
+                if (Operation == AssignmentOperator.Assign)
+                    return Right.ValueType;
+
+                return BinaryExpressionSyntax.ResolveValueType(
+                    GetSyntaxType(Operation),
+                    Left.ValueType,
+                    Right.ValueType
+                );
+            }
         }
 
         public AssignmentSyntax(AssignmentOperator operation, ExpressionSyntax left, ExpressionSyntax right)
@@ -44,6 +54,25 @@ namespace Jint.Expressions
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
             return visitor.VisitAssignment(this);
+        }
+
+        internal static SyntaxExpressionType GetSyntaxType(AssignmentOperator operation)
+        {
+            switch (operation)
+            {
+                case AssignmentOperator.Add: return SyntaxExpressionType.Add;
+                case AssignmentOperator.BitwiseAnd: return SyntaxExpressionType.BitwiseAnd;
+                case AssignmentOperator.Divide: return SyntaxExpressionType.Divide;
+                case AssignmentOperator.Modulo: return SyntaxExpressionType.Modulo;
+                case AssignmentOperator.Multiply: return SyntaxExpressionType.Multiply;
+                case AssignmentOperator.BitwiseOr: return SyntaxExpressionType.BitwiseOr;
+                case AssignmentOperator.LeftShift: return SyntaxExpressionType.LeftShift;
+                case AssignmentOperator.RightShift: return SyntaxExpressionType.RightShift;
+                case AssignmentOperator.Subtract: return SyntaxExpressionType.Subtract;
+                case AssignmentOperator.UnsignedRightShift: return SyntaxExpressionType.UnsignedRightShift;
+                case AssignmentOperator.BitwiseExclusiveOr: return SyntaxExpressionType.BitwiseExclusiveOr;
+                default: throw new InvalidOperationException();
+            }
         }
     }
 }

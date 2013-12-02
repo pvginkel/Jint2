@@ -106,12 +106,24 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildGetMember(Expression expression, int index)
         {
+            Expression indexExpression;
+
+#if DEBUG
+            indexExpression = Expression.Call(
+                _scope.Runtime,
+                typeof(JintRuntime).GetMethod("ResolveIdentifier"),
+                Expression.Constant(_global.GetIdentifier(index))
+            );
+#else
+            indexExpression = Expression.Constant(index);
+#endif
+
             if (typeof(JsObject).IsAssignableFrom(expression.Type))
             {
                 return Expression.Call(
                     expression,
                     _objectGetByIndex,
-                    Expression.Constant(index)
+                    indexExpression
                 );
             }
 
@@ -119,28 +131,12 @@ namespace Jint.Backend.Dlr
                 _scope.Runtime,
                 _runtimeGetByIndex,
                 EnsureJs(expression),
-                Expression.Constant(index)
+                indexExpression
             );
         }
 
         private Expression BuildGetIndex(Expression expression, Expression index)
         {
-            var constant = index as ConstantExpression;
-            if (constant != null)
-            {
-                if (constant.Type == typeof(double))
-                {
-                    double doubleValue = (double)constant.Value;
-                    int intValue = (int)doubleValue;
-                    if (intValue >= 0 && doubleValue == intValue)
-                        return BuildGetMember(expression, intValue);
-                }
-                else if (constant.Type == typeof(string))
-                {
-                    return BuildGetMember(expression, (string)constant.Value);
-                }
-            }
-
             return BuildOperationCall(
                 SyntaxExpressionType.Index,
                 expression,
@@ -150,22 +146,6 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildSetIndex(Expression expression, Expression index, Expression value)
         {
-            var constant = index as ConstantExpression;
-            if (constant != null)
-            {
-                if (constant.Type == typeof(double))
-                {
-                    double doubleValue = (double)constant.Value;
-                    int intValue = (int)doubleValue;
-                    if (intValue >= 0 && doubleValue == intValue)
-                        return BuildSetMember(expression, intValue, value);
-                }
-                else if (constant.Type == typeof(string))
-                {
-                    return BuildSetMember(expression, _global.ResolveIdentifier((string)constant.Value), value);
-                }
-            }
-
             return BuildOperationCall(
                 SyntaxExpressionType.SetIndex,
                 expression,
@@ -181,12 +161,24 @@ namespace Jint.Backend.Dlr
 
         private Expression BuildSetMember(Expression expression, int index, Expression value)
         {
+            Expression indexExpression;
+
+#if DEBUG
+            indexExpression = Expression.Call(
+                _scope.Runtime,
+                typeof(JintRuntime).GetMethod("ResolveIdentifier"),
+                Expression.Constant(_global.GetIdentifier(index))
+            );
+#else
+            indexExpression = Expression.Constant(index);
+#endif
+
             if (typeof(JsObject).IsAssignableFrom(expression.Type))
             {
                 return Expression.Call(
                     expression,
                     _objectSetByIndex,
-                    Expression.Constant(index),
+                    indexExpression,
                     EnsureJs(value)
                 );
             }
@@ -194,7 +186,7 @@ namespace Jint.Backend.Dlr
             return Expression.Call(
                 _runtimeSetByIndex,
                 EnsureJs(expression),
-                Expression.Constant(index),
+                indexExpression,
                 EnsureJs(value)
             );
         }
@@ -329,6 +321,7 @@ namespace Jint.Backend.Dlr
                     case ValueType.Boolean: value = EnsureBoolean(value); break;
                     case ValueType.String: value = EnsureString(value); break;
                     case ValueType.Double: value = EnsureNumber(value); break;
+                    case ValueType.Object: value = EnsureObject(value); break;
                     default: throw new InvalidOperationException();
                 }
 

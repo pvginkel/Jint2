@@ -32,7 +32,7 @@ namespace Jint.Support
         private Chunk[] _chunks;
         private uint _chunkCount;
 
-        public T this[int index]
+        public virtual T this[int index]
         {
             get
             {
@@ -225,22 +225,6 @@ namespace Jint.Support
             while (lo < hi);
 
             return new ChunkIndex(lo, false);
-        }
-
-        public bool ContainsKey(int index)
-        {
-            return this[index] != null;
-        }
-
-        public bool TryGetValue(int index, out T value)
-        {
-            value = this[index];
-            return value != null;
-        }
-
-        public void Remove(int index)
-        {
-            this[index] = null;
         }
 
         public IEnumerable<int> GetKeys()

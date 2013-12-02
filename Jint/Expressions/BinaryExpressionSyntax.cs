@@ -17,51 +17,53 @@ namespace Jint.Expressions
 
         internal override ValueType ValueType
         {
-            get
+            get { return ResolveValueType(Operation, Left.ValueType, Right.ValueType); }
+        }
+
+        internal static ValueType ResolveValueType(SyntaxExpressionType operation, ValueType left, ValueType right)
+        {
+            switch (operation)
             {
-                switch (Operation)
-                {
-                    case SyntaxExpressionType.And:
-                    case SyntaxExpressionType.Or:
-                        if (Left.ValueType == Right.ValueType)
-                            return Left.ValueType;
+                case SyntaxExpressionType.And:
+                case SyntaxExpressionType.Or:
+                    if (left == right)
+                        return left;
 
-                        return ValueType.Unknown;
+                    return ValueType.Unknown;
 
-                    case SyntaxExpressionType.Add:
-                        if (Left.ValueType == ValueType.String && Right.ValueType == ValueType.String)
-                            return ValueType.String;
+                case SyntaxExpressionType.Add:
+                    if (left == ValueType.String || right == ValueType.String)
+                        return ValueType.String;
 
-                        return ValueType.Double;
+                    return ValueType.Double;
 
-                    case SyntaxExpressionType.BitwiseAnd:
-                    case SyntaxExpressionType.BitwiseExclusiveOr:
-                    case SyntaxExpressionType.BitwiseOr:
-                    case SyntaxExpressionType.Divide:
-                    case SyntaxExpressionType.LeftShift:
-                    case SyntaxExpressionType.RightShift:
-                    case SyntaxExpressionType.UnsignedRightShift:
-                    case SyntaxExpressionType.Modulo:
-                    case SyntaxExpressionType.Multiply:
-                    case SyntaxExpressionType.Power:
-                    case SyntaxExpressionType.Subtract:
-                        return ValueType.Double;
+                case SyntaxExpressionType.BitwiseAnd:
+                case SyntaxExpressionType.BitwiseExclusiveOr:
+                case SyntaxExpressionType.BitwiseOr:
+                case SyntaxExpressionType.Divide:
+                case SyntaxExpressionType.LeftShift:
+                case SyntaxExpressionType.RightShift:
+                case SyntaxExpressionType.UnsignedRightShift:
+                case SyntaxExpressionType.Modulo:
+                case SyntaxExpressionType.Multiply:
+                case SyntaxExpressionType.Power:
+                case SyntaxExpressionType.Subtract:
+                    return ValueType.Double;
 
-                    case SyntaxExpressionType.Equal:
-                    case SyntaxExpressionType.NotEqual:
-                    case SyntaxExpressionType.Same:
-                    case SyntaxExpressionType.NotSame:
-                    case SyntaxExpressionType.LessThan:
-                    case SyntaxExpressionType.LessThanOrEqual:
-                    case SyntaxExpressionType.GreaterThan:
-                    case SyntaxExpressionType.GreaterThanOrEqual:
-                    case SyntaxExpressionType.In:
-                    case SyntaxExpressionType.InstanceOf:
-                        return ValueType.Boolean;
+                case SyntaxExpressionType.Equal:
+                case SyntaxExpressionType.NotEqual:
+                case SyntaxExpressionType.Same:
+                case SyntaxExpressionType.NotSame:
+                case SyntaxExpressionType.LessThan:
+                case SyntaxExpressionType.LessThanOrEqual:
+                case SyntaxExpressionType.GreaterThan:
+                case SyntaxExpressionType.GreaterThanOrEqual:
+                case SyntaxExpressionType.In:
+                case SyntaxExpressionType.InstanceOf:
+                    return ValueType.Boolean;
 
-                    default:
-                        throw new ArgumentOutOfRangeException("operation");
-                }
+                default:
+                    throw new ArgumentOutOfRangeException("operation");
             }
         }
 

@@ -39,8 +39,10 @@ namespace Jint.Native.Interop
 
         public override bool TryGetProperty(int index, out JsInstance result)
         {
-            // TODO: Optimize.
-            return TryGetProperty(JsString.Create(_global.GetIdentifier(index)), out result);
+            if (index >= 0)
+                return TryGetProperty(JsString.Create(_global.GetIdentifier(index)), out result);
+
+            return base.TryGetProperty(index, out result);
         }
 
         public override bool TryGetProperty(JsInstance index, out JsInstance result)
@@ -55,8 +57,10 @@ namespace Jint.Native.Interop
 
         public override bool TrySetProperty(int index, JsInstance value)
         {
-            // TODO: Optimize.
-            return TrySetProperty(JsString.Create(_global.GetIdentifier(index)), value);
+            if (index >= 0)
+                return TrySetProperty(JsString.Create(_global.GetIdentifier(index)), value);
+
+            return base.TrySetProperty(index, value);
         }
 
         public override bool TrySetProperty(JsInstance index, JsInstance value)

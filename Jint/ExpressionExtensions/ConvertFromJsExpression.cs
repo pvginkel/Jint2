@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Jint.Expressions;
 using Jint.Native;
-using Jint.Runtime;
+using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.ExpressionExtensions
 {
@@ -42,7 +42,7 @@ namespace Jint.ExpressionExtensions
         public Expression Expression { get; private set; }
         public Expressions.ValueType ValueType { get; private set; }
 
-        public ConvertFromJsExpression(Expression expression, Expressions.ValueType valueType)
+        public ConvertFromJsExpression(Expression expression, ValueType valueType)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
@@ -52,9 +52,10 @@ namespace Jint.ExpressionExtensions
 
             switch (valueType)
             {
-                case Expressions.ValueType.Boolean: _type = typeof(bool); break;
-                case Expressions.ValueType.Double: _type = typeof(double); break;
-                case Expressions.ValueType.String: _type = typeof(string); break;
+                case ValueType.Boolean: _type = typeof(bool); break;
+                case ValueType.Double: _type = typeof(double); break;
+                case ValueType.String: _type = typeof(string); break;
+                case ValueType.Object: _type = typeof(JsObject); break;
                 default: throw new ArgumentOutOfRangeException("valueType");
             }
         }
@@ -65,35 +66,38 @@ namespace Jint.ExpressionExtensions
 
             switch (ValueType)
             {
-                case Expressions.ValueType.Boolean:
+                case ValueType.Boolean:
                     switch (SyntaxUtil.GetValueType(Expression.Type))
                     {
-                        case Expressions.ValueType.Boolean: return Expression;
-                        case Expressions.ValueType.Double: method = _numberToBoolean; break;
-                        case Expressions.ValueType.String: method = _stringToBoolean; break;
+                        case ValueType.Boolean: return Expression;
+                        case ValueType.Double: method = _numberToBoolean; break;
+                        case ValueType.String: method = _stringToBoolean; break;
                         default: method = _toBoolean; break;
                     }
                     break;
 
-                case Expressions.ValueType.Double:
+                case ValueType.Double:
                     switch (SyntaxUtil.GetValueType(Expression.Type))
                     {
-                        case Expressions.ValueType.Boolean: method = _booleanToNumber; break;
-                        case Expressions.ValueType.Double: return Expression;
-                        case Expressions.ValueType.String: method = _stringToNumber; break;
+                        case ValueType.Boolean: method = _booleanToNumber; break;
+                        case ValueType.Double: return Expression;
+                        case ValueType.String: method = _stringToNumber; break;
                         default: method = _toNumber; break;
                     }
                     break;
 
-                case Expressions.ValueType.String:
+                case ValueType.String:
                     switch (SyntaxUtil.GetValueType(Expression.Type))
                     {
-                        case Expressions.ValueType.Boolean: method = _booleanToString; break;
-                        case Expressions.ValueType.Double: method = _numberToString; break;
-                        case Expressions.ValueType.String: return Expression;
+                        case ValueType.Boolean: method = _booleanToString; break;
+                        case ValueType.Double: method = _numberToString; break;
+                        case ValueType.String: return Expression;
                         default: method = _toString; break;
                     }
                     break;
+
+                case ValueType.Object:
+                    throw new InvalidOperationException();
 
                 default: throw new InvalidOperationException();
             }

@@ -40,42 +40,38 @@ namespace Jint.Native
             public static JsInstance Exec(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var regexp = (JsRegExp)@this;
-                JsArray a = runtime.Global.CreateArray();
+                var array = runtime.Global.CreateArray();
                 string input = arguments[0].ToString();
-                a["input"] = JsString.Create(input);
+                array["input"] = JsString.Create(input);
 
                 int i = 0;
                 var lastIndex = regexp.IsGlobal ? regexp["lastIndex"].ToNumber() : 0;
-                MatchCollection matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
-                if (matches.Count > 0)
-                {
-                    // A[JsNumber.Create(i++)] = JsString.Create(matches[0].Value);
-                    a["index"] = JsNumber.Create(matches[0].Index);
 
-                    if (regexp.IsGlobal)
-                    {
-                        regexp["lastIndex"] = JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length);
-                    }
-
-                    foreach (Group g in matches[0].Groups)
-                    {
-                        a[JsNumber.Create(i++)] = JsString.Create(g.Value);
-                    }
-
-                    return a;
-                }
-                else
-                {
+                var matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
+                if (matches.Count == 0)
                     return JsNull.Instance;
+
+                // A[JsNumber.Create(i++)] = JsString.Create(matches[0].Value);
+                array["index"] = JsNumber.Create(matches[0].Index);
+
+                if (regexp.IsGlobal)
+                    regexp["lastIndex"] = JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length);
+
+                foreach (Group group in matches[0].Groups)
+                {
+                    array[JsNumber.Create(i++)] = JsString.Create(group.Value);
                 }
 
+                return array;
             }
 
             public static JsInstance Test(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var regexp = (JsRegExp)@this;
-                var array = ((JsFunction)regexp["exec"]).Execute(runtime, @this, arguments, null) as JsArray;
-                return JsBoolean.Create(array != null && array.Length > 0);
+                var matches = ((JsFunction)regexp["exec"]).Execute(runtime, @this, arguments, null);
+                var store = matches.FindArrayStore();
+
+                return JsBoolean.Create(store != null && store.Length > 0);
             }
 
             public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)

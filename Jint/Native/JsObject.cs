@@ -16,8 +16,8 @@ namespace Jint.Native
     {
         internal static readonly ReadOnlyCollection<KeyValuePair<int, JsInstance>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, JsInstance>>(new KeyValuePair<int, JsInstance>[0]);
 
-        private int _length;
         private object _value;
+        private readonly bool? _isClr;
 
         internal IPropertyStore PropertyStore { get; set; }
 
@@ -25,24 +25,6 @@ namespace Jint.Native
         {
             get { return _value; }
             set { _value = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of an actually stored properties.
-        /// </summary>
-        /// <remarks>
-        /// This is a non ecma262 standard property.
-        /// </remarks>
-        public int Length
-        {
-            get { return _length; }
-            internal set
-            {
-                int oldLength = _length;
-                _length = value;
-                if (PropertyStore != null)
-                    PropertyStore.SetLength(value, oldLength);
-            }
         }
 
         public JsGlobal Global { get; private set; }
@@ -53,12 +35,18 @@ namespace Jint.Native
         public JsObject Prototype { get; internal set; }
 
         internal JsObject(JsGlobal global, object value, JsObject prototype)
+            : this(global, value, prototype, null)
+        {
+        }
+
+        internal JsObject(JsGlobal global, object value, JsObject prototype, bool? isClr)
         {
             if (global == null)
                 throw new ArgumentNullException("global");
 
             Global = global;
             _value = value;
+            _isClr = isClr;
             Prototype = prototype ?? global.PrototypeSink;
         }
 
@@ -66,7 +54,10 @@ namespace Jint.Native
         {
             get
             {
-                // if this instance holds a native value
+                if (_isClr.HasValue)
+                    return _isClr.Value;
+
+                // If this instance holds a native value
                 return _value != null;
             }
         }
@@ -442,7 +433,7 @@ namespace Jint.Native
             {
                 Trace.WriteLine(String.Format(
                     "Unresolved identifier {0} of {1}",
-                    index,
+                    Global.GetIdentifier(index),
                     GetType()
                 ));
             }
@@ -598,7 +589,7 @@ namespace Jint.Native
             return IsPrototypeOf(target.Prototype);
         }
 
-        private bool IsPrototypeNull
+        internal bool IsPrototypeNull
         {
             get
             {

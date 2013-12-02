@@ -25,7 +25,9 @@ namespace Jint.Expressions
                 case ValueType.Boolean: return typeof(bool);
                 case ValueType.Double: return typeof(double);
                 case ValueType.String: return typeof(string);
-                default: return typeof(JsInstance);
+                case ValueType.Object: return typeof(JsObject);
+                case ValueType.Unknown: return typeof(JsInstance);
+                default: throw new ArgumentOutOfRangeException("self");
             }
         }
 
@@ -41,9 +43,15 @@ namespace Jint.Expressions
                 case TypeCode.Double: return ValueType.Double;
                 case TypeCode.Boolean: return ValueType.Boolean;
                 case TypeCode.String: return ValueType.String;
+
                 case TypeCode.Object:
+                    if (typeof(JsObject).IsAssignableFrom(type))
+                        return ValueType.Object;
+
                     Debug.Assert(typeof(JsInstance).IsAssignableFrom(type));
+
                     return ValueType.Unknown;
+
                 default: throw new NotImplementedException();
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
@@ -14,7 +15,13 @@ namespace Jint.Backend.Dlr
             foreach (var variable in syntax.DeclaredVariables)
             {
                 if (variable.Type == VariableType.Global)
+                {
+#if TRACE_TYPEMARKING
+                    Trace.WriteLine(String.Format("{0} -> Unknown: Initializing global", variable.Name));
+#endif
+
                     variable.ValueType = ValueType.Unknown;
+                }
             }
 
             base.VisitProgram(syntax);
@@ -22,12 +29,18 @@ namespace Jint.Backend.Dlr
 
         public override void VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
         {
-            MarkAssign(syntax.Target, ValueType.Unknown);
+            MarkAssign(syntax.Target, ValueType.Object);
 
             foreach (var variable in syntax.Body.DeclaredVariables)
             {
                 if (variable.Type == VariableType.Parameter)
+                {
+#if TRACE_TYPEMARKING
+                    Trace.WriteLine(String.Format("{0} -> Unknown: Initializing function parameter", variable.Name));
+#endif
+
                     variable.ValueType = ValueType.Unknown;
+                }
             }
 
             base.VisitFunctionDeclaration(syntax);
@@ -36,12 +49,18 @@ namespace Jint.Backend.Dlr
         public override void VisitFunction(FunctionSyntax syntax)
         {
             if (syntax.Target != null)
-                MarkAssign(syntax.Target, ValueType.Unknown);
+                MarkAssign(syntax.Target, ValueType.Object);
 
             foreach (var variable in syntax.Body.DeclaredVariables)
             {
                 if (variable.Type == VariableType.Parameter)
+                {
+#if TRACE_TYPEMARKING
+                    Trace.WriteLine(String.Format("{0} -> Unknown: Initializing function parameter", variable.Name));
+#endif
+
                     variable.ValueType = ValueType.Unknown;
+                }
             }
 
             base.VisitFunction(syntax);
@@ -52,7 +71,12 @@ namespace Jint.Backend.Dlr
             var identifier = syntax.Left as IdentifierSyntax;
 
             if (identifier != null)
-                MarkAssign(identifier.Target, syntax.Right.ValueType);
+            {
+                if (syntax.Operation != AssignmentOperator.Assign)
+                    MarkRead(identifier.Target);
+
+                MarkAssign(identifier.Target, syntax.ValueType);
+            }
 
             base.VisitAssignment(syntax);
         }
@@ -68,41 +92,48 @@ namespace Jint.Backend.Dlr
         public override void VisitTry(TrySyntax syntax)
         {
             if (syntax.Catch != null)
-                MarkAssign(syntax.Catch.Target, ValueType.Unknown);
+                MarkAssign(syntax.Catch.Target, ValueType.Object);
 
             base.VisitTry(syntax);
         }
 
         public override void VisitIdentifier(IdentifierSyntax syntax)
         {
-            // If we get a read before we get a write, we set it to JsInstance
-            // because that's the only way we can make it undefined.
-
-            if (syntax.Target.ValueType == ValueType.Unset)
-                syntax.Target.ValueType = ValueType.Unknown;
+            MarkRead(syntax.Target);
 
             base.VisitIdentifier(syntax);
         }
 
-        public override void VisitUnaryExpression(UnaryExpressionSyntax syntax)
+        private void MarkRead(Variable variable)
         {
-            // We can only delete identifiers that are JsInstance.
+            // Mark variables that may be read before they are written to.
 
-            if (
-                syntax.Operation == SyntaxExpressionType.Delete &&
-                syntax.Operand.Type == SyntaxType.Identifier
-            )
-                MarkAssign(((IdentifierSyntax)syntax.Operand).Target, ValueType.Unknown);
+            if (variable.ValueType == ValueType.Unset)
+            {
+#if TRACE_TYPEMARKING
+                Trace.WriteLine(String.Format("{0} -> Unknown: Read before write", variable.Name));
+#endif
 
-            base.VisitUnaryExpression(syntax);
+                variable.ValueType = ValueType.Unknown;
+            }
         }
 
         private void MarkAssign(Variable variable, ValueType valueType)
         {
             if (variable.ValueType == ValueType.Unset)
+            {
+#if TRACE_TYPEMARKING
+                Trace.WriteLine(String.Format("{0} -> {1}", variable.Name, valueType));
+#endif
                 variable.ValueType = valueType;
-            else if (variable.ValueType != valueType)
+            }
+            else if (variable.ValueType != valueType && variable.ValueType != ValueType.Unknown)
+            {
+#if TRACE_TYPEMARKING
+                Trace.WriteLine(String.Format("{0} -> Unknown: Cannot assign {1} to {2}", variable.Name, valueType, variable.ValueType));
+#endif
                 variable.ValueType = ValueType.Unknown;
+            }
         }
     }
 }

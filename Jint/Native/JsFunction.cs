@@ -8,27 +8,21 @@ namespace Jint.Native
     [Serializable]
     public class JsFunction : JsObject
     {
-        private readonly bool _isClr;
         public JsFunctionDelegate Delegate { get; private set; }
         public string Name { get; private set; }
         public object Closure { get; private set; }
+        public int ArgumentCount { get; private set; }
 
         internal JsFunction(JsGlobal global, string name, JsFunctionDelegate @delegate, int argumentCount, object closure, JsObject prototype, bool isClr)
-            : base(global, null, prototype)
+            : base(global, null, prototype, isClr)
         {
-            _isClr = isClr;
             if (@delegate == null)
                 throw new ArgumentNullException("delegate");
 
             Name = name;
             Closure = closure;
             Delegate = @delegate;
-            Length = argumentCount;
-        }
-
-        public override bool IsClr
-        {
-            get { return _isClr; }
+            ArgumentCount = argumentCount;
         }
 
         public override string Class

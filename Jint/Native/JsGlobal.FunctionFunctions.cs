@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using Jint.Runtime;
@@ -23,20 +22,11 @@ namespace Jint.Native
 
             public static JsInstance GetLength(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((JsObject)@this).Length);
+                return JsNumber.Create(((JsFunction)@this).ArgumentCount);
             }
 
             public static JsInstance SetLength(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                int length = (int)arguments[0].ToNumber();
-
-                if (length < 0 || double.IsNaN(length) || double.IsInfinity(length))
-                    throw new JsException(JsErrorType.RangeError, "Invalid length");
-
-                var obj = (JsObject)@this;
-
-                obj.Length = length;
-
                 return arguments[0];
             }
 
@@ -78,7 +68,6 @@ namespace Jint.Native
             public static JsInstance Apply(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var function = @this as JsFunction;
-
                 if (function == null)
                     throw new ArgumentException("The target of call() must be a function");
 
@@ -94,14 +83,15 @@ namespace Jint.Native
                 if (arguments.Length >= 2 && !JsInstance.IsNull(arguments[1]))
                 {
                     var argument = arguments[1] as JsObject;
-                    if (argument == null)
-                        throw new JsException(JsErrorType.TypeError, "Second argument must be an array");
+                    int length = 0;
+                    if (argument != null)
+                        length = (int)argument["length"].ToNumber();
 
-                    argumentsCopy = new JsInstance[argument.Length];
+                    argumentsCopy = new JsInstance[length];
 
-                    for (int i = 0; i < argument.Length; i++)
+                    for (int i = 0; i < length; i++)
                     {
-                        argumentsCopy[i] = argument[i.ToString(CultureInfo.InvariantCulture)];
+                        argumentsCopy[i] = argument[i.ToString()];
                     }
                 }
                 else

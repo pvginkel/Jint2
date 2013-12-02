@@ -9,7 +9,7 @@ namespace Jint.Native
     public class JsArguments : JsObject
     {
         internal JsArguments(JsGlobal global, JsFunction callee, JsInstance[] arguments)
-            : base(global, null, global.CreateObject())
+            : base(global, null, global.CreateObject(), false)
         {
             int length;
 

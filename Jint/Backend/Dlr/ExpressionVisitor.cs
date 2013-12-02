@@ -211,28 +211,10 @@ namespace Jint.Backend.Dlr
             if (syntax.Operation == AssignmentOperator.Assign)
                 return BuildSet(syntax.Left, syntax.Right.Accept(this));
 
-            SyntaxExpressionType operation;
-
-            switch (syntax.Operation)
-            {
-                case AssignmentOperator.Add: operation = SyntaxExpressionType.Add; break;
-                case AssignmentOperator.BitwiseAnd: operation = SyntaxExpressionType.BitwiseAnd; break;
-                case AssignmentOperator.Divide: operation = SyntaxExpressionType.Divide; break;
-                case AssignmentOperator.Modulo: operation = SyntaxExpressionType.Modulo; break;
-                case AssignmentOperator.Multiply: operation = SyntaxExpressionType.Multiply; break;
-                case AssignmentOperator.BitwiseOr: operation = SyntaxExpressionType.BitwiseOr; break;
-                case AssignmentOperator.LeftShift: operation = SyntaxExpressionType.LeftShift; break;
-                case AssignmentOperator.RightShift: operation = SyntaxExpressionType.RightShift; break;
-                case AssignmentOperator.Subtract: operation = SyntaxExpressionType.Subtract; break;
-                case AssignmentOperator.UnsignedRightShift: operation = SyntaxExpressionType.UnsignedRightShift; break;
-                case AssignmentOperator.BitwiseExclusiveOr: operation = SyntaxExpressionType.BitwiseExclusiveOr; break;
-                default: throw new NotImplementedException();
-            }
-
             return BuildSet(
                 syntax.Left,
                 new BinaryExpressionSyntax(
-                    operation,
+                    AssignmentSyntax.GetSyntaxType(syntax.Operation),
                     syntax.Left,
                     syntax.Right
                 ).Accept(this)
@@ -1306,7 +1288,8 @@ namespace Jint.Backend.Dlr
 
         private Expression EnsureJs(Expression expression)
         {
-            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Unknown)
+            var type = SyntaxUtil.GetValueType(expression.Type);
+            if (type == ValueType.Object || type == ValueType.Unknown)
                 return expression;
 
             return new ConvertToJsExpression(_scope.Runtime, expression);
@@ -1334,6 +1317,14 @@ namespace Jint.Backend.Dlr
                 return expression;
 
             return new ConvertFromJsExpression(expression, ValueType.Double);
+        }
+
+        private Expression EnsureObject(Expression expression)
+        {
+            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Object)
+                return expression;
+
+            return new ConvertFromJsExpression(expression, ValueType.Object);
         }
 
         public Expression VisitTernary(TernarySyntax syntax)

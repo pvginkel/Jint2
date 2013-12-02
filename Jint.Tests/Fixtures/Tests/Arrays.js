@@ -22,18 +22,14 @@ myArray.push(undefined);
 assert(4, myArray.length);
 
 myArray = [1, 2, 3, 4, 5];
-print('x');
 assert(2, myArray.slice(0, 2).length);
-print('x');
 assert(3, myArray.slice(0, -2).length);
 assert(1, myArray.slice(2, -2).length);
 
 assert(5, myArray.length);
 assert(1, myArray.shift());
 assert(4, myArray.length);
-print('x');
 assert(2, myArray.shift());
-print('x');
 assert(3, myArray.length);
 
 
@@ -74,9 +70,7 @@ assert(3, n);
 // set length
 var array = [1, 2, 3];
 array.length = 2;
-print('x');
 assert(2, array.length);
-print('x');
 
 
 //splice edge cases
@@ -123,3 +117,39 @@ if ([]) {
 if (![1, 2, 3]) {
     assert(true, false);
 }
+
+// Inherited arrays just look at the base array.
+var MyArray = function () { };
+MyArray.prototype = new Array();
+var myInheritedArray = new MyArray();
+assert(true, myInheritedArray instanceof Array);
+myInheritedArray.push(1);
+myInheritedArray[1] = 2;
+myInheritedArray.push(2);
+assert(2, myInheritedArray.length);
+assert('1,2', myInheritedArray.toString());
+
+// Concat doesn't treat something that looks like an array, like an array.
+var myArray = [1, 2];
+var myArray2 = { length: 2, 0: 3, 1: 4 };
+assert('1,2,[object Object]', myArray.concat(myArray2).toString());
+
+// Apply does treat something that looks like an array, as an array.
+assert(
+    '1,2,3,4',
+    Array.prototype.concat.apply([1, 2], { length: 2, 0: 3, 1: 4 }).toString()
+);
+
+// And call doesn't.
+
+assert(
+    '1,2,[object Object]',
+    Array.prototype.concat.call([1, 2], [{ length: 2, 0: 3, 1: 4 }]).toString()
+);
+
+// Applying concat to a non-array converts the first argument into an array.
+
+assert(
+    'hi,1,2,3',
+    Array.prototype.concat.apply('hi', [1, 2, 3]).toString()
+);

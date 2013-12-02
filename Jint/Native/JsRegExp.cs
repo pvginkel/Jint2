@@ -28,7 +28,7 @@ namespace Jint.Native
         }
 
        internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
-            : base(global, null, prototype)
+            : base(global, null, prototype, false)
         {
             _options = options;
             _parsedOptions = RegexOptions.ECMAScript;

@@ -65,6 +65,7 @@ namespace Jint.Tests.Mozilla
         {
             var engine = base.CreateContext(errorAction);
 
+            engine.DisableSecurity();
             engine.Run(GetInclude("shell.js"));
             engine.Run(GetInclude("environment.js"));
 

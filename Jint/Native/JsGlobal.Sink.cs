@@ -36,10 +36,6 @@ namespace Jint.Native
                 {
                 }
 
-                public void SetLength(int length, int oldLength)
-                {
-                }
-
                 public bool HasOwnProperty(int index)
                 {
                     return false;

@@ -150,3 +150,11 @@ assert(true, foo.f1.call({}) === undefined);
 assert(true, foo.f1() === undefined);
 assert(true, foo.f1.apply({}, []) === undefined);
 
+function f3(a, b) {
+}
+
+assert(2, f3.length);
+f3.length = 7;
+assert(2, f3.length);
+f3.length = 'hello';
+assert(2, f3.length);

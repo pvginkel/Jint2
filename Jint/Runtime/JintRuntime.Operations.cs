@@ -427,7 +427,7 @@ namespace Jint.Runtime
             {
                 int intIndex = (int)index;
                 if (index == intIndex)
-                    return ((ArrayPropertyStore)array.PropertyStore).GetByIndex(intIndex);
+                    return ((ArrayPropertyStore)array.PropertyStore)[intIndex];
             }
 
             return Operation_Index(obj, JsNumber.Create(index));
@@ -441,7 +441,7 @@ namespace Jint.Runtime
                 int intIndex = (int)index;
                 if (index == intIndex)
                 {
-                    ((ArrayPropertyStore)array.PropertyStore).SetByIndex(intIndex, value);
+                    ((ArrayPropertyStore)array.PropertyStore)[intIndex] = value;
                     return value;
                 }
             }

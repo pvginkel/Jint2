@@ -129,8 +129,6 @@ namespace Jint.Native.Interop
                 properties.Add(global.Marshaller.MarshalFieldInfo(info, prototype));
             }
 
-            // TODO: THIS WAS InitPrototype!!!
-
             foreach (var member in GetMethods(type, BindingFlags.Instance | BindingFlags.Public))
             {
                 prototype[member.Key] = ReflectOverload(global, member.Value);
@@ -152,6 +150,7 @@ namespace Jint.Native.Interop
 
             // HACK: When the delegate is going to be put into Value, this will
             // give a problem.
+
             Debug.Assert(result.Value == null);
             result.Value = type;
 
@@ -256,10 +255,10 @@ namespace Jint.Native.Interop
 
                 var @object = (JsObject)@this;
 
-                SetupNativeProperties(@object);
-
                 if (_propertyStoreFactory != null)
                     @object.PropertyStore = _propertyStoreFactory(@object);
+
+                SetupNativeProperties(@object);
 
                 return @this;
             }
@@ -267,11 +266,11 @@ namespace Jint.Native.Interop
             private void SetupNativeProperties(JsObject target)
             {
                 if (target == null)
-                    throw new ArgumentException("A valid js object is required", "target");
+                    throw new ArgumentException("A valid JS object is required", "target");
 
-                foreach (var prop in _properties)
+                foreach (var property in _properties)
                 {
-                    target.DefineOwnProperty(new NativeDescriptor(target, prop));
+                    target.DefineOwnProperty(new NativeDescriptor(target, property));
                 }
             }
 

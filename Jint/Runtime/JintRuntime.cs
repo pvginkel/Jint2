@@ -136,5 +136,10 @@ namespace Jint.Runtime
 
             return function.Construct(this, arguments);
         }
+
+        public int ResolveIdentifier(string name)
+        {
+            return Global.ResolveIdentifier(name);
+        }
     }
 }

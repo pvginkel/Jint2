@@ -210,7 +210,7 @@ namespace Jint.Native
             DefineFunction(prototype, "replace", StringFunctions.Replace, 2, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toString", StringFunctions.ToString, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toLocaleString", StringFunctions.ToString, 0, PropertyAttributes.DontEnum);
-            DefineFunction(prototype, "match", StringFunctions.MatchFunc, 0, PropertyAttributes.DontEnum);
+            DefineFunction(prototype, "match", StringFunctions.Match, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "localeCompare", StringFunctions.LocaleCompare, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "substring", StringFunctions.Substring, 2, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "substr", StringFunctions.Substr, 2, PropertyAttributes.DontEnum);

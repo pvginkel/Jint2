@@ -7,6 +7,7 @@ using System.Text;
 using Jint.Expressions;
 using Jint.Native;
 using Jint.Runtime;
+using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.ExpressionExtensions
 {
@@ -51,9 +52,9 @@ namespace Jint.ExpressionExtensions
 
             switch (SyntaxUtil.GetValueType(Expression.Type))
             {
-                case Expressions.ValueType.Boolean: method = _newBoolean; break;
-                case Expressions.ValueType.Double: method = _newNumber; break;
-                case Expressions.ValueType.String: method = _newString; break;
+                case ValueType.Boolean: method = _newBoolean; break;
+                case ValueType.Double: method = _newNumber; break;
+                case ValueType.String: method = _newString; break;
                 default: throw new InvalidOperationException();
             }
 

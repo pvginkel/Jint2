@@ -176,7 +176,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.10
-            public static JsInstance MatchFunc(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Match(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 JsRegExp regexp = arguments[0].Class == JsInstance.ClassString
                     ? runtime.Global.CreateRegExp(arguments[0].ToString(), JsRegExpOptions.None)

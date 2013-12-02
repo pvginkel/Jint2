@@ -10,6 +10,24 @@ namespace Jint.Native
     {
         private readonly JsObject _owner;
         private DictionaryPropertyStore _baseStore;
+        private int _length;
+
+        public int Length
+        {
+            get { return _length; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("value", "New length is out of range");
+
+                for (int i = value; i < _length; i++)
+                {
+                    this[i] = null;
+                }
+
+                _length = value;
+            }
+        }
 
         public ArrayPropertyStore(JsObject owner)
         {
@@ -28,22 +46,16 @@ namespace Jint.Native
             _owner = owner;
         }
 
-        public void SetLength(int length, int oldLength)
+        private bool ContainsKey(int index)
         {
-            if (length < 0)
-                throw new ArgumentOutOfRangeException("length", "New length is out of range");
-
-            for (int i = length; i < oldLength; i++)
-            {
-                Remove(i);
-            }
+            return base[index] != null;
         }
 
         public bool HasOwnProperty(int index)
         {
             int i;
             if (TryParseIndex(index, out i))
-                return i >= 0 && i < _owner.Length && ContainsKey(i);
+                return i >= 0 && i < _length && ContainsKey(i);
 
             if (_baseStore != null)
                 return _baseStore.HasOwnProperty(index);
@@ -55,7 +67,7 @@ namespace Jint.Native
         {
             int i;
             if (TryParseIndex(index, out i))
-                return i >= 0 && i < _owner.Length && ContainsKey(i);
+                return i >= 0 && i < _length && ContainsKey(i);
 
             if (_baseStore != null)
                 return _baseStore.HasOwnProperty(index);
@@ -125,9 +137,21 @@ namespace Jint.Native
             return false;
         }
 
+        public override JsInstance this[int index]
+        {
+            get { return base[index] ?? JsUndefined.Instance; }
+            set
+            {
+                if (index >= _length)
+                    _length = index + 1;
+
+                base[index] = value;
+            }
+        }
+
         public JsInstance GetByIndex(int index)
         {
-            return this[index] ?? JsUndefined.Instance;
+            return this[index];
         }
 
         public bool TrySetProperty(int index, JsInstance value)
@@ -156,9 +180,6 @@ namespace Jint.Native
 
         public void SetByIndex(int index, JsInstance value)
         {
-            if (index >= _owner.Length)
-                _owner.Length = index + 1;
-
             this[index] = value;
         }
 
@@ -167,7 +188,7 @@ namespace Jint.Native
             int i;
             if (TryParseIndex(index, out i))
             {
-                Remove(i);
+                this[i] = null;
                 return true;
             }
 
@@ -182,7 +203,7 @@ namespace Jint.Native
             int i;
             if (TryParseIndex(index, out i))
             {
-                Remove(i);
+                this[i] = null;
                 return true;
             }
 
@@ -251,7 +272,7 @@ namespace Jint.Native
         public JsArray Concat(JsInstance[] args)
         {
             var newArray = new SparseArray<JsInstance>(this);
-            int offset = _owner.Length;
+            int offset = _length;
 
             foreach (var item in args)
             {
@@ -262,10 +283,10 @@ namespace Jint.Native
 
                     foreach (int key in oldArray.GetKeys())
                     {
-                        newArray[key + offset] = oldArray[key];
+                        newArray[key + offset] = oldArray.GetByIndex(key);
                     }
 
-                    offset += array.Length;
+                    offset += oldArray._length;
                 }
                 else
                 {
@@ -278,7 +299,9 @@ namespace Jint.Native
                     {
                         // Array subclass.
 
-                        for (int i = 0; i < @object.Length; i++)
+                        int objectLength = (int)@object["lenght"].ToNumber();
+
+                        for (int i = 0; i < objectLength; i++)
                         {
                             JsInstance value;
                             if (@object.TryGetProperty(i, out value))
@@ -293,12 +316,16 @@ namespace Jint.Native
                 }
             }
 
-            return new JsArray(_owner.Global, newArray, offset, _owner.Global.ArrayClass.Prototype);
+            var result = new JsArray(_owner.Global, newArray, _owner.Global.ArrayClass.Prototype);
+
+            ((ArrayPropertyStore)result.PropertyStore).Length = offset;
+
+            return result;
         }
 
         public JsInstance Join(JsInstance separator)
         {
-            int length = _owner.Length;
+            int length = _length;
             if (length == 0)
                 return JsString.Empty;
 
@@ -307,9 +334,9 @@ namespace Jint.Native
 
             for (int i = 0; i < length; i++)
             {
-                var item = this[i];
+                var item = base[i];
                 if (item != null && !JsInstance.IsNullOrUndefined(item))
-                    map[i] = item.ToSource();
+                    map[i] = item.ToString();
                 else
                     map[i] = String.Empty;
             }

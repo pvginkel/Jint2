@@ -55,8 +55,6 @@ namespace Jint.Tests.SparseArrayFixture
                 else
                 {
                     Assert.IsNull(array[i]);
-                    string value;
-                    Assert.IsFalse(array.TryGetValue(i, out value));
                 }
             }
 

@@ -11,7 +11,7 @@ namespace Jint.Native
         internal static int TicksFactor = 10000;
 
         internal JsDate(JsGlobal global, DateTime date, JsObject prototype)
-            : base(global, null, prototype)
+            : base(global, null, prototype, false)
         {
             Value = date;
         }
