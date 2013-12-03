@@ -33,7 +33,7 @@ namespace Jint.Native
         public override JsInstance Get(JsInstance that)
         {
             //JsObject that = _global._visitor.CallTarget;
-            return _global.Backend.ExecuteFunction(GetFunction, that, JsInstance.EmptyArray, null);
+            return _global.ExecuteFunction(GetFunction, that, JsInstance.EmptyArray, null);
         }
 
         public override void Set(JsObject that, JsInstance value)
@@ -41,7 +41,7 @@ namespace Jint.Native
             if (SetFunction == null)
                 throw new JsException(JsErrorType.TypeError);
 
-            _global.Backend.ExecuteFunction(SetFunction, that, new[] { value }, null);
+            _global.ExecuteFunction(SetFunction, that, new[] { value }, null);
         }
 
         internal override DescriptorType DescriptorType

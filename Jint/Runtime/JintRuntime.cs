@@ -37,19 +37,6 @@ namespace Jint.Runtime
             );
         }
 
-        public JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] parameters, JsInstance[] genericArguments)
-        {
-            if (function == null)
-                throw new ArgumentNullException("function");
-
-            return function.Execute(
-                this,
-                that ?? Global.GlobalScope,
-                parameters ?? JsInstance.EmptyArray,
-                genericArguments
-            );
-        }
-
         public IEnumerable<JsInstance> GetForEachKeys(JsInstance obj)
         {
             if (obj == null)

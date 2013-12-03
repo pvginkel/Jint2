@@ -277,9 +277,9 @@ namespace Jint.Native
                                 replaceParameters.Add(JsNumber.Create(m.Index));
                                 replaceParameters.Add(JsString.Create(source));
 
-                                return runtime.ExecuteFunction(
-                                    function,
-                                    null,
+                                return function.Execute(
+                                    runtime,
+                                    runtime.GlobalScope,
                                     replaceParameters.ToArray(),
                                     null
                                 ).ToString();
@@ -324,9 +324,9 @@ namespace Jint.Native
                     var function = replaceValue as JsObject;
                     if (function != null && function.Delegate != null)
                     {
-                        replaceValue = runtime.ExecuteFunction(
-                            function,
-                            null,
+                        replaceValue = function.Execute(
+                            runtime,
+                            runtime.GlobalScope,
                             new JsInstance[]
                             {
                                 JsString.Create(search),

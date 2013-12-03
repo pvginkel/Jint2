@@ -21,8 +21,6 @@ namespace Jint
 
         JsInstance Eval(JsInstance[] arguments);
 
-        JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters);
-
         int Compare(JsObject function, JsInstance x, JsInstance y);
 
         JsObject CompileFunction(JsInstance[] parameters);

@@ -83,18 +83,4 @@ namespace Jint.Expressions
         T VisitRegexp(RegexpSyntax syntax);
         T VisitLabel(LabelSyntax syntax);
     }
-
-    public interface IJintVisitor
-    {
-        JsInstance Result { get; set; }
-        JsObject CallTarget { get; }
-
-        JsGlobal Global { get; }
-
-        JsInstance Returned { get; }
-
-        JsInstance Return(JsInstance result);
-
-        void ExecuteFunction(JsObject function, JsInstance @this, JsInstance[] parameters);
-    }
 }

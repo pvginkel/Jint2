@@ -161,5 +161,13 @@ namespace Jint.Native
 
             return _identifiersByIndex[-index];
         }
+
+        public JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters)
+        {
+            if (function == null)
+                throw new ArgumentNullException("function");
+
+            return function.Execute(_runtime, that, arguments, genericParameters);
+        }
     }
 }

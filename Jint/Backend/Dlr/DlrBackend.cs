@@ -197,7 +197,7 @@ namespace Jint.Backend.Dlr
             var original = new JsInstance[arguments.Length];
             Array.Copy(arguments, original, arguments.Length);
 
-            var result = _runtime.ExecuteFunction(function, JsNull.Instance, arguments, null);
+            var result = function.Execute(_runtime, JsNull.Instance, arguments, null);
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -237,15 +237,10 @@ namespace Jint.Backend.Dlr
             }
         }
 
-        public JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters)
-        {
-            return _runtime.ExecuteFunction(function, that, arguments, genericParameters);
-        }
-
         public int Compare(JsObject function, JsInstance x, JsInstance y)
         {
-            var result = _runtime.ExecuteFunction(
-                function,
+            var result = function.Execute(
+                _runtime,
                 JsNull.Instance,
                 new[] { x, y },
                 null

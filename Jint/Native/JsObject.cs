@@ -172,7 +172,7 @@ namespace Jint.Native
             if (function == null)
                 return false;
 
-            var result = Global.Backend.ExecuteFunction(
+            var result = Global.ExecuteFunction(
                 function,
                 this,
                 EmptyArray,
