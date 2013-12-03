@@ -7,64 +7,98 @@ namespace Jint.Native
 {
     partial class JsGlobal
     {
-        public JsDate CreateDate(DateTime date)
+        public JsObject CreateDate(DateTime date)
         {
-            return new JsDate(this, date, DateClass.Prototype);
+            return CreateDate(JsConvert.ToNumber(date));
         }
 
-        public JsDate CreateDate(double value)
+        public JsObject CreateDate(double value)
         {
-            return new JsDate(this, value, DateClass.Prototype);
+            return (JsObject)DateClass.Construct(
+                _runtime,
+                new JsInstance[]
+                {
+                    JsNumber.Create(value)
+                }
+            );
         }
 
-        public JsFunction CreateFunction(string name, JsFunctionDelegate @delegate, int argumentCount, object closure)
+        public JsObject CreateFunction(string name, JsFunction @delegate, int argumentCount, object closure)
         {
             return CreateFunction(name, @delegate, argumentCount, closure, CreateObject(FunctionClass.Prototype));
         }
 
-        public JsFunction CreateFunction(string name, JsFunctionDelegate @delegate, int argumentCount, object closure, JsObject prototype)
+        public JsObject CreateFunction(string name, JsFunction @delegate, int argumentCount, object closure, JsObject prototype)
         {
             return CreateFunction(name, @delegate, argumentCount, closure, prototype, false);
         }
 
-        public JsFunction CreateFunction(string name, JsFunctionDelegate @delegate, int argumentCount, object closure, JsObject prototype, bool isClr)
+        public JsObject CreateFunction(string name, JsFunction @delegate, int argumentCount, object closure, JsObject prototype, bool isClr)
         {
-            return new JsFunction(this, name, @delegate, argumentCount, closure, prototype, isClr);
+            var result = CreateObject(null, prototype, new JsDelegate(name, @delegate, argumentCount, closure));
+
+            result.SetClass(JsNames.ClassFunction);
+            result.SetIsClr(isClr);
+
+            return result;
         }
 
         public JsObject CreateObject()
         {
-            return CreateObject(null, ObjectClass.Prototype);
+            return CreateObject(ObjectClass.Prototype);
         }
 
         public JsObject CreateObject(JsObject prototype)
         {
-            return CreateObject(null, prototype);
+            return CreateObject(null, prototype, null);
         }
 
         public JsObject CreateObject(object value, JsObject prototype)
         {
-            return new JsObject(this, value, prototype);
+            return CreateObject(value, prototype, null);
         }
 
-        public JsRegExp CreateRegExp(string pattern, JsRegExpOptions options)
+        private JsObject CreateObject(object value, JsObject prototype, JsDelegate @delegate)
         {
-            return new JsRegExp(this, pattern, options, RegExpClass.Prototype);
+            return new JsObject(this, value, prototype, @delegate);
         }
 
-        public JsArray CreateArray()
+        public JsObject CreateError(JsObject constructor)
         {
-            return new JsArray(this, ArrayClass.Prototype);
+            return CreateError(constructor, null);
         }
 
-        public JsError CreateError(JsObject prototype)
+        public JsObject CreateError(JsObject constructor, string message)
         {
-            return CreateError(prototype, null);
+            return (JsObject)constructor.Construct(
+                _runtime,
+                new JsInstance[] { JsString.Create(message) }
+            );
         }
 
-        public JsError CreateError(JsObject prototype, string message)
+        public JsObject CreateRegExp(string pattern)
         {
-            return new JsError(this, prototype, message);
+            return CreateRegExp(pattern, null);
+        }
+
+        public JsObject CreateRegExp(string pattern, string options)
+        {
+            return (JsObject)RegExpClass.Construct(
+                _runtime,
+                new JsInstance[]
+                {
+                    JsString.Create(pattern),
+                    JsString.Create(options)
+                }
+            );
+        }
+
+        public JsObject CreateArray()
+        {
+            return (JsObject)ArrayClass.Construct(
+                _runtime,
+                JsInstance.EmptyArray
+            );
         }
     }
 }

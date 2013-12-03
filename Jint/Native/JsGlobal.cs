@@ -10,6 +10,7 @@ namespace Jint.Native
     [Serializable]
     public partial class JsGlobal
     {
+        private readonly JintRuntime _runtime;
         private readonly Dictionary<string, int> _identifiersByName = new Dictionary<string, int>();
         private readonly Dictionary<int, string> _identifiersByIndex = new Dictionary<int, string>();
 
@@ -25,9 +26,14 @@ namespace Jint.Native
 
         public JsGlobal(JintRuntime runtime, IJintBackend backend, Options options)
         {
+            if (runtime == null)
+                throw new ArgumentNullException("runtime");
+
+            _runtime = runtime;
+
             Id.SeedGlobal(this);
 
-            PrototypeSink = new Sink(this);
+            PrototypeSink = CreatePrototypeSink();
 
             Options = options;
             Backend = backend;
@@ -37,29 +43,29 @@ namespace Jint.Native
 
             BuildEnvironment();
 
-            GlobalScope = new Scope(this);
+            GlobalScope = CreateGlobalScope();
 
             Marshaller = new Marshaller(runtime, this);
             Marshaller.Initialize();
         }
 
-        public JsFunction ObjectClass { get; private set; }
-        public JsFunction FunctionClass { get; private set; }
-        public JsFunction ArrayClass { get; private set; }
-        public JsFunction BooleanClass { get; private set; }
-        public JsFunction DateClass { get; private set; }
-        public JsFunction ErrorClass { get; private set; }
-        public JsFunction EvalErrorClass { get; private set; }
-        public JsFunction RangeErrorClass { get; private set; }
-        public JsFunction ReferenceErrorClass { get; private set; }
-        public JsFunction SyntaxErrorClass { get; private set; }
-        public JsFunction TypeErrorClass { get; private set; }
-        public JsFunction URIErrorClass { get; private set; }
+        public JsObject ObjectClass { get; private set; }
+        public JsObject FunctionClass { get; private set; }
+        public JsObject ArrayClass { get; private set; }
+        public JsObject BooleanClass { get; private set; }
+        public JsObject DateClass { get; private set; }
+        public JsObject ErrorClass { get; private set; }
+        public JsObject EvalErrorClass { get; private set; }
+        public JsObject RangeErrorClass { get; private set; }
+        public JsObject ReferenceErrorClass { get; private set; }
+        public JsObject SyntaxErrorClass { get; private set; }
+        public JsObject TypeErrorClass { get; private set; }
+        public JsObject URIErrorClass { get; private set; }
 
         public JsObject MathClass { get; private set; }
-        public JsFunction NumberClass { get; private set; }
-        public JsFunction RegExpClass { get; private set; }
-        public JsFunction StringClass { get; private set; }
+        public JsObject NumberClass { get; private set; }
+        public JsObject RegExpClass { get; private set; }
+        public JsObject StringClass { get; private set; }
         public Marshaller Marshaller { get; private set; }
 
         [Obsolete]

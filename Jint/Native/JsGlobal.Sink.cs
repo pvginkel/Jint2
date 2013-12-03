@@ -7,105 +7,99 @@ namespace Jint.Native
 {
     partial class JsGlobal
     {
-        /// <remarks>
-        /// This is a special type which is only used as the sink object for
-        /// prototypes. It's used when we don't have a parent prototype, to
-        /// make sure that there is something.
-        /// </remarks>
-        [Serializable]
-        private class Sink : JsObject
+        private JsObject CreatePrototypeSink()
         {
-            public Sink(JsGlobal global)
-                : base(global, null, null)
+            // This is a special type which is only used as the sink object for
+            // prototypes. It's used when we don't have a parent prototype, to
+            // make sure that there is something.
+
+            var sink = CreateObject(null);
+
+            sink.SetIsClr(false);
+            sink.PropertyStore = SinkPropertyStore.Instance;
+
+            return sink;
+        }
+
+        private class SinkPropertyStore : IPropertyStore
+        {
+            public static readonly SinkPropertyStore Instance = new SinkPropertyStore();
+
+            private static readonly int[] EmptyIntegers = new int[0];
+
+            private SinkPropertyStore()
             {
-                PropertyStore = SinkPropertyStore.Instance;
             }
 
-            public override string Class
+            public bool HasOwnProperty(int index)
             {
-                get { return JsNames.ClassObject; }
+                return false;
             }
 
-            private class SinkPropertyStore : IPropertyStore
+            public bool HasOwnProperty(JsInstance index)
             {
-                public static readonly SinkPropertyStore Instance = new SinkPropertyStore();
+                return false;
+            }
 
-                private static readonly int[] EmptyIntegers = new int[0];
+            public Descriptor GetOwnDescriptor(int index)
+            {
+                return null;
+            }
 
-                private SinkPropertyStore()
-                {
-                }
+            public Descriptor GetOwnDescriptor(JsInstance index)
+            {
+                return null;
+            }
 
-                public bool HasOwnProperty(int index)
-                {
-                    return false;
-                }
+            public bool TryGetProperty(JsInstance index, out JsInstance result)
+            {
+                result = JsUndefined.Instance;
+                return true;
+            }
 
-                public bool HasOwnProperty(JsInstance index)
-                {
-                    return false;
-                }
+            public bool TryGetProperty(int index, out JsInstance result)
+            {
+                result = JsUndefined.Instance;
+                return true;
+            }
 
-                public Descriptor GetOwnDescriptor(int index)
-                {
-                    return null;
-                }
+            public bool TrySetProperty(int index, JsInstance value)
+            {
+                return true;
+            }
 
-                public Descriptor GetOwnDescriptor(JsInstance index)
-                {
-                    return null;
-                }
+            public bool TrySetProperty(JsInstance index, JsInstance value)
+            {
+                return true;
+            }
 
-                public bool TryGetProperty(JsInstance index, out JsInstance result)
-                {
-                    result = JsUndefined.Instance;
-                    return true;
-                }
+            public bool Delete(JsInstance index)
+            {
+                return true;
+            }
 
-                public bool TryGetProperty(int index, out JsInstance result)
-                {
-                    result = JsUndefined.Instance;
-                    return true;
-                }
+            public bool Delete(int index)
+            {
+                return true;
+            }
 
-                public bool TrySetProperty(int index, JsInstance value)
-                {
-                    return true;
-                }
+            public void DefineOwnProperty(Descriptor currentDescriptor)
+            {
+            }
 
-                public bool TrySetProperty(JsInstance index, JsInstance value)
-                {
-                    return true;
-                }
+            public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
+            {
+                return JsObject.EmptyKeyValues.GetEnumerator();
+            }
 
-                public bool Delete(JsInstance index)
-                {
-                    return true;
-                }
+            public IEnumerable<JsInstance> GetValues()
+            {
+                return JsInstance.EmptyArray;
+            }
 
-                public bool Delete(int index)
-                {
-                    return true;
-                }
-
-                public void DefineOwnProperty(Descriptor currentDescriptor)
-                {
-                }
-
-                public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
-                {
-                    return EmptyKeyValues.GetEnumerator();
-                }
-
-                public IEnumerable<JsInstance> GetValues()
-                {
-                    return JsInstance.EmptyArray;
-                }
-
-                public IEnumerable<int> GetKeys()
-                {
-                    return EmptyIntegers;
-                }
+            public IEnumerable<int> GetKeys()
+            {
+                return EmptyIntegers;
             }
         }
     }

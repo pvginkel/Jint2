@@ -7,6 +7,14 @@ namespace Jint.Native
 {
     internal static class JsNames
     {
+        public static long Offset1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
+        public static int TicksFactor = 10000;
+
+        public static string DateTimeFormat = "ddd, dd MMM yyyy HH':'mm':'ss 'GMT'zzz";
+        public static string DateTimeFormatUtc = "ddd, dd MMM yyyy HH':'mm':'ss 'UTC'";
+        public static string DateFormat = "ddd, dd MMM yyyy";
+        public static string TimeFormat = "HH':'mm':'ss 'GMT'zzz";
+
         public const string This = "this";
         public const string Arguments = "arguments";
 

@@ -10,26 +10,25 @@ namespace Jint.Native
     {
         private static class ErrorFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                if (@this == null || @this == runtime.Global.GlobalScope)
-                {
-                    string message = null;
-                    if (arguments.Length > 0)
-                        message = arguments[0].ToSource();
+                JsObject target;
 
-                    return runtime.Global.CreateError(callee.Prototype, message);
-                }
+                if (@this == null || @this == runtime.Global.GlobalScope)
+                    target = runtime.Global.CreateObject(callee.Prototype);
+                else
+                    target = (JsObject)@this;
+
+                target.SetClass(callee.Delegate.Name);
+                target.SetIsClr(false);
 
                 if (arguments.Length > 0)
-                    @this.Value = arguments[0].ToString();
-                else
-                    @this.Value = String.Empty;
+                    target.SetProperty(Id.message, arguments[0]);
 
-                return @this;
+                return target;
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
 

@@ -192,10 +192,10 @@ namespace Jint.Runtime
 
         public bool Operation_InstanceOf(JsInstance left, JsInstance right)
         {
-            var function = right as JsFunction;
+            var function = right as JsObject;
             var obj = left as JsObject;
 
-            if (function == null)
+            if (function == null || function.Delegate == null)
                 throw new JsException(JsErrorType.TypeError, "Right argument should be a function");
             if (obj == null)
                 throw new JsException(JsErrorType.TypeError, "Left argument should be an object");
@@ -351,7 +351,8 @@ namespace Jint.Runtime
                 return JsNames.TypeUndefined;
             if (operand is JsNull)
                 return JsNames.TypeObject;
-            if (operand is JsFunction)
+            var jsObject = operand as JsObject;
+            if (jsObject != null && jsObject.Delegate != null)
                 return JsNames.TypeFunction;
             switch (operand.Type)
             {
@@ -422,12 +423,12 @@ namespace Jint.Runtime
 
         public JsInstance Operation_Index(JsInstance obj, double index)
         {
-            var array = obj as JsArray;
-            if (array != null)
+            var arrayStore = obj.FindArrayStore(false);
+            if (arrayStore != null)
             {
                 int intIndex = (int)index;
                 if (index == intIndex)
-                    return ((ArrayPropertyStore)array.PropertyStore)[intIndex];
+                    return arrayStore[intIndex];
             }
 
             return Operation_Index(obj, JsNumber.Create(index));
@@ -435,13 +436,13 @@ namespace Jint.Runtime
 
         public static JsInstance Operation_SetIndex(JsInstance obj, double index, JsInstance value)
         {
-            var array = obj as JsArray;
-            if (array != null)
+            var arrayStore = obj.FindArrayStore(false);
+            if (arrayStore != null)
             {
                 int intIndex = (int)index;
                 if (index == intIndex)
                 {
-                    ((ArrayPropertyStore)array.PropertyStore)[intIndex] = value;
+                    arrayStore[intIndex] = value;
                     return value;
                 }
             }

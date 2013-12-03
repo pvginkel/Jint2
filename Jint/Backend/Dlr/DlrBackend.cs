@@ -99,7 +99,7 @@ namespace Jint.Backend.Dlr
             node.Accept(new TypeMarkerPhase());
         }
 
-        public JsFunction CompileFunction(JsInstance[] parameters)
+        public JsObject CompileFunction(JsInstance[] parameters)
         {
             if (parameters == null)
                 parameters = JsInstance.EmptyArray;
@@ -170,10 +170,10 @@ namespace Jint.Backend.Dlr
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            return CallFunction((JsFunction)Global.GlobalScope[name], args);
+            return CallFunction((JsObject)Global.GlobalScope[name], args);
         }
 
-        public object CallFunction(JsFunction function, object[] args)
+        public object CallFunction(JsObject function, object[] args)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
@@ -237,12 +237,12 @@ namespace Jint.Backend.Dlr
             }
         }
 
-        public JsInstance ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters)
+        public JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters)
         {
             return _runtime.ExecuteFunction(function, that, arguments, genericParameters);
         }
 
-        public int Compare(JsFunction function, JsInstance x, JsInstance y)
+        public int Compare(JsObject function, JsInstance x, JsInstance y)
         {
             var result = _runtime.ExecuteFunction(
                 function,

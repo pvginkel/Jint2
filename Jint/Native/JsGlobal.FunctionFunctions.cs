@@ -10,36 +10,36 @@ namespace Jint.Native
     {
         private static class FunctionFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return runtime.Global.Backend.CompileFunction(arguments);
             }
 
-            public static JsInstance GetConstructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance GetConstructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return callee;
             }
 
-            public static JsInstance GetLength(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance GetLength(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsNumber.Create(((JsFunction)@this).ArgumentCount);
+                return JsNumber.Create(((JsObject)@this).Delegate.ArgumentCount);
             }
 
-            public static JsInstance SetLength(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance SetLength(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return arguments[0];
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return JsString.Create(String.Format("function {0} ( ) {{ [native code] }}", callee.Name));
+                return JsString.Create(String.Format("function {0} ( ) {{ [native code] }}", callee.Delegate.Name));
             }
 
-            public static JsInstance Call(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Call(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                var function = @this as JsFunction;
+                var function = @this as JsObject;
 
-                if (function == null)
+                if (function == null || function.Delegate == null)
                     throw new ArgumentException("the target of call() must be a function");
 
                 JsInstance obj;
@@ -65,10 +65,10 @@ namespace Jint.Native
                 return function.Execute(runtime, obj, argumentsCopy, null);
             }
 
-            public static JsInstance Apply(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Apply(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                var function = @this as JsFunction;
-                if (function == null)
+                var function = @this as JsObject;
+                if (function == null || function.Delegate == null)
                     throw new ArgumentException("The target of call() must be a function");
 
                 JsInstance obj;
@@ -103,7 +103,7 @@ namespace Jint.Native
                 return function.Execute(runtime, obj, argumentsCopy, null);
             }
 
-            public static JsInstance BaseConstructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericarguments)
+            public static JsInstance BaseConstructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericarguments)
             {
                 return JsUndefined.Instance;
             }

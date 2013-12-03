@@ -17,15 +17,15 @@ namespace Jint
 
         object CallFunction(string name, object[] args);
 
-        object CallFunction(JsFunction function, object[] args);
+        object CallFunction(JsObject function, object[] args);
 
         JsInstance Eval(JsInstance[] arguments);
 
-        JsInstance ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters);
+        JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters);
 
-        int Compare(JsFunction function, JsInstance x, JsInstance y);
+        int Compare(JsObject function, JsInstance x, JsInstance y);
 
-        JsFunction CompileFunction(JsInstance[] parameters);
+        JsObject CompileFunction(JsInstance[] parameters);
 
         JsInstance ResolveUndefined(string typeFullName, Type[] generics);
     }

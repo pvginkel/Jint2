@@ -14,7 +14,7 @@ namespace Jint.Native.Interop
 
         private static readonly MethodInfo _createStruct = typeof(NativeFactory).GetMethod("CreateStruct", BindingFlags.NonPublic | BindingFlags.Static);
 
-        public static JsFunction BuildNativeConstructor(JsGlobal global, Type type, JsObject basePrototype)
+        public static JsObject BuildNativeConstructor(JsGlobal global, Type type, JsObject basePrototype)
         {
             if (global == null)
                 throw new ArgumentNullException("global");
@@ -175,7 +175,7 @@ namespace Jint.Native.Interop
             return members;
         }
 
-        private static JsFunction ReflectOverload(JsGlobal global, List<MethodInfo> methods)
+        private static JsObject ReflectOverload(JsGlobal global, List<MethodInfo> methods)
         {
             switch (methods.Count)
             {
@@ -194,7 +194,7 @@ namespace Jint.Native.Interop
             }
         }
 
-        private static JsFunction BuildMethodOverload(JsGlobal global, List<MethodInfo> methods)
+        private static JsObject BuildMethodOverload(JsGlobal global, List<MethodInfo> methods)
         {
             return global.CreateFunction(
                 methods[0].Name,
@@ -240,7 +240,7 @@ namespace Jint.Native.Interop
                 _properties = properties;
             }
 
-            public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (@this == null || @this == runtime.Global.GlobalScope)
                     throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");

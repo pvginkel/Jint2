@@ -10,13 +10,13 @@ namespace Jint.Native
     {
         private static class ObjectFunctions
         {
-            public static JsInstance GetConstructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance GetConstructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return callee;
             }
 
             // 15.2.2.1
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 // TODO: This looks wrong. It looks like this should be returning
                 // a JsObject that has the value set to the parameter. Chrome returns
@@ -45,13 +45,13 @@ namespace Jint.Native
             }
 
             // 15.2.4.3 and 15.2.4.4
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return JsString.Create("[object " + @this.Class + "]");
             }
 
             // 15.2.4.4
-            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 // TODO: This looks wrong and it looks like the Value should be returned
                 // here. E.g. typeof(new Object(7).valueOf()) returns 'number' in Chrome.
@@ -60,14 +60,14 @@ namespace Jint.Native
             }
 
             // 15.2.4.5
-            public static JsInstance HasOwnProperty(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance HasOwnProperty(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
                 return JsBoolean.Create(target.HasOwnProperty(arguments[0]));
             }
 
             // 15.2.4.6
-            public static JsInstance IsPrototypeOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance IsPrototypeOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (target.Class != JsNames.ClassObject)
@@ -79,7 +79,7 @@ namespace Jint.Native
             }
 
             // 15.2.4.7
-            public static JsInstance PropertyIsEnumerable(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance PropertyIsEnumerable(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 throw new NotImplementedException();
                 /*
@@ -93,7 +93,7 @@ namespace Jint.Native
             }
 
             // 15.2.3.2
-            public static JsInstance GetPrototypeOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance GetPrototypeOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (arguments[0].Class != JsNames.ClassObject)
                     throw new JsException(JsErrorType.TypeError);
@@ -110,7 +110,7 @@ namespace Jint.Native
             }
 
             // 15.2.3.6
-            public static JsInstance DefineProperty(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance DefineProperty(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 JsInstance instance = arguments[0];
 
@@ -125,32 +125,32 @@ namespace Jint.Native
                 return instance;
             }
 
-            public static JsInstance LookupGetter(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance LookupGetter(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (arguments.Length == 0)
                     throw new ArgumentException("propertyName");
 
                 if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
-                    return ((JsFunction)target.Prototype.GetProperty(Id.__lookupGetter__)).Execute(runtime, target.Prototype, arguments, null);
+                    return ((JsObject)target.Prototype.GetProperty(Id.__lookupGetter__)).Execute(runtime, target.Prototype, arguments, null);
 
-                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToSource())) as PropertyDescriptor;
+                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyDescriptor;
                 if (descriptor == null)
                     return JsUndefined.Instance;
 
                 return (JsInstance)descriptor.GetFunction ?? JsUndefined.Instance;
             }
 
-            public static JsInstance LookupSetter(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance LookupSetter(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (arguments.Length <= 0)
                     throw new ArgumentException("propertyName");
 
                 if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
-                    return ((JsFunction)target.Prototype.GetProperty(Id.__lookupSetter__)).Execute(runtime, target.Prototype, arguments, null);
+                    return ((JsObject)target.Prototype.GetProperty(Id.__lookupSetter__)).Execute(runtime, target.Prototype, arguments, null);
 
-                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToSource())) as PropertyDescriptor;
+                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyDescriptor;
                 if (descriptor == null)
                     return JsUndefined.Instance;
 

@@ -55,12 +55,17 @@ namespace Jint.Native
 
         public static string ToString(DateTime value)
         {
-            return value.ToLocalTime().ToString(JsDate.Format, CultureInfo.InvariantCulture);
+            return value.ToLocalTime().ToString(JsNames.DateTimeFormat, CultureInfo.InvariantCulture);
         }
 
         public static double ToNumber(DateTime value)
         {
-            return (value.ToUniversalTime().Ticks - JsDate.Offset1970) / JsDate.TicksFactor;
+            return (value.ToUniversalTime().Ticks - JsNames.Offset1970) / JsNames.TicksFactor;
+        }
+
+        public static DateTime ToDateTime(double number)
+        {
+            return new DateTime((long)(number * JsNames.TicksFactor + JsNames.Offset1970), DateTimeKind.Utc);
         }
     }
 }

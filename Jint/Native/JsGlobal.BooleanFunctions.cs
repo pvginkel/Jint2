@@ -10,7 +10,7 @@ namespace Jint.Native
     {
         private static class BooleanFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 // e.g., var foo = Boolean(true);
                 if (@this == null || @this == runtime.Global.GlobalScope)
@@ -25,7 +25,7 @@ namespace Jint.Native
                 return @this;
             }
 
-            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var jsBoolean = @this as JsBoolean;
                 if (jsBoolean != null)
@@ -34,7 +34,7 @@ namespace Jint.Native
                 return JsBoolean.Create((bool)@this.Value);
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return JsString.Create(JsConvert.ToString((bool)@this.Value));
             }

@@ -11,7 +11,7 @@ namespace Jint.Native
     {
         private static class StringFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (@this == null || @this == runtime.Global.GlobalScope)
                 {
@@ -56,13 +56,13 @@ namespace Jint.Native
             }
 
             // 15.5.4.2
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsFunction)runtime.GetMember(@this, "valueOf")).Execute(runtime, @this, arguments, null);
+                return ((JsObject)runtime.GetMemberByIndex(@this, Id.valueOf)).Execute(runtime, @this, arguments, null);
             }
 
             // 15.5.4.3
-            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var jsString = @this as JsString;
                 if (jsString != null)
@@ -72,9 +72,9 @@ namespace Jint.Native
             }
 
             // 15.5.4.4
-            public static JsInstance CharAt(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance CharAt(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsFunction)runtime.GetMember(@this, "substring")).Execute(
+                return ((JsObject)runtime.GetMemberByIndex(@this, Id.substring)).Execute(
                     runtime,
                     @this,
                     new[] { arguments[0], JsNumber.Create(arguments[0].ToNumber() + 1) },
@@ -83,7 +83,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.5
-            public static JsInstance CharCodeAt(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance CharCodeAt(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var r = @this.ToString();
                 var at = (int)arguments[0].ToNumber();
@@ -99,7 +99,7 @@ namespace Jint.Native
             }
 
             // 15.5.3.2
-            public static JsInstance FromCharCode(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance FromCharCode(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 //var r = @this.ToString();
 
@@ -118,7 +118,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.6
-            public static JsInstance Concat(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Concat(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -133,7 +133,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.7
-            public static JsInstance IndexOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance IndexOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string source = @this.ToString();
                 string searchString = arguments[0].ToString();
@@ -160,7 +160,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.8
-            public static JsInstance LastIndexOf(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance LastIndexOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string source = @this.ToString();
                 string searchString = arguments[0].ToString();
@@ -170,177 +170,210 @@ namespace Jint.Native
             }
 
             // 15.5.4.9
-            public static JsInstance LocaleCompare(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance LocaleCompare(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return JsNumber.Create(@this.ToString().CompareTo(arguments[0].ToString()));
             }
 
             // 15.5.4.10
-            public static JsInstance Match(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Match(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                JsRegExp regexp = arguments[0].Class == JsNames.ClassString
-                    ? runtime.Global.CreateRegExp(arguments[0].ToString(), JsRegExpOptions.None)
-                    : (JsRegExp)arguments[0];
+                JsObject regexpObject;
+                
+                var regexp = arguments[0].Value as RegExpManager;
+                if (regexp != null)
+                {
+                    regexpObject = (JsObject)arguments[0];
+                }
+                else
+                {
+                    regexpObject = runtime.Global.CreateRegExp(arguments[0].ToString());
+                    regexp = (RegExpManager)regexpObject.Value;
+                }
 
                 if (!regexp.IsGlobal)
                 {
-                    return ((JsFunction)regexp.GetProperty(Id.exec)).Execute(runtime, regexp, new[] { @this }, null);
+                    return ((JsObject)regexpObject.GetProperty(Id.exec)).Execute(
+                        runtime,
+                        regexpObject,
+                        new[] { @this },
+                        null
+                    );
                 }
-                else
-                {
-                    var result = runtime.Global.CreateArray();
-                    var matches = Regex.Matches(@this.ToString(), regexp.Pattern, regexp.Options);
-                    if (matches.Count > 0)
-                    {
-                        var i = 0;
-                        foreach (Match match in matches)
-                        {
-                            result[JsNumber.Create(i++)] = JsString.Create(match.Value);
-                        }
 
-                        return result;
-                    }
-                    else
+                var result = runtime.Global.CreateArray();
+                var matches = Regex.Matches(@this.ToString(), regexp.Pattern, regexp.Options);
+
+                if (matches.Count > 0)
+                {
+                    var i = 0;
+
+                    foreach (Match match in matches)
                     {
-                        return JsNull.Instance;
+                        result[JsNumber.Create(i++)] = JsString.Create(match.Value);
                     }
+
+                    return result;
                 }
+
+                return JsNull.Instance;
             }
 
             // 15.5.4.11
-            public static JsInstance Replace(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Replace(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (arguments.Length == 0)
-                {
                     return JsString.Create(@this.ToString());
-                }
 
-                JsInstance searchValue = arguments[0];
-                JsInstance replaceValue = JsUndefined.Instance;
+                var searchValue = arguments[0];
 
-                if (arguments.Length > 1)
-                {
-                    replaceValue = arguments[1];
-                }
+                var replaceValue =
+                    arguments.Length > 1
+                    ? arguments[1]
+                    : JsUndefined.Instance;
 
                 string source = @this.ToString();
 
-                JsFunction function = replaceValue as JsFunction;
-                if (searchValue.Class == JsNames.ClassRegexp)
+                var regexp = searchValue.Value as RegExpManager;
+
+                if (regexp != null)
                 {
-                    int count = ((JsRegExp)arguments[0]).IsGlobal ? int.MaxValue : 1;
-                    var regexp = ((JsRegExp)arguments[0]);
-                    int lastIndex = regexp.IsGlobal ? 0 : Math.Max(0, (int)regexp.GetProperty(Id.lastIndex).ToNumber() - 1);
+                    var regexpObject = (JsObject)searchValue;
+                    int count = regexp.IsGlobal ? int.MaxValue : 1;
+                    int lastIndex =
+                        regexp.IsGlobal
+                        ? 0
+                        : Math.Max(
+                            0,
+                            (int)regexpObject.GetProperty(Id.lastIndex).ToNumber() - 1
+                        );
 
                     if (regexp.IsGlobal)
+                        regexpObject.SetProperty(Id.lastIndex, JsNumber.Create(0));
+
+                    string result;
+
+                    var function = replaceValue as JsObject;
+                    if (function != null && function.Delegate != null)
                     {
-                        regexp.SetProperty(Id.lastIndex, JsNumber.Create(0));
-                    }
-
-                    if (replaceValue is JsFunction)
-                    {
-                        string ret = ((JsRegExp)arguments[0]).Regex.Replace(source, delegate(Match m)
-                        {
-                            List<JsInstance> replaceParameters = new List<JsInstance>();
-                            if (!regexp.IsGlobal)
+                        result = regexp.Regex.Replace(
+                            source,
+                            m =>
                             {
-                                regexp.SetProperty(Id.lastIndex, JsNumber.Create(m.Index + 1));
-                            }
+                                var replaceParameters = new List<JsInstance>();
+                                if (!regexp.IsGlobal)
+                                    regexpObject.SetProperty(Id.lastIndex, JsNumber.Create(m.Index + 1));
 
-                            replaceParameters.Add(JsString.Create(m.Value));
-                            for (int i = 1; i < m.Groups.Count; i++)
-                            {
-                                if (m.Groups[i].Success)
+                                replaceParameters.Add(JsString.Create(m.Value));
+
+                                for (int i = 1; i < m.Groups.Count; i++)
                                 {
-                                    replaceParameters.Add(JsString.Create(m.Groups[i].Value));
+                                    if (m.Groups[i].Success)
+                                        replaceParameters.Add(JsString.Create(m.Groups[i].Value));
+                                    else
+                                        replaceParameters.Add(JsUndefined.Instance);
                                 }
-                                else
-                                {
-                                    replaceParameters.Add(JsUndefined.Instance);
-                                }
-                            }
-                            replaceParameters.Add(JsNumber.Create(m.Index));
-                            replaceParameters.Add(JsString.Create(source));
 
-                            return runtime.ExecuteFunction(function, null, replaceParameters.ToArray(), null).ToString();
-                        }, count, lastIndex);
+                                replaceParameters.Add(JsNumber.Create(m.Index));
+                                replaceParameters.Add(JsString.Create(source));
 
-
-                        return JsString.Create(ret);
-
+                                return runtime.ExecuteFunction(
+                                    function,
+                                    null,
+                                    replaceParameters.ToArray(),
+                                    null
+                                ).ToString();
+                            },
+                            count,
+                            lastIndex
+                        );
                     }
                     else
                     {
-                        string str = arguments[1].ToString();
-                        string ret = ((JsRegExp)arguments[0]).Regex.Replace(@this.ToString(), delegate(Match m)
-                        {
-                            if (!regexp.IsGlobal)
+                        string value = replaceValue.ToString();
+
+                        result = regexp.Regex.Replace(
+                            @this.ToString(),
+                            m =>
                             {
-                                regexp.SetProperty(Id.lastIndex, JsNumber.Create(m.Index + 1));
-                            }
+                                if (!regexp.IsGlobal)
+                                    regexpObject.SetProperty(Id.lastIndex, JsNumber.Create(m.Index + 1));
 
-                            string after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
-                            return EvaluateReplacePattern(m.Value, source.Substring(0, m.Index), after, str, m.Groups);
-                        }, count, lastIndex);
-
-                        return JsString.Create(ret);
+                                string after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
+                                return EvaluateReplacePattern(
+                                    m.Value,
+                                    source.Substring(0, m.Index),
+                                    after,
+                                    value,
+                                    m.Groups
+                                );
+                            },
+                            count,
+                            lastIndex
+                        );
                     }
 
-
+                    return JsString.Create(result);
                 }
-                else
+
+                string search = searchValue.ToString();
+                int index = source.IndexOf(search);
+
+                if (index != -1)
                 {
-                    string search = searchValue.ToString();
-                    int index = source.IndexOf(search);
-                    if (index != -1)
+                    var function = replaceValue as JsObject;
+                    if (function != null && function.Delegate != null)
                     {
-                        if (replaceValue is JsFunction)
-                        {
-                            List<JsInstance> replaceParameters = new List<JsInstance>();
-                            replaceParameters.Add(JsString.Create(search));
-                            replaceParameters.Add(JsNumber.Create(index));
-                            replaceParameters.Add(JsString.Create(source));
+                        replaceValue = runtime.ExecuteFunction(
+                            function,
+                            null,
+                            new JsInstance[]
+                            {
+                                JsString.Create(search),
+                                JsNumber.Create(index),
+                                JsString.Create(source)
+                            },
+                            null
+                        );
 
-                            replaceValue = runtime.ExecuteFunction(function, null, replaceParameters.ToArray(), null);
+                        return JsString.Create(
+                            source.Substring(0, index) +
+                            replaceValue +
+                            source.Substring(index + search.Length)
+                        );
+                    }
 
-                            return JsString.Create(source.Substring(0, index) + replaceValue.ToString() + source.Substring(index + search.Length));
-                        }
-                        else
-                        {
-                            string before = source.Substring(0, index);
-                            string after = source.Substring(index + search.Length);
-                            string newString = EvaluateReplacePattern(search, before, after, replaceValue.ToString(), null);
-                            return JsString.Create(before + newString + after);
-                        }
-                    }
-                    else
-                    {
-                        return JsString.Create(source);
-                    }
+                    string before = source.Substring(0, index);
+                    string after = source.Substring(index + search.Length);
+                    string newString = EvaluateReplacePattern(search, before, after, replaceValue.ToString(), null);
+                    return JsString.Create(before + newString + after);
                 }
+
+                return JsString.Create(source);
             }
 
             // 15.5.4.12
-            public static JsInstance Search(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Search(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 // Converts the arguments to a regex
-                JsRegExp regExp;
+                var regexp = arguments[0].Value as RegExpManager;
 
-                if (arguments[0].Class == JsNames.ClassString)
-                    regExp = runtime.Global.CreateRegExp(arguments[0].ToString(), JsRegExpOptions.None);
-                else
-                    regExp = ((JsRegExp)arguments[0]);
+                if (regexp == null)
+                {
+                    var regexpObject = runtime.Global.CreateRegExp(arguments[0].ToString());
+                    regexp = (RegExpManager)regexpObject.Value;
+                }
 
-                Match m = regExp.Regex.Match(@this.ToString());
+                Match m = regexp.Regex.Match(@this.ToString());
 
                 if (m != null && m.Success)
                     return JsNumber.Create(m.Index);
-                else
-                    return JsNumber.Create(-1);
+
+                return JsNumber.Create(-1);
             }
 
             // 15.5.4.13
-            public static JsInstance Slice(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Slice(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string source = @this.ToString();
                 int start = (int)arguments[0].ToNumber();
@@ -348,10 +381,9 @@ namespace Jint.Native
                 if (arguments.Length > 1)
                 {
                     end = (int)arguments[1].ToNumber();
+
                     if (end < 0)
-                    {
                         end = source.Length + end;
-                    }
                 }
 
                 if (start < 0)
@@ -363,7 +395,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.14
-            public static JsInstance Split(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Split(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 JsObject a = runtime.Global.CreateArray();
                 string s = @this.ToString();
@@ -375,17 +407,14 @@ namespace Jint.Native
 
                 JsInstance separator = arguments[0];
                 int limit = arguments.Length > 1 ? Convert.ToInt32(arguments[1].ToNumber()) : Int32.MaxValue;
-                int length = s.Length;
                 string[] result;
 
-                if (separator.Class == JsNames.ClassRegexp)
-                {
-                    result = ((JsRegExp)arguments[0]).Regex.Split(s, limit);
-                }
+                var regexp = separator.Value as RegExpManager;
+
+                if (regexp != null)
+                    result = regexp.Regex.Split(s, limit);
                 else
-                {
                     result = s.Split(new[] { separator.ToString() }, limit, StringSplitOptions.None);
-                }
 
                 for (int i = 0; i < result.Length; i++)
                 {
@@ -396,7 +425,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.15
-            public static JsInstance Substring(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Substring(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string str = @this.ToString();
                 int start = 0, end = str.Length;
@@ -418,7 +447,7 @@ namespace Jint.Native
                 return JsString.Create(str);
             }
 
-            public static JsInstance Substr(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Substr(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string str = @this.ToString();
                 int start = 0, end = str.Length;
@@ -441,32 +470,32 @@ namespace Jint.Native
             }
 
             // 15.5.4.16
-            public static JsInstance ToLowerCase(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToLowerCase(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return JsString.Create(@this.ToString().ToLowerInvariant());
             }
 
             // 15.5.4.17
-            public static JsInstance ToLocaleLowerCase(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToLocaleLowerCase(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return JsString.Create(@this.ToString().ToLower());
             }
 
             // 15.5.4.18
-            public static JsInstance ToUpperCase(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToUpperCase(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 return JsString.Create(@this.ToString().ToUpperInvariant());
             }
 
             // 15.5.4.19
-            public static JsInstance ToLocaleUpperCase(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToLocaleUpperCase(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string str = @this.ToString();
                 return JsString.Create(str.ToUpper());
             }
 
             // 15.5.5.1
-            public static JsInstance GetLength(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance GetLength(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 string str = @this.ToString();
                 return JsNumber.Create(str.Length);

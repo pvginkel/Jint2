@@ -36,7 +36,7 @@ namespace Jint.Native
             URIErrorClass = BuildErrorClass("URIError");
         }
 
-        private JsFunction BuildObjectClass(JsObject prototype)
+        private JsObject BuildObjectClass(JsObject prototype)
         {
             // We need to keep this because the prototype is passed to the constructor rather than created in it.
             DefineFunction(prototype, "constructor", ObjectFunctions.GetConstructor, 0, PropertyAttributes.DontEnum);
@@ -59,10 +59,25 @@ namespace Jint.Native
             return CreateFunction("Object", ObjectFunctions.Constructor, 0, null, prototype);
         }
 
-        private JsFunction BuildFunctionClass(JsObject functionPrototype)
+        private JsObject BuildFunctionClass(JsObject functionPrototype)
         {
             // Direct call to the JsFunction constructor because of bootstrapping.
-            return new JsFunction(this, "Function", FunctionFunctions.Constructor, 0, null, functionPrototype, false);
+
+            var result = CreateObject(
+                null,
+                functionPrototype,
+                new JsDelegate(
+                    "Function",
+                    FunctionFunctions.Constructor,
+                    0,
+                    null
+                )
+            );
+
+            result.SetClass(JsNames.ClassFunction);
+            result.SetIsClr(false);
+
+            return result;
         }
 
         private void InitializeFunctionClass()
@@ -77,7 +92,7 @@ namespace Jint.Native
             DefineProperty(prototype, "length", FunctionFunctions.GetLength, FunctionFunctions.SetLength, PropertyAttributes.DontEnum);
         }
 
-        private JsFunction BuildArrayClass()
+        private JsObject BuildArrayClass()
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
@@ -100,7 +115,7 @@ namespace Jint.Native
             return CreateFunction("Array", ArrayFunctions.Constructor, 0, null, prototype);
         }
 
-        private JsFunction BuildBooleanClass()
+        private JsObject BuildBooleanClass()
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
@@ -111,7 +126,7 @@ namespace Jint.Native
             return CreateFunction("Boolean", BooleanFunctions.Constructor, 0, null, prototype);
         }
 
-        private JsFunction BuildDateClass()
+        private JsObject BuildDateClass()
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
@@ -167,7 +182,7 @@ namespace Jint.Native
             return result;
         }
 
-        private JsFunction BuildNumberClass()
+        private JsObject BuildNumberClass()
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
@@ -189,7 +204,7 @@ namespace Jint.Native
             return result;
         }
 
-        private JsFunction BuildRegExpClass()
+        private JsObject BuildRegExpClass()
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
@@ -202,7 +217,7 @@ namespace Jint.Native
             return CreateFunction("RegExp", RegExpFunctions.Constructor, 0, null, prototype);
         }
 
-        private JsFunction BuildStringClass()
+        private JsObject BuildStringClass()
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
@@ -268,7 +283,7 @@ namespace Jint.Native
             return result;
         }
 
-        private JsFunction BuildErrorClass(string name)
+        private JsObject BuildErrorClass(string name)
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 

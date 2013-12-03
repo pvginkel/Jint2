@@ -6,7 +6,7 @@ using System.Text;
 namespace Jint.Native
 {
     [Flags]
-    public enum JsRegExpOptions
+    public enum RegExpOptions
     {
         None = 0,
         Global = 1,

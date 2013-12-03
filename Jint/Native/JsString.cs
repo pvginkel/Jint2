@@ -48,12 +48,6 @@ namespace Jint.Native
             return JsConvert.ToNumber(_value);
         }
 
-        public override string ToSource()
-        {
-            // TODO: Substitute escape sequences
-            return _value == null ? "null" : "'" + ToString() + "'";
-        }
-
         public override string ToString()
         {
             return _value;

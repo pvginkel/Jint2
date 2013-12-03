@@ -11,10 +11,15 @@ namespace Jint.Native
     {
         private static class RegExpFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
+                var target = (JsObject)@this;
+
+                if (target == null || target == runtime.Global.GlobalScope)
+                    target = runtime.Global.CreateObject(callee.Prototype);
+
                 string pattern = null;
-                var options = JsRegExpOptions.None;
+                var options = RegExpOptions.None;
 
                 if (arguments.Length > 0)
                 {
@@ -24,9 +29,9 @@ namespace Jint.Native
                         {
                             switch (c)
                             {
-                                case 'm': options |= JsRegExpOptions.Multiline; break;
-                                case 'i': options |= JsRegExpOptions.IgnoreCase; break;
-                                case 'g': options |= JsRegExpOptions.Global; break;
+                                case 'm': options |= RegExpOptions.Multiline; break;
+                                case 'i': options |= RegExpOptions.IgnoreCase; break;
+                                case 'g': options |= RegExpOptions.Global; break;
                             }
                         }
                     }
@@ -34,18 +39,27 @@ namespace Jint.Native
                     pattern = arguments[0].ToString();
                 }
 
-                return runtime.Global.CreateRegExp(pattern, options);
+                target.SetClass(JsNames.ClassRegexp);
+                target.SetIsClr(false);
+                target.Value = new RegExpManager(pattern, options);
+                target.SetProperty(Id.source, JsString.Create(pattern));
+                target.SetProperty(Id.lastIndex, JsNumber.Create(0));
+                target.SetProperty(Id.global, JsBoolean.Create(options.HasFlag(RegExpOptions.Global)));
+
+                return target;
             }
 
-            public static JsInstance Exec(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Exec(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                var regexp = (JsRegExp)@this;
+                var target = (JsObject)@this;
+                var regexp = (RegExpManager)target.Value;
+
                 var array = runtime.Global.CreateArray();
                 string input = arguments[0].ToString();
                 array.SetProperty(Id.input, JsString.Create(input));
 
                 int i = 0;
-                var lastIndex = regexp.IsGlobal ? regexp.GetProperty(Id.lastIndex).ToNumber() : 0;
+                var lastIndex = regexp.IsGlobal ? target.GetProperty(Id.lastIndex).ToNumber() : 0;
 
                 var matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
                 if (matches.Count == 0)
@@ -55,7 +69,7 @@ namespace Jint.Native
                 array.SetProperty(Id.index, JsNumber.Create(matches[0].Index));
 
                 if (regexp.IsGlobal)
-                    regexp.SetProperty(Id.lastIndex, JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length));
+                    target.SetProperty(Id.lastIndex, JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length));
 
                 foreach (Group group in matches[0].Groups)
                 {
@@ -65,18 +79,18 @@ namespace Jint.Native
                 return array;
             }
 
-            public static JsInstance Test(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Test(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                var regexp = (JsRegExp)@this;
-                var matches = ((JsFunction)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments, null);
+                var regexp = (JsObject)@this;
+                var matches = ((JsObject)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments, null);
                 var store = matches.FindArrayStore();
 
                 return JsBoolean.Create(store != null && store.Length > 0);
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                var regexp = (JsRegExp)@this;
+                var regexp = (RegExpManager)@this.Value;
 
                 return JsString.Create(
                     "/" +
@@ -88,9 +102,9 @@ namespace Jint.Native
                 );
             }
 
-            public static JsInstance GetLastIndex(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance GetLastIndex(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return ((JsRegExp)@this).GetProperty(Id.lastIndex);
+                return ((JsObject)@this).GetProperty(Id.lastIndex);
             }
         }
     }

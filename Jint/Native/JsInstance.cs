@@ -73,11 +73,6 @@ namespace Jint.Native
             return Value;
         }
 
-        public virtual string ToSource()
-        {
-            return ToString();
-        }
-
         public abstract override string ToString();
 
         public override int GetHashCode()

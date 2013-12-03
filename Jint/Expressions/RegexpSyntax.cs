@@ -15,7 +15,7 @@ namespace Jint.Expressions
         }
 
         public string Regexp { get; private set; }
-        public JsRegExpOptions Options { get; private set; }
+        public string Options { get; private set; }
 
         internal override ValueType ValueType
         {
@@ -30,16 +30,7 @@ namespace Jint.Expressions
                 throw new ArgumentNullException("options");
 
             Regexp = regexp;
-
-            foreach (char c in options)
-            {
-                switch (c)
-                {
-                    case 'g': Options |= JsRegExpOptions.Global; break;
-                    case 'i': Options |= JsRegExpOptions.IgnoreCase; break;
-                    case 'm': Options |= JsRegExpOptions.Multiline; break;
-                }
-            }
+            Options = options;
         }
 
         [DebuggerStepThrough]

@@ -269,18 +269,16 @@ namespace Jint.Native
             }
         }
 
-        public JsArray Concat(JsInstance[] args)
+        public JsObject Concat(JsInstance[] args)
         {
             var newArray = new SparseArray<JsInstance>(this);
             int offset = _length;
 
             foreach (var item in args)
             {
-                var array = item as JsArray;
-                if (array != null)
+                var oldArray = item.FindArrayStore(false);
+                if (oldArray != null)
                 {
-                    var oldArray = (ArrayPropertyStore)array.PropertyStore;
-
                     foreach (int key in oldArray.GetKeys())
                     {
                         newArray[key + offset] = oldArray.GetByIndex(key);
@@ -316,9 +314,12 @@ namespace Jint.Native
                 }
             }
 
-            var result = new JsArray(_owner.Global, newArray, _owner.Global.ArrayClass.Prototype);
+            var result = _owner.Global.CreateArray();
 
-            ((ArrayPropertyStore)result.PropertyStore).Length = offset;
+            result.PropertyStore = new ArrayPropertyStore(result, newArray)
+            {
+                Length = offset
+            };
 
             return result;
         }

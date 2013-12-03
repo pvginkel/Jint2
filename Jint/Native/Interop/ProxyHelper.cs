@@ -16,7 +16,7 @@ namespace Jint.Native.Interop
     {
         private static readonly MethodInfo _marshalJsValue = typeof(Marshaller).GetMethod("MarshalJsValue");
         private static readonly MethodInfo _marshalClr = typeof(Marshaller).GetMethod("MarshalClrValue");
-        private static readonly ConcurrentDictionary<MethodInfo, JsFunctionDelegate> _methodCache = new ConcurrentDictionary<MethodInfo, JsFunctionDelegate>();
+        private static readonly ConcurrentDictionary<MethodInfo, JsFunction> _methodCache = new ConcurrentDictionary<MethodInfo, JsFunction>();
         private static readonly ConcurrentDictionary<PropertyInfo, WrappedGetter> _getPropertyCache = new ConcurrentDictionary<PropertyInfo, WrappedGetter>();
         private static readonly ConcurrentDictionary<PropertyInfo, WrappedSetter> _setPropertyCache = new ConcurrentDictionary<PropertyInfo, WrappedSetter>();
         private static readonly ConcurrentDictionary<FieldInfo, WrappedGetter> _getFieldCache = new ConcurrentDictionary<FieldInfo, WrappedGetter>();
@@ -25,7 +25,7 @@ namespace Jint.Native.Interop
         private static readonly ConcurrentDictionary<MethodInfo, WrappedIndexerSetter> _setIndexerCache = new ConcurrentDictionary<MethodInfo, WrappedIndexerSetter>();
         private static readonly ConcurrentDictionary<ConstructorInfo, WrappedConstructor> _constructorCache = new ConcurrentDictionary<ConstructorInfo, WrappedConstructor>();
 
-        public static JsFunction BuildMethodFunction(JsGlobal global, MethodInfo method)
+        public static JsObject BuildMethodFunction(JsGlobal global, MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -42,7 +42,7 @@ namespace Jint.Native.Interop
             );
         }
 
-        public static JsFunctionDelegate WrapMethod(MethodInfo method)
+        public static JsFunction WrapMethod(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -50,13 +50,13 @@ namespace Jint.Native.Interop
             return _methodCache.GetOrAdd(method, WrapMethodCore);
         }
 
-        private static JsFunctionDelegate WrapMethodCore(MethodInfo method)
+        private static JsFunction WrapMethodCore(MethodInfo method)
         {
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
             builder.AddThisParameter();
-            builder.AddParameter(typeof(JsFunction), "callee");
+            builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             var argumentsParameter = builder.AddParameter(typeof(JsInstance[]), "arguments");
             builder.AddParameter(typeof(JsInstance[]), "genericArguments");
@@ -203,7 +203,7 @@ namespace Jint.Native.Interop
                 : Expression.Constant(JsUndefined.Instance)
             );
 
-            return builder.Compile<JsFunctionDelegate>();
+            return builder.Compile<JsFunction>();
         }
 
         public static JsInstance BuildDelegateFunction(JsGlobal global, Delegate @delegate)
@@ -221,13 +221,13 @@ namespace Jint.Native.Interop
             );
         }
 
-        private static JsFunctionDelegate WrapDelegate(Delegate @delegate)
+        private static JsFunction WrapDelegate(Delegate @delegate)
         {
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
             builder.AddThisParameter();
-            builder.AddParameter(typeof(JsFunction), "callee");
+            builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             var argumentsParameter = builder.AddParameter(typeof(JsInstance[]), "arguments");
             builder.AddParameter(typeof(JsInstance[]), "genericArguments");
@@ -291,7 +291,7 @@ namespace Jint.Native.Interop
                 method.ReturnType
             ));
 
-            return builder.Compile<JsFunctionDelegate>();
+            return builder.Compile<JsFunction>();
         }
 
         public static WrappedGetter WrapGetProperty(PropertyInfo property)
@@ -527,7 +527,7 @@ namespace Jint.Native.Interop
             return builder.Compile<WrappedConstructor>();
         }
 
-        public static Delegate MarshalJsFunction(JintRuntime runtime, JsFunction function, JsObject that, Type delegateType)
+        public static Delegate MarshalJsFunction(JintRuntime runtime, JsObject function, JsObject that, Type delegateType)
         {
             if (runtime == null)
                 throw new ArgumentNullException("runtime");
@@ -547,7 +547,7 @@ namespace Jint.Native.Interop
 
             Expression call = Expression.Call(
                 Expression.Constant(function),
-                typeof(JsFunction).GetMethod("Execute"),
+                typeof(JsObject).GetMethod("Execute"),
                 Expression.Constant(runtime),
                 Expression.Constant(that),
                 Backend.Dlr.ExpressionVisitor.MakeArrayInit(

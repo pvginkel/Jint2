@@ -90,7 +90,7 @@ namespace Jint.Backend.Dlr
                 if (variable.Type == VariableType.Local)
                     fields.Add(variable.Name, typeof(JsInstance));
                 else if (!fields.ContainsKey(Closure.ArgumentsFieldName))
-                    fields.Add(Closure.ArgumentsFieldName, typeof(JsArguments));
+                    fields.Add(Closure.ArgumentsFieldName, typeof(JsObject));
             }
 
             // If we have a parent closure, add a variable for that.

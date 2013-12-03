@@ -301,7 +301,7 @@ namespace Jint
             return this;
         }
 
-        public JintEngine SetFunction(string name, JsFunction function)
+        public JintEngine SetFunction(string name, JsObject function)
         {
             _backend.Global.GlobalScope[name] = function;
             return this;
@@ -312,7 +312,7 @@ namespace Jint
             return _backend.CallFunction(name, args);
         }
 
-        public object CallFunction(JsFunction function, params object[] args)
+        public object CallFunction(JsObject function, params object[] args)
         {
             return _backend.CallFunction(function, args);
         }

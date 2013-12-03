@@ -9,15 +9,15 @@ namespace Jint.Native
     {
         private readonly JsGlobal _global;
 
-        public JsFunction GetFunction { get; internal set; }
-        public JsFunction SetFunction { get; internal set; }
+        public JsObject GetFunction { get; internal set; }
+        public JsObject SetFunction { get; internal set; }
 
         public override bool IsReference
         {
             get { return false; }
         }
 
-        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, JsFunction getFunction, JsFunction setFunction, PropertyAttributes attributes)
+        public PropertyDescriptor(JsGlobal global, JsObject owner, string name, JsObject getFunction, JsObject setFunction, PropertyAttributes attributes)
             : base(owner, name, attributes)
         {
             GetFunction = getFunction;

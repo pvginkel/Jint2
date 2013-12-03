@@ -23,9 +23,9 @@ namespace Jint
     public class Marshaller
     {
         private readonly JintRuntime _runtime;
-        private readonly Dictionary<Type, JsFunction> _typeCache = new Dictionary<Type, JsFunction>();
+        private readonly Dictionary<Type, JsObject> _typeCache = new Dictionary<Type, JsObject>();
         private readonly Dictionary<Type, Delegate> _arrayMarshallers = new Dictionary<Type, Delegate>();
-        private JsFunction _typeType;
+        private JsObject _typeType;
 
         public JsGlobal Global { get; private set; }
 
@@ -131,7 +131,7 @@ namespace Jint
             return Wrap(MarshalType(value.GetType()), value);
         }
 
-        private JsObject Wrap(JsFunction constructor, object value)
+        private JsObject Wrap(JsObject constructor, object value)
         {
             // We go through the real constructor because it needs to do some
             // setup for us. However, the constructor tries to instantiate the
@@ -147,9 +147,9 @@ namespace Jint
             return @this;
         }
 
-        public JsFunction MarshalType(Type type)
+        public JsObject MarshalType(Type type)
         {
-            JsFunction result;
+            JsObject result;
             if (!_typeCache.TryGetValue(type, out result))
             {
                 result = CreateConstructor(type);
@@ -159,7 +159,7 @@ namespace Jint
             return result;
         }
 
-        private JsFunction CreateConstructor(Type type)
+        private JsObject CreateConstructor(Type type)
         {
             return NativeFactory.BuildNativeConstructor(
                 Global,
@@ -176,7 +176,7 @@ namespace Jint
         /// For example native strings should be derived from <c>'String'</c> class i.e. they should
         /// contain a <c>String.prototype</c> object in theirs prototype chain.
         /// </remarks>
-        private JsFunction CreateConstructor(Type type, JsObject rootPrototype)
+        private JsObject CreateConstructor(Type type, JsObject rootPrototype)
         {
             // BUG: Instead of the normal SetupNativeProperties, this
             // would call the SetupNativeProperties from _typeType and not from the
@@ -232,10 +232,10 @@ namespace Jint
                 if (value == null || JsInstance.IsNullOrUndefined(value))
                     return default(T);
 
-                if (!(value is JsFunction))
+                if (!(value is JsObject))
                     throw new JintException("Can't convert a non function object to a delegate type");
 
-                return (T)(object)ProxyHelper.MarshalJsFunction(_runtime, value as JsFunction, Global.PrototypeSink, typeof(T));
+                return (T)(object)ProxyHelper.MarshalJsFunction(_runtime, value as JsObject, Global.PrototypeSink, typeof(T));
             }
 
             if (!JsInstance.IsNullOrUndefined(value) && value is T)

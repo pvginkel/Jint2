@@ -71,10 +71,10 @@ namespace Jint.Native.Interop
                             }
                             else if (
                                 !typeof(Delegate).IsAssignableFrom(paramType) && 
-                                !typeof(JsFunction).IsAssignableFrom(type) &&
+                                !typeof(JsObject).IsAssignableFrom(type) &&
                                 !_global.Marshaller.IsAssignable(paramType, type)
                             ) {
-                                // Delegates can be assigned to a JsFunction,
+                                // Delegates can be assigned to a JsObject,
                                 // so these don't invalidate a match.
 
                                 match.Weight = int.MinValue;

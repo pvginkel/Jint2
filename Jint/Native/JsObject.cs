@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Runtime;
 
 namespace Jint.Native
 {
@@ -12,14 +13,16 @@ namespace Jint.Native
 #if !DEBUG
     [DebuggerTypeProxy(typeof(JsObjectDebugView))]
 #endif
-    public class JsObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
+    public sealed class JsObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
     {
         internal static readonly ReadOnlyCollection<KeyValuePair<int, JsInstance>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, JsInstance>>(new KeyValuePair<int, JsInstance>[0]);
 
         private object _value;
-        private readonly bool? _isClr;
+        private bool? _isClr;
+        private string _class;
 
         internal IPropertyStore PropertyStore { get; set; }
+        internal JsDelegate Delegate { get; private set; }
 
         public override object Value
         {
@@ -28,27 +31,6 @@ namespace Jint.Native
         }
 
         public JsGlobal Global { get; private set; }
-
-        /// <summary>
-        /// ecma262 [[prototype]] property
-        /// </summary>
-        public JsObject Prototype { get; internal set; }
-
-        internal JsObject(JsGlobal global, object value, JsObject prototype)
-            : this(global, value, prototype, null)
-        {
-        }
-
-        internal JsObject(JsGlobal global, object value, JsObject prototype, bool? isClr)
-        {
-            if (global == null)
-                throw new ArgumentNullException("global");
-
-            Global = global;
-            _value = value;
-            _isClr = isClr;
-            Prototype = prototype ?? global.PrototypeSink;
-        }
 
         public override bool IsClr
         {
@@ -62,14 +44,44 @@ namespace Jint.Native
             }
         }
 
+        internal void SetIsClr(bool isClr)
+        {
+            _isClr = IsClr;
+        }
+
         public override string Class
         {
-            get { return JsNames.ClassObject; }
+            get { return _class; }
+        }
+
+        internal void SetClass(string @class)
+        {
+            if (@class == null)
+                throw new ArgumentNullException("class");
+
+            _class = @class;
         }
 
         public override JsType Type
         {
             get { return JsType.Object; }
+        }
+
+        /// <summary>
+        /// ecma262 [[prototype]] property
+        /// </summary>
+        public JsObject Prototype { get; set; }
+
+        internal JsObject(JsGlobal global, object value, JsObject prototype, JsDelegate @delegate)
+        {
+            if (global == null)
+                throw new ArgumentNullException("global");
+
+            Global = global;
+            _value = value;
+            _class = JsNames.ClassObject;
+            Prototype = prototype ?? global.PrototypeSink;
+            Delegate = @delegate;
         }
 
         private void EnsurePropertyStore()
@@ -88,7 +100,7 @@ namespace Jint.Native
             if (hint == PreferredType.None)
             {
                 // 8.6.2.6
-                if (this is JsDate)
+                if (Class == JsNames.ClassDate)
                     hint = PreferredType.String;
             }
 
@@ -155,7 +167,7 @@ namespace Jint.Native
         {
             primitive = null;
 
-            var function = descriptor.Get(this) as JsFunction;
+            var function = descriptor.Get(this) as JsObject;
 
             if (function == null)
                 return false;
@@ -163,7 +175,7 @@ namespace Jint.Native
             var result = Global.Backend.ExecuteFunction(
                 function,
                 this,
-                JsInstance.EmptyArray,
+                EmptyArray,
                 null
             );
 
@@ -224,16 +236,11 @@ namespace Jint.Native
 
         public override string ToString()
         {
-            return ToPrimitive(PreferredType.String).ToString();
-        }
-
-        public override string ToSource()
-        {
-            var function = this as JsFunction;
-            if (function != null)
-                return String.Format("function {0} () {{ /* js code */ }}", function.Name);
-
-            return ToString();
+            string s = ToPrimitive(PreferredType.String).ToString();
+            if (s == "[object ]")
+            {
+            }
+            return s;
         }
 
         /// <summary>
@@ -519,7 +526,7 @@ namespace Jint.Native
             PropertyStore.DefineOwnProperty(currentDescriptor);
         }
 
-        public void DefineAccessorProperty(string name, JsFunction getFunction, JsFunction setFunction)
+        public void DefineAccessorProperty(string name, JsObject getFunction, JsObject setFunction)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -596,6 +603,38 @@ namespace Jint.Native
                 Debug.Assert(Prototype != null);
                 return Prototype == Global.PrototypeSink;
             }
+        }
+
+        // 15.3.5.3
+        public bool HasInstance(JsObject instance)
+        {
+            return
+                instance != null &&
+                Prototype.IsPrototypeOf(instance);
+        }
+
+        // 13.2.2
+        public JsInstance Construct(JintRuntime runtime, JsInstance[] arguments)
+        {
+            if (Delegate == null)
+                throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
+
+            var @this = Global.CreateObject((JsObject)GetProperty(Id.prototype));
+
+            var result = Delegate.Delegate(runtime, @this, this, Delegate.Closure, arguments, null);
+
+            if (result is JsObject)
+                return result;
+
+            return @this;
+        }
+
+        public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsInstance[] arguments, JsInstance[] genericArguments)
+        {
+            if (Delegate == null)
+                throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
+
+            return Delegate.Delegate(runtime, @this, this, Delegate.Closure, arguments, genericArguments);
         }
     }
 }

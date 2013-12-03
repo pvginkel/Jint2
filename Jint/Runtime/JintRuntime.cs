@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security;
 using System.Text;
@@ -26,7 +27,7 @@ namespace Jint.Runtime
             GlobalScope = Global.GlobalScope;
         }
 
-        public JsFunction CreateFunction(string name, JsFunctionDelegate function, object closure, string[] parameters)
+        public JsObject CreateFunction(string name, JsFunction function, object closure, string[] parameters)
         {
             return Global.CreateFunction(
                 name,
@@ -36,7 +37,7 @@ namespace Jint.Runtime
             );
         }
 
-        public JsInstance ExecuteFunction(JsFunction function, JsInstance that, JsInstance[] parameters, JsInstance[] genericArguments)
+        public JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] parameters, JsInstance[] genericArguments)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
@@ -104,7 +105,7 @@ namespace Jint.Runtime
                 default: errorClass = Global.ErrorClass; break;
             }
 
-            return Global.CreateError(errorClass.Prototype, exception.Message);
+            return Global.CreateError(errorClass, exception.Message);
         }
 
         public JsInstance New(JsInstance target, JsInstance[] arguments, JsInstance[] generics)
@@ -130,8 +131,8 @@ namespace Jint.Runtime
                 target = _backend.ResolveUndefined(undefined.Name, genericParameters);
             }
 
-            var function = target as JsFunction;
-            if (function == null)
+            var function = target as JsObject;
+            if (function == null || function.Delegate == null)
                 throw new JsException(JsErrorType.Error, "Function expected.");
 
             return function.Construct(this, arguments);
@@ -140,6 +141,49 @@ namespace Jint.Runtime
         public int ResolveIdentifier(string name)
         {
             return Global.ResolveIdentifier(name);
+        }
+
+        internal JsObject CreateArguments(JsObject callee, JsInstance[] arguments)
+        {
+            var result = Global.CreateObject();
+
+            result.SetClass(JsNames.ClassArguments);
+            result.SetIsClr(false);
+
+            int length = 0;
+
+            // Add the named parameters.
+
+            if (arguments != null)
+            {
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    result.DefineOwnProperty(new ValueDescriptor(
+                        result,
+                        i.ToString(CultureInfo.InvariantCulture),
+                        arguments[i],
+                        PropertyAttributes.DontEnum
+                    ));
+                }
+
+                length = arguments.Length;
+            }
+
+            result.DefineOwnProperty(new ValueDescriptor(
+                result,
+                "callee",
+                callee,
+                PropertyAttributes.DontEnum
+            ));
+
+            result.DefineOwnProperty(new ValueDescriptor(
+                result,
+                "length",
+                JsNumber.Create(length),
+                PropertyAttributes.DontEnum
+            ));
+
+            return result;
         }
     }
 }

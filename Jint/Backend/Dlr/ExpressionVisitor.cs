@@ -16,10 +16,12 @@ namespace Jint.Backend.Dlr
 {
     internal partial class ExpressionVisitor : ISyntaxVisitor<Expression>
     {
+        private const BindingFlags InstanceFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const BindingFlags StaticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         private static readonly MethodInfo _defineAccessorProperty = typeof(JsObject).GetMethod("DefineAccessorProperty");
-        private static readonly ConstructorInfo _argumentsConstructor = typeof(JsArguments).GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Single();
+        private static readonly MethodInfo _createArguments = typeof(JintRuntime).GetMethod("CreateArguments", InstanceFlags);
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
-        private static readonly MethodInfo _buildLiteral = typeof(JsGlobal).GetMethod("BuildLiteral", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        private static readonly MethodInfo _buildLiteral = typeof(JsGlobal).GetMethod("BuildLiteral", InstanceFlags);
 
         private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a)
         {
@@ -652,15 +654,12 @@ namespace Jint.Backend.Dlr
 
             var statements = new List<Expression>();
 
-            var array = Expression.Parameter(typeof(JsArray), "array");
+            var array = Expression.Parameter(typeof(JsObject), "array");
 
             statements.Add(Expression.Assign(
                 array,
                 Expression.Call(
-                    Expression.Property(
-                        _scope.Runtime,
-                        typeof(JintRuntime).GetProperty("Global")
-                    ),
+                    Expression.Property(_scope.Runtime, "Global"),
                     typeof(JsGlobal).GetMethod("CreateArray")
                 )
             ));
@@ -703,7 +702,7 @@ namespace Jint.Backend.Dlr
                 return compiledFunction;
         }
 
-        private Expression CreateFunctionSyntax(IFunctionDeclaration function, JsFunctionDelegate compiledFunction)
+        private Expression CreateFunctionSyntax(IFunctionDeclaration function, JsFunction compiledFunction)
         {
             return Expression.Call(
                 _scope.Runtime,
@@ -715,7 +714,7 @@ namespace Jint.Backend.Dlr
             );
         }
 
-        public JsFunctionDelegate DeclareFunction(IFunctionDeclaration function)
+        public JsFunction DeclareFunction(IFunctionDeclaration function)
         {
             var body = function.Body;
 
@@ -725,7 +724,7 @@ namespace Jint.Backend.Dlr
             );
 
             var functionParameter = Expression.Parameter(
-                typeof(JsFunction),
+                typeof(JsObject),
                 "function"
             );
             
@@ -871,12 +870,9 @@ namespace Jint.Backend.Dlr
 
             statements.Add(_scope.BuildSet(
                 _scope.ArgumentsVariable,
-                Expression.New(
-                    _argumentsConstructor,
-                    Expression.Property(
-                        _scope.Runtime,
-                        typeof(JintRuntime).GetProperty("Global")
-                    ),
+                Expression.Call(
+                    _scope.Runtime,
+                    _createArguments,
                     functionParameter,
                     argumentsParameter
                 )
@@ -917,7 +913,7 @@ namespace Jint.Backend.Dlr
 
             // Add the arguments if one was created.
 
-            var lambda = Expression.Lambda<JsFunctionDelegate>(
+            var lambda = Expression.Lambda<JsFunction>(
                 Expression.Block(
                     typeof(JsInstance),
                     locals,
@@ -1050,8 +1046,8 @@ namespace Jint.Backend.Dlr
             statements.Add(Expression.Assign(
                 result,
                 Expression.Call(
-                    Expression.Convert(getter, typeof(JsFunction)),
-                    typeof(JsFunction).GetMethod("Execute"),
+                    Expression.Convert(getter, typeof(JsObject)),
+                    typeof(JsObject).GetMethod("Execute"),
                     _scope.Runtime,
                     target,
                     arguments,
@@ -1152,8 +1148,12 @@ namespace Jint.Backend.Dlr
                         new[]
                         {
                             Expression.Constant(accessorProperty.Name),
-                            accessorProperty.GetExpression != null ? accessorProperty.GetExpression.Accept(this) : Expression.Default(typeof(JsFunction)),
-                            accessorProperty.SetExpression != null ? accessorProperty.SetExpression.Accept(this) : Expression.Default(typeof(JsFunction))
+                            accessorProperty.GetExpression != null
+                                ? accessorProperty.GetExpression.Accept(this)
+                                : Expression.Default(typeof(JsObject)),
+                            accessorProperty.SetExpression != null
+                                ? accessorProperty.SetExpression.Accept(this)
+                                : Expression.Default(typeof(JsObject))
                         }
                     ));
                 }
@@ -1492,11 +1492,8 @@ namespace Jint.Backend.Dlr
         public Expression VisitRegexp(RegexpSyntax syntax)
         {
             return Expression.Call(
-                Expression.Property(
-                    _scope.Runtime,
-                    "Global"
-                ),
-                typeof(JsGlobal).GetMethod("CreateRegExp", new[] { typeof(string), typeof(JsRegExpOptions) }),
+                Expression.Property(_scope.Runtime, "Global"),
+                typeof(JsGlobal).GetMethod("CreateRegExp", InstanceFlags, null, new[] { typeof(string), typeof(string) }, null),
                 Expression.Constant(syntax.Regexp),
                 Expression.Constant(syntax.Options)
             );

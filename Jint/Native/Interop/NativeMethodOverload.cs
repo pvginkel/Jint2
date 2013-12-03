@@ -11,7 +11,7 @@ namespace Jint.Native.Interop
     {
         private readonly List<MethodInfo> _methods = new List<MethodInfo>();
         private readonly List<MethodInfo> _generics = new List<MethodInfo>();
-        private readonly NativeOverloadImpl<MethodInfo, JsFunctionDelegate> _overloads;
+        private readonly NativeOverloadImpl<MethodInfo, JsFunction> _overloads;
 
         public NativeMethodOverload(JsGlobal global, IEnumerable<MethodInfo> methods)
         {
@@ -28,14 +28,14 @@ namespace Jint.Native.Interop
                     _methods.Add(method);
             }
 
-            _overloads = new NativeOverloadImpl<MethodInfo, JsFunctionDelegate>(
+            _overloads = new NativeOverloadImpl<MethodInfo, JsFunction>(
                 global,
                 GetMembers,
                 ProxyHelper.WrapMethod
             );
         }
 
-        public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsFunction callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+        public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
         {
             if (
                 _generics.Count == 0 &&
@@ -49,7 +49,7 @@ namespace Jint.Native.Interop
                 runtime.Global.Marshaller.MarshalGenericArguments(genericArguments)
             );
             if (implementation == null)
-                throw new JintException(String.Format("No matching overload found {0}<{1}>", callee.Name, genericArguments));
+                throw new JintException(String.Format("No matching overload found {0}<{1}>", callee.Delegate.Name, genericArguments));
 
             return implementation(runtime, @this, callee, closure, arguments, null);
         }

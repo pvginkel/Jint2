@@ -7,7 +7,7 @@ namespace Jint.Native
 {
     partial class JsGlobal
     {
-        private void DefineProperty(JsObject prototype, string name, JsFunctionDelegate getFunction, JsFunctionDelegate setFunction, PropertyAttributes attributes)
+        private void DefineProperty(JsObject prototype, string name, JsFunction getFunction, JsFunction setFunction, PropertyAttributes attributes)
         {
             var getJsFunction =
                 getFunction != null
@@ -35,7 +35,7 @@ namespace Jint.Native
             prototype.DefineOwnProperty(name, value, attributes);
         }
 
-        protected void DefineFunction(JsObject prototype, string name, JsFunctionDelegate @delegate, int argumentCount, PropertyAttributes attributes)
+        protected void DefineFunction(JsObject prototype, string name, JsFunction @delegate, int argumentCount, PropertyAttributes attributes)
         {
             prototype.DefineOwnProperty(
                 name,

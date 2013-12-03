@@ -1,53 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Jint.Native
 {
-    [Serializable]
-    public class JsRegExp : JsObject
+    internal class RegExpManager
     {
         private readonly string _pattern;
         private readonly RegexOptions _parsedOptions;
-        private readonly JsRegExpOptions _options;
+        private readonly RegExpOptions _options;
 
         public bool IsGlobal
         {
-            get { return (_options & JsRegExpOptions.Global) != 0; }
+            get { return (_options & RegExpOptions.Global) != 0; }
         }
 
         public bool IsIgnoreCase
         {
-            get { return (_options & JsRegExpOptions.IgnoreCase) != 0; }
+            get { return (_options & RegExpOptions.IgnoreCase) != 0; }
         }
 
         public bool IsMultiLine
         {
-            get { return (_options & JsRegExpOptions.Multiline) != 0; }
+            get { return (_options & RegExpOptions.Multiline) != 0; }
         }
 
-        internal JsRegExp(JsGlobal global, string pattern, JsRegExpOptions options, JsObject prototype)
-            : base(global, null, prototype, false)
+        public RegExpManager(string pattern, RegExpOptions options)
         {
             _options = options;
             _parsedOptions = RegexOptions.ECMAScript;
 
-            if (options.HasFlag(JsRegExpOptions.Multiline))
+            if (options.HasFlag(RegExpOptions.Multiline))
                 _parsedOptions |= RegexOptions.Multiline;
-            if (options.HasFlag(JsRegExpOptions.IgnoreCase))
+            if (options.HasFlag(RegExpOptions.IgnoreCase))
                 _parsedOptions |= RegexOptions.IgnoreCase;
 
             _pattern = pattern;
-
-            SetProperty(Id.source, JsString.Create(pattern));
-            SetProperty(Id.lastIndex, JsNumber.Create(0));
-            SetProperty(Id.global, JsBoolean.Create(options.HasFlag(JsRegExpOptions.Global)));
-        }
-
-        public override string Class
-        {
-            get { return JsNames.ClassRegexp; }
         }
 
         public string Pattern
@@ -67,7 +57,20 @@ namespace Jint.Native
 
         public override string ToString()
         {
-            return "/" + _pattern + "/";
+            var sb = new StringBuilder();
+
+            sb.Append('/');
+            sb.Append(_pattern);
+            sb.Append('/');
+
+            if (IsGlobal)
+                sb.Append('g');
+            if (IsIgnoreCase)
+                sb.Append('i');
+            if (IsMultiLine)
+                sb.Append('m');
+
+            return sb.ToString();
         }
     }
 }

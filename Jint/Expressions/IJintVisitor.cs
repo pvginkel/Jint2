@@ -95,6 +95,6 @@ namespace Jint.Expressions
 
         JsInstance Return(JsInstance result);
 
-        void ExecuteFunction(JsFunction function, JsInstance @this, JsInstance[] parameters);
+        void ExecuteFunction(JsObject function, JsInstance @this, JsInstance[] parameters);
     }
 }

@@ -88,8 +88,8 @@ namespace Jint.Native
                 throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
 
             var attributes = PropertyAttributes.None;
-            JsFunction getFunction = null;
-            JsFunction setFunction = null;
+            JsObject getFunction = null;
+            JsObject setFunction = null;
             JsInstance result;
 
             if (
@@ -112,18 +112,16 @@ namespace Jint.Native
 
             if (obj.TryGetProperty(Id.get, out result))
             {
-                if (!(result is JsFunction))
+                getFunction = result as JsObject;
+                if (getFunction == null || getFunction.Delegate == null)
                     throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
-
-                getFunction = (JsFunction)result;
             }
 
             if (obj.TryGetProperty(Id.set, out result))
             {
-                if (!(result is JsFunction))
+                setFunction = result as JsObject;
+                if (setFunction == null || setFunction.Delegate == null)
                     throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
-
-                setFunction = (JsFunction)result;
             }
 
             if (obj.HasProperty(Id.value))
