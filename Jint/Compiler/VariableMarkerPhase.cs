@@ -7,7 +7,7 @@ using System.Text;
 using Jint.Expressions;
 using Jint.Native;
 
-namespace Jint.Backend.Dlr
+namespace Jint.Compiler
 {
     internal class VariableMarkerPhase : SyntaxVisitor
     {
@@ -24,12 +24,12 @@ namespace Jint.Backend.Dlr
         private MarkerWithScope _withScope;
         private int _nextWithScopeIndex = 1;
 
-        public VariableMarkerPhase(DlrBackend backend)
+        public VariableMarkerPhase(JintEngine engine)
         {
-            if (backend == null)
-                throw new ArgumentNullException("backend");
+            if (engine == null)
+                throw new ArgumentNullException("engine");
 
-            _isStrict = backend.Options.HasFlag(Options.Strict);
+            _isStrict = engine.Options.HasFlag(Options.Strict);
         }
 
         public override void VisitProgram(ProgramSyntax syntax)

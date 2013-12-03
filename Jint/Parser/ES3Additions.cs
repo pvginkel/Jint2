@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Antlr.Runtime;
-using Jint.Debugger;
+using Jint.Compiler;
 using Jint.Expressions;
 
 namespace Jint.Parser

@@ -56,11 +56,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backend\Dlr\ClosureManager.cs" />
-    <Compile Include="Backend\Dlr\DlrBackend.cs" />
-    <Compile Include="Backend\Dlr\ExpressionVisitor.Builders.cs" />
-    <Compile Include="Backend\Dlr\ExpressionVisitor.OperationBuilders.cs" />
-    <Compile Include="Backend\Dlr\TypeMarkerPhase.cs" />
+    <Compile Include="Compiler\ClosureManager.cs" />
+    <Compile Include="Compiler\ExpressionVisitor.Builders.cs" />
+    <Compile Include="Compiler\ExpressionVisitor.OperationBuilders.cs" />
+    <Compile Include="Compiler\TypeMarkerPhase.cs" />
     <Compile Include="ExpressionExtensions\ConvertFromJsExpression.cs" />
     <Compile Include="ExpressionExtensions\ConvertToJsExpression.cs" />
     <Compile Include="ExpressionExtensions\ExpressionEx.cs" />
@@ -93,18 +92,16 @@
     <Compile Include="Native\JsErrorType.cs" />
     <Compile Include="Native\JsExtensions.cs" />
     <Compile Include="Native\JsFunction.cs" />
-    <Compile Include="Backend\Dlr\ExpressionVisitor.cs" />
+    <Compile Include="Compiler\ExpressionVisitor.cs" />
     <Compile Include="Expressions\Closure.cs" />
-    <Compile Include="Backend\Dlr\VariableMarkerPhase.cs" />
+    <Compile Include="Compiler\VariableMarkerPhase.cs" />
     <Compile Include="CachedTypeResolver.cs" />
-    <Compile Include="Delegates\Delegates.cs" />
     <Compile Include="Expressions\AssignmentOperator.cs" />
     <Compile Include="Expressions\PropertyExpressionType.cs" />
     <Compile Include="Expressions\SyntaxVisitor.cs" />
     <Compile Include="Expressions\Variable.cs" />
     <Compile Include="Expressions\VariableCollection.cs" />
     <Compile Include="Expressions\VariableType.cs" />
-    <Compile Include="IJintBackend.cs" />
     <Compile Include="Native\Interop\Delegates.cs" />
     <Compile Include="Native\Interop\ProxyHelper.cs" />
     <Compile Include="Native\ClrFunction.cs" />
@@ -130,7 +127,7 @@
     <Compile Include="Native\Interop\NativePropertyStore.cs" />
     <Compile Include="Native\Interop\NativeOverloadImpl.cs" />
     <Compile Include="Native\Interop\NativeDescriptor.cs" />
-    <Compile Include="Marshal.cs" />
+    <Compile Include="Marshaller.cs" />
     <Compile Include="Native\ILiteral.cs" />
     <Compile Include="Native\PreferredType.cs" />
     <Compile Include="Native\RegExpManager.cs" />
@@ -139,10 +136,9 @@
     <Compile Include="Parser\ES3Additions.cs" />
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="Parser\ES3Util.cs" />
-    <Compile Include="Debugger\SourceCodeDescriptor.cs" />
+    <Compile Include="Compiler\SourceCodeDescriptor.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
-    <Compile Include="IConstructorInvoker.cs" />
     <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />
     <Compile Include="Native\PropertyDescriptor.cs" />
@@ -200,7 +196,6 @@
     <Compile Include="Expressions\VariableDeclarationSyntax.cs" />
     <Compile Include="Expressions\WhileSyntax.cs" />
     <Compile Include="Native\PropertyAttributes.cs" />
-    <Compile Include="Number.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Native\JsObjectDebugView.cs" />
     <Compile Include="Runtime\JintRuntime.Comparers.cs" />
@@ -217,7 +212,7 @@
     <Compile Include="Support\SparseArray.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backend\Dlr\ExpressionVisitor.Scope.cs" />
+    <Compile Include="Compiler\ExpressionVisitor.Scope.cs" />
     <None Include="ES3.g" />
     <None Include="Key.snk" />
     <Compile Include="Native\JsGlobal.StringFunctions.cs" />
@@ -234,9 +229,7 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Marshal\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Native\Id.tokens" />
   </ItemGroup>

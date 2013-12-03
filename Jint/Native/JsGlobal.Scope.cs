@@ -89,7 +89,7 @@ namespace Jint.Native
                 if (descriptor != null)
                     result = descriptor.Get(Owner);
                 else
-                    result = _global.Backend.ResolveUndefined(_global.GetIdentifier(index), null);
+                    result = _global.Engine.ResolveUndefined(_global.GetIdentifier(index), null);
 
                 return true;
             }
@@ -180,7 +180,7 @@ namespace Jint.Native
                 if (JsNames.ClassString != arguments[0].Class)
                     return arguments[0];
 
-                return runtime.Global.Backend.Eval(arguments);
+                return runtime.Global.Engine.Eval(arguments);
             }
 
             /// <summary>

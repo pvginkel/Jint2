@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Debugger
+namespace Jint.Compiler
 {
     [Serializable]
     internal class SourceCodeDescriptor

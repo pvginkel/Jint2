@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jint.Backend.Dlr
+namespace Jint.Compiler
 {
     internal static class ClosureManager
     {

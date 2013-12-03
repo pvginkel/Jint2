@@ -463,7 +463,7 @@ namespace Jint.Runtime
                 if (undefined.Name != null)
                     name = undefined.Name + "." + name;
 
-                return Global.Backend.ResolveUndefined(name, null);
+                return Global.Engine.ResolveUndefined(name, null);
             }
 
             var jsObject = obj as JsObject;
@@ -490,7 +490,7 @@ namespace Jint.Runtime
                 if (undefined.Name != null)
                     name = undefined.Name + "." + name;
 
-                return Global.Backend.ResolveUndefined(name, null);
+                return Global.Engine.ResolveUndefined(name, null);
             }
 
             var jsObject = obj as JsObject;

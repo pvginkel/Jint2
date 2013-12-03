@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
-using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
 using Jint.Runtime;
 
-namespace Jint.Backend.Dlr
+namespace Jint.Compiler
 {
     partial class ExpressionVisitor
     {

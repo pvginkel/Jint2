@@ -11,19 +11,19 @@ namespace Jint.Runtime
 {
     public partial class JintRuntime
     {
-        private readonly IJintBackend _backend;
+        private readonly JintEngine _engine;
 
         public JsGlobal Global { get; private set; }
         public JsObject GlobalScope { get; private set; }
 
-        public JintRuntime(IJintBackend backend, Options options)
+        public JintRuntime(JintEngine engine, Options options)
         {
-            if (backend == null)
-                throw new ArgumentNullException("backend");
+            if (engine == null)
+                throw new ArgumentNullException("engine");
 
-            _backend = backend;
+            _engine = engine;
 
-            Global = new JsGlobal(this, backend, options);
+            Global = new JsGlobal(this, engine, options);
             GlobalScope = Global.GlobalScope;
         }
 
@@ -99,7 +99,7 @@ namespace Jint.Runtime
         {
             var undefined = target as JsUndefined;
 
-            if (_backend.AllowClr && undefined != null && !String.IsNullOrEmpty(undefined.Name) && generics.Length > 0)
+            if (_engine.IsClrAllowed && undefined != null && !String.IsNullOrEmpty(undefined.Name) && generics.Length > 0)
             {
                 var genericParameters = new Type[generics.Length];
 
@@ -115,7 +115,7 @@ namespace Jint.Runtime
                     throw new JintException("A type parameter is required", e);
                 }
 
-                target = _backend.ResolveUndefined(undefined.Name, genericParameters);
+                target = _engine.ResolveUndefined(undefined.Name, genericParameters);
             }
 
             var function = target as JsObject;

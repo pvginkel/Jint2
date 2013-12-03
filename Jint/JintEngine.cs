@@ -1,24 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
+using Jint.Compiler;
 using Jint.Expressions;
 using Antlr.Runtime;
 using Jint.Native;
-using Jint.Delegates;
 using System.Security;
 using System.Security.Permissions;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Jint.Native.Interop;
 using Jint.Parser;
+using Jint.Runtime;
+using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
+using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint
 {
     [Serializable]
     public class JintEngine
     {
-        private IJintBackend _backend;
+        private readonly JintRuntime _runtime;
+        private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
+
+        public Options Options { get; private set; }
+        public bool IsClrAllowed { get; set; }
+
+        [DebuggerStepThrough]
+        public JintEngine(Options options)
+        {
+            Options = options;
+            PermissionSet = new PermissionSet(PermissionState.None);
+
+            _runtime = new JintRuntime(this, Options);
+
+            ResetExpressionDump();
+        }
+
+        public PermissionSet PermissionSet { get; private set; }
+
+        /// <summary>
+        /// A global object associated with this engine instance
+        /// </summary>
+        public JsGlobal Global
+        {
+            get { return _runtime.Global; }
+        }
 
         [DebuggerStepThrough]
         public JintEngine()
@@ -26,18 +58,16 @@ namespace Jint
         {
         }
 
-        [DebuggerStepThrough]
-        public JintEngine(Options options)
+        public JintEngine AllowClr()
         {
-            _backend = new Backend.Dlr.DlrBackend(options, this);
+            return AllowClr(true);
         }
 
-        /// <summary>
-        /// A global object associated with this engine instance
-        /// </summary>
-        public JsGlobal Global
+        public JintEngine AllowClr(bool allowed)
         {
-            get { return _backend.Global; }
+            IsClrAllowed = true;
+
+            return this;
         }
 
         public static ProgramSyntax Compile(string source)
@@ -172,7 +202,7 @@ namespace Jint
             }
             catch (Exception e)
             {
-                throw new JintException("An unexpected error occured while parsing the script", e);
+                throw new JintException("An unexpected error occurred while parsing the script", e);
             }
 
             if (program == null)
@@ -199,7 +229,7 @@ namespace Jint
             try
             {
 #endif
-                return _backend.Run(program, unwrap);
+                return CompileAndRun(program, unwrap);
 #if !DEBUG
             }
             catch (SecurityException)
@@ -227,7 +257,8 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, object value)
         {
-            _backend.Global.GlobalScope[name] = _backend.Global.WrapClr(value);
+            Global.GlobalScope[name] = Global.WrapClr(value);
+
             return this;
         }
 
@@ -239,7 +270,8 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, double value)
         {
-            _backend.Global.GlobalScope[name] = JsNumber.Create(value);
+            Global.GlobalScope[name] = JsNumber.Create(value);
+
             return this;
         }
 
@@ -252,9 +284,10 @@ namespace Jint
         public JintEngine SetParameter(string name, string value)
         {
             if (value == null)
-                _backend.Global.GlobalScope[name] = JsNull.Instance;
+                Global.GlobalScope[name] = JsNull.Instance;
             else
-                _backend.Global.GlobalScope[name] = JsString.Create(value);
+                Global.GlobalScope[name] = JsString.Create(value);
+
             return this;
         }
 
@@ -266,7 +299,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, int value)
         {
-            _backend.Global.GlobalScope[name] = _backend.Global.WrapClr(value);
+            Global.GlobalScope[name] = Global.WrapClr(value);
             return this;
         }
 
@@ -278,7 +311,8 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, bool value)
         {
-            _backend.Global.GlobalScope[name] = JsBoolean.Create(value);
+            Global.GlobalScope[name] = JsBoolean.Create(value);
+
             return this;
         }
 
@@ -290,31 +324,24 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, DateTime value)
         {
-            _backend.Global.GlobalScope[name] = _backend.Global.CreateDate(value);
+            Global.GlobalScope[name] = Global.CreateDate(value);
+
             return this;
         }
         #endregion
 
         public JintEngine AddPermission(IPermission perm)
         {
-            _backend.PermissionSet.AddPermission(perm);
+            PermissionSet.AddPermission(perm);
+
             return this;
         }
 
         public JintEngine SetFunction(string name, JsObject function)
         {
-            _backend.Global.GlobalScope[name] = function;
+            Global.GlobalScope[name] = function;
+
             return this;
-        }
-
-        public object CallFunction(string name, params object[] args)
-        {
-            return _backend.CallFunction(name, args);
-        }
-
-        public object CallFunction(JsObject function, params object[] args)
-        {
-            return _backend.CallFunction(function, args);
         }
 
         public JintEngine SetFunction(string name, Delegate @delegate)
@@ -342,44 +369,267 @@ namespace Jint
 
         public JintEngine DisableSecurity()
         {
-            _backend.PermissionSet = new PermissionSet(PermissionState.Unrestricted);
-            return this;
-        }
-
-        public JintEngine AllowClr()
-        {
-            _backend.AllowClr = true;
-            return this;
-        }
-
-        public JintEngine AllowClr(bool value)
-        {
-            _backend.AllowClr = value;
+            PermissionSet = new PermissionSet(PermissionState.Unrestricted);
             return this;
         }
 
         public JintEngine EnableSecurity()
         {
-            _backend.PermissionSet = new PermissionSet(PermissionState.None);
+            PermissionSet = new PermissionSet(PermissionState.None);
             return this;
         }
 
-        public void Save(Stream s)
+        public void Save(Stream stream)
         {
-            BinaryFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(s, _backend);
+            if (stream == null)
+                throw new ArgumentNullException("stream");
+
+            new BinaryFormatter().Serialize(stream, this);
         }
 
-        public static void Load(JintEngine engine, Stream s)
+        public static JintEngine Load(Stream stream)
         {
-            engine._backend = (IJintBackend)new BinaryFormatter().Deserialize(s);
+            if (stream == null)
+                throw new ArgumentNullException("stream");
+
+            return (JintEngine)new BinaryFormatter().Deserialize(stream);
         }
 
-        public static JintEngine Load(Stream s)
+        private object CompileAndRun(ProgramSyntax program, bool unwrap)
         {
-            JintEngine engine = new JintEngine();
-            Load(engine, s);
-            return engine;
+            if (program == null)
+                throw new ArgumentNullException("program");
+
+            PrepareTree(program);
+
+            JsInstance result;
+
+            if (program.IsLiteral)
+            {
+                // If the whole program is a literal, there's no use in invoking
+                // the compiler.
+
+                result = Global.BuildLiteral(program);
+            }
+            else
+            {
+                var expression = program.Accept(new ExpressionVisitor(Global));
+
+                PrintExpression(expression);
+
+                EnsureGlobalsDeclared(program);
+
+                result = ((Func<JintRuntime, JsInstance>)((LambdaExpression)expression).Compile())(_runtime);
+            }
+
+            return
+                result == null
+                ? null
+                : unwrap
+                    ? Global.Marshaller.MarshalJsValue<object>(result)
+                    : result;
+        }
+
+        private void EnsureGlobalsDeclared(ProgramSyntax program)
+        {
+            var scope = Global.GlobalScope;
+
+            foreach (var declaredVariable in program.DeclaredVariables)
+            {
+                if (
+                    declaredVariable.IsDeclared &&
+                    !scope.HasOwnProperty(declaredVariable.Index)
+                )
+                    scope.DefineOwnProperty(declaredVariable.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
+            }
+        }
+
+        private void PrepareTree(SyntaxNode node)
+        {
+            node.Accept(new VariableMarkerPhase(this));
+            node.Accept(new TypeMarkerPhase());
+        }
+
+        internal JsObject CompileFunction(JsInstance[] parameters)
+        {
+            if (parameters == null)
+                parameters = JsInstance.EmptyArray;
+
+            var newParameters = new List<string>();
+
+            for (int i = 0; i < parameters.Length - 1; i++)
+            {
+                string arg = parameters[i].ToString();
+
+                foreach (string a in arg.Split(','))
+                {
+                    newParameters.Add(a.Trim());
+                }
+            }
+
+            BlockSyntax newBody;
+
+            if (parameters.Length >= 1)
+            {
+                newBody = JintEngine.CompileBlockStatements(
+                    parameters[parameters.Length - 1].Value.ToString()
+                );
+            }
+            else
+            {
+                newBody = new BlockSyntax(SyntaxNode.EmptyList);
+            }
+
+            var function = new FunctionSyntax(null, newParameters, newBody);
+
+            PrepareTree(function);
+
+            return _runtime.CreateFunction(
+                function.Name,
+                new ExpressionVisitor(Global).DeclareFunction(function),
+                null,
+                function.Parameters.ToArray()
+            );
+        }
+
+        [Conditional("DEBUG")]
+        internal static void ResetExpressionDump()
+        {
+            File.WriteAllText("Dump.txt", "");
+        }
+
+        [Conditional("DEBUG")]
+        internal static void PrintExpression(Expression expression)
+        {
+            try
+            {
+                File.AppendAllText(
+                    "Dump.txt",
+                    (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null),
+                    Encoding.UTF8
+                );
+            }
+            catch
+            {
+                // When permissions are set, we may not be able to access the
+                // debug view. Just swallow all exceptions here.
+            }
+        }
+
+        public object CallFunction(string name, params object[] args)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            return CallFunction((JsObject)Global.GlobalScope[name], args);
+        }
+
+        public object CallFunction(JsObject function, params object[] args)
+        {
+            if (function == null)
+                throw new ArgumentNullException("function");
+
+            JsInstance[] arguments;
+
+            if (args == null || args.Length == 0)
+            {
+                arguments = JsInstance.EmptyArray;
+            }
+            else
+            {
+                arguments = new JsInstance[args.Length];
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    arguments[i] = Global.Marshaller.MarshalClrValue(args[i]);
+                }
+            }
+
+            var original = new JsInstance[arguments.Length];
+            Array.Copy(arguments, original, arguments.Length);
+
+            var result = function.Execute(_runtime, JsNull.Instance, arguments, null);
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (!ReferenceEquals(arguments[i], original[i]))
+                    args[i] = Global.Marshaller.MarshalJsValue<object>(arguments[i]);
+            }
+
+            return Global.Marshaller.MarshalJsValue<object>(result);
+        }
+
+        internal JsInstance Eval(JsInstance[] arguments)
+        {
+            if (JsNames.ClassString != arguments[0].Class)
+                return arguments[0];
+
+            ProgramSyntax program;
+
+            try
+            {
+                program = JintEngine.Compile(arguments[0].ToString());
+            }
+            catch (Exception e)
+            {
+                throw new JsException(JsErrorType.SyntaxError, e.Message);
+            }
+
+            if (program == null)
+                return JsNull.Instance;
+
+            try
+            {
+                return (JsInstance)Run(program, false);
+            }
+            catch (Exception e)
+            {
+                throw new JsException(JsErrorType.EvalError, e.Message);
+            }
+        }
+
+        internal int Compare(JsObject function, JsInstance x, JsInstance y)
+        {
+            var result = function.Execute(
+                _runtime,
+                JsNull.Instance,
+                new[] { x, y },
+                null
+            );
+
+            return (int)result.ToNumber();
+        }
+
+        internal JsInstance ResolveUndefined(string typeFullName, Type[] generics)
+        {
+            if (!IsClrAllowed)
+                throw new JsException(JsErrorType.ReferenceError);
+
+            if (!String.IsNullOrEmpty(typeFullName))
+            {
+                EnsureClrAllowed();
+
+                bool haveGenerics = generics != null && generics.Length > 0;
+
+                if (haveGenerics)
+                    typeFullName += "`" + generics.Length.ToString(CultureInfo.InvariantCulture);
+
+                var type = _typeResolver.ResolveType(typeFullName);
+
+                if (haveGenerics && type != null)
+                    type = type.MakeGenericType(generics);
+
+                if (type != null)
+                    return Global.WrapClr(type);
+            }
+
+            return new JsUndefined(typeFullName);
+        }
+
+        private void EnsureClrAllowed()
+        {
+            if (!IsClrAllowed)
+                throw new SecurityException("Use of Clr is not allowed");
         }
     }
 }

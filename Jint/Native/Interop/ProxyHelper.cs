@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Reflection;
 using Jint.Runtime;
+using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
 
 namespace Jint.Native.Interop
 {
@@ -550,7 +551,7 @@ namespace Jint.Native.Interop
                 typeof(JsObject).GetMethod("Execute"),
                 Expression.Constant(runtime),
                 Expression.Constant(that),
-                Backend.Dlr.ExpressionVisitor.MakeArrayInit(
+                ExpressionVisitor.MakeArrayInit(
                     parameters.Select(p => Expression.Call(
                         Expression.Constant(runtime.Global.Marshaller),
                         typeof(Marshaller).GetMethod("MarshalClrValue").MakeGenericMethod(p.Type),

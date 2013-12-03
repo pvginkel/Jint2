@@ -12,7 +12,7 @@ namespace Jint.Native
         {
             public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
-                return runtime.Global.Backend.CompileFunction(arguments);
+                return runtime.Global.Engine.CompileFunction(arguments);
             }
 
             public static JsInstance GetConstructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
 using ValueType = Jint.Expressions.ValueType;
 
-namespace Jint.Backend.Dlr
+namespace Jint.Compiler
 {
     internal class TypeMarkerPhase : SyntaxVisitor
     {

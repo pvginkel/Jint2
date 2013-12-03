@@ -98,9 +98,9 @@ namespace Jint.Native.Interop
                     Expression.Property(
                         Expression.Property(
                             _global,
-                            "Backend"
+                            "Engine"
                         ),
-                    "PermissionSet"
+                        "PermissionSet"
                     ),
                     typeof(PermissionSet).GetMethod("PermitOnly")
                 ));

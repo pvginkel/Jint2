@@ -9,7 +9,7 @@ using Jint.Native;
 using Jint.Runtime;
 using ValueType = Jint.Expressions.ValueType;
 
-namespace Jint.Backend.Dlr
+namespace Jint.Compiler
 {
     partial class ExpressionVisitor
     {

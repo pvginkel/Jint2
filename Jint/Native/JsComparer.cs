@@ -7,23 +7,23 @@ namespace Jint.Native
     [Serializable]
     public class JsComparer : IComparer<JsInstance>
     {
-        public IJintBackend Backend { get; private set; }
+        public JintEngine Engine { get; private set; }
         public JsObject Function { get; private set; }
 
-        public JsComparer(IJintBackend backend, JsObject function)
+        public JsComparer(JintEngine engine, JsObject function)
         {
-            if (backend == null)
-                throw new ArgumentNullException("backend");
+            if (engine == null)
+                throw new ArgumentNullException("engine");
             if (function == null)
                 throw new ArgumentNullException("function");
 
-            Backend = backend;
+            Engine = engine;
             Function = function;
         }
 
         public int Compare(JsInstance x, JsInstance y)
         {
-            return Backend.Compare(Function, x, y);
+            return Engine.Compare(Function, x, y);
         }
     }
 }

@@ -198,7 +198,6 @@ using System;
 using System.Text;
 using System.Globalization;
 using Jint.Expressions;
-using Jint.Debugger;
 }
 
 //

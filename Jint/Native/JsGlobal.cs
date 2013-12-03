@@ -14,7 +14,7 @@ namespace Jint.Native
         private readonly Dictionary<string, int> _identifiersByName = new Dictionary<string, int>();
         private readonly Dictionary<int, string> _identifiersByIndex = new Dictionary<int, string>();
 
-        public IJintBackend Backend { get; set; }
+        public JintEngine Engine { get; set; }
 
         public Options Options { get; set; }
 
@@ -24,7 +24,7 @@ namespace Jint.Native
 
         internal Random Random { get; private set; }
 
-        public JsGlobal(JintRuntime runtime, IJintBackend backend, Options options)
+        public JsGlobal(JintRuntime runtime, JintEngine engine, Options options)
         {
             if (runtime == null)
                 throw new ArgumentNullException("runtime");
@@ -36,7 +36,7 @@ namespace Jint.Native
             PrototypeSink = CreatePrototypeSink();
 
             Options = options;
-            Backend = backend;
+            Engine = engine;
 
             // The Random instance is used by Math to generate random numbers.
             Random = new Random();

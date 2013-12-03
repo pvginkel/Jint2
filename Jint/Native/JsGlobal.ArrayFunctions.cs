@@ -244,7 +244,7 @@ namespace Jint.Native
                 {
                     try
                     {
-                        values.Sort(new JsComparer(runtime.Global.Backend, compare));
+                        values.Sort(new JsComparer(runtime.Global.Engine, compare));
                     }
                     catch (Exception e)
                     {

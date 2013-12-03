@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,7 +11,7 @@ using Jint.Native;
 using Jint.Runtime;
 using ValueType = Jint.Expressions.ValueType;
 
-namespace Jint.Backend.Dlr
+namespace Jint.Compiler
 {
     internal partial class ExpressionVisitor : ISyntaxVisitor<Expression>
     {
@@ -924,7 +923,7 @@ namespace Jint.Backend.Dlr
 
             _scope = _scope.Parent;
 
-            DlrBackend.PrintExpression(lambda);
+            JintEngine.PrintExpression(lambda);
 
             return lambda.Compile();
         }
@@ -1010,10 +1009,7 @@ namespace Jint.Backend.Dlr
                     // Else we execute the function against the global scope.
 
                     target = Expression.Property(
-                        Expression.Property(
-                            _scope.Runtime,
-                            "Global"
-                        ),
+                        _scope.Runtime,
                         "GlobalScope"
                     );
                     getter = BuildGet(syntax.Expression);
