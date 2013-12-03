@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Reflection;
-using Jint.Runtime;
 using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
 
 namespace Jint.Native.Interop

@@ -16,7 +16,6 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Jint.Native.Interop;
 using Jint.Parser;
-using Jint.Runtime;
 using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
 

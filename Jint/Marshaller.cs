@@ -5,7 +5,6 @@ using Jint.Native;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Jint.Native.Interop;
-using Jint.Runtime;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint

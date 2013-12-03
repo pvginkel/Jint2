@@ -3,11 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Security;
 using System.Text;
-using Jint.Native;
 
-namespace Jint.Runtime
+namespace Jint.Native
 {
     public partial class JintRuntime
     {

@@ -17,9 +17,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using Jint.Native;
-
-namespace Jint.Runtime
+namespace Jint.Native
 {
     partial class JintRuntime
     {

@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Text;
 using Jint.Expressions;
 using Jint.Native;
-using Jint.Runtime;
 
 namespace Jint.Compiler
 {

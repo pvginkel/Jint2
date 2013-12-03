@@ -8,7 +8,6 @@ using System.Text;
 using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
-using Jint.Runtime;
 using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.Compiler

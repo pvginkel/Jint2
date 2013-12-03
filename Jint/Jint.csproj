@@ -198,12 +198,12 @@
     <Compile Include="Native\PropertyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Native\JsObjectDebugView.cs" />
-    <Compile Include="Runtime\JintRuntime.Comparers.cs" />
-    <Compile Include="Runtime\JintRuntime.cs" />
-    <Compile Include="Runtime\JintRuntime.Operations.cs" />
+    <Compile Include="Native\JintRuntime.Comparers.cs" />
+    <Compile Include="Native\JintRuntime.cs" />
+    <Compile Include="Native\JintRuntime.Operations.cs" />
     <Compile Include="Native\JsGlobal.Setup.cs" />
     <Compile Include="Native\JsGlobal.FunctionFunctions.cs" />
-    <Compile Include="Runtime\JintRuntime.Operations.Generated.cs">
+    <Compile Include="Native\JintRuntime.Operations.Generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>JintRuntime.Operations.Generated.tt</DependentUpon>
@@ -221,7 +221,7 @@
       <LastGenOutput>Id.cs</LastGenOutput>
     </None>
     <None Include="Parser\Generate.bat" />
-    <None Include="Runtime\JintRuntime.Operations.Generated.tt">
+    <None Include="Native\JintRuntime.Operations.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>JintRuntime.Operations.Generated.cs</LastGenOutput>
     </None>

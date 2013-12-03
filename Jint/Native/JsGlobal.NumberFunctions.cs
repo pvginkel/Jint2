@@ -10,7 +10,7 @@ namespace Jint.Native
     {
         private static class NumberFunctions
         {
-            public static JsInstance Constructor(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (@this == null || @this == runtime.Global.GlobalScope)
                 {
@@ -27,7 +27,7 @@ namespace Jint.Native
                 return @this;
             }
 
-            public static JsInstance ValueOf(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 var jsNumber = @this as JsNumber;
                 if (jsNumber != null)
@@ -36,7 +36,7 @@ namespace Jint.Native
                 return JsNumber.Create(Convert.ToDouble(@this.Value));
             }
 
-            public static JsInstance ToLocaleString(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToLocaleString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 // Remove arguments
                 return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsInstance.EmptyArray, null);
@@ -50,7 +50,7 @@ namespace Jint.Native
                 'U', 'V', 'W', 'X', 'Y', 'Z'
             };
 
-            public static JsInstance ToString(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 if (@this == JsNumber.NaN)
                     return JsString.Create("NaN");
@@ -100,7 +100,7 @@ namespace Jint.Native
             }
 
             // 15.7.4.5
-            public static JsInstance ToFixed(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToFixed(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 int fractions = 0;
                 if (arguments.Length > 0)
@@ -116,7 +116,7 @@ namespace Jint.Native
             }
 
             // 15.7.4.6
-            public static JsInstance ToExponential(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToExponential(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 double value = Convert.ToDouble(@this.Value);
 
@@ -139,7 +139,7 @@ namespace Jint.Native
             }
 
             // 15.7.4.7
-            public static JsInstance ToPrecision(Runtime.JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsInstance ToPrecision(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
             {
                 double value = Convert.ToDouble(@this.Value);
 

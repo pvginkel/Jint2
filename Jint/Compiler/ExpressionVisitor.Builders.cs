@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using Jint.Expressions;
 using Jint.Native;
-using Jint.Runtime;
 using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.Compiler

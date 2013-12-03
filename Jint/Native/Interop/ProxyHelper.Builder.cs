@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security;
 using System.Text;
-using Jint.Runtime;
 
 namespace Jint.Native.Interop
 {
