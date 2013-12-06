@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Jint.Native
@@ -25,11 +26,11 @@ namespace Jint.Native
             GlobalScope = Global.GlobalScope;
         }
 
-        public JsObject CreateFunction(string name, JsFunction function, object closure, string[] parameters)
+        public JsObject CreateFunction(string name, MethodInfo function, object closure, string[] parameters)
         {
             return Global.CreateFunction(
                 name,
-                function,
+                (JsFunction)Delegate.CreateDelegate(typeof(JsFunction), function),
                 parameters == null ? 0 : parameters.Length,
                 closure
             );
@@ -138,7 +139,7 @@ namespace Jint.Native
             return Global.ResolveIdentifier(name);
         }
 
-        internal JsObject CreateArguments(JsObject callee, JsBox[] arguments)
+        public JsObject CreateArguments(JsObject callee, JsBox[] arguments)
         {
             var result = Global.CreateObject();
 

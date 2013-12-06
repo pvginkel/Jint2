@@ -12,19 +12,10 @@ namespace Jint.Compiler
 {
     partial class ExpressionVisitor
     {
-        private readonly JsGlobal _global;
         private static readonly MethodInfo _objectGetByIndex = typeof(JsObject).GetMethod("GetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int) }, null);
         private static readonly MethodInfo _objectSetByIndex = typeof(JsObject).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int), typeof(JsBox) }, null);
         private static readonly MethodInfo _runtimeGetByIndex = typeof(JintRuntime).GetMethod("GetMemberByIndex");
         private static readonly MethodInfo _runtimeSetByIndex = typeof(JintRuntime).GetMethod("SetMemberByIndex");
-
-        public ExpressionVisitor(JsGlobal global)
-        {
-            if (global == null)
-                throw new ArgumentNullException("global");
-
-            _global = global;
-        }
 
         public Expression BuildGet(SyntaxNode syntax)
         {

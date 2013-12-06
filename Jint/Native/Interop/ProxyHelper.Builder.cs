@@ -238,7 +238,7 @@ namespace Jint.Native.Interop
                 {
                     return Expression.Block(
                         expression,
-                        Expression.Constant(JsBox.Undefined)
+                        Expression.Field(null, typeof(JsBox).GetField("Undefined"))
                     );
                 }
 

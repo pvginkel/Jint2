@@ -98,7 +98,7 @@ namespace Jint.Native.Interop
                         argumentsParameter,
                         Expression.Constant(index)
                     ),
-                    Expression.Constant(JsBox.Undefined),
+                    Expression.Field(null, typeof(JsBox).GetField("Undefined")),
                     typeof(JsBox)
                 );
 
@@ -200,7 +200,7 @@ namespace Jint.Native.Interop
             builder.AddStatement(
                 returnLocal != null
                 ? builder.UnMarshal(returnLocal, method.ReturnType)
-                : Expression.Constant(JsBox.Undefined)
+                : Expression.Field(null, typeof(JsBox).GetField("Undefined"))
             );
 
             return builder.Compile<JsFunction>();
@@ -268,7 +268,7 @@ namespace Jint.Native.Interop
                         argumentsParameter,
                         Expression.Constant(index)
                     ),
-                    Expression.Constant(JsBox.Undefined),
+                    Expression.Field(null, typeof(JsBox).GetField("Undefined")),
                     typeof(JsBox)
                 );
 
@@ -506,7 +506,7 @@ namespace Jint.Native.Interop
                             argumentsParameter,
                             Expression.Constant(i)
                         ),
-                        Expression.Constant(JsBox.Undefined),
+                        Expression.Field(null, typeof(JsBox).GetField("Undefined")),
                         typeof(JsBox)
                     ),
                     parameters[i].ParameterType

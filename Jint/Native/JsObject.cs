@@ -251,7 +251,7 @@ namespace Jint.Native
             return HasProperty(Global.ResolveIdentifier(index));
         }
         
-        internal bool HasProperty(int index)
+        public bool HasProperty(int index)
         {
             var @object = this;
 
@@ -393,7 +393,7 @@ namespace Jint.Native
             return GetPropertyCore(Global.ResolveIdentifier(index.ToString()));
         }
 
-        internal JsBox GetProperty(int index)
+        public JsBox GetProperty(int index)
         {
             if (PropertyStore != null)
             {
@@ -446,7 +446,7 @@ namespace Jint.Native
                 : JsBox.Undefined;
         }
 
-        internal JsBox SetProperty(int index, JsBox value)
+        public JsBox SetProperty(int index, JsBox value)
         {
             EnsurePropertyStore();
             if (!PropertyStore.TrySetProperty(index, value))
@@ -497,7 +497,7 @@ namespace Jint.Native
             return Delete(Global.ResolveIdentifier(index));
         }
 
-        internal bool Delete(int index)
+        public bool Delete(int index)
         {
             if (PropertyStore == null)
                 return true;
@@ -591,7 +591,7 @@ namespace Jint.Native
             return IsPrototypeOf(target.Prototype);
         }
 
-        internal bool IsPrototypeNull
+        public bool IsPrototypeNull
         {
             get
             {

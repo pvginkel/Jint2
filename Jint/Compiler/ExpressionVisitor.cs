@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
@@ -19,7 +21,102 @@ namespace Jint.Compiler
         private static readonly MethodInfo _defineAccessorProperty = typeof(JsObject).GetMethod("DefineAccessorProperty");
         private static readonly MethodInfo _createArguments = typeof(JintRuntime).GetMethod("CreateArguments", InstanceFlags);
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
-        private static readonly MethodInfo _buildLiteral = typeof(JsGlobal).GetMethod("BuildLiteral", InstanceFlags);
+        private const string RuntimeParameterName = "<>runtime";
+
+        private static AssemblyBuilder _assemblyBuilder;
+        private static ModuleBuilder _moduleBuilder;
+        private static int _lastTypeId;
+#if DEBUG || SAVE_ASSEMBLY
+        private static int _lastAssemblyId;
+#endif
+        private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
+
+        private int _lastMethodId;
+        private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
+        private Scope _scope;
+        private readonly JsGlobal _global;
+
+        static ExpressionVisitor()
+        {
+            CreateAssemblyBuilder();
+        }
+
+        private static void CreateAssemblyBuilder()
+        {
+            string name = "DynamicJintAssembly";
+
+#if DEBUG || SAVE_ASSEMBLY
+            int assemblyId = Interlocked.Increment(ref _lastAssemblyId);
+            name += assemblyId.ToString(CultureInfo.InvariantCulture);
+#endif
+
+            var assemblyName = new AssemblyName(name);
+
+            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+                assemblyName,
+                AssemblyBuilderAccess.RunAndSave
+            );
+
+            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(
+                assemblyName.Name,
+                assemblyName.Name + ".dll"
+            );
+        }
+
+        public ExpressionVisitor(JsGlobal global)
+        {
+            if (global == null)
+                throw new ArgumentNullException("global");
+
+            _global = global;
+        }
+
+        public Func<JintRuntime, JsBox> BuildMainMethod(LambdaExpression lambda)
+        {
+            if (lambda == null)
+                throw new ArgumentNullException("lambda");
+
+            var methodInfo = BuildMethod(
+                "Main",
+                typeof(JsBox),
+                new[] { typeof(JintRuntime) },
+                lambda
+            );
+
+            var result = (Func<JintRuntime, JsBox>)Delegate.CreateDelegate(
+                typeof(Func<JintRuntime, JsBox>),
+                methodInfo
+            );
+
+#if DEBUG || SAVE_ASSEMBLY
+            _assemblyBuilder.Save(_assemblyBuilder.GetName().Name + ".dll");
+
+            CreateAssemblyBuilder();
+#endif
+
+            return result;
+        }
+
+        private MethodInfo BuildMethod(string name, Type returnType, Type[] parameterTypes, LambdaExpression lambda)
+        {
+            int typeId = Interlocked.Increment(ref _lastTypeId);
+
+            var typeBuilder = _moduleBuilder.DefineType(
+                "CompiledExpression" + typeId.ToString(CultureInfo.InvariantCulture),
+                 TypeAttributes.Public
+            );
+
+            var method = typeBuilder.DefineMethod(
+                name,
+                MethodAttributes.Static | MethodAttributes.Public | MethodAttributes.HideBySig,
+                returnType,
+                parameterTypes
+            );
+
+            lambda.CompileToMethod(method);
+
+            return typeBuilder.CreateType().GetMethod(name);
+        }
 
         private static int GetOperationMethodKey(SyntaxExpressionType operation, ValueType a)
         {
@@ -83,11 +180,6 @@ namespace Jint.Compiler
             _operationCache.TryGetValue(GetOperationMethodKey(operation, a, b, c), out result);
             return result;
         }
-
-        private Scope _scope;
-        private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
-
-        private const string RuntimeParameterName = "<>runtime";
 
         public Expression VisitProgram(ProgramSyntax syntax)
         {
@@ -644,12 +736,6 @@ namespace Jint.Compiler
 
         public Expression VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
         {
-            // It's more efficient to build the array using compiled code if
-            // it doesn't have any contents.
-
-            if (syntax.IsLiteral && syntax.Parameters.Count > 0)
-                return BuildLiteralExpression(syntax);
-
             var statements = new List<Expression>();
 
             var array = Expression.Parameter(typeof(JsObject), "array");
@@ -682,9 +768,6 @@ namespace Jint.Compiler
 
         public Expression VisitCommaOperator(CommaOperatorSyntax syntax)
         {
-            if (syntax.IsLiteral)
-                return BuildLiteralExpression(syntax);
-
             return Expression.Block(
                 syntax.Expressions.Select(p => p.Accept(this))
             );
@@ -700,19 +783,19 @@ namespace Jint.Compiler
                 return compiledFunction;
         }
 
-        private Expression CreateFunctionSyntax(IFunctionDeclaration function, JsFunction compiledFunction)
+        private Expression CreateFunctionSyntax(IFunctionDeclaration function, MethodInfo compiledFunction)
         {
             return Expression.Call(
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("CreateFunction"),
                 Expression.Constant(function.Name, typeof(string)),
-                Expression.Constant(compiledFunction),
+                Expression.Constant(compiledFunction, typeof(MethodInfo)),
                 _scope.ClosureLocal != null ? (Expression)_scope.ClosureLocal : Expression.Constant(null),
                 MakeArrayInit(function.Parameters.Select(Expression.Constant), typeof(string), true)
             );
         }
 
-        public JsFunction DeclareFunction(IFunctionDeclaration function)
+        public MethodInfo DeclareFunction(IFunctionDeclaration function)
         {
             var body = function.Body;
 
@@ -924,7 +1007,39 @@ namespace Jint.Compiler
 
             JintEngine.PrintExpression(lambda);
 
-            return lambda.Compile();
+            return BuildMethod(
+                GetFunctionName(function),
+                typeof(JsBox),
+                new[] { typeof(JintRuntime), typeof(JsBox), typeof(JsObject), typeof(object), typeof(JsBox[]), typeof(JsBox[]) },
+                lambda
+            );
+        }
+
+        private string GetFunctionName(IFunctionDeclaration function)
+        {
+            string name;
+
+            if (function.Name == null)
+            {
+                name = (++_lastMethodId).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                name = function.Name;
+
+                for (int i = 0;; i++)
+                {
+                    if (i > 0)
+                        name = function.Name + "_" + i.ToString(CultureInfo.InvariantCulture);
+
+                    if (!_compiledMethodNames.Contains(name))
+                        break;
+                }
+            }
+
+            _compiledMethodNames.Add(name);
+
+            return name;
         }
 
         private Closure FindScopedClosure(BlockSyntax body, Scope scope)
@@ -1146,12 +1261,6 @@ namespace Jint.Compiler
 
         public Expression VisitJsonExpression(JsonExpressionSyntax syntax)
         {
-            // It's more efficient to build the object using compiled code if
-            // it doesn't have any contents.
-
-            if (syntax.IsLiteral && syntax.Properties.Count > 0)
-                return BuildLiteralExpression(syntax);
-
             var global = Expression.Parameter(typeof(JsGlobal), "global");
             var obj = Expression.Parameter(typeof(JsObject), "obj");
 
@@ -1260,7 +1369,7 @@ namespace Jint.Compiler
                     return Expression.Constant(null, elementType.MakeArrayType());
 
                 if (elementType == typeof(JsBox[]))
-                    return Expression.Constant(JsBox.EmptyArray);
+                    return Expression.Field(null, typeof(JsBox).GetField("EmptyArray"));
 
                 return Expression.NewArrayBounds(elementType, Expression.Constant(0));
             }
@@ -1529,10 +1638,9 @@ namespace Jint.Compiler
             // the raw values in the expression tree; not the JsBox's.
 
             if (syntax.Value == null)
-                return Expression.Constant(JsBox.Null);
+                return Expression.Field(null, typeof(JsBox).GetField("Null"));
 
             return Expression.Constant(syntax.Value);
-
         }
 
         public Expression VisitRegexp(RegexpSyntax syntax)
@@ -1550,18 +1658,6 @@ namespace Jint.Compiler
             _labels.Add(syntax.Expression, syntax.Label);
 
             return syntax.Expression.Accept(this);
-        }
-
-        private Expression BuildLiteralExpression(SyntaxNode node)
-        {
-            return Expression.Call(
-                Expression.Property(
-                    _scope.Runtime,
-                    "Global"
-                ),
-                _buildLiteral,
-                Expression.Constant(node)
-            );
         }
     }
 }

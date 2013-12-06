@@ -411,13 +411,16 @@ namespace Jint
             }
             else
             {
-                var expression = program.Accept(new ExpressionVisitor(Global));
+                var visitor = new ExpressionVisitor(Global);
+                var expression = program.Accept(visitor);
 
                 PrintExpression(expression);
 
                 EnsureGlobalsDeclared(program);
 
-                result = ((Func<JintRuntime, JsBox>)((LambdaExpression)expression).Compile())(_runtime);
+                var method = visitor.BuildMainMethod((LambdaExpression)expression);
+
+                result = method(_runtime);
             }
 
             return
