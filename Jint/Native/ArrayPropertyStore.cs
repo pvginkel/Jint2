@@ -6,7 +6,7 @@ using Jint.Support;
 
 namespace Jint.Native
 {
-    internal class ArrayPropertyStore : SparseArray<JsBox>, IPropertyStore
+    internal sealed class ArrayPropertyStore : SparseArray<JsBox>, IPropertyStore
     {
         private readonly JsObject _owner;
         private DictionaryPropertyStore _baseStore;
