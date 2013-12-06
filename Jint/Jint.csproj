@@ -87,6 +87,7 @@
     <Compile Include="Native\Interop\NativeFactory.cs" />
     <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\IPropertyStore.cs" />
+    <Compile Include="Native\JsBox.cs" />
     <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsDelegate.cs" />
     <Compile Include="Native\JsErrorType.cs" />
@@ -105,7 +106,6 @@
     <Compile Include="Native\Interop\Delegates.cs" />
     <Compile Include="Native\Interop\ProxyHelper.cs" />
     <Compile Include="Native\ClrFunction.cs" />
-    <Compile Include="Native\INativeIndexer.cs" />
     <Compile Include="Native\JsGlobal.ArrayFunctions.cs" />
     <Compile Include="Native\JsGlobal.BooleanFunctions.cs" />
     <Compile Include="Native\JsGlobal.Builders.cs" />

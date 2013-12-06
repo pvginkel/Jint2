@@ -6,7 +6,7 @@ using Jint.Support;
 
 namespace Jint.Native
 {
-    internal class ArrayPropertyStore : SparseArray<JsInstance>, IPropertyStore
+    internal class ArrayPropertyStore : SparseArray<JsBox>, IPropertyStore
     {
         private readonly JsObject _owner;
         private DictionaryPropertyStore _baseStore;
@@ -22,7 +22,7 @@ namespace Jint.Native
 
                 for (int i = value; i < _length; i++)
                 {
-                    this[i] = null;
+                    this[i] = new JsBox();
                 }
 
                 _length = value;
@@ -37,7 +37,7 @@ namespace Jint.Native
             _owner = owner;
         }
 
-        public ArrayPropertyStore(JsObject owner, SparseArray<JsInstance> array)
+        public ArrayPropertyStore(JsObject owner, SparseArray<JsBox> array)
             : base(array)
         {
             if (owner == null)
@@ -48,7 +48,7 @@ namespace Jint.Native
 
         private bool ContainsKey(int index)
         {
-            return base[index] != null;
+            return base[index].IsValid;
         }
 
         public bool HasOwnProperty(int index)
@@ -63,7 +63,7 @@ namespace Jint.Native
             return false;
         }
 
-        public bool HasOwnProperty(JsInstance index)
+        public bool HasOwnProperty(JsBox index)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -83,7 +83,7 @@ namespace Jint.Native
             return null;
         }
 
-        public Descriptor GetOwnDescriptor(JsInstance index)
+        public Descriptor GetOwnDescriptor(JsBox index)
         {
             if (_baseStore != null)
                 return _baseStore.GetOwnDescriptor(index);
@@ -102,7 +102,7 @@ namespace Jint.Native
             return index >= 0;
         }
 
-        private bool TryParseIndex(JsInstance index, out int result)
+        private bool TryParseIndex(JsBox index, out int result)
         {
             double indexNumber = index.ToNumber();
             result = (int)indexNumber;
@@ -111,7 +111,7 @@ namespace Jint.Native
 // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
-        public bool TryGetProperty(JsInstance index, out JsInstance result)
+        public bool TryGetProperty(JsBox index, out JsBox result)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -120,11 +120,11 @@ namespace Jint.Native
                 return true;
             }
 
-            result = null;
+            result = new JsBox();
             return false;
         }
 
-        public bool TryGetProperty(int index, out JsInstance result)
+        public bool TryGetProperty(int index, out JsBox result)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -133,13 +133,19 @@ namespace Jint.Native
                 return true;
             }
 
-            result = null;
+            result = new JsBox();
             return false;
         }
 
-        public override JsInstance this[int index]
+        public override JsBox this[int index]
         {
-            get { return base[index] ?? JsUndefined.Instance; }
+            get
+            {
+                var result = base[index];
+                if (result.IsValid)
+                    return result;
+                return JsBox.Undefined;
+            }
             set
             {
                 if (index >= _length)
@@ -149,12 +155,12 @@ namespace Jint.Native
             }
         }
 
-        public JsInstance GetByIndex(int index)
+        public JsBox GetByIndex(int index)
         {
             return this[index];
         }
 
-        public bool TrySetProperty(int index, JsInstance value)
+        public bool TrySetProperty(int index, JsBox value)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -166,7 +172,7 @@ namespace Jint.Native
             return false;
         }
 
-        public bool TrySetProperty(JsInstance index, JsInstance value)
+        public bool TrySetProperty(JsBox index, JsBox value)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -178,17 +184,17 @@ namespace Jint.Native
             return false;
         }
 
-        public void SetByIndex(int index, JsInstance value)
+        public void SetByIndex(int index, JsBox value)
         {
             this[index] = value;
         }
 
-        public bool Delete(JsInstance index)
+        public bool Delete(JsBox index)
         {
             int i;
             if (TryParseIndex(index, out i))
             {
-                this[i] = null;
+                this[i] = new JsBox();
                 return true;
             }
 
@@ -203,7 +209,7 @@ namespace Jint.Native
             int i;
             if (TryParseIndex(index, out i))
             {
-                this[i] = null;
+                this[i] = new JsBox();
                 return true;
             }
 
@@ -217,7 +223,7 @@ namespace Jint.Native
         {
             int i;
             if (TryParseIndex(descriptor.Index, out i))
-                SetByIndex(i, descriptor.Get(_owner));
+                SetByIndex(i, descriptor.Get(JsBox.CreateObject(_owner)));
 
             EnsureBaseStore();
             _baseStore.DefineOwnProperty(descriptor);
@@ -229,7 +235,7 @@ namespace Jint.Native
                 _baseStore = new DictionaryPropertyStore(_owner);
         }
 
-        public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
+        public IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator()
         {
             if (_baseStore != null)
                 return _baseStore.GetEnumerator();
@@ -237,7 +243,7 @@ namespace Jint.Native
             return JsObject.EmptyKeyValues.GetEnumerator();
         }
 
-        public new IEnumerable<JsInstance> GetValues()
+        public new IEnumerable<JsBox> GetValues()
         {
             foreach (var value in base.GetValues())
             {
@@ -269,9 +275,9 @@ namespace Jint.Native
             }
         }
 
-        public JsObject Concat(JsInstance[] args)
+        public JsObject Concat(JsBox[] args)
         {
-            var newArray = new SparseArray<JsInstance>(this);
+            var newArray = new SparseArray<JsBox>(this);
             int offset = _length;
 
             foreach (var item in args)
@@ -288,11 +294,11 @@ namespace Jint.Native
                 }
                 else
                 {
-                    var @object = item as JsObject;
+                    JsObject @object;
 
                     if (
-                        @object != null &&
-                        _owner.Global.ArrayClass.HasInstance(@object)
+                        item.IsObject &&
+                        _owner.Global.ArrayClass.HasInstance(@object = (JsObject)item)
                     )
                     {
                         // Array subclass.
@@ -301,7 +307,7 @@ namespace Jint.Native
 
                         for (int i = 0; i < objectLength; i++)
                         {
-                            JsInstance value;
+                            JsBox value;
                             if (@object.TryGetProperty(i, out value))
                                 newArray[offset + 1] = value;
                         }
@@ -324,25 +330,25 @@ namespace Jint.Native
             return result;
         }
 
-        public JsInstance Join(JsInstance separator)
+        public JsBox Join(JsBox separator)
         {
             int length = _length;
             if (length == 0)
-                return JsString.Empty;
+                return JsBox.EmptyString;
 
-            string separatorString = JsInstance.IsUndefined(separator) ? "," : separator.ToString();
+            string separatorString = separator.IsUndefined ? "," : separator.ToString();
             string[] map = new string[length];
 
             for (int i = 0; i < length; i++)
             {
                 var item = base[i];
-                if (item != null && !JsInstance.IsNullOrUndefined(item))
+                if (item.IsValid && !item.IsNullOrUndefined)
                     map[i] = item.ToString();
                 else
                     map[i] = String.Empty;
             }
 
-            return JsString.Create(String.Join(separatorString, map));
+            return JsString.Box(String.Join(separatorString, map));
         }
     }
 }

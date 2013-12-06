@@ -8,18 +8,18 @@ namespace Jint.Native
     internal interface IPropertyStore
     {
         bool HasOwnProperty(int index);
-        bool HasOwnProperty(JsInstance index);
+        bool HasOwnProperty(JsBox index);
         Descriptor GetOwnDescriptor(int index);
-        Descriptor GetOwnDescriptor(JsInstance index);
-        bool TryGetProperty(JsInstance index, out JsInstance result);
-        bool TryGetProperty(int index, out JsInstance result);
-        bool TrySetProperty(int index, JsInstance value);
-        bool TrySetProperty(JsInstance index, JsInstance value);
-        bool Delete(JsInstance index);
+        Descriptor GetOwnDescriptor(JsBox index);
+        bool TryGetProperty(JsBox index, out JsBox result);
+        bool TryGetProperty(int index, out JsBox result);
+        bool TrySetProperty(int index, JsBox value);
+        bool TrySetProperty(JsBox index, JsBox value);
+        bool Delete(JsBox index);
         bool Delete(int index);
         void DefineOwnProperty(Descriptor currentDescriptor);
-        IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator();
-        IEnumerable<JsInstance> GetValues();
+        IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator();
+        IEnumerable<JsBox> GetValues();
         IEnumerable<int> GetKeys();
     }
 }

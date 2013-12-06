@@ -10,12 +10,12 @@ namespace Jint.Native
     {
         private static class DateFunctions
         {
-            public static JsInstance Now(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Now(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return runtime.Global.CreateDate(DateTime.Now);
+                return JsBox.CreateObject(runtime.Global.CreateDate(DateTime.Now));
             }
 
-            internal static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            internal static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 DateTime result;
 
@@ -26,11 +26,16 @@ namespace Jint.Native
                         break;
 
                     case 1:
-                        if ((arguments[0].Class == JsNames.ClassNumber || arguments[0].Class == JsNames.ClassObject) && double.IsNaN(arguments[0].ToNumber()))
+                        string @class = arguments[0].GetClass();
+
+                        if (
+                            (@class == JsNames.ClassNumber || @class == JsNames.ClassObject) &&
+                            Double.IsNaN(arguments[0].ToNumber())
+                        )
                         {
                             result = JsConvert.ToDateTime(Double.NaN);
                         }
-                        else if (arguments[0].Class == JsNames.ClassNumber)
+                        else if (@class == JsNames.ClassNumber)
                         {
                             result = JsConvert.ToDateTime(arguments[0].ToNumber());
                         }
@@ -73,16 +78,15 @@ namespace Jint.Native
                         break;
                 }
 
-                if (@this == null || @this == runtime.Global.GlobalScope)
-                    return JsString.Create(ToString(result));
-
                 var target = (JsObject)@this;
+                if (target == runtime.Global.GlobalScope)
+                    return JsString.Box(ToString(result));
 
                 target.SetClass(JsNames.ClassDate);
                 target.SetIsClr(false);
                 target.Value = result;
 
-                return target;
+                return @this;
             }
 
             private static bool ParseDate(JsGlobal global, string value, IFormatProvider culture, out double result)
@@ -120,27 +124,27 @@ namespace Jint.Native
             }
 
             // 15.9.4.1
-            public static JsInstance Parse(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Parse(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 double d;
                 if (ParseDate(runtime.Global, arguments[0].ToString(), CultureInfo.InvariantCulture, out d))
-                    return JsNumber.Create(d);
+                    return JsNumber.Box(d);
                 else
-                    return JsNumber.NaN;
+                    return JsBox.NaN;
             }
 
-            public static JsInstance ParseLocale(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ParseLocale(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 double d;
                 if (ParseDate(runtime.Global, arguments[0].ToString(), CultureInfo.CurrentCulture, out d))
-                    return JsNumber.Create(d);
-                return JsNumber.NaN;
+                    return JsNumber.Box(d);
+                return JsBox.NaN;
             }
 
             // 15.9.5.2
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(ToString(GetDateTimeValue(@this)));
+                return JsString.Box(ToString(GetDateTimeValue(@this)));
             }
 
             private static string ToString(DateTime dateTime)
@@ -148,169 +152,169 @@ namespace Jint.Native
                 return dateTime.ToLocalTime().ToString(JsNames.DateTimeFormat, CultureInfo.InvariantCulture);
             }
 
-            public static JsInstance ToLocaleString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToLocaleString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
+                return JsString.Box(GetDateTimeValue(@this).ToLocalTime().ToString("F", CultureInfo.CurrentCulture));
             }
 
             // 15.9.5.3
-            public static JsInstance ToDateString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToDateString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.DateFormat, CultureInfo.InvariantCulture));
+                return JsString.Box(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.DateFormat, CultureInfo.InvariantCulture));
             }
 
             // 15.9.5.4
-            public static JsInstance ToTimeString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToTimeString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.TimeFormat, CultureInfo.InvariantCulture));
+                return JsString.Box(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.TimeFormat, CultureInfo.InvariantCulture));
             }
 
             // 15.9.5.6
-            public static JsInstance ToLocaleDateString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToLocaleDateString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.DateFormat));
+                return JsString.Box(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.DateFormat));
             }
 
             // 15.9.5.7
-            public static JsInstance ToLocaleTimeString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToLocaleTimeString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.TimeFormat));
+                return JsString.Box(GetDateTimeValue(@this).ToLocalTime().ToString(JsNames.TimeFormat));
             }
 
             // 15.9.5.8
-            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(JsConvert.ToNumber(GetDateTimeValue(@this)));
+                return JsNumber.Box(JsConvert.ToNumber(GetDateTimeValue(@this)));
             }
 
             // 15.9.5.9
-            public static JsInstance GetTime(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetTime(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(JsConvert.ToNumber(GetDateTimeValue(@this)));
+                return JsNumber.Box(JsConvert.ToNumber(GetDateTimeValue(@this)));
             }
 
             // 15.9.5.10
-            public static JsInstance GetFullYear(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetFullYear(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Year);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Year);
             }
 
             // 15.9.5.11
-            public static JsInstance GetUTCFullYear(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCFullYear(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Year);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Year);
             }
 
             // 15.9.5.12
-            public static JsInstance GetMonth(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetMonth(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Month - 1);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Month - 1);
             }
 
             // 15.9.5.13
-            public static JsInstance GetUTCMonth(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCMonth(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Month - 1);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Month - 1);
 
             }
 
             // 15.9.5.14
-            public static JsInstance GetDate(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetDate(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Day);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Day);
             }
 
             // 15.9.5.15
-            public static JsInstance GetUTCDate(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCDate(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Day);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Day);
             }
 
             // 15.9.5.16
-            public static JsInstance GetDay(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetDay(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create((int)GetDateTimeValue(@this).ToLocalTime().DayOfWeek);
+                return JsNumber.Box((int)GetDateTimeValue(@this).ToLocalTime().DayOfWeek);
             }
 
             // 15.9.5.17
-            public static JsInstance GetUTCDay(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCDay(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create((int)GetDateTimeValue(@this).ToUniversalTime().DayOfWeek);
+                return JsNumber.Box((int)GetDateTimeValue(@this).ToUniversalTime().DayOfWeek);
             }
 
             // 15.9.5.18
-            public static JsInstance GetHours(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetHours(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Hour);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Hour);
             }
 
             // 15.9.5.19
-            public static JsInstance GetUTCHours(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCHours(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Hour);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Hour);
             }
 
             // 15.9.5.20
-            public static JsInstance GetMinutes(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetMinutes(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Minute);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Minute);
             }
 
             // 15.9.5.21
-            public static JsInstance GetUTCMinutes(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCMinutes(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Minute);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Minute);
             }
 
             // 15.9.5.
-            public static JsInstance ToUTCString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToUTCString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(GetDateTimeValue(@this).ToString(JsNames.DateTimeFormatUtc, CultureInfo.InvariantCulture));
+                return JsString.Box(GetDateTimeValue(@this).ToString(JsNames.DateTimeFormatUtc, CultureInfo.InvariantCulture));
             }
 
             // 15.9.5.22
-            public static JsInstance GetSeconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetSeconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Second);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Second);
             }
 
             // 15.9.5.23
-            public static JsInstance GetUTCSeconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCSeconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Second);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Second);
             }
 
             // 15.9.5.24
-            public static JsInstance GetMilliseconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetMilliseconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToLocalTime().Millisecond);
+                return JsNumber.Box(GetDateTimeValue(@this).ToLocalTime().Millisecond);
             }
 
             // 15.9.5.25
-            public static JsInstance GetUTCMilliseconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetUTCMilliseconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(GetDateTimeValue(@this).ToUniversalTime().Millisecond);
+                return JsNumber.Box(GetDateTimeValue(@this).ToUniversalTime().Millisecond);
             }
 
             // 15.9.5.26
-            public static JsInstance GetTimezoneOffset(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetTimezoneOffset(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(-TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes);
+                return JsNumber.Box(-TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes);
             }
 
             // 15.9.5.27
-            public static JsInstance SetTime(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetTime(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no time specified");
 
-                @this.Value = JsConvert.ToNumber(GetDateTimeValue(arguments[0]));
+                ((JsObject)@this).Value = JsConvert.ToNumber(GetDateTimeValue(arguments[0]));
 
                 return @this;
             }
 
             // 15.9.5.28
-            public static JsInstance SetMilliseconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetMilliseconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no millisecond specified");
@@ -319,13 +323,13 @@ namespace Jint.Native
                 valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
                 valueOf = valueOf.AddMilliseconds(arguments[0].ToNumber());
 
-                @this.Value = runtime.Global.CreateDate(valueOf).ToNumber();
+                ((JsObject)@this).Value = runtime.Global.CreateDate(valueOf).ToNumber();
 
                 return @this;
             }
 
             // 15.9.5.29
-            public static JsInstance SetUTCMilliseconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCMilliseconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no millisecond specified");
@@ -334,13 +338,13 @@ namespace Jint.Native
                 valueOf = valueOf.AddMilliseconds(-valueOf.Millisecond);
                 valueOf = valueOf.AddMilliseconds(arguments[0].ToNumber());
 
-                @this.Value = runtime.Global.CreateDate(valueOf).ToNumber();
+                ((JsObject)@this).Value = runtime.Global.CreateDate(valueOf).ToNumber();
 
                 return @this;
             }
 
             // 15.9.5.30
-            public static JsInstance SetSeconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetSeconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no second specified");
@@ -349,10 +353,12 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value).ToLocalTime();
                 valueOf = valueOf.AddSeconds(-valueOf.Second);
                 valueOf = valueOf.AddSeconds(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
+
                 if (arguments.Length > 1)
                 {
-                    var innerParams = new JsInstance[arguments.Length - 1];
+                    var innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
                     @this = ((JsObject)target.GetProperty(Id.setMilliseconds)).Execute(runtime, @this, innerParams, null);
                 }
@@ -361,7 +367,7 @@ namespace Jint.Native
             }
 
             // 15.9.5.31
-            public static JsInstance SetUTCSeconds(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCSeconds(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no second specified");
@@ -370,11 +376,12 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value);
                 valueOf = valueOf.AddSeconds(-valueOf.Second);
                 valueOf = valueOf.AddSeconds(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
+                    JsBox[] innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
                     @this = ((JsObject)target.GetProperty(Id.setMilliseconds)).Execute(runtime, @this, innerParams, null);
                 }
@@ -383,7 +390,7 @@ namespace Jint.Native
             }
 
             // 15.9.5.33
-            public static JsInstance SetMinutes(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetMinutes(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no minute specified");
@@ -392,11 +399,12 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value).ToLocalTime();
                 valueOf = valueOf.AddMinutes(-valueOf.Minute);
                 valueOf = valueOf.AddMinutes(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
+                    JsBox[] innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
                     @this = ((JsObject)target.GetProperty(Id.setSeconds)).Execute(runtime, @this, innerParams, null);
                 }
@@ -405,7 +413,7 @@ namespace Jint.Native
             }
 
             // 15.9.5.34
-            public static JsInstance SetUTCMinutes(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCMinutes(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no minute specified");
@@ -414,11 +422,12 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value);
                 valueOf = valueOf.AddMinutes(-valueOf.Minute);
                 valueOf = valueOf.AddMinutes(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
+                    JsBox[] innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
                     @this = ((JsObject)target.GetProperty(Id.setSeconds)).Execute(runtime, @this, innerParams, null);
                 }
@@ -427,7 +436,7 @@ namespace Jint.Native
             }
 
             // 15.9.5.35
-            public static JsInstance SetHours(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetHours(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no hour specified");
@@ -436,20 +445,23 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value).ToLocalTime();
                 valueOf = valueOf.AddHours(-valueOf.Hour);
                 valueOf = valueOf.AddHours(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
+                    JsBox[] innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsObject)target.GetProperty(Id.setMinutes)).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsObject)target.GetProperty(Id.setMinutes)).Execute(
+                        runtime, @this, innerParams, null
+                    );
                 }
 
                 return @this;
             }
 
             // 15.9.5.36
-            public static JsInstance SetUTCHours(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCHours(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no hour specified");
@@ -458,20 +470,23 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value);
                 valueOf = valueOf.AddHours(-valueOf.Hour);
                 valueOf = valueOf.AddHours(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    JsInstance[] innerParams = new JsInstance[arguments.Length - 1];
+                    JsBox[] innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsObject)target.GetProperty(Id.setMinutes)).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsObject)target.GetProperty(Id.setMinutes)).Execute(
+                        runtime, @this, innerParams, null
+                    );
                 }
 
                 return @this;
             }
 
             // 15.9.5.36
-            public static JsInstance SetDate(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetDate(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no date specified");
@@ -479,14 +494,15 @@ namespace Jint.Native
                 var valueOf = GetDateTimeValue(@this).ToLocalTime();
                 valueOf = valueOf.AddDays(-valueOf.Day);
                 valueOf = valueOf.AddDays(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 return @this;
 
             }
 
             // 15.9.5.37
-            public static JsInstance SetUTCDate(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCDate(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no date specified");
@@ -494,13 +510,14 @@ namespace Jint.Native
                 var valueOf = GetDateTimeValue(@this);
                 valueOf = valueOf.AddDays(-valueOf.Day);
                 valueOf = valueOf.AddDays(arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 return @this;
             }
 
             // 15.9.5.38
-            public static JsInstance SetMonth(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetMonth(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no month specified");
@@ -509,20 +526,23 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value).ToLocalTime();
                 valueOf = valueOf.AddMonths(-valueOf.Month);
                 valueOf = valueOf.AddMonths((int)arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    var innerParams = new JsInstance[arguments.Length - 1];
+                    var innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsObject)target.GetProperty(Id.setDate)).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsObject)target.GetProperty(Id.setDate)).Execute(
+                        runtime, @this, innerParams, null
+                    );
                 }
 
                 return @this;
             }
 
             // 15.9.5.39
-            public static JsInstance SetUTCMonth(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCMonth(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no month specified");
@@ -531,20 +551,23 @@ namespace Jint.Native
                 var valueOf = ((DateTime)target.Value);
                 valueOf = valueOf.AddMonths(-valueOf.Month);
                 valueOf = valueOf.AddMonths((int)arguments[0].ToNumber());
-                @this.Value = valueOf;
+
+                ((JsObject)@this).Value = valueOf;
 
                 if (arguments.Length > 1)
                 {
-                    var innerParams = new JsInstance[arguments.Length - 1];
+                    var innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
-                    @this = ((JsObject)target.GetProperty(Id.setDate)).Execute(runtime, @this, innerParams, null);
+                    @this = ((JsObject)target.GetProperty(Id.setDate)).Execute(
+                        runtime, @this, innerParams, null
+                    );
                 }
 
                 return @this;
             }
 
             // 15.9.5.40
-            public static JsInstance SetFullYear(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetFullYear(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no year specified");
@@ -557,7 +580,7 @@ namespace Jint.Native
 
                 if (arguments.Length > 1)
                 {
-                    var innerParams = new JsInstance[arguments.Length - 1];
+                    var innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
                     @this = ((JsObject)target.GetProperty(Id.setMonth)).Execute(runtime, @this, innerParams, null);
                 }
@@ -567,7 +590,7 @@ namespace Jint.Native
             }
 
             // 15.9.5.41
-            public static JsInstance SetUTCFullYear(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetUTCFullYear(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                     throw new ArgumentException("There was no year specified");
@@ -580,7 +603,7 @@ namespace Jint.Native
 
                 if (arguments.Length > 1)
                 {
-                    var innerParams = new JsInstance[arguments.Length - 1];
+                    var innerParams = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, innerParams, 0, innerParams.Length);
                     @this = ((JsObject)target.GetProperty(Id.setMonth)).Execute(runtime, @this, innerParams, null);
                 }
@@ -588,19 +611,19 @@ namespace Jint.Native
                 return @this;
             }
 
-            public static JsInstance UTC(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox UTC(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     if (
-                        JsInstance.IsUndefined(arguments[i]) || (
-                            arguments[i].Class == JsNames.ClassNumber && (
+                        arguments[i].IsUndefined || (
+                            arguments[i].GetClass() == JsNames.ClassNumber && (
                                 Double.IsNaN(arguments[i].ToNumber()) ||
                                 Double.IsInfinity(arguments[i].ToNumber())
                             )
                         )
                     )
-                        return JsNumber.NaN;
+                        return JsBox.NaN;
                 }
 
                 var result = runtime.Global.DateClass.Construct(runtime, arguments);
@@ -608,17 +631,18 @@ namespace Jint.Native
                     result.ToNumber() +
                     TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMilliseconds;
 
-                return JsNumber.Create(offset);
+                return JsNumber.Box(offset);
             }
 
-            private static DateTime GetDateTimeValue(JsInstance value)
+            private static DateTime GetDateTimeValue(JsBox value)
             {
-                if (value.Type == JsType.Number)
+                if (value.IsNumber)
                     return JsConvert.ToDateTime(value.ToNumber());
-                if (value.Value is double)
-                    return JsConvert.ToDateTime((double)value.Value);
+                var instance = value.ToInstance();
+                if (instance.Value is double)
+                    return JsConvert.ToDateTime((double)instance.Value);
 
-                return (DateTime)value.Value;
+                return (DateTime)instance.Value;
             }
         }
     }

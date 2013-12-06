@@ -22,8 +22,8 @@ namespace Jint.Tests.Fixtures
             var ctx = CreateContext(Assert.Fail);
 
             var dic = ctx.Global.CreateObject();
-            dic["prop1"] = JsNumber.Create(1);
-            Assert.IsTrue(dic.HasProperty(JsString.Create("prop1")));
+            dic["prop1"] = JsNumber.Box(1);
+            Assert.IsTrue(dic.HasProperty(JsString.Box("prop1")));
             Assert.IsTrue(dic.HasProperty("prop1"));
             Assert.AreEqual(1, dic["prop1"].ToNumber());
         }

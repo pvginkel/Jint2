@@ -30,18 +30,18 @@ namespace Jint.Native
             return new PropertyDescriptor(_global, Owner, Name, GetFunction, SetFunction, Attributes);
         }
 
-        public override JsInstance Get(JsInstance that)
+        public override JsBox Get(JsBox that)
         {
             //JsObject that = _global._visitor.CallTarget;
-            return _global.ExecuteFunction(GetFunction, that, JsInstance.EmptyArray, null);
+            return _global.ExecuteFunction(GetFunction, that, JsBox.EmptyArray, null);
         }
 
-        public override void Set(JsObject that, JsInstance value)
+        public override void Set(JsObject that, JsBox value)
         {
             if (SetFunction == null)
                 throw new JsException(JsErrorType.TypeError);
 
-            _global.ExecuteFunction(SetFunction, that, new[] { value }, null);
+            _global.ExecuteFunction(SetFunction, JsBox.CreateObject(that), new[] { value }, null);
         }
 
         internal override DescriptorType DescriptorType

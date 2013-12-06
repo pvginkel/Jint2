@@ -36,7 +36,7 @@ namespace Jint.Native
                 return false;
             }
 
-            public bool HasOwnProperty(JsInstance index)
+            public bool HasOwnProperty(JsBox index)
             {
                 return false;
             }
@@ -46,34 +46,34 @@ namespace Jint.Native
                 return null;
             }
 
-            public Descriptor GetOwnDescriptor(JsInstance index)
+            public Descriptor GetOwnDescriptor(JsBox index)
             {
                 return null;
             }
 
-            public bool TryGetProperty(JsInstance index, out JsInstance result)
+            public bool TryGetProperty(JsBox index, out JsBox result)
             {
-                result = JsUndefined.Instance;
+                result = JsBox.Undefined;
                 return true;
             }
 
-            public bool TryGetProperty(int index, out JsInstance result)
+            public bool TryGetProperty(int index, out JsBox result)
             {
-                result = JsUndefined.Instance;
+                result = JsBox.Undefined;
                 return true;
             }
 
-            public bool TrySetProperty(int index, JsInstance value)
-            {
-                return true;
-            }
-
-            public bool TrySetProperty(JsInstance index, JsInstance value)
+            public bool TrySetProperty(int index, JsBox value)
             {
                 return true;
             }
 
-            public bool Delete(JsInstance index)
+            public bool TrySetProperty(JsBox index, JsBox value)
+            {
+                return true;
+            }
+
+            public bool Delete(JsBox index)
             {
                 return true;
             }
@@ -87,14 +87,14 @@ namespace Jint.Native
             {
             }
 
-            public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
+            public IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator()
             {
                 return JsObject.EmptyKeyValues.GetEnumerator();
             }
 
-            public IEnumerable<JsInstance> GetValues()
+            public IEnumerable<JsBox> GetValues()
             {
-                return JsInstance.EmptyArray;
+                return JsBox.EmptyArray;
             }
 
             public IEnumerable<int> GetKeys()

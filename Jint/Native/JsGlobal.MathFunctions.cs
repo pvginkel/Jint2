@@ -9,61 +9,61 @@ namespace Jint.Native
     {
         private static class MathFunctions
         {
-            internal static JsInstance Abs(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            internal static JsBox Abs(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Abs(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Abs(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Acos(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Acos(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Acos(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Acos(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Asin(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Asin(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Asin(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Asin(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Atan(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Atan(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Atan(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Atan(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Atan2(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Atan2(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Atan2(arguments[0].ToNumber(), arguments[1].ToNumber()));
+                return JsNumber.Box(Math.Atan2(arguments[0].ToNumber(), arguments[1].ToNumber()));
             }
 
-            public static JsInstance Ceil(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Ceil(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Ceiling(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Ceiling(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Cos(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Cos(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Cos(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Cos(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Exp(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Exp(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Exp(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Exp(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Floor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Floor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Floor(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Floor(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Log(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Log(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Log(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Log(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Max(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Max(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                 {
-                    return JsNumber.NegativeInfinity;
+                    return JsBox.NegativeInfinity;
                 }
 
                 var result = arguments[0].ToNumber();
@@ -73,15 +73,15 @@ namespace Jint.Native
                     result = Math.Max(p.ToNumber(), result);
                 }
 
-                return JsNumber.Create(result);
+                return JsNumber.Box(result);
             }
 
 
-            public static JsInstance Min(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Min(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length == 0)
                 {
-                    return JsNumber.PositiveInfinity;
+                    return JsBox.PositiveInfinity;
                 }
 
                 var result = arguments[0].ToNumber();
@@ -91,37 +91,37 @@ namespace Jint.Native
                     result = Math.Min(p.ToNumber(), result);
                 }
 
-                return JsNumber.Create(result);
+                return JsNumber.Box(result);
             }
 
-            public static JsInstance Pow(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Pow(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Pow(arguments[0].ToNumber(), arguments[1].ToNumber()));
+                return JsNumber.Box(Math.Pow(arguments[0].ToNumber(), arguments[1].ToNumber()));
             }
 
-            public static JsInstance Random(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Random(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(runtime.Global.Random.NextDouble());
+                return JsNumber.Box(runtime.Global.Random.NextDouble());
             }
 
-            public static JsInstance Round(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Round(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Round(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Round(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Sin(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Sin(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Sin(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Sin(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Sqrt(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Sqrt(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Sqrt(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Sqrt(arguments[0].ToNumber()));
             }
 
-            public static JsInstance Tan(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Tan(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Math.Tan(arguments[0].ToNumber()));
+                return JsNumber.Box(Math.Tan(arguments[0].ToNumber()));
             }
         }
     }

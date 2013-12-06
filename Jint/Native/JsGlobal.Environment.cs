@@ -195,11 +195,11 @@ namespace Jint.Native
 
             var result = CreateFunction("Number", NumberFunctions.Constructor, 0, null, prototype);
 
-            DefineProperty(result, "MAX_VALUE", JsNumber.MaxValue, PropertyAttributes.None);
-            DefineProperty(result, "MIN_VALUE", JsNumber.MinValue, PropertyAttributes.None);
-            DefineProperty(result, "NaN", JsNumber.NaN, PropertyAttributes.None);
-            DefineProperty(result, "POSITIVE_INFINITY", JsNumber.PositiveInfinity, PropertyAttributes.None);
-            DefineProperty(result, "NEGATIVE_INFINITY", JsNumber.NegativeInfinity, PropertyAttributes.None);
+            DefineProperty(result, "MAX_VALUE", JsBox.MaxValue, PropertyAttributes.None);
+            DefineProperty(result, "MIN_VALUE", JsBox.MinValue, PropertyAttributes.None);
+            DefineProperty(result, "NaN", JsBox.NaN, PropertyAttributes.None);
+            DefineProperty(result, "POSITIVE_INFINITY", JsBox.PositiveInfinity, PropertyAttributes.None);
+            DefineProperty(result, "NEGATIVE_INFINITY", JsBox.NegativeInfinity, PropertyAttributes.None);
 
             return result;
         }
@@ -272,13 +272,13 @@ namespace Jint.Native
             DefineFunction(result, "sin", MathFunctions.Sin, 1, PropertyAttributes.DontEnum);
             DefineFunction(result, "sqrt", MathFunctions.Sqrt, 1, PropertyAttributes.DontEnum);
             DefineFunction(result, "tan", MathFunctions.Tan, 1, PropertyAttributes.DontEnum);
-            DefineProperty(result, "E", JsNumber.Create(Math.E), PropertyAttributes.DontEnum);
-            DefineProperty(result, "LN2", JsNumber.Create(Math.Log(2)), PropertyAttributes.DontEnum);
-            DefineProperty(result, "LN10", JsNumber.Create(Math.Log(10)), PropertyAttributes.DontEnum);
-            DefineProperty(result, "LOG2E", JsNumber.Create(Math.Log(Math.E, 2)), PropertyAttributes.DontEnum);
-            DefineProperty(result, "PI", JsNumber.Create(Math.PI), PropertyAttributes.DontEnum);
-            DefineProperty(result, "SQRT1_2", JsNumber.Create(Math.Sqrt(0.5)), PropertyAttributes.DontEnum);
-            DefineProperty(result, "SQRT2", JsNumber.Create(Math.Sqrt(2)), PropertyAttributes.DontEnum);
+            DefineProperty(result, "E", JsNumber.Box(Math.E), PropertyAttributes.DontEnum);
+            DefineProperty(result, "LN2", JsNumber.Box(Math.Log(2)), PropertyAttributes.DontEnum);
+            DefineProperty(result, "LN10", JsNumber.Box(Math.Log(10)), PropertyAttributes.DontEnum);
+            DefineProperty(result, "LOG2E", JsNumber.Box(Math.Log(Math.E, 2)), PropertyAttributes.DontEnum);
+            DefineProperty(result, "PI", JsNumber.Box(Math.PI), PropertyAttributes.DontEnum);
+            DefineProperty(result, "SQRT1_2", JsNumber.Box(Math.Sqrt(0.5)), PropertyAttributes.DontEnum);
+            DefineProperty(result, "SQRT2", JsNumber.Box(Math.Sqrt(2)), PropertyAttributes.DontEnum);
 
             return result;
         }
@@ -287,7 +287,7 @@ namespace Jint.Native
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
-            DefineProperty(prototype, "name", JsString.Create(name), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            DefineProperty(prototype, "name", JsString.Box(name), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
             DefineFunction(prototype, "toString", ErrorFunctions.ToString, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toLocaleString", ErrorFunctions.ToString, 0, PropertyAttributes.DontEnum);
 

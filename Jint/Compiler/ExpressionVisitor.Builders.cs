@@ -14,7 +14,7 @@ namespace Jint.Compiler
     {
         private readonly JsGlobal _global;
         private static readonly MethodInfo _objectGetByIndex = typeof(JsObject).GetMethod("GetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int) }, null);
-        private static readonly MethodInfo _objectSetByIndex = typeof(JsObject).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int), typeof(JsInstance) }, null);
+        private static readonly MethodInfo _objectSetByIndex = typeof(JsObject).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int), typeof(JsBox) }, null);
         private static readonly MethodInfo _runtimeGetByIndex = typeof(JintRuntime).GetMethod("GetMemberByIndex");
         private static readonly MethodInfo _runtimeSetByIndex = typeof(JintRuntime).GetMethod("SetMemberByIndex");
 
@@ -227,7 +227,7 @@ namespace Jint.Compiler
             }
 
             if (builder != null)
-                return builder(new[] { obj, index, value });
+                return builder(_scope.Runtime, new[] { obj, index, value });
 
             return Expression.Call(
                 method.IsStatic ? null : _scope.Runtime,
@@ -273,7 +273,7 @@ namespace Jint.Compiler
             }
 
             if (builder != null)
-                return builder(new[] { left, right });
+                return builder(_scope.Runtime, new[] { left, right });
 
             return Expression.Call(
                 method.IsStatic ? null : _scope.Runtime,
@@ -298,7 +298,7 @@ namespace Jint.Compiler
             }
 
             if (builder != null)
-                return builder(new[] { operand });
+                return builder(_scope.Runtime, new[] { operand });
 
             return Expression.Call(
                 method.IsStatic ? null : _scope.Runtime,

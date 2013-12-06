@@ -7,6 +7,13 @@ namespace Jint.Native
     [Serializable]
     public class ValueDescriptor : Descriptor
     {
+        private JsBox _value;
+
+        public override bool IsReference
+        {
+            get { return false; }
+        }
+
         public ValueDescriptor(JsObject owner, string name)
             : this(owner, name, PropertyAttributes.None)
         {
@@ -17,23 +24,16 @@ namespace Jint.Native
         {
         }
 
-        private JsInstance _value;
-
-        public ValueDescriptor(JsObject owner, string name, JsInstance value)
+        public ValueDescriptor(JsObject owner, string name, JsBox value)
             : this(owner, name, value, PropertyAttributes.None)
         {
         }
 
-        public ValueDescriptor(JsObject owner, string name, JsInstance value, PropertyAttributes attributes)
+        public ValueDescriptor(JsObject owner, string name, JsBox value, PropertyAttributes attributes)
             : this(owner, name, attributes)
         {
             // Write directly to _value to ignore the writable flag.
             _value = value;
-        }
-
-        public override bool IsReference
-        {
-            get { return false; }
         }
 
         public override Descriptor Clone()
@@ -41,12 +41,15 @@ namespace Jint.Native
             return new ValueDescriptor(Owner, Name, _value, Attributes);
         }
 
-        public override JsInstance Get(JsInstance that)
+        public override JsBox Get(JsBox that)
         {
-            return _value ?? JsUndefined.Instance;
+            if (_value.IsValid)
+                return _value;
+
+            return JsBox.Undefined;
         }
 
-        public override void Set(JsObject that, JsInstance value)
+        public override void Set(JsObject that, JsBox value)
         {
             if (!Writable)
                 throw new JintException("This property is not writable");

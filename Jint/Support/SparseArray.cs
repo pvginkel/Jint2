@@ -21,7 +21,6 @@ namespace Jint.Support
     /// or creating large gaps, does this switch to an actual sparse array.
     /// </remarks>
     internal class SparseArray<T>
-        where T : class
     {
         private const int ChunkShift = 5;
         private const int ChunkSize = 1 << ChunkShift;
@@ -37,13 +36,13 @@ namespace Jint.Support
             get
             {
                 if (index < 0)
-                    return null;
+                    return default(T);
 
                 if (_values != null)
                 {
                     if (index < _values.Length)
                         return _values[index];
-                    return null;
+                    return default(T);
                 }
 
                 int offset = GetOffsetFromIndex(index);
@@ -51,7 +50,7 @@ namespace Jint.Support
                 if (chunk.Found)
                     return _chunks[chunk.Index].Values[index - offset];
 
-                return null;
+                return default(T);
             }
             set
             {

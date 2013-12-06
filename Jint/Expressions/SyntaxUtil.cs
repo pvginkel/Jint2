@@ -26,7 +26,7 @@ namespace Jint.Expressions
                 case ValueType.Double: return typeof(double);
                 case ValueType.String: return typeof(string);
                 case ValueType.Object: return typeof(JsObject);
-                case ValueType.Unknown: return typeof(JsInstance);
+                case ValueType.Unknown: return typeof(JsBox);
                 default: throw new ArgumentOutOfRangeException("self");
             }
         }
@@ -48,7 +48,7 @@ namespace Jint.Expressions
                     if (typeof(JsObject).IsAssignableFrom(type))
                         return ValueType.Object;
 
-                    Debug.Assert(typeof(JsInstance).IsAssignableFrom(type));
+                    Debug.Assert(type == typeof(JsBox));
 
                     return ValueType.Unknown;
 

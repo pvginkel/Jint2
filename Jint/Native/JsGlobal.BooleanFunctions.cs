@@ -9,33 +9,29 @@ namespace Jint.Native
     {
         private static class BooleanFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                // e.g., var foo = Boolean(true);
-                if (@this == null || @this == runtime.Global.GlobalScope)
-                    return JsBoolean.Create(arguments.Length > 0 && arguments[0].ToBoolean());
+                var target = (JsObject)@this;
+                if (target == runtime.Global.GlobalScope)
+                    return JsBoolean.Box(arguments.Length > 0 && arguments[0].ToBoolean());
 
                 // e.g., var foo = new Boolean(true);
                 if (arguments.Length > 0)
-                    @this.Value = arguments[0].ToBoolean();
+                    target.Value = arguments[0].ToBoolean();
                 else
-                    @this.Value = false;
+                    target.Value = false;
 
                 return @this;
             }
 
-            public static JsInstance ValueOf(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                var jsBoolean = @this as JsBoolean;
-                if (jsBoolean != null)
-                    return jsBoolean;
-
-                return JsBoolean.Create((bool)@this.Value);
+                return JsBox.CreateBoolean(@this.ToBoolean());
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(JsConvert.ToString((bool)@this.Value));
+                return JsString.Box(JsConvert.ToString(@this.ToBoolean()));
             }
         }
     }

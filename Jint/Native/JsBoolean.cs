@@ -23,6 +23,11 @@ namespace Jint.Native
             return value ? True : False;
         }
 
+        public static JsBox Box(bool value)
+        {
+            return JsBox.CreateBoolean(value);
+        }
+
         private JsBoolean(bool boolean)
         {
             _value = boolean;
@@ -58,9 +63,9 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(PreferredType preferredType)
+        public override JsBox ToPrimitive(PreferredType preferredType)
         {
-            return this;
+            return _value ? JsBox.True : JsBox.False;
         }
     }
 }

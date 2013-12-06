@@ -52,15 +52,15 @@ namespace Jint.Native.Interop
             return new NativeDescriptor(Owner, this);
         }
 
-        public override JsInstance Get(JsInstance that)
+        public override JsBox Get(JsBox that)
         {
             return
                 _getter != null
                 ? _getter(Owner.Global, (JsObject)that)
-                : JsUndefined.Instance;
+                : JsBox.Undefined;
         }
 
-        public override void Set(JsObject that, JsInstance value)
+        public override void Set(JsObject that, JsBox value)
         {
             if (_setter != null)
                 _setter(Owner.Global, that, value);

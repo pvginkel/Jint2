@@ -11,27 +11,27 @@ namespace Jint.Native
 {
     partial class JintRuntime
     {
-        public static bool Operation_Equal(JsInstance left, JsInstance right)
+        public static bool Operation_Equal(JsBox left, JsBox right)
         {
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(JsInstance left, bool right)
+        public static bool Operation_Equal(JsBox left, bool right)
         {
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(JsInstance left, double right)
+        public static bool Operation_Equal(JsBox left, double right)
         {
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(JsInstance left, string right)
+        public static bool Operation_Equal(JsBox left, string right)
         {
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(bool left, JsInstance right)
+        public static bool Operation_Equal(bool left, JsBox right)
         {
             return CompareEquality(left, right);
         }
@@ -46,7 +46,7 @@ namespace Jint.Native
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(double left, JsInstance right)
+        public static bool Operation_Equal(double left, JsBox right)
         {
             return CompareEquality(left, right);
         }
@@ -61,7 +61,7 @@ namespace Jint.Native
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_Equal(string left, JsInstance right)
+        public static bool Operation_Equal(string left, JsBox right)
         {
             return CompareEquality(left, right);
         }
@@ -76,27 +76,27 @@ namespace Jint.Native
             return CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(JsInstance left, JsInstance right)
+        public static bool Operation_NotEqual(JsBox left, JsBox right)
         {
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(JsInstance left, bool right)
+        public static bool Operation_NotEqual(JsBox left, bool right)
         {
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(JsInstance left, double right)
+        public static bool Operation_NotEqual(JsBox left, double right)
         {
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(JsInstance left, string right)
+        public static bool Operation_NotEqual(JsBox left, string right)
         {
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(bool left, JsInstance right)
+        public static bool Operation_NotEqual(bool left, JsBox right)
         {
             return !CompareEquality(left, right);
         }
@@ -111,7 +111,7 @@ namespace Jint.Native
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(double left, JsInstance right)
+        public static bool Operation_NotEqual(double left, JsBox right)
         {
             return !CompareEquality(left, right);
         }
@@ -126,7 +126,7 @@ namespace Jint.Native
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_NotEqual(string left, JsInstance right)
+        public static bool Operation_NotEqual(string left, JsBox right)
         {
             return !CompareEquality(left, right);
         }
@@ -141,7 +141,7 @@ namespace Jint.Native
             return !CompareEquality(left, right);
         }
 
-        public static bool Operation_LessThan(JsInstance left, JsInstance right)
+        public static bool Operation_LessThan(JsBox left, JsBox right)
         {
             double result;
             if (TryCompareRange(left, right, out result))
@@ -149,22 +149,22 @@ namespace Jint.Native
             return false;
         }
 
-        public static bool Operation_LessThan(JsInstance left, bool right)
+        public static bool Operation_LessThan(JsBox left, bool right)
         {
             return left.ToNumber() < JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThan(JsInstance left, double right)
+        public static bool Operation_LessThan(JsBox left, double right)
         {
             return left.ToNumber() < right;
         }
 
-        public static bool Operation_LessThan(JsInstance left, string right)
+        public static bool Operation_LessThan(JsBox left, string right)
         {
             return left.ToNumber() < JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThan(bool left, JsInstance right)
+        public static bool Operation_LessThan(bool left, JsBox right)
         {
             return JsConvert.ToNumber(left) < right.ToNumber();
         }
@@ -184,7 +184,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) < JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThan(double left, JsInstance right)
+        public static bool Operation_LessThan(double left, JsBox right)
         {
             return left < right.ToNumber();
         }
@@ -199,7 +199,7 @@ namespace Jint.Native
             return left < JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThan(string left, JsInstance right)
+        public static bool Operation_LessThan(string left, JsBox right)
         {
             return JsConvert.ToNumber(left) < right.ToNumber();
         }
@@ -219,7 +219,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) < JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThanOrEqual(JsInstance left, JsInstance right)
+        public static bool Operation_LessThanOrEqual(JsBox left, JsBox right)
         {
             double result;
             if (TryCompareRange(left, right, out result))
@@ -227,22 +227,22 @@ namespace Jint.Native
             return false;
         }
 
-        public static bool Operation_LessThanOrEqual(JsInstance left, bool right)
+        public static bool Operation_LessThanOrEqual(JsBox left, bool right)
         {
             return left.ToNumber() <= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThanOrEqual(JsInstance left, double right)
+        public static bool Operation_LessThanOrEqual(JsBox left, double right)
         {
             return left.ToNumber() <= right;
         }
 
-        public static bool Operation_LessThanOrEqual(JsInstance left, string right)
+        public static bool Operation_LessThanOrEqual(JsBox left, string right)
         {
             return left.ToNumber() <= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThanOrEqual(bool left, JsInstance right)
+        public static bool Operation_LessThanOrEqual(bool left, JsBox right)
         {
             return JsConvert.ToNumber(left) <= right.ToNumber();
         }
@@ -262,7 +262,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) <= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThanOrEqual(double left, JsInstance right)
+        public static bool Operation_LessThanOrEqual(double left, JsBox right)
         {
             return left <= right.ToNumber();
         }
@@ -277,7 +277,7 @@ namespace Jint.Native
             return left <= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_LessThanOrEqual(string left, JsInstance right)
+        public static bool Operation_LessThanOrEqual(string left, JsBox right)
         {
             return JsConvert.ToNumber(left) <= right.ToNumber();
         }
@@ -297,7 +297,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) <= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThan(JsInstance left, JsInstance right)
+        public static bool Operation_GreaterThan(JsBox left, JsBox right)
         {
             double result;
             if (TryCompareRange(left, right, out result))
@@ -305,22 +305,22 @@ namespace Jint.Native
             return false;
         }
 
-        public static bool Operation_GreaterThan(JsInstance left, bool right)
+        public static bool Operation_GreaterThan(JsBox left, bool right)
         {
             return left.ToNumber() > JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThan(JsInstance left, double right)
+        public static bool Operation_GreaterThan(JsBox left, double right)
         {
             return left.ToNumber() > right;
         }
 
-        public static bool Operation_GreaterThan(JsInstance left, string right)
+        public static bool Operation_GreaterThan(JsBox left, string right)
         {
             return left.ToNumber() > JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThan(bool left, JsInstance right)
+        public static bool Operation_GreaterThan(bool left, JsBox right)
         {
             return JsConvert.ToNumber(left) > right.ToNumber();
         }
@@ -340,7 +340,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) > JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThan(double left, JsInstance right)
+        public static bool Operation_GreaterThan(double left, JsBox right)
         {
             return left > right.ToNumber();
         }
@@ -355,7 +355,7 @@ namespace Jint.Native
             return left > JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThan(string left, JsInstance right)
+        public static bool Operation_GreaterThan(string left, JsBox right)
         {
             return JsConvert.ToNumber(left) > right.ToNumber();
         }
@@ -375,7 +375,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) > JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThanOrEqual(JsInstance left, JsInstance right)
+        public static bool Operation_GreaterThanOrEqual(JsBox left, JsBox right)
         {
             double result;
             if (TryCompareRange(left, right, out result))
@@ -383,22 +383,22 @@ namespace Jint.Native
             return false;
         }
 
-        public static bool Operation_GreaterThanOrEqual(JsInstance left, bool right)
+        public static bool Operation_GreaterThanOrEqual(JsBox left, bool right)
         {
             return left.ToNumber() >= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThanOrEqual(JsInstance left, double right)
+        public static bool Operation_GreaterThanOrEqual(JsBox left, double right)
         {
             return left.ToNumber() >= right;
         }
 
-        public static bool Operation_GreaterThanOrEqual(JsInstance left, string right)
+        public static bool Operation_GreaterThanOrEqual(JsBox left, string right)
         {
             return left.ToNumber() >= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThanOrEqual(bool left, JsInstance right)
+        public static bool Operation_GreaterThanOrEqual(bool left, JsBox right)
         {
             return JsConvert.ToNumber(left) >= right.ToNumber();
         }
@@ -418,7 +418,7 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) >= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThanOrEqual(double left, JsInstance right)
+        public static bool Operation_GreaterThanOrEqual(double left, JsBox right)
         {
             return left >= right.ToNumber();
         }
@@ -433,7 +433,7 @@ namespace Jint.Native
             return left >= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_GreaterThanOrEqual(string left, JsInstance right)
+        public static bool Operation_GreaterThanOrEqual(string left, JsBox right)
         {
             return JsConvert.ToNumber(left) >= right.ToNumber();
         }
@@ -453,27 +453,27 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) >= JsConvert.ToNumber(right);
         }
 
-        public static bool Operation_Same(JsInstance left, JsInstance right)
+        public static bool Operation_Same(JsBox left, JsBox right)
         {
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(JsInstance left, bool right)
+        public static bool Operation_Same(JsBox left, bool right)
         {
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(JsInstance left, double right)
+        public static bool Operation_Same(JsBox left, double right)
         {
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(JsInstance left, string right)
+        public static bool Operation_Same(JsBox left, string right)
         {
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(bool left, JsInstance right)
+        public static bool Operation_Same(bool left, JsBox right)
         {
             return CompareSame(left, right);
         }
@@ -488,7 +488,7 @@ namespace Jint.Native
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(double left, JsInstance right)
+        public static bool Operation_Same(double left, JsBox right)
         {
             return CompareSame(left, right);
         }
@@ -503,7 +503,7 @@ namespace Jint.Native
             return CompareSame(left, right);
         }
 
-        public static bool Operation_Same(string left, JsInstance right)
+        public static bool Operation_Same(string left, JsBox right)
         {
             return CompareSame(left, right);
         }
@@ -518,27 +518,27 @@ namespace Jint.Native
             return CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(JsInstance left, JsInstance right)
+        public static bool Operation_NotSame(JsBox left, JsBox right)
         {
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(JsInstance left, bool right)
+        public static bool Operation_NotSame(JsBox left, bool right)
         {
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(JsInstance left, double right)
+        public static bool Operation_NotSame(JsBox left, double right)
         {
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(JsInstance left, string right)
+        public static bool Operation_NotSame(JsBox left, string right)
         {
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(bool left, JsInstance right)
+        public static bool Operation_NotSame(bool left, JsBox right)
         {
             return !CompareSame(left, right);
         }
@@ -553,7 +553,7 @@ namespace Jint.Native
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(double left, JsInstance right)
+        public static bool Operation_NotSame(double left, JsBox right)
         {
             return !CompareSame(left, right);
         }
@@ -568,7 +568,7 @@ namespace Jint.Native
             return !CompareSame(left, right);
         }
 
-        public static bool Operation_NotSame(string left, JsInstance right)
+        public static bool Operation_NotSame(string left, JsBox right)
         {
             return !CompareSame(left, right);
         }

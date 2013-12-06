@@ -9,6 +9,9 @@ namespace Jint.Native
 {
     partial class JsGlobal
     {
+        private static readonly char[] ReservedEncoded = new[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
+        private static readonly char[] ReservedEncodedComponent = new[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
+
         private JsObject CreateGlobalScope()
         {
             var scope = CreateObject();
@@ -17,7 +20,7 @@ namespace Jint.Native
             scope.SetIsClr(false);
             scope.PropertyStore = new GlobalScopePropertyStore(scope);
 
-            DefineProperty(scope, "null", JsNull.Instance, PropertyAttributes.DontEnum);
+            DefineProperty(scope, "null", JsBox.Null, PropertyAttributes.DontEnum);
             DefineProperty(scope, "Function", FunctionClass, PropertyAttributes.DontEnum);
             DefineProperty(scope, "Object", ObjectClass, PropertyAttributes.DontEnum);
             DefineProperty(scope, "Array", ArrayClass, PropertyAttributes.DontEnum);
@@ -36,7 +39,7 @@ namespace Jint.Native
             DefineProperty(scope, "Math", MathClass, PropertyAttributes.DontEnum);
             DefineProperty(scope, "NaN", NumberClass.GetProperty(Id.NaN), PropertyAttributes.DontEnum); // 15.1.1.1
             DefineProperty(scope, "Infinity", NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
-            DefineProperty(scope, "undefined", JsUndefined.Instance, PropertyAttributes.DontEnum); // 15.1.1.3
+            DefineProperty(scope, "undefined", JsBox.Undefined, PropertyAttributes.DontEnum); // 15.1.1.3
             DefineProperty(scope, JsNames.This, scope, PropertyAttributes.DontEnum);
             DefineFunction(scope, "ToBoolean", GlobalFunctions.ToBoolean, 1, PropertyAttributes.DontEnum);
             DefineFunction(scope, "ToByte", GlobalFunctions.ToByte, 1, PropertyAttributes.DontEnum);
@@ -77,16 +80,16 @@ namespace Jint.Native
                 _global = owner.Global;
             }
 
-            public override bool TryGetProperty(JsInstance index, out JsInstance result)
+            public override bool TryGetProperty(JsBox index, out JsBox result)
             {
                 return TryGetProperty(_global.ResolveIdentifier(index.ToString()), out result);
             }
 
-            public override bool TryGetProperty(int index, out JsInstance result)
+            public override bool TryGetProperty(int index, out JsBox result)
             {
                 var descriptor = Owner.GetDescriptor(index);
                 if (descriptor != null)
-                    result = descriptor.Get(Owner);
+                    result = descriptor.Get(JsBox.CreateObject(Owner));
                 else
                     result = _global.Engine.ResolveUndefined(_global.GetIdentifier(index), null);
 
@@ -96,87 +99,89 @@ namespace Jint.Native
 
         private static class GlobalFunctions
         {
-            public static JsInstance ToBoolean(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToBoolean(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsBoolean.Create(Convert.ToBoolean(arguments[0].Value));
+                return JsBoolean.Box(Convert.ToBoolean(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToByte(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToByte(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToByte(arguments[0].Value));
+                return JsNumber.Box(Convert.ToByte(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToChar(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToChar(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToChar(arguments[0].Value));
+                return JsNumber.Box(Convert.ToChar(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToDateTime(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToDateTime(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return runtime.Global.CreateDate((DateTime)arguments[0].Value);
+                return JsBox.CreateObject(
+                    runtime.Global.CreateDate((DateTime)arguments[0].ToInstance().Value)
+                );
             }
 
-            public static JsInstance ToDecimal(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToDecimal(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create((double)Convert.ToDecimal(arguments[0].Value));
+                return JsNumber.Box((double)Convert.ToDecimal(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToDouble(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToDouble(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToDouble(arguments[0].Value));
+                return JsNumber.Box(Convert.ToDouble(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToInt16(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToInt16(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToInt16(arguments[0].Value));
+                return JsNumber.Box(Convert.ToInt16(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToInt32(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToInt32(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToInt32(arguments[0].Value));
+                return JsNumber.Box(Convert.ToInt32(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToInt64(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToInt64(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToInt64(arguments[0].Value));
+                return JsNumber.Box(Convert.ToInt64(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToSByte(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToSByte(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToSByte(arguments[0].Value));
+                return JsNumber.Box(Convert.ToSByte(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToSingle(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToSingle(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToSingle(arguments[0].Value));
+                return JsNumber.Box(Convert.ToSingle(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(@this.ToString());
+                return JsString.Box(@this.ToString());
             }
 
-            public static JsInstance ToUInt16(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToUInt16(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToUInt16(arguments[0].Value));
+                return JsNumber.Box(Convert.ToUInt16(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToUInt32(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToUInt32(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToUInt32(arguments[0].Value));
+                return JsNumber.Box(Convert.ToUInt32(arguments[0].ToInstance().Value));
             }
 
-            public static JsInstance ToUInt64(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToUInt64(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(Convert.ToUInt64(arguments[0].Value));
+                return JsNumber.Box(Convert.ToUInt64(arguments[0].ToInstance().Value));
             }
 
             /// <summary>
             /// 15.1.2.1
             /// </summary>
-            public static JsInstance Eval(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Eval(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (JsNames.ClassString != arguments[0].Class)
+                if (JsNames.ClassString != arguments[0].GetClass())
                     return arguments[0];
 
                 return runtime.Global.Engine.Eval(arguments);
@@ -185,21 +190,25 @@ namespace Jint.Native
             /// <summary>
             /// 15.1.2.2
             /// </summary>
-            public static JsInstance ParseInt(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ParseInt(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                    return JsUndefined.Instance;
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsBox.Undefined;
 
-                //in case of an enum, just cast it to an integer
-                if (arguments[0].IsClr && arguments[0].Value.GetType().IsEnum)
-                    return JsNumber.Create((int)arguments[0].Value);
+                // In case of an enum, just cast it to an integer
+                if (arguments[0].IsClr)
+                {
+                    var value = arguments[0].ToInstance().Value;
+                    if (value.GetType().IsEnum)
+                        return JsNumber.Box((int)value);
+                }
 
                 string number = arguments[0].ToString().Trim();
                 int sign = 1;
                 int radix = 10;
 
                 if (number == String.Empty)
-                    return JsNumber.NaN;
+                    return JsBox.NaN;
 
                 if (number.StartsWith("-"))
                 {
@@ -211,27 +220,20 @@ namespace Jint.Native
                     number = number.Substring(1);
                 }
 
-                if (arguments.Length >= 2)
-                {
-                    if (!JsInstance.IsUndefined(arguments[1]) && !0.Equals(arguments[1]))
-                    {
-                        radix = Convert.ToInt32(arguments[1].Value);
-                    }
-                }
+                if (
+                    arguments.Length >= 2 &&
+                    !arguments[1].IsUndefined &&
+                    arguments[1].ToNumber() != 0
+                )
+                    radix = (int)arguments[1].ToNumber();
 
                 if (radix == 0)
-                {
                     radix = 10;
-                }
                 else if (radix < 2 || radix > 36)
-                {
-                    return JsNumber.NaN;
-                }
+                    return JsBox.NaN;
 
                 if (number.ToLower().StartsWith("0x"))
-                {
                     radix = 16;
-                }
 
                 try
                 {
@@ -242,95 +244,87 @@ namespace Jint.Native
                         if (double.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
                         {
                             // parseInt(12.42) == 42
-                            return JsNumber.Create(sign * Math.Floor(result));
+                            return JsNumber.Box(sign * Math.Floor(result));
                         }
                         else
                         {
-                            return JsNumber.NaN;
+                            return JsBox.NaN;
                         }
                     }
                     else
                     {
-                        return JsNumber.Create(sign * Convert.ToInt32(number, radix));
+                        return JsNumber.Box(sign * Convert.ToInt32(number, radix));
                     }
                 }
                 catch
                 {
-                    return JsNumber.NaN;
+                    return JsBox.NaN;
                 }
             }
 
             /// <summary>
             /// 15.1.2.3
             /// </summary>
-            public static JsInstance ParseFloat(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ParseFloat(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                {
-                    return JsUndefined.Instance;
-                }
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsBox.Undefined;
 
                 string number = arguments[0].ToString().Trim();
-                // the parseFloat function should stop parsing when it encounters an unalowed char
+                // the parseFloat function should stop parsing when it encounters an disallowed char
                 Regex regexp = new Regex(@"^[\+\-\d\.e]*", RegexOptions.IgnoreCase);
 
                 Match match = regexp.Match(number);
 
                 double result;
                 if (match.Success && double.TryParse(match.Value, NumberStyles.Float, new CultureInfo("en-US"), out result))
-                {
-                    return JsNumber.Create(result);
-                }
+                    return JsNumber.Box(result);
                 else
-                {
-                    return JsNumber.NaN;
-                }
+                    return JsBox.NaN;
             }
 
             /// <summary>
             /// 15.1.2.4
             /// </summary>
-            public static JsInstance IsNaN(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox IsNaN(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 if (arguments.Length < 1)
                 {
-                    return JsBoolean.Create(false);
+                    return JsBoolean.Box(false);
                 }
 
-                return JsBoolean.Create(double.NaN.Equals(arguments[0].ToNumber()));
+                return JsBoolean.Box(double.NaN.Equals(arguments[0].ToNumber()));
             }
 
             /// <summary>
             /// 15.1.2.5
             /// </summary>
-            public static JsInstance IsFinite(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox IsFinite(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                    return JsBoolean.False;
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsBox.False;
 
-                var value = arguments[0];
-                return JsBoolean.Create(
-                    value != JsNumber.NaN &&
-                    value != JsNumber.PositiveInfinity &&
-                    value != JsNumber.NegativeInfinity
+                var value = arguments[0].ToNumber();
+
+                return JsBoolean.Box(
+                    !Double.IsNaN(value) &&
+                    !Double.IsPositiveInfinity(value) &&
+                    !Double.IsNegativeInfinity(value)
                 );
             }
 
-            public static JsInstance DecodeURI(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox DecodeURI(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                    return JsString.Create();
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsString.Box();
 
-                return JsString.Create(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
+                return JsString.Box(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
             }
 
-            private static readonly char[] ReservedEncoded = new char[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
-            private static readonly char[] ReservedEncodedComponent = new char[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
-
-            public static JsInstance EncodeURI(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox EncodeURI(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                    return JsString.Create();
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsString.Box();
 
                 string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
@@ -344,21 +338,21 @@ namespace Jint.Native
                     encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString());
                 }
 
-                return JsString.Create(encoded.ToUpper());
+                return JsString.Box(encoded.ToUpper());
             }
 
-            public static JsInstance DecodeURIComponent(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox DecodeURIComponent(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                    return JsString.Create();
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsString.Box();
 
-                return JsString.Create(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
+                return JsString.Box(Uri.UnescapeDataString(arguments[0].ToString().Replace("+", " ")));
             }
 
-            public static JsInstance EncodeURIComponent(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox EncodeURIComponent(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (arguments.Length < 1 || JsInstance.IsUndefined(arguments[0]))
-                    return JsString.Create();
+                if (arguments.Length < 1 || arguments[0].IsUndefined)
+                    return JsString.Box();
 
                 string encoded = Uri.EscapeDataString(arguments[0].ToString());
 
@@ -367,7 +361,7 @@ namespace Jint.Native
                     encoded = encoded.Replace(Uri.EscapeDataString(c.ToString()), c.ToString().ToUpper());
                 }
 
-                return JsString.Create(encoded);
+                return JsString.Box(encoded);
             }
         }
     }

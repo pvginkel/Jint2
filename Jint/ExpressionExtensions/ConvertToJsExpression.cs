@@ -12,13 +12,14 @@ namespace Jint.ExpressionExtensions
 {
     internal class ConvertToJsExpression : Expression
     {
-        private static readonly MethodInfo _newBoolean = typeof(JsBoolean).GetMethod("Create", new[] { typeof(bool) });
-        private static readonly MethodInfo _newNumber = typeof(JsNumber).GetMethod("Create", new[] { typeof(double) });
-        private static readonly MethodInfo _newString = typeof(JsString).GetMethod("Create", new[] { typeof(string) });
+        private static readonly MethodInfo _newBoolean = typeof(JsBoolean).GetMethod("Box", new[] { typeof(bool) });
+        private static readonly MethodInfo _newNumber = typeof(JsNumber).GetMethod("Box", new[] { typeof(double) });
+        private static readonly MethodInfo _newString = typeof(JsString).GetMethod("Box", new[] { typeof(string) });
+        private static readonly MethodInfo _newObject = typeof(JsBox).GetMethod("CreateObject", new[] { typeof(JsObject) });
 
         public override Type Type
         {
-            get { return typeof(JsInstance); }
+            get { return typeof(JsBox); }
         }
 
         public override ExpressionType NodeType
@@ -54,6 +55,7 @@ namespace Jint.ExpressionExtensions
                 case ValueType.Boolean: method = _newBoolean; break;
                 case ValueType.Double: method = _newNumber; break;
                 case ValueType.String: method = _newString; break;
+                case ValueType.Object: method = _newObject; break;
                 default: throw new InvalidOperationException();
             }
 

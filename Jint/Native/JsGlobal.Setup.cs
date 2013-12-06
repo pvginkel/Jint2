@@ -30,7 +30,12 @@ namespace Jint.Native
             prototype.DefineOwnProperty(descriptor);
         }
 
-        private static void DefineProperty(JsObject prototype, string name, JsInstance value, PropertyAttributes attributes)
+        private static void DefineProperty(JsObject prototype, string name, JsObject value, PropertyAttributes attributes)
+        {
+            DefineProperty(prototype, name, JsBox.CreateObject(value), attributes);
+        }
+
+        private static void DefineProperty(JsObject prototype, string name, JsBox value, PropertyAttributes attributes)
         {
             prototype.DefineOwnProperty(name, value, attributes);
         }
@@ -39,7 +44,7 @@ namespace Jint.Native
         {
             prototype.DefineOwnProperty(
                 name,
-                CreateFunction(name, @delegate, argumentCount, null),
+                JsBox.CreateObject(CreateFunction(name, @delegate, argumentCount, null)),
                 attributes
             );
         }

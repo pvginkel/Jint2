@@ -35,30 +35,33 @@ namespace Jint.Native
             );
         }
 
-        public IEnumerable<JsInstance> GetForEachKeys(JsInstance obj)
+        public IEnumerable<JsBox> GetForEachKeys(JsBox obj)
         {
-            if (obj == null)
+            if (!obj.IsValid)
                 yield break;
 
-            var values = obj.Value as IEnumerable;
-
-            if (values != null)
+            if (obj.IsClr)
             {
-                foreach (object value in values)
+                var values = obj.ToInstance().Value as IEnumerable;
+
+                if (values != null)
                 {
-                    yield return Global.WrapClr(value);
+                    foreach (object value in values)
+                    {
+                        yield return JsBox.CreateObject(Global.WrapClr(value));
+                    }
+
+                    yield break;
                 }
             }
-            else
+
+            foreach (int key in new List<int>(((JsObject)obj).GetKeys()))
             {
-                foreach (int key in new List<int>(((JsObject)obj).GetKeys()))
-                {
-                    yield return JsString.Create(Global.GetIdentifier(key));
-                }
+                yield return JsString.Box(Global.GetIdentifier(key));
             }
         }
 
-        public JsInstance WrapException(Exception exception)
+        public JsBox WrapException(Exception exception)
         {
             if (exception == null)
                 throw new ArgumentNullException("exception");
@@ -71,7 +74,7 @@ namespace Jint.Native
             var jsException = exception as JsException;
             if (jsException != null)
             {
-                if (jsException.Value != null)
+                if (jsException.Value.IsValid)
                     return jsException.Value;
 
                 type = jsException.Type;
@@ -90,37 +93,44 @@ namespace Jint.Native
                 default: errorClass = Global.ErrorClass; break;
             }
 
-            return Global.CreateError(errorClass, exception.Message);
+            return JsBox.CreateObject(Global.CreateError(errorClass, exception.Message));
         }
 
-        public JsInstance New(JsInstance target, JsInstance[] arguments, JsInstance[] generics)
+        public JsBox New(JsBox target, JsBox[] arguments, JsBox[] generics)
         {
-            var undefined = target as JsUndefined;
-
-            if (_engine.IsClrAllowed && undefined != null && !String.IsNullOrEmpty(undefined.Name) && generics.Length > 0)
+            if (
+                _engine.IsClrAllowed &&
+                target.IsUndefined
+            )
             {
-                var genericParameters = new Type[generics.Length];
-
-                try
+                var undefined = (JsUndefined)target.ToInstance();
+                if (
+                    !String.IsNullOrEmpty(undefined.Name) &&
+                    generics.Length > 0
+                )
                 {
-                    for (int i = 0; i < generics.Length; i++)
+                    var genericParameters = new Type[generics.Length];
+
+                    try
                     {
-                        genericParameters[i] = (Type)generics[i].Value;
+                        for (int i = 0; i < generics.Length; i++)
+                        {
+                            genericParameters[i] = (Type)generics[i].ToInstance().Value;
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    throw new JintException("A type parameter is required", e);
-                }
+                    catch (Exception e)
+                    {
+                        throw new JintException("A type parameter is required", e);
+                    }
 
-                target = _engine.ResolveUndefined(undefined.Name, genericParameters);
+                    target = _engine.ResolveUndefined(undefined.Name, genericParameters);
+                }
             }
 
-            var function = target as JsObject;
-            if (function == null || function.Delegate == null)
+            if (!target.IsFunction)
                 throw new JsException(JsErrorType.Error, "Function expected.");
 
-            return function.Construct(this, arguments);
+            return ((JsObject)target).Construct(this, arguments);
         }
 
         public int ResolveIdentifier(string name)
@@ -128,7 +138,7 @@ namespace Jint.Native
             return Global.ResolveIdentifier(name);
         }
 
-        internal JsObject CreateArguments(JsObject callee, JsInstance[] arguments)
+        internal JsObject CreateArguments(JsObject callee, JsBox[] arguments)
         {
             var result = Global.CreateObject();
 
@@ -157,14 +167,14 @@ namespace Jint.Native
             result.DefineOwnProperty(new ValueDescriptor(
                 result,
                 "callee",
-                callee,
+                JsBox.CreateObject(callee),
                 PropertyAttributes.DontEnum
             ));
 
             result.DefineOwnProperty(new ValueDescriptor(
                 result,
                 "length",
-                JsNumber.Create(length),
+                JsNumber.Box(length),
                 PropertyAttributes.DontEnum
             ));
 

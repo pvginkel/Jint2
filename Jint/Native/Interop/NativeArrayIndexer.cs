@@ -16,45 +16,45 @@ namespace Jint.Native.Interop
             _global = owner.Global;
         }
 
-        public override bool TryGetProperty(JsInstance index, out JsInstance result)
+        public override bool TryGetProperty(JsBox index, out JsBox result)
         {
             result = _marshaller.MarshalClrValue(
-                _marshaller.MarshalJsValue<T[]>(Owner)[_marshaller.MarshalJsValue<int>(index)]
+                _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(Owner))[_marshaller.MarshalJsValue<int>(index)]
             );
 
             return true;
         }
 
-        public override bool TryGetProperty(int index, out JsInstance result)
+        public override bool TryGetProperty(int index, out JsBox result)
         {
             if (index >= 0)
             {
                 result = _marshaller.MarshalClrValue(
-                    _marshaller.MarshalJsValue<T[]>(Owner)[index]
+                    _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(Owner))[index]
                 );
                 return true;
             }
 
-            return TryGetProperty(JsString.Create(_global.GetIdentifier(index)), out result);
+            return TryGetProperty(JsString.Box(_global.GetIdentifier(index)), out result);
         }
 
-        public override bool TrySetProperty(JsInstance index, JsInstance value)
+        public override bool TrySetProperty(JsBox index, JsBox value)
         {
-            _marshaller.MarshalJsValue<T[]>(Owner)[_marshaller.MarshalJsValue<int>(index)] =
+            _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(Owner))[_marshaller.MarshalJsValue<int>(index)] =
                 _marshaller.MarshalJsValue<T>(value);
 
             return true;
         }
 
-        public override bool TrySetProperty(int index, JsInstance value)
+        public override bool TrySetProperty(int index, JsBox value)
         {
             if (index >= 0)
             {
-                _marshaller.MarshalJsValue<T[]>(Owner)[index] = _marshaller.MarshalJsValue<T>(value);
+                _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(Owner))[index] = _marshaller.MarshalJsValue<T>(value);
                 return true;
             }
 
-            return TrySetProperty(JsString.Create(_global.GetIdentifier(index)), value);
+            return TrySetProperty(JsString.Box(_global.GetIdentifier(index)), value);
         }
     }
 }

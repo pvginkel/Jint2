@@ -5,7 +5,7 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public class JsNull : JsInstance
+    public sealed class JsNull : JsInstance
     {
         public static JsNull Instance = new JsNull();
 
@@ -38,9 +38,9 @@ namespace Jint.Native
             return "null";
         }
 
-        public override JsInstance ToPrimitive(PreferredType preferredType)
+        public override JsBox ToPrimitive(PreferredType preferredType)
         {
-            return this;
+            return JsBox.Null;
         }
 
         public override object Value

@@ -34,7 +34,7 @@ namespace Jint.Native.Interop
             );
         }
 
-        public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+        public JsBox Execute(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
         {
             if (
                 _generics.Count == 0 &&

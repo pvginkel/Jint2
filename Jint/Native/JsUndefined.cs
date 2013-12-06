@@ -5,7 +5,7 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public class JsUndefined : JsInstance
+    public sealed class JsUndefined : JsInstance
     {
         internal string Name { get; private set; }
 
@@ -56,9 +56,12 @@ namespace Jint.Native
             return Double.NaN;
         }
 
-        public override JsInstance ToPrimitive(PreferredType preferredType)
+        public override JsBox ToPrimitive(PreferredType preferredType)
         {
-            return this;
+            if (Name == null)
+                return JsBox.Undefined;
+
+            return JsBox.FromInstance(this);
         }
 
         public override object Value

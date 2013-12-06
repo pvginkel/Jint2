@@ -1,4 +1,6 @@
-﻿using System;
+﻿// ReSharper disable CompareOfFloatsByEqualityOperator
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,104 +10,104 @@ namespace Jint.Native
 {
     partial class JintRuntime
     {
-        public static JsInstance Operation_Add(JsInstance left, JsInstance right)
+        public static JsBox Operation_Add(JsBox left, JsBox right)
         {
             var leftPrimitive = left.ToPrimitive();
             var rightPrimitive = right.ToPrimitive();
 
-            if (leftPrimitive is JsString || rightPrimitive is JsString)
-                return JsString.Create(leftPrimitive.ToString() + rightPrimitive.ToString());
+            if (leftPrimitive.IsString || rightPrimitive.IsString)
+                return JsString.Box(leftPrimitive.ToString() + rightPrimitive.ToString());
 
-            return JsNumber.Create(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
+            return JsNumber.Box(leftPrimitive.ToNumber() + rightPrimitive.ToNumber());
         }
 
-        public static string Operation_Add(string left, JsInstance right)
+        public static string Operation_Add(string left, JsBox right)
         {
             return left + right.ToPrimitive().ToString();
         }
 
-        public static string Operation_Add(JsInstance left, string right)
+        public static string Operation_Add(JsBox left, string right)
         {
             return left.ToPrimitive().ToString() + right;
         }
 
-        public static JsInstance Operation_Add(double left, JsInstance right)
+        public static JsBox Operation_Add(double left, JsBox right)
         {
             var rightPrimitive = right.ToPrimitive();
 
-            if (rightPrimitive is JsString)
-                return JsString.Create(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
+            if (rightPrimitive.IsString)
+                return JsString.Box(left.ToString(CultureInfo.InvariantCulture) + rightPrimitive.ToString());
 
-            return JsNumber.Create(left + rightPrimitive.ToNumber());
+            return JsNumber.Box(left + rightPrimitive.ToNumber());
         }
 
-        public static JsInstance Operation_Add(JsInstance left, double right)
+        public static JsBox Operation_Add(JsBox left, double right)
         {
             var leftPrimitive = left.ToPrimitive();
 
-            if (leftPrimitive is JsString)
-                return JsString.Create(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
+            if (leftPrimitive.IsString)
+                return JsString.Box(leftPrimitive.ToString() + right.ToString(CultureInfo.InvariantCulture));
 
-            return JsNumber.Create(leftPrimitive.ToNumber() + right);
+            return JsNumber.Box(leftPrimitive.ToNumber() + right);
         }
 
-        public static double Operation_BitwiseAnd(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseAnd(JsBox left, JsBox right)
         {
-            if (JsInstance.IsUndefined(left) || JsInstance.IsUndefined(right))
+            if (left.IsUndefined || right.IsUndefined)
                 return 0;
 
             return (long)left.ToNumber() & (long)right.ToNumber();
         }
 
-        public static double Operation_BitwiseAnd(double left, JsInstance right)
+        public static double Operation_BitwiseAnd(double left, JsBox right)
         {
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return 0;
 
             return (long)left & (long)right.ToNumber();
         }
 
-        public static double Operation_BitwiseAnd(JsInstance left, double right)
+        public static double Operation_BitwiseAnd(JsBox left, double right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
 
             return (long)left.ToNumber() & (long)right;
         }
 
-        public static double Operation_BitwiseExclusiveOr(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseExclusiveOr(JsBox left, JsBox right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
             {
-                if (JsInstance.IsUndefined(right))
+                if (right.IsUndefined)
                     return 1;
 
                 return (long)right.ToNumber();
             }
 
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left.ToNumber();
 
             return (long)left.ToNumber() ^ (long)right.ToNumber();
         }
 
-        public static double Operation_BitwiseExclusiveOr(double left, JsInstance right)
+        public static double Operation_BitwiseExclusiveOr(double left, JsBox right)
         {
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left;
 
             return (long)left ^ (long)right.ToNumber();
         }
 
-        public static double Operation_BitwiseExclusiveOr(JsInstance left, double right)
+        public static double Operation_BitwiseExclusiveOr(JsBox left, double right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return (long)right;
 
             return (long)left.ToNumber() ^ (long)right;
         }
 
-        public static double Operation_BitwiseNot(JsInstance operand)
+        public static double Operation_BitwiseNot(JsBox operand)
         {
             var number = operand.ToPrimitive().ToNumber();
 
@@ -123,49 +125,49 @@ namespace Jint.Native
             return -((long)operand + 1);
         }
 
-        public static double Operation_BitwiseOr(JsInstance left, JsInstance right)
+        public static double Operation_BitwiseOr(JsBox left, JsBox right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
             {
-                if (JsInstance.IsUndefined(right))
+                if (right.IsUndefined)
                     return 1;
 
                 return (long)right.ToNumber();
             }
 
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left.ToNumber();
 
             return (long)left.ToNumber() | (long)right.ToNumber();
         }
 
-        public static double Operation_BitwiseOr(double left, JsInstance right)
+        public static double Operation_BitwiseOr(double left, JsBox right)
         {
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left;
 
             return (long)left | (long)right.ToNumber();
         }
 
-        public static double Operation_BitwiseOr(JsInstance left, double right)
+        public static double Operation_BitwiseOr(JsBox left, double right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return (long)right;
 
             return (long)left.ToNumber() | (long)right;
         }
 
-        public static double Operation_Divide(JsInstance left, JsInstance right)
+        public static double Operation_Divide(JsBox left, JsBox right)
         {
             return Operation_Divide(left.ToNumber(), right.ToNumber());
         }
 
-        public static double Operation_Divide(double left, JsInstance right)
+        public static double Operation_Divide(double left, JsBox right)
         {
             return Operation_Divide(left, right.ToNumber());
         }
 
-        public static double Operation_Divide(JsInstance left, double right)
+        public static double Operation_Divide(JsBox left, double right)
         {
             return Operation_Divide(left.ToNumber(), right);
         }
@@ -181,51 +183,48 @@ namespace Jint.Native
             return left / right;
         }
 
-        public bool Operation_In(JsInstance left, JsInstance right)
+        public bool Operation_In(JsBox left, JsBox right)
         {
-            if (right is ILiteral)
+            if (right.IsLiteral)
                 throw new JsException(JsErrorType.Error, "Cannot apply 'in' operator to the specified member.");
 
             return ((JsObject)right).HasProperty(left);
         }
 
-        public bool Operation_InstanceOf(JsInstance left, JsInstance right)
+        public bool Operation_InstanceOf(JsBox left, JsBox right)
         {
-            var function = right as JsObject;
-            var obj = left as JsObject;
-
-            if (function == null || function.Delegate == null)
+            if (!right.IsFunction)
                 throw new JsException(JsErrorType.TypeError, "Right argument should be a function");
-            if (obj == null)
+            if (!left.IsObject)
                 throw new JsException(JsErrorType.TypeError, "Left argument should be an object");
 
-            return function.HasInstance(obj);
+            return ((JsObject)right).HasInstance((JsObject)left);
         }
 
-        public static double Operation_LeftShift(JsInstance left, JsInstance right)
+        public static double Operation_LeftShift(JsBox left, JsBox right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left.ToNumber();
             return (long)left.ToNumber() << (ushort)right.ToNumber();
         }
 
-        public static double Operation_LeftShift(double left, JsInstance right)
+        public static double Operation_LeftShift(double left, JsBox right)
         {
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left;
             return (long)left << (ushort)right.ToNumber();
         }
 
-        public static double Operation_LeftShift(JsInstance left, double right)
+        public static double Operation_LeftShift(JsBox left, double right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
             return (long)left.ToNumber() << (ushort)right;
         }
 
-        public static double Operation_Modulo(JsInstance left, JsInstance right)
+        public static double Operation_Modulo(JsBox left, JsBox right)
         {
             double rightNumber = right.ToNumber();
             if (Double.IsInfinity(rightNumber))
@@ -235,7 +234,7 @@ namespace Jint.Native
             return left.ToNumber() % rightNumber;
         }
 
-        public static double Operation_Modulo(double left, JsInstance right)
+        public static double Operation_Modulo(double left, JsBox right)
         {
             double rightNumber = right.ToNumber();
             if (Double.IsInfinity(rightNumber))
@@ -243,7 +242,7 @@ namespace Jint.Native
             return left % rightNumber;
         }
 
-        public static double Operation_Modulo(JsInstance left, double right)
+        public static double Operation_Modulo(JsBox left, double right)
         {
             if (Double.IsInfinity(right))
                 return Double.PositiveInfinity;
@@ -261,17 +260,17 @@ namespace Jint.Native
             return left % right;
         }
 
-        public static double Operation_Multiply(JsInstance left, JsInstance right)
+        public static double Operation_Multiply(JsBox left, JsBox right)
         {
             return left.ToNumber() * right.ToNumber();
         }
 
-        public static double Operation_Multiply(double left, JsInstance right)
+        public static double Operation_Multiply(double left, JsBox right)
         {
             return left * right.ToNumber();
         }
 
-        public static double Operation_Multiply(JsInstance left, double right)
+        public static double Operation_Multiply(JsBox left, double right)
         {
             return left.ToNumber() * right;
         }
@@ -281,87 +280,72 @@ namespace Jint.Native
             return left * right;
         }
 
-        public static double Operation_Negate(JsInstance operand)
+        public static double Operation_Negate(JsBox operand)
         {
             return -operand.ToNumber();
         }
 
-        public static bool Operation_Not(JsInstance operand)
+        public static bool Operation_Not(JsBox operand)
         {
             return !operand.ToBoolean();
         }
 
-        public static double Operation_Power(JsInstance left, JsInstance right)
+        public static double Operation_Power(JsBox left, JsBox right)
         {
             return Math.Pow(left.ToNumber(), right.ToNumber());
         }
 
-        public static double Operation_Power(double left, JsInstance right)
+        public static double Operation_Power(double left, JsBox right)
         {
             return Math.Pow(left, right.ToNumber());
         }
 
-        public static double Operation_Power(JsInstance left, double right)
+        public static double Operation_Power(JsBox left, double right)
         {
             return Math.Pow(left.ToNumber(), right);
         }
 
-        public static double Operation_RightShift(JsInstance left, JsInstance right)
+        public static double Operation_RightShift(JsBox left, JsBox right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left.ToNumber();
             return (long)left.ToNumber() >> (ushort)right.ToNumber();
         }
 
-        public static double Operation_RightShift(double left, JsInstance right)
+        public static double Operation_RightShift(double left, JsBox right)
         {
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left;
             return (long)left >> (ushort)right.ToNumber();
         }
 
-        public static double Operation_RightShift(JsInstance left, double right)
+        public static double Operation_RightShift(JsBox left, double right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
             return (long)left.ToNumber() >> (ushort)right;
         }
 
-        public static double Operation_Subtract(JsInstance left, JsInstance right)
+        public static double Operation_Subtract(JsBox left, JsBox right)
         {
             return left.ToNumber() - right.ToNumber();
         }
 
-        public static double Operation_Subtract(double left, JsInstance right)
+        public static double Operation_Subtract(double left, JsBox right)
         {
             return left - right.ToNumber();
         }
 
-        public static double Operation_Subtract(JsInstance left, double right)
+        public static double Operation_Subtract(JsBox left, double right)
         {
             return left.ToNumber() - right;
         }
 
-        public static string Operation_TypeOf(JsInstance operand)
+        public static string Operation_TypeOf(JsBox operand)
         {
-            if (operand == null)
-                return JsNames.TypeUndefined;
-            if (operand is JsNull)
-                return JsNames.TypeObject;
-            var jsObject = operand as JsObject;
-            if (jsObject != null && jsObject.Delegate != null)
-                return JsNames.TypeFunction;
-            switch (operand.Type)
-            {
-                case JsType.Boolean: return JsNames.TypeBoolean;
-                case JsType.Number: return JsNames.TypeNumber;
-                case JsType.Object: return JsNames.TypeObject;
-                case JsType.String: return JsNames.TypeString;
-                case JsType.Undefined: return JsNames.TypeUndefined;
-                default: throw new InvalidOperationException();
-            }
+            return operand.GetTypeOf();
         }
 
         public static string Operation_TypeOf(JsObject scope, string identifier)
@@ -370,164 +354,172 @@ namespace Jint.Native
             if (!scope.TryGetDescriptor(scope.Global.ResolveIdentifier(identifier), out descriptor))
                 return JsNames.TypeUndefined;
 
-            return Operation_TypeOf(descriptor.Get(scope));
+            return Operation_TypeOf(descriptor.Get(JsBox.CreateObject(scope)));
         }
 
-        public static double Operation_UnaryPlus(JsInstance operand)
+        public static double Operation_UnaryPlus(JsBox operand)
         {
             return operand.ToNumber();
         }
 
-        public static double Operation_UnsignedRightShift(JsInstance left, JsInstance right)
+        public static double Operation_UnsignedRightShift(JsBox left, JsBox right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left.ToNumber();
             return (long)left.ToNumber() >> (ushort)right.ToNumber();
         }
 
-        public static double Operation_UnsignedRightShift(double left, JsInstance right)
+        public static double Operation_UnsignedRightShift(double left, JsBox right)
         {
-            if (JsInstance.IsUndefined(right))
+            if (right.IsUndefined)
                 return (long)left;
             return (long)left >> (ushort)right.ToNumber();
         }
 
-        public static double Operation_UnsignedRightShift(JsInstance left, double right)
+        public static double Operation_UnsignedRightShift(JsBox left, double right)
         {
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return 0;
             return (long)left.ToNumber() >> (ushort)right;
         }
 
-        public JsInstance Operation_Index(JsInstance obj, JsInstance index)
+        public JsBox Operation_Index(JsBox obj, JsBox index)
         {
-            var stringObj = obj as JsString;
-            var numberIndex = index as JsNumber;
+            if (obj.IsObject)
+                return ((JsObject)obj)[index];
 
-            if (stringObj != null && numberIndex != null)
+            if (obj.IsString && index.IsNumber)
             {
-                return JsString.Create(
-                    ((string)stringObj.Value).Substring((int)numberIndex.ToNumber(), 1)
+                return JsString.Box(
+                    ((string)obj).Substring((int)(double)index, 1)
                 );
             }
 
-            var jsObject = obj as JsObject;
-            if (jsObject == null)
-                jsObject = Global.GetPrototype(obj);
-
-            return jsObject[index];
+            return Global.GetPrototype(obj)[index];
         }
 
-        public JsInstance Operation_Index(JsInstance obj, double index)
+        public JsBox Operation_Index(JsObject obj, JsBox index)
         {
-            var arrayStore = obj.FindArrayStore(false);
-            if (arrayStore != null)
+            return obj[index];
+        }
+
+        public JsBox Operation_Index(JsBox obj, double index)
+        {
+            if (obj.IsObject)
+                return Operation_Index((JsObject)obj, index);
+
+            return Operation_Index(obj, JsNumber.Box(index));
+        }
+
+        public JsBox Operation_Index(JsObject obj, double index)
+        {
+            int intIndex = (int)index;
+            if (index == intIndex)
             {
-                int intIndex = (int)index;
-                if (index == intIndex)
+                var arrayStore = obj.PropertyStore as ArrayPropertyStore;
+                if (arrayStore != null)
                     return arrayStore[intIndex];
             }
 
-            return Operation_Index(obj, JsNumber.Create(index));
+            return obj[JsNumber.Box(index)];
         }
 
-        public static JsInstance Operation_SetIndex(JsInstance obj, double index, JsInstance value)
+        public static JsBox Operation_SetIndex(JsBox obj, double index, JsBox value)
         {
-            var arrayStore = obj.FindArrayStore(false);
-            if (arrayStore != null)
+            return Operation_SetIndex((JsObject)obj, index, value);
+        }
+
+        public static JsBox Operation_SetIndex(JsObject obj, double index, JsBox value)
+        {
+            int intIndex = (int)index;
+            if (index == intIndex)
             {
-                int intIndex = (int)index;
-                if (index == intIndex)
-                {
-                    arrayStore[intIndex] = value;
-                    return value;
-                }
+                var arrayStore = obj.PropertyStore as ArrayPropertyStore;
+                if (arrayStore != null)
+                    return arrayStore[intIndex] = value;
             }
 
-            return ((JsObject)obj)[JsNumber.Create(index)] = value;
+            return obj[JsNumber.Box(index)] = value;
         }
 
-        public JsInstance Operation_Member(JsInstance obj, string name)
+        public static JsBox Operation_SetIndex(JsBox obj, JsBox index, JsBox value)
         {
-            return GetMember(obj, name);
+            return ((JsObject)obj)[index] = value;
         }
 
-        public JsInstance GetMember(JsInstance obj, string name)
+        public JsBox Operation_Member(JsBox obj, string name)
         {
-            var undefined = obj as JsUndefined;
-            if (undefined != null)
+            if (obj.IsUndefined)
             {
+                var undefined = (JsUndefined)obj.ToInstance();
                 if (undefined.Name != null)
                     name = undefined.Name + "." + name;
 
                 return Global.Engine.ResolveUndefined(name, null);
             }
 
-            var jsObject = obj as JsObject;
-            if (jsObject == null)
+            if (!obj.IsObject)
             {
-                jsObject = Global.GetPrototype(obj);
+                var jsObject = Global.GetPrototype(obj);
                 var descriptor = jsObject.GetDescriptor(Global.ResolveIdentifier(name));
                 if (descriptor == null)
-                    return JsUndefined.Instance;
+                    return JsBox.Undefined;
 
                 return descriptor.Get(obj);
             }
 
-            return jsObject[name];
+            return ((JsObject)obj)[name];
         }
 
-        public JsInstance GetMemberByIndex(JsInstance obj, int index)
+        public JsBox GetMember(JsBox obj, string name)
         {
-            var undefined = obj as JsUndefined;
-            if (undefined != null)
+            return Operation_Member(obj, name);
+        }
+
+        public JsBox GetMemberByIndex(JsBox obj, int index)
+        {
+            if (obj.IsUndefined)
             {
                 string name = Global.GetIdentifier(index);
 
+                var undefined = (JsUndefined)obj.ToInstance();
                 if (undefined.Name != null)
                     name = undefined.Name + "." + name;
 
                 return Global.Engine.ResolveUndefined(name, null);
             }
 
-            var jsObject = obj as JsObject;
-            if (jsObject == null)
-            {
-                jsObject = Global.GetPrototype(obj);
-                var descriptor = jsObject.GetDescriptor(index);
-                if (descriptor == null)
-                    return JsUndefined.Instance;
+            if (obj.IsObject)
+                return ((JsObject)obj).GetProperty(index);
 
-                return descriptor.Get(obj);
-            }
+            var prototype = Global.GetPrototype(obj);
+            var descriptor = prototype.GetDescriptor(index);
+            if (descriptor == null)
+                return JsBox.Undefined;
 
-            return jsObject.GetProperty(index);
+            return descriptor.Get(JsBox.CreateObject(prototype));
         }
 
-        public static JsInstance Operation_SetMember(JsInstance obj, string name, JsInstance value)
+        public static JsBox Operation_SetMember(JsBox obj, string name, JsBox value)
         {
             return SetMember(obj, name, value);
         }
 
-        public static JsInstance SetMember(JsInstance obj, string name, JsInstance value)
+        public static JsBox SetMember(JsBox obj, string name, JsBox value)
         {
-            var dictionary = obj as JsObject;
-
-            if (dictionary != null)
-                return dictionary[name] = value;
+            if (obj.IsObject)
+                ((JsObject)obj)[name] = value;
 
             return value;
         }
 
-        public static JsInstance SetMemberByIndex(JsInstance obj, int index, JsInstance value)
+        public static JsBox SetMemberByIndex(JsBox obj, int index, JsBox value)
         {
-            var dictionary = obj as JsObject;
-
-            if (dictionary != null)
+            if (obj.IsObject)
             {
-                dictionary.SetProperty(index, value);
+                ((JsObject)obj).SetProperty(index, value);
                 return value;
             }
 

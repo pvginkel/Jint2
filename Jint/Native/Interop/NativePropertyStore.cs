@@ -37,39 +37,39 @@ namespace Jint.Native.Interop
             );
         }
 
-        public override bool TryGetProperty(int index, out JsInstance result)
+        public override bool TryGetProperty(int index, out JsBox result)
         {
             if (index >= 0)
-                return TryGetProperty(JsString.Create(_global.GetIdentifier(index)), out result);
+                return TryGetProperty(JsString.Box(_global.GetIdentifier(index)), out result);
 
             return base.TryGetProperty(index, out result);
         }
 
-        public override bool TryGetProperty(JsInstance index, out JsInstance result)
+        public override bool TryGetProperty(JsBox index, out JsBox result)
         {
             var getter = _getOverload.ResolveOverload(new[] { index }, null);
             if (getter == null)
                 throw new JintException("No matching overload found");
 
-            result = getter(_global, Owner, index);
+            result = getter(_global, JsBox.CreateObject(Owner), index);
             return true;
         }
 
-        public override bool TrySetProperty(int index, JsInstance value)
+        public override bool TrySetProperty(int index, JsBox value)
         {
             if (index >= 0)
-                return TrySetProperty(JsString.Create(_global.GetIdentifier(index)), value);
+                return TrySetProperty(JsString.Box(_global.GetIdentifier(index)), value);
 
             return base.TrySetProperty(index, value);
         }
 
-        public override bool TrySetProperty(JsInstance index, JsInstance value)
+        public override bool TrySetProperty(JsBox index, JsBox value)
         {
             var setter = _setOverload.ResolveOverload(new[] { index, value }, null);
             if (setter == null)
                 throw new JintException("No matching overload found");
 
-            setter(_global, Owner, index, value);
+            setter(_global, JsBox.CreateObject(Owner), index, value);
             return true;
         }
     }

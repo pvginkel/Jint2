@@ -60,7 +60,7 @@ namespace Jint.Expressions
                     case Expressions.ValueType.Boolean: return typeof(bool);
                     case Expressions.ValueType.Double: return typeof(double);
                     case Expressions.ValueType.String: return typeof(string);
-                    default: return typeof(JsInstance);
+                    default: return typeof(JsBox);
                 }
             }
         }

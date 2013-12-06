@@ -18,6 +18,12 @@ namespace Jint.Play
 
             var jint = new JintEngine();
 
+#if false
+            jint.Run(program);
+            Console.WriteLine("Attach");
+            Console.ReadLine();
+            jint.Run(program);
+#else
             for (int i = 0; i < 10; i++)
             {
                 var sw = Stopwatch.StartNew();
@@ -26,6 +32,7 @@ namespace Jint.Play
 
                 Console.WriteLine(sw.Elapsed);
             }
+#endif
         }
     }
 }

@@ -23,8 +23,8 @@ namespace Jint.Native
     {
 <#
     foreach (var operation in new[] { Operation.Equal, Operation.NotEqual, Operation.LessThan, Operation.LessThanOrEqual, Operation.GreaterThan, Operation.GreaterThanOrEqual, Operation.Same, Operation.NotSame }) {
-        foreach (var left in new[] { "JsInstance", "bool", "double", "string" }) {
-            foreach (var right in new[] { "JsInstance", "bool", "double", "string" }) {
+        foreach (var left in new[] { "JsBox", "bool", "double", "string" }) {
+            foreach (var right in new[] { "JsBox", "bool", "double", "string" }) {
                 bool skip = false;
 
                 switch (operation) {
@@ -32,7 +32,7 @@ namespace Jint.Native
                     case Operation.Same:
                     case Operation.NotEqual:
                     case Operation.NotSame:
-                        skip = left == right && left != "JsInstance";
+                        skip = left == right && left != "JsBox";
                         break;
 
                     case Operation.LessThan:
@@ -50,31 +50,31 @@ namespace Jint.Native
         {
 <# switch (operation) { #>
 <#  case Operation.Equal: { #>
-<#      if (left == right && left != "JsInstance") { #>
+<#      if (left == right && left != "JsBox") { #>
             return left == right;
 <#      } else { #>
             return CompareEquality(left, right);
 <#      } #>
 <# break; } case Operation.NotEqual: { #>
-<#      if (left == right && left != "JsInstance") { #>
+<#      if (left == right && left != "JsBox") { #>
             return left != right;
 <#      } else { #>
             return !CompareEquality(left, right);
 <#      } #>
 <# break; } case Operation.Same: { #>
-<#      if (left == right && left != "JsInstance") { #>
+<#      if (left == right && left != "JsBox") { #>
             return left == right;
 <#      } else { #>
             return CompareSame(left, right);
 <#      } #>
 <# break; } case Operation.NotSame: { #>
-<#      if (left == right && left != "JsInstance") { #>
+<#      if (left == right && left != "JsBox") { #>
             return left != right;
 <#      } else { #>
             return !CompareSame(left, right);
 <#      } #>
 <# break; } default: { #>
-<# if (left == "JsInstance" && right == "JsInstance") { #>
+<# if (left == "JsBox" && right == "JsBox") { #>
             double result;
             if (TryCompareRange(left, right, out result))
 <#      switch (operation) { #>
@@ -91,7 +91,6 @@ namespace Jint.Native
                 return result <= 0;
 <#          break; }
         default: throw new NotImplementedException();
-            break;
         } #>
             return false;
 <# } else { #>
@@ -109,7 +108,6 @@ namespace Jint.Native
             return <#= MakeNumber(left, "left") #> <= <#= MakeNumber(right, "right") #>;
 <#          break; }
         default: throw new NotImplementedException();
-            break;
     } #>
 <# } #>
 <# break; } #>

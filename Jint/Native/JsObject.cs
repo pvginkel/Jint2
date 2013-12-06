@@ -12,9 +12,9 @@ namespace Jint.Native
 #if !DEBUG
     [DebuggerTypeProxy(typeof(JsObjectDebugView))]
 #endif
-    public sealed class JsObject : JsInstance, IEnumerable<KeyValuePair<string, JsInstance>>
+    public sealed class JsObject : JsInstance, IEnumerable<KeyValuePair<string, JsBox>>
     {
-        internal static readonly ReadOnlyCollection<KeyValuePair<int, JsInstance>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, JsInstance>>(new KeyValuePair<int, JsInstance>[0]);
+        internal static readonly ReadOnlyCollection<KeyValuePair<int, JsBox>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, JsBox>>(new KeyValuePair<int, JsBox>[0]);
 
         private object _value;
         private bool? _isClr;
@@ -89,12 +89,12 @@ namespace Jint.Native
                 PropertyStore = new DictionaryPropertyStore(this);
         }
 
-        public override JsInstance ToPrimitive(PreferredType preferredType)
+        public override JsBox ToPrimitive(PreferredType preferredType)
         {
             return DefaultValue(preferredType);
         }
 
-        public JsInstance DefaultValue(PreferredType hint)
+        public JsBox DefaultValue(PreferredType hint)
         {
             if (hint == PreferredType.None)
             {
@@ -103,7 +103,7 @@ namespace Jint.Native
                     hint = PreferredType.String;
             }
 
-            JsInstance primitive;
+            JsBox primitive;
 
             var toString = GetDescriptor(Id.toString);
             var valueOf = GetDescriptor(Id.valueOf);
@@ -126,20 +126,20 @@ namespace Jint.Native
             if (IsClr && Value != null)
             {
                 if (!(Value is IComparable))
-                    return JsString.Create(Value.ToString());
+                    return JsString.Box(Value.ToString());
 
                 switch (Convert.GetTypeCode(Value))
                 {
                     case TypeCode.Boolean:
-                        return JsBoolean.Create((bool)Value);
+                        return JsBox.CreateBoolean((bool)Value);
 
                     case TypeCode.Char:
                     case TypeCode.String:
                     case TypeCode.Object:
-                        return JsString.Create(Value.ToString());
+                        return JsString.Box(Value.ToString());
 
                     case TypeCode.DateTime:
-                        return JsString.Create(JsConvert.ToString((DateTime)Value));
+                        return JsString.Box(JsConvert.ToString((DateTime)Value));
 
                     case TypeCode.Byte:
                     case TypeCode.Int16:
@@ -152,29 +152,29 @@ namespace Jint.Native
                     case TypeCode.Decimal:
                     case TypeCode.Double:
                     case TypeCode.Single:
-                        return JsNumber.Create(Convert.ToDouble(Value));
+                        return JsBox.CreateNumber(Convert.ToDouble(Value));
 
                     default:
-                        return JsString.Create(Value.ToString());
+                        return JsString.Box(Value.ToString());
                 }
             }
 
             throw new JsException(JsErrorType.TypeError, "Invalid type");
         }
 
-        private bool TryExecuteToPrimitiveFunction(Descriptor descriptor, out JsInstance primitive)
+        private bool TryExecuteToPrimitiveFunction(Descriptor descriptor, out JsBox primitive)
         {
-            primitive = null;
+            primitive = new JsBox();
+            var boxedThis = JsBox.CreateObject(this);
 
-            var function = descriptor.Get(this) as JsObject;
-
-            if (function == null)
+            var function = descriptor.Get(boxedThis);
+            if (!function.IsFunction)
                 return false;
 
             var result = Global.ExecuteFunction(
-                function,
-                this,
-                EmptyArray,
+                (JsObject)function,
+                boxedThis,
+                JsBox.EmptyArray,
                 null
             );
 
@@ -235,11 +235,7 @@ namespace Jint.Native
 
         public override string ToString()
         {
-            string s = ToPrimitive(PreferredType.String).ToString();
-            if (s == "[object ]")
-            {
-            }
-            return s;
+            return ToPrimitive(PreferredType.String).ToString();
         }
 
         /// <summary>
@@ -271,7 +267,7 @@ namespace Jint.Native
             }
         }
 
-        public bool HasProperty(JsInstance index)
+        public bool HasProperty(JsBox index)
         {
             var @object = this;
 
@@ -295,7 +291,7 @@ namespace Jint.Native
             return PropertyStore.HasOwnProperty(index);
         }
 
-        public bool HasOwnProperty(JsInstance index)
+        public bool HasOwnProperty(JsBox index)
         {
             if (PropertyStore == null)
                 return false;
@@ -311,7 +307,7 @@ namespace Jint.Native
             return PropertyStore.GetOwnDescriptor(index);
         }
 
-        public Descriptor GetOwnDescriptor(JsInstance index)
+        public Descriptor GetOwnDescriptor(JsBox index)
         {
             if (PropertyStore == null)
                 return null;
@@ -331,7 +327,7 @@ namespace Jint.Native
             return Prototype.GetDescriptor(index);
         }
 
-        public Descriptor GetDescriptor(JsInstance index)
+        public Descriptor GetDescriptor(JsBox index)
         {
             var result = GetOwnDescriptor(index);
             if (result != null)
@@ -343,7 +339,7 @@ namespace Jint.Native
             return Prototype.GetDescriptor(index);
         }
 
-        public bool TryGetDescriptor(JsInstance index, out Descriptor result)
+        public bool TryGetDescriptor(JsBox index, out Descriptor result)
         {
             result = GetDescriptor(index);
             return result != null;
@@ -355,41 +351,41 @@ namespace Jint.Native
             return result != null;
         }
 
-        public bool TryGetProperty(JsInstance index, out JsInstance result)
+        public bool TryGetProperty(JsBox index, out JsBox result)
         {
             if (PropertyStore != null)
                 return PropertyStore.TryGetProperty(index, out result);
 
-            result = null;
+            result = new JsBox();
             return false;
         }
 
-        public bool TryGetProperty(int index, out JsInstance result)
+        public bool TryGetProperty(int index, out JsBox result)
         {
             if (PropertyStore != null)
                 return PropertyStore.TryGetProperty(index, out result);
 
-            result = null;
+            result = new JsBox();
             return false;
         }
 
-        public JsInstance this[JsInstance index]
+        public JsBox this[JsBox index]
         {
             get { return GetProperty(index); }
             set { SetProperty(index, value); }
         }
 
-        public JsInstance this[string index]
+        public JsBox this[string index]
         {
             get { return GetProperty(Global.ResolveIdentifier(index)); }
             set { SetProperty(Global.ResolveIdentifier(index), value); }
         }
 
-        private JsInstance GetProperty(JsInstance index)
+        private JsBox GetProperty(JsBox index)
         {
             if (PropertyStore != null)
             {
-                JsInstance result;
+                JsBox result;
                 if (PropertyStore.TryGetProperty(index, out result))
                     return result;
             }
@@ -397,11 +393,11 @@ namespace Jint.Native
             return GetPropertyCore(Global.ResolveIdentifier(index.ToString()));
         }
 
-        internal JsInstance GetProperty(int index)
+        internal JsBox GetProperty(int index)
         {
             if (PropertyStore != null)
             {
-                JsInstance result;
+                JsBox result;
                 if (PropertyStore.TryGetProperty(index, out result))
                     return result;
             }
@@ -409,7 +405,7 @@ namespace Jint.Native
             return GetPropertyCore(index);
         }
 
-        private JsInstance GetPropertyCore(int index)
+        private JsBox GetPropertyCore(int index)
         {
             Descriptor descriptor;
 
@@ -417,20 +413,20 @@ namespace Jint.Native
             {
                 descriptor = GetOwnDescriptor(index);
                 if (descriptor != null)
-                    return descriptor.Get(this);
+                    return descriptor.Get(JsBox.CreateObject(this));
 
                 if (IsPrototypeNull)
-                    return JsNull.Instance;
+                    return JsBox.Null;
 
-                return Prototype;
+                return JsBox.CreateObject(Prototype);
             }
 
             if (index == Id.__proto__)
             {
                 if (IsPrototypeNull)
-                    return JsNull.Instance;
+                    return JsBox.Null;
 
-                return Prototype;
+                return JsBox.CreateObject(Prototype);
             }
 
             descriptor = GetDescriptor(index);
@@ -446,11 +442,11 @@ namespace Jint.Native
 
             return
                 descriptor != null
-                ? descriptor.Get(this)
-                : JsUndefined.Instance;
+                ? descriptor.Get(JsBox.CreateObject(this))
+                : JsBox.Undefined;
         }
 
-        internal JsInstance SetProperty(int index, JsInstance value)
+        internal JsBox SetProperty(int index, JsBox value)
         {
             EnsurePropertyStore();
             if (!PropertyStore.TrySetProperty(index, value))
@@ -459,18 +455,18 @@ namespace Jint.Native
             return value;
         }
 
-        private void SetProperty(JsInstance index, JsInstance value)
+        private void SetProperty(JsBox index, JsBox value)
         {
             EnsurePropertyStore();
             if (!PropertyStore.TrySetProperty(index, value))
                 SetPropertyCore(Global.ResolveIdentifier(index.ToString()), value);
         }
 
-        private void SetPropertyCore(int index, JsInstance value)
+        private void SetPropertyCore(int index, JsBox value)
         {
             if (index == Id.__proto__)
             {
-                if (value.Type == JsType.Object)
+                if (value.IsObject)
                     Prototype = (JsObject)value;
             }
             else
@@ -488,7 +484,7 @@ namespace Jint.Native
             }
         }
 
-        public bool Delete(JsInstance index)
+        public bool Delete(JsBox index)
         {
             if (PropertyStore == null)
                 return true;
@@ -509,12 +505,12 @@ namespace Jint.Native
             return PropertyStore.Delete(index);
         }
 
-        public void DefineOwnProperty(string key, JsInstance value, PropertyAttributes attributes)
+        public void DefineOwnProperty(string key, JsBox value, PropertyAttributes attributes)
         {
             DefineOwnProperty(new ValueDescriptor(this, key, value, attributes));
         }
 
-        public void DefineOwnProperty(string key, JsInstance value)
+        public void DefineOwnProperty(string key, JsBox value)
         {
             DefineOwnProperty(new ValueDescriptor(this, key, value));
         }
@@ -533,7 +529,7 @@ namespace Jint.Native
             DefineOwnProperty(new PropertyDescriptor(Global, this, name, getFunction, setFunction, PropertyAttributes.None));
         }
 
-        public IEnumerator<KeyValuePair<string, JsInstance>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, JsBox>> GetEnumerator()
         {
             var items =
                 PropertyStore == null
@@ -544,7 +540,7 @@ namespace Jint.Native
             {
                 while (items.MoveNext())
                 {
-                    yield return new KeyValuePair<string, JsInstance>(
+                    yield return new KeyValuePair<string, JsBox>(
                         Global.GetIdentifier(items.Current.Key),
                         items.Current.Value
                     );
@@ -557,10 +553,10 @@ namespace Jint.Native
             return GetEnumerator();
         }
 
-        public IEnumerable<JsInstance> GetValues()
+        public IEnumerable<JsBox> GetValues()
         {
             if (PropertyStore == null)
-                return EmptyArray;
+                return JsBox.EmptyArray;
 
             return PropertyStore.GetValues();
         }
@@ -613,22 +609,23 @@ namespace Jint.Native
         }
 
         // 13.2.2
-        public JsInstance Construct(JintRuntime runtime, JsInstance[] arguments)
+        public JsBox Construct(JintRuntime runtime, JsBox[] arguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
 
             var @this = Global.CreateObject((JsObject)GetProperty(Id.prototype));
+            var boxedThis = JsBox.CreateObject(@this);
 
-            var result = Delegate.Delegate(runtime, @this, this, Delegate.Closure, arguments, null);
+            var result = Delegate.Delegate(runtime, boxedThis, this, Delegate.Closure, arguments, null);
 
-            if (result is JsObject)
+            if (result.IsObject)
                 return result;
 
-            return @this;
+            return boxedThis;
         }
 
-        public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsInstance[] arguments, JsInstance[] genericArguments)
+        public JsBox Execute(JintRuntime runtime, JsBox @this, JsBox[] arguments, JsBox[] genericArguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");

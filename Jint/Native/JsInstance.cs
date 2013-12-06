@@ -46,12 +46,12 @@ namespace Jint.Native
 
         public PropertyAttributes Attributes { get; set; }
 
-        public JsInstance ToPrimitive()
+        public JsBox ToPrimitive()
         {
             return ToPrimitive(PreferredType.None);
         }
 
-        public abstract JsInstance ToPrimitive(PreferredType preferredType);
+        public abstract JsBox ToPrimitive(PreferredType preferredType);
 
         public abstract bool ToBoolean();
 
@@ -94,12 +94,6 @@ namespace Jint.Native
         /// A type of a JsObject
         /// </summary>
         public abstract JsType Type { get; }
-
-        // 11.9.6 The Strict Equality Comparison Algorithm
-        public static bool StrictlyEquals(JsInstance left, JsInstance right)
-        {
-            return JintRuntime.CompareSame(left, right);
-        }
 
         public int CompareTo(JsInstance other)
         {

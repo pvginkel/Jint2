@@ -9,14 +9,11 @@ namespace Jint.Native
     {
         private static class ErrorFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                JsObject target;
-
-                if (@this == null || @this == runtime.Global.GlobalScope)
+                var target = (JsObject)@this;
+                if (target == runtime.Global.GlobalScope)
                     target = runtime.Global.CreateObject(callee.Prototype);
-                else
-                    target = (JsObject)@this;
 
                 target.SetClass(callee.Delegate.Name);
                 target.SetIsClr(false);
@@ -24,14 +21,14 @@ namespace Jint.Native
                 if (arguments.Length > 0)
                     target.SetProperty(Id.message, arguments[0]);
 
-                return target;
+                return JsBox.CreateObject(target);
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 var target = (JsObject)@this;
 
-                return JsString.Create(target.GetProperty(Id.name) + ": " + target.GetProperty(Id.message));
+                return JsString.Box(target.GetProperty(Id.name) + ": " + target.GetProperty(Id.message));
             }
         }
     }

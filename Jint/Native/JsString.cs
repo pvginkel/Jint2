@@ -35,6 +35,16 @@ namespace Jint.Native
             return new JsString(value);
         }
 
+        public static JsBox Box()
+        {
+            return Box(null);
+        }
+
+        public static JsBox Box(string value)
+        {
+            return JsBox.CreateString(value);
+        }
+
         public override bool ToBoolean()
         {
             return JsConvert.ToBoolean(_value);
@@ -70,9 +80,9 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(PreferredType preferredType)
+        public override JsBox ToPrimitive(PreferredType preferredType)
         {
-            return this;
+            return Box((string)Value);
         }
     }
 }

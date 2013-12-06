@@ -10,11 +10,11 @@ namespace Jint.Native
     {
         private static class RegExpFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 var target = (JsObject)@this;
 
-                if (target == null || target == runtime.Global.GlobalScope)
+                if (target == runtime.Global.GlobalScope)
                     target = runtime.Global.CreateObject(callee.Prototype);
 
                 string pattern = null;
@@ -41,57 +41,57 @@ namespace Jint.Native
                 target.SetClass(JsNames.ClassRegexp);
                 target.SetIsClr(false);
                 target.Value = new RegExpManager(pattern, options);
-                target.SetProperty(Id.source, JsString.Create(pattern));
-                target.SetProperty(Id.lastIndex, JsNumber.Create(0));
-                target.SetProperty(Id.global, JsBoolean.Create(options.HasFlag(RegExpOptions.Global)));
+                target.SetProperty(Id.source, JsString.Box(pattern));
+                target.SetProperty(Id.lastIndex, JsNumber.Box(0));
+                target.SetProperty(Id.global, JsBoolean.Box(options.HasFlag(RegExpOptions.Global)));
 
-                return target;
+                return JsBox.CreateObject(target);
             }
 
-            public static JsInstance Exec(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Exec(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 var target = (JsObject)@this;
                 var regexp = (RegExpManager)target.Value;
 
                 var array = runtime.Global.CreateArray();
                 string input = arguments[0].ToString();
-                array.SetProperty(Id.input, JsString.Create(input));
+                array.SetProperty(Id.input, JsString.Box(input));
 
                 int i = 0;
                 var lastIndex = regexp.IsGlobal ? target.GetProperty(Id.lastIndex).ToNumber() : 0;
 
                 var matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
                 if (matches.Count == 0)
-                    return JsNull.Instance;
+                    return JsBox.Null;
 
-                // A[JsNumber.Create(i++)] = JsString.Create(matches[0].Value);
-                array.SetProperty(Id.index, JsNumber.Create(matches[0].Index));
+                // A[JsNumber.Box(i++)] = JsString.Box(matches[0].Value);
+                array.SetProperty(Id.index, JsNumber.Box(matches[0].Index));
 
                 if (regexp.IsGlobal)
-                    target.SetProperty(Id.lastIndex, JsNumber.Create(lastIndex + matches[0].Index + matches[0].Value.Length));
+                    target.SetProperty(Id.lastIndex, JsNumber.Box(lastIndex + matches[0].Index + matches[0].Value.Length));
 
                 foreach (Group group in matches[0].Groups)
                 {
-                    array[JsNumber.Create(i++)] = JsString.Create(group.Value);
+                    array[JsNumber.Box(i++)] = JsString.Box(group.Value);
                 }
 
-                return array;
+                return JsBox.CreateObject(array);
             }
 
-            public static JsInstance Test(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Test(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 var regexp = (JsObject)@this;
                 var matches = ((JsObject)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments, null);
                 var store = matches.FindArrayStore();
 
-                return JsBoolean.Create(store != null && store.Length > 0);
+                return JsBoolean.Box(store != null && store.Length > 0);
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                var regexp = (RegExpManager)@this.Value;
+                var regexp = (RegExpManager)((JsObject)@this).Value;
 
-                return JsString.Create(
+                return JsString.Box(
                     "/" +
                     regexp.Pattern +
                     "/" +
@@ -101,7 +101,7 @@ namespace Jint.Native
                 );
             }
 
-            public static JsInstance GetLastIndex(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetLastIndex(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 return ((JsObject)@this).GetProperty(Id.lastIndex);
             }

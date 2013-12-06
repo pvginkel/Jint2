@@ -23,7 +23,7 @@ namespace Jint.Native
             _global = Owner.Global;
         }
 
-        public bool HasOwnProperty(JsInstance index)
+        public bool HasOwnProperty(JsBox index)
         {
             return HasOwnProperty(_global.ResolveIdentifier(index.ToString()));
         }
@@ -34,7 +34,7 @@ namespace Jint.Native
             return _properties.TryGetValue(index, out descriptor);
         }
 
-        public Descriptor GetOwnDescriptor(JsInstance index)
+        public Descriptor GetOwnDescriptor(JsBox index)
         {
             return GetOwnDescriptor(_global.ResolveIdentifier(index.ToString()));
         }
@@ -46,7 +46,7 @@ namespace Jint.Native
             return result;
         }
 
-        public bool Delete(JsInstance index)
+        public bool Delete(JsBox index)
         {
             return Delete(_global.ResolveIdentifier(index.ToString()));
         }
@@ -84,7 +84,7 @@ namespace Jint.Native
                         switch (currentDescriptor.DescriptorType)
                         {
                             case DescriptorType.Value:
-                                _properties[key].Set(Owner, currentDescriptor.Get(Owner));
+                                _properties[key].Set(Owner, currentDescriptor.Get(JsBox.CreateObject(Owner)));
                                 break;
 
                             case DescriptorType.Accessor:
@@ -110,7 +110,7 @@ namespace Jint.Native
                         }
                         else
                         {
-                            propertyDescriptor.Set(Owner, currentDescriptor.Get(Owner));
+                            propertyDescriptor.Set(Owner, currentDescriptor.Get(JsBox.CreateObject(Owner)));
                         }
                         break;
                 }
@@ -143,55 +143,55 @@ namespace Jint.Native
             }
         }
 
-        public IEnumerable<JsInstance> GetValues()
+        public IEnumerable<JsBox> GetValues()
         {
             return
                 from descriptor in _properties.Values
                 where descriptor.Enumerable
-                select descriptor.Get(Owner);
+                select descriptor.Get(JsBox.CreateObject(Owner));
         }
 
-        public IEnumerator<KeyValuePair<int, JsInstance>> GetEnumerator()
+        public IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator()
         {
             return (
                 from descriptor in _properties
                 where descriptor.Value.Enumerable
-                select new KeyValuePair<int, JsInstance>(descriptor.Key, descriptor.Value.Get(Owner))
+                select new KeyValuePair<int, JsBox>(descriptor.Key, descriptor.Value.Get(JsBox.CreateObject(Owner)))
             ).GetEnumerator();
         }
 
-        public virtual bool TryGetProperty(JsInstance index, out JsInstance result)
+        public virtual bool TryGetProperty(JsBox index, out JsBox result)
         {
             var descriptor = Owner.GetDescriptor(index);
             if (descriptor != null)
             {
-                result = descriptor.Get(Owner);
+                result = descriptor.Get(JsBox.CreateObject(Owner));
                 return true;
             }
 
-            result = null;
+            result = new JsBox();
             return false;
         }
 
-        public virtual bool TryGetProperty(int index, out JsInstance result)
+        public virtual bool TryGetProperty(int index, out JsBox result)
         {
             var descriptor = Owner.GetDescriptor(index);
             if (descriptor != null)
             {
-                result = descriptor.Get(Owner);
+                result = descriptor.Get(JsBox.CreateObject(Owner));
                 return true;
             }
 
-            result = null;
+            result = new JsBox();
             return false;
         }
 
-        public virtual bool TrySetProperty(int index, JsInstance value)
+        public virtual bool TrySetProperty(int index, JsBox value)
         {
             return false;
         }
 
-        public virtual bool TrySetProperty(JsInstance index, JsInstance value)
+        public virtual bool TrySetProperty(JsBox index, JsBox value)
         {
             return false;
         }

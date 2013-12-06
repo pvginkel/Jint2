@@ -34,6 +34,11 @@ namespace Jint.Native
             return new JsNumber(value);
         }
 
+        public static JsBox Box(double value)
+        {
+            return JsBox.CreateNumber(value);
+        }
+
         private JsNumber(double value)
         {
             _value = value;
@@ -74,9 +79,9 @@ namespace Jint.Native
             get { return true; }
         }
 
-        public override JsInstance ToPrimitive(PreferredType preferredType)
+        public override JsBox ToPrimitive(PreferredType preferredType)
         {
-            return this;
+            return Box((double)Value);
         }
     }
 }

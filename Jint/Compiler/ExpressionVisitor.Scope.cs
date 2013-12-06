@@ -46,7 +46,7 @@ namespace Jint.Compiler
                 Runtime = Expression.Parameter(typeof(JintRuntime), RuntimeParameterName);
                 Variables = new Dictionary<Variable, ParameterExpression>();
                 Parent = parent;
-                Return = Expression.Label(typeof(JsInstance), "return");
+                Return = Expression.Label(typeof(JsBox), "return");
                 ClosureLocals = new Dictionary<Closure, ParameterExpression>();
                 BreakTargets = new Stack<LabelTarget>();
                 ContinueTargets = new Stack<LabelTarget>();
@@ -215,7 +215,7 @@ namespace Jint.Compiler
                             }
                             else
                             {
-                                targetType = typeof(JsInstance);
+                                targetType = typeof(JsBox);
                                 getter = _visitor.EnsureJs(getter);
                                 result = _visitor.EnsureJs(result);
                             }

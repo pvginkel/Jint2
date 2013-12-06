@@ -5,12 +5,12 @@ using System.Text;
 
 namespace Jint.Native
 {
-    public delegate JsInstance JsFunction(
+    public delegate JsBox JsFunction(
         JintRuntime runtime,
-        JsInstance @this,
+        JsBox @this,
         JsObject callee,
         object closure,
-        JsInstance[] arguments,
-        JsInstance[] genericArguments
+        JsBox[] arguments,
+        JsBox[] genericArguments
     );
 }

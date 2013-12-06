@@ -9,18 +9,23 @@ namespace Jint.Native
 {
     partial class JintRuntime
     {
-        private static bool TryCompareRange(JsInstance left, JsInstance right, out double result)
+        private static bool TryCompareRange(JsBox left, JsBox right, out double result)
         {
             result = 0;
 
             if (left.IsClr && right.IsClr)
             {
-                var comparer = left.Value as IComparable;
+                var comparer = left.ToInstance().Value as IComparable;
+                var rightInstance = right.ToInstance();
 
-                if (comparer == null || right.Value == null || comparer.GetType() != right.Value.GetType())
+                if (
+                    comparer == null ||
+                    rightInstance.Value == null ||
+                    comparer.GetType() != rightInstance.Value.GetType()
+                )
                     return false;
 
-                result = comparer.CompareTo(right.Value);
+                result = comparer.CompareTo(rightInstance.Value);
             }
             else
             {
@@ -41,79 +46,79 @@ namespace Jint.Native
             return true;
         }
 
-        public static bool CompareEquality(JsInstance left, JsInstance right)
+        public static bool CompareEquality(JsBox left, JsBox right)
         {
             if (left.IsClr && right.IsClr)
-                return left.Value.Equals(right.Value);
+                return left.ToInstance().Value.Equals(right.ToInstance().Value);
             if (left.Type == right.Type)
             {
-                // if both are Objects but then only one is Clrs
-                if (JsInstance.IsUndefined(left))
+                // If both are Objects but then only one is CLR
+                if (left.IsUndefined)
                     return true;
-                if (JsInstance.IsNull(left))
+                if (left.IsNull)
                     return true;
 
-                if (left.Type == JsType.Number)
+                if (left.IsNumber)
                     return left.ToNumber() == right.ToNumber();
-                if (left.Type == JsType.String)
+                if (left.IsString)
                     return left.ToString() == right.ToString();
-                if (left.Type == JsType.Boolean)
+                if (left.IsBoolean)
                     return left.ToBoolean() == right.ToBoolean();
-                if (left.Type == JsType.Object)
-                    return left == right;
-                return left.Value.Equals(right.Value);
+                if (left.IsObject)
+                    return (JsObject)left == (JsObject)right;
+                return left.ToInstance().Value.Equals(right.ToInstance().Value);
             }
-            if (JsInstance.IsNull(left) && JsInstance.IsUndefined(right))
+            if (left.IsNull && right.IsUndefined)
                 return true;
-            if (JsInstance.IsUndefined(left) && JsInstance.IsNull(right))
+            if (left.IsUndefined && right.IsNull)
                 return true;
-            if (left.Type == JsType.Number && right.Type == JsType.String)
+            if (left.IsNumber && right.IsString)
                 return left.ToNumber() == right.ToNumber();
-            if (left.Type == JsType.String && right.Type == JsType.Number)
+            if (left.IsString && right.IsNumber)
                 return left.ToNumber() == right.ToNumber();
-            if (left.Type == JsType.Boolean || right.Type == JsType.Boolean)
+            if (left.IsBoolean || right.IsBoolean)
                 return left.ToNumber() == right.ToNumber();
-            if (right.Type == JsType.Object && (left.Type == JsType.String || left.Type == JsType.Number))
+            if (right.IsObject && (left.IsString || left.IsNumber))
                 return CompareEquality(left, right.ToPrimitive());
-            if (left.Type == JsType.Object && (right.Type == JsType.String || right.Type == JsType.Number))
+            if (left.IsObject && (right.IsString || right.IsNumber))
                 return CompareEquality(left.ToPrimitive(), right);
             return false;
         }
 
-        private static bool CompareEquality(JsInstance left, bool right)
+        private static bool CompareEquality(JsBox left, bool right)
         {
-            if (left.Type == JsType.Boolean)
+            if (left.IsBoolean)
                 return left.ToBoolean() == right;
             return left.ToNumber() == JsConvert.ToNumber(right);
         }
 
-        private static bool CompareEquality(JsInstance left, double right)
+        private static bool CompareEquality(JsBox left, double right)
         {
-            if (left.Type == JsType.Number)
+            if (left.IsNumber)
                 return left.ToNumber() == right;
-            if (left.Type == JsType.Boolean)
+            if (left.IsBoolean)
                 return left.ToNumber() == right;
-            if (left.Type == JsType.Object)
+            if (left.IsObject)
                 return CompareEquality(left.ToPrimitive(), right);
             return false;
         }
 
-        private static bool CompareEquality(JsInstance left, string right)
+        private static bool CompareEquality(JsBox left, string right)
         {
-            if (left.Type == JsType.String)
+            if (left.IsString)
                 return left.ToString() == right;
-            if (left.Type == JsType.Number)
+            if (left.IsNumber)
                 return left.ToNumber() == JsConvert.ToNumber(right);
-            if (left.Type == JsType.Boolean)
+            if (left.IsBoolean)
                 return left.ToNumber() == JsConvert.ToNumber(right);
-            if (left.Type == JsType.Object)
+            if (left.IsObject)
                 return CompareEquality(left.ToPrimitive(), right);
             return false;
         }
 
-        private static bool CompareEquality(bool left, JsInstance right)
+        private static bool CompareEquality(bool left, JsBox right)
         {
-            if (right.Type == JsType.Boolean)
+            if (right.IsBoolean)
                 return left == right.ToBoolean();
             return JsConvert.ToNumber(left) == right.ToNumber();
         }
@@ -128,13 +133,13 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) == JsConvert.ToNumber(right);
         }
 
-        private static bool CompareEquality(double left, JsInstance right)
+        private static bool CompareEquality(double left, JsBox right)
         {
-            if (right.Type == JsType.Number)
+            if (right.IsNumber)
                 return left == right.ToNumber();
-            if (right.Type == JsType.String)
+            if (right.IsString)
                 return left == right.ToNumber();
-            if (right.Type == JsType.Object)
+            if (right.IsObject)
                 return CompareEquality(left, right.ToPrimitive());
             return false;
         }
@@ -149,15 +154,15 @@ namespace Jint.Native
             return left == JsConvert.ToNumber(right);
         }
 
-        private static bool CompareEquality(string left, JsInstance right)
+        private static bool CompareEquality(string left, JsBox right)
         {
-            if (right.Type == JsType.String)
+            if (right.IsString)
                 return left == right.ToString();
-            if (right.Type == JsType.Number)
+            if (right.IsNumber)
                 return JsConvert.ToNumber(left) == right.ToNumber();
-            if (right.Type == JsType.Boolean)
+            if (right.IsBoolean)
                 return JsConvert.ToNumber(left) == right.ToNumber();
-            if (right.Type == JsType.Object)
+            if (right.IsObject)
                 return CompareEquality(left, right.ToPrimitive());
             return false;
         }
@@ -172,47 +177,47 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) == right;
         }
 
-        public static bool CompareSame(JsInstance left, JsInstance right)
+        public static bool CompareSame(JsBox left, JsBox right)
         {
             if (left.Type != right.Type)
                 return false;
-            if (JsInstance.IsUndefined(left))
+            if (left.IsUndefined)
                 return true;
-            if (left is JsNull)
+            if (left.IsNull)
                 return true;
-            if (left.Type == JsType.Number)
+            if (left.IsNumber)
                 return left.ToNumber() == right.ToNumber();
-            if (left.Type == JsType.String)
+            if (left.IsString)
                 return left.ToString() == right.ToString();
-            if (left.Type == JsType.Boolean)
+            if (left.IsBoolean)
                 return left.ToBoolean() == right.ToBoolean();
-            return left == right;
+            return (JsObject)left == (JsObject)right;
         }
 
-        private static bool CompareSame(JsInstance left, bool right)
+        private static bool CompareSame(JsBox left, bool right)
         {
-            if (left.Type == JsType.Boolean)
+            if (left.IsBoolean)
                 return left.ToBoolean() == right;
             return false;
         }
 
-        private static bool CompareSame(JsInstance left, double right)
+        private static bool CompareSame(JsBox left, double right)
         {
-            if (left.Type == JsType.Number)
+            if (left.IsNumber)
                 return left.ToNumber() == right;
             return false;
         }
 
-        private static bool CompareSame(JsInstance left, string right)
+        private static bool CompareSame(JsBox left, string right)
         {
-            if (left.Type == JsType.String)
+            if (left.IsString)
                 return left.ToString() == right;
             return false;
         }
 
-        private static bool CompareSame(bool left, JsInstance right)
+        private static bool CompareSame(bool left, JsBox right)
         {
-            if (right.Type == JsType.Boolean)
+            if (right.IsBoolean)
                 return left == right.ToBoolean();
             return false;
         }
@@ -227,9 +232,9 @@ namespace Jint.Native
             return false;
         }
 
-        private static bool CompareSame(double left, JsInstance right)
+        private static bool CompareSame(double left, JsBox right)
         {
-            if (right.Type == JsType.Number)
+            if (right.IsNumber)
                 return left == right.ToNumber();
             return false;
         }
@@ -244,9 +249,9 @@ namespace Jint.Native
             return false;
         }
 
-        private static bool CompareSame(string left, JsInstance right)
+        private static bool CompareSame(string left, JsBox right)
         {
-            if (right.Type == JsType.String)
+            if (right.IsString)
                 return left == right.ToString();
             return false;
         }

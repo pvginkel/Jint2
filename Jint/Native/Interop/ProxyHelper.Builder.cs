@@ -105,9 +105,9 @@ namespace Jint.Native.Interop
                 ));
             }
 
-            public void AddThisParameter()
+            public void AddThisParameter(Type type)
             {
-                _this = AddParameter(typeof(JsInstance), "@this");
+                _this = AddParameter(type, "@this");
             }
 
             public ParameterExpression AddParameter(Type type, string name)
@@ -124,9 +124,18 @@ namespace Jint.Native.Interop
 
                 if (declaringType.IsValueType)
                 {
+                    Expression expression = _this;
+                    if (expression.Type == typeof(JsBox))
+                    {
+                        expression = Expression.Call(
+                            expression,
+                            typeof(JsBox).GetMethod("ToInstance")
+                        );
+                    }
+
                     return Expression.Unbox(
                         Expression.Property(
-                            _this,
+                            expression,
                             "Value"
                         ),
                         declaringType
@@ -187,6 +196,14 @@ namespace Jint.Native.Interop
 
             public Expression Marshal(Expression expression, Type type)
             {
+                if (typeof(JsInstance).IsAssignableFrom(expression.Type))
+                {
+                    expression = Expression.Call(
+                        typeof(JsBox).GetMethod("FromInstance"),
+                        expression
+                    );
+                }
+
                 return Expression.Call(
                     Marshaller,
                     _marshalJsValue.MakeGenericMethod(type),
@@ -221,7 +238,7 @@ namespace Jint.Native.Interop
                 {
                     return Expression.Block(
                         expression,
-                        Expression.Constant(JsUndefined.Instance)
+                        Expression.Constant(JsBox.Undefined)
                     );
                 }
 

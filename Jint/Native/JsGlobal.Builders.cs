@@ -16,10 +16,7 @@ namespace Jint.Native
         {
             return (JsObject)DateClass.Construct(
                 _runtime,
-                new JsInstance[]
-                {
-                    JsNumber.Create(value)
-                }
+                new[] { JsBox.CreateNumber(value) }
             );
         }
 
@@ -72,7 +69,7 @@ namespace Jint.Native
         {
             return (JsObject)constructor.Construct(
                 _runtime,
-                new JsInstance[] { JsString.Create(message) }
+                new[] { JsString.Box(message) }
             );
         }
 
@@ -85,10 +82,10 @@ namespace Jint.Native
         {
             return (JsObject)RegExpClass.Construct(
                 _runtime,
-                new JsInstance[]
+                new[]
                 {
-                    JsString.Create(pattern),
-                    JsString.Create(options)
+                    JsString.Box(pattern),
+                    JsString.Box(options)
                 }
             );
         }
@@ -97,7 +94,7 @@ namespace Jint.Native
         {
             return (JsObject)ArrayClass.Construct(
                 _runtime,
-                JsInstance.EmptyArray
+                JsBox.EmptyArray
             );
         }
     }

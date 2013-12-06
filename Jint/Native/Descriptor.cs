@@ -59,7 +59,7 @@ namespace Jint.Native
         /// <param name="that">A target object. This has a meaning in case of descriptors which helds an accessors,
         /// in value descriptors this parameter is ignored.</param>
         /// <returns>A value stored in the descriptor</returns>
-        public abstract JsInstance Get(JsInstance that);
+        public abstract JsBox Get(JsBox that);
 
         /// <summary>
         /// Sets a value.
@@ -67,21 +67,19 @@ namespace Jint.Native
         /// <param name="that">A target object. This has a meaning in case of descriptors which helds an accessors,
         /// in value descriptors this parameter is ignored.</param>
         /// <param name="value">A new value which should be stored in the descriptor.</param>
-        public abstract void Set(JsObject that, JsInstance value);
+        public abstract void Set(JsObject that, JsBox value);
 
         internal abstract DescriptorType DescriptorType { get; }
 
         /// <summary>
         /// 8.10.5
         /// </summary>
-        internal static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsInstance jsInstance)
+        internal static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsBox value)
         {
-            if (jsInstance.Class != JsNames.ClassObject)
-            {
+            if (value.GetClass() != JsNames.ClassObject)
                 throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
-            }
 
-            JsObject obj = (JsObject)jsInstance;
+            var obj = (JsObject)value;
             if (
                 (obj.HasProperty(Id.value) || obj.HasProperty(Id.writable)) &&
                 (obj.HasProperty(Id.set) || obj.HasProperty(Id.get)))
@@ -90,7 +88,7 @@ namespace Jint.Native
             var attributes = PropertyAttributes.None;
             JsObject getFunction = null;
             JsObject setFunction = null;
-            JsInstance result;
+            JsBox result;
 
             if (
                 obj.TryGetProperty(Id.enumerable, out result) &&
@@ -112,16 +110,18 @@ namespace Jint.Native
 
             if (obj.TryGetProperty(Id.get, out result))
             {
-                getFunction = result as JsObject;
-                if (getFunction == null || getFunction.Delegate == null)
+                if (!result.IsFunction)
                     throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
+
+                getFunction = (JsObject)result;
             }
 
             if (obj.TryGetProperty(Id.set, out result))
             {
-                setFunction = result as JsObject;
-                if (setFunction == null || setFunction.Delegate == null)
+                if (!result.IsFunction)
                     throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
+
+                setFunction = (JsObject)result;
             }
 
             if (obj.HasProperty(Id.value))

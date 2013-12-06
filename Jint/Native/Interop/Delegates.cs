@@ -4,14 +4,14 @@ using System.Text;
 
 namespace Jint.Native.Interop
 {
-    public delegate object WrappedConstructor(JsGlobal global, JsInstance[] arguments);
+    public delegate object WrappedConstructor(JsGlobal global, JsBox[] arguments);
 
-    public delegate JsInstance WrappedGetter(JsGlobal global, JsObject @this);
+    public delegate JsBox WrappedGetter(JsGlobal global, JsObject @this);
 
-    public delegate void WrappedSetter(JsGlobal global, JsObject @this, JsInstance value);
+    public delegate void WrappedSetter(JsGlobal global, JsObject @this, JsBox value);
 
-    public delegate JsInstance WrappedIndexerGetter(JsGlobal global, JsInstance @this, JsInstance index);
+    public delegate JsBox WrappedIndexerGetter(JsGlobal global, JsBox @this, JsBox index);
 
-    public delegate void WrappedIndexerSetter(JsGlobal global, JsInstance @this, JsInstance index, JsInstance value);
+    public delegate void WrappedIndexerSetter(JsGlobal global, JsBox @this, JsBox index, JsBox value);
 
 }

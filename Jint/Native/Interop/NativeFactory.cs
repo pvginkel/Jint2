@@ -53,7 +53,10 @@ namespace Jint.Native.Interop
 
             foreach (var member in GetMethods(type, BindingFlags.Static | BindingFlags.Public))
             {
-                prototype.DefineOwnProperty(member.Key, ReflectOverload(global, member.Value));
+                prototype.DefineOwnProperty(
+                    member.Key,
+                    JsBox.CreateObject(ReflectOverload(global, member.Value))
+                );
             }
 
             // Find and add all static properties and fields
@@ -76,7 +79,10 @@ namespace Jint.Native.Interop
 
                 for (int i = 0; i < names.Length; i++)
                 {
-                    prototype.DefineOwnProperty(names[i], global.CreateObject(values[i], prototype));
+                    prototype.DefineOwnProperty(
+                        names[i],
+                        JsBox.CreateObject(global.CreateObject(values[i], prototype))
+                    );
                 }
             }
 
@@ -130,13 +136,13 @@ namespace Jint.Native.Interop
 
             foreach (var member in GetMethods(type, BindingFlags.Instance | BindingFlags.Public))
             {
-                prototype[member.Key] = ReflectOverload(global, member.Value);
+                prototype[member.Key] = JsBox.CreateObject(ReflectOverload(global, member.Value));
             }
 
-            prototype.SetProperty(Id.toString, ProxyHelper.BuildMethodFunction(
+            prototype.SetProperty(Id.toString, JsBox.CreateObject(ProxyHelper.BuildMethodFunction(
                 global,
                 typeof(object).GetMethod("ToString")
-            ));
+            )));
 
             var result = global.CreateFunction(
                 type.FullName,
@@ -218,7 +224,8 @@ namespace Jint.Native.Interop
         /// A helper which conforms a ConstructorImpl signature and used as a default constructor for the value types
         /// </summary>
 // ReSharper disable UnusedMember.Local
-        private static object CreateStruct<T>(JsGlobal global, JsInstance[] args) where T : struct
+        private static object CreateStruct<T>(JsGlobal global, JsBox[] args)
+            where T : struct
         {
             return new T();
         }
@@ -239,17 +246,25 @@ namespace Jint.Native.Interop
                 _properties = properties;
             }
 
-            public JsInstance Execute(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public JsBox Execute(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                if (@this == null || @this == runtime.Global.GlobalScope)
+                var target = (JsObject)@this;
+                if (target == runtime.Global.GlobalScope)
                     throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
-                if (@this.Value != WrappingMarker)
+                if (target.Value != WrappingMarker)
                 {
-                    if (@this.Value != null)
-                        throw new JintException("Can't apply the constructor '" + _reflectedType.FullName + "' to already initialized '" + @this.Value + "'");
+                    if (target.Value != null)
+                    {
+                        throw new JintException(
+                            "Can't apply the constructor '" +
+                            _reflectedType.FullName +
+                            "' to already initialized '" +
+                            target.Value + "'"
+                        );
+                    }
 
-                    @this.Value = CreateInstance(runtime.Global, arguments);
+                    target.Value = CreateInstance(runtime.Global, arguments);
                 }
 
                 var @object = (JsObject)@this;
@@ -276,10 +291,10 @@ namespace Jint.Native.Interop
             /// <summary>
             /// Finds a best matched constructor and uses it to create a native object instance
             /// </summary>
-            private object CreateInstance(JsGlobal global, JsInstance[] parameters)
+            private object CreateInstance(JsGlobal global, JsBox[] parameters)
             {
                 if (parameters == null)
-                    parameters = JsInstance.EmptyArray;
+                    parameters = JsBox.EmptyArray;
 
                 var implementation = _overloads.ResolveOverload(parameters, null);
                 if (implementation == null)

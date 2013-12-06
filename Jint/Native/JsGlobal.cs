@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -67,42 +66,6 @@ namespace Jint.Native
         public JsObject StringClass { get; private set; }
         public Marshaller Marshaller { get; private set; }
 
-        [Obsolete]
-        public JsInstance Wrap(object value)
-        {
-            switch (Convert.GetTypeCode(value))
-            {
-                case TypeCode.Boolean:
-                    return JsBoolean.Create((bool)value);
-
-                case TypeCode.Char:
-                case TypeCode.String:
-                    return JsString.Create(Convert.ToString(value));
-
-                case TypeCode.DateTime:
-                    return CreateDate((DateTime)value);
-
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                    return JsNumber.Create(Convert.ToDouble(value));
-
-                case TypeCode.Object:
-                    return CreateObject(value, ObjectClass.Prototype);
-
-                default:
-                    throw new ArgumentNullException("value");
-            }
-        }
-
         public JsObject WrapClr(object value)
         {
             return (JsObject)Marshaller.MarshalClrValue(value);
@@ -113,20 +76,23 @@ namespace Jint.Native
             return (Options & options) == options;
         }
 
-        internal JsObject GetPrototype(JsInstance instance)
+        internal JsObject GetPrototype(JsBox instance)
         {
-            if (instance == null)
+            if (!instance.IsValid)
                 throw new ArgumentNullException("instance");
 
-            switch (instance.Type)
-            {
-                case JsType.Boolean: return BooleanClass.Prototype;
-                case JsType.Null: throw new InvalidOperationException();
-                case JsType.Number: return NumberClass.Prototype;
-                case JsType.String: return StringClass.Prototype;
-                case JsType.Undefined: return PrototypeSink;
-                default: return ((JsObject)instance).Prototype;
-            }
+            if (instance.IsObject)
+                return ((JsObject)instance).Prototype;
+            if (instance.IsString)
+                return StringClass.Prototype;
+            if (instance.IsNumber)
+                return NumberClass.Prototype;
+            if (instance.IsBoolean)
+                return BooleanClass.Prototype;
+            if (instance.IsUndefined)
+                return PrototypeSink;
+
+            throw new InvalidOperationException();
         }
 
         internal int ResolveIdentifier(string name)
@@ -161,7 +127,7 @@ namespace Jint.Native
             return _identifiersByIndex[-index];
         }
 
-        public JsInstance ExecuteFunction(JsObject function, JsInstance that, JsInstance[] arguments, JsInstance[] genericParameters)
+        public JsBox ExecuteFunction(JsObject function, JsBox that, JsBox[] arguments, JsBox[] genericParameters)
         {
             if (function == null)
                 throw new ArgumentNullException("function");

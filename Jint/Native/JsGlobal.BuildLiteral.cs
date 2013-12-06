@@ -12,7 +12,7 @@ namespace Jint.Native
     {
         private LiteralVisitor _literalVisitor;
 
-        internal JsInstance BuildLiteral(SyntaxNode syntaxNode)
+        internal JsBox BuildLiteral(SyntaxNode syntaxNode)
         {
             if (_literalVisitor == null)
                 _literalVisitor = new LiteralVisitor(this);
@@ -20,7 +20,7 @@ namespace Jint.Native
             return syntaxNode.Accept(_literalVisitor);
         }
 
-        private class LiteralVisitor : SyntaxVisitor<JsInstance>
+        private class LiteralVisitor : SyntaxVisitor<JsBox>
         {
             private readonly JsGlobal _global;
 
@@ -29,30 +29,30 @@ namespace Jint.Native
                 _global = global;
             }
 
-            public override JsInstance VisitCommaOperator(CommaOperatorSyntax syntax)
+            public override JsBox VisitCommaOperator(CommaOperatorSyntax syntax)
             {
                 Debug.Assert(syntax.IsLiteral);
 
                 return syntax.Expressions[0].Accept(this);
             }
 
-            public override JsInstance VisitExpressionStatement(ExpressionStatementSyntax syntax)
+            public override JsBox VisitExpressionStatement(ExpressionStatementSyntax syntax)
             {
                 return syntax.Expression.Accept(this);
             }
 
-            public override JsInstance VisitValue(ValueSyntax syntax)
+            public override JsBox VisitValue(ValueSyntax syntax)
             {
                 switch (syntax.ValueType)
                 {
-                    case ValueType.Boolean: return JsBoolean.Create((bool)syntax.Value);
-                    case ValueType.Double: return JsNumber.Create((double)syntax.Value);
-                    case ValueType.String: return JsString.Create((string)syntax.Value);
+                    case ValueType.Boolean: return JsBoolean.Box((bool)syntax.Value);
+                    case ValueType.Double: return JsNumber.Box((double)syntax.Value);
+                    case ValueType.String: return JsString.Box((string)syntax.Value);
                     default: throw new InvalidOperationException();
                 }
             }
 
-            public override JsInstance VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
+            public override JsBox VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
             {
                 var array = _global.CreateArray();
 
@@ -61,10 +61,10 @@ namespace Jint.Native
                     array.SetProperty(i, syntax.Parameters[i].Accept(this));
                 }
 
-                return array;
+                return JsBox.CreateObject(array);
             }
 
-            public override JsInstance VisitJsonExpression(JsonExpressionSyntax syntax)
+            public override JsBox VisitJsonExpression(JsonExpressionSyntax syntax)
             {
                 var @object = _global.CreateObject();
 
@@ -73,10 +73,10 @@ namespace Jint.Native
                     @object[property.Name] = property.Expression.Accept(this);
                 }
 
-                return @object;
+                return JsBox.CreateObject(@object);
             }
 
-            public override JsInstance VisitProgram(ProgramSyntax syntax)
+            public override JsBox VisitProgram(ProgramSyntax syntax)
             {
                 // The IsLiteral of program ensures that we either have a
                 // single statement that is a literal, or we have a single

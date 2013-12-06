@@ -94,7 +94,7 @@ namespace Jint.Compiler
             var statements = new List<Expression>();
             var locals = new List<ParameterExpression>();
             
-            var that = Expression.Parameter(typeof(JsInstance), "this");
+            var that = Expression.Parameter(typeof(JsBox), "this");
 
             ParameterExpression closureLocal = null;
 
@@ -136,10 +136,10 @@ namespace Jint.Compiler
 
             statements.Add(Expression.Assign(
                 that,
-                Expression.Property(
+                EnsureJs(Expression.Property(
                     _scope.Runtime,
                     "GlobalScope"
-                )
+                ))
             ));
 
             // Build the body and return label.
@@ -151,7 +151,7 @@ namespace Jint.Compiler
                 statements.Add(body);
                 statements.Add(Expression.Label(
                     _scope.Return,
-                    Expression.Constant(JsUndefined.Instance)
+                    Expression.Field(null, typeof(JsBox).GetField("Undefined"))
                 ));
             }
             else
@@ -162,7 +162,7 @@ namespace Jint.Compiler
                 ));
             }
 
-            return Expression.Lambda<Func<JintRuntime, JsInstance>>(
+            return Expression.Lambda<Func<JintRuntime, JsBox>>(
                 Expression.Block(
                     locals,
                     statements
@@ -182,7 +182,7 @@ namespace Jint.Compiler
                 if (variable.Type == VariableType.Local)
                 {
                     var parameter = Expression.Parameter(
-                        typeof(JsInstance),
+                        typeof(JsBox),
                         variable.Name
                     );
 
@@ -320,11 +320,11 @@ namespace Jint.Compiler
 
             // Temporary variable to hold a reference to the current key.
 
-            var keyLocal = Expression.Parameter(typeof(JsInstance), "key");
+            var keyLocal = Expression.Parameter(typeof(JsBox), "key");
 
             var result = ExpressionEx.ForEach(
                 keyLocal,
-                typeof(JsInstance),
+                typeof(JsBox),
                 // Call JintRuntime.GetForEachKeys to get the keys to enumerate over.
                 Expression.Call(
                     _scope.Runtime,
@@ -450,7 +450,7 @@ namespace Jint.Compiler
                 _scope.Return,
                 syntax.Expression != null
                 ? EnsureJs(syntax.Expression.Accept(this))
-                : Expression.Default(typeof(JsInstance))
+                : Expression.Default(typeof(JsBox))
             );
         }
 
@@ -531,7 +531,7 @@ namespace Jint.Compiler
         {
             return Expression.Throw(
                 Expression.New(
-                    typeof(JsException).GetConstructor(new[] { typeof(JsInstance) }),
+                    typeof(JsException).GetConstructor(new[] { typeof(JsBox) }),
                     EnsureJs(syntax.Expression.Accept(this))
                 )
             );
@@ -674,7 +674,7 @@ namespace Jint.Compiler
             statements.Add(array);
 
             return Expression.Block(
-                typeof(JsInstance),
+                typeof(JsObject),
                 new[] { array },
                 statements
             );
@@ -717,7 +717,7 @@ namespace Jint.Compiler
             var body = function.Body;
 
             var thisParameter = Expression.Parameter(
-                typeof(JsInstance),
+                typeof(JsBox),
                 "this"
             );
 
@@ -738,7 +738,7 @@ namespace Jint.Compiler
             }
 
             var argumentsParameter = Expression.Parameter(
-                typeof(JsInstance[]),
+                typeof(JsBox[]),
                 "argumentsParameter"
             );
 
@@ -778,7 +778,7 @@ namespace Jint.Compiler
                 functionParameter,
                 closureParameter,
                 argumentsParameter,
-                Expression.Parameter(typeof(JsInstance[]), "genericArguments")
+                Expression.Parameter(typeof(JsBox[]), "genericArguments")
             };
 
             // Initialize our closure.
@@ -817,11 +817,11 @@ namespace Jint.Compiler
 
                     foreach (var field in body.Closure.Type.GetFields())
                     {
-                        if (field.FieldType == typeof(JsInstance))
+                        if (field.FieldType == typeof(JsBox))
                         {
                             statements.Add(Expression.Assign(
                                 Expression.Field(closureLocal, field),
-                                Expression.Constant(JsUndefined.Instance)
+                                Expression.Field(null, typeof(JsBox).GetField("Undefined"))
                             ));
                         }
                     }
@@ -852,11 +852,11 @@ namespace Jint.Compiler
                     );
                     locals.Add(local);
 
-                    if (local.Type == typeof(JsInstance))
+                    if (local.Type == typeof(JsBox))
                     {
                         statements.Add(Expression.Assign(
                             local,
-                            Expression.Constant(JsUndefined.Instance)
+                            Expression.Field(null, typeof(JsBox).GetField("Undefined"))
                         ));
                     }
 
@@ -899,7 +899,7 @@ namespace Jint.Compiler
 
             statements.Add(Expression.Label(
                 _scope.Return,
-                Expression.Constant(JsUndefined.Instance)
+                Expression.Field(null, typeof(JsBox).GetField("Undefined"))
             ));
 
             // Add all gathered locals for the closures to the locals list.
@@ -913,7 +913,7 @@ namespace Jint.Compiler
 
             var lambda = Expression.Lambda<JsFunction>(
                 Expression.Block(
-                    typeof(JsInstance),
+                    typeof(JsBox),
                     locals,
                     statements
                 ),
@@ -958,15 +958,24 @@ namespace Jint.Compiler
                 // a local and both the getter and the ExecuteFunction is this
                 // local.
 
-                target = Expression.Parameter(typeof(JsInstance), "target");
+                var targetAssignment = EnsureJs(memberSyntax.Expression.Accept(this));
+
+                if (targetAssignment is ParameterExpression)
+                {
+                    target = targetAssignment;
+                }
+                else
+                {
+                    target = Expression.Parameter(typeof(JsBox), "target");
+
+                    statements.Add(Expression.Assign(target, targetAssignment));
+                    parameters.Add((ParameterExpression)target);
+                }
 
                 if (memberSyntax.Type == SyntaxType.Property)
                     getter = BuildGetMember(target, ((PropertySyntax)memberSyntax).Name);
                 else
                     getter = BuildGetIndex(target, BuildGet(((IndexerSyntax)memberSyntax).Index));
-
-                statements.Add(Expression.Assign(target, EnsureJs(memberSyntax.Expression.Accept(this))));
-                parameters.Add((ParameterExpression)target);
             }
             else
             {
@@ -980,14 +989,14 @@ namespace Jint.Compiler
                     // With a with scope, the target depends on how the variable
                     // is resolved.
 
-                    var withTarget = Expression.Parameter(typeof(JsInstance), "target");
+                    var withTarget = Expression.Parameter(typeof(JsBox), "target");
                     statements.Add(Expression.Assign(
                         withTarget,
-                        Expression.Constant(null, typeof(JsInstance))
+                        Expression.Constant(null, typeof(JsBox))
                     ));
 
                     var method = Expression.Parameter(
-                        typeof(JsInstance),
+                        typeof(JsBox),
                         "method"
                     );
 
@@ -1007,72 +1016,114 @@ namespace Jint.Compiler
                 {
                     // Else we execute the function against the global scope.
 
-                    target = Expression.Property(
+                    target = EnsureJs(Expression.Property(
                         _scope.Runtime,
                         "GlobalScope"
-                    );
+                    ));
                     getter = BuildGet(syntax.Expression);
                 }
             }
 
-            var arguments = Expression.Parameter(
-                typeof(JsInstance[]),
-                "arguments"
-            );
-            parameters.Add(arguments);
-            var result = Expression.Parameter(
-                typeof(JsInstance),
-                "result"
-            );
-            parameters.Add(result);
+            bool needWriteBack = false;
 
-            var expressions = new List<Expression>();
+            Expression argumentsExpression;
 
-            foreach (var argument in syntax.Arguments)
+            if (syntax.Arguments.Count > 0)
             {
-                expressions.Add(EnsureJs(argument.Expression.Accept(this)));
-            }
+                var expressions = new List<Expression>();
 
-            statements.Add(Expression.Assign(
-                arguments,
-                MakeArrayInit(expressions, typeof(JsInstance), false)
-            ));
+                var arguments = Expression.Parameter(
+                    typeof(JsBox[]),
+                    "arguments"
+                );
+                parameters.Add(arguments);
 
-            statements.Add(Expression.Assign(
-                result,
-                Expression.Call(
-                    Expression.Convert(getter, typeof(JsObject)),
-                    typeof(JsObject).GetMethod("Execute"),
-                    _scope.Runtime,
-                    target,
-                    arguments,
-                    MakeArrayInit(syntax.Generics, typeof(JsInstance), true)
-                )
-            ));
-
-            // We need to read the arguments back for when the ExecuteFunction
-            // has out parameters for native calls.
-
-            for (int i = 0; i < syntax.Arguments.Count; i++)
-            {
-                var argument = syntax.Arguments[i];
-
-                if (argument.IsRef && argument.Expression.IsAssignable)
+                foreach (var argument in syntax.Arguments)
                 {
-                    statements.Add(BuildSet(
-                        argument.Expression,
-                        Expression.ArrayAccess(
-                            arguments,
-                            Expression.Constant(i)
-                        )
+                    expressions.Add(EnsureJs(argument.Expression.Accept(this)));
+
+                    if (argument.IsRef && argument.Expression.IsAssignable)
+                        needWriteBack = true;
+                }
+
+                var argumentsInit = MakeArrayInit(expressions, typeof(JsBox), false);
+
+                if (needWriteBack)
+                {
+                    statements.Add(Expression.Assign(
+                        arguments,
+                        argumentsInit
                     ));
+
+                    argumentsExpression = arguments;
+                }
+                else
+                {
+                    argumentsExpression = argumentsInit;
                 }
             }
+            else
+            {
+                argumentsExpression = Expression.Field(
+                    null,
+                    typeof(JsBox).GetField("EmptyArray")
+                );
+            }
 
-            statements.Add(result);
+            var callExpression = Expression.Call(
+                Expression.Convert(getter, typeof(JsObject)),
+                typeof(JsObject).GetMethod("Execute"),
+                _scope.Runtime,
+                target,
+                argumentsExpression,
+                MakeArrayInit(syntax.Generics, typeof(JsBox), true)
+            );
+
+            if (needWriteBack)
+            {
+                var result = Expression.Parameter(
+                    typeof(JsBox),
+                    "result"
+                );
+                parameters.Add(result);
+
+                statements.Add(Expression.Assign(
+                    result,
+                    callExpression
+                ));
+
+                // We need to read the arguments back for when the ExecuteFunction
+                // has out parameters for native calls.
+
+                for (int i = 0; i < syntax.Arguments.Count; i++)
+                {
+                    var arguments = (ParameterExpression)argumentsExpression;
+                    var argument = syntax.Arguments[i];
+
+                    if (argument.IsRef && argument.Expression.IsAssignable)
+                    {
+                        statements.Add(BuildSet(
+                            argument.Expression,
+                            Expression.ArrayAccess(
+                                arguments,
+                                Expression.Constant(i)
+                            )
+                        ));
+                    }
+                }
+
+                statements.Add(result);
+            }
+            else
+            {
+                statements.Add(callExpression);
+            }
+
+            if (statements.Count == 1)
+                return statements[0];
 
             return Expression.Block(
-                typeof(JsInstance),
+                typeof(JsBox),
                 parameters,
                 statements
             );
@@ -1157,7 +1208,7 @@ namespace Jint.Compiler
             statements.Add(obj);
 
             return Expression.Block(
-                typeof(JsInstance),
+                typeof(JsObject),
                 new[] { obj, global },
                 statements
             );
@@ -1184,10 +1235,10 @@ namespace Jint.Compiler
                 expression.Accept(this),
                 MakeArrayInit(
                     arguments == null ? null : arguments.Select(p => p.Expression),
-                    typeof(JsInstance),
+                    typeof(JsBox),
                     false
                 ),
-                MakeArrayInit(generics, typeof(JsInstance), true)
+                MakeArrayInit(generics, typeof(JsBox), true)
             );
         }
 
@@ -1208,8 +1259,8 @@ namespace Jint.Compiler
                 if (nullWhenEmpty)
                     return Expression.Constant(null, elementType.MakeArrayType());
 
-                if (elementType == typeof(JsInstance[]))
-                    return Expression.Constant(JsInstance.EmptyArray);
+                if (elementType == typeof(JsBox[]))
+                    return Expression.Constant(JsBox.EmptyArray);
 
                 return Expression.NewArrayBounds(elementType, Expression.Constant(0));
             }
@@ -1279,7 +1330,7 @@ namespace Jint.Compiler
         private Expression EnsureJs(Expression expression)
         {
             var type = SyntaxUtil.GetValueType(expression.Type);
-            if (type == ValueType.Object || type == ValueType.Unknown)
+            if (type == ValueType.Unknown)
                 return expression;
 
             return new ConvertToJsExpression(_scope.Runtime, expression);
@@ -1331,7 +1382,7 @@ namespace Jint.Compiler
             }
             else
             {
-                targetType = typeof(JsInstance);
+                targetType = typeof(JsBox);
                 then = EnsureJs(then);
                 @else = EnsureJs(@else);
             }
@@ -1396,7 +1447,7 @@ namespace Jint.Compiler
                 case SyntaxExpressionType.Void:
                     return Expression.Block(
                         syntax.Operand.Accept(this),
-                        Expression.Constant(JsUndefined.Instance)
+                        Expression.Field(null, typeof(JsBox).GetField("Undefined"))
                     );
 
                 case SyntaxExpressionType.Delete:
@@ -1475,10 +1526,10 @@ namespace Jint.Compiler
         public Expression VisitValue(ValueSyntax syntax)
         {
             // We don't handle literal here because this allows us to have
-            // the raw values in the expression tree; not the JsInstance's.
+            // the raw values in the expression tree; not the JsBox's.
 
             if (syntax.Value == null)
-                return Expression.Constant(JsNull.Instance);
+                return Expression.Constant(JsBox.Null);
 
             return Expression.Constant(syntax.Value);
 

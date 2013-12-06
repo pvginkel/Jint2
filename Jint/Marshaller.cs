@@ -103,15 +103,17 @@ namespace Jint
         }
 
         /// <summary>
-        /// Marshals a native value to a JsInstance.
+        /// Marshals a native value to a JsBox.
         /// </summary>
-        public JsInstance MarshalClrValue<T>(T value)
+        public JsBox MarshalClrValue<T>(T value)
         {
             if (value == null)
-                return JsNull.Instance;
+                return JsBox.Null;
 
+            if (value is JsBox)
+                return (JsBox)(object)value;
             if (value is JsInstance)
-                return value as JsInstance;
+                return JsBox.FromInstance((JsInstance)(object)value);
 
             if (value is Type)
             {
@@ -121,13 +123,13 @@ namespace Jint
                     // Generic definitions aren't types in the meaning of JS
                     // but they are instances of System.Type.
 
-                    return Wrap(_typeType, type);
+                    return JsBox.CreateObject(Wrap(_typeType, type));
                 }
 
-                return MarshalType(type);
+                return JsBox.CreateObject(MarshalType(type));
             }
 
-            return Wrap(MarshalType(value.GetType()), value);
+            return JsBox.CreateObject(Wrap(MarshalType(value.GetType()), value));
         }
 
         private JsObject Wrap(JsObject constructor, object value)
@@ -139,7 +141,7 @@ namespace Jint
 
             var @this = Global.CreateObject(NativeFactory.WrappingMarker, constructor.Prototype);
 
-            constructor.Execute(_runtime, @this, JsInstance.EmptyArray, null);
+            constructor.Execute(_runtime, JsBox.CreateObject(@this), JsBox.EmptyArray, null);
 
             @this.Value = value;
 
@@ -189,25 +191,27 @@ namespace Jint
         }
 
         /// <summary>
-        /// Marshals a JsInstance to a native value.
+        /// Marshals a JsBox to a native value.
         /// </summary>
         /// <typeparam name="T">A native object type</typeparam>
-        /// <param name="value">A JsInstance to marshal</param>
-        /// <returns>A converted native velue</returns>
-        public T MarshalJsValue<T>(JsInstance value)
+        /// <param name="value">A JsBox to marshal</param>
+        /// <returns>A converted native value</returns>
+        public T MarshalJsValue<T>(JsBox value)
         {
-            object valueValue = value.Value;
+            object valueValue = value.ToInstance().Value;
 
             if (valueValue is T)
                 return (T)valueValue;
 
             if (typeof(T).IsArray)
             {
-                if (value == null || JsInstance.IsNullOrUndefined(value))
+                if (!value.IsValid || value.IsNullOrUndefined)
                     return default(T);
 
-                if (Global.ArrayClass.HasInstance(value as JsObject))
-                {
+                if (
+                    value.IsObject &&
+                    Global.ArrayClass.HasInstance((JsObject)value)
+                ) {
                     Delegate marshaller;
                     if (!_arrayMarshallers.TryGetValue(typeof(T), out marshaller))
                     {
@@ -220,7 +224,7 @@ namespace Jint
                         );
                     }
 
-                    return ((Func<JsObject, T>)marshaller)(value as JsObject);
+                    return ((Func<JsObject, T>)marshaller)((JsObject)value);
                 }
 
                 throw new JintException("Array is required");
@@ -228,16 +232,21 @@ namespace Jint
 
             if (typeof(Delegate).IsAssignableFrom(typeof(T)))
             {
-                if (value == null || JsInstance.IsNullOrUndefined(value))
+                if (!value.IsValid || value.IsNullOrUndefined)
                     return default(T);
 
-                if (!(value is JsObject))
+                if (!value.IsObject)
                     throw new JintException("Can't convert a non function object to a delegate type");
 
-                return (T)(object)ProxyHelper.MarshalJsFunction(_runtime, value as JsObject, Global.PrototypeSink, typeof(T));
+                return (T)(object)ProxyHelper.MarshalJsFunction(
+                    _runtime,
+                    (JsObject)value,
+                    Global.PrototypeSink,
+                    typeof(T)
+                );
             }
 
-            if (!JsInstance.IsNullOrUndefined(value) && value is T)
+            if (!value.IsNullOrUndefined && value is T)
                 return (T)(object)value;
 
             // JsNull and JsUndefined will fall here and become a nulls
@@ -245,8 +254,8 @@ namespace Jint
         }
 
         /// <summary>
-        /// Gets a type of a native object represented by the current JsInstance.
-        /// If JsInstance is a pure JsObject than returns a type of js object itself.
+        /// Gets a type of a native object represented by the current JsBox.
+        /// If JsBox is a pure JsObject than returns a type of js object itself.
         /// </summary>
         /// <remarks>
         /// If a value is a wrapper around native value (like String, Number or a marshaled native value)
@@ -254,14 +263,15 @@ namespace Jint
         /// If a value is an js object (constructed with a pure js function) this method returns
         /// a type of this value (for example JsArray, JsObject)
         /// </remarks>
-        /// <param name="value">JsInstance value</param>
+        /// <param name="value">JsBox value</param>
         /// <returns>A Type object</returns>
-        public Type GetInstanceType(JsInstance value)
+        public Type GetInstanceType(JsBox value)
         {
-            if (value == null || JsInstance.IsNullOrUndefined(value))
+            if (!value.IsValid || value.IsNullOrUndefined)
                 return null;
 
-            return (value.Value ?? value).GetType();
+            var instance = value.ToInstance();
+            return (instance.Value ?? instance).GetType();
         }
 
         /// <summary>
@@ -278,7 +288,7 @@ namespace Jint
             if (property.CanRead && property.GetGetMethod() != null)
                 getter = ProxyHelper.WrapGetProperty(property);
             else
-                getter = (global, @this) => JsUndefined.Instance;
+                getter = (global, @this) => JsBox.Undefined;
 
             if (property.CanWrite && property.GetSetMethod() != null)
                 setter = ProxyHelper.WrapSetProperty(property);
@@ -317,7 +327,7 @@ namespace Jint
                 target.IsAssignableFrom(source);
         }
 
-        public Type[] MarshalGenericArguments(JsInstance[] genericArguments)
+        public Type[] MarshalGenericArguments(JsBox[] genericArguments)
         {
             if (genericArguments == null)
                 return Type.EmptyTypes;

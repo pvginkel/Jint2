@@ -5,7 +5,7 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public class JsComparer : IComparer<JsInstance>
+    public class JsComparer : IComparer<JsBox>
     {
         public JintEngine Engine { get; private set; }
         public JsObject Function { get; private set; }
@@ -21,7 +21,7 @@ namespace Jint.Native
             Function = function;
         }
 
-        public int Compare(JsInstance x, JsInstance y)
+        public int Compare(JsBox x, JsBox y)
         {
             return Engine.Compare(Function, x, y);
         }

@@ -9,102 +9,93 @@ namespace Jint.Native
     {
         private static class FunctionFunctions
         {
-            public static JsInstance Constructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return runtime.Global.Engine.CompileFunction(arguments);
+                return JsBox.CreateObject(runtime.Global.Engine.CompileFunction(arguments));
             }
 
-            public static JsInstance GetConstructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetConstructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return callee;
+                return JsBox.CreateObject(callee);
             }
 
-            public static JsInstance GetLength(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox GetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Create(((JsObject)@this).Delegate.ArgumentCount);
+                return JsNumber.Box(((JsObject)@this).Delegate.ArgumentCount);
             }
 
-            public static JsInstance SetLength(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox SetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 return arguments[0];
             }
 
-            public static JsInstance ToString(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Create(String.Format("function {0} ( ) {{ [native code] }}", callee.Delegate.Name));
+                return JsString.Box(String.Format("function {0} ( ) {{ [native code] }}", callee.Delegate.Name));
             }
 
-            public static JsInstance Call(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Call(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                var function = @this as JsObject;
-
-                if (function == null || function.Delegate == null)
+                if (!@this.IsFunction)
                     throw new ArgumentException("the target of call() must be a function");
 
-                JsInstance obj;
-
-                if (arguments.Length >= 1 && !JsInstance.IsNullOrUndefined(arguments[0]))
+                JsBox obj;
+                if (arguments.Length >= 1 && !arguments[0].IsNullOrUndefined)
                     obj = arguments[0];
                 else
-                    obj = runtime.Global.GlobalScope;
+                    obj = new JsBox();
 
-                JsInstance[] argumentsCopy;
+                JsBox[] argumentsCopy = null;
 
-                if (arguments.Length >= 2 && !JsInstance.IsNull(arguments[1]))
+                if (arguments.Length >= 2 && !arguments[1].IsNull)
                 {
-                    argumentsCopy = new JsInstance[arguments.Length - 1];
+                    argumentsCopy = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, argumentsCopy, 0, argumentsCopy.Length);
-                }
-                else
-                {
-                    argumentsCopy = JsInstance.EmptyArray;
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call
-                return function.Execute(runtime, obj, argumentsCopy, null);
+                return ((JsObject)@this).Execute(runtime, obj, argumentsCopy, null);
             }
 
-            public static JsInstance Apply(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericArguments)
+            public static JsBox Apply(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                var function = @this as JsObject;
-                if (function == null || function.Delegate == null)
+                if (!@this.IsFunction)
                     throw new ArgumentException("The target of call() must be a function");
 
-                JsInstance obj;
+                JsBox obj;
 
-                if (arguments.Length >= 1 && !JsInstance.IsNullOrUndefined(arguments[0]))
+                if (arguments.Length >= 1 && !arguments[0].IsNullOrUndefined)
                     obj = arguments[0];
                 else
-                    obj = runtime.Global.GlobalScope;
+                    obj = new JsBox();
 
-                JsInstance[] argumentsCopy;
+                JsBox[] argumentsCopy = null;
 
-                if (arguments.Length >= 2 && !JsInstance.IsNull(arguments[1]))
+                if (
+                    arguments.Length >= 2 &&
+                    !arguments[1].IsNull &&
+                    arguments[0].IsObject
+                )
                 {
-                    var argument = arguments[1] as JsObject;
-                    int length = 0;
-                    if (argument != null)
-                        length = (int)argument.GetProperty(Id.length).ToNumber();
+                    var argument = (JsObject)arguments[0];
 
-                    argumentsCopy = new JsInstance[length];
+                    int length = (int)argument.GetProperty(Id.length).ToNumber();
+
+                    argumentsCopy = new JsBox[length];
 
                     for (int i = 0; i < length; i++)
                     {
                         argumentsCopy[i] = argument.GetProperty(i);
                     }
                 }
-                else
-                {
-                    argumentsCopy = JsInstance.EmptyArray;
-                }
 
                 // Executes the statements in 'that' and use _this as the target of the call
-                return function.Execute(runtime, obj, argumentsCopy, null);
+                return ((JsObject)@this).Execute(runtime, obj, argumentsCopy, null);
             }
 
-            public static JsInstance BaseConstructor(JintRuntime runtime, JsInstance @this, JsObject callee, object closure, JsInstance[] arguments, JsInstance[] genericarguments)
+            public static JsBox BaseConstructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsUndefined.Instance;
+                return JsBox.Undefined;
             }
         }
     }
