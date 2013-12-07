@@ -37,19 +37,20 @@ namespace Jint.Native.Interop
                 ProxyHelper.WrapConstructor
             );
 
-            // if this is a value type, define a default constructor
+            // Ff this is a value type, define a default constructor.
+
             if (type.IsValueType)
             {
                 overloads.DefineCustomOverload(
-                    new Type[0],
-                    new Type[0],
+                    Type.EmptyTypes,
+                    Type.EmptyTypes,
                     (WrappedConstructor)Delegate.CreateDelegate(typeof(WrappedConstructor), _createStruct.MakeGenericMethod(type))
                 );
             }
 
-            // Now we should find all static members and add them as a properties
+            // Now we should find all static members and add them as a properties.
 
-            // Members are grouped by their names
+            // Members are grouped by their names.
 
             foreach (var member in GetMethods(type, BindingFlags.Static | BindingFlags.Public))
             {
@@ -59,7 +60,7 @@ namespace Jint.Native.Interop
                 );
             }
 
-            // Find and add all static properties and fields
+            // Find and add all static properties and fields.
 
             foreach (var info in type.GetProperties(BindingFlags.Static | BindingFlags.Public))
             {
@@ -68,35 +69,33 @@ namespace Jint.Native.Interop
 
             foreach (var info in type.GetFields(BindingFlags.Static | BindingFlags.Public))
             {
-                prototype.DefineOwnProperty(marshaller.MarshalFieldInfo(info, prototype));
-            }
-
-            if (type.IsEnum)
-            {
-                string[] names = Enum.GetNames(type);
-                object[] values = new object[names.Length];
-                Enum.GetValues(type).CopyTo(values, 0);
-
-                for (int i = 0; i < names.Length; i++)
+                if (info.IsLiteral)
                 {
                     prototype.DefineOwnProperty(
-                        names[i],
-                        JsBox.CreateObject(global.CreateObject(values[i], prototype))
+                        info.Name,
+                        JsBox.CreateObject(global.CreateObject(info.GetValue(null), prototype))
+                    );
+                }
+                else
+                {
+                    prototype.DefineOwnProperty(
+                        marshaller.MarshalFieldInfo(info, prototype)
                     );
                 }
             }
 
-            // find all nested types
+            // Find all nested types.
+
             foreach (var info in type.GetNestedTypes(BindingFlags.Public))
             {
                 prototype.DefineOwnProperty(info.Name, marshaller.MarshalClrValue(info), PropertyAttributes.DontEnum);
             }
 
-            // Find all instance properties and fields
+            // Find all instance properties and fields.
 
             var getMethods = new List<MethodInfo>();
             var setMethods = new List<MethodInfo>();
-            var properties = new List<NativeDescriptor>();
+            var properties = new List<Descriptor>();
 
             foreach (var info in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
@@ -236,9 +235,9 @@ namespace Jint.Native.Interop
             private readonly Type _reflectedType;
             private readonly NativeOverloadImpl<ConstructorInfo, WrappedConstructor> _overloads;
             private readonly Func<JsObject, IPropertyStore> _propertyStoreFactory;
-            private readonly List<NativeDescriptor> _properties;
+            private readonly List<Descriptor> _properties;
 
-            public Constructor(Type reflectedType, NativeOverloadImpl<ConstructorInfo, WrappedConstructor> overloads, Func<JsObject, IPropertyStore> propertyStoreFactory, List<NativeDescriptor> properties)
+            public Constructor(Type reflectedType, NativeOverloadImpl<ConstructorInfo, WrappedConstructor> overloads, Func<JsObject, IPropertyStore> propertyStoreFactory, List<Descriptor> properties)
             {
                 _reflectedType = reflectedType;
                 _overloads = overloads;
@@ -284,7 +283,12 @@ namespace Jint.Native.Interop
 
                 foreach (var property in _properties)
                 {
-                    target.DefineOwnProperty(new NativeDescriptor(target, property));
+                    target.DefineOwnProperty(new Descriptor(
+                        property.Index,
+                        property.Getter,
+                        property.Setter,
+                        property.Attributes
+                    ));
                 }
             }
 

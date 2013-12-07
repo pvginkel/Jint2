@@ -4,28 +4,47 @@ using System.Text;
 
 namespace Jint.Native
 {
-    internal enum DescriptorType
-    {
-        Value,
-        Accessor,
-        Clr
-    }
-
     [Serializable]
-    public abstract class Descriptor
+    public sealed class Descriptor
     {
-        protected Descriptor(JsObject owner, string name, PropertyAttributes attributes)
+        // The lower three bits of _index contains the attributes. The rest
+        // contains the actual index of the property.
+
+        private readonly int _index;
+        private object _value;
+
+        public Descriptor(int index, JsBox value, PropertyAttributes attributes)
+            : this(index, attributes)
         {
-            Attributes = attributes;
-            Owner = owner;
-            Name = name;
-            Index = owner.Global.ResolveIdentifier(name);
+            _value = value.GetValue();
         }
 
-        public string Name { get; private set; }
-        public int Index { get; private set; }
+        public Descriptor(int index, JsObject getter, JsObject setter, PropertyAttributes attributes)
+            : this(index, attributes)
+        {
+            _value = new Accessor
+            {
+                Getter = getter,
+                Setter = setter
+            };
+        }
 
-        public PropertyAttributes Attributes { get; private set; }
+        private Descriptor(int index, PropertyAttributes attributes)
+        {
+            // * 8 for a signed shift.
+
+            _index = index * 8 | (int)attributes;
+        }
+
+        public int Index
+        {
+            get { return _index >> 3; }
+        }
+
+        public PropertyAttributes Attributes
+        {
+            get { return (PropertyAttributes)(_index & 7); }
+        }
 
         public bool Enumerable
         {
@@ -42,97 +61,84 @@ namespace Jint.Native
             get { return (Attributes & PropertyAttributes.ReadOnly) == 0; }
         }
 
-        public JsObject Owner { get; set; }
-
-        public abstract bool IsReference { get; }
-
-        public bool IsClr
+        public bool IsAccessor
         {
-            get { return false; }
+            get { return _value is Accessor; }
         }
 
-        public abstract Descriptor Clone();
-
-        /// <summary>
-        /// Gets a value stored in the descriptor.
-        /// </summary>
-        /// <param name="that">A target object. This has a meaning in case of descriptors which helds an accessors,
-        /// in value descriptors this parameter is ignored.</param>
-        /// <returns>A value stored in the descriptor</returns>
-        public abstract JsBox Get(JsBox that);
-
-        /// <summary>
-        /// Sets a value.
-        /// </summary>
-        /// <param name="that">A target object. This has a meaning in case of descriptors which helds an accessors,
-        /// in value descriptors this parameter is ignored.</param>
-        /// <param name="value">A new value which should be stored in the descriptor.</param>
-        public abstract void Set(JsObject that, JsBox value);
-
-        internal abstract DescriptorType DescriptorType { get; }
-
-        /// <summary>
-        /// 8.10.5
-        /// </summary>
-        internal static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsBox value)
+        public JsBox Get(JsBox @this)
         {
-            if (value.GetClass() != JsNames.ClassObject)
-                throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
+            if (_value == null)
+                return JsBox.Undefined;
 
-            var obj = (JsObject)value;
-            if (
-                (obj.HasProperty(Id.value) || obj.HasProperty(Id.writable)) &&
-                (obj.HasProperty(Id.set) || obj.HasProperty(Id.get)))
-                throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
-
-            var attributes = PropertyAttributes.None;
-            JsObject getFunction = null;
-            JsObject setFunction = null;
-            JsBox result;
-
-            if (
-                obj.TryGetProperty(Id.enumerable, out result) &&
-                !result.ToBoolean()
-            )
-                attributes |= PropertyAttributes.DontEnum;
-
-            if (
-                obj.TryGetProperty(Id.configurable, out result) &&
-                !result.ToBoolean()
-            )
-                attributes |= PropertyAttributes.DontDelete;
-
-            if (
-                obj.TryGetProperty(Id.writable, out result) &&
-                !result.ToBoolean()
-            )
-                attributes |= PropertyAttributes.ReadOnly;
-
-            if (obj.TryGetProperty(Id.get, out result))
+            var accessor = _value as Accessor;
+            if (accessor != null)
             {
-                if (!result.IsFunction)
-                    throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
-
-                getFunction = (JsObject)result;
+                return accessor.Getter.Global.ExecuteFunction(
+                    accessor.Getter,
+                    @this,
+                    JsBox.EmptyArray,
+                    null
+                );
             }
 
-            if (obj.TryGetProperty(Id.set, out result))
-            {
-                if (!result.IsFunction)
-                    throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
-
-                setFunction = (JsObject)result;
-            }
-
-            if (obj.HasProperty(Id.value))
-                return new ValueDescriptor(owner, name, obj.GetProperty(Id.value));
-
-            return new PropertyDescriptor(global, owner, name, getFunction, setFunction, attributes);
+            return JsBox.FromValue(_value);
         }
 
-        public override string ToString()
+        public void Set(JsBox @this, JsBox value)
         {
-            return Name;
+            var accessor = _value as Accessor;
+            if (accessor != null)
+            {
+                if (accessor.Setter == null)
+                    throw new JsException(JsErrorType.TypeError);
+
+                accessor.Setter.Global.ExecuteFunction(
+                    accessor.Setter,
+                    @this,
+                    new[] { value },
+                    null
+                );
+            }
+            else
+            {
+                if (!Writable)
+                    throw new JintException("This property is not writable");
+
+                _value = value.GetValue();
+            }
+        }
+
+        public JsObject Getter
+        {
+            get
+            {
+                var accessor = _value as Accessor;
+                return accessor == null ? null : accessor.Getter;
+            }
+            set
+            {
+                ((Accessor)_value).Getter = value;
+            }
+        }
+
+        public JsObject Setter
+        {
+            get
+            {
+                var accessor = _value as Accessor;
+                return accessor == null ? null : accessor.Setter;
+            }
+            set
+            {
+                ((Accessor)_value).Setter = value;
+            }
+        }
+
+        private sealed class Accessor
+        {
+            public JsObject Getter;
+            public JsObject Setter;
         }
     }
 }

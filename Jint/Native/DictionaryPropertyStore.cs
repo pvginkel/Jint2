@@ -73,46 +73,45 @@ namespace Jint.Native
         public void DefineOwnProperty(Descriptor currentDescriptor)
         {
             int key = currentDescriptor.Index;
+
             Descriptor descriptor;
             if (_properties.TryGetValue(key, out descriptor))
             {
                 // Updating an existing property.
 
-                switch (descriptor.DescriptorType)
+                var boxedThis = JsBox.CreateObject(Owner);
+
+                if (descriptor.IsAccessor)
                 {
-                    case DescriptorType.Value:
-                        switch (currentDescriptor.DescriptorType)
-                        {
-                            case DescriptorType.Value:
-                                _properties[key].Set(Owner, currentDescriptor.Get(JsBox.CreateObject(Owner)));
-                                break;
+                    if (currentDescriptor.IsAccessor)
+                    {
+                        if (currentDescriptor.Getter != null)
+                            descriptor.Getter = currentDescriptor.Getter;
+                        if (currentDescriptor.Setter != null)
+                            descriptor.Setter = currentDescriptor.Setter;
+                    }
+                    else
+                    {
+                        descriptor.Set(boxedThis, currentDescriptor.Get(boxedThis));
+                    }
+                }
+                else
+                {
+                    // TODO: No exception is thrown anymore when it's a CLR
+                    // accessor.
 
-                            case DescriptorType.Accessor:
-                                _properties.Remove(key);
-                                _properties[key] = currentDescriptor;
-                                break;
-
-                            case DescriptorType.Clr:
-                                throw new NotSupportedException();
-                        }
-                        break;
-
-                    case DescriptorType.Accessor:
-                        var propertyDescriptor = (PropertyDescriptor)descriptor;
-                        var currentPropertyDescriptor = (PropertyDescriptor)currentDescriptor;
-
-                        if (currentDescriptor.DescriptorType == DescriptorType.Accessor)
-                        {
-                            if (currentPropertyDescriptor.GetFunction != null)
-                                propertyDescriptor.GetFunction = currentPropertyDescriptor.GetFunction;
-                            if (currentPropertyDescriptor.SetFunction != null)
-                                propertyDescriptor.SetFunction = currentPropertyDescriptor.SetFunction;
-                        }
-                        else
-                        {
-                            propertyDescriptor.Set(Owner, currentDescriptor.Get(JsBox.CreateObject(Owner)));
-                        }
-                        break;
+                    if (currentDescriptor.IsAccessor)
+                    {
+                        _properties.Remove(key);
+                        _properties[key] = currentDescriptor;
+                    }
+                    else
+                    {
+                        _properties[key].Set(
+                            boxedThis,
+                            currentDescriptor.Get(boxedThis)
+                        );
+                    }
                 }
             }
             else

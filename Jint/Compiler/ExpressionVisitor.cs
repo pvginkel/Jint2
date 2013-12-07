@@ -1269,7 +1269,7 @@ namespace Jint.Compiler
                         _defineAccessorProperty,
                         new[]
                         {
-                            Expression.Constant(accessorProperty.Name),
+                            Expression.Constant(_global.ResolveIdentifier(accessorProperty.Name)),
                             accessorProperty.GetExpression != null
                                 ? accessorProperty.GetExpression.Accept(this)
                                 : Expression.Default(typeof(JsObject)),

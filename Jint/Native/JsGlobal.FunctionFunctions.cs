@@ -26,7 +26,7 @@ namespace Jint.Native
 
             public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsString.Box(String.Format("function {0} ( ) {{ [native code] }}", callee.Delegate.Name));
+                return JsString.Box(String.Format("function {0} ( ) {{ [native code] }}", ((JsObject)@this).Delegate.Name));
             }
 
             public static JsBox Call(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)

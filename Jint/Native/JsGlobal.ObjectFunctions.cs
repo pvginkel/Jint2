@@ -40,9 +40,8 @@ namespace Jint.Native
 
                 var obj = runtime.Global.CreateObject(callee.Prototype);
 
-                obj.DefineOwnProperty(new ValueDescriptor(
-                    obj,
-                    "constructor",
+                obj.DefineOwnProperty(new Descriptor(
+                    Id.constructor,
                     JsBox.CreateObject(callee),
                     PropertyAttributes.DontEnum
                 ));
@@ -124,7 +123,7 @@ namespace Jint.Native
                     throw new JsException(JsErrorType.TypeError);
 
                 string name = arguments[1].ToString();
-                var desc = Descriptor.ToPropertyDescriptor(
+                var desc = ToPropertyDescriptor(
                     runtime.Global,
                     (JsObject)instance,
                     name,
@@ -134,6 +133,76 @@ namespace Jint.Native
                 ((JsObject)instance).DefineOwnProperty(desc);
 
                 return instance;
+            }
+
+            /// <summary>
+            /// 8.10.5
+            /// </summary>
+            private static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsBox value)
+            {
+                if (value.GetClass() != JsNames.ClassObject)
+                    throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
+
+                var obj = (JsObject)value;
+                if (
+                    (obj.HasProperty(Id.value) || obj.HasProperty(Id.writable)) &&
+                    (obj.HasProperty(Id.set) || obj.HasProperty(Id.get)))
+                    throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
+
+                var attributes = PropertyAttributes.None;
+                JsObject getFunction = null;
+                JsObject setFunction = null;
+                JsBox result;
+
+                if (
+                    obj.TryGetProperty(Id.enumerable, out result) &&
+                    !result.ToBoolean()
+                )
+                    attributes |= PropertyAttributes.DontEnum;
+
+                if (
+                    obj.TryGetProperty(Id.configurable, out result) &&
+                    !result.ToBoolean()
+                )
+                    attributes |= PropertyAttributes.DontDelete;
+
+                if (
+                    obj.TryGetProperty(Id.writable, out result) &&
+                    !result.ToBoolean()
+                )
+                    attributes |= PropertyAttributes.ReadOnly;
+
+                if (obj.TryGetProperty(Id.get, out result))
+                {
+                    if (!result.IsFunction)
+                        throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
+
+                    getFunction = (JsObject)result;
+                }
+
+                if (obj.TryGetProperty(Id.set, out result))
+                {
+                    if (!result.IsFunction)
+                        throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
+
+                    setFunction = (JsObject)result;
+                }
+
+                if (obj.HasProperty(Id.value))
+                {
+                    return new Descriptor(
+                        global.ResolveIdentifier(name),
+                        obj.GetProperty(Id.value),
+                        PropertyAttributes.None
+                    );
+                }
+
+                return new Descriptor(
+                    global.ResolveIdentifier(name),
+                    getFunction,
+                    setFunction,
+                    attributes
+                );
             }
 
             public static JsBox LookupGetter(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
@@ -152,12 +221,13 @@ namespace Jint.Native
                     );
                 }
 
-                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyDescriptor;
+                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as Descriptor;
                 if (descriptor == null)
                     return JsBox.Undefined;
 
-                if (descriptor.GetFunction != null)
-                    return JsBox.CreateObject(descriptor.GetFunction);
+                var getter = descriptor.Getter;
+                if (getter != null)
+                    return JsBox.CreateObject(getter);
 
                 return JsBox.Undefined;
             }
@@ -178,12 +248,13 @@ namespace Jint.Native
                     );
                 }
 
-                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyDescriptor;
+                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as Descriptor;
                 if (descriptor == null)
                     return JsBox.Undefined;
 
-                if (descriptor.SetFunction != null)
-                    return JsBox.CreateObject(descriptor.SetFunction);
+                var setter = descriptor.Setter;
+                if (setter != null)
+                    return JsBox.CreateObject(setter);
 
                 return JsBox.Undefined;
             }

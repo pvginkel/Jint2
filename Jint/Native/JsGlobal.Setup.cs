@@ -15,13 +15,11 @@ namespace Jint.Native
                 : null;
             var setJsFunction =
                 setFunction != null
-                ? CreateFunction(null, setFunction, 0, null)
+                ? CreateFunction(null, setFunction, 1, null)
                 : null;
 
-            var descriptor = new PropertyDescriptor(
-                this,
-                prototype,
-                name,
+            var descriptor = new Descriptor(
+                ResolveIdentifier(name),
                 getJsFunction,
                 setJsFunction,
                 attributes

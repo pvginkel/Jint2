@@ -154,9 +154,8 @@ namespace Jint.Native
             {
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    result.DefineOwnProperty(new ValueDescriptor(
-                        result,
-                        i.ToString(CultureInfo.InvariantCulture),
+                    result.DefineOwnProperty(new Descriptor(
+                        i,
                         arguments[i],
                         PropertyAttributes.DontEnum
                     ));
@@ -165,16 +164,14 @@ namespace Jint.Native
                 length = arguments.Length;
             }
 
-            result.DefineOwnProperty(new ValueDescriptor(
-                result,
-                "callee",
+            result.DefineOwnProperty(new Descriptor(
+                Id.callee,
                 JsBox.CreateObject(callee),
                 PropertyAttributes.DontEnum
             ));
 
-            result.DefineOwnProperty(new ValueDescriptor(
-                result,
-                "length",
+            result.DefineOwnProperty(new Descriptor(
+                Id.length,
                 JsNumber.Box(length),
                 PropertyAttributes.DontEnum
             ));

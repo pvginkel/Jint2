@@ -17,10 +17,10 @@ namespace Jint.Native.Interop
         private static readonly MethodInfo _marshalJsValue = typeof(Marshaller).GetMethod("MarshalJsValue");
         private static readonly MethodInfo _marshalClr = typeof(Marshaller).GetMethod("MarshalClrValue");
         private static readonly ConcurrentDictionary<MethodInfo, JsFunction> _methodCache = new ConcurrentDictionary<MethodInfo, JsFunction>();
-        private static readonly ConcurrentDictionary<PropertyInfo, WrappedGetter> _getPropertyCache = new ConcurrentDictionary<PropertyInfo, WrappedGetter>();
-        private static readonly ConcurrentDictionary<PropertyInfo, WrappedSetter> _setPropertyCache = new ConcurrentDictionary<PropertyInfo, WrappedSetter>();
-        private static readonly ConcurrentDictionary<FieldInfo, WrappedGetter> _getFieldCache = new ConcurrentDictionary<FieldInfo, WrappedGetter>();
-        private static readonly ConcurrentDictionary<FieldInfo, WrappedSetter> _setFieldCache = new ConcurrentDictionary<FieldInfo, WrappedSetter>();
+        private static readonly ConcurrentDictionary<PropertyInfo, JsFunction> _getPropertyCache = new ConcurrentDictionary<PropertyInfo, JsFunction>();
+        private static readonly ConcurrentDictionary<PropertyInfo, JsFunction> _setPropertyCache = new ConcurrentDictionary<PropertyInfo, JsFunction>();
+        private static readonly ConcurrentDictionary<FieldInfo, JsFunction> _getFieldCache = new ConcurrentDictionary<FieldInfo, JsFunction>();
+        private static readonly ConcurrentDictionary<FieldInfo, JsFunction> _setFieldCache = new ConcurrentDictionary<FieldInfo, JsFunction>();
         private static readonly ConcurrentDictionary<MethodInfo, WrappedIndexerGetter> _getIndexerCache = new ConcurrentDictionary<MethodInfo, WrappedIndexerGetter>();
         private static readonly ConcurrentDictionary<MethodInfo, WrappedIndexerSetter> _setIndexerCache = new ConcurrentDictionary<MethodInfo, WrappedIndexerSetter>();
         private static readonly ConcurrentDictionary<ConstructorInfo, WrappedConstructor> _constructorCache = new ConcurrentDictionary<ConstructorInfo, WrappedConstructor>();
@@ -294,7 +294,7 @@ namespace Jint.Native.Interop
             return builder.Compile<JsFunction>();
         }
 
-        public static WrappedGetter WrapGetProperty(PropertyInfo property)
+        public static JsFunction WrapGetProperty(PropertyInfo property)
         {
             if (property == null)
                 throw new ArgumentNullException("property");
@@ -302,12 +302,16 @@ namespace Jint.Native.Interop
             return _getPropertyCache.GetOrAdd(property, WrapGetPropertyCore);
         }
 
-        private static WrappedGetter WrapGetPropertyCore(PropertyInfo property)
+        private static JsFunction WrapGetPropertyCore(PropertyInfo property)
         {
             var builder = new Builder();
 
-            builder.AddGlobalParameter();
-            builder.AddThisParameter(typeof(JsObject));
+            builder.AddRuntimeParameter();
+            builder.AddThisParameter(typeof(JsBox));
+            builder.AddParameter(typeof(JsObject), "callee");
+            builder.AddParameter(typeof(object), "closure");
+            builder.AddParameter(typeof(JsBox[]), "arguments");
+            builder.AddParameter(typeof(JsBox[]), "genericArguments");
 
             var method = property.GetGetMethod();
 
@@ -319,10 +323,10 @@ namespace Jint.Native.Interop
                 method.ReturnType
             ));
 
-            return builder.Compile<WrappedGetter>();
+            return builder.Compile<JsFunction>();
         }
 
-        public static WrappedSetter WrapSetProperty(PropertyInfo property)
+        public static JsFunction WrapSetProperty(PropertyInfo property)
         {
             if (property == null)
                 throw new ArgumentNullException("property");
@@ -330,28 +334,46 @@ namespace Jint.Native.Interop
             return _setPropertyCache.GetOrAdd(property, WrapSetPropertyCore);
         }
 
-        private static WrappedSetter WrapSetPropertyCore(PropertyInfo property)
+        private static JsFunction WrapSetPropertyCore(PropertyInfo property)
         {
             var builder = new Builder();
 
-            builder.AddGlobalParameter();
-            builder.AddThisParameter(typeof(JsObject));
-            var argument = builder.AddParameter(typeof(JsBox), "value");
+            builder.AddRuntimeParameter();
+            builder.AddThisParameter(typeof(JsBox));
+            builder.AddParameter(typeof(JsObject), "callee");
+            builder.AddParameter(typeof(object), "closure");
+            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
+            builder.AddParameter(typeof(JsBox[]), "genericArguments");
 
             var method = property.GetSetMethod();
+
+            var local = builder.AddLocal(typeof(JsBox), "value");
+
+            builder.AddStatement(Expression.Assign(
+                local,
+                Expression.ArrayAccess(
+                    argumentsParameter,
+                    Expression.Constant(0)
+                )
+            ));
 
             builder.AddStatement(Expression.Assign(
                 Expression.Property(
                     builder.MarshalThis(method.DeclaringType, method.IsStatic),
                     property
                 ),
-                builder.Marshal(argument, property.PropertyType)
+                builder.Marshal(
+                    local,
+                    property.PropertyType
+                )
             ));
 
-            return builder.Compile<WrappedSetter>();
+            builder.AddStatement(local);
+
+            return builder.Compile<JsFunction>();
         }
 
-        public static WrappedGetter WrapGetField(FieldInfo field)
+        public static JsFunction WrapGetField(FieldInfo field)
         {
             if (field == null)
                 throw new ArgumentNullException("field");
@@ -359,12 +381,16 @@ namespace Jint.Native.Interop
             return _getFieldCache.GetOrAdd(field, WrapGetFieldCore);
         }
 
-        private static WrappedGetter WrapGetFieldCore(FieldInfo field)
+        private static JsFunction WrapGetFieldCore(FieldInfo field)
         {
             var builder = new Builder();
 
-            builder.AddGlobalParameter();
-            builder.AddThisParameter(typeof(JsObject));
+            builder.AddRuntimeParameter();
+            builder.AddThisParameter(typeof(JsBox));
+            builder.AddParameter(typeof(JsObject), "callee");
+            builder.AddParameter(typeof(object), "closure");
+            builder.AddParameter(typeof(JsBox[]), "arguments");
+            builder.AddParameter(typeof(JsBox[]), "genericArguments");
 
             builder.AddStatement(builder.UnMarshal(
                 Expression.Field(
@@ -374,10 +400,10 @@ namespace Jint.Native.Interop
                 field.FieldType
             ));
 
-            return builder.Compile<WrappedGetter>();
+            return builder.Compile<JsFunction>();
         }
 
-        public static WrappedSetter WrapSetField(FieldInfo field)
+        public static JsFunction WrapSetField(FieldInfo field)
         {
             if (field == null)
                 throw new ArgumentNullException("field");
@@ -385,16 +411,29 @@ namespace Jint.Native.Interop
             return _setFieldCache.GetOrAdd(field, WrapSetFieldCore);
         }
 
-        private static WrappedSetter WrapSetFieldCore(FieldInfo field)
+        private static JsFunction WrapSetFieldCore(FieldInfo field)
         {
             if (field == null)
                 throw new ArgumentNullException("field");
 
             var builder = new Builder();
 
-            builder.AddGlobalParameter();
-            builder.AddThisParameter(typeof(JsObject));
-            var argument = builder.AddParameter(typeof(JsBox), "value");
+            builder.AddRuntimeParameter();
+            builder.AddThisParameter(typeof(JsBox));
+            builder.AddParameter(typeof(JsObject), "callee");
+            builder.AddParameter(typeof(object), "closure");
+            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
+            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+
+            var local = builder.AddLocal(typeof(JsBox), "value");
+
+            builder.AddStatement(Expression.Assign(
+                local,
+                Expression.ArrayAccess(
+                    argumentsParameter,
+                    Expression.Constant(0)
+                )
+            ));
 
             // Can't assign to constants.
 
@@ -405,15 +444,13 @@ namespace Jint.Native.Interop
                         builder.MarshalThis(field.DeclaringType, field.IsStatic),
                         field
                     ),
-                    builder.Marshal(argument, field.FieldType)
+                    builder.Marshal(local, field.FieldType)
                 ));
             }
-            else
-            {
-                builder.AddStatement(Expression.Empty());
-            }
 
-            return builder.Compile<WrappedSetter>();
+            builder.AddStatement(local);
+
+            return builder.Compile<JsFunction>();
         }
 
         public static WrappedIndexerGetter WrapIndexerGetter(MethodInfo method)

@@ -286,15 +286,15 @@ namespace Jint
         /// <param name="property">Property to marshal</param>
         /// <param name="owner">Owner of the returned descriptor</param>
         /// <returns>A descriptor</returns>
-        public NativeDescriptor MarshalPropertyInfo(PropertyInfo property, JsObject owner)
+        public Descriptor MarshalPropertyInfo(PropertyInfo property, JsObject owner)
         {
-            WrappedGetter getter;
-            WrappedSetter setter = null;
+            JsFunction getter;
+            JsFunction setter = null;
 
             if (property.CanRead && property.GetGetMethod() != null)
                 getter = ProxyHelper.WrapGetProperty(property);
             else
-                getter = (global, @this) => JsBox.Undefined;
+                getter = DummyPropertyGetter;
 
             if (property.CanWrite && property.GetSetMethod() != null)
                 setter = ProxyHelper.WrapSetProperty(property);
@@ -303,7 +303,19 @@ namespace Jint
             if (setter == null)
                 attributes |= PropertyAttributes.ReadOnly;
 
-            return new NativeDescriptor(owner, property.Name, getter, setter, attributes);
+            return new Descriptor(
+                owner.Global.ResolveIdentifier(property.Name),
+                owner.Global.CreateFunction(null, getter, 0, null),
+                setter == null
+                    ? null
+                    : owner.Global.CreateFunction(null, setter, 1, null),
+                attributes
+            );
+        }
+
+        private JsBox DummyPropertyGetter(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericarguments)
+        {
+            return JsBox.Undefined;
         }
 
         /// <summary>
@@ -312,13 +324,12 @@ namespace Jint
         /// <param name="field">Field info to marshal</param>
         /// <param name="owner">Owner for the descriptor</param>
         /// <returns>Descriptor</returns>
-        public NativeDescriptor MarshalFieldInfo(FieldInfo field, JsObject owner)
+        public Descriptor MarshalFieldInfo(FieldInfo field, JsObject owner)
         {
-            return new NativeDescriptor(
-                owner,
-                field.Name,
-                ProxyHelper.WrapGetField(field),
-                ProxyHelper.WrapSetField(field),
+            return new Descriptor(
+                Global.ResolveIdentifier(field.Name),
+                Global.CreateFunction(null, ProxyHelper.WrapGetField(field), 0, null),
+                Global.CreateFunction(null, ProxyHelper.WrapSetField(field), 1, null),
                 PropertyAttributes.None
             );
         }

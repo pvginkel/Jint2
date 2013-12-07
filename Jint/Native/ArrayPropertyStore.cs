@@ -1,4 +1,6 @@
-﻿using System;
+﻿// ReSharper disable CompareOfFloatsByEqualityOperator
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -111,9 +113,7 @@ namespace Jint.Native
         {
             double indexNumber = index.ToNumber();
             result = (int)indexNumber;
-// ReSharper disable CompareOfFloatsByEqualityOperator
             return result == indexNumber && result >= 0;
-// ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
         public bool TryGetProperty(JsBox index, out JsBox result)

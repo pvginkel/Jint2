@@ -474,16 +474,39 @@ namespace Jint.Native
             }
             else
             {
-                var descriptor = GetDescriptor(index);
-                if (
-                    descriptor == null || (
-                        descriptor.Owner != this &&
-                        descriptor.DescriptorType == DescriptorType.Value
-                    )
-                )
-                    DefineOwnProperty(new ValueDescriptor(this, Global.GetIdentifier(index), value));
-                else
-                    descriptor.Set(this, value);
+                // If we have this descriptor, we can set it using that descriptor.
+
+                var descriptor = GetOwnDescriptor(index);
+                if (descriptor != null)
+                {
+                    descriptor.Set(JsBox.CreateObject(this), value);
+                    return;
+                }
+
+                // If we don't have it, the prototype may have it.
+                
+                if (!IsPrototypeNull)
+                {
+                    descriptor = Prototype.GetDescriptor(index);
+
+                    // If the prototype has it and it's an accessor; go through
+                    // that accessor.
+
+                    if (descriptor != null && descriptor.IsAccessor)
+                    {
+                        descriptor.Set(JsBox.CreateObject(this), value);
+                        return;
+                    }
+                }
+
+                // We don't have the property yet and there is no accessor
+                // defined; create a new property.
+
+                DefineOwnProperty(new Descriptor(
+                    index,
+                    value,
+                    PropertyAttributes.None
+                ));
             }
         }
 
@@ -508,14 +531,14 @@ namespace Jint.Native
             return PropertyStore.Delete(index);
         }
 
-        public void DefineOwnProperty(string key, JsBox value, PropertyAttributes attributes)
-        {
-            DefineOwnProperty(new ValueDescriptor(this, key, value, attributes));
-        }
-
         public void DefineOwnProperty(string key, JsBox value)
         {
-            DefineOwnProperty(new ValueDescriptor(this, key, value));
+            DefineOwnProperty(key, value, PropertyAttributes.None);
+        }
+
+        public void DefineOwnProperty(string key, JsBox value, PropertyAttributes attributes)
+        {
+            DefineOwnProperty(new Descriptor(Global.ResolveIdentifier(key), value, attributes));
         }
 
         public void DefineOwnProperty(Descriptor currentDescriptor)
@@ -524,12 +547,14 @@ namespace Jint.Native
             PropertyStore.DefineOwnProperty(currentDescriptor);
         }
 
-        public void DefineAccessorProperty(string name, JsObject getFunction, JsObject setFunction)
+        public void DefineAccessorProperty(int index, JsObject getFunction, JsObject setFunction)
         {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            DefineOwnProperty(new PropertyDescriptor(Global, this, name, getFunction, setFunction, PropertyAttributes.None));
+            DefineOwnProperty(new Descriptor(
+                index,
+                getFunction,
+                setFunction,
+                PropertyAttributes.None
+            ));
         }
 
         public IEnumerator<KeyValuePair<string, JsBox>> GetEnumerator()

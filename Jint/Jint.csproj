@@ -126,7 +126,6 @@
     <Compile Include="Native\Interop\NativeMethodOverload.cs" />
     <Compile Include="Native\Interop\NativePropertyStore.cs" />
     <Compile Include="Native\Interop\NativeOverloadImpl.cs" />
-    <Compile Include="Native\Interop\NativeDescriptor.cs" />
     <Compile Include="Marshaller.cs" />
     <Compile Include="Native\ILiteral.cs" />
     <Compile Include="Native\PreferredType.cs" />
@@ -141,8 +140,6 @@
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />
-    <Compile Include="Native\PropertyDescriptor.cs" />
-    <Compile Include="Native\ValueDescriptor.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Expressions\ArrayDeclarationSyntax.cs" />
     <Compile Include="Expressions\CommaOperatorSyntax.cs" />

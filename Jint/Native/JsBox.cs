@@ -300,6 +300,20 @@ namespace Jint.Native
             return JintRuntime.CompareSame(left, right);
         }
 
+        // TODO: This is a temporary solution to give the Descriptor
+        // access to the internal value.
+        internal object GetValue()
+        {
+            return _value;
+        }
+
+        // TODO: This is a temporary solution to give the Descriptor
+        // access to the internal value.
+        internal static JsBox FromValue(object value)
+        {
+            return new JsBox(value);
+        }
+
         public override bool Equals(object obj)
         {
             if (!(obj is JsBox))

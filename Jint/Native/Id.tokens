@@ -12,6 +12,7 @@ atan
 atan2
 Boolean
 call
+callee
 ceil
 charAt
 charCodeAt
