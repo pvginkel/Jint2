@@ -24,13 +24,28 @@ namespace Jint.Play
             Console.ReadLine();
             jint.Run(program);
 #else
-            while (true)
+            // Run a few times to stabilize the results.
+
+            for (int i = 0; i < 5; i++)
             {
-                var sw = Stopwatch.StartNew();
+                jint.Run(program);
+            }
+
+            // Perform the iterations.
+
+            var total = new TimeSpan();
+
+            for (int i = 0; ; i++)
+            {
+                var stopwatch = Stopwatch.StartNew();
 
                 jint.Run(program);
 
-                Console.WriteLine(sw.Elapsed);
+                var elapsed = stopwatch.Elapsed;
+
+                total += elapsed;
+
+                Console.WriteLine("This run: {0}, average: {1}", elapsed, new TimeSpan(total.Ticks / (i + 1)));
             }
 #endif
         }

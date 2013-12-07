@@ -49,7 +49,7 @@ namespace Jint.Compiler
 
             result[GetOperationMethodKey(SyntaxExpressionType.BitwiseExclusiveOr, ValueType.Double, ValueType.Double)] =
                 (runtime, arguments) => Expression.Convert(
-                        Expression.ExclusiveOr(
+                    Expression.ExclusiveOr(
                         Expression.Convert(arguments[0], typeof(long)),
                         Expression.Convert(arguments[1], typeof(long))
                     ),
@@ -58,7 +58,7 @@ namespace Jint.Compiler
 
             result[GetOperationMethodKey(SyntaxExpressionType.BitwiseOr, ValueType.Double, ValueType.Double)] =
                 (runtime, arguments) => Expression.Convert(
-                        Expression.Or(
+                    Expression.Or(
                         Expression.Convert(arguments[0], typeof(long)),
                         Expression.Convert(arguments[1], typeof(long))
                     ),
