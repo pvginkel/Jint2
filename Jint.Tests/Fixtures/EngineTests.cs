@@ -237,7 +237,7 @@ namespace Jint.Tests.Fixtures
 
             var r = engine.Run(script, false);
 
-            Assert.IsTrue(r is JsString);
+            Assert.IsTrue(r is JsBox);
             Assert.AreEqual("31,2", r.ToString());
         }
 

@@ -499,7 +499,7 @@ namespace Jint.Native
             if (descriptor == null)
                 return JsBox.Undefined;
 
-            return descriptor.Get(JsBox.CreateObject(prototype));
+            return descriptor.Get(obj);
         }
 
         public static JsBox Operation_SetMember(JsBox obj, string name, JsBox value)

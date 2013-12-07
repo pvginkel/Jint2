@@ -251,7 +251,7 @@ namespace Jint.Native
                     {
                         replaceValue = ((JsObject)replaceValue).Execute(
                             runtime,
-                            new JsBox(),
+                            JsBox.CreateObject(runtime.GlobalScope),
                             new[]
                             {
                                 JsString.Box(search),
@@ -320,7 +320,7 @@ namespace Jint.Native
 
                             return ((JsObject)replaceValue).Execute(
                                 runtime,
-                                new JsBox(),
+                                JsBox.CreateObject(runtime.GlobalScope),
                                 replaceParameters.ToArray(),
                                 null
                                 ).ToString();

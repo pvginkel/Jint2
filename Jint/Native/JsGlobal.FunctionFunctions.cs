@@ -14,11 +14,6 @@ namespace Jint.Native
                 return JsBox.CreateObject(runtime.Global.Engine.CompileFunction(arguments));
             }
 
-            public static JsBox GetConstructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
-            {
-                return JsBox.CreateObject(callee);
-            }
-
             public static JsBox GetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 return JsNumber.Box(((JsObject)@this).Delegate.ArgumentCount);
@@ -43,14 +38,18 @@ namespace Jint.Native
                 if (arguments.Length >= 1 && !arguments[0].IsNullOrUndefined)
                     obj = arguments[0];
                 else
-                    obj = new JsBox();
+                    obj = JsBox.CreateObject(runtime.GlobalScope);
 
-                JsBox[] argumentsCopy = null;
+                JsBox[] argumentsCopy;
 
                 if (arguments.Length >= 2 && !arguments[1].IsNull)
                 {
                     argumentsCopy = new JsBox[arguments.Length - 1];
                     Array.Copy(arguments, 1, argumentsCopy, 0, argumentsCopy.Length);
+                }
+                else
+                {
+                    argumentsCopy = JsBox.EmptyArray;
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call
@@ -67,17 +66,17 @@ namespace Jint.Native
                 if (arguments.Length >= 1 && !arguments[0].IsNullOrUndefined)
                     obj = arguments[0];
                 else
-                    obj = new JsBox();
+                    obj = JsBox.CreateObject(runtime.Global.GlobalScope);
 
-                JsBox[] argumentsCopy = null;
+                JsBox[] argumentsCopy;
 
                 if (
                     arguments.Length >= 2 &&
                     !arguments[1].IsNull &&
-                    arguments[0].IsObject
+                    arguments[1].IsObject
                 )
                 {
-                    var argument = (JsObject)arguments[0];
+                    var argument = (JsObject)arguments[1];
 
                     int length = (int)argument.GetProperty(Id.length).ToNumber();
 
@@ -87,6 +86,10 @@ namespace Jint.Native
                     {
                         argumentsCopy[i] = argument.GetProperty(i);
                     }
+                }
+                else
+                {
+                    argumentsCopy = JsBox.EmptyArray;
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call

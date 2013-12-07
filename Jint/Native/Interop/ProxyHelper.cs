@@ -549,7 +549,10 @@ namespace Jint.Native.Interop
                 Expression.Constant(function),
                 typeof(JsObject).GetMethod("Execute"),
                 Expression.Constant(runtime),
-                Expression.Constant(that),
+                Expression.Call(
+                    typeof(JsBox).GetMethod("CreateObject"),
+                    Expression.Constant(that)
+                ),
                 ExpressionVisitor.MakeArrayInit(
                     parameters.Select(p => Expression.Call(
                         Expression.Constant(runtime.Global.Marshaller),

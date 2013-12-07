@@ -38,9 +38,6 @@ namespace Jint.Native
 
         private JsObject BuildObjectClass(JsObject prototype)
         {
-            // We need to keep this because the prototype is passed to the constructor rather than created in it.
-            DefineFunction(prototype, "constructor", ObjectFunctions.GetConstructor, 0, PropertyAttributes.DontEnum);
-
             DefineFunction(prototype, "toString", ObjectFunctions.ToString, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toLocaleString", ObjectFunctions.ToString, 0, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "valueOf", ObjectFunctions.ValueOf, 0, PropertyAttributes.DontEnum);
@@ -84,7 +81,7 @@ namespace Jint.Native
         {
             var prototype = FunctionClass.Prototype;
 
-            DefineFunction(prototype, "constructor", FunctionFunctions.GetConstructor, 0, PropertyAttributes.DontEnum);
+            DefineProperty(prototype, "constructor", JsBox.CreateObject(FunctionClass), PropertyAttributes.DontEnum);
             DefineFunction(prototype, "call", FunctionFunctions.Call, 1, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "apply", FunctionFunctions.Apply, 2, PropertyAttributes.DontEnum);
             DefineFunction(prototype, "toString", FunctionFunctions.ToString, 0, PropertyAttributes.DontEnum);

@@ -517,43 +517,43 @@ namespace Jint
             }
         }
 
-        public object CallFunction(string name, params object[] args)
+        public object CallFunction(string name, params object[] arguments)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            return CallFunction((JsObject)Global.GlobalScope[name], args);
+            return CallFunction((JsObject)Global.GlobalScope[name], arguments);
         }
 
-        public object CallFunction(JsObject function, params object[] args)
+        public object CallFunction(JsObject function, params object[] arguments)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
 
-            JsBox[] arguments;
+            JsBox[] argumentsCopy;
 
-            if (args == null || args.Length == 0)
+            if (arguments == null || arguments.Length == 0)
             {
-                arguments = JsBox.EmptyArray;
+                argumentsCopy = JsBox.EmptyArray;
             }
             else
             {
-                arguments = new JsBox[args.Length];
+                argumentsCopy = new JsBox[arguments.Length];
 
-                for (int i = 0; i < args.Length; i++)
+                for (int i = 0; i < arguments.Length; i++)
                 {
-                    arguments[i] = Global.Marshaller.MarshalClrValue(args[i]);
+                    argumentsCopy[i] = Global.Marshaller.MarshalClrValue(arguments[i]);
                 }
             }
 
-            var original = new JsBox[arguments.Length];
-            Array.Copy(arguments, original, arguments.Length);
+            var original = new JsBox[argumentsCopy.Length];
+            Array.Copy(argumentsCopy, original, argumentsCopy.Length);
 
-            var result = function.Execute(_runtime, JsBox.Null, arguments, null);
+            var result = function.Execute(_runtime, JsBox.Null, argumentsCopy, null);
 
-            for (int i = 0; i < args.Length; i++)
+            for (int i = 0; i < arguments.Length; i++)
             {
-                args[i] = Global.Marshaller.MarshalJsValue<object>(arguments[i]);
+                arguments[i] = Global.Marshaller.MarshalJsValue<object>(argumentsCopy[i]);
             }
 
             return Global.Marshaller.MarshalJsValue<object>(result);

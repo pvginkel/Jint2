@@ -51,7 +51,7 @@ namespace Jint.Native.Interop
             if (getter == null)
                 throw new JintException("No matching overload found");
 
-            result = getter(_global, JsBox.CreateObject(Owner), index);
+            result = getter(_global, Owner, index);
             return true;
         }
 
@@ -69,7 +69,7 @@ namespace Jint.Native.Interop
             if (setter == null)
                 throw new JintException("No matching overload found");
 
-            setter(_global, JsBox.CreateObject(Owner), index, value);
+            setter(_global, Owner, index, value);
             return true;
         }
     }

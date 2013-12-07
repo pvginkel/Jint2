@@ -10,8 +10,8 @@ namespace Jint.Native.Interop
 
     public delegate void WrappedSetter(JsGlobal global, JsObject @this, JsBox value);
 
-    public delegate JsBox WrappedIndexerGetter(JsGlobal global, JsBox @this, JsBox index);
+    public delegate JsBox WrappedIndexerGetter(JsGlobal global, JsObject @this, JsBox index);
 
-    public delegate void WrappedIndexerSetter(JsGlobal global, JsBox @this, JsBox index, JsBox value);
+    public delegate void WrappedIndexerSetter(JsGlobal global, JsObject @this, JsBox index, JsBox value);
 
 }

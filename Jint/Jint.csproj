@@ -56,7 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compiler\ClosureManager.cs" />
+    <Compile Include="Compiler\DynamicAssemblyManager.cs" />
     <Compile Include="Compiler\ExpressionVisitor.Builders.cs" />
     <Compile Include="Compiler\ExpressionVisitor.OperationBuilders.cs" />
     <Compile Include="Compiler\TypeMarkerPhase.cs" />

@@ -24,7 +24,7 @@ namespace Jint.Play
             Console.ReadLine();
             jint.Run(program);
 #else
-            for (int i = 0; i < 10; i++)
+            while (true)
             {
                 var sw = Stopwatch.StartNew();
 

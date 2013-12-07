@@ -200,7 +200,7 @@ namespace Jint.Compiler
                             if (withTarget != null)
                             {
                                 getter = Expression.Block(
-                                    Expression.Assign(withTarget, withLocal),
+                                    Expression.Assign(withTarget, _visitor.EnsureJs(withLocal)),
                                     getter
                                 );
                             }

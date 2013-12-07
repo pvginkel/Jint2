@@ -164,12 +164,14 @@ namespace Jint.Native
 
         private bool TryExecuteToPrimitiveFunction(Descriptor descriptor, out JsBox primitive)
         {
-            primitive = new JsBox();
             var boxedThis = JsBox.CreateObject(this);
 
             var function = descriptor.Get(boxedThis);
             if (!function.IsFunction)
+            {
+                primitive = new JsBox();
                 return false;
+            }
 
             var result = Global.ExecuteFunction(
                 (JsObject)function,
@@ -184,6 +186,7 @@ namespace Jint.Native
                 return true;
             }
 
+            primitive = new JsBox();
             return false;
         }
 

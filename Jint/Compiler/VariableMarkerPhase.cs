@@ -100,7 +100,7 @@ namespace Jint.Compiler
 
             // Build the closure.
 
-            var closureType = ClosureManager.BuildClosure(fields);
+            var closureType = DynamicAssemblyManager.BuildClosure(fields);
             var closure = new Closure(
                 closureType,
                 parent != null ? parent.Block.Closure : null

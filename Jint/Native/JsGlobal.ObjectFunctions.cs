@@ -9,11 +9,6 @@ namespace Jint.Native
     {
         private static class ObjectFunctions
         {
-            public static JsBox GetConstructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
-            {
-                return JsBox.CreateObject(callee);
-            }
-
             // 15.2.2.1
             public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
@@ -35,8 +30,10 @@ namespace Jint.Native
                         result = global.CreateObject(argument.ToString(), global.StringClass);
                     else if (argument.IsNull)
                         result = global.CreateObject(argument.ToNumber(), global.NumberClass);
-                    else // if (argument.IsBoolean)
+                    else if (argument.IsBoolean)
                         result = global.CreateObject(argument.ToBoolean(), global.BooleanClass);
+                    else
+                        throw new InvalidOperationException();
 
                     return JsBox.CreateObject(result);
                 }

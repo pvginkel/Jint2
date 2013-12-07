@@ -23,45 +23,13 @@ namespace Jint.Compiler
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
         private const string RuntimeParameterName = "<>runtime";
 
-        private static AssemblyBuilder _assemblyBuilder;
-        private static ModuleBuilder _moduleBuilder;
         private static int _lastTypeId;
-#if DEBUG || SAVE_ASSEMBLY
-        private static int _lastAssemblyId;
-#endif
         private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
 
         private int _lastMethodId;
         private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
         private Scope _scope;
         private readonly JsGlobal _global;
-
-        static ExpressionVisitor()
-        {
-            CreateAssemblyBuilder();
-        }
-
-        private static void CreateAssemblyBuilder()
-        {
-            string name = "DynamicJintAssembly";
-
-#if DEBUG || SAVE_ASSEMBLY
-            int assemblyId = Interlocked.Increment(ref _lastAssemblyId);
-            name += assemblyId.ToString(CultureInfo.InvariantCulture);
-#endif
-
-            var assemblyName = new AssemblyName(name);
-
-            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
-                assemblyName,
-                AssemblyBuilderAccess.RunAndSave
-            );
-
-            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(
-                assemblyName.Name,
-                assemblyName.Name + ".dll"
-            );
-        }
 
         public ExpressionVisitor(JsGlobal global)
         {
@@ -88,11 +56,10 @@ namespace Jint.Compiler
                 methodInfo
             );
 
-#if DEBUG || SAVE_ASSEMBLY
-            _assemblyBuilder.Save(_assemblyBuilder.GetName().Name + ".dll");
+            // We've build a complete script. Dump the assembly (with the right
+            // constants defined) so the generated assembly can be inspected.
 
-            CreateAssemblyBuilder();
-#endif
+            DynamicAssemblyManager.FlushAssembly();
 
             return result;
         }
@@ -101,7 +68,7 @@ namespace Jint.Compiler
         {
             int typeId = Interlocked.Increment(ref _lastTypeId);
 
-            var typeBuilder = _moduleBuilder.DefineType(
+            var typeBuilder = DynamicAssemblyManager.ModuleBuilder.DefineType(
                 "CompiledExpression" + typeId.ToString(CultureInfo.InvariantCulture),
                  TypeAttributes.Public
             );
@@ -421,7 +388,7 @@ namespace Jint.Compiler
                 Expression.Call(
                     _scope.Runtime,
                     typeof(JintRuntime).GetMethod("GetForEachKeys"),
-                    syntax.Expression.Accept(this)
+                    EnsureJs(syntax.Expression.Accept(this))
                 ),
                 Expression.Block(
                     typeof(void),
@@ -1107,7 +1074,7 @@ namespace Jint.Compiler
                     var withTarget = Expression.Parameter(typeof(JsBox), "target");
                     statements.Add(Expression.Assign(
                         withTarget,
-                        Expression.Constant(null, typeof(JsBox))
+                        Expression.Default(typeof(JsBox))
                     ));
 
                     var method = Expression.Parameter(
@@ -1450,7 +1417,7 @@ namespace Jint.Compiler
             if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Boolean)
                 return expression;
 
-            return new ConvertFromJsExpression(expression, ValueType.Boolean);
+            return new ConvertFromJsExpression(EnsureJs(expression), ValueType.Boolean);
         }
 
         private Expression EnsureString(Expression expression)
@@ -1458,7 +1425,7 @@ namespace Jint.Compiler
             if (SyntaxUtil.GetValueType(expression.Type) == ValueType.String)
                 return expression;
 
-            return new ConvertFromJsExpression(expression, ValueType.String);
+            return new ConvertFromJsExpression(EnsureJs(expression), ValueType.String);
         }
 
         private Expression EnsureNumber(Expression expression)
@@ -1466,7 +1433,7 @@ namespace Jint.Compiler
             if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Double)
                 return expression;
 
-            return new ConvertFromJsExpression(expression, ValueType.Double);
+            return new ConvertFromJsExpression(EnsureJs(expression), ValueType.Double);
         }
 
         private Expression EnsureObject(Expression expression)
@@ -1474,7 +1441,7 @@ namespace Jint.Compiler
             if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Object)
                 return expression;
 
-            return new ConvertFromJsExpression(expression, ValueType.Object);
+            return new ConvertFromJsExpression(EnsureJs(expression), ValueType.Object);
         }
 
         public Expression VisitTernary(TernarySyntax syntax)

@@ -198,7 +198,8 @@ namespace Jint
         /// <returns>A converted native value</returns>
         public T MarshalJsValue<T>(JsBox value)
         {
-            object valueValue = value.ToInstance().Value;
+            var valueInstance = value.ToInstance();
+            object valueValue = valueInstance.Value;
 
             if (valueValue is T)
                 return (T)valueValue;
@@ -246,8 +247,13 @@ namespace Jint
                 );
             }
 
-            if (!value.IsNullOrUndefined && value is T)
-                return (T)(object)value;
+            if (!value.IsNullOrUndefined)
+            {
+                if (value is T)
+                    return (T)(object)value;
+                if (valueInstance is T)
+                    return (T)(object)valueInstance;
+            }
 
             // JsNull and JsUndefined will fall here and become a nulls
             return (T)Convert.ChangeType(valueValue, typeof(T));

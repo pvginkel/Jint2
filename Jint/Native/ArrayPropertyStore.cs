@@ -46,6 +46,11 @@ namespace Jint.Native
             _owner = owner;
         }
 
+        protected override bool IsValid(JsBox value)
+        {
+            return value.IsValid;
+        }
+
         private bool ContainsKey(int index)
         {
             return base[index].IsValid;

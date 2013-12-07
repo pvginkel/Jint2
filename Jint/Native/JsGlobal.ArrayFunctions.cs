@@ -255,7 +255,7 @@ namespace Jint.Native
                 }
                 else
                 {
-                    values.Sort();
+                    values.Sort(JsBoxComparer.Instance);
                 }
 
                 for (int i = 0; i < length; i++)
@@ -482,6 +482,20 @@ namespace Jint.Native
                 }
 
                 return arguments[0];
+            }
+
+            private class JsBoxComparer : IComparer<JsBox>
+            {
+                public static readonly JsBoxComparer Instance = new JsBoxComparer();
+
+                private JsBoxComparer()
+                {
+                }
+
+                public int Compare(JsBox x, JsBox y)
+                {
+                    return x.ToString().CompareTo(y.ToString());
+                }
             }
         }
     }

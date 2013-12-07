@@ -40,7 +40,7 @@ namespace Jint.ExpressionExtensions
         }
 
         public Expression Expression { get; private set; }
-        public Expressions.ValueType ValueType { get; private set; }
+        public ValueType ValueType { get; private set; }
 
         public ConvertFromJsExpression(Expression expression, ValueType valueType)
         {

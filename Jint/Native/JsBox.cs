@@ -259,10 +259,15 @@ namespace Jint.Native
 
         public string GetTypeOf()
         {
-            if (IsNull || IsObject)
+            if (IsNull)
                 return JsNames.TypeObject;
-            if (IsFunction)
-                return JsNames.TypeFunction;
+            var @object = _value as JsObject;
+            if (@object != null)
+            {
+                if (@object.Delegate != null)
+                    return JsNames.TypeFunction;
+                return JsNames.TypeObject;
+            }
             if (IsBoolean)
                 return JsNames.TypeBoolean;
             if (IsNumber)
@@ -284,7 +289,7 @@ namespace Jint.Native
                 return JsNames.ClassString;
             if (IsBoolean)
                 return JsNames.ClassBoolean;
-            if (IsNull)
+            if (IsNumber)
                 return JsNames.ClassNumber;
             throw new InvalidOperationException();
         }
@@ -293,6 +298,21 @@ namespace Jint.Native
         public static bool StrictlyEquals(JsBox left, JsBox right)
         {
             return JintRuntime.CompareSame(left, right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is JsBox))
+                return false;
+
+            return Equals(_value, ((JsBox)obj)._value);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_value == null)
+                return 0;
+            return _value.GetHashCode();
         }
     }
 }

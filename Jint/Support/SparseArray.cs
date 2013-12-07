@@ -31,6 +31,11 @@ namespace Jint.Support
         private Chunk[] _chunks;
         private uint _chunkCount;
 
+        protected virtual bool IsValid(T value)
+        {
+            return value != null;
+        }
+
         public virtual T this[int index]
         {
             get
@@ -232,7 +237,7 @@ namespace Jint.Support
             {
                 for (int i = 0; i < _values.Length; i++)
                 {
-                    if (_values[i] != null)
+                    if (IsValid(_values[i]))
                         yield return i;
                 }
             }
@@ -247,7 +252,7 @@ namespace Jint.Support
 
                         for (int j = 0; j < values.Length; j++)
                         {
-                            if (values[j] != null)
+                            if (IsValid(values[j]))
                                 yield return offset + j;
                         }
                     }
@@ -261,7 +266,7 @@ namespace Jint.Support
             {
                 foreach (var value in _values)
                 {
-                    if (value != null)
+                    if (IsValid(value))
                         yield return value;
                 }
             }
@@ -271,7 +276,7 @@ namespace Jint.Support
                 {
                     foreach (var value in _chunks[i].Values)
                     {
-                        if (value != null)
+                        if (IsValid(value))
                             yield return value;
                     }
                 }

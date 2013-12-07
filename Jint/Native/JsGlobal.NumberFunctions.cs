@@ -30,7 +30,10 @@ namespace Jint.Native
 
             public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
-                return JsNumber.Box(Convert.ToDouble(@this.ToNumber()));
+                if (@this.IsNumber)
+                    return @this;
+
+                return JsNumber.Box(Convert.ToDouble(@this.ToInstance().Value));
             }
 
             public static JsBox ToLocaleString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
