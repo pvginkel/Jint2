@@ -14,7 +14,7 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            var program = File.ReadAllText(@"..\..\..\Jint.Tests\SunSpider\Tests\access-fannkuch.js");
+            var program = File.ReadAllText(@"..\..\..\Jint.Tests\SunSpider\Tests\bitops-bitwise-and.js");
 
             var jint = new JintEngine();
 
@@ -24,28 +24,43 @@ namespace Jint.Play
             Console.ReadLine();
             jint.Run(program);
 #else
-            // Run a few times to stabilize the results.
 
-            for (int i = 0; i < 5; i++)
-            {
-                jint.Run(program);
-            }
+            jint.Run(program);
+
+            var times = new TimeSpan[20];
+            int timeOffset = 0;
+            var lowest = new TimeSpan();
 
             // Perform the iterations.
 
-            var total = new TimeSpan();
-
             for (int i = 0; ; i++)
             {
+                GC.Collect();
+
                 var stopwatch = Stopwatch.StartNew();
 
                 jint.Run(program);
 
                 var elapsed = stopwatch.Elapsed;
 
-                total += elapsed;
+                times[timeOffset++] = elapsed;
+                if (timeOffset == times.Length)
+                    timeOffset = 0;
 
-                Console.WriteLine("This run: {0}, average: {1}", elapsed, new TimeSpan(total.Ticks / (i + 1)));
+                if (times[times.Length - 1].Ticks != 0)
+                {
+                    var average = new TimeSpan(times.Sum(p => p.Ticks) / times.Length);
+
+                    if (lowest.Ticks == 0 || average.Ticks < lowest.Ticks)
+                        lowest = average;
+
+                    Console.WriteLine(
+                        "This run: {0}, average: {1}, lowest: {2}",
+                        elapsed.ToString("s\\.fffff"),
+                        average.ToString("s\\.fffff"),
+                        lowest.ToString("s\\.fffff")
+                    );
+                }
             }
 #endif
         }

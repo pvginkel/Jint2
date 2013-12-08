@@ -207,6 +207,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>JintRuntime.Operations.Generated.tt</DependentUpon>
     </Compile>
+    <Compile Include="Support\FastPropertyStore.cs" />
+    <Compile Include="Support\FastPropertyStoreDebugView.cs" />
+    <Compile Include="Support\PrimesHelper.cs" />
     <Compile Include="Support\KeyedCollection.cs" />
     <Compile Include="Support\SparseArray.cs" />
   </ItemGroup>

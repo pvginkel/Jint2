@@ -123,7 +123,11 @@ namespace Jint.Native
             object value = GetPropertyRaw(index);
 
             if (value == null)
+            {
+                Trace.WriteLine("Undefined identifier " + Global.GetIdentifier(index));
+
                 return ResolveUndefined(index);
+            }
 
             return ResolvePropertyValue(value);
         }

@@ -55,6 +55,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FastPropertyStoreFixture\Fixture.cs" />
     <Compile Include="Fixtures\AccessorsTests.cs" />
     <Compile Include="Fixtures\ArgumentsTests.cs" />
     <Compile Include="Fixtures\ArrayTests.cs" />
