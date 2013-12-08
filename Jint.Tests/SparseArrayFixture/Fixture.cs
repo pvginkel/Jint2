@@ -20,14 +20,14 @@ namespace Jint.Tests.SparseArrayFixture
 
             for (int i = 0; i < 1000; i++)
             {
-                array[i] = i.ToString();
+                array.SetValue(i, i.ToString());
             }
 
             // Verify that we can get them back.
 
             for (int i = 0; i < 1000; i++)
             {
-                Assert.AreEqual(i.ToString(), array[i]);
+                Assert.AreEqual(i.ToString(), array.GetValue(i));
             }
 
             // Verify that we didn't switch to chunks.
@@ -43,18 +43,18 @@ namespace Jint.Tests.SparseArrayFixture
             for (int i = 0; i < 1000; i++)
             {
                 if (i % 2 == 0)
-                    array[i] = i.ToString();
+                    array.SetValue(i, i.ToString());
             }
 
             for (int i = 0; i < 1000; i++)
             {
                 if (i % 2 == 0)
                 {
-                    Assert.AreEqual(i.ToString(), array[i]);
+                    Assert.AreEqual(i.ToString(), array.GetValue(i));
                 }
                 else
                 {
-                    Assert.IsNull(array[i]);
+                    Assert.IsNull(array.GetValue(i));
                 }
             }
 
@@ -72,7 +72,7 @@ namespace Jint.Tests.SparseArrayFixture
             for (int i = 0; i < 1000; i++)
             {
                 if (i % 2 == 0)
-                    array[i] = i.ToString();
+                    array.SetValue(i, i.ToString());
             }
 
             int offset = 0;
@@ -89,35 +89,11 @@ namespace Jint.Tests.SparseArrayFixture
         }
 
         [Test]
-        public void CorrectValuesWithInsertsWithSpaces()
-        {
-            var array = new SparseArray<string>();
-
-            for (int i = 0; i < 1000; i++)
-            {
-                if (i % 2 == 0)
-                    array[i] = i.ToString();
-            }
-
-            int offset = 0;
-            foreach (string value in array.GetValues())
-            {
-                Assert.AreEqual(offset, int.Parse(value));
-                offset += 2;
-            }
-
-            // Verify that we didn't switch to chunks even though we have
-            // sparsely set items.
-
-            Assert.AreEqual("Values=1280", array.ToString());
-        }
-
-        [Test]
         public void GetNegativeShouldNotFail()
         {
             var array = new SparseArray<string>();
 
-            Assert.IsNull(array[-10]);
+            Assert.IsNull(array.GetValue(-10));
 
             // We shouldn't have allocated items.
 
@@ -129,7 +105,7 @@ namespace Jint.Tests.SparseArrayFixture
         {
             var array = new SparseArray<string>();
 
-            Assert.IsNull(array[10000]);
+            Assert.IsNull(array.GetValue(10000));
 
             // We shouldn't have allocated items.
 
@@ -146,14 +122,14 @@ namespace Jint.Tests.SparseArrayFixture
 
             for (int i = 0; i < 1000; i++)
             {
-                array[offset + i] = i.ToString();
+                array.SetValue(offset + i, i.ToString());
             }
 
             // Verify that we can get them back.
 
             for (int i = 0; i < 1000; i++)
             {
-                Assert.AreEqual(i.ToString(), array[offset + i]);
+                Assert.AreEqual(i.ToString(), array.GetValue(offset + i));
             }
 
             // Verify that we've switched to chunks.
@@ -168,7 +144,7 @@ namespace Jint.Tests.SparseArrayFixture
 
             for (int i = 1000; i > 0; i--)
             {
-                array[i] = "";
+                array.SetValue(i, "");
             }
 
             int offset = 1;
@@ -191,7 +167,7 @@ namespace Jint.Tests.SparseArrayFixture
 
             for (int i = 0; i < 1000; i++)
             {
-                array[random.Next()] = "";
+                array.SetValue(random.Next(), "");
             }
 
             int lastKey = int.MinValue;
@@ -200,51 +176,6 @@ namespace Jint.Tests.SparseArrayFixture
             {
                 Assert.Greater(key, lastKey);
                 lastKey = key;
-            }
-        }
-
-        [Test]
-        public void VerifyValuesInOrderFromReverseInserts()
-        {
-            var array = new SparseArray<string>();
-
-            for (int i = 1000; i > 0; i--)
-            {
-                array[i] = i.ToString();
-            }
-
-            int offset = 1;
-
-            foreach (string value in array.GetValues())
-            {
-                Assert.AreEqual(offset.ToString(), value);
-                offset++;
-            }
-
-            // Verify the allocations.
-
-            Assert.AreEqual("Chunks=32, ChunkCapacity=37", array.ToString());
-        }
-
-        [Test]
-        public void VerifyValuesInOrderFromRandomInserts()
-        {
-            var array = new SparseArray<string>();
-            var random = new Random();
-
-            for (int i = 0; i < 1000; i++)
-            {
-                int value = random.Next();
-                array[value] = value.ToString();
-            }
-
-            int lastValue = int.MinValue;
-
-            foreach (string value in array.GetValues())
-            {
-                int intValue = int.Parse(value);
-                Assert.Greater(intValue, lastValue);
-                lastValue = intValue;
             }
         }
     }

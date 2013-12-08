@@ -23,7 +23,7 @@ namespace Jint.Native
 
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    propertyStore[i] = arguments[i]; // Fast version since it avoids a type conversion
+                    propertyStore.DefineOrSetPropertyValue(i, arguments[i]);
                 }
 
                 return JsBox.CreateObject(target);
@@ -45,9 +45,13 @@ namespace Jint.Native
 
                 for (int i = 0; i < store.Length; i++)
                 {
-                    var obj = (JsObject)store[i];
-                    resultStore[i] = ((JsObject)obj.GetProperty(Id.toLocaleString)).Execute(
-                        runtime, JsBox.CreateObject(obj), arguments, null
+                    var obj = (JsObject)store.GetOwnProperty(i);
+
+                    resultStore.DefineOrSetPropertyValue(
+                        i,
+                        ((JsObject)obj.GetProperty(Id.toLocaleString)).Execute(
+                            runtime, JsBox.CreateObject(obj), arguments, null
+                        )
                     );
                 }
 
@@ -62,7 +66,7 @@ namespace Jint.Native
                 {
                     var array = runtime.Global.CreateArray();
                     store = array.FindArrayStore();
-                    store[0] = @this;
+                    store.DefineOrSetPropertyValue(0, @this);
                 }
 
                 return JsBox.CreateObject(store.Concat(arguments));
@@ -86,9 +90,9 @@ namespace Jint.Native
                     return JsBox.Undefined;
 
                 var key = store.Length - 1;
-                var result = store[key];
+                var result = store.GetOwnProperty(key);
 
-                store.Delete(key);
+                store.DeleteProperty(key);
                 store.Length--;
 
                 return result;
@@ -103,7 +107,7 @@ namespace Jint.Native
                 {
                     foreach (var arg in arguments)
                     {
-                        store[store.Length] = arg;
+                        store.DefineOrSetPropertyValue(store.Length, arg);
                     }
 
                     return JsNumber.Box(store.Length);
@@ -111,12 +115,11 @@ namespace Jint.Native
                 else
                 {
                     var obj = (JsObject)@this;
-
                     int length = (int)obj.GetProperty(Id.length).ToNumber();
 
                     foreach (var arg in arguments)
                     {
-                        obj[JsNumber.Box(length)] = arg;
+                        obj.SetProperty(length, arg);
                         length++;
                     }
 
@@ -143,12 +146,12 @@ namespace Jint.Native
                     if (lowerExists)
                         target.SetProperty(upper, lowerValue);
                     else
-                        target.Delete(upper);
+                        target.DeleteProperty(upper);
 
                     if (upperExists)
                         target.SetProperty(lower, upperValue);
                     else
-                        target.Delete(lower);
+                        target.DeleteProperty(lower);
                 }
 
                 return JsBox.CreateObject(target);
@@ -161,20 +164,32 @@ namespace Jint.Native
                 if (store == null)
                     return JsBox.Undefined;
 
-                var first = store[0];
+                var first = store.GetOwnProperty(0);
                 for (int k = 1; k < store.Length; k++)
                 {
                     int from = k;
                     int to = k - 1;
 
-                    JsBox result;
-                    if (store.TryGetProperty(from, out result))
-                        store[to] = result;
+                    object result = store.GetOwnPropertyRaw(from);
+                    if (result != null)
+                    {
+                        JsBox value;
+
+                        var accessor = result as PropertyAccessor;
+                        if (accessor != null)
+                            value = accessor.GetValue(@this);
+                        else
+                            value = JsBox.FromValue(result);
+
+                        store.DefineOrSetPropertyValue(to, value);
+                    }
                     else
-                        store.Delete(to);
+                    {
+                        store.DeleteProperty(to);
+                    }
                 }
 
-                store.Delete(store.Length - 1);
+                store.DeleteProperty(store.Length - 1);
                 store.Length--;
 
                 return first;
@@ -208,7 +223,7 @@ namespace Jint.Native
                     push.Execute(
                         runtime,
                         boxedResult,
-                        new[] { target[JsNumber.Box(i)] },
+                        new[] { target.GetProperty(i) },
                         null
                     );
                 }
@@ -297,7 +312,7 @@ namespace Jint.Native
                     int from = relativeStart + k;
                     JsBox item;
                     if (target.TryGetProperty(from, out item))
-                        resultStore[k] = item;
+                        resultStore.DefineOrSetPropertyValue(k, item);
                 }
 
                 var items = new List<JsBox>();
@@ -317,12 +332,12 @@ namespace Jint.Native
                         if (target.TryGetProperty(from, out item))
                             target.SetProperty(to, item);
                         else
-                            target.Delete(to);
+                            target.DeleteProperty(to);
                     }
 
                     for (int k = length; k > length - actualDeleteCount + items.Count; k--)
                     {
-                        target.Delete(k - 1);
+                        target.DeleteProperty(k - 1);
                     }
 
                     target.SetProperty(Id.length, JsNumber.Box(length - actualDeleteCount + items.Count));
@@ -337,7 +352,7 @@ namespace Jint.Native
                         if (target.TryGetProperty(from, out item))
                             target.SetProperty(to, item);
                         else
-                            target.Delete(to);
+                            target.DeleteProperty(to);
                     }
                 }
 
@@ -363,7 +378,7 @@ namespace Jint.Native
                     if (target.TryGetProperty(from, out result))
                         target.SetProperty(to, result);
                     else
-                        target.Delete(to);
+                        target.DeleteProperty(to);
                 }
 
                 var items = new List<JsBox>(arguments);
@@ -477,7 +492,7 @@ namespace Jint.Native
 
                     for (int i = newLength; i < oldLen; i++)
                     {
-                        target.Delete(JsNumber.Box(i));
+                        target.DeleteProperty(JsNumber.Box(i));
                     }
                 }
 

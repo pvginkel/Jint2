@@ -8,14 +8,14 @@ namespace Jint.Native.Interop
     /// <summary>
     /// Represent a set of native overloads to set and get values using indexers.
     /// </summary>
-    internal class NativePropertyStore : DictionaryPropertyStore
+    internal sealed class NativePropertyStore : AbstractPropertyStore
     {
         private readonly JsGlobal _global;
         private readonly NativeOverloadImpl<MethodInfo, WrappedIndexerGetter> _getOverload;
         private readonly NativeOverloadImpl<MethodInfo, WrappedIndexerSetter> _setOverload;
 
         public NativePropertyStore(JsObject owner, MethodInfo[] getters, MethodInfo[] setters)
-            : base(owner)
+            : base((DictionaryPropertyStore)owner.PropertyStore)
         {
             if (getters == null)
                 throw new ArgumentNullException("getters");
@@ -37,40 +37,38 @@ namespace Jint.Native.Interop
             );
         }
 
-        public override bool TryGetProperty(int index, out JsBox result)
+        public override object GetOwnPropertyRaw(int index)
         {
             if (index >= 0)
-                return TryGetProperty(JsString.Box(_global.GetIdentifier(index)), out result);
+                return GetOwnPropertyRaw(JsString.Box(_global.GetIdentifier(index)));
 
-            return base.TryGetProperty(index, out result);
+            return base.GetOwnPropertyRaw(index);
         }
 
-        public override bool TryGetProperty(JsBox index, out JsBox result)
+        public override object GetOwnPropertyRaw(JsBox index)
         {
             var getter = _getOverload.ResolveOverload(new[] { index }, null);
             if (getter == null)
                 throw new JintException("No matching overload found");
 
-            result = getter(_global, Owner, index);
-            return true;
+            return getter(_global, BaseStore.Owner, index).GetValue();
         }
 
-        public override bool TrySetProperty(int index, JsBox value)
+        public override void SetPropertyValue(int index, JsBox value)
         {
             if (index >= 0)
-                return TrySetProperty(JsString.Box(_global.GetIdentifier(index)), value);
-
-            return base.TrySetProperty(index, value);
+                SetPropertyValue(JsString.Box(_global.GetIdentifier(index)), value);
+            else
+                base.SetPropertyValue(index, value);
         }
 
-        public override bool TrySetProperty(JsBox index, JsBox value)
+        public override void SetPropertyValue(JsBox index, JsBox value)
         {
             var setter = _setOverload.ResolveOverload(new[] { index, value }, null);
             if (setter == null)
                 throw new JintException("No matching overload found");
 
-            setter(_global, Owner, index, value);
-            return true;
+            setter(_global, BaseStore.Owner, index, value);
         }
     }
 }

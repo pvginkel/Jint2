@@ -2,13 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Jint.Support;
 
 namespace Jint.Native
 {
-    internal sealed class ArrayPropertyStore : SparseArray<JsBox>, IPropertyStore
+    internal sealed class ArrayPropertyStore : SparseArray<object>, IPropertyStore
     {
         private readonly JsObject _owner;
         private DictionaryPropertyStore _baseStore;
@@ -24,7 +25,7 @@ namespace Jint.Native
 
                 for (int i = value; i < _length; i++)
                 {
-                    this[i] = new JsBox();
+                    SetValue(i, null);
                 }
 
                 _length = value;
@@ -39,7 +40,7 @@ namespace Jint.Native
             _owner = owner;
         }
 
-        public ArrayPropertyStore(JsObject owner, SparseArray<JsBox> array)
+        public ArrayPropertyStore(JsObject owner, SparseArray<object> array)
             : base(array)
         {
             if (owner == null)
@@ -48,65 +49,166 @@ namespace Jint.Native
             _owner = owner;
         }
 
-        protected override bool IsValid(JsBox value)
+        public JsBox GetOwnProperty(int index)
         {
-            return value.IsValid;
+            object result = GetOwnPropertyRaw(index);
+
+            if (result == null)
+                return JsBox.Undefined;
+
+            var accessor = result as PropertyAccessor;
+            if (accessor != null)
+                return accessor.GetValue(JsBox.CreateObject(_owner));
+
+            return JsBox.FromValue(result);
         }
 
-        private bool ContainsKey(int index)
+        public JsBox GetOwnProperty(JsBox index)
         {
-            return base[index].IsValid;
+            object result = GetOwnPropertyRaw(index);
+
+            if (result == null)
+                return JsBox.Undefined;
+
+            var accessor = result as PropertyAccessor;
+            if (accessor != null)
+                return accessor.GetValue(JsBox.CreateObject(_owner));
+
+            return JsBox.FromValue(result);
         }
 
-        public bool HasOwnProperty(int index)
+        public object GetOwnPropertyRaw(int index)
         {
-            int i;
-            if (TryParseIndex(index, out i))
-                return i >= 0 && i < _length && ContainsKey(i);
+            if (index >= 0)
+                return GetValue(index);
 
             if (_baseStore != null)
-                return _baseStore.HasOwnProperty(index);
-
-            return false;
-        }
-
-        public bool HasOwnProperty(JsBox index)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-                return i >= 0 && i < _length && ContainsKey(i);
-
-            if (_baseStore != null)
-                return _baseStore.HasOwnProperty(index);
-
-            return false;
-        }
-
-        public Descriptor GetOwnDescriptor(int index)
-        {
-            if (_baseStore != null)
-                return _baseStore.GetOwnDescriptor(index);
+                return _baseStore.GetOwnPropertyRaw(index);
 
             return null;
         }
 
-        public Descriptor GetOwnDescriptor(JsBox index)
+        public object GetOwnPropertyRaw(JsBox index)
         {
+            int i;
+            if (TryParseIndex(index, out i))
+                return GetValue(i);
+
             if (_baseStore != null)
-                return _baseStore.GetOwnDescriptor(index);
+                return _baseStore.GetOwnPropertyRaw(index);
 
             return null;
         }
 
-        private bool TryParseIndex(int index, out int result)
+        public void SetPropertyValue(int index, JsBox value)
         {
-            // Indexes are stored as negative numbers. However, when ResolveIndex
-            // can parse the index as an integer, it returns the parsed integer
-            // as a positive value. This allows us to have a simple >= 0 check
-            // here to be sure that we got a number.
+            if (index >= 0)
+            {
+                Debug.Assert(GetValue(index) != null);
+                Debug.Assert(!(GetValue(index) is PropertyAccessor));
 
-            result = index;
-            return index >= 0;
+                SetValue(index, value.GetValue());
+            }
+            else
+            {
+                EnsureBaseStore();
+                _baseStore.SetPropertyValue(index, value);
+            }
+        }
+
+        public void DefineOrSetPropertyValue(int index, JsBox value)
+        {
+            SetValue(index, value.GetValue());
+
+            if (index >= _length)
+                _length = index + 1;
+        }
+
+        public void SetPropertyValue(JsBox index, JsBox value)
+        {
+            int i;
+            if (TryParseIndex(index, out i))
+            {
+                Debug.Assert(GetValue(i) != null);
+                Debug.Assert(!(GetValue(i) is PropertyAccessor));
+
+                SetValue(i, value.GetValue());
+            }
+            else
+            {
+                EnsureBaseStore();
+                _baseStore.SetPropertyValue(index, value);
+            }
+        }
+
+        public bool DeleteProperty(int index)
+        {
+            if (index >= 0)
+            {
+                SetValue(index, null);
+                return true;
+            }
+
+            if (_baseStore != null)
+                return _baseStore.DeleteProperty(index);
+
+            return true;
+        }
+
+        public bool DeleteProperty(JsBox index)
+        {
+            int i;
+            if (TryParseIndex(index, out i))
+            {
+                SetValue(i, null);
+                return true;
+            }
+
+            if (_baseStore != null)
+                return _baseStore.DeleteProperty(index);
+
+            return true;
+        }
+
+        public void DefineProperty(int index, object value, PropertyAttributes attributes)
+        {
+            if (index >= 0)
+            {
+                if (attributes != 0)
+                    throw new JintException("Cannot set attributes on array properties");
+
+                Debug.Assert(GetValue(index) == null);
+
+                SetValue(index, value);
+                if (index >= _length)
+                    _length = index + 1;
+            }
+            else
+            {
+                EnsureBaseStore();
+                _baseStore.DefineProperty(index, value, attributes);
+            }
+        }
+
+        public void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+        {
+            int i;
+            if (TryParseIndex(index, out i))
+            {
+                if (attributes != 0)
+                    throw new JintException("Cannot set attributes on array properties");
+
+                Debug.Assert(GetValue(i) == null);
+
+                SetValue(i, value);
+                if (i >= _length)
+                    _length = i + 1;
+            }
+            else
+            {
+                EnsureBaseStore();
+                _baseStore.DefineProperty(index, value, attributes);
+            }
         }
 
         private bool TryParseIndex(JsBox index, out int result)
@@ -116,173 +218,15 @@ namespace Jint.Native
             return result == indexNumber && result >= 0;
         }
 
-        public bool TryGetProperty(JsBox index, out JsBox result)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-            {
-                result = GetByIndex(i);
-                return true;
-            }
-
-            result = new JsBox();
-            return false;
-        }
-
-        public bool TryGetProperty(int index, out JsBox result)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-            {
-                result = GetByIndex(i);
-                return true;
-            }
-
-            result = new JsBox();
-            return false;
-        }
-
-        public override JsBox this[int index]
-        {
-            get
-            {
-                var result = base[index];
-                if (result.IsValid)
-                    return result;
-                return JsBox.Undefined;
-            }
-            set
-            {
-                if (index >= _length)
-                    _length = index + 1;
-
-                base[index] = value;
-            }
-        }
-
-        public JsBox GetByIndex(int index)
-        {
-            return this[index];
-        }
-
-        public bool TrySetProperty(int index, JsBox value)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-            {
-                SetByIndex(i, value);
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool TrySetProperty(JsBox index, JsBox value)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-            {
-                SetByIndex(i, value);
-                return true;
-            }
-
-            return false;
-        }
-
-        public void SetByIndex(int index, JsBox value)
-        {
-            this[index] = value;
-        }
-
-        public bool Delete(JsBox index)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-            {
-                this[i] = new JsBox();
-                return true;
-            }
-
-            if (_baseStore != null)
-                return _baseStore.Delete(index);
-
-            return true;
-        }
-
-        public bool Delete(int index)
-        {
-            int i;
-            if (TryParseIndex(index, out i))
-            {
-                this[i] = new JsBox();
-                return true;
-            }
-
-            if (_baseStore != null)
-                return _baseStore.Delete(index);
-
-            return true;
-        }
-
-        public void DefineOwnProperty(Descriptor descriptor)
-        {
-            int i;
-            if (TryParseIndex(descriptor.Index, out i))
-                SetByIndex(i, descriptor.Get(JsBox.CreateObject(_owner)));
-
-            EnsureBaseStore();
-            _baseStore.DefineOwnProperty(descriptor);
-        }
-
         private void EnsureBaseStore()
         {
             if (_baseStore == null)
                 _baseStore = new DictionaryPropertyStore(_owner);
         }
 
-        public IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator()
-        {
-            if (_baseStore != null)
-                return _baseStore.GetEnumerator();
-
-            return JsObject.EmptyKeyValues.GetEnumerator();
-        }
-
-        public new IEnumerable<JsBox> GetValues()
-        {
-            foreach (var value in base.GetValues())
-            {
-                yield return value;
-            }
-
-            if (_baseStore != null)
-            {
-                foreach (var value in _baseStore.GetValues())
-                {
-                    yield return value;
-                }
-            }
-        }
-
-        public new IEnumerable<int> GetKeys()
-        {
-            foreach (var key in base.GetKeys())
-            {
-                yield return key;
-            }
-
-            if (_baseStore != null)
-            {
-                foreach (int key in _baseStore.GetKeys())
-                {
-                    yield return key;
-                }
-            }
-        }
-
         public JsObject Concat(JsBox[] args)
         {
-            var newArray = new SparseArray<JsBox>(this);
+            var newArray = new SparseArray<object>(this);
             int offset = _length;
 
             foreach (var item in args)
@@ -292,7 +236,10 @@ namespace Jint.Native
                 {
                     foreach (int key in oldArray.GetKeys())
                     {
-                        newArray[key + offset] = oldArray.GetByIndex(key);
+                        newArray.SetValue(
+                            key + offset,
+                            oldArray.GetValue(key)
+                        );
                     }
 
                     offset += oldArray._length;
@@ -312,14 +259,14 @@ namespace Jint.Native
 
                         for (int i = 0; i < objectLength; i++)
                         {
-                            JsBox value;
-                            if (@object.TryGetProperty(i, out value))
-                                newArray[offset + 1] = value;
+                            object value = @object.GetPropertyRaw(i);
+                            if (value != null)
+                                newArray.SetValue(offset + 1, value);
                         }
                     }
                     else
                     {
-                        newArray[offset] = item;
+                        newArray.SetValue(offset, item.GetValue());
                         offset++;
                     }
                 }
@@ -346,11 +293,9 @@ namespace Jint.Native
 
             for (int i = 0; i < length; i++)
             {
-                var item = base[i];
-                if (item.IsValid && !item.IsNullOrUndefined)
+                var item = GetValue(i);
+                if (item != null && item != JsNull.Instance && !(item is JsUndefined))
                     map[i] = item.ToString();
-                else
-                    map[i] = String.Empty;
             }
 
             return JsString.Box(String.Join(separatorString, map));

@@ -70,7 +70,7 @@ namespace Jint.Native
 
                 foreach (JsonDataProperty property in syntax.Properties)
                 {
-                    @object[property.Name] = property.Expression.Accept(this);
+                    @object.SetProperty(property.Name, property.Expression.Accept(this));
                 }
 
                 return JsBox.CreateObject(@object);

@@ -23,8 +23,17 @@ namespace Jint.Native
         public JsObject CreateFunction(string name, JsFunction @delegate, int argumentCount, object closure)
         {
             // The CreateObject here is because of 13.2; this is "Result(9)":
-            //   9. Create a new object as would be constructed by the expression new Object(). 
-            return CreateFunction(name, @delegate, argumentCount, closure, CreateObject(FunctionClass.Prototype));
+            //   9. Create a new object as would be constructed by the expression new Object(). 
+
+            var prototype = CreateObject(FunctionClass.Prototype);
+
+            var result = CreateFunction(name, @delegate, argumentCount, closure, prototype);
+
+            // Constructor on the prototype links back to the result of CreateFunction:
+            //   10. Set the constructor property of Result(9) to F. This property is given attributes { DontEnum }. 
+            prototype.DefineProperty("constructor", JsBox.CreateObject(result), PropertyAttributes.DontEnum);
+
+            return result;
         }
 
         public JsObject CreateFunction(string name, JsFunction @delegate, int argumentCount, object closure, JsObject prototype)
@@ -36,16 +45,12 @@ namespace Jint.Native
         {
             // Prototype is set to the created object from the CreateFunction
             // above; prototype here is "Result(9)"
-            //   11. Set the prototype property of F to Result(9). This property is given attributes as specified in section 15.3.5.2. 
+            //   11. Set the prototype property of F to Result(9). This property is given attributes as specified in section 15.3.5.2. 
+
             var result = CreateObject(null, prototype, new JsDelegate(name, @delegate, argumentCount, closure));
 
             result.SetClass(JsNames.ClassFunction);
             result.SetIsClr(isClr);
-            
-            // Constructor on the prototype links back to the result of CreateFunction:
-            //   10. Set the constructor property of Result(9) to F. This property is given attributes { DontEnum }. 
-            DefineProperty(prototype, "constructor", JsBox.CreateObject(result), PropertyAttributes.DontEnum);
-
 
             return result;
         }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Native
 {
-    internal class DictionaryPropertyStore : IPropertyStore
+    internal sealed class DictionaryPropertyStore : IPropertyStore
     {
         private readonly CachedDictionary _properties = new CachedDictionary();
 
@@ -23,38 +23,50 @@ namespace Jint.Native
             _global = Owner.Global;
         }
 
-        public bool HasOwnProperty(JsBox index)
-        {
-            return HasOwnProperty(_global.ResolveIdentifier(index.ToString()));
-        }
-
-        public bool HasOwnProperty(int index)
+        public object GetOwnPropertyRaw(int index)
         {
             Descriptor descriptor;
-            return _properties.TryGetValue(index, out descriptor);
+            if (_properties.TryGetValue(index, out descriptor))
+                return descriptor.Value;
+            return null;
         }
 
-        public Descriptor GetOwnDescriptor(JsBox index)
+        public object GetOwnPropertyRaw(JsBox index)
         {
-            return GetOwnDescriptor(_global.ResolveIdentifier(index.ToString()));
+            return GetOwnPropertyRaw(_global.ResolveIdentifier(index.ToString()));
         }
 
-        public Descriptor GetOwnDescriptor(int index)
+        public void SetPropertyValue(int index, JsBox value)
         {
-            Descriptor result;
-            _properties.TryGetValue(index, out result);
-            return result;
+            // SetPropertyValue is only used to replace the value of a normal,
+            // existing, property in the store.
+
+            var descriptor = _properties[index];
+
+            Debug.Assert(!(descriptor.Value is PropertyAccessor));
+
+            if (!descriptor.Writable)
+                throw new JintException("This property is not writable");
+
+            _properties[index] = new Descriptor(
+                index,
+                value.GetValue(),
+                _properties[index].Attributes
+#if DEBUG
+                , _global
+#endif
+            );
         }
 
-        public bool Delete(JsBox index)
+        public void SetPropertyValue(JsBox index, JsBox value)
         {
-            return Delete(_global.ResolveIdentifier(index.ToString()));
+            SetPropertyValue(_global.ResolveIdentifier(index.ToString()), value);
         }
 
-        public bool Delete(int index)
+        public bool DeleteProperty(int index)
         {
             Descriptor descriptor;
-            if (!Owner.TryGetDescriptor(index, out descriptor))
+            if (!_properties.TryGetValue(index, out descriptor))
                 return true;
 
             if (descriptor.Configurable)
@@ -63,136 +75,43 @@ namespace Jint.Native
                 return true;
             }
 
+            if (_global.HasOption(Options.Strict))
+                throw new JintException("Property " + index + " isn't configurable");
+
             return false;
-
-            // TODO: This should throw in strict mode.
-
-            // throw new JintException("Property " + index + " isn't configurable");
         }
 
-        public void DefineOwnProperty(Descriptor currentDescriptor)
+        public bool DeleteProperty(JsBox index)
         {
-            int key = currentDescriptor.Index;
+            return DeleteProperty(_global.ResolveIdentifier(index.ToString()));
+        }
 
-            Descriptor descriptor;
-            if (_properties.TryGetValue(key, out descriptor))
-            {
-                // Updating an existing property.
+        public void DefineProperty(int index, object value, PropertyAttributes attributes)
+        {
+            Debug.Assert(!_properties.ContainsKey(index));
 
-                var boxedThis = JsBox.CreateObject(Owner);
+            _properties[index] = new Descriptor(
+                index,
+                value,
+                attributes
+#if DEBUG
+                , _global
+#endif
+            );
+        }
 
-                if (descriptor.IsAccessor)
-                {
-                    if (currentDescriptor.IsAccessor)
-                    {
-                        if (currentDescriptor.Getter != null)
-                            descriptor.Getter = currentDescriptor.Getter;
-                        if (currentDescriptor.Setter != null)
-                            descriptor.Setter = currentDescriptor.Setter;
-                    }
-                    else
-                    {
-                        descriptor.Set(boxedThis, currentDescriptor.Get(boxedThis));
-                    }
-                }
-                else
-                {
-                    // TODO: No exception is thrown anymore when it's a CLR
-                    // accessor.
-
-                    if (currentDescriptor.IsAccessor)
-                    {
-                        _properties.Remove(key);
-                        _properties[key] = currentDescriptor;
-                    }
-                    else
-                    {
-                        _properties[key].Set(
-                            boxedThis,
-                            currentDescriptor.Get(boxedThis)
-                        );
-                    }
-                }
-            }
-            else
-            {
-                _properties[key] = currentDescriptor;
-            }
+        public void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+        {
+            DefineProperty(
+                _global.ResolveIdentifier(index.ToString()),
+                value,
+                attributes
+            );
         }
 
         public IEnumerable<int> GetKeys()
         {
-            var prototype = Owner.Prototype;
-
-            Debug.Assert(prototype != null);
-
-            if (prototype != _global.PrototypeSink)
-            {
-                foreach (int key in prototype.GetKeys())
-                {
-                    if (!HasOwnProperty(key))
-                        yield return key;
-                }
-            }
-
-            foreach (KeyValuePair<int, Descriptor> descriptor in _properties)
-            {
-                if (descriptor.Value.Enumerable)
-                    yield return descriptor.Key;
-            }
-        }
-
-        public IEnumerable<JsBox> GetValues()
-        {
-            return
-                from descriptor in _properties.Values
-                where descriptor.Enumerable
-                select descriptor.Get(JsBox.CreateObject(Owner));
-        }
-
-        public IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator()
-        {
-            return (
-                from descriptor in _properties
-                where descriptor.Value.Enumerable
-                select new KeyValuePair<int, JsBox>(descriptor.Key, descriptor.Value.Get(JsBox.CreateObject(Owner)))
-            ).GetEnumerator();
-        }
-
-        public virtual bool TryGetProperty(JsBox index, out JsBox result)
-        {
-            var descriptor = Owner.GetDescriptor(index);
-            if (descriptor != null)
-            {
-                result = descriptor.Get(JsBox.CreateObject(Owner));
-                return true;
-            }
-
-            result = new JsBox();
-            return false;
-        }
-
-        public virtual bool TryGetProperty(int index, out JsBox result)
-        {
-            var descriptor = Owner.GetDescriptor(index);
-            if (descriptor != null)
-            {
-                result = descriptor.Get(JsBox.CreateObject(Owner));
-                return true;
-            }
-
-            result = new JsBox();
-            return false;
-        }
-
-        public virtual bool TrySetProperty(int index, JsBox value)
-        {
-            return false;
-        }
-
-        public virtual bool TrySetProperty(JsBox index, JsBox value)
-        {
-            return false;
+            return _properties.Where(p => p.Value.Enumerable).Select(p => p.Key);
         }
 
         private class CachedDictionary : Dictionary<int, Descriptor>
@@ -203,7 +122,7 @@ namespace Jint.Native
             {
                 get
                 {
-                    if (_lastAccessed != null && _lastAccessed.Index == index)
+                    if (_lastAccessed.IsValid && _lastAccessed.Index == index)
                         return _lastAccessed;
 
                     Descriptor descriptor;
@@ -222,13 +141,13 @@ namespace Jint.Native
             public new void Remove(int index)
             {
                 base.Remove(index);
-                if (_lastAccessed != null && _lastAccessed.Index == index)
-                    _lastAccessed = null;
+                if (_lastAccessed.IsValid && _lastAccessed.Index == index)
+                    _lastAccessed = new Descriptor();
             }
 
             public new bool TryGetValue(int index, out Descriptor descriptor)
             {
-                if (_lastAccessed != null && _lastAccessed.Index == index)
+                if (_lastAccessed.IsValid && _lastAccessed.Index == index)
                 {
                     descriptor = _lastAccessed;
                     return true;
@@ -239,6 +158,107 @@ namespace Jint.Native
 
                 _lastAccessed = descriptor;
                 return true;
+            }
+        }
+
+        [Serializable]
+        private struct Descriptor
+        {
+            // The lower three bits of _index contains the attributes. The rest
+            // contains the actual index of the property.
+
+            private readonly int _index;
+            private readonly object _value;
+#if DEBUG
+            private JsGlobal _global;
+#endif
+
+            public object Value
+            {
+                get { return _value; }
+            }
+
+            public Descriptor(int index, object value, PropertyAttributes attributes
+#if DEBUG
+                , JsGlobal global
+#endif
+            )
+            {
+                // * 8 for a signed shift.
+                _index = index * 8 | (int)attributes;
+
+                Debug.Assert(value != null && value.GetType() != typeof(JsBox));
+
+                _value = value;
+#if DEBUG
+                _global = global;
+#endif
+            }
+
+            public bool IsValid
+            {
+                get { return _value != null; }
+            }
+
+            public int Index
+            {
+                get { return _index >> 3; }
+            }
+
+            public PropertyAttributes Attributes
+            {
+                get { return (PropertyAttributes)(_index & 7); }
+            }
+
+            public bool Enumerable
+            {
+                get { return (Attributes & PropertyAttributes.DontEnum) == 0; }
+            }
+
+            public bool Configurable
+            {
+                get { return (Attributes & PropertyAttributes.DontDelete) == 0; }
+            }
+
+            public bool Writable
+            {
+                get { return (Attributes & PropertyAttributes.ReadOnly) == 0; }
+            }
+
+            public override string ToString()
+            {
+                string value;
+                try
+                {
+                    value = Value.ToString();
+                }
+                catch
+                {
+                    value = Value.GetType().FullName;
+                }
+
+#if DEBUG
+                string name;
+                if (Index < 0)
+                    name = _global.GetIdentifier(Index);
+                else
+                    name = "";
+
+                return String.Format(
+                    "Name={0}, Index={1}, Value={2}, Attributes={3}",
+                    name,
+                    Index,
+                    value,
+                    Attributes
+                );
+#else
+                return String.Format(
+                    "Index={0}, Value={1}, Attributes={2}",
+                    Index,
+                    value,
+                    Attributes
+                );
+#endif
             }
         }
     }

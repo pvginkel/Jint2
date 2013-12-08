@@ -165,11 +165,18 @@ namespace Jint.Compiler
 
             if (typeof(JsObject).IsAssignableFrom(expression.Type))
             {
-                return Expression.Call(
-                    expression,
-                    _objectSetByIndex,
-                    indexExpression,
-                    EnsureJs(value)
+                var tmp = Expression.Parameter(typeof(JsBox), "tmp");
+
+                return Expression.Block(
+                    new[] { tmp },
+                    Expression.Assign(tmp, EnsureJs(value)),
+                    Expression.Call(
+                        expression,
+                        _objectSetByIndex,
+                        indexExpression,
+                        tmp
+                    ),
+                    tmp
                 );
             }
 

@@ -12,6 +12,33 @@ namespace Jint.Tests.Support
     {
         private readonly string _testsPath;
 
+        private static bool _traceInitialized;
+
+        [TestFixtureSetUp]
+        public static void Setup()
+        {
+            if (_traceInitialized)
+                return;
+
+            _traceInitialized = true;
+
+
+            var toRemove = new List<TraceListener>();
+
+            foreach (TraceListener listener in Trace.Listeners)
+            {
+                if (listener is DefaultTraceListener)
+                    toRemove.Add(listener);
+            }
+
+            foreach (var item in toRemove)
+            {
+                Trace.Listeners.Remove(item);
+            }
+
+            Trace.Listeners.Add(new FailTraceListener());
+        }
+
         protected abstract string BasePath { get; }
 
         public TestBase(string testsPath)
@@ -126,6 +153,30 @@ namespace Jint.Tests.Support
         protected virtual object RunFile(JintEngine ctx, string fileName)
         {
             return ctx.Run(File.ReadAllText(fileName));
+        }
+
+        [DebuggerStepThrough]
+        private class FailTraceListener : TraceListener
+        {
+            public override void Write(string message)
+            {
+                Console.Write(message);
+            }
+
+            public override void WriteLine(string message)
+            {
+                Console.WriteLine(message);
+            }
+
+            public override void Fail(string message)
+            {
+                Assert.Fail(message);
+            }
+
+            public override void Fail(string message, string detailMessage)
+            {
+                Assert.Fail(message);
+            }
         }
     }
 }

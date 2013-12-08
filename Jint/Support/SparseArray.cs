@@ -21,6 +21,7 @@ namespace Jint.Support
     /// or creating large gaps, does this switch to an actual sparse array.
     /// </remarks>
     internal class SparseArray<T>
+        where T : class
     {
         private const int ChunkShift = 5;
         private const int ChunkSize = 1 << ChunkShift;
@@ -30,65 +31,6 @@ namespace Jint.Support
         private T[] _values;
         private Chunk[] _chunks;
         private uint _chunkCount;
-
-        protected virtual bool IsValid(T value)
-        {
-            return value != null;
-        }
-
-        public virtual T this[int index]
-        {
-            get
-            {
-                if (index < 0)
-                    return default(T);
-
-                if (_values != null)
-                {
-                    if (index < _values.Length)
-                        return _values[index];
-                    return default(T);
-                }
-
-                int offset = GetOffsetFromIndex(index);
-                var chunk = FindChunk(offset);
-                if (chunk.Found)
-                    return _chunks[chunk.Index].Values[index - offset];
-
-                return default(T);
-            }
-            set
-            {
-                if (index < 0)
-                    throw new ArgumentOutOfRangeException("index");
-
-                if (_values != null)
-                {
-                    if (index < _values.Length)
-                    {
-                        _values[index] = value;
-                        return;
-                    }
-                    if (index < _values.Length * 2)
-                    {
-                        // We allow the array to double in size every time
-                        // we grow it.
-
-                        GrowValues();
-                        _values[index] = value;
-                        return;
-                    }
-
-                    // We have a real array, but not enough room. Transfer the
-                    // values to chunks and continue.
-                    TransferToChunks();
-                }
-
-                int offset = GetOffsetFromIndex(index);
-                var chunk = FindOrCreateChunk(offset);
-                _chunks[chunk.Index].Values[index - offset] = value;
-            }
-        }
 
         public SparseArray()
         {
@@ -118,7 +60,62 @@ namespace Jint.Support
             }
         }
 
-        private int GetOffsetFromIndex(int index)
+        public T GetValue(int index)
+        {
+            if (index < 0)
+                return default(T);
+
+            if (_values != null)
+            {
+                if (index < _values.Length)
+                    return _values[index];
+                return default(T);
+            }
+
+            int offset = GetOffsetFromIndex(index);
+            var chunk = FindChunk(offset);
+            if (chunk.Found)
+                return _chunks[chunk.Index].Values[index - offset];
+
+            return default(T);
+        }
+
+        public void SetValue(int index, T value)
+        {
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("index");
+
+            // This is here for the conversion from JsBox to object.
+            Debug.Assert(value == null || value.GetType() != typeof(Native.JsBox));
+
+            if (_values != null)
+            {
+                if (index < _values.Length)
+                {
+                    _values[index] = value;
+                    return;
+                }
+                if (index < _values.Length * 2)
+                {
+                    // We allow the array to double in size every time
+                    // we grow it.
+
+                    GrowValues();
+                    _values[index] = value;
+                    return;
+                }
+
+                // We have a real array, but not enough room. Transfer the
+                // values to chunks and continue.
+                TransferToChunks();
+            }
+
+            int offset = GetOffsetFromIndex(index);
+            var chunk = FindOrCreateChunk(offset);
+            _chunks[chunk.Index].Values[index - offset] = value;
+        }
+
+        private static int GetOffsetFromIndex(int index)
         {
             return index & ~(ChunkSize - 1);
         }
@@ -237,7 +234,7 @@ namespace Jint.Support
             {
                 for (int i = 0; i < _values.Length; i++)
                 {
-                    if (IsValid(_values[i]))
+                    if (_values[i] != null)
                         yield return i;
                 }
             }
@@ -252,32 +249,9 @@ namespace Jint.Support
 
                         for (int j = 0; j < values.Length; j++)
                         {
-                            if (IsValid(values[j]))
+                            if (values[j] != null)
                                 yield return offset + j;
                         }
-                    }
-                }
-            }
-        }
-
-        public IEnumerable<T> GetValues()
-        {
-            if (_values != null)
-            {
-                foreach (var value in _values)
-                {
-                    if (IsValid(value))
-                        yield return value;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < _chunkCount; i++)
-                {
-                    foreach (var value in _chunks[i].Values)
-                    {
-                        if (IsValid(value))
-                            yield return value;
                     }
                 }
             }

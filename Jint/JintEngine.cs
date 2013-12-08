@@ -255,7 +255,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, object value)
         {
-            Global.GlobalScope[name] = JsBox.CreateObject(Global.WrapClr(value));
+            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(Global.WrapClr(value)));
 
             return this;
         }
@@ -268,7 +268,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, double value)
         {
-            Global.GlobalScope[name] = JsBox.CreateNumber(value);
+            Global.GlobalScope.SetProperty(name, JsBox.CreateNumber(value));
 
             return this;
         }
@@ -282,9 +282,9 @@ namespace Jint
         public JintEngine SetParameter(string name, string value)
         {
             if (value == null)
-                Global.GlobalScope[name] = JsBox.Null;
+                Global.GlobalScope.SetProperty(name, JsBox.Null);
             else
-                Global.GlobalScope[name] = JsString.Box(value);
+                Global.GlobalScope.SetProperty(name, JsString.Box(value));
 
             return this;
         }
@@ -297,7 +297,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, int value)
         {
-            Global.GlobalScope[name] = JsBox.CreateObject(Global.WrapClr(value));
+            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(Global.WrapClr(value)));
             return this;
         }
 
@@ -309,7 +309,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, bool value)
         {
-            Global.GlobalScope[name] = JsBox.CreateBoolean(value);
+            Global.GlobalScope.SetProperty(name, JsBox.CreateBoolean(value));
 
             return this;
         }
@@ -322,7 +322,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, DateTime value)
         {
-            Global.GlobalScope[name] = JsBox.CreateObject(Global.CreateDate(value));
+            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(Global.CreateDate(value)));
 
             return this;
         }
@@ -337,7 +337,7 @@ namespace Jint
 
         public JintEngine SetFunction(string name, JsObject function)
         {
-            Global.GlobalScope[name] = JsBox.CreateObject(function);
+            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(function));
 
             return this;
         }
@@ -347,10 +347,13 @@ namespace Jint
             if (@delegate == null)
                 throw new ArgumentNullException();
 
-            Global.GlobalScope[name] = JsBox.CreateObject(ProxyHelper.BuildDelegateFunction(
-                Global,
-                @delegate
-            ));
+            Global.GlobalScope.SetProperty(
+                name,
+                JsBox.CreateObject(ProxyHelper.BuildDelegateFunction(
+                    Global,
+                    @delegate
+                ))
+            );
 
             return this;
         }
@@ -439,9 +442,9 @@ namespace Jint
             {
                 if (
                     declaredVariable.IsDeclared &&
-                    !scope.HasOwnProperty(declaredVariable.Index)
+                    !scope.HasOwnProperty(declaredVariable.Name)
                 )
-                    scope.DefineOwnProperty(declaredVariable.Name, JsBox.Undefined, PropertyAttributes.DontEnum);
+                    scope.DefineProperty(declaredVariable.Name, JsBox.Undefined, PropertyAttributes.DontEnum);
             }
         }
 
@@ -522,7 +525,7 @@ namespace Jint
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            return CallFunction((JsObject)Global.GlobalScope[name], arguments);
+            return CallFunction((JsObject)Global.GlobalScope.GetProperty(name), arguments);
         }
 
         public object CallFunction(JsObject function, params object[] arguments)

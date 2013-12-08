@@ -72,7 +72,7 @@ namespace Jint.Native
 
                 foreach (Group group in matches[0].Groups)
                 {
-                    array[JsNumber.Box(i++)] = JsString.Box(group.Value);
+                    array.SetProperty(i++, JsString.Box(group.Value));
                 }
 
                 return JsBox.CreateObject(array);

@@ -54,9 +54,10 @@ namespace Jint.Native.Interop
 
             foreach (var member in GetMethods(type, BindingFlags.Static | BindingFlags.Public))
             {
-                prototype.DefineOwnProperty(
+                prototype.DefineProperty(
                     member.Key,
-                    JsBox.CreateObject(ReflectOverload(global, member.Value))
+                    JsBox.CreateObject(ReflectOverload(global, member.Value)),
+                    PropertyAttributes.None
                 );
             }
 
@@ -64,23 +65,22 @@ namespace Jint.Native.Interop
 
             foreach (var info in type.GetProperties(BindingFlags.Static | BindingFlags.Public))
             {
-                prototype.DefineOwnProperty(marshaller.MarshalPropertyInfo(info, prototype));
+                marshaller.MarshalPropertyInfo(info).DefineProperty(prototype);
             }
 
             foreach (var info in type.GetFields(BindingFlags.Static | BindingFlags.Public))
             {
                 if (info.IsLiteral)
                 {
-                    prototype.DefineOwnProperty(
+                    prototype.DefineProperty(
                         info.Name,
-                        JsBox.CreateObject(global.CreateObject(info.GetValue(null), prototype))
+                        JsBox.CreateObject(global.CreateObject(info.GetValue(null), prototype)),
+                        PropertyAttributes.None
                     );
                 }
                 else
                 {
-                    prototype.DefineOwnProperty(
-                        marshaller.MarshalFieldInfo(info, prototype)
-                    );
+                    marshaller.MarshalFieldInfo(info).DefineProperty(prototype);
                 }
             }
 
@@ -88,14 +88,14 @@ namespace Jint.Native.Interop
 
             foreach (var info in type.GetNestedTypes(BindingFlags.Public))
             {
-                prototype.DefineOwnProperty(info.Name, marshaller.MarshalClrValue(info), PropertyAttributes.DontEnum);
+                prototype.DefineProperty(info.Name, marshaller.MarshalClrValue(info), PropertyAttributes.DontEnum);
             }
 
             // Find all instance properties and fields.
 
             var getMethods = new List<MethodInfo>();
             var setMethods = new List<MethodInfo>();
-            var properties = new List<Descriptor>();
+            var properties = new List<MarshalAccessorProperty>();
 
             foreach (var info in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
@@ -103,7 +103,7 @@ namespace Jint.Native.Interop
 
                 if (indexerParams.Length == 0)
                 {
-                    properties.Add(global.Marshaller.MarshalPropertyInfo(info, prototype));
+                    properties.Add(global.Marshaller.MarshalPropertyInfo(info));
                 }
                 else if (info.Name == "Item" && indexerParams.Length == 1)
                 {
@@ -130,12 +130,15 @@ namespace Jint.Native.Interop
 
             foreach (var info in type.GetFields(BindingFlags.Instance | BindingFlags.Public))
             {
-                properties.Add(global.Marshaller.MarshalFieldInfo(info, prototype));
+                properties.Add(global.Marshaller.MarshalFieldInfo(info));
             }
 
             foreach (var member in GetMethods(type, BindingFlags.Instance | BindingFlags.Public))
             {
-                prototype[member.Key] = JsBox.CreateObject(ReflectOverload(global, member.Value));
+                prototype.SetProperty(
+                    member.Key,
+                    JsBox.CreateObject(ReflectOverload(global, member.Value))
+                );
             }
 
             prototype.SetProperty(Id.toString, JsBox.CreateObject(ProxyHelper.BuildMethodFunction(
@@ -152,10 +155,7 @@ namespace Jint.Native.Interop
                 true
             );
 
-            // HACK: When the delegate is going to be put into Value, this will
-            // give a problem.
-
-            Debug.Assert(result.Value == null);
+            result.SetIsClr(true);
             result.Value = type;
 
             return result;
@@ -235,9 +235,9 @@ namespace Jint.Native.Interop
             private readonly Type _reflectedType;
             private readonly NativeOverloadImpl<ConstructorInfo, WrappedConstructor> _overloads;
             private readonly Func<JsObject, IPropertyStore> _propertyStoreFactory;
-            private readonly List<Descriptor> _properties;
+            private readonly List<MarshalAccessorProperty> _properties;
 
-            public Constructor(Type reflectedType, NativeOverloadImpl<ConstructorInfo, WrappedConstructor> overloads, Func<JsObject, IPropertyStore> propertyStoreFactory, List<Descriptor> properties)
+            public Constructor(Type reflectedType, NativeOverloadImpl<ConstructorInfo, WrappedConstructor> overloads, Func<JsObject, IPropertyStore> propertyStoreFactory, List<MarshalAccessorProperty> properties)
             {
                 _reflectedType = reflectedType;
                 _overloads = overloads;
@@ -248,6 +248,7 @@ namespace Jint.Native.Interop
             public JsBox Execute(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
             {
                 var target = (JsObject)@this;
+
                 if (target == runtime.Global.GlobalScope)
                     throw new JintException("A constructor '" + _reflectedType.FullName + "' should be applied to the object");
 
@@ -268,10 +269,17 @@ namespace Jint.Native.Interop
 
                 var @object = (JsObject)@this;
 
-                if (_propertyStoreFactory != null)
-                    @object.PropertyStore = _propertyStoreFactory(@object);
+                // We let the object setup on its own property store. This will
+                // initialize a DictionaryPropertyStore for us that contains the
+                // objects that we need. Afterward, we let the property store
+                // factory wrap that property store in a native property store.
 
                 SetupNativeProperties(@object);
+
+                target.SetIsClr(true);
+
+                if (_propertyStoreFactory != null)
+                    @object.PropertyStore = _propertyStoreFactory(@object);
 
                 return @this;
             }
@@ -283,12 +291,7 @@ namespace Jint.Native.Interop
 
                 foreach (var property in _properties)
                 {
-                    target.DefineOwnProperty(new Descriptor(
-                        property.Index,
-                        property.Getter,
-                        property.Setter,
-                        property.Attributes
-                    ));
+                    property.DefineProperty(target);
                 }
             }
 

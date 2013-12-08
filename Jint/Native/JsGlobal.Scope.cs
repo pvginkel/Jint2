@@ -18,83 +18,55 @@ namespace Jint.Native
 
             scope.SetClass(JsNames.ClassGlobal);
             scope.SetIsClr(false);
-            scope.PropertyStore = new GlobalScopePropertyStore(scope);
+            scope.PropertyStore = new DictionaryPropertyStore(scope);
 
-            DefineProperty(scope, "null", JsBox.Null, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Function", FunctionClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Object", ObjectClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Array", ArrayClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Boolean", BooleanClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Date", DateClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Error", ErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "EvalError", EvalErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "RangeError", RangeErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "ReferenceError", ReferenceErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "SyntaxError", SyntaxErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "TypeError", TypeErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "URIError", URIErrorClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Number", NumberClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "RegExp", RegExpClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "String", StringClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "Math", MathClass, PropertyAttributes.DontEnum);
-            DefineProperty(scope, "NaN", NumberClass.GetProperty(Id.NaN), PropertyAttributes.DontEnum); // 15.1.1.1
-            DefineProperty(scope, "Infinity", NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
-            DefineProperty(scope, "undefined", JsBox.Undefined, PropertyAttributes.DontEnum); // 15.1.1.3
-            DefineProperty(scope, JsNames.This, scope, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToBoolean", GlobalFunctions.ToBoolean, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToByte", GlobalFunctions.ToByte, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToChar", GlobalFunctions.ToChar, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToDateTime", GlobalFunctions.ToDateTime, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToDecimal", GlobalFunctions.ToDecimal, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToDouble", GlobalFunctions.ToDouble, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToInt16", GlobalFunctions.ToInt16, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToInt32", GlobalFunctions.ToInt32, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToInt64", GlobalFunctions.ToInt64, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToSByte", GlobalFunctions.ToSByte, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToSingle", GlobalFunctions.ToSingle, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToString", GlobalFunctions.ToString, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToUInt16", GlobalFunctions.ToUInt16, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToUInt32", GlobalFunctions.ToUInt32, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "ToUInt64", GlobalFunctions.ToUInt64, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "eval", GlobalFunctions.Eval, 1, PropertyAttributes.DontEnum); // 15.1.2.1
-            DefineFunction(scope, "parseInt", GlobalFunctions.ParseInt, 1, PropertyAttributes.DontEnum); // 15.1.2.2
-            DefineFunction(scope, "parseFloat", GlobalFunctions.ParseFloat, 1, PropertyAttributes.DontEnum); // 15.1.2.3
-            DefineFunction(scope, "isNaN", GlobalFunctions.IsNaN, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "isFinite", GlobalFunctions.IsFinite, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "decodeURI", GlobalFunctions.DecodeURI, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "encodeURI", GlobalFunctions.EncodeURI, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "decodeURIComponent", GlobalFunctions.DecodeURIComponent, 1, PropertyAttributes.DontEnum);
-            DefineFunction(scope, "encodeURIComponent", GlobalFunctions.EncodeURIComponent, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("null", JsBox.Null, PropertyAttributes.DontEnum);
+            scope.DefineProperty("Function", JsBox.CreateObject(FunctionClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Object", JsBox.CreateObject(ObjectClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Array", JsBox.CreateObject(ArrayClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Boolean", JsBox.CreateObject(BooleanClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Date", JsBox.CreateObject(DateClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Error", JsBox.CreateObject(ErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("EvalError", JsBox.CreateObject(EvalErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("RangeError", JsBox.CreateObject(RangeErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("ReferenceError", JsBox.CreateObject(ReferenceErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("SyntaxError", JsBox.CreateObject(SyntaxErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("TypeError", JsBox.CreateObject(TypeErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("URIError", JsBox.CreateObject(URIErrorClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Number", JsBox.CreateObject(NumberClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("RegExp", JsBox.CreateObject(RegExpClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("String", JsBox.CreateObject(StringClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("Math", JsBox.CreateObject(MathClass), PropertyAttributes.DontEnum);
+            scope.DefineProperty("NaN", NumberClass.GetProperty(Id.NaN), PropertyAttributes.DontEnum); // 15.1.1.1
+            scope.DefineProperty("Infinity", NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
+            scope.DefineProperty("undefined", JsBox.Undefined, PropertyAttributes.DontEnum); // 15.1.1.3
+            scope.DefineProperty(JsNames.This, JsBox.CreateObject(scope), PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToBoolean", GlobalFunctions.ToBoolean, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToByte", GlobalFunctions.ToByte, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToChar", GlobalFunctions.ToChar, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToDateTime", GlobalFunctions.ToDateTime, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToDecimal", GlobalFunctions.ToDecimal, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToDouble", GlobalFunctions.ToDouble, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToInt16", GlobalFunctions.ToInt16, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToInt32", GlobalFunctions.ToInt32, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToInt64", GlobalFunctions.ToInt64, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToSByte", GlobalFunctions.ToSByte, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToSingle", GlobalFunctions.ToSingle, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToString", GlobalFunctions.ToString, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToUInt16", GlobalFunctions.ToUInt16, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToUInt32", GlobalFunctions.ToUInt32, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("ToUInt64", GlobalFunctions.ToUInt64, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("eval", GlobalFunctions.Eval, 1, PropertyAttributes.DontEnum); // 15.1.2.1
+            scope.DefineProperty("parseInt", GlobalFunctions.ParseInt, 1, PropertyAttributes.DontEnum); // 15.1.2.2
+            scope.DefineProperty("parseFloat", GlobalFunctions.ParseFloat, 1, PropertyAttributes.DontEnum); // 15.1.2.3
+            scope.DefineProperty("isNaN", GlobalFunctions.IsNaN, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("isFinite", GlobalFunctions.IsFinite, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("decodeURI", GlobalFunctions.DecodeURI, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("encodeURI", GlobalFunctions.EncodeURI, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("decodeURIComponent", GlobalFunctions.DecodeURIComponent, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty("encodeURIComponent", GlobalFunctions.EncodeURIComponent, 1, PropertyAttributes.DontEnum);
 
             return scope;
-        }
-
-        // If we're the global scope, perform special handling on JsUndefined.
-        private class GlobalScopePropertyStore : DictionaryPropertyStore
-        {
-            private readonly JsGlobal _global;
-
-            public GlobalScopePropertyStore(JsObject owner)
-                : base(owner)
-            {
-                _global = owner.Global;
-            }
-
-            public override bool TryGetProperty(JsBox index, out JsBox result)
-            {
-                return TryGetProperty(_global.ResolveIdentifier(index.ToString()), out result);
-            }
-
-            public override bool TryGetProperty(int index, out JsBox result)
-            {
-                var descriptor = Owner.GetDescriptor(index);
-                if (descriptor != null)
-                    result = descriptor.Get(JsBox.CreateObject(Owner));
-                else
-                    result = _global.Engine.ResolveUndefined(_global.GetIdentifier(index), null);
-
-                return true;
-            }
         }
 
         private static class GlobalFunctions

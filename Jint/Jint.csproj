@@ -77,6 +77,8 @@
     <Compile Include="Expressions\SyntaxType.cs" />
     <Compile Include="Expressions\SyntaxUtil.cs" />
     <Compile Include="Expressions\WithScope.cs" />
+    <Compile Include="MarshalAccessorProperty.cs" />
+    <Compile Include="Native\AbstractPropertyStore.cs" />
     <Compile Include="Native\ArrayPropertyStore.cs" />
     <Compile Include="Native\DictionaryPropertyStore.cs" />
     <Compile Include="Native\Id.cs">
@@ -120,6 +122,8 @@
     <Compile Include="Native\JsGlobal.Scope.cs" />
     <Compile Include="Native\JsGlobal.Sink.cs" />
     <Compile Include="Native\JsNames.cs" />
+    <Compile Include="Native\JsObject.Properties.cs" />
+    <Compile Include="Native\PropertyAccessor.cs" />
     <Compile Include="Native\RegExpOptions.cs" />
     <Compile Include="Native\JsType.cs" />
     <Compile Include="Native\Interop\NativeArrayIndexer.cs" />
@@ -138,7 +142,6 @@
     <Compile Include="Compiler\SourceCodeDescriptor.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
-    <Compile Include="Native\Descriptor.cs" />
     <Compile Include="Native\JsComparer.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Expressions\ArrayDeclarationSyntax.cs" />
@@ -194,7 +197,6 @@
     <Compile Include="Expressions\WhileSyntax.cs" />
     <Compile Include="Native\PropertyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Native\JsObjectDebugView.cs" />
     <Compile Include="Native\JintRuntime.Comparers.cs" />
     <Compile Include="Native\JintRuntime.cs" />
     <Compile Include="Native\JintRuntime.Operations.cs" />

@@ -15,9 +15,8 @@ namespace Jint.Compiler
         private static readonly MethodInfo _concat = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
         private static readonly MethodInfo _pow = typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) });
         private static readonly MethodInfo _substring = typeof(string).GetMethod("Substring", new[] { typeof(int), typeof(int) });
-        private static readonly PropertyInfo _indexByInstance = typeof(JsObject).GetProperty("Item", new[] { typeof(JsBox) });
-        private static readonly MethodInfo _deleteByString = typeof(JsObject).GetMethod("Delete", new[] { typeof(string) });
-        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("Delete", new[] { typeof(JsBox) });
+        private static readonly MethodInfo _deleteByString = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(string) });
+        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(JsBox) });
         private static readonly MethodInfo _stringEquals = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(string) });
 
         private static readonly Dictionary<int, Func<ParameterExpression, Expression[], Expression>> _operationBuilders = CreateOperationBuilders();

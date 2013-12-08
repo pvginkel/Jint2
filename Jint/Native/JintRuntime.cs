@@ -154,27 +154,27 @@ namespace Jint.Native
             {
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    result.DefineOwnProperty(new Descriptor(
+                    result.DefineProperty(
                         i,
                         arguments[i],
                         PropertyAttributes.DontEnum
-                    ));
+                    );
                 }
 
                 length = arguments.Length;
             }
 
-            result.DefineOwnProperty(new Descriptor(
+            result.DefineProperty(
                 Id.callee,
                 JsBox.CreateObject(callee),
                 PropertyAttributes.DontEnum
-            ));
+            );
 
-            result.DefineOwnProperty(new Descriptor(
+            result.DefineProperty(
                 Id.length,
                 JsNumber.Box(length),
                 PropertyAttributes.DontEnum
-            ));
+            );
 
             return result;
         }

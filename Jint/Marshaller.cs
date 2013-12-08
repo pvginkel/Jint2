@@ -143,6 +143,7 @@ namespace Jint
 
             constructor.Execute(_runtime, JsBox.CreateObject(@this), JsBox.EmptyArray, null);
 
+            @this.SetIsClr(true);
             @this.Value = value;
 
             return @this;
@@ -283,10 +284,7 @@ namespace Jint
         /// <summary>
         /// Marshals a native property to a descriptor
         /// </summary>
-        /// <param name="property">Property to marshal</param>
-        /// <param name="owner">Owner of the returned descriptor</param>
-        /// <returns>A descriptor</returns>
-        public Descriptor MarshalPropertyInfo(PropertyInfo property, JsObject owner)
+        public MarshalAccessorProperty MarshalPropertyInfo(PropertyInfo property)
         {
             JsFunction getter;
             JsFunction setter = null;
@@ -303,12 +301,12 @@ namespace Jint
             if (setter == null)
                 attributes |= PropertyAttributes.ReadOnly;
 
-            return new Descriptor(
-                owner.Global.ResolveIdentifier(property.Name),
-                owner.Global.CreateFunction(null, getter, 0, null),
+            return new MarshalAccessorProperty(
+                Global.ResolveIdentifier(property.Name),
+                Global.CreateFunction(null, getter, 0, null),
                 setter == null
                     ? null
-                    : owner.Global.CreateFunction(null, setter, 1, null),
+                    : Global.CreateFunction(null, setter, 1, null),
                 attributes
             );
         }
@@ -321,12 +319,9 @@ namespace Jint
         /// <summary>
         /// Marshals a native field to a JS Descriptor
         /// </summary>
-        /// <param name="field">Field info to marshal</param>
-        /// <param name="owner">Owner for the descriptor</param>
-        /// <returns>Descriptor</returns>
-        public Descriptor MarshalFieldInfo(FieldInfo field, JsObject owner)
+        public MarshalAccessorProperty MarshalFieldInfo(FieldInfo field)
         {
-            return new Descriptor(
+            return new MarshalAccessorProperty(
                 Global.ResolveIdentifier(field.Name),
                 Global.CreateFunction(null, ProxyHelper.WrapGetField(field), 0, null),
                 Global.CreateFunction(null, ProxyHelper.WrapSetField(field), 1, null),

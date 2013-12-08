@@ -214,7 +214,10 @@ namespace Jint.Native
 
                     foreach (Match match in matches)
                     {
-                        result[JsNumber.Box(i++)] = JsString.Box(match.Value);
+                        result.SetProperty(
+                            i++,
+                            JsString.Box(match.Value)
+                        );
                     }
 
                     return JsBox.CreateObject(result);

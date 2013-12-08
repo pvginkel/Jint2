@@ -40,11 +40,11 @@ namespace Jint.Native
 
                 var obj = runtime.Global.CreateObject(callee.Prototype);
 
-                obj.DefineOwnProperty(new Descriptor(
+                obj.DefineProperty(
                     Id.constructor,
                     JsBox.CreateObject(callee),
                     PropertyAttributes.DontEnum
-                ));
+                );
 
                 return JsBox.CreateObject(obj);
             }
@@ -122,15 +122,12 @@ namespace Jint.Native
                 if (!instance.IsObject)
                     throw new JsException(JsErrorType.TypeError);
 
-                string name = arguments[1].ToString();
-                var desc = ToPropertyDescriptor(
+                ToPropertyDescriptor(
                     runtime.Global,
                     (JsObject)instance,
-                    name,
+                    arguments[1].ToString(),
                     arguments[2]
                 );
-
-                ((JsObject)instance).DefineOwnProperty(desc);
 
                 return instance;
             }
@@ -138,15 +135,17 @@ namespace Jint.Native
             /// <summary>
             /// 8.10.5
             /// </summary>
-            private static Descriptor ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsBox value)
+            private static void ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsBox value)
             {
                 if (value.GetClass() != JsNames.ClassObject)
                     throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
 
                 var obj = (JsObject)value;
+
                 if (
                     (obj.HasProperty(Id.value) || obj.HasProperty(Id.writable)) &&
-                    (obj.HasProperty(Id.set) || obj.HasProperty(Id.get)))
+                    (obj.HasProperty(Id.set) || obj.HasProperty(Id.get))
+                )
                     throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
 
                 var attributes = PropertyAttributes.None;
@@ -190,19 +189,21 @@ namespace Jint.Native
 
                 if (obj.HasProperty(Id.value))
                 {
-                    return new Descriptor(
+                    owner.DefineProperty(
                         global.ResolveIdentifier(name),
                         obj.GetProperty(Id.value),
                         PropertyAttributes.None
                     );
                 }
-
-                return new Descriptor(
-                    global.ResolveIdentifier(name),
-                    getFunction,
-                    setFunction,
-                    attributes
-                );
+                else
+                {
+                    owner.DefineAccessor(
+                        global.ResolveIdentifier(name),
+                        getFunction,
+                        setFunction,
+                        attributes
+                    );
+                }
             }
 
             public static JsBox LookupGetter(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
@@ -221,11 +222,11 @@ namespace Jint.Native
                     );
                 }
 
-                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as Descriptor;
-                if (descriptor == null)
+                var accessor = target.GetOwnPropertyRaw(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyAccessor;
+                if (accessor == null)
                     return JsBox.Undefined;
 
-                var getter = descriptor.Getter;
+                var getter = accessor.Getter;
                 if (getter != null)
                     return JsBox.CreateObject(getter);
 
@@ -248,11 +249,11 @@ namespace Jint.Native
                     );
                 }
 
-                var descriptor = target.GetOwnDescriptor(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as Descriptor;
-                if (descriptor == null)
+                var accessor = target.GetOwnPropertyRaw(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyAccessor;
+                if (accessor == null)
                     return JsBox.Undefined;
 
-                var setter = descriptor.Setter;
+                var setter = accessor.Setter;
                 if (setter != null)
                     return JsBox.CreateObject(setter);
 

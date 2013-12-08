@@ -31,70 +31,40 @@ namespace Jint.Native
             {
             }
 
-            public bool HasOwnProperty(int index)
-            {
-                return false;
-            }
-
-            public bool HasOwnProperty(JsBox index)
-            {
-                return false;
-            }
-
-            public Descriptor GetOwnDescriptor(int index)
+            public object GetOwnPropertyRaw(int index)
             {
                 return null;
             }
 
-            public Descriptor GetOwnDescriptor(JsBox index)
+            public object GetOwnPropertyRaw(JsBox index)
             {
                 return null;
             }
 
-            public bool TryGetProperty(JsBox index, out JsBox result)
+            public void SetPropertyValue(int index, JsBox value)
             {
-                result = JsBox.Undefined;
-                return true;
             }
 
-            public bool TryGetProperty(int index, out JsBox result)
+            public void SetPropertyValue(JsBox index, JsBox value)
             {
-                result = JsBox.Undefined;
-                return true;
             }
 
-            public bool TrySetProperty(int index, JsBox value)
+            public bool DeleteProperty(int index)
             {
                 return true;
             }
 
-            public bool TrySetProperty(JsBox index, JsBox value)
+            public bool DeleteProperty(JsBox index)
             {
                 return true;
             }
 
-            public bool Delete(JsBox index)
-            {
-                return true;
-            }
-
-            public bool Delete(int index)
-            {
-                return true;
-            }
-
-            public void DefineOwnProperty(Descriptor currentDescriptor)
+            public void DefineProperty(int index, object value, PropertyAttributes attributes)
             {
             }
 
-            public IEnumerator<KeyValuePair<int, JsBox>> GetEnumerator()
+            public void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
             {
-                return JsObject.EmptyKeyValues.GetEnumerator();
-            }
-
-            public IEnumerable<JsBox> GetValues()
-            {
-                return JsBox.EmptyArray;
             }
 
             public IEnumerable<int> GetKeys()

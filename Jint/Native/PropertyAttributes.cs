@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Native {
+namespace Jint.Native
+{
     /// <summary>
     /// A property can have zero or more attributes from the following set
     /// </summary>
     [Flags]
-    public enum PropertyAttributes {
+    public enum PropertyAttributes
+    {
         None = 0,
 
         /// <summary>

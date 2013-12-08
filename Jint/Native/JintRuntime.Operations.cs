@@ -350,11 +350,15 @@ namespace Jint.Native
 
         public static string Operation_TypeOf(JsObject scope, string identifier)
         {
-            Descriptor descriptor;
-            if (!scope.TryGetDescriptor(scope.Global.ResolveIdentifier(identifier), out descriptor))
+            object value = scope.GetPropertyRaw(scope.Global.ResolveIdentifier(identifier));
+            if (value == null)
                 return JsNames.TypeUndefined;
 
-            return Operation_TypeOf(descriptor.Get(JsBox.CreateObject(scope)));
+            var accessor = value as PropertyAccessor;
+            if (accessor != null)
+                return Operation_TypeOf(accessor.GetValue(JsBox.CreateObject(scope)));
+
+            return Operation_TypeOf(JsBox.FromValue(value));
         }
 
         public static double Operation_UnaryPlus(JsBox operand)
@@ -388,7 +392,7 @@ namespace Jint.Native
         public JsBox Operation_Index(JsBox obj, JsBox index)
         {
             if (obj.IsObject)
-                return ((JsObject)obj)[index];
+                return ((JsObject)obj).GetProperty(index);
 
             if (obj.IsString && index.IsNumber)
             {
@@ -397,12 +401,12 @@ namespace Jint.Native
                 );
             }
 
-            return Global.GetPrototype(obj)[index];
+            return GetMemberOnPrototype(obj, index);
         }
 
         public JsBox Operation_Index(JsObject obj, JsBox index)
         {
-            return obj[index];
+            return obj.GetProperty(index);
         }
 
         public JsBox Operation_Index(JsBox obj, double index)
@@ -420,10 +424,10 @@ namespace Jint.Native
             {
                 var arrayStore = obj.PropertyStore as ArrayPropertyStore;
                 if (arrayStore != null)
-                    return arrayStore[intIndex];
+                    return arrayStore.GetOwnProperty(intIndex);
             }
 
-            return obj[JsNumber.Box(index)];
+            return obj.GetProperty(JsNumber.Box(index));
         }
 
         public static JsBox Operation_SetIndex(JsBox obj, double index, JsBox value)
@@ -438,15 +442,22 @@ namespace Jint.Native
             {
                 var arrayStore = obj.PropertyStore as ArrayPropertyStore;
                 if (arrayStore != null)
-                    return arrayStore[intIndex] = value;
+                {
+                    arrayStore.DefineOrSetPropertyValue(intIndex, value);
+                    return value;
+                }
             }
 
-            return obj[JsNumber.Box(index)] = value;
+            obj.SetProperty(JsNumber.Box(index), value);
+
+            return value;
         }
 
         public static JsBox Operation_SetIndex(JsBox obj, JsBox index, JsBox value)
         {
-            return ((JsObject)obj)[index] = value;
+            ((JsObject)obj).SetProperty(index, value);
+
+            return value;
         }
 
         public JsBox Operation_Member(JsBox obj, string name)
@@ -460,17 +471,36 @@ namespace Jint.Native
                 return Global.Engine.ResolveUndefined(name, null);
             }
 
-            if (!obj.IsObject)
-            {
-                var jsObject = Global.GetPrototype(obj);
-                var descriptor = jsObject.GetDescriptor(Global.ResolveIdentifier(name));
-                if (descriptor == null)
-                    return JsBox.Undefined;
+            if (obj.IsObject)
+                return ((JsObject)obj).GetProperty(name);
 
-                return descriptor.Get(obj);
-            }
+            return GetMemberOnPrototype(obj, Global.ResolveIdentifier(name));
+        }
 
-            return ((JsObject)obj)[name];
+        private JsBox GetMemberOnPrototype(JsBox obj, int index)
+        {
+            var value = Global.GetPrototype(obj).GetPropertyRaw(index);
+            if (value == null)
+                return JsBox.Undefined;
+
+            var accessor = value as PropertyAccessor;
+            if (accessor != null)
+                return accessor.GetValue(obj);
+
+            return JsBox.FromValue(value);
+        }
+
+        private JsBox GetMemberOnPrototype(JsBox obj, JsBox index)
+        {
+            var value = Global.GetPrototype(obj).GetPropertyRaw(index);
+            if (value == null)
+                return JsBox.Undefined;
+
+            var accessor = value as PropertyAccessor;
+            if (accessor != null)
+                return accessor.GetValue(obj);
+
+            return JsBox.FromValue(value);
         }
 
         public JsBox GetMember(JsBox obj, string name)
@@ -494,12 +524,7 @@ namespace Jint.Native
             if (obj.IsObject)
                 return ((JsObject)obj).GetProperty(index);
 
-            var prototype = Global.GetPrototype(obj);
-            var descriptor = prototype.GetDescriptor(index);
-            if (descriptor == null)
-                return JsBox.Undefined;
-
-            return descriptor.Get(obj);
+            return GetMemberOnPrototype(obj, index);
         }
 
         public static JsBox Operation_SetMember(JsBox obj, string name, JsBox value)
@@ -510,7 +535,7 @@ namespace Jint.Native
         public static JsBox SetMember(JsBox obj, string name, JsBox value)
         {
             if (obj.IsObject)
-                ((JsObject)obj)[name] = value;
+                ((JsObject)obj).SetProperty(name, value);
 
             return value;
         }

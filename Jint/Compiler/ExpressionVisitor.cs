@@ -18,7 +18,7 @@ namespace Jint.Compiler
     {
         private const BindingFlags InstanceFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         private const BindingFlags StaticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-        private static readonly MethodInfo _defineAccessorProperty = typeof(JsObject).GetMethod("DefineAccessorProperty");
+        private static readonly MethodInfo _defineAccessor = typeof(JsObject).GetMethod("DefineAccessor", new[] { typeof(int), typeof(JsObject), typeof(JsObject) });
         private static readonly MethodInfo _createArguments = typeof(JintRuntime).GetMethod("CreateArguments", InstanceFlags);
         private static readonly Dictionary<int, MethodInfo> _operationCache = BuildOperationCache();
         private const string RuntimeParameterName = "<>runtime";
@@ -1266,7 +1266,7 @@ namespace Jint.Compiler
 
                     statements.Add(Expression.Call(
                         obj,
-                        _defineAccessorProperty,
+                        _defineAccessor,
                         new[]
                         {
                             Expression.Constant(_global.ResolveIdentifier(accessorProperty.Name)),
