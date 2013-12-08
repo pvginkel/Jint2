@@ -1308,7 +1308,7 @@ namespace Jint.Compiler
             return Expression.Call(
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("New"),
-                expression.Accept(this),
+                EnsureJs(expression.Accept(this)),
                 MakeArrayInit(
                     arguments == null ? null : arguments.Select(p => p.Expression),
                     typeof(JsBox),
