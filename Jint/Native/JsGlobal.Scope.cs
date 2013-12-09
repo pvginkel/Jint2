@@ -20,51 +20,51 @@ namespace Jint.Native
             scope.IsClr = false;
             scope.PropertyStore = new DictionaryPropertyStore(scope);
 
-            scope.DefineProperty("null", JsNull.Instance, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Function", FunctionClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Object", ObjectClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Array", ArrayClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Boolean", BooleanClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Date", DateClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Error", ErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("EvalError", EvalErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("RangeError", RangeErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ReferenceError", ReferenceErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("SyntaxError", SyntaxErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("TypeError", TypeErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("URIError", URIErrorClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Number", NumberClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("RegExp", RegExpClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("String", StringClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("Math", MathClass, PropertyAttributes.DontEnum);
-            scope.DefineProperty("NaN", NumberClass.GetProperty(Id.NaN), PropertyAttributes.DontEnum); // 15.1.1.1
-            scope.DefineProperty("Infinity", NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
-            scope.DefineProperty("undefined", JsUndefined.Instance, PropertyAttributes.DontEnum); // 15.1.1.3
+            scope.DefineProperty(Id.@null, JsNull.Instance, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Function, FunctionClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Object, ObjectClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Array, ArrayClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Boolean, BooleanClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Date, DateClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Error, ErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.EvalError, EvalErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.RangeError, RangeErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ReferenceError, ReferenceErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.SyntaxError, SyntaxErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.TypeError, TypeErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.URIError, URIErrorClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Number, NumberClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.RegExp, RegExpClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.String, StringClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.Math, MathClass, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.NaN, NumberClass.GetProperty(Id.NaN), PropertyAttributes.DontEnum); // 15.1.1.1
+            scope.DefineProperty(Id.Infinity, NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
+            scope.DefineProperty(Id.undefined, JsUndefined.Instance, PropertyAttributes.DontEnum); // 15.1.1.3
             scope.DefineProperty(JsNames.This, scope, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToBoolean", GlobalFunctions.ToBoolean, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToByte", GlobalFunctions.ToByte, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToChar", GlobalFunctions.ToChar, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToDateTime", GlobalFunctions.ToDateTime, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToDecimal", GlobalFunctions.ToDecimal, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToDouble", GlobalFunctions.ToDouble, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToInt16", GlobalFunctions.ToInt16, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToInt32", GlobalFunctions.ToInt32, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToInt64", GlobalFunctions.ToInt64, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToSByte", GlobalFunctions.ToSByte, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToSingle", GlobalFunctions.ToSingle, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToString", GlobalFunctions.ToString, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToUInt16", GlobalFunctions.ToUInt16, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToUInt32", GlobalFunctions.ToUInt32, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("ToUInt64", GlobalFunctions.ToUInt64, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("eval", GlobalFunctions.Eval, 1, PropertyAttributes.DontEnum); // 15.1.2.1
-            scope.DefineProperty("parseInt", GlobalFunctions.ParseInt, 1, PropertyAttributes.DontEnum); // 15.1.2.2
-            scope.DefineProperty("parseFloat", GlobalFunctions.ParseFloat, 1, PropertyAttributes.DontEnum); // 15.1.2.3
-            scope.DefineProperty("isNaN", GlobalFunctions.IsNaN, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("isFinite", GlobalFunctions.IsFinite, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("decodeURI", GlobalFunctions.DecodeURI, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("encodeURI", GlobalFunctions.EncodeURI, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("decodeURIComponent", GlobalFunctions.DecodeURIComponent, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty("encodeURIComponent", GlobalFunctions.EncodeURIComponent, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToBoolean, GlobalFunctions.ToBoolean, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToByte, GlobalFunctions.ToByte, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToChar, GlobalFunctions.ToChar, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToDateTime, GlobalFunctions.ToDateTime, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToDecimal, GlobalFunctions.ToDecimal, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToDouble, GlobalFunctions.ToDouble, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToInt16, GlobalFunctions.ToInt16, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToInt32, GlobalFunctions.ToInt32, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToInt64, GlobalFunctions.ToInt64, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToSByte, GlobalFunctions.ToSByte, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToSingle, GlobalFunctions.ToSingle, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToString, GlobalFunctions.ToString, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToUInt16, GlobalFunctions.ToUInt16, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToUInt32, GlobalFunctions.ToUInt32, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.ToUInt64, GlobalFunctions.ToUInt64, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.eval, GlobalFunctions.Eval, 1, PropertyAttributes.DontEnum); // 15.1.2.1
+            scope.DefineProperty(Id.parseInt, GlobalFunctions.ParseInt, 1, PropertyAttributes.DontEnum); // 15.1.2.2
+            scope.DefineProperty(Id.parseFloat, GlobalFunctions.ParseFloat, 1, PropertyAttributes.DontEnum); // 15.1.2.3
+            scope.DefineProperty(Id.isNaN, GlobalFunctions.IsNaN, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.isFinite, GlobalFunctions.IsFinite, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.decodeURI, GlobalFunctions.DecodeURI, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.encodeURI, GlobalFunctions.EncodeURI, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.decodeURIComponent, GlobalFunctions.DecodeURIComponent, 1, PropertyAttributes.DontEnum);
+            scope.DefineProperty(Id.encodeURIComponent, GlobalFunctions.EncodeURIComponent, 1, PropertyAttributes.DontEnum);
 
             return scope;
         }

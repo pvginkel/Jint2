@@ -31,7 +31,7 @@ namespace Jint.Native
 
             // Constructor on the prototype links back to the result of CreateFunction:
             //   10. Set the constructor property of Result(9) to F. This property is given attributes { DontEnum }. 
-            prototype.DefineProperty("constructor", result, PropertyAttributes.DontEnum);
+            prototype.DefineProperty(Id.constructor, result, PropertyAttributes.DontEnum);
 
             return result;
         }

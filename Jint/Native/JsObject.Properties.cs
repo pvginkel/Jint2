@@ -367,12 +367,12 @@ namespace Jint.Native
             return true;
         }
 
-        public void DefineProperty(string index, JsFunction @delegate, int argumentCount, PropertyAttributes attributes)
+        public void DefineProperty(int index, JsFunction @delegate, int argumentCount, PropertyAttributes attributes)
         {
             EnsurePropertyStore();
             PropertyStore.DefineProperty(
-                Global.ResolveIdentifier(index),
-                Global.CreateFunction(index, @delegate, argumentCount, null),
+                index,
+                Global.CreateFunction(Global.GetIdentifier(index), @delegate, argumentCount, null),
                 attributes
             );
         }
@@ -394,7 +394,7 @@ namespace Jint.Native
             PropertyStore.DefineProperty(index, value, attributes);
         }
 
-        public void DefineAccessor(string name, JsFunction getter, JsFunction setter, PropertyAttributes attributes)
+        public void DefineAccessor(int index, JsFunction getter, JsFunction setter, PropertyAttributes attributes)
         {
             var getterObject =
                 getter != null
@@ -405,7 +405,7 @@ namespace Jint.Native
                     ? Global.CreateFunction(null, setter, 1, null)
                     : null;
 
-            DefineAccessor(name, getterObject, setterObject, attributes);
+            DefineAccessor(index, getterObject, setterObject, attributes);
         }
 
         public void DefineAccessor(int index, JsObject getter, JsObject setter)
