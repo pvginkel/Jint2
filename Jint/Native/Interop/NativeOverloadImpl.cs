@@ -132,7 +132,7 @@ namespace Jint.Native.Interop
             _protoCache[MakeKey(args, generics)] = impl;
         }
 
-        public TImpl ResolveOverload(JsBox[] args, Type[] generics)
+        public TImpl ResolveOverload(object[] args, Type[] generics)
         {
             Type[] argTypes = Array.ConvertAll(args, x => _global.Marshaller.GetInstanceType(x));
             string key = MakeKey(argTypes, generics);

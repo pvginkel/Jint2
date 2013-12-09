@@ -72,7 +72,7 @@ namespace Jint.Native
             );
 
             result.SetClass(JsNames.ClassFunction);
-            result.SetIsClr(false);
+            result.IsClr = false;
 
             return result;
         }
@@ -81,7 +81,7 @@ namespace Jint.Native
         {
             var prototype = FunctionClass.Prototype;
 
-            prototype.DefineProperty("constructor", JsBox.CreateObject(FunctionClass), PropertyAttributes.DontEnum);
+            prototype.DefineProperty("constructor", FunctionClass, PropertyAttributes.DontEnum);
             prototype.DefineProperty("call", FunctionFunctions.Call, 1, PropertyAttributes.DontEnum);
             prototype.DefineProperty("apply", FunctionFunctions.Apply, 2, PropertyAttributes.DontEnum);
             prototype.DefineProperty("toString", FunctionFunctions.ToString, 0, PropertyAttributes.DontEnum);
@@ -192,11 +192,11 @@ namespace Jint.Native
 
             var result = CreateFunction("Number", NumberFunctions.Constructor, 0, null, prototype);
 
-            result.DefineProperty("MAX_VALUE", JsBox.MaxValue, PropertyAttributes.None);
-            result.DefineProperty("MIN_VALUE", JsBox.MinValue, PropertyAttributes.None);
-            result.DefineProperty("NaN", JsBox.NaN, PropertyAttributes.None);
-            result.DefineProperty("POSITIVE_INFINITY", JsBox.PositiveInfinity, PropertyAttributes.None);
-            result.DefineProperty("NEGATIVE_INFINITY", JsBox.NegativeInfinity, PropertyAttributes.None);
+            result.DefineProperty("MAX_VALUE", DoubleBoxes.MaxValue, PropertyAttributes.None);
+            result.DefineProperty("MIN_VALUE", DoubleBoxes.MinValue, PropertyAttributes.None);
+            result.DefineProperty("NaN", DoubleBoxes.NaN, PropertyAttributes.None);
+            result.DefineProperty("POSITIVE_INFINITY", DoubleBoxes.PositiveInfinity, PropertyAttributes.None);
+            result.DefineProperty("NEGATIVE_INFINITY", DoubleBoxes.NegativeInfinity, PropertyAttributes.None);
 
             return result;
         }
@@ -269,13 +269,13 @@ namespace Jint.Native
             result.DefineProperty("sin", MathFunctions.Sin, 1, PropertyAttributes.DontEnum);
             result.DefineProperty("sqrt", MathFunctions.Sqrt, 1, PropertyAttributes.DontEnum);
             result.DefineProperty("tan", MathFunctions.Tan, 1, PropertyAttributes.DontEnum);
-            result.DefineProperty("E", JsNumber.Box(Math.E), PropertyAttributes.DontEnum);
-            result.DefineProperty("LN2", JsNumber.Box(Math.Log(2)), PropertyAttributes.DontEnum);
-            result.DefineProperty("LN10", JsNumber.Box(Math.Log(10)), PropertyAttributes.DontEnum);
-            result.DefineProperty("LOG2E", JsNumber.Box(Math.Log(Math.E, 2)), PropertyAttributes.DontEnum);
-            result.DefineProperty("PI", JsNumber.Box(Math.PI), PropertyAttributes.DontEnum);
-            result.DefineProperty("SQRT1_2", JsNumber.Box(Math.Sqrt(0.5)), PropertyAttributes.DontEnum);
-            result.DefineProperty("SQRT2", JsNumber.Box(Math.Sqrt(2)), PropertyAttributes.DontEnum);
+            result.DefineProperty("E", Math.E, PropertyAttributes.DontEnum);
+            result.DefineProperty("LN2", Math.Log(2), PropertyAttributes.DontEnum);
+            result.DefineProperty("LN10", Math.Log(10), PropertyAttributes.DontEnum);
+            result.DefineProperty("LOG2E", Math.Log(Math.E, 2), PropertyAttributes.DontEnum);
+            result.DefineProperty("PI", Math.PI, PropertyAttributes.DontEnum);
+            result.DefineProperty("SQRT1_2", Math.Sqrt(0.5), PropertyAttributes.DontEnum);
+            result.DefineProperty("SQRT2", Math.Sqrt(2), PropertyAttributes.DontEnum);
 
             return result;
         }
@@ -284,7 +284,7 @@ namespace Jint.Native
         {
             var prototype = CreateObject(FunctionClass.Prototype);
 
-            prototype.DefineProperty("name", JsString.Box(name), PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
+            prototype.DefineProperty("name", name, PropertyAttributes.DontEnum | PropertyAttributes.DontDelete | PropertyAttributes.ReadOnly);
             prototype.DefineProperty("toString", ErrorFunctions.ToString, 0, PropertyAttributes.DontEnum);
             prototype.DefineProperty("toLocaleString", ErrorFunctions.ToString, 0, PropertyAttributes.DontEnum);
 

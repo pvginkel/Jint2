@@ -56,7 +56,7 @@ namespace Jint.Native.Interop
             {
                 prototype.DefineProperty(
                     member.Key,
-                    JsBox.CreateObject(ReflectOverload(global, member.Value)),
+                    ReflectOverload(global, member.Value),
                     PropertyAttributes.None
                 );
             }
@@ -74,7 +74,7 @@ namespace Jint.Native.Interop
                 {
                     prototype.DefineProperty(
                         info.Name,
-                        JsBox.CreateObject(global.CreateObject(info.GetValue(null), prototype)),
+                        global.CreateObject(info.GetValue(null), prototype),
                         PropertyAttributes.None
                     );
                 }
@@ -137,14 +137,14 @@ namespace Jint.Native.Interop
             {
                 prototype.SetProperty(
                     member.Key,
-                    JsBox.CreateObject(ReflectOverload(global, member.Value))
+                    ReflectOverload(global, member.Value)
                 );
             }
 
-            prototype.SetProperty(Id.toString, JsBox.CreateObject(ProxyHelper.BuildMethodFunction(
+            prototype.SetProperty(Id.toString, ProxyHelper.BuildMethodFunction(
                 global,
                 typeof(object).GetMethod("ToString")
-            )));
+            ));
 
             var result = global.CreateFunction(
                 type.FullName,
@@ -155,7 +155,7 @@ namespace Jint.Native.Interop
                 true
             );
 
-            result.SetIsClr(true);
+            result.IsClr = true;
             result.Value = type;
 
             return result;
@@ -223,7 +223,7 @@ namespace Jint.Native.Interop
         /// A helper which conforms a ConstructorImpl signature and used as a default constructor for the value types
         /// </summary>
 // ReSharper disable UnusedMember.Local
-        private static object CreateStruct<T>(JsGlobal global, JsBox[] args)
+        private static object CreateStruct<T>(JsGlobal global, object[] args)
             where T : struct
         {
             return new T();
@@ -245,7 +245,7 @@ namespace Jint.Native.Interop
                 _properties = properties;
             }
 
-            public JsBox Execute(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public object Execute(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
 
@@ -276,7 +276,7 @@ namespace Jint.Native.Interop
 
                 SetupNativeProperties(@object);
 
-                target.SetIsClr(true);
+                target.IsClr = true;
 
                 if (_propertyStoreFactory != null)
                     @object.PropertyStore = _propertyStoreFactory(@object);
@@ -298,10 +298,10 @@ namespace Jint.Native.Interop
             /// <summary>
             /// Finds a best matched constructor and uses it to create a native object instance
             /// </summary>
-            private object CreateInstance(JsGlobal global, JsBox[] parameters)
+            private object CreateInstance(JsGlobal global, object[] parameters)
             {
                 if (parameters == null)
-                    parameters = JsBox.EmptyArray;
+                    parameters = JsValue.EmptyArray;
 
                 var implementation = _overloads.ResolveOverload(parameters, null);
                 if (implementation == null)
@@ -309,7 +309,7 @@ namespace Jint.Native.Interop
                     throw new JintException(
                         String.Format("No matching overload found {0}({1})",
                             _reflectedType.FullName,
-                            String.Join(",", Array.ConvertAll(parameters, p => p.ToString()))
+                            String.Join(",", Array.ConvertAll(parameters, p => JsValue.ToString(p)))
                         )
                     );
                 }

@@ -23,8 +23,8 @@ namespace Jint.Native
     {
 <#
     foreach (var operation in new[] { Operation.Equal, Operation.NotEqual, Operation.LessThan, Operation.LessThanOrEqual, Operation.GreaterThan, Operation.GreaterThanOrEqual, Operation.Same, Operation.NotSame }) {
-        foreach (var left in new[] { "JsBox", "bool", "double", "string" }) {
-            foreach (var right in new[] { "JsBox", "bool", "double", "string" }) {
+        foreach (var left in new[] { "object", "bool", "double", "string" }) {
+            foreach (var right in new[] { "object", "bool", "double", "string" }) {
                 bool skip = false;
 
                 switch (operation) {
@@ -32,7 +32,7 @@ namespace Jint.Native
                     case Operation.Same:
                     case Operation.NotEqual:
                     case Operation.NotSame:
-                        skip = left == right && left != "JsBox";
+                        skip = left == right && left != "object";
                         break;
 
                     case Operation.LessThan:
@@ -50,31 +50,31 @@ namespace Jint.Native
         {
 <# switch (operation) { #>
 <#  case Operation.Equal: { #>
-<#      if (left == right && left != "JsBox") { #>
+<#      if (left == right && left != "object") { #>
             return left == right;
 <#      } else { #>
             return CompareEquality(left, right);
 <#      } #>
 <# break; } case Operation.NotEqual: { #>
-<#      if (left == right && left != "JsBox") { #>
+<#      if (left == right && left != "object") { #>
             return left != right;
 <#      } else { #>
             return !CompareEquality(left, right);
 <#      } #>
 <# break; } case Operation.Same: { #>
-<#      if (left == right && left != "JsBox") { #>
+<#      if (left == right && left != "object") { #>
             return left == right;
 <#      } else { #>
             return CompareSame(left, right);
 <#      } #>
 <# break; } case Operation.NotSame: { #>
-<#      if (left == right && left != "JsBox") { #>
+<#      if (left == right && left != "object") { #>
             return left != right;
 <#      } else { #>
             return !CompareSame(left, right);
 <#      } #>
 <# break; } default: { #>
-<# if (left == "JsBox" && right == "JsBox") { #>
+<# if (left == "object" && right == "object") { #>
             double result;
             if (TryCompareRange(left, right, out result))
 <#      switch (operation) { #>

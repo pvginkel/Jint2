@@ -22,12 +22,12 @@ namespace Jint.Native
             _global = Owner.Global;
         }
 
-        public object GetOwnPropertyRaw(JsBox index)
+        public object GetOwnPropertyRaw(object index)
         {
-            return GetOwnPropertyRaw(_global.ResolveIdentifier(index.ToString()));
+            return base.GetOwnPropertyRaw(_global.ResolveIdentifier(JsValue.ToString(index)));
         }
 
-        public void SetPropertyValue(int index, JsBox value)
+        public void SetPropertyValue(int index, object value)
         {
             // SetPropertyValue is only used to replace the value of a normal,
             // existing, property in the store. GetAttributes throws when the
@@ -39,12 +39,12 @@ namespace Jint.Native
             if ((attributes & PropertyAttributes.ReadOnly) != 0)
                 throw new JintException("This property is not writable");
 
-            SetValue(index, value.GetValue());
+            SetValue(index, value);
         }
 
-        public void SetPropertyValue(JsBox index, JsBox value)
+        public void SetPropertyValue(object index, object value)
         {
-            SetPropertyValue(_global.ResolveIdentifier(index.ToString()), value);
+            SetPropertyValue(_global.ResolveIdentifier(JsValue.ToString(index)), value);
         }
 
         public bool DeleteProperty(int index)
@@ -65,9 +65,9 @@ namespace Jint.Native
             return false;
         }
 
-        public bool DeleteProperty(JsBox index)
+        public bool DeleteProperty(object index)
         {
-            return DeleteProperty(_global.ResolveIdentifier(index.ToString()));
+            return DeleteProperty(_global.ResolveIdentifier(JsValue.ToString(index)));
         }
 
         public void DefineProperty(int index, object value, PropertyAttributes attributes)
@@ -81,10 +81,10 @@ namespace Jint.Native
             );
         }
 
-        public void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+        public void DefineProperty(object index, object value, PropertyAttributes attributes)
         {
             DefineProperty(
-                _global.ResolveIdentifier(index.ToString()),
+                _global.ResolveIdentifier(JsValue.ToString(index)),
                 value,
                 attributes
             );

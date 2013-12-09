@@ -10,7 +10,7 @@ namespace Jint.Native
         private static class ObjectFunctions
         {
             // 15.2.2.1
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 // TODO: This looks wrong. It looks like this should be returning
                 // a JsObject that has the value set to the parameter. Chrome returns
@@ -20,43 +20,40 @@ namespace Jint.Native
                 {
                     var argument = arguments[0];
 
-                    if (!argument.IsLiteral)
-                        return argument;
-
                     var global = runtime.Global;
                     JsObject result;
 
-                    if (argument.IsString)
-                        result = global.CreateObject(argument.ToString(), global.StringClass);
-                    else if (argument.IsNull)
-                        result = global.CreateObject(argument.ToNumber(), global.NumberClass);
-                    else if (argument.IsBoolean)
-                        result = global.CreateObject(argument.ToBoolean(), global.BooleanClass);
+                    if (argument is string)
+                        result = global.CreateObject(argument, global.StringClass);
+                    else if (argument is double)
+                        result = global.CreateObject((double)argument, global.NumberClass);
+                    else if (argument is bool)
+                        result = global.CreateObject(argument, global.BooleanClass);
                     else
-                        throw new InvalidOperationException();
+                        return argument;
 
-                    return JsBox.CreateObject(result);
+                    return result;
                 }
 
                 var obj = runtime.Global.CreateObject(callee.Prototype);
 
                 obj.DefineProperty(
                     Id.constructor,
-                    JsBox.CreateObject(callee),
+                    callee,
                     PropertyAttributes.DontEnum
                 );
 
-                return JsBox.CreateObject(obj);
+                return obj;
             }
 
             // 15.2.4.3 and 15.2.4.4
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box("[object " + @this.GetClass() + "]");
+                return "[object " + JsValue.GetClass(@this) + "]";
             }
 
             // 15.2.4.4
-            public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 // TODO: This looks wrong and it looks like the Value should be returned
                 // here. E.g. typeof(new Object(7).valueOf()) returns 'number' in Chrome.
@@ -65,28 +62,28 @@ namespace Jint.Native
             }
 
             // 15.2.4.5
-            public static JsBox HasOwnProperty(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object HasOwnProperty(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
-                return JsBoolean.Box(target.HasOwnProperty(arguments[0]));
+                return BooleanBoxes.Box(target.HasOwnProperty(arguments[0]));
             }
 
             // 15.2.4.6
-            public static JsBox IsPrototypeOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object IsPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (
                     target.Class != JsNames.ClassObject ||
                     arguments.Length == 0 ||
-                    !arguments[0].IsObject
+                    !(arguments[0] is JsObject)
                 )
-                    return JsBox.False;
+                    return BooleanBoxes.False;
 
-                return JsBoolean.Box(target.IsPrototypeOf((JsObject)arguments[0]));
+                return BooleanBoxes.Box(target.IsPrototypeOf((JsObject)arguments[0]));
             }
 
             // 15.2.4.7
-            public static JsBox PropertyIsEnumerable(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object PropertyIsEnumerable(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 throw new NotImplementedException();
                 /*
@@ -100,32 +97,33 @@ namespace Jint.Native
             }
 
             // 15.2.3.2
-            public static JsBox GetPrototypeOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object GetPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                if (arguments[0].GetClass() != JsNames.ClassObject)
+                if (JsValue.GetClass(arguments[0]) != JsNames.ClassObject)
                     throw new JsException(JsErrorType.TypeError);
 
-                if (arguments[0].IsObject)
+                var argument = arguments[0] as JsObject;
+                if (argument != null)
                 {
-                    var constructor = ((JsObject)arguments[0]).GetProperty(Id.constructor);
-                    if (constructor.IsObject)
-                        return ((JsObject)constructor).GetProperty(Id.prototype);
+                    var constructor = argument.GetProperty(Id.constructor) as JsObject;
+                    if (constructor != null)
+                        return constructor.GetProperty(Id.prototype);
                 }
 
-                return JsBox.Null;
+                return JsNull.Instance;
             }
 
             // 15.2.3.6
-            public static JsBox DefineProperty(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object DefineProperty(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                var instance = arguments[0];
-                if (!instance.IsObject)
+                var instance = arguments[0] as JsObject;
+                if (instance == null)
                     throw new JsException(JsErrorType.TypeError);
 
                 ToPropertyDescriptor(
                     runtime.Global,
                     (JsObject)instance,
-                    arguments[1].ToString(),
+                    JsValue.ToString(arguments[1]),
                     arguments[2]
                 );
 
@@ -135,9 +133,9 @@ namespace Jint.Native
             /// <summary>
             /// 8.10.5
             /// </summary>
-            private static void ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, JsBox value)
+            private static void ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, object value)
             {
-                if (value.GetClass() != JsNames.ClassObject)
+                if (JsValue.GetClass(value) != JsNames.ClassObject)
                     throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
 
                 var obj = (JsObject)value;
@@ -151,29 +149,29 @@ namespace Jint.Native
                 var attributes = PropertyAttributes.None;
                 JsObject getFunction = null;
                 JsObject setFunction = null;
-                JsBox result;
+                object result;
 
                 if (
                     obj.TryGetProperty(Id.enumerable, out result) &&
-                    !result.ToBoolean()
+                    !JsValue.ToBoolean(result)
                 )
                     attributes |= PropertyAttributes.DontEnum;
 
                 if (
                     obj.TryGetProperty(Id.configurable, out result) &&
-                    !result.ToBoolean()
+                    !JsValue.ToBoolean(result)
                 )
                     attributes |= PropertyAttributes.DontDelete;
 
                 if (
                     obj.TryGetProperty(Id.writable, out result) &&
-                    !result.ToBoolean()
+                    !JsValue.ToBoolean(result)
                 )
                     attributes |= PropertyAttributes.ReadOnly;
 
                 if (obj.TryGetProperty(Id.get, out result))
                 {
-                    if (!result.IsFunction)
+                    if (!JsValue.IsFunction(result))
                         throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
 
                     getFunction = (JsObject)result;
@@ -181,7 +179,7 @@ namespace Jint.Native
 
                 if (obj.TryGetProperty(Id.set, out result))
                 {
-                    if (!result.IsFunction)
+                    if (!JsValue.IsFunction(result))
                         throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
 
                     setFunction = (JsObject)result;
@@ -206,58 +204,58 @@ namespace Jint.Native
                 }
             }
 
-            public static JsBox LookupGetter(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object LookupGetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (arguments.Length == 0)
                     throw new ArgumentException("propertyName");
 
-                if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
+                if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(JsValue.ToString(arguments[0]))))
                 {
                     return ((JsObject)target.Prototype.GetProperty(Id.__lookupGetter__)).Execute(
                         runtime,
-                        JsBox.CreateObject(target.Prototype),
+                        target.Prototype,
                         arguments,
                         null
                     );
                 }
 
-                var accessor = target.GetOwnPropertyRaw(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyAccessor;
+                var accessor = target.GetOwnPropertyRaw(runtime.Global.ResolveIdentifier(JsValue.ToString(arguments[0]))) as PropertyAccessor;
                 if (accessor == null)
-                    return JsBox.Undefined;
+                    return JsUndefined.Instance;
 
                 var getter = accessor.Getter;
                 if (getter != null)
-                    return JsBox.CreateObject(getter);
+                    return getter;
 
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
             }
 
-            public static JsBox LookupSetter(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object LookupSetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (arguments.Length <= 0)
                     throw new ArgumentException("propertyName");
 
-                if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(arguments[0].ToString())))
+                if (!target.HasOwnProperty(runtime.Global.ResolveIdentifier(JsValue.ToString(arguments[0]))))
                 {
                     return ((JsObject)target.Prototype.GetProperty(Id.__lookupSetter__)).Execute(
                         runtime,
-                        JsBox.CreateObject(target.Prototype),
+                        target.Prototype,
                         arguments,
                         null
                     );
                 }
 
-                var accessor = target.GetOwnPropertyRaw(runtime.Global.ResolveIdentifier(arguments[0].ToString())) as PropertyAccessor;
+                var accessor = target.GetOwnPropertyRaw(runtime.Global.ResolveIdentifier(JsValue.ToString(arguments[0]))) as PropertyAccessor;
                 if (accessor == null)
-                    return JsBox.Undefined;
+                    return JsUndefined.Instance;
 
                 var setter = accessor.Setter;
                 if (setter != null)
-                    return JsBox.CreateObject(setter);
+                    return setter;
 
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
             }
         }
     }

@@ -255,7 +255,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, object value)
         {
-            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(Global.WrapClr(value)));
+            Global.GlobalScope.SetProperty(name, Global.WrapClr(value));
 
             return this;
         }
@@ -268,7 +268,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, double value)
         {
-            Global.GlobalScope.SetProperty(name, JsBox.CreateNumber(value));
+            Global.GlobalScope.SetProperty(name, value);
 
             return this;
         }
@@ -282,9 +282,9 @@ namespace Jint
         public JintEngine SetParameter(string name, string value)
         {
             if (value == null)
-                Global.GlobalScope.SetProperty(name, JsBox.Null);
+                Global.GlobalScope.SetProperty(name, JsNull.Instance);
             else
-                Global.GlobalScope.SetProperty(name, JsString.Box(value));
+                Global.GlobalScope.SetProperty(name, value);
 
             return this;
         }
@@ -297,7 +297,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, int value)
         {
-            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(Global.WrapClr(value)));
+            Global.GlobalScope.SetProperty(name, Global.WrapClr(value));
             return this;
         }
 
@@ -309,7 +309,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, bool value)
         {
-            Global.GlobalScope.SetProperty(name, JsBox.CreateBoolean(value));
+            Global.GlobalScope.SetProperty(name, BooleanBoxes.Box(value));
 
             return this;
         }
@@ -322,7 +322,7 @@ namespace Jint
         /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, DateTime value)
         {
-            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(Global.CreateDate(value)));
+            Global.GlobalScope.SetProperty(name, Global.CreateDate(value));
 
             return this;
         }
@@ -337,7 +337,7 @@ namespace Jint
 
         public JintEngine SetFunction(string name, JsObject function)
         {
-            Global.GlobalScope.SetProperty(name, JsBox.CreateObject(function));
+            Global.GlobalScope.SetProperty(name, function);
 
             return this;
         }
@@ -349,10 +349,10 @@ namespace Jint
 
             Global.GlobalScope.SetProperty(
                 name,
-                JsBox.CreateObject(ProxyHelper.BuildDelegateFunction(
+                ProxyHelper.BuildDelegateFunction(
                     Global,
                     @delegate
-                ))
+                )
             );
 
             return this;
@@ -403,7 +403,7 @@ namespace Jint
 
             PrepareTree(program);
 
-            JsBox result;
+            object result;
 
             if (program.IsLiteral)
             {
@@ -427,7 +427,7 @@ namespace Jint
             }
 
             return
-                !result.IsValid
+                result == null
                 ? null
                 : unwrap
                     ? Global.Marshaller.MarshalJsValue<object>(result)
@@ -444,7 +444,7 @@ namespace Jint
                     declaredVariable.IsDeclared &&
                     !scope.HasOwnProperty(declaredVariable.Name)
                 )
-                    scope.DefineProperty(declaredVariable.Name, JsBox.Undefined, PropertyAttributes.DontEnum);
+                    scope.DefineProperty(declaredVariable.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
             }
         }
 
@@ -454,16 +454,16 @@ namespace Jint
             node.Accept(new TypeMarkerPhase());
         }
 
-        internal JsObject CompileFunction(JsBox[] parameters)
+        internal JsObject CompileFunction(object[] parameters)
         {
             if (parameters == null)
-                parameters = JsBox.EmptyArray;
+                parameters = JsValue.EmptyArray;
 
             var newParameters = new List<string>();
 
             for (int i = 0; i < parameters.Length - 1; i++)
             {
-                string arg = parameters[i].ToString();
+                string arg = JsValue.ToString(parameters[i]);
 
                 foreach (string a in arg.Split(','))
                 {
@@ -476,7 +476,7 @@ namespace Jint
             if (parameters.Length >= 1)
             {
                 newBody = CompileBlockStatements(
-                    parameters[parameters.Length - 1].ToString()
+                    JsValue.ToString(parameters[parameters.Length - 1])
                 );
             }
             else
@@ -533,15 +533,15 @@ namespace Jint
             if (function == null)
                 throw new ArgumentNullException("function");
 
-            JsBox[] argumentsCopy;
+            object[] argumentsCopy;
 
             if (arguments == null || arguments.Length == 0)
             {
-                argumentsCopy = JsBox.EmptyArray;
+                argumentsCopy = JsValue.EmptyArray;
             }
             else
             {
-                argumentsCopy = new JsBox[arguments.Length];
+                argumentsCopy = new object[arguments.Length];
 
                 for (int i = 0; i < arguments.Length; i++)
                 {
@@ -549,10 +549,10 @@ namespace Jint
                 }
             }
 
-            var original = new JsBox[argumentsCopy.Length];
+            var original = new object[argumentsCopy.Length];
             Array.Copy(argumentsCopy, original, argumentsCopy.Length);
 
-            var result = function.Execute(_runtime, JsBox.Null, argumentsCopy, null);
+            var result = function.Execute(_runtime, JsNull.Instance, argumentsCopy, null);
 
             for (int i = 0; i < arguments.Length; i++)
             {
@@ -562,16 +562,16 @@ namespace Jint
             return Global.Marshaller.MarshalJsValue<object>(result);
         }
 
-        internal JsBox Eval(JsBox[] arguments)
+        internal object Eval(object[] arguments)
         {
-            if (JsNames.ClassString != arguments[0].GetClass())
+            if (JsNames.ClassString != JsValue.GetClass(arguments[0]))
                 return arguments[0];
 
             ProgramSyntax program;
 
             try
             {
-                program = JintEngine.Compile(arguments[0].ToString());
+                program = JintEngine.Compile(JsValue.ToString(arguments[0]));
             }
             catch (Exception e)
             {
@@ -579,11 +579,11 @@ namespace Jint
             }
 
             if (program == null)
-                return JsBox.Null;
+                return JsNull.Instance;
 
             try
             {
-                return (JsBox)Run(program, false);
+                return (object)Run(program, false);
             }
             catch (Exception e)
             {
@@ -591,19 +591,19 @@ namespace Jint
             }
         }
 
-        internal int Compare(JsObject function, JsBox x, JsBox y)
+        internal int Compare(JsObject function, object x, object y)
         {
             var result = function.Execute(
                 _runtime,
-                JsBox.Null,
+                JsNull.Instance,
                 new[] { x, y },
                 null
             );
 
-            return (int)result.ToNumber();
+            return (int)JsValue.ToNumber(result);
         }
 
-        internal JsBox ResolveUndefined(string typeFullName, Type[] generics)
+        internal object ResolveUndefined(string typeFullName, Type[] generics)
         {
             if (!IsClrAllowed)
                 throw new JsException(JsErrorType.ReferenceError);
@@ -623,10 +623,10 @@ namespace Jint
                     type = type.MakeGenericType(generics);
 
                 if (type != null)
-                    return JsBox.CreateObject(Global.WrapClr(type));
+                    return Global.WrapClr(type);
             }
 
-            return JsBox.CreateUndefined(typeFullName);
+            return new JsUndefined(typeFullName);
         }
 
         private void EnsureClrAllowed()

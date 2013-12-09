@@ -10,36 +10,36 @@ namespace Jint.Native
     {
         private static class NumberFunctions
         {
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
                 {
                     // 15.7.1 - When Number is called as a function rather than as a constructor, it performs a type conversion.
                     if (arguments.Length > 0)
-                        return JsNumber.Box(arguments[0].ToNumber());
+                        return JsValue.ToNumber(arguments[0]);
 
-                    return JsNumber.Box(0);
+                    return (double)0;
                 }
 
                 // 15.7.2 - When Number is called as part of a new expression, it is a constructor: it initializes the newly created object.
-                target.Value = arguments.Length > 0 ? arguments[0].ToNumber() : 0;
+                target.Value = arguments.Length > 0 ? JsValue.ToNumber(arguments[0]) : 0;
 
                 return @this;
             }
 
-            public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                if (@this.IsNumber)
+                if (@this is double)
                     return @this;
 
-                return JsNumber.Box(Convert.ToDouble(@this.ToInstance().Value));
+                return Convert.ToDouble(JsValue.UnwrapValue(@this));
             }
 
-            public static JsBox ToLocaleString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 // Remove arguments
-                return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsBox.EmptyArray, null);
+                return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
             }
 
             private static readonly char[] RDigits =
@@ -50,30 +50,30 @@ namespace Jint.Native
                 'U', 'V', 'W', 'X', 'Y', 'Z'
             };
 
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                double value = @this.ToNumber();
+                double value = JsValue.ToNumber(@this);
 
                 if (Double.IsNaN(value))
-                    return JsString.Box("NaN");
+                    return "NaN";
                 if (Double.IsNegativeInfinity(value))
-                    return JsString.Box("-Infinity");
+                    return "-Infinity";
                 if (Double.IsPositiveInfinity(value))
-                    return JsString.Box("Infinity");
+                    return "Infinity";
 
                 int radix = 10;
 
                 // Is radix defined ?
                 if (
                     arguments.Length > 0 &&
-                    !arguments[0].IsUndefined
+                    !JsValue.IsUndefined(arguments[0])
                 )
-                    radix = (int)arguments[0].ToNumber();
+                    radix = (int)JsValue.ToNumber(arguments[0]);
 
                 var longToBeFormatted = (long)value;
 
                 if (radix == 10)
-                    return JsString.Box(value.ToString(CultureInfo.InvariantCulture).ToLower());
+                    return value.ToString(CultureInfo.InvariantCulture).ToLower();
 
                 // Extract the magnitude for conversion.
                 long longPositive = Math.Abs(longToBeFormatted);
@@ -94,65 +94,65 @@ namespace Jint.Native
                 if (longToBeFormatted < 0)
                     outDigits[outDigits.Length - digitIndex++ - 1] = '-';
 
-                return JsString.Box(new string(outDigits,
-                    outDigits.Length - digitIndex, digitIndex).ToLower());
+                return new string(outDigits,
+                    outDigits.Length - digitIndex, digitIndex).ToLower();
             }
 
             // 15.7.4.5
-            public static JsBox ToFixed(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToFixed(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 int fractions = 0;
                 if (arguments.Length > 0)
-                    fractions = Convert.ToInt32(arguments[0].ToNumber());
+                    fractions = Convert.ToInt32(JsValue.ToNumber(arguments[0]));
 
                 if (fractions > 20 || fractions < 0)
                     throw new JsException(JsErrorType.SyntaxError, "Fraction Digits must be greater than 0 and lesser than 20");
 
-                double value = @this.ToNumber();
+                double value = JsValue.ToNumber(@this);
 
                 if (Double.IsNaN(value))
-                    return JsString.Box(@this.ToString());
+                    return JsValue.ToString(@this);
 
-                return JsString.Box(value.ToString("f" + fractions, CultureInfo.InvariantCulture));
+                return value.ToString("f" + fractions, CultureInfo.InvariantCulture);
             }
 
             // 15.7.4.6
-            public static JsBox ToExponential(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToExponential(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                double value = @this.ToNumber();
+                double value = JsValue.ToNumber(@this);
 
                 if (Double.IsInfinity(value) || Double.IsNaN(value))
-                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsBox.EmptyArray, null);
+                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
 
                 int fractions = 16;
                 if (arguments.Length > 0)
-                    fractions = Convert.ToInt32(arguments[0].ToNumber());
+                    fractions = Convert.ToInt32(JsValue.ToNumber(arguments[0]));
 
                 if (fractions > 20 || fractions < 0)
                     throw new JsException(JsErrorType.SyntaxError, "Fraction Digits must be greater than 0 and lesser than 20");
 
                 string format = String.Concat("#.", new String('0', fractions), "e+0");
-                return JsString.Box(value.ToString(format, CultureInfo.InvariantCulture));
+                return value.ToString(format, CultureInfo.InvariantCulture);
             }
 
             // 15.7.4.7
-            public static JsBox ToPrecision(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToPrecision(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                double value = @this.ToNumber();
+                double value = JsValue.ToNumber(@this);
 
                 if (Double.IsInfinity(value) || Double.IsNaN(value))
-                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsBox.EmptyArray, null);
+                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
 
                 if (arguments.Length == 0)
                     throw new JsException(JsErrorType.SyntaxError, "Precision missing");
 
-                if (arguments[0].IsUndefined)
-                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsBox.EmptyArray, null);
+                if (JsValue.IsUndefined(arguments[0]))
+                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
 
                 int precision = 0;
                 if (arguments.Length > 0)
                 {
-                    precision = Convert.ToInt32(arguments[0].ToNumber());
+                    precision = Convert.ToInt32(JsValue.ToNumber(arguments[0]));
                 }
 
                 if (precision < 1 || precision > 21)
@@ -168,7 +168,7 @@ namespace Jint.Native
                 precision -= decimals;
                 precision = precision < 1 ? 1 : precision;
 
-                return JsString.Box(value.ToString("f" + precision, CultureInfo.InvariantCulture));
+                return value.ToString("f" + precision, CultureInfo.InvariantCulture);
             }
         }
     }

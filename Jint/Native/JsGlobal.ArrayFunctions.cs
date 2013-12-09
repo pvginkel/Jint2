@@ -9,14 +9,14 @@ namespace Jint.Native
     {
         private static class ArrayFunctions
         {
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
                     target = runtime.Global.CreateObject(callee.Prototype);
 
                 target.SetClass(JsNames.ClassArray);
-                target.SetIsClr(false);
+                target.IsClr = false;
 
                 var propertyStore = new ArrayPropertyStore(target);
                 target.PropertyStore = propertyStore;
@@ -26,17 +26,17 @@ namespace Jint.Native
                     propertyStore.DefineOrSetPropertyValue(i, arguments[i]);
                 }
 
-                return JsBox.CreateObject(target);
+                return target;
             }
 
             // 15.4.4.2
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return ((JsObject)runtime.Global.ArrayClass.GetProperty(Id.join)).Execute(runtime, @this, JsBox.EmptyArray, null);
+                return ((JsObject)runtime.Global.ArrayClass.GetProperty(Id.join)).Execute(runtime, @this, JsValue.EmptyArray, null);
             }
 
             // 15.4.4.3
-            public static JsBox ToLocaleString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var global = runtime.Global;
                 var store = @this.FindArrayStore();
@@ -50,16 +50,16 @@ namespace Jint.Native
                     resultStore.DefineOrSetPropertyValue(
                         i,
                         ((JsObject)obj.GetProperty(Id.toLocaleString)).Execute(
-                            runtime, JsBox.CreateObject(obj), arguments, null
+                            runtime, obj, arguments, null
                         )
                     );
                 }
 
-                return JsString.Box(result.ToString());
+                return result.ToString();
             }
 
             // 15.4.4.4
-            public static JsBox Concat(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Concat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
@@ -69,25 +69,25 @@ namespace Jint.Native
                     store.DefineOrSetPropertyValue(0, @this);
                 }
 
-                return JsBox.CreateObject(store.Concat(arguments));
+                return store.Concat(arguments);
             }
 
             // 15.4.4.5
-            public static JsBox Join(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Join(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
-                    return JsBox.Undefined;
+                    return JsUndefined.Instance;
 
-                return store.Join(arguments.Length > 0 ? arguments[0] : JsBox.Undefined);
+                return store.Join(arguments.Length > 0 ? arguments[0] : JsUndefined.Instance);
             }
 
             // 15.4.4.6
-            public static JsBox Pop(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Pop(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
-                    return JsBox.Undefined;
+                    return JsUndefined.Instance;
 
                 var key = store.Length - 1;
                 var result = store.GetOwnProperty(key);
@@ -99,7 +99,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.7
-            public static JsBox Push(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Push(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var store = @this.FindArrayStore();
 
@@ -110,12 +110,12 @@ namespace Jint.Native
                         store.DefineOrSetPropertyValue(store.Length, arg);
                     }
 
-                    return JsNumber.Box(store.Length);
+                    return (double)store.Length;
                 }
                 else
                 {
                     var obj = (JsObject)@this;
-                    int length = (int)obj.GetProperty(Id.length).ToNumber();
+                    int length = (int)JsValue.ToNumber(obj.GetProperty(Id.length));
 
                     foreach (var arg in arguments)
                     {
@@ -123,24 +123,24 @@ namespace Jint.Native
                         length++;
                     }
 
-                    return JsNumber.Box(length);
+                    return (double)length;
                 }
             }
 
             // 15.4.4.8
-            public static JsBox Reverse(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Reverse(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
-                int length = (int)target.GetProperty(Id.length).ToNumber();
+                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
                 int middle = length / 2;
 
                 for (int lower = 0; lower != middle; lower++)
                 {
                     int upper = length - lower - 1;
 
-                    JsBox lowerValue;
+                    object lowerValue;
                     bool lowerExists = target.TryGetProperty(lower, out lowerValue);
-                    JsBox upperValue;
+                    object upperValue;
                     bool upperExists = target.TryGetProperty(upper, out upperValue);
 
                     if (lowerExists)
@@ -154,15 +154,15 @@ namespace Jint.Native
                         target.DeleteProperty(lower);
                 }
 
-                return JsBox.CreateObject(target);
+                return target;
             }
 
             // 15.4.4.9
-            public static JsBox Shift(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Shift(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
-                    return JsBox.Undefined;
+                    return JsUndefined.Instance;
 
                 var first = store.GetOwnProperty(0);
                 for (int k = 1; k < store.Length; k++)
@@ -173,13 +173,15 @@ namespace Jint.Native
                     object result = store.GetOwnPropertyRaw(from);
                     if (result != null)
                     {
-                        JsBox value;
+                        object value;
 
                         var accessor = result as PropertyAccessor;
                         if (accessor != null)
                             value = accessor.GetValue(@this);
                         else
-                            value = JsBox.FromValue(result);
+                        {
+                            value = result;
+                        }
 
                         store.DefineOrSetPropertyValue(to, value);
                     }
@@ -196,14 +198,14 @@ namespace Jint.Native
             }
 
             // 15.4.4.10
-            public static JsBox Slice(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Slice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var global = runtime.Global;
                 var target = (JsObject)@this;
-                int length = (int)target.GetProperty(Id.length).ToNumber();
+                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
 
-                var start = arguments.Length > 0 ? (int)arguments[0].ToNumber() : 0;
-                var end = arguments.Length > 1 ? (int)arguments[1].ToNumber() : length;
+                var start = arguments.Length > 0 ? (int)JsValue.ToNumber(arguments[0]) : 0;
+                var end = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : length;
 
                 if (start < 0)
                     start += length;
@@ -216,7 +218,7 @@ namespace Jint.Native
 
                 var result = global.CreateArray();
                 var push = (JsObject)result.GetProperty(Id.push);
-                var boxedResult = JsBox.CreateObject(result);
+                var boxedResult = (object)result;
 
                 for (int i = start; i < end; i++)
                 {
@@ -232,22 +234,22 @@ namespace Jint.Native
             }
 
             // 15.4.4.11
-            public static JsBox Sort(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Sort(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 int length = 0;
-                if (@this.IsObject)
-                    length = (int)((JsObject)@this).GetProperty(Id.length).ToNumber();
+                var target = @this as JsObject;
+                if (target != null)
+                    length = (int)JsValue.ToNumber(((JsObject)@this).GetProperty(Id.length));
                 if (length <= 1)
                     return @this;
 
                 JsObject compare = null;
-                var target = (JsObject)@this;
 
                 // Compare function defined
-                if (arguments.Length > 0 && arguments[0].IsObject)
-                    compare = (JsObject)arguments[0];
+                if (arguments.Length > 0)
+                    compare = arguments[0] as JsObject;
 
-                var values = new List<JsBox>();
+                var values = new List<object>();
 
                 for (int i = 0; i < length; i++)
                 {
@@ -270,7 +272,7 @@ namespace Jint.Native
                 }
                 else
                 {
-                    values.Sort(JsBoxComparer.Instance);
+                    values.Sort(ToStringComparer.Instance);
                 }
 
                 for (int i = 0; i < length; i++)
@@ -278,20 +280,20 @@ namespace Jint.Native
                     target.SetProperty(i, values[i]);
                 }
 
-                return JsBox.CreateObject(target);
+                return target;
             }
 
             // 15.4.4.12
-            public static JsBox Splice(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Splice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
-                int length = (int)target.GetProperty(Id.length).ToNumber();
+                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
                 var global = target.Global;
 
                 var result = global.CreateArray();
                 var resultStore = (ArrayPropertyStore)result.PropertyStore;
 
-                int relativeStart = (int)arguments[0].ToNumber();
+                int relativeStart = (int)JsValue.ToNumber(arguments[0]);
 
                 int actualStart =
                     relativeStart < 0
@@ -301,7 +303,7 @@ namespace Jint.Native
                 int actualDeleteCount =
                     Math.Min(
                         Math.Max(
-                            (int)arguments[1].ToNumber(),
+                            (int)JsValue.ToNumber(arguments[1]),
                             0
                         ),
                         length - actualStart
@@ -310,12 +312,12 @@ namespace Jint.Native
                 for (int k = 0; k < actualDeleteCount; k++)
                 {
                     int from = relativeStart + k;
-                    JsBox item;
+                    object item;
                     if (target.TryGetProperty(from, out item))
                         resultStore.DefineOrSetPropertyValue(k, item);
                 }
 
-                var items = new List<JsBox>();
+                var items = new List<object>();
 
                 items.AddRange(arguments);
                 items.RemoveAt(0);
@@ -328,7 +330,7 @@ namespace Jint.Native
                     {
                         int from = k + actualDeleteCount;
                         int to = k + items.Count;
-                        JsBox item;
+                        object item;
                         if (target.TryGetProperty(from, out item))
                             target.SetProperty(to, item);
                         else
@@ -340,7 +342,7 @@ namespace Jint.Native
                         target.DeleteProperty(k - 1);
                     }
 
-                    target.SetProperty(Id.length, JsNumber.Box(length - actualDeleteCount + items.Count));
+                    target.SetProperty(Id.length, (double)(length - actualDeleteCount + items.Count));
                 }
                 else
                 {
@@ -348,7 +350,7 @@ namespace Jint.Native
                     {
                         int from = k + actualDeleteCount - 1;
                         int to = k + items.Count - 1;
-                        JsBox item;
+                        object item;
                         if (target.TryGetProperty(from, out item))
                             target.SetProperty(to, item);
                         else
@@ -361,30 +363,30 @@ namespace Jint.Native
                     target.SetProperty(k, items[k]);
                 }
 
-                return JsBox.CreateObject(result);
+                return result;
             }
 
             // 15.4.4.13
-            public static JsBox UnShift(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object UnShift(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
-                int length = (int)target.GetProperty(Id.length).ToNumber();
+                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
 
                 for (int k = length; k > 0; k--)
                 {
                     int from = k - 1;
                     int to = k + arguments.Length - 1;
-                    JsBox result;
+                    object result;
                     if (target.TryGetProperty(from, out result))
                         target.SetProperty(to, result);
                     else
                         target.DeleteProperty(to);
                 }
 
-                var items = new List<JsBox>(arguments);
+                var items = new List<object>(arguments);
                 for (int j = 0; items.Count > 0; j++)
                 {
-                    JsBox e = items[0];
+                    object e = items[0];
                     items.RemoveAt(0);
                     target.SetProperty(j, e);
                 }
@@ -393,22 +395,22 @@ namespace Jint.Native
             }
 
             // 15.4.4.15
-            public static JsBox IndexOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 if (arguments.Length == 0)
-                    return JsNumber.Box(-1);
+                    return (double)(-1);
 
                 var target = (JsObject)@this;
-                int length = (int)target.GetProperty(Id.length).ToNumber();
+                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
                 if (length == 0)
-                    return JsNumber.Box(-1);
+                    return (double)(-1);
 
                 int n = 0;
                 if (arguments.Length > 1)
-                    n = Convert.ToInt32(arguments[1].ToNumber());
+                    n = Convert.ToInt32(JsValue.ToNumber(arguments[1]));
 
                 if (n >= length)
-                    return JsNumber.Box(-1);
+                    return (double)(-1);
 
                 var searchParameter = arguments[0];
 
@@ -420,32 +422,32 @@ namespace Jint.Native
 
                 while (k < length)
                 {
-                    JsBox result;
+                    object result;
                     if (
                         target.TryGetProperty(k, out result) &&
-                        JsBox.StrictlyEquals(result, searchParameter)
+                        JintRuntime.CompareSame(result, searchParameter)
                     )
-                        return JsNumber.Box(k);
+                        return (double)k;
                     k++;
                 }
 
-                return JsNumber.Box(-1);
+                return (double)(-1);
             }
 
             // 15.4.4.15
-            public static JsBox LastIndexOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 if (arguments.Length == 0)
-                    return JsNumber.Box(-1);
+                    return (double)(-1);
 
                 var target = (JsObject)@this;
-                int length = (int)target.GetProperty(Id.length).ToNumber();
+                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
                 if (length == 0)
-                    return JsNumber.Box(-1);
+                    return (double)(-1);
 
                 int n = length;
                 if (arguments.Length > 1)
-                    n = (int)arguments[1].ToNumber();
+                    n = (int)JsValue.ToNumber(arguments[1]);
 
                 int k;
                 var searchParameter = arguments[0];
@@ -456,60 +458,60 @@ namespace Jint.Native
 
                 while (k >= 0)
                 {
-                    JsBox result;
+                    object result;
                     if (
                         target.TryGetProperty(k, out result) &&
-                        JsBox.StrictlyEquals(result, searchParameter)
+                        JintRuntime.CompareSame(result, searchParameter)
                     )
-                        return JsNumber.Box(k);
+                        return (double)k;
 
                     k--;
                 }
 
-                return JsNumber.Box(-1);
+                return (double)(-1);
             }
 
-            public static JsBox GetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(@this.FindArrayStore().Length);
+                return (double)@this.FindArrayStore().Length;
             }
 
-            public static JsBox SetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object SetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 var store = target.FindArrayStore();
 
                 if (store != null)
                 {
-                    store.Length = (int)arguments[0].ToNumber();
+                    store.Length = (int)JsValue.ToNumber(arguments[0]);
                 }
                 else
                 {
-                    int oldLen = (int)target.GetProperty(Id.length).ToNumber();
-                    int newLength = (int)arguments[0].ToNumber();
+                    int oldLen = (int)JsValue.ToNumber(target.GetProperty(Id.length));
+                    int newLength = (int)JsValue.ToNumber(arguments[0]);
 
-                    target.SetProperty(Id.length, JsNumber.Box(newLength));
+                    target.SetProperty(Id.length, (double)newLength);
 
                     for (int i = newLength; i < oldLen; i++)
                     {
-                        target.DeleteProperty(JsNumber.Box(i));
+                        target.DeleteProperty((double)i);
                     }
                 }
 
                 return arguments[0];
             }
 
-            private class JsBoxComparer : IComparer<JsBox>
+            private class ToStringComparer : IComparer<object>
             {
-                public static readonly JsBoxComparer Instance = new JsBoxComparer();
+                public static readonly ToStringComparer Instance = new ToStringComparer();
 
-                private JsBoxComparer()
+                private ToStringComparer()
                 {
                 }
 
-                public int Compare(JsBox x, JsBox y)
+                public int Compare(object x, object y)
                 {
-                    return x.ToString().CompareTo(y.ToString());
+                    return JsValue.ToString(x).CompareTo(JsValue.ToString(y));
                 }
             }
         }

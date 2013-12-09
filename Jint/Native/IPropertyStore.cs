@@ -8,13 +8,13 @@ namespace Jint.Native
     internal interface IPropertyStore
     {
         object GetOwnPropertyRaw(int index);
-        object GetOwnPropertyRaw(JsBox index);
-        void SetPropertyValue(int index, JsBox value);
-        void SetPropertyValue(JsBox index, JsBox value);
+        object GetOwnPropertyRaw(object index);
+        void SetPropertyValue(int index, object value);
+        void SetPropertyValue(object index, object value);
         bool DeleteProperty(int index);
-        bool DeleteProperty(JsBox index);
+        bool DeleteProperty(object index);
         void DefineProperty(int index, object value, PropertyAttributes attributes);
-        void DefineProperty(JsBox index, object value, PropertyAttributes attributes);
+        void DefineProperty(object index, object value, PropertyAttributes attributes);
         IEnumerable<int> GetKeys();
     }
 }

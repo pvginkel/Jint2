@@ -8,51 +8,27 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public sealed partial class JsObject : JsInstance
+    public sealed partial class JsObject : IComparable<JsObject>
     {
-        internal static readonly ReadOnlyCollection<KeyValuePair<int, JsBox>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, JsBox>>(new KeyValuePair<int, JsBox>[0]);
-
-        private object _value;
-        private bool _isClr;
-        private string _class;
+        internal static readonly ReadOnlyCollection<KeyValuePair<int, object>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, object>>(new KeyValuePair<int, object>[0]);
 
         internal IPropertyStore PropertyStore { get; set; }
         internal JsDelegate Delegate { get; private set; }
 
-        public override object Value
-        {
-            get { return _value; }
-            set { _value = value; }
-        }
+        public object Value { get; set; }
 
         public JsGlobal Global { get; private set; }
 
-        public override bool IsClr
-        {
-            get { return _isClr; }
-        }
+        public bool IsClr { get; internal set; }
 
-        internal void SetIsClr(bool isClr)
-        {
-            _isClr = isClr;
-        }
-
-        public override string Class
-        {
-            get { return _class; }
-        }
+        public string Class { get; private set; }
 
         internal void SetClass(string @class)
         {
             if (@class == null)
                 throw new ArgumentNullException("class");
 
-            _class = @class;
-        }
-
-        public override JsType Type
-        {
-            get { return JsType.Object; }
+            Class = @class;
         }
 
         /// <summary>
@@ -66,8 +42,8 @@ namespace Jint.Native
                 throw new ArgumentNullException("global");
 
             Global = global;
-            _value = value;
-            _class = JsNames.ClassObject;
+            Value = value;
+            Class = JsNames.ClassObject;
             Prototype = prototype ?? global.PrototypeSink;
             Delegate = @delegate;
         }
@@ -78,12 +54,17 @@ namespace Jint.Native
                 PropertyStore = new DictionaryPropertyStore(this);
         }
 
-        public override JsBox ToPrimitive(PreferredType preferredType)
+        public object ToPrimitive()
+        {
+            return ToPrimitive(PreferredType.None);
+        }
+
+        public object ToPrimitive(PreferredType preferredType)
         {
             return DefaultValue(preferredType);
         }
 
-        public JsBox DefaultValue(PreferredType hint)
+        public object DefaultValue(PreferredType hint)
         {
             if (hint == PreferredType.None)
             {
@@ -92,7 +73,7 @@ namespace Jint.Native
                     hint = PreferredType.String;
             }
 
-            JsBox primitive;
+            object primitive;
 
             var toString = GetProperty(Id.toString);
             var valueOf = GetProperty(Id.valueOf);
@@ -101,13 +82,13 @@ namespace Jint.Native
             var second = hint == PreferredType.String ? valueOf : toString;
 
             if (
-                first.IsValid &&
+                first != null &&
                 TryExecuteToPrimitiveFunction(first, out primitive)
             )
                 return primitive;
 
             if (
-                second.IsValid &&
+                second != null &&
                 TryExecuteToPrimitiveFunction(second, out primitive)
             )
                 return primitive;
@@ -115,20 +96,20 @@ namespace Jint.Native
             if (IsClr && Value != null)
             {
                 if (!(Value is IComparable))
-                    return JsString.Box(Value.ToString());
+                    return Value.ToString();
 
                 switch (Convert.GetTypeCode(Value))
                 {
                     case TypeCode.Boolean:
-                        return JsBox.CreateBoolean((bool)Value);
+                        return BooleanBoxes.Box((bool)Value);
 
                     case TypeCode.Char:
                     case TypeCode.String:
                     case TypeCode.Object:
-                        return JsString.Box(Value.ToString());
+                        return Value.ToString();
 
                     case TypeCode.DateTime:
-                        return JsString.Box(JsConvert.ToString((DateTime)Value));
+                        return JsConvert.ToString((DateTime)Value);
 
                     case TypeCode.Byte:
                     case TypeCode.Int16:
@@ -141,47 +122,44 @@ namespace Jint.Native
                     case TypeCode.Decimal:
                     case TypeCode.Double:
                     case TypeCode.Single:
-                        return JsBox.CreateNumber(Convert.ToDouble(Value));
+                        return Convert.ToDouble(Value);
 
                     default:
-                        return JsString.Box(Value.ToString());
+                        return Value.ToString();
                 }
             }
 
             throw new JsException(JsErrorType.TypeError, "Invalid type");
         }
 
-        private bool TryExecuteToPrimitiveFunction(JsBox function, out JsBox primitive)
+        private bool TryExecuteToPrimitiveFunction(object function, out object primitive)
         {
-            if (!function.IsFunction)
+            if (!JsValue.IsFunction(function))
             {
-                primitive = new JsBox();
+                primitive = null;
                 return false;
             }
 
             var result = Global.ExecuteFunction(
                 (JsObject)function,
-                JsBox.CreateObject(this),
-                JsBox.EmptyArray,
+                this,
+                JsValue.EmptyArray,
                 null
             );
 
-            if (result.IsPrimitive)
+            if (JsValue.IsPrimitive(result))
             {
                 primitive = result;
                 return true;
             }
 
-            primitive = new JsBox();
+            primitive = null;
             return false;
         }
 
-        public override bool ToBoolean()
+        public bool ToBoolean()
         {
-            if (
-                Type == JsType.Object ||
-                (Value != null && !(Value is IConvertible))
-            )
+            if (Value != null && !(Value is IConvertible))
                 return true;
 
             switch (Convert.GetTypeCode(Value))
@@ -217,14 +195,14 @@ namespace Jint.Native
             }
         }
 
-        public override double ToNumber()
+        public double ToNumber()
         {
-            return ToPrimitive(PreferredType.Number).ToNumber();
+            return JsValue.ToNumber(ToPrimitive(PreferredType.Number));
         }
 
         public override string ToString()
         {
-            return ToPrimitive(PreferredType.String).ToString();
+            return JsValue.ToString(ToPrimitive(PreferredType.String));
         }
 
         public bool IsPrototypeOf(JsObject target)
@@ -256,28 +234,42 @@ namespace Jint.Native
         }
 
         // 13.2.2
-        public JsBox Construct(JintRuntime runtime, JsBox[] arguments)
+        public object Construct(JintRuntime runtime, object[] arguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
 
             var @this = Global.CreateObject((JsObject)GetProperty(Id.prototype));
-            var boxedThis = JsBox.CreateObject(@this);
+            var boxedThis = (object)@this;
 
-            var result = Delegate.Delegate(runtime, boxedThis, this, Delegate.Closure, arguments, null);
+            var result = Delegate.Delegate(runtime, boxedThis, this, Delegate.Closure, arguments, null) as JsObject;
 
-            if (result.IsObject)
+            if (result != null)
                 return result;
 
             return boxedThis;
         }
 
-        public JsBox Execute(JintRuntime runtime, JsBox @this, JsBox[] arguments, JsBox[] genericArguments)
+        public object Execute(JintRuntime runtime, object @this, object[] arguments, object[] genericArguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
 
             return Delegate.Delegate(runtime, @this, this, Delegate.Closure, arguments, genericArguments);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value != null ? Value.GetHashCode() : base.GetHashCode();
+        }
+
+        public int CompareTo(JsObject other)
+        {
+            return String.Compare(
+                ToString(),
+                other.ToString(),
+                StringComparison.Ordinal
+            );
         }
     }
 }

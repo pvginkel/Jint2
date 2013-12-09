@@ -9,119 +9,117 @@ namespace Jint.Native
     {
         private static class MathFunctions
         {
-            internal static JsBox Abs(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            internal static object Abs(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Abs(arguments[0].ToNumber()));
+                return Math.Abs(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Acos(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Acos(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Acos(arguments[0].ToNumber()));
+                return Math.Acos(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Asin(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Asin(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Asin(arguments[0].ToNumber()));
+                return Math.Asin(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Atan(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Atan(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Atan(arguments[0].ToNumber()));
+                return Math.Atan(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Atan2(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Atan2(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Atan2(arguments[0].ToNumber(), arguments[1].ToNumber()));
+                return Math.Atan2(JsValue.ToNumber(arguments[0]), JsValue.ToNumber(arguments[1]));
             }
 
-            public static JsBox Ceil(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Ceil(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Ceiling(arguments[0].ToNumber()));
+                return Math.Ceiling(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Cos(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Cos(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Cos(arguments[0].ToNumber()));
+                return Math.Cos(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Exp(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Exp(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Exp(arguments[0].ToNumber()));
+                return Math.Exp(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Floor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Floor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Floor(arguments[0].ToNumber()));
+                return Math.Floor(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Log(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Log(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Log(arguments[0].ToNumber()));
+                return Math.Log(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Max(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Max(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 if (arguments.Length == 0)
-                {
-                    return JsBox.NegativeInfinity;
-                }
+                    return DoubleBoxes.NegativeInfinity;
 
-                var result = arguments[0].ToNumber();
+                var result = JsValue.ToNumber(arguments[0]);
 
                 foreach (var p in arguments)
                 {
-                    result = Math.Max(p.ToNumber(), result);
+                    result = Math.Max(JsValue.ToNumber(p), result);
                 }
 
-                return JsNumber.Box(result);
+                return result;
             }
 
 
-            public static JsBox Min(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Min(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 if (arguments.Length == 0)
                 {
-                    return JsBox.PositiveInfinity;
+                    return DoubleBoxes.PositiveInfinity;
                 }
 
-                var result = arguments[0].ToNumber();
+                var result = JsValue.ToNumber(arguments[0]);
 
                 foreach (var p in arguments)
                 {
-                    result = Math.Min(p.ToNumber(), result);
+                    result = Math.Min(JsValue.ToNumber(p), result);
                 }
 
-                return JsNumber.Box(result);
+                return result;
             }
 
-            public static JsBox Pow(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Pow(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Pow(arguments[0].ToNumber(), arguments[1].ToNumber()));
+                return Math.Pow(JsValue.ToNumber(arguments[0]), JsValue.ToNumber(arguments[1]));
             }
 
-            public static JsBox Random(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Random(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(runtime.Global.Random.NextDouble());
+                return runtime.Global.Random.NextDouble();
             }
 
-            public static JsBox Round(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Round(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Round(arguments[0].ToNumber()));
+                return Math.Round(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Sin(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Sin(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Sin(arguments[0].ToNumber()));
+                return Math.Sin(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Sqrt(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Sqrt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Sqrt(arguments[0].ToNumber()));
+                return Math.Sqrt(JsValue.ToNumber(arguments[0]));
             }
 
-            public static JsBox Tan(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Tan(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(Math.Tan(arguments[0].ToNumber()));
+                return Math.Tan(JsValue.ToNumber(arguments[0]));
             }
         }
     }

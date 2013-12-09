@@ -16,7 +16,7 @@ namespace Jint.Compiler
         private static readonly MethodInfo _pow = typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) });
         private static readonly MethodInfo _substring = typeof(string).GetMethod("Substring", new[] { typeof(int), typeof(int) });
         private static readonly MethodInfo _deleteByString = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(string) });
-        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(JsBox) });
+        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(object) });
         private static readonly MethodInfo _stringEquals = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(string) });
 
         private static readonly Dictionary<int, Func<ParameterExpression, Expression[], Expression>> _operationBuilders = CreateOperationBuilders();
@@ -205,7 +205,7 @@ namespace Jint.Compiler
 
             //result[GetOperationMethodKey(SyntaxExpressionType.SetIndex, ValueType.Unknown, ValueType.Double, ValueType.Unknown)] =
             //    (runtime, arguments) => Expression.Call(
-            //        typeof(JintRuntime).GetMethod("Operation_SetIndex", new[] { typeof(JsObject), typeof(double), typeof(JsBox) }),
+            //        typeof(JintRuntime).GetMethod("Operation_SetIndex", new[] { typeof(JsObject), typeof(double), typeof(object) }),
             //        Expression.Convert(arguments[0], typeof(JsObject)),
             //        arguments[1],
             //        arguments[2]
@@ -225,7 +225,7 @@ namespace Jint.Compiler
             //        ),
             //        Expression.Call(
             //            runtime,
-            //            typeof(JintRuntime).GetMethod("Operation_Index", new[] { typeof(JsBox), typeof(JsBox) }),
+            //            typeof(JintRuntime).GetMethod("Operation_Index", new[] { typeof(object), typeof(object) }),
             //            arguments[0],
             //            Expression.Call(
             //                typeof(JsNumber).GetMethod("Box"),
@@ -237,7 +237,7 @@ namespace Jint.Compiler
             //result[GetOperationMethodKey(SyntaxExpressionType.Index, ValueType.Object, ValueType.Unknown)] =
             //    (runtime, arguments) => Expression.MakeIndex(
             //        arguments[0],
-            //        typeof(JsObject).GetProperty("Item", new[] { typeof(JsBox) }),
+            //        typeof(JsObject).GetProperty("Item", new[] { typeof(object) }),
             //        new[] { arguments[1] }
             //    );
 

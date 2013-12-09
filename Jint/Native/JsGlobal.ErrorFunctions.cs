@@ -9,26 +9,26 @@ namespace Jint.Native
     {
         private static class ErrorFunctions
         {
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
                     target = runtime.Global.CreateObject(callee.Prototype);
 
                 target.SetClass(callee.Delegate.Name);
-                target.SetIsClr(false);
+                target.IsClr = false;
 
                 if (arguments.Length > 0)
                     target.SetProperty(Id.message, arguments[0]);
 
-                return JsBox.CreateObject(target);
+                return target;
             }
 
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
 
-                return JsString.Box(target.GetProperty(Id.name) + ": " + target.GetProperty(Id.message));
+                return target.GetProperty(Id.name) + ": " + target.GetProperty(Id.message);
             }
         }
     }

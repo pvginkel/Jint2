@@ -55,11 +55,11 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
-            builder.AddThisParameter(typeof(JsBox));
+            builder.AddThisParameter(typeof(object));
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
-            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
-            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+            var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
+            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var methodThis = builder.MarshalThis(method.DeclaringType, method.IsStatic);
 
@@ -98,8 +98,8 @@ namespace Jint.Native.Interop
                         argumentsParameter,
                         Expression.Constant(index)
                     ),
-                    Expression.Field(null, typeof(JsBox).GetField("Undefined")),
-                    typeof(JsBox)
+                    Expression.Field(null, typeof(JsUndefined).GetField("Instance")),
+                    typeof(object)
                 );
 
                 // If this is a ref or out parameter, we need to create a local.
@@ -200,7 +200,7 @@ namespace Jint.Native.Interop
             builder.AddStatement(
                 returnLocal != null
                 ? builder.UnMarshal(returnLocal, method.ReturnType)
-                : Expression.Field(null, typeof(JsBox).GetField("Undefined"))
+                : Expression.Field(null, typeof(JsUndefined).GetField("Instance"))
             );
 
             return builder.Compile<JsFunction>();
@@ -226,11 +226,11 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
-            builder.AddThisParameter(typeof(JsBox));
+            builder.AddThisParameter(typeof(object));
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
-            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
-            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+            var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
+            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var method = @delegate.Method;
 
@@ -268,8 +268,8 @@ namespace Jint.Native.Interop
                         argumentsParameter,
                         Expression.Constant(index)
                     ),
-                    Expression.Field(null, typeof(JsBox).GetField("Undefined")),
-                    typeof(JsBox)
+                    Expression.Field(null, typeof(JsUndefined).GetField("Instance")),
+                    typeof(object)
                 );
 
                 // Add the argument to the list.
@@ -307,11 +307,11 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
-            builder.AddThisParameter(typeof(JsBox));
+            builder.AddThisParameter(typeof(object));
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
-            builder.AddParameter(typeof(JsBox[]), "arguments");
-            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+            builder.AddParameter(typeof(object[]), "arguments");
+            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var method = property.GetGetMethod();
 
@@ -339,15 +339,15 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
-            builder.AddThisParameter(typeof(JsBox));
+            builder.AddThisParameter(typeof(object));
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
-            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
-            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+            var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
+            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var method = property.GetSetMethod();
 
-            var local = builder.AddLocal(typeof(JsBox), "value");
+            var local = builder.AddLocal(typeof(object), "value");
 
             builder.AddStatement(Expression.Assign(
                 local,
@@ -386,11 +386,11 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
-            builder.AddThisParameter(typeof(JsBox));
+            builder.AddThisParameter(typeof(object));
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
-            builder.AddParameter(typeof(JsBox[]), "arguments");
-            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+            builder.AddParameter(typeof(object[]), "arguments");
+            builder.AddParameter(typeof(object[]), "genericArguments");
 
             builder.AddStatement(builder.UnMarshal(
                 Expression.Field(
@@ -419,13 +419,13 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddRuntimeParameter();
-            builder.AddThisParameter(typeof(JsBox));
+            builder.AddThisParameter(typeof(object));
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
-            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
-            builder.AddParameter(typeof(JsBox[]), "genericArguments");
+            var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
+            builder.AddParameter(typeof(object[]), "genericArguments");
 
-            var local = builder.AddLocal(typeof(JsBox), "value");
+            var local = builder.AddLocal(typeof(object), "value");
 
             builder.AddStatement(Expression.Assign(
                 local,
@@ -467,7 +467,7 @@ namespace Jint.Native.Interop
 
             builder.AddGlobalParameter();
             builder.AddThisParameter(typeof(JsObject));
-            var indexParameter = builder.AddParameter(typeof(JsBox), "index");
+            var indexParameter = builder.AddParameter(typeof(object), "index");
 
             builder.AddStatement(builder.UnMarshal(
                 Expression.Call(
@@ -495,8 +495,8 @@ namespace Jint.Native.Interop
 
             builder.AddGlobalParameter();
             builder.AddThisParameter(typeof(JsObject));
-            var indexParameter = builder.AddParameter(typeof(JsBox), "index");
-            var argument = builder.AddParameter(typeof(JsBox), "value");
+            var indexParameter = builder.AddParameter(typeof(object), "index");
+            var argument = builder.AddParameter(typeof(object), "value");
 
             var parameters = method.GetParameters();
 
@@ -523,7 +523,7 @@ namespace Jint.Native.Interop
             var builder = new Builder();
 
             builder.AddGlobalParameter();
-            var argumentsParameter = builder.AddParameter(typeof(JsBox[]), "arguments");
+            var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
 
             var parameters = constructor.GetParameters();
             var arguments = new List<Expression>();
@@ -543,8 +543,8 @@ namespace Jint.Native.Interop
                             argumentsParameter,
                             Expression.Constant(i)
                         ),
-                        Expression.Field(null, typeof(JsBox).GetField("Undefined")),
-                        typeof(JsBox)
+                        Expression.Field(null, typeof(JsUndefined).GetField("Instance")),
+                        typeof(object)
                     ),
                     parameters[i].ParameterType
                 ));
@@ -586,20 +586,17 @@ namespace Jint.Native.Interop
                 Expression.Constant(function),
                 typeof(JsObject).GetMethod("Execute"),
                 Expression.Constant(runtime),
-                Expression.Call(
-                    typeof(JsBox).GetMethod("CreateObject"),
-                    Expression.Constant(that)
-                ),
+                Expression.Constant(that),
                 ExpressionVisitor.MakeArrayInit(
                     parameters.Select(p => Expression.Call(
                         Expression.Constant(runtime.Global.Marshaller),
                         typeof(Marshaller).GetMethod("MarshalClrValue").MakeGenericMethod(p.Type),
                         p
                     )),
-                    typeof(JsBox),
+                    typeof(object),
                     false
                 ),
-                Expression.Constant(null, typeof(JsBox[]))
+                Expression.Constant(null, typeof(object[]))
             );
 
             if (invokeMethod.ReturnType != typeof(void))

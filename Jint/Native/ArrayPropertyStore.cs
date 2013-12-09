@@ -49,32 +49,32 @@ namespace Jint.Native
             _owner = owner;
         }
 
-        public JsBox GetOwnProperty(int index)
+        public object GetOwnProperty(int index)
         {
             object result = GetOwnPropertyRaw(index);
 
             if (result == null)
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
 
             var accessor = result as PropertyAccessor;
             if (accessor != null)
-                return accessor.GetValue(JsBox.CreateObject(_owner));
+                return accessor.GetValue(_owner);
 
-            return JsBox.FromValue(result);
+            return result;
         }
 
-        public JsBox GetOwnProperty(JsBox index)
+        public object GetOwnProperty(object index)
         {
             object result = GetOwnPropertyRaw(index);
 
             if (result == null)
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
 
             var accessor = result as PropertyAccessor;
             if (accessor != null)
-                return accessor.GetValue(JsBox.CreateObject(_owner));
+                return accessor.GetValue(_owner);
 
-            return JsBox.FromValue(result);
+            return result;
         }
 
         public object GetOwnPropertyRaw(int index)
@@ -88,7 +88,7 @@ namespace Jint.Native
             return null;
         }
 
-        public object GetOwnPropertyRaw(JsBox index)
+        public object GetOwnPropertyRaw(object index)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -100,14 +100,14 @@ namespace Jint.Native
             return null;
         }
 
-        public void SetPropertyValue(int index, JsBox value)
+        public void SetPropertyValue(int index, object value)
         {
             if (index >= 0)
             {
                 Debug.Assert(GetValue(index) != null);
                 Debug.Assert(!(GetValue(index) is PropertyAccessor));
 
-                SetValue(index, value.GetValue());
+                SetValue(index, value);
             }
             else
             {
@@ -116,15 +116,15 @@ namespace Jint.Native
             }
         }
 
-        public void DefineOrSetPropertyValue(int index, JsBox value)
+        public void DefineOrSetPropertyValue(int index, object value)
         {
-            SetValue(index, value.GetValue());
+            SetValue(index, value);
 
             if (index >= _length)
                 _length = index + 1;
         }
 
-        public void SetPropertyValue(JsBox index, JsBox value)
+        public void SetPropertyValue(object index, object value)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -132,7 +132,7 @@ namespace Jint.Native
                 Debug.Assert(GetValue(i) != null);
                 Debug.Assert(!(GetValue(i) is PropertyAccessor));
 
-                SetValue(i, value.GetValue());
+                SetValue(i, value);
             }
             else
             {
@@ -155,7 +155,7 @@ namespace Jint.Native
             return true;
         }
 
-        public bool DeleteProperty(JsBox index)
+        public bool DeleteProperty(object index)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -190,7 +190,7 @@ namespace Jint.Native
             }
         }
 
-        public void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+        public void DefineProperty(object index, object value, PropertyAttributes attributes)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -211,9 +211,9 @@ namespace Jint.Native
             }
         }
 
-        private bool TryParseIndex(JsBox index, out int result)
+        private bool TryParseIndex(object index, out int result)
         {
-            double indexNumber = index.ToNumber();
+            double indexNumber = JsValue.ToNumber(index);
             result = (int)indexNumber;
             return result == indexNumber && result >= 0;
         }
@@ -224,7 +224,7 @@ namespace Jint.Native
                 _baseStore = new DictionaryPropertyStore(_owner);
         }
 
-        public JsObject Concat(JsBox[] args)
+        public JsObject Concat(object[] args)
         {
             var newArray = new SparseArray<object>(this);
             int offset = _length;
@@ -246,16 +246,16 @@ namespace Jint.Native
                 }
                 else
                 {
-                    JsObject @object;
+                    var @object = item as JsObject;
 
                     if (
-                        item.IsObject &&
-                        _owner.Global.ArrayClass.HasInstance(@object = (JsObject)item)
+                        @object != null &&
+                        _owner.Global.ArrayClass.HasInstance(@object)
                     )
                     {
                         // Array subclass.
 
-                        int objectLength = (int)@object.GetProperty(Id.length).ToNumber();
+                        int objectLength = (int)JsValue.ToNumber(@object.GetProperty(Id.length));
 
                         for (int i = 0; i < objectLength; i++)
                         {
@@ -266,7 +266,7 @@ namespace Jint.Native
                     }
                     else
                     {
-                        newArray.SetValue(offset, item.GetValue());
+                        newArray.SetValue(offset, item);
                         offset++;
                     }
                 }
@@ -282,13 +282,13 @@ namespace Jint.Native
             return result;
         }
 
-        public JsBox Join(JsBox separator)
+        public object Join(object separator)
         {
             int length = _length;
             if (length == 0)
-                return JsBox.EmptyString;
+                return String.Empty;
 
-            string separatorString = separator.IsUndefined ? "," : separator.ToString();
+            string separatorString = JsValue.IsUndefined(separator) ? "," : JsValue.ToString(separator);
             string[] map = new string[length];
 
             for (int i = 0; i < length; i++)
@@ -298,7 +298,7 @@ namespace Jint.Native
                     map[i] = item.ToString();
             }
 
-            return JsString.Box(String.Join(separatorString, map));
+            return String.Join(separatorString, map);
         }
     }
 }

@@ -19,17 +19,17 @@ namespace Jint.Native
             Setter = setter;
         }
 
-        public JsBox GetValue(JsBox @this)
+        public object GetValue(object @this)
         {
             return Getter.Global.ExecuteFunction(
                 Getter,
                 @this,
-                JsBox.EmptyArray,
+                JsValue.EmptyArray,
                 null
             );
         }
 
-        public void SetValue(JsBox @this, JsBox value)
+        public void SetValue(object @this, object value)
         {
             Setter.Global.ExecuteFunction(
                 Setter,

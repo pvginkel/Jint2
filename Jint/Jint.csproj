@@ -61,7 +61,6 @@
     <Compile Include="Compiler\ExpressionVisitor.OperationBuilders.cs" />
     <Compile Include="Compiler\TypeMarkerPhase.cs" />
     <Compile Include="ExpressionExtensions\ConvertFromJsExpression.cs" />
-    <Compile Include="ExpressionExtensions\ConvertToJsExpression.cs" />
     <Compile Include="ExpressionExtensions\ExpressionEx.cs" />
     <Compile Include="ExpressionExtensions\ForEachExpression.cs" />
     <Compile Include="ExpressionExtensions\UsingExpression.cs" />
@@ -80,7 +79,9 @@
     <Compile Include="MarshalAccessorProperty.cs" />
     <Compile Include="Native\AbstractPropertyStore.cs" />
     <Compile Include="Native\ArrayPropertyStore.cs" />
+    <Compile Include="Native\BooleanBoxes.cs" />
     <Compile Include="Native\DictionaryPropertyStore.cs" />
+    <Compile Include="Native\DoubleBoxes.cs" />
     <Compile Include="Native\Id.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -89,7 +90,7 @@
     <Compile Include="Native\Interop\NativeFactory.cs" />
     <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\IPropertyStore.cs" />
-    <Compile Include="Native\JsBox.cs" />
+    <Compile Include="Native\JsValue.cs" />
     <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsDelegate.cs" />
     <Compile Include="Native\JsErrorType.cs" />
@@ -153,11 +154,7 @@
     <Compile Include="Native\JsException.cs" />
     <Compile Include="Native\JsNull.cs" />
     <Compile Include="Expressions\RegexpSyntax.cs" />
-    <Compile Include="Native\JsInstance.cs" />
     <Compile Include="Native\JsUndefined.cs" />
-    <Compile Include="Native\JsBoolean.cs" />
-    <Compile Include="Native\JsString.cs" />
-    <Compile Include="Native\JsNumber.cs" />
     <Compile Include="Native\JsGlobal.cs" />
     <Compile Include="Native\JsObject.cs" />
     <Compile Include="Expressions\JsonExpressionSyntax.cs" />

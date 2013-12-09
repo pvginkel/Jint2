@@ -8,7 +8,7 @@ namespace Jint.Native
     public class JsException : Exception
     {
         public JsErrorType Type { get; private set; }
-        public JsBox Value { get; private set; }
+        public object Value { get; private set; }
 
         public JsException(JsErrorType type)
             : this(type, null)
@@ -21,9 +21,9 @@ namespace Jint.Native
             Type = type;
         }
 
-        public JsException(JsBox value)
+        public JsException(object value)
         {
-            if (!value.IsValid)
+            if (value == null)
                 throw new ArgumentNullException("value");
 
             Value = value;

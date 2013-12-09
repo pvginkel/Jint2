@@ -40,29 +40,29 @@ namespace Jint.Native.Interop
         public override object GetOwnPropertyRaw(int index)
         {
             if (index >= 0)
-                return GetOwnPropertyRaw(JsString.Box(_global.GetIdentifier(index)));
+                return GetOwnPropertyRaw(_global.GetIdentifier(index));
 
             return base.GetOwnPropertyRaw(index);
         }
 
-        public override object GetOwnPropertyRaw(JsBox index)
+        public override object GetOwnPropertyRaw(object index)
         {
             var getter = _getOverload.ResolveOverload(new[] { index }, null);
             if (getter == null)
                 throw new JintException("No matching overload found");
 
-            return getter(_global, BaseStore.Owner, index).GetValue();
+            return getter(_global, BaseStore.Owner, index);
         }
 
-        public override void SetPropertyValue(int index, JsBox value)
+        public override void SetPropertyValue(int index, object value)
         {
             if (index >= 0)
-                SetPropertyValue(JsString.Box(_global.GetIdentifier(index)), value);
+                SetPropertyValue(_global.GetIdentifier(index), value);
             else
                 base.SetPropertyValue(index, value);
         }
 
-        public override void SetPropertyValue(JsBox index, JsBox value)
+        public override void SetPropertyValue(object index, object value)
         {
             var setter = _setOverload.ResolveOverload(new[] { index, value }, null);
             if (setter == null)

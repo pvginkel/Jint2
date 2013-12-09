@@ -7,17 +7,16 @@ namespace Jint.Native
 {
     internal static class JsExtensions
     {
-        public static ArrayPropertyStore FindArrayStore(this JsBox value)
+        public static ArrayPropertyStore FindArrayStore(this object value)
         {
             return FindArrayStore(value, true);
         }
 
-        public static ArrayPropertyStore FindArrayStore(this JsBox value, bool lookAtPrototype)
+        public static ArrayPropertyStore FindArrayStore(this object value, bool lookAtPrototype)
         {
-            if (!value.IsObject)
+            var @object = value as JsObject;
+            if (@object == null)
                 return null;
-
-            var @object = (JsObject)value;
 
             while (!@object.IsPrototypeNull)
             {

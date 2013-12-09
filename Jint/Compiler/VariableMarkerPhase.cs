@@ -88,7 +88,7 @@ namespace Jint.Compiler
             foreach (var variable in block.ClosedOverVariables)
             {
                 if (variable.Type == VariableType.Local)
-                    fields.Add(variable.Name, typeof(JsBox));
+                    fields.Add(variable.Name, typeof(object));
                 else if (!fields.ContainsKey(Closure.ArgumentsFieldName))
                     fields.Add(Closure.ArgumentsFieldName, typeof(JsObject));
             }

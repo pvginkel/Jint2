@@ -125,21 +125,22 @@ namespace Jint.Native.Interop
                 if (declaringType.IsValueType)
                 {
                     Expression expression = _this;
-                    if (expression.Type == typeof(JsBox))
+                    if (expression.Type == typeof(object))
                     {
                         expression = Expression.Call(
+                            typeof(JsValue).GetMethod("UnwrapValue"),
+                            expression
+                        );
+                    }
+                    else
+                    {
+                        expression = Expression.Property(
                             expression,
-                            typeof(JsBox).GetMethod("ToInstance")
+                            "Value"
                         );
                     }
 
-                    return Expression.Unbox(
-                        Expression.Property(
-                            expression,
-                            "Value"
-                        ),
-                        declaringType
-                    );
+                    return Expression.Unbox(expression, declaringType);
                 }
 
                 var local = Expression.Parameter(declaringType, "marshaledThis");
@@ -196,14 +197,6 @@ namespace Jint.Native.Interop
 
             public Expression Marshal(Expression expression, Type type)
             {
-                if (typeof(JsInstance).IsAssignableFrom(expression.Type))
-                {
-                    expression = Expression.Call(
-                        typeof(JsBox).GetMethod("FromInstance"),
-                        expression
-                    );
-                }
-
                 return Expression.Call(
                     Marshaller,
                     _marshalJsValue.MakeGenericMethod(type),
@@ -238,7 +231,7 @@ namespace Jint.Native.Interop
                 {
                     return Expression.Block(
                         expression,
-                        Expression.Field(null, typeof(JsBox).GetField("Undefined"))
+                        Expression.Field(null, typeof(JsUndefined).GetField("Instance"))
                     );
                 }
 

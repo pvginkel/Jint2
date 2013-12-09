@@ -16,7 +16,7 @@ namespace Jint.Native
         {
             return (JsObject)DateClass.Construct(
                 _runtime,
-                new[] { JsBox.CreateNumber(value) }
+                new[] { (object)value }
             );
         }
 
@@ -31,7 +31,7 @@ namespace Jint.Native
 
             // Constructor on the prototype links back to the result of CreateFunction:
             //   10. Set the constructor property of Result(9) to F. This property is given attributes { DontEnum }. 
-            prototype.DefineProperty("constructor", JsBox.CreateObject(result), PropertyAttributes.DontEnum);
+            prototype.DefineProperty("constructor", result, PropertyAttributes.DontEnum);
 
             return result;
         }
@@ -50,7 +50,7 @@ namespace Jint.Native
             var result = CreateObject(null, prototype, new JsDelegate(name, @delegate, argumentCount, closure));
 
             result.SetClass(JsNames.ClassFunction);
-            result.SetIsClr(isClr);
+            result.IsClr = isClr;
 
             return result;
         }
@@ -84,7 +84,7 @@ namespace Jint.Native
         {
             return (JsObject)constructor.Construct(
                 _runtime,
-                new[] { JsString.Box(message) }
+                new[] { (object)message }
             );
         }
 
@@ -99,8 +99,8 @@ namespace Jint.Native
                 _runtime,
                 new[]
                 {
-                    JsString.Box(pattern),
-                    JsString.Box(options)
+                    pattern,
+                    (object)options
                 }
             );
         }
@@ -109,7 +109,7 @@ namespace Jint.Native
         {
             return (JsObject)ArrayClass.Construct(
                 _runtime,
-                JsBox.EmptyArray
+                JsValue.EmptyArray
             );
         }
     }

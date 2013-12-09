@@ -5,14 +5,11 @@ using System.Text;
 namespace Jint.Native
 {
     [Serializable]
-    public sealed class JsUndefined : JsInstance
+    public sealed class JsUndefined
     {
         internal string Name { get; private set; }
 
-        public static JsUndefined Instance = new JsUndefined
-        {
-            Attributes = PropertyAttributes.DontEnum | PropertyAttributes.DontDelete
-        };
+        public static JsUndefined Instance = new JsUndefined();
 
         private JsUndefined()
         {
@@ -26,48 +23,9 @@ namespace Jint.Native
             Name = name;
         }
 
-        public override string Class
-        {
-            get { return JsNames.ClassObject; }
-        }
-
-        public override JsType Type
-        {
-            get { return JsType.Undefined; }
-        }
-
         public override string ToString()
         {
             return "undefined";
-        }
-
-        public override object ToObject()
-        {
-            return null;
-        }
-
-        public override bool ToBoolean()
-        {
-            return false;
-        }
-
-        public override double ToNumber()
-        {
-            return Double.NaN;
-        }
-
-        public override JsBox ToPrimitive(PreferredType preferredType)
-        {
-            if (Name == null)
-                return JsBox.Undefined;
-
-            return JsBox.FromInstance(this);
-        }
-
-        public override object Value
-        {
-            get { return null; }
-            set { }
         }
     }
 }

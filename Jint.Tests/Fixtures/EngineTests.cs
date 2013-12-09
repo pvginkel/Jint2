@@ -22,10 +22,9 @@ namespace Jint.Tests.Fixtures
             var ctx = CreateContext(Assert.Fail);
 
             var dic = ctx.Global.CreateObject();
-            dic.SetProperty("prop1", JsNumber.Box(1));
-            Assert.IsTrue(dic.HasProperty(JsString.Box("prop1")));
+            dic.SetProperty("prop1", (double)1);
             Assert.IsTrue(dic.HasProperty("prop1"));
-            Assert.AreEqual(1, dic.GetProperty("prop1").ToNumber());
+            Assert.AreEqual(1, JsValue.ToNumber(dic.GetProperty("prop1")));
         }
 
         [Test]
@@ -189,7 +188,11 @@ namespace Jint.Tests.Fixtures
         }
 
         [Test]
+#if DEBUG
         [ExpectedException(typeof(JsException))]
+#else
+        [ExpectedException(typeof(JintException))]
+#endif
         public void ShouldNotAccessClr()
         {
             const string script = @"
@@ -219,16 +222,16 @@ namespace Jint.Tests.Fixtures
             new JintEngine().Run(script);
         }
 
-        private static JsString GiveMeJavascript(JsNumber number, JsInstance instance)
+        private static string GiveMeJavascript(double number, object instance)
         {
-            return JsString.Create(number + instance.ToString());
+            return number + instance.ToString();
         }
 
         [Test]
         public void ShouldNotWrapJsInstancesIfExpected()
         {
             var engine = CreateContext(Assert.Fail)
-                .SetFunction("evaluate", new Func<JsNumber, JsInstance, JsString>(GiveMeJavascript));
+                .SetFunction("evaluate", new Func<double, object, string>(GiveMeJavascript));
 
             const string script = @"
                 var r = evaluate(3, [1,2]);
@@ -237,7 +240,7 @@ namespace Jint.Tests.Fixtures
 
             var r = engine.Run(script, false);
 
-            Assert.IsTrue(r is JsBox);
+            Assert.IsTrue(r is object);
             Assert.AreEqual("31,2", r.ToString());
         }
 

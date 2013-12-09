@@ -85,9 +85,6 @@ namespace Jint.Support
             if (index < 0)
                 throw new ArgumentOutOfRangeException("index");
 
-            // This is here for the conversion from JsBox to object.
-            Debug.Assert(value == null || value.GetType() != typeof(Native.JsBox));
-
             if (_values != null)
             {
                 if (index < _values.Length)

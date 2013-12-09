@@ -21,22 +21,22 @@ namespace Jint.Native.Interop
             if (index >= 0)
             {
                 var result = _marshaller.MarshalClrValue(
-                    _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(BaseStore.Owner))[index]
+                    _marshaller.MarshalJsValue<T[]>(BaseStore.Owner)[index]
                 );
 
-                return result.GetValue();
+                return result;
             }
 
-            return GetOwnPropertyRaw(JsString.Box(_global.GetIdentifier(index)));
+            return GetOwnPropertyRaw(_global.GetIdentifier(index));
         }
 
-        public override object GetOwnPropertyRaw(JsBox index)
+        public override object GetOwnPropertyRaw(object index)
         {
             var result = _marshaller.MarshalClrValue(
-                _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(BaseStore.Owner))[_marshaller.MarshalJsValue<int>(index)]
+                _marshaller.MarshalJsValue<T[]>(BaseStore.Owner)[_marshaller.MarshalJsValue<int>(index)]
             );
 
-            return result.GetValue();
+            return result;
         }
 
         public override void DefineProperty(int index, object value, PropertyAttributes attributes)
@@ -46,33 +46,33 @@ namespace Jint.Native.Interop
                 if (attributes != 0)
                     throw new JintException("Cannot set attributes on a native indexable");
 
-                SetPropertyValue(index, JsBox.FromValue(value));
+                SetPropertyValue(index, value);
             }
             else
             {
-                SetPropertyValue(JsString.Box(_global.GetIdentifier(index)), JsBox.FromValue(value));
+                SetPropertyValue(_global.GetIdentifier(index), value);
             }
         }
 
-        public override void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+        public override void DefineProperty(object index, object value, PropertyAttributes attributes)
         {
             if (attributes != 0)
                 throw new JintException("Cannot set attributes on a native indexable");
 
-            SetPropertyValue(index, JsBox.FromValue(value));
+            SetPropertyValue(index, value);
         }
 
-        public override void SetPropertyValue(int index, JsBox value)
+        public override void SetPropertyValue(int index, object value)
         {
             if (index >= 0)
-                _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(BaseStore.Owner))[index] = _marshaller.MarshalJsValue<T>(value);
+                _marshaller.MarshalJsValue<T[]>(BaseStore.Owner)[index] = _marshaller.MarshalJsValue<T>(value);
             else
-                SetPropertyValue(JsString.Box(_global.GetIdentifier(index)), value);
+                SetPropertyValue(_global.GetIdentifier(index), value);
         }
 
-        public override void SetPropertyValue(JsBox index, JsBox value)
+        public override void SetPropertyValue(object index, object value)
         {
-            _marshaller.MarshalJsValue<T[]>(JsBox.CreateObject(BaseStore.Owner))[_marshaller.MarshalJsValue<int>(index)] =
+            _marshaller.MarshalJsValue<T[]>(BaseStore.Owner)[_marshaller.MarshalJsValue<int>(index)] =
                 _marshaller.MarshalJsValue<T>(value);
         }
     }

@@ -22,17 +22,17 @@ namespace Jint.Native
             return BaseStore.GetOwnPropertyRaw(index);
         }
 
-        public virtual object GetOwnPropertyRaw(JsBox index)
+        public virtual object GetOwnPropertyRaw(object index)
         {
             return BaseStore.GetOwnPropertyRaw(index);
         }
 
-        public virtual void SetPropertyValue(int index, JsBox value)
+        public virtual void SetPropertyValue(int index, object value)
         {
             BaseStore.SetPropertyValue(index, value);
         }
 
-        public virtual void SetPropertyValue(JsBox index, JsBox value)
+        public virtual void SetPropertyValue(object index, object value)
         {
             BaseStore.SetPropertyValue(index, value);
         }
@@ -42,7 +42,7 @@ namespace Jint.Native
             return BaseStore.DeleteProperty(index);
         }
 
-        public virtual bool DeleteProperty(JsBox index)
+        public virtual bool DeleteProperty(object index)
         {
             return BaseStore.DeleteProperty(index);
         }
@@ -52,7 +52,7 @@ namespace Jint.Native
             BaseStore.DefineProperty(index, value, attributes);
         }
 
-        public virtual void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+        public virtual void DefineProperty(object index, object value, PropertyAttributes attributes)
         {
             BaseStore.DefineProperty(index, value, attributes);
         }

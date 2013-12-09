@@ -36,20 +36,20 @@ namespace Jint.Native
             );
         }
 
-        public IEnumerable<JsBox> GetForEachKeys(JsBox obj)
+        public IEnumerable<object> GetForEachKeys(object obj)
         {
-            if (!obj.IsValid)
+            if (obj == null)
                 yield break;
 
-            if (obj.IsClr)
+            if (JsValue.IsClr(obj))
             {
-                var values = obj.ToInstance().Value as IEnumerable;
+                var values = JsValue.UnwrapValue(obj) as IEnumerable;
 
                 if (values != null)
                 {
                     foreach (object value in values)
                     {
-                        yield return JsBox.CreateObject(Global.WrapClr(value));
+                        yield return Global.WrapClr(value);
                     }
 
                     yield break;
@@ -58,11 +58,11 @@ namespace Jint.Native
 
             foreach (int key in new List<int>(((JsObject)obj).GetKeys()))
             {
-                yield return JsString.Box(Global.GetIdentifier(key));
+                yield return Global.GetIdentifier(key);
             }
         }
 
-        public JsBox WrapException(Exception exception)
+        public object WrapException(Exception exception)
         {
             if (exception == null)
                 throw new ArgumentNullException("exception");
@@ -75,7 +75,7 @@ namespace Jint.Native
             var jsException = exception as JsException;
             if (jsException != null)
             {
-                if (jsException.Value.IsValid)
+                if (jsException.Value != null)
                     return jsException.Value;
 
                 type = jsException.Type;
@@ -94,17 +94,17 @@ namespace Jint.Native
                 default: errorClass = Global.ErrorClass; break;
             }
 
-            return JsBox.CreateObject(Global.CreateError(errorClass, exception.Message));
+            return Global.CreateError(errorClass, exception.Message);
         }
 
-        public JsBox New(JsBox target, JsBox[] arguments, JsBox[] generics)
+        public object New(object target, object[] arguments, object[] generics)
         {
             if (
                 _engine.IsClrAllowed &&
-                target.IsUndefined
+                JsValue.IsUndefined(target)
             )
             {
-                var undefined = (JsUndefined)target.ToInstance();
+                var undefined = (JsUndefined)target;
                 if (
                     !String.IsNullOrEmpty(undefined.Name) &&
                     generics.Length > 0
@@ -116,7 +116,7 @@ namespace Jint.Native
                     {
                         for (int i = 0; i < generics.Length; i++)
                         {
-                            genericParameters[i] = (Type)generics[i].ToInstance().Value;
+                            genericParameters[i] = (Type)JsValue.UnwrapValue(generics[i]);
                         }
                     }
                     catch (Exception e)
@@ -128,7 +128,7 @@ namespace Jint.Native
                 }
             }
 
-            if (!target.IsFunction)
+            if (!JsValue.IsFunction(target))
                 throw new JsException(JsErrorType.Error, "Function expected.");
 
             return ((JsObject)target).Construct(this, arguments);
@@ -139,12 +139,12 @@ namespace Jint.Native
             return Global.ResolveIdentifier(name);
         }
 
-        public JsObject CreateArguments(JsObject callee, JsBox[] arguments)
+        public JsObject CreateArguments(JsObject callee, object[] arguments)
         {
             var result = Global.CreateObject();
 
             result.SetClass(JsNames.ClassArguments);
-            result.SetIsClr(false);
+            result.IsClr = false;
 
             int length = 0;
 
@@ -166,13 +166,13 @@ namespace Jint.Native
 
             result.DefineProperty(
                 Id.callee,
-                JsBox.CreateObject(callee),
+                callee,
                 PropertyAttributes.DontEnum
             );
 
             result.DefineProperty(
                 Id.length,
-                JsNumber.Box(length),
+                (double)length,
                 PropertyAttributes.DontEnum
             );
 

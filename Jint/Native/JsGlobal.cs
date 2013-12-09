@@ -76,20 +76,21 @@ namespace Jint.Native
             return (Options & options) == options;
         }
 
-        internal JsObject GetPrototype(JsBox instance)
+        internal JsObject GetPrototype(object instance)
         {
-            if (!instance.IsValid)
+            if (instance == null)
                 throw new ArgumentNullException("instance");
 
-            if (instance.IsObject)
-                return ((JsObject)instance).Prototype;
-            if (instance.IsString)
+            var @object = instance as JsObject;
+            if (@object != null)
+                return @object.Prototype;
+            if (instance is string)
                 return StringClass.Prototype;
-            if (instance.IsNumber)
+            if (instance is double)
                 return NumberClass.Prototype;
-            if (instance.IsBoolean)
+            if (instance is bool)
                 return BooleanClass.Prototype;
-            if (instance.IsUndefined)
+            if (JsValue.IsUndefined(instance))
                 return PrototypeSink;
 
             throw new InvalidOperationException();
@@ -127,7 +128,7 @@ namespace Jint.Native
             return _identifiersByIndex[-index];
         }
 
-        public JsBox ExecuteFunction(JsObject function, JsBox that, JsBox[] arguments, JsBox[] genericParameters)
+        public object ExecuteFunction(JsObject function, object that, object[] arguments, object[] genericParameters)
         {
             if (function == null)
                 throw new ArgumentNullException("function");

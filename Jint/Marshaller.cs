@@ -103,17 +103,15 @@ namespace Jint
         }
 
         /// <summary>
-        /// Marshals a native value to a JsBox.
+        /// Marshals a native value to a object.
         /// </summary>
-        public JsBox MarshalClrValue<T>(T value)
+        public object MarshalClrValue<T>(T value)
         {
             if (value == null)
-                return JsBox.Null;
+                return JsNull.Instance;
 
-            if (value is JsBox)
-                return (JsBox)(object)value;
-            if (value is JsInstance)
-                return JsBox.FromInstance((JsInstance)(object)value);
+            if (value is JsObject || JsValue.IsNullOrUndefined(value))
+                return value;
 
             if (value is Type)
             {
@@ -123,13 +121,13 @@ namespace Jint
                     // Generic definitions aren't types in the meaning of JS
                     // but they are instances of System.Type.
 
-                    return JsBox.CreateObject(Wrap(_typeType, type));
+                    return Wrap(_typeType, type);
                 }
 
-                return JsBox.CreateObject(MarshalType(type));
+                return MarshalType(type);
             }
 
-            return JsBox.CreateObject(Wrap(MarshalType(value.GetType()), value));
+            return Wrap(MarshalType(value.GetType()), value);
         }
 
         private JsObject Wrap(JsObject constructor, object value)
@@ -141,9 +139,9 @@ namespace Jint
 
             var @this = Global.CreateObject(NativeFactory.WrappingMarker, constructor.Prototype);
 
-            constructor.Execute(_runtime, JsBox.CreateObject(@this), JsBox.EmptyArray, null);
+            constructor.Execute(_runtime, @this, JsValue.EmptyArray, null);
 
-            @this.SetIsClr(true);
+            @this.IsClr = true;
             @this.Value = value;
 
             return @this;
@@ -192,27 +190,27 @@ namespace Jint
         }
 
         /// <summary>
-        /// Marshals a JsBox to a native value.
+        /// Marshals a object to a native value.
         /// </summary>
         /// <typeparam name="T">A native object type</typeparam>
-        /// <param name="value">A JsBox to marshal</param>
+        /// <param name="value">A object to marshal</param>
         /// <returns>A converted native value</returns>
-        public T MarshalJsValue<T>(JsBox value)
+        public T MarshalJsValue<T>(object value)
         {
-            var valueInstance = value.ToInstance();
-            object valueValue = valueInstance.Value;
+            object unwrapped = JsValue.UnwrapValue(value);
 
-            if (valueValue is T)
-                return (T)valueValue;
+            if (unwrapped is T)
+                return (T)unwrapped;
 
             if (typeof(T).IsArray)
             {
-                if (!value.IsValid || value.IsNullOrUndefined)
+                if (value == null || JsValue.IsNullOrUndefined(value))
                     return default(T);
 
+                var @object = value as JsObject;
                 if (
-                    value.IsObject &&
-                    Global.ArrayClass.HasInstance((JsObject)value)
+                    @object != null &&
+                    Global.ArrayClass.HasInstance(@object)
                 ) {
                     Delegate marshaller;
                     if (!_arrayMarshallers.TryGetValue(typeof(T), out marshaller))
@@ -226,7 +224,7 @@ namespace Jint
                         );
                     }
 
-                    return ((Func<JsObject, T>)marshaller)((JsObject)value);
+                    return ((Func<JsObject, T>)marshaller)(@object);
                 }
 
                 throw new JintException("Array is required");
@@ -234,35 +232,31 @@ namespace Jint
 
             if (typeof(Delegate).IsAssignableFrom(typeof(T)))
             {
-                if (!value.IsValid || value.IsNullOrUndefined)
+                if (value == null || JsValue.IsNullOrUndefined(value))
                     return default(T);
 
-                if (!value.IsObject)
+                var @object = value as JsObject;
+                if (@object == null)
                     throw new JintException("Can't convert a non function object to a delegate type");
 
                 return (T)(object)ProxyHelper.MarshalJsFunction(
                     _runtime,
-                    (JsObject)value,
+                    @object,
                     Global.PrototypeSink,
                     typeof(T)
                 );
             }
 
-            if (!value.IsNullOrUndefined)
-            {
-                if (value is T)
-                    return (T)(object)value;
-                if (valueInstance is T)
-                    return (T)(object)valueInstance;
-            }
+            if (!JsValue.IsNullOrUndefined(value) && value is T)
+                return (T)value;
 
             // JsNull and JsUndefined will fall here and become a nulls
-            return (T)Convert.ChangeType(valueValue, typeof(T));
+            return (T)Convert.ChangeType(unwrapped, typeof(T));
         }
 
         /// <summary>
-        /// Gets a type of a native object represented by the current JsBox.
-        /// If JsBox is a pure JsObject than returns a type of js object itself.
+        /// Gets a type of a native object represented by the current object.
+        /// If object is a pure JsObject than returns a type of js object itself.
         /// </summary>
         /// <remarks>
         /// If a value is a wrapper around native value (like String, Number or a marshaled native value)
@@ -270,15 +264,14 @@ namespace Jint
         /// If a value is an js object (constructed with a pure js function) this method returns
         /// a type of this value (for example JsArray, JsObject)
         /// </remarks>
-        /// <param name="value">JsBox value</param>
+        /// <param name="value">object value</param>
         /// <returns>A Type object</returns>
-        public Type GetInstanceType(JsBox value)
+        public Type GetInstanceType(object value)
         {
-            if (!value.IsValid || value.IsNullOrUndefined)
+            if (value == null || JsValue.IsNullOrUndefined(value))
                 return null;
 
-            var instance = value.ToInstance();
-            return (instance.Value ?? instance).GetType();
+            return (JsValue.UnwrapValue(value) ?? value).GetType();
         }
 
         /// <summary>
@@ -311,9 +304,9 @@ namespace Jint
             );
         }
 
-        private JsBox DummyPropertyGetter(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericarguments)
+        private object DummyPropertyGetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
         {
-            return JsBox.Undefined;
+            return JsUndefined.Instance;
         }
 
         /// <summary>
@@ -339,7 +332,7 @@ namespace Jint
                 target.IsAssignableFrom(source);
         }
 
-        public Type[] MarshalGenericArguments(JsBox[] genericArguments)
+        public Type[] MarshalGenericArguments(object[] genericArguments)
         {
             if (genericArguments == null)
                 return Type.EmptyTypes;

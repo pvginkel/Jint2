@@ -62,7 +62,7 @@ namespace Jint.Native
             }
 
             if (result == null)
-                result = JsBox.Undefined;
+                result = object.Undefined;
             else if (!(result is JsInstance))
                 result = Global.WrapClr(result);
 

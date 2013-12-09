@@ -9,29 +9,29 @@ namespace Jint.Native
     {
         private static class BooleanFunctions
         {
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
-                    return JsBoolean.Box(arguments.Length > 0 && arguments[0].ToBoolean());
+                    return BooleanBoxes.Box(arguments.Length > 0 && JsValue.ToBoolean(arguments[0]));
 
                 // e.g., var foo = new Boolean(true);
                 if (arguments.Length > 0)
-                    target.Value = arguments[0].ToBoolean();
+                    target.Value = JsValue.ToBoolean(arguments[0]);
                 else
                     target.Value = false;
 
                 return @this;
             }
 
-            public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsBox.CreateBoolean(@this.ToBoolean());
+                return BooleanBoxes.Box(JsValue.ToBoolean(@this));
             }
 
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box(JsConvert.ToString(@this.ToBoolean()));
+                return JsConvert.ToString(JsValue.ToBoolean(@this));
             }
         }
     }

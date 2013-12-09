@@ -15,7 +15,7 @@ namespace Jint.Native
 
             var sink = CreateObject(null);
 
-            sink.SetIsClr(false);
+            sink.IsClr = false;
             sink.PropertyStore = SinkPropertyStore.Instance;
 
             return sink;
@@ -36,16 +36,16 @@ namespace Jint.Native
                 return null;
             }
 
-            public object GetOwnPropertyRaw(JsBox index)
+            public object GetOwnPropertyRaw(object index)
             {
                 return null;
             }
 
-            public void SetPropertyValue(int index, JsBox value)
+            public void SetPropertyValue(int index, object value)
             {
             }
 
-            public void SetPropertyValue(JsBox index, JsBox value)
+            public void SetPropertyValue(object index, object value)
             {
             }
 
@@ -54,7 +54,7 @@ namespace Jint.Native
                 return true;
             }
 
-            public bool DeleteProperty(JsBox index)
+            public bool DeleteProperty(object index)
             {
                 return true;
             }
@@ -63,7 +63,7 @@ namespace Jint.Native
             {
             }
 
-            public void DefineProperty(JsBox index, object value, PropertyAttributes attributes)
+            public void DefineProperty(object index, object value, PropertyAttributes attributes)
             {
             }
 

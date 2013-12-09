@@ -15,7 +15,7 @@ namespace Jint.Native
     {
         private static class StringFunctions
         {
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 var target = (JsObject)@this;
 
@@ -23,19 +23,19 @@ namespace Jint.Native
                 {
                     // 15.5.1 - When String is called as a function rather than as a constructor, it performs a type conversion.
                     if (arguments.Length > 0)
-                        return JsString.Box(arguments[0].ToString());
+                        return JsValue.ToString(arguments[0]);
 
-                    return JsString.Box(String.Empty);
+                    return String.Empty;
                 }
                 else
                 {
                     // 15.5.2 - When String is called as part of a new expression, it is a constructor: it initializes the newly created object.
                     target.Value =
                         arguments.Length > 0
-                        ? arguments[0].ToString()
+                        ? JsValue.ToString(arguments[0])
                         : String.Empty;
 
-                    return JsBox.CreateObject(target);
+                    return target;
                 }
             }
 
@@ -62,125 +62,125 @@ namespace Jint.Native
             }
 
             // 15.5.4.2
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 return ((JsObject)runtime.GetMemberByIndex(@this, Id.valueOf)).Execute(runtime, @this, arguments, null);
             }
 
             // 15.5.4.3
-            public static JsBox ValueOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                if (@this.IsString)
+                if (@this is string)
                     return @this;
 
-                return JsString.Box((string)((JsObject)@this).Value);
+                return ((JsObject)@this).Value;
             }
 
             // 15.5.4.4
-            public static JsBox CharAt(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object CharAt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 return ((JsObject)runtime.GetMemberByIndex(@this, Id.substring)).Execute(
                     runtime,
                     @this,
-                    new[] { arguments[0], JsNumber.Box(arguments[0].ToNumber() + 1) },
+                    new[] { arguments[0], JsValue.ToNumber(arguments[0]) + 1 },
                     null
                 );
             }
 
             // 15.5.4.5
-            public static JsBox CharCodeAt(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object CharCodeAt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                var r = @this.ToString();
-                var at = (int)arguments[0].ToNumber();
+                var r = JsValue.ToString(@this);
+                var at = (int)JsValue.ToNumber(arguments[0]);
 
                 if (r == String.Empty || at > r.Length - 1)
-                    return JsBox.NaN;
+                    return DoubleBoxes.NaN;
                 else
-                    return JsNumber.Box(Convert.ToInt32(r[at]));
+                    return (double)Convert.ToInt32(r[at]);
             }
 
             // 15.5.3.2
-            public static JsBox FromCharCode(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object FromCharCode(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 //var r = @this.ToString();
 
                 //if (r == String.Empty || at > r.Length - 1)
                 //{
-                //    return JsBox.NaN;
+                //    return object.NaN;
                 //}
                 //else
                 //{
                 string result = string.Empty;
 
-                foreach (JsBox arg in arguments)
+                foreach (object arg in arguments)
                 {
-                    result += Convert.ToChar(Convert.ToUInt32(arg.ToNumber()));
+                    result += Convert.ToChar(Convert.ToUInt32(JsValue.ToNumber(arg)));
                 }
 
-                return JsString.Box(result);
+                return result;
                 //}
             }
 
             // 15.5.4.6
-            public static JsBox Concat(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Concat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 StringBuilder sb = new StringBuilder();
 
-                sb.Append(@this.ToString());
+                sb.Append(JsValue.ToString(@this));
 
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    sb.Append(arguments[i].ToString());
+                    sb.Append(JsValue.ToString(arguments[i]));
                 }
 
-                return JsString.Box(sb.ToString());
+                return sb.ToString();
             }
 
             // 15.5.4.7
-            public static JsBox IndexOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                string source = @this.ToString();
-                string searchString = arguments[0].ToString();
-                int position = arguments.Length > 1 ? (int)arguments[1].ToNumber() : 0;
+                string source = JsValue.ToString(@this);
+                string searchString = JsValue.ToString(arguments[0]);
+                int position = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : 0;
 
                 if (searchString == String.Empty)
                 {
                     if (arguments.Length > 1)
                     {
-                        return JsNumber.Box(Math.Min(source.Length, position));
+                        return (double)Math.Min(source.Length, position);
                     }
                     else
                     {
-                        return JsNumber.Box(0);
+                        return (double)0;
                     }
                 }
 
                 if (position >= source.Length)
                 {
-                    return JsNumber.Box(-1);
+                    return (double)(-1);
                 }
 
-                return JsNumber.Box(source.IndexOf(searchString, position));
+                return (double)source.IndexOf(searchString, position);
             }
 
             // 15.5.4.8
-            public static JsBox LastIndexOf(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                string source = @this.ToString();
-                string searchString = arguments[0].ToString();
-                int position = arguments.Length > 1 ? (int)arguments[1].ToNumber() : source.Length;
+                string source = JsValue.ToString(@this);
+                string searchString = JsValue.ToString(arguments[0]);
+                int position = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : source.Length;
 
-                return JsNumber.Box(source.Substring(0, position).LastIndexOf(searchString));
+                return (double)source.Substring(0, position).LastIndexOf(searchString);
             }
 
             // 15.5.4.9
-            public static JsBox LocaleCompare(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object LocaleCompare(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(@this.ToString().CompareTo(arguments[0].ToString()));
+                return (double)JsValue.ToString(@this).CompareTo(JsValue.ToString(arguments[0]));
             }
 
             // 15.5.4.10
-            public static JsBox Match(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Match(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 JsObject regexpObject;
                 RegExpManager regexp;
@@ -191,7 +191,7 @@ namespace Jint.Native
                 }
                 else
                 {
-                    regexpObject = runtime.Global.CreateRegExp(arguments[0].ToString());
+                    regexpObject = runtime.Global.CreateRegExp(JsValue.ToString(arguments[0]));
                     regexp = (RegExpManager)regexpObject.Value;
                 }
 
@@ -199,14 +199,14 @@ namespace Jint.Native
                 {
                     return ((JsObject)regexpObject.GetProperty(Id.exec)).Execute(
                         runtime,
-                        JsBox.CreateObject(regexpObject),
+                        regexpObject,
                         new[] { @this },
                         null
                     );
                 }
 
                 var result = runtime.Global.CreateArray();
-                var matches = Regex.Matches(@this.ToString(), regexp.Pattern, regexp.Options);
+                var matches = Regex.Matches(JsValue.ToString(@this), regexp.Pattern, regexp.Options);
 
                 if (matches.Count > 0)
                 {
@@ -216,71 +216,69 @@ namespace Jint.Native
                     {
                         result.SetProperty(
                             i++,
-                            JsString.Box(match.Value)
+                            match.Value
                         );
                     }
 
-                    return JsBox.CreateObject(result);
+                    return result;
                 }
 
-                return JsBox.Null;
+                return JsNull.Instance;
             }
 
             // 15.5.4.11
-            public static JsBox Replace(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Replace(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 if (arguments.Length == 0)
-                    return JsString.Box(@this.ToString());
+                    return JsValue.ToString(@this);
 
                 var searchValue = arguments[0];
 
                 var replaceValue =
                     arguments.Length > 1
                     ? arguments[1]
-                    : JsBox.Undefined;
+                    : JsUndefined.Instance;
 
-                string source = @this.ToString();
+                string source = JsValue.ToString(@this);
                 RegExpManager regexp;
 
                 if (TryGetRegExpManager(searchValue, out regexp))
                     return SearchWithRegExp(runtime, @this, searchValue, regexp, replaceValue, source);
 
-                string search = searchValue.ToString();
+                string search = JsValue.ToString(searchValue);
                 int index = source.IndexOf(search);
 
                 if (index != -1)
                 {
-                    if (replaceValue.IsFunction)
+                    if (JsValue.IsFunction(replaceValue))
                     {
                         replaceValue = ((JsObject)replaceValue).Execute(
                             runtime,
-                            JsBox.CreateObject(runtime.GlobalScope),
+                            runtime.GlobalScope,
                             new[]
                             {
-                                JsString.Box(search),
-                                JsNumber.Box(index),
-                                JsString.Box(source)
+                                search,
+                                (double)index,
+                                (object)source
                             },
                             null
                         );
 
-                        return JsString.Box(
-                            source.Substring(0, index) +
+                        return source.Substring(0, index) +
                             replaceValue +
-                            source.Substring(index + search.Length)
-                        );
+                            source.Substring(index + search.Length);
                     }
 
                     string before = source.Substring(0, index);
                     string after = source.Substring(index + search.Length);
-                    string newString = EvaluateReplacePattern(search, before, after, replaceValue.ToString(), null);
-                    return JsString.Box(before + newString + after);
+                    string newString = EvaluateReplacePattern(search, before, after, JsValue.ToString(replaceValue), null);
+                    return before + newString + after;
                 }
 
-                return JsString.Box(source);
+                return source;
             }
 
-            private static JsBox SearchWithRegExp(JintRuntime runtime, JsBox @this, JsBox searchValue, RegExpManager regexp, JsBox replaceValue, string source)
+            private static object SearchWithRegExp(JintRuntime runtime, object @this, object searchValue, RegExpManager regexp, object replaceValue, string source)
             {
                 var regexpObject = (JsObject)searchValue;
                 int count = regexp.IsGlobal ? int.MaxValue : 1;
@@ -289,44 +287,44 @@ namespace Jint.Native
                         ? 0
                         : Math.Max(
                             0,
-                            (int)regexpObject.GetProperty(Id.lastIndex).ToNumber() - 1
+                            (int)JsValue.ToNumber(regexpObject.GetProperty(Id.lastIndex)) - 1
                             );
 
                 if (regexp.IsGlobal)
-                    regexpObject.SetProperty(Id.lastIndex, JsNumber.Box(0));
+                    regexpObject.SetProperty(Id.lastIndex, (double)0);
 
                 string result;
 
-                if (replaceValue.IsFunction)
+                if (JsValue.IsFunction(replaceValue))
                 {
                     result = regexp.Regex.Replace(
                         source,
                         m =>
                         {
-                            var replaceParameters = new List<JsBox>();
+                            var replaceParameters = new List<object>();
                             if (!regexp.IsGlobal)
-                                regexpObject.SetProperty(Id.lastIndex, JsNumber.Box(m.Index + 1));
+                                regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
 
-                            replaceParameters.Add(JsString.Box(m.Value));
+                            replaceParameters.Add(m.Value);
 
                             for (int i = 1; i < m.Groups.Count; i++)
                             {
                                 replaceParameters.Add(
                                     m.Groups[i].Success
-                                    ? JsString.Box(m.Groups[i].Value)
-                                    : JsBox.Undefined
+                                    ? (object)m.Groups[i].Value
+                                    : JsUndefined.Instance
                                 );
                             }
 
-                            replaceParameters.Add(JsNumber.Box(m.Index));
-                            replaceParameters.Add(JsString.Box(source));
+                            replaceParameters.Add((double)m.Index);
+                            replaceParameters.Add(source);
 
-                            return ((JsObject)replaceValue).Execute(
-                                runtime,
-                                JsBox.CreateObject(runtime.GlobalScope),
-                                replaceParameters.ToArray(),
-                                null
-                                ).ToString();
+                            return JsValue.ToString(((JsObject)replaceValue).Execute(
+                                    runtime,
+                                    runtime.GlobalScope,
+                                    replaceParameters.ToArray(),
+                                    null
+                                    ));
                         },
                         count,
                         lastIndex
@@ -334,14 +332,14 @@ namespace Jint.Native
                 }
                 else
                 {
-                    string value = replaceValue.ToString();
+                    string value = JsValue.ToString(replaceValue);
 
                     result = regexp.Regex.Replace(
-                        @this.ToString(),
+                        JsValue.ToString(@this),
                         m =>
                         {
                             if (!regexp.IsGlobal)
-                                regexpObject.SetProperty(Id.lastIndex, JsNumber.Box(m.Index + 1));
+                                regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
 
                             string after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
                             return EvaluateReplacePattern(
@@ -357,38 +355,38 @@ namespace Jint.Native
                         );
                 }
 
-                return JsString.Box(result);
+                return result;
             }
 
             // 15.5.4.12
-            public static JsBox Search(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Search(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 // Converts the arguments to a regex
 
                 RegExpManager regexp;
                 if (!TryGetRegExpManager(arguments[0], out regexp))
                 {
-                    var regexpObject = runtime.Global.CreateRegExp(arguments[0].ToString());
+                    var regexpObject = runtime.Global.CreateRegExp(JsValue.ToString(arguments[0]));
                     regexp = (RegExpManager)regexpObject.Value;
                 }
 
-                Match m = regexp.Regex.Match(@this.ToString());
+                Match m = regexp.Regex.Match(JsValue.ToString(@this));
 
                 if (m != null && m.Success)
-                    return JsNumber.Box(m.Index);
+                    return (double)m.Index;
 
-                return JsNumber.Box(-1);
+                return (double)(-1);
             }
 
             // 15.5.4.13
-            public static JsBox Slice(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Slice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                string source = @this.ToString();
-                int start = (int)arguments[0].ToNumber();
+                string source = JsValue.ToString(@this);
+                int start = (int)JsValue.ToNumber(arguments[0]);
                 int end = source.Length;
                 if (arguments.Length > 1)
                 {
-                    end = (int)arguments[1].ToNumber();
+                    end = (int)JsValue.ToNumber(arguments[1]);
 
                     if (end < 0)
                         end = source.Length + end;
@@ -399,117 +397,118 @@ namespace Jint.Native
                     start = source.Length + start;
                 }
 
-                return JsString.Box(source.Substring(start, end - start));
+                return source.Substring(start, end - start);
             }
 
             // 15.5.4.14
-            public static JsBox Split(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Split(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 JsObject array = runtime.Global.CreateArray();
-                string target = @this.ToString();
+                string target = JsValue.ToString(@this);
 
-                if (arguments.Length == 0 || arguments[0].IsUndefined)
+                if (arguments.Length == 0 || JsValue.IsUndefined(arguments[0]))
                 {
-                    array.SetProperty(0, JsString.Box(target));
+                    array.SetProperty(0, target);
                 }
 
                 var separator = arguments[0];
-                int limit = arguments.Length > 1 ? Convert.ToInt32(arguments[1].ToNumber()) : Int32.MaxValue;
+                int limit = arguments.Length > 1 ? Convert.ToInt32(JsValue.ToNumber(arguments[1])) : Int32.MaxValue;
                 string[] result;
 
                 RegExpManager regexp;
                 if (TryGetRegExpManager(separator, out regexp))
                     result = regexp.Regex.Split(target, limit);
                 else
-                    result = target.Split(new[] { separator.ToString() }, limit, StringSplitOptions.None);
+                    result = target.Split(new[] { JsValue.ToString(separator) }, limit, StringSplitOptions.None);
 
                 for (int i = 0; i < result.Length; i++)
                 {
-                    array.SetProperty(i, JsString.Box(result[i]));
+                    array.SetProperty(i, result[i]);
                 }
 
-                return JsBox.CreateObject(array);
+                return array;
             }
 
             // 15.5.4.15
-            public static JsBox Substring(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Substring(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                string target = @this.ToString();
+                string target = JsValue.ToString(@this);
                 int start = 0, end = target.Length;
 
-                if (arguments.Length > 0 && !double.IsNaN(arguments[0].ToNumber()))
-                    start = (int)arguments[0].ToNumber();
+                if (arguments.Length > 0 && !double.IsNaN(JsValue.ToNumber(arguments[0])))
+                    start = (int)JsValue.ToNumber(arguments[0]);
 
                 if (
                     arguments.Length > 1 &&
-                    !arguments[1].IsUndefined &&
-                    !Double.IsNaN(arguments[1].ToNumber())
+                    !JsValue.IsUndefined(arguments[1]) &&
+                    !Double.IsNaN(JsValue.ToNumber(arguments[1]))
                 )
-                    end = (int)arguments[1].ToNumber();
+                    end = (int)JsValue.ToNumber(arguments[1]);
 
                 start = Math.Min(Math.Max(start, 0), Math.Max(0, target.Length - 1));
                 end = Math.Min(Math.Max(end, 0), target.Length);
                 target = target.Substring(start, end - start);
 
-                return JsString.Box(target);
+                return target;
             }
 
-            public static JsBox Substr(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Substr(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                string target = @this.ToString();
+                string target = JsValue.ToString(@this);
                 int start = 0, end = target.Length;
 
-                if (arguments.Length > 0 && !Double.IsNaN(arguments[0].ToNumber()))
-                    start = (int)arguments[0].ToNumber();
+                if (arguments.Length > 0 && !Double.IsNaN(JsValue.ToNumber(arguments[0])))
+                    start = (int)JsValue.ToNumber(arguments[0]);
 
                 if (
                     arguments.Length > 1 &&
-                    !arguments[1].IsUndefined &&
-                    !Double.IsNaN(arguments[1].ToNumber())
+                    !JsValue.IsUndefined(arguments[1]) &&
+                    !Double.IsNaN(JsValue.ToNumber(arguments[1]))
                 )
-                    end = (int)arguments[1].ToNumber();
+                    end = (int)JsValue.ToNumber(arguments[1]);
 
                 start = Math.Min(Math.Max(start, 0), Math.Max(0, target.Length - 1));
                 end = Math.Min(Math.Max(end, 0), target.Length);
                 target = target.Substring(start, end);
 
-                return JsString.Box(target);
+                return target;
             }
 
             // 15.5.4.16
-            public static JsBox ToLowerCase(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToLowerCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box(@this.ToString().ToLowerInvariant());
+                return JsValue.ToString(@this).ToLowerInvariant();
             }
 
             // 15.5.4.17
-            public static JsBox ToLocaleLowerCase(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToLocaleLowerCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box(@this.ToString().ToLower());
+                return JsValue.ToString(@this).ToLower();
             }
 
             // 15.5.4.18
-            public static JsBox ToUpperCase(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToUpperCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box(@this.ToString().ToUpperInvariant());
+                return JsValue.ToString(@this).ToUpperInvariant();
             }
 
             // 15.5.4.19
-            public static JsBox ToLocaleUpperCase(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToLocaleUpperCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box(@this.ToString().ToUpper());
+                return JsValue.ToString(@this).ToUpper();
             }
 
             // 15.5.5.1
-            public static JsBox GetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(@this.ToString().Length);
+                return (double)JsValue.ToString(@this).Length;
             }
 
-            private static bool TryGetRegExpManager(JsBox value, out RegExpManager manager)
+            private static bool TryGetRegExpManager(object value, out RegExpManager manager)
             {
-                if (value.IsObject)
-                    manager = ((JsObject)value).Value as RegExpManager;
+                var @object = value as JsObject;
+                if (@object != null)
+                    manager = @object.Value as RegExpManager;
                 else
                     manager = null;
 

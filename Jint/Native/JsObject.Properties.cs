@@ -30,7 +30,7 @@ namespace Jint.Native
             }
         }
 
-        public bool HasProperty(JsBox index)
+        public bool HasProperty(object index)
         {
             var @object = this;
 
@@ -56,7 +56,7 @@ namespace Jint.Native
             return GetOwnPropertyRaw(index) != null;
         }
 
-        public bool HasOwnProperty(JsBox index)
+        public bool HasOwnProperty(object index)
         {
             return GetOwnPropertyRaw(index) != null;
         }
@@ -74,7 +74,7 @@ namespace Jint.Native
             return null;
         }
 
-        public object GetOwnPropertyRaw(JsBox index)
+        public object GetOwnPropertyRaw(object index)
         {
             if (PropertyStore != null)
                 return PropertyStore.GetOwnPropertyRaw(index);
@@ -82,12 +82,12 @@ namespace Jint.Native
             return null;
         }
 
-        public JsBox GetOwnProperty(string index)
+        public object GetOwnProperty(string index)
         {
             return GetOwnProperty(Global.ResolveIdentifier(index));
         }
 
-        public JsBox GetOwnProperty(int index)
+        public object GetOwnProperty(int index)
         {
             object result =
                 PropertyStore != null
@@ -100,7 +100,7 @@ namespace Jint.Native
             return ResolvePropertyValue(result);
         }
 
-        public JsBox GetOwnProperty(JsBox index)
+        public object GetOwnProperty(object index)
         {
             var value =
                 PropertyStore != null
@@ -108,17 +108,17 @@ namespace Jint.Native
                 : null;
 
             if (value == null)
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
 
             return ResolvePropertyValue(value);
         }
 
-        public JsBox GetProperty(string name)
+        public object GetProperty(string name)
         {
             return GetProperty(Global.ResolveIdentifier(name));
         }
 
-        public JsBox GetProperty(int index)
+        public object GetProperty(int index)
         {
             object value = GetPropertyRaw(index);
 
@@ -132,63 +132,63 @@ namespace Jint.Native
             return ResolvePropertyValue(value);
         }
 
-        public JsBox GetProperty(JsBox index)
+        public object GetProperty(object index)
         {
             var value = GetPropertyRaw(index);
 
             if (value == null)
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
 
             return ResolvePropertyValue(value);
         }
 
-        public bool TryGetProperty(string index, out JsBox result)
+        public bool TryGetProperty(string index, out object result)
         {
             return TryGetProperty(Global.ResolveIdentifier(index), out result);
         }
 
-        public bool TryGetProperty(int index, out JsBox result)
+        public bool TryGetProperty(int index, out object result)
         {
             object value = GetPropertyRaw(index);
 
             if (value == null)
-                result = JsBox.Undefined;
+                result = JsUndefined.Instance;
             else
                 result = ResolvePropertyValue(value);
 
             return value != null;
         }
 
-        public bool TryGetProperty(JsBox index, out JsBox result)
+        public bool TryGetProperty(object index, out object result)
         {
             object value = GetPropertyRaw(index);
 
             if (value == null)
-                result = JsBox.Undefined;
+                result = JsUndefined.Instance;
             else
                 result = ResolvePropertyValue(value);
 
             return value != null;
         }
 
-        private JsBox ResolvePropertyValue(object value)
+        private object ResolvePropertyValue(object value)
         {
             Debug.Assert(value != null);
 
             var accessor = value as PropertyAccessor;
             if (accessor != null)
-                return accessor.GetValue(JsBox.CreateObject(this));
+                return accessor.GetValue(this);
 
-            return JsBox.FromValue(value);
+            return value;
         }
 
-        private JsBox ResolveUndefined(int index)
+        private object ResolveUndefined(int index)
         {
             // If we're the global scope, perform special handling on JsUndefined.
             if (this == Global.GlobalScope)
                 return Global.Engine.ResolveUndefined(Global.GetIdentifier(index), null);
 
-            return JsBox.Undefined;
+            return JsUndefined.Instance;
         }
 
         public object GetPropertyRaw(int index)
@@ -228,7 +228,7 @@ namespace Jint.Native
             }
         }
 
-        public object GetPropertyRaw(JsBox index)
+        public object GetPropertyRaw(object index)
         {
             var @object = this;
 
@@ -245,24 +245,25 @@ namespace Jint.Native
             }
         }
 
-        public void SetProperty(string name, JsBox value)
+        public void SetProperty(string name, object value)
         {
             SetProperty(Global.ResolveIdentifier(name), value);
         }
 
-        public void SetProperty(int index, JsBox value)
+        public void SetProperty(int index, object value)
         {
             if (index == Id.__proto__)
             {
-                if (value.IsObject)
-                    Prototype = (JsObject)value;
+                var @object = value as JsObject;
+                if (@object != null)
+                    Prototype = @object;
                 return;
             }
 
             // CLR objects have their own rules concerning how and when a
             // property is set.
 
-            if (_isClr && !(PropertyStore is DictionaryPropertyStore))
+            if (IsClr && !(PropertyStore is DictionaryPropertyStore))
             {
                 PropertyStore.SetPropertyValue(index, value);
                 return;
@@ -277,7 +278,7 @@ namespace Jint.Native
             {
                 var accessor = currentValue as PropertyAccessor;
                 if (accessor != null)
-                    accessor.SetValue(JsBox.CreateObject(this), value);
+                    accessor.SetValue(this, value);
                 else
                     PropertyStore.SetPropertyValue(index, value);
                 return;
@@ -291,7 +292,7 @@ namespace Jint.Native
                 var accessor = currentValue as PropertyAccessor;
                 if (accessor != null)
                 {
-                    accessor.SetValue(JsBox.CreateObject(this), value);
+                    accessor.SetValue(this, value);
                     return;
                 }
             }
@@ -301,12 +302,12 @@ namespace Jint.Native
             DefineProperty(index, value, PropertyAttributes.None);
         }
 
-        public void SetProperty(JsBox index, JsBox value)
+        public void SetProperty(object index, object value)
         {
             // CLR objects have their own rules concerning how and when a
             // property is set.
 
-            if (_isClr && !(PropertyStore is DictionaryPropertyStore))
+            if (IsClr && !(PropertyStore is DictionaryPropertyStore))
             {
                 PropertyStore.SetPropertyValue(index, value);
                 return;
@@ -321,7 +322,7 @@ namespace Jint.Native
             {
                 var accessor = currentValue as PropertyAccessor;
                 if (accessor != null)
-                    accessor.SetValue(JsBox.CreateObject(this), value);
+                    accessor.SetValue(this, value);
                 else
                     PropertyStore.SetPropertyValue(index, value);
                 return;
@@ -335,7 +336,7 @@ namespace Jint.Native
                 var accessor = currentValue as PropertyAccessor;
                 if (accessor != null)
                 {
-                    accessor.SetValue(JsBox.CreateObject(this), value);
+                    accessor.SetValue(this, value);
                     return;
                 }
             }
@@ -358,7 +359,7 @@ namespace Jint.Native
             return true;
         }
 
-        public bool DeleteProperty(JsBox index)
+        public bool DeleteProperty(object index)
         {
             if (PropertyStore != null)
                 return PropertyStore.DeleteProperty(index);
@@ -376,21 +377,21 @@ namespace Jint.Native
             );
         }
 
-        public void DefineProperty(string index, JsBox value, PropertyAttributes attributes)
+        public void DefineProperty(string index, object value, PropertyAttributes attributes)
         {
             DefineProperty(Global.ResolveIdentifier(index), value, attributes);
         }
 
-        public void DefineProperty(int index, JsBox value, PropertyAttributes attributes)
+        public void DefineProperty(int index, object value, PropertyAttributes attributes)
         {
             EnsurePropertyStore();
-            PropertyStore.DefineProperty(index, value.GetValue(), attributes);
+            PropertyStore.DefineProperty(index, value, attributes);
         }
 
-        public void DefineProperty(JsBox index, JsBox value, PropertyAttributes attributes)
+        public void DefineProperty(object index, object value, PropertyAttributes attributes)
         {
             EnsurePropertyStore();
-            PropertyStore.DefineProperty(index, value.GetValue(), attributes);
+            PropertyStore.DefineProperty(index, value, attributes);
         }
 
         public void DefineAccessor(string name, JsFunction getter, JsFunction setter, PropertyAttributes attributes)

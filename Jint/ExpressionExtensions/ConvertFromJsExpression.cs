@@ -12,9 +12,9 @@ namespace Jint.ExpressionExtensions
 {
     internal class ConvertFromJsExpression : Expression
     {
-        private static readonly MethodInfo _toBoolean = typeof(JsBox).GetMethod("ToBoolean");
-        private static readonly MethodInfo _toNumber = typeof(JsBox).GetMethod("ToNumber");
-        private static readonly MethodInfo _toString = typeof(object).GetMethod("ToString");
+        private static readonly MethodInfo _toBoolean = typeof(JsValue).GetMethod("ToBoolean");
+        private static readonly MethodInfo _toNumber = typeof(JsValue).GetMethod("ToNumber");
+        private static readonly MethodInfo _toString = typeof(JsValue).GetMethod("ToString", new[] { typeof(object) });
         private static readonly MethodInfo _numberToBoolean = typeof(JsConvert).GetMethod("ToBoolean", new[] { typeof(double) });
         private static readonly MethodInfo _numberToString = typeof(JsConvert).GetMethod("ToString", new[] { typeof(double) });
         private static readonly MethodInfo _stringToBoolean = typeof(JsConvert).GetMethod("ToBoolean", new[] { typeof(string) });

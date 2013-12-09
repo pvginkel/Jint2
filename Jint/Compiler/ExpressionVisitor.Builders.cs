@@ -13,7 +13,7 @@ namespace Jint.Compiler
     partial class ExpressionVisitor
     {
         private static readonly MethodInfo _objectGetByIndex = typeof(JsObject).GetMethod("GetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int) }, null);
-        private static readonly MethodInfo _objectSetByIndex = typeof(JsObject).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int), typeof(JsBox) }, null);
+        private static readonly MethodInfo _objectSetByIndex = typeof(JsObject).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(int), typeof(object) }, null);
         private static readonly MethodInfo _runtimeGetByIndex = typeof(JintRuntime).GetMethod("GetMemberByIndex");
         private static readonly MethodInfo _runtimeSetByIndex = typeof(JintRuntime).GetMethod("SetMemberByIndex");
 
@@ -165,7 +165,7 @@ namespace Jint.Compiler
 
             if (typeof(JsObject).IsAssignableFrom(expression.Type))
             {
-                var tmp = Expression.Parameter(typeof(JsBox), "tmp");
+                var tmp = Expression.Parameter(typeof(object), "tmp");
 
                 return Expression.Block(
                     new[] { tmp },

@@ -9,78 +9,81 @@ namespace Jint.Native
     {
         private static class FunctionFunctions
         {
-            public static JsBox Constructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsBox.CreateObject(runtime.Global.Engine.CompileFunction(arguments));
+                return runtime.Global.Engine.CompileFunction(arguments);
             }
 
-            public static JsBox GetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsNumber.Box(((JsObject)@this).Delegate.ArgumentCount);
+                return (double)((JsObject)@this).Delegate.ArgumentCount;
             }
 
-            public static JsBox SetLength(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object SetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
                 return arguments[0];
             }
 
-            public static JsBox ToString(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsString.Box(String.Format("function {0} ( ) {{ [native code] }}", ((JsObject)@this).Delegate.Name));
+                return String.Format("function {0} ( ) {{ [native code] }}", ((JsObject)@this).Delegate.Name);
             }
 
-            public static JsBox Call(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Call(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                if (!@this.IsFunction)
+                if (!JsValue.IsFunction(@this))
                     throw new ArgumentException("the target of call() must be a function");
 
-                JsBox obj;
-                if (arguments.Length >= 1 && !arguments[0].IsNullOrUndefined)
+                object obj;
+                if (arguments.Length >= 1 && !JsValue.IsNullOrUndefined(arguments[0]))
                     obj = arguments[0];
                 else
-                    obj = JsBox.CreateObject(runtime.GlobalScope);
-
-                JsBox[] argumentsCopy;
-
-                if (arguments.Length >= 2 && !arguments[1].IsNull)
                 {
-                    argumentsCopy = new JsBox[arguments.Length - 1];
+                    obj = runtime.GlobalScope;
+                }
+
+                object[] argumentsCopy;
+
+                if (arguments.Length >= 2 && !JsValue.IsNull(arguments[1]))
+                {
+                    argumentsCopy = new object[arguments.Length - 1];
                     Array.Copy(arguments, 1, argumentsCopy, 0, argumentsCopy.Length);
                 }
                 else
                 {
-                    argumentsCopy = JsBox.EmptyArray;
+                    argumentsCopy = JsValue.EmptyArray;
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call
                 return ((JsObject)@this).Execute(runtime, obj, argumentsCopy, null);
             }
 
-            public static JsBox Apply(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object Apply(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                if (!@this.IsFunction)
+                if (!JsValue.IsFunction(@this))
                     throw new ArgumentException("The target of call() must be a function");
 
-                JsBox obj;
+                object obj;
 
-                if (arguments.Length >= 1 && !arguments[0].IsNullOrUndefined)
+                if (arguments.Length >= 1 && !JsValue.IsNullOrUndefined(arguments[0]))
                     obj = arguments[0];
                 else
-                    obj = JsBox.CreateObject(runtime.Global.GlobalScope);
+                {
+                    obj = runtime.Global.GlobalScope;
+                }
 
-                JsBox[] argumentsCopy;
+                object[] argumentsCopy;
 
                 if (
                     arguments.Length >= 2 &&
-                    !arguments[1].IsNull &&
-                    arguments[1].IsObject
+                    arguments[1] is JsObject
                 )
                 {
                     var argument = (JsObject)arguments[1];
 
-                    int length = (int)argument.GetProperty(Id.length).ToNumber();
+                    int length = (int)JsValue.ToNumber(argument.GetProperty(Id.length));
 
-                    argumentsCopy = new JsBox[length];
+                    argumentsCopy = new object[length];
 
                     for (int i = 0; i < length; i++)
                     {
@@ -89,16 +92,16 @@ namespace Jint.Native
                 }
                 else
                 {
-                    argumentsCopy = JsBox.EmptyArray;
+                    argumentsCopy = JsValue.EmptyArray;
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call
                 return ((JsObject)@this).Execute(runtime, obj, argumentsCopy, null);
             }
 
-            public static JsBox BaseConstructor(JintRuntime runtime, JsBox @this, JsObject callee, object closure, JsBox[] arguments, JsBox[] genericArguments)
+            public static object BaseConstructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return JsBox.Undefined;
+                return JsUndefined.Instance;
             }
         }
     }

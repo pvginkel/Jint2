@@ -238,7 +238,7 @@ namespace Jint.Support
 
         public void SetValue(int index, object value)
         {
-            Debug.Assert(value == null || value.GetType() != typeof(JsBox));
+            Debug.Assert(value == null || value.GetType() != typeof(object));
 
             int entryIndex = FindEntry(index);
             if (entryIndex < 0)
