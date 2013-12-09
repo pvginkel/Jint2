@@ -19,6 +19,11 @@ namespace Jint.Native
             {
                 DateTime result;
 
+                // TODO: This implementation does not comply with the specifications
+                // at 15.9.2 and 15.9.3. First, when called as a function, no
+                // arguments should be parsed. Second, the second argument is
+                // mandatory and this does not correctly process that.
+
                 switch (arguments.Length)
                 {
                     case 0:
@@ -617,7 +622,7 @@ namespace Jint.Native
                 {
                     if (
                         JsValue.IsUndefined(arguments[i]) || (
-                            JsValue.GetClass(arguments[i]) == JsNames.ClassNumber && (
+                            arguments[i] is double && (
                                 Double.IsNaN(JsValue.ToNumber(arguments[i])) ||
                                 Double.IsInfinity(JsValue.ToNumber(arguments[i]))
                             )

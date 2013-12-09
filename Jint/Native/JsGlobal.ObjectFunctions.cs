@@ -99,16 +99,13 @@ namespace Jint.Native
             // 15.2.3.2
             public static object GetPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                if (JsValue.GetClass(arguments[0]) != JsNames.ClassObject)
+                var @object = arguments[0] as JsObject;
+                if (@object == null)
                     throw new JsException(JsErrorType.TypeError);
 
-                var argument = arguments[0] as JsObject;
-                if (argument != null)
-                {
-                    var constructor = argument.GetProperty(Id.constructor) as JsObject;
-                    if (constructor != null)
-                        return constructor.GetProperty(Id.prototype);
-                }
+                var constructor = @object.GetProperty(Id.constructor) as JsObject;
+                if (constructor != null)
+                    return constructor.GetProperty(Id.prototype);
 
                 return JsNull.Instance;
             }
@@ -135,14 +132,13 @@ namespace Jint.Native
             /// </summary>
             private static void ToPropertyDescriptor(JsGlobal global, JsObject owner, string name, object value)
             {
-                if (JsValue.GetClass(value) != JsNames.ClassObject)
+                var @object = value as JsObject;
+                if (@object == null)
                     throw new JsException(JsErrorType.TypeError, "The target object has to be an instance of an object");
 
-                var obj = (JsObject)value;
-
                 if (
-                    (obj.HasProperty(Id.value) || obj.HasProperty(Id.writable)) &&
-                    (obj.HasProperty(Id.set) || obj.HasProperty(Id.get))
+                    (@object.HasProperty(Id.value) || @object.HasProperty(Id.writable)) &&
+                    (@object.HasProperty(Id.set) || @object.HasProperty(Id.get))
                 )
                     throw new JsException(JsErrorType.TypeError, "The property cannot be both writable and have get/set accessors or cannot have both a value and an accessor defined");
 
@@ -152,24 +148,24 @@ namespace Jint.Native
                 object result;
 
                 if (
-                    obj.TryGetProperty(Id.enumerable, out result) &&
+                    @object.TryGetProperty(Id.enumerable, out result) &&
                     !JsValue.ToBoolean(result)
                 )
                     attributes |= PropertyAttributes.DontEnum;
 
                 if (
-                    obj.TryGetProperty(Id.configurable, out result) &&
+                    @object.TryGetProperty(Id.configurable, out result) &&
                     !JsValue.ToBoolean(result)
                 )
                     attributes |= PropertyAttributes.DontDelete;
 
                 if (
-                    obj.TryGetProperty(Id.writable, out result) &&
+                    @object.TryGetProperty(Id.writable, out result) &&
                     !JsValue.ToBoolean(result)
                 )
                     attributes |= PropertyAttributes.ReadOnly;
 
-                if (obj.TryGetProperty(Id.get, out result))
+                if (@object.TryGetProperty(Id.get, out result))
                 {
                     if (!JsValue.IsFunction(result))
                         throw new JsException(JsErrorType.TypeError, "The getter has to be a function");
@@ -177,7 +173,7 @@ namespace Jint.Native
                     getFunction = (JsObject)result;
                 }
 
-                if (obj.TryGetProperty(Id.set, out result))
+                if (@object.TryGetProperty(Id.set, out result))
                 {
                     if (!JsValue.IsFunction(result))
                         throw new JsException(JsErrorType.TypeError, "The setter has to be a function");
@@ -185,11 +181,11 @@ namespace Jint.Native
                     setFunction = (JsObject)result;
                 }
 
-                if (obj.HasProperty(Id.value))
+                if (@object.HasProperty(Id.value))
                 {
                     owner.DefineProperty(
                         global.ResolveIdentifier(name),
-                        obj.GetProperty(Id.value),
+                        @object.GetProperty(Id.value),
                         PropertyAttributes.None
                     );
                 }

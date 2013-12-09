@@ -564,14 +564,14 @@ namespace Jint
 
         internal object Eval(object[] arguments)
         {
-            if (JsNames.ClassString != JsValue.GetClass(arguments[0]))
+            if (!(arguments[0] is string))
                 return arguments[0];
 
             ProgramSyntax program;
 
             try
             {
-                program = JintEngine.Compile(JsValue.ToString(arguments[0]));
+                program = JintEngine.Compile((string)arguments[0]);
             }
             catch (Exception e)
             {
