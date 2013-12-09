@@ -96,7 +96,7 @@ namespace Jint.Native
                 if (r == String.Empty || at > r.Length - 1)
                     return DoubleBoxes.NaN;
                 else
-                    return (double)Convert.ToInt32(r[at]);
+                    return (double)r[at];
             }
 
             // 15.5.3.2
@@ -114,7 +114,7 @@ namespace Jint.Native
 
                 foreach (object arg in arguments)
                 {
-                    result += Convert.ToChar(Convert.ToUInt32(JsValue.ToNumber(arg)));
+                    result += (char)(uint)JsValue.ToNumber(arg);
                 }
 
                 return result;
@@ -412,7 +412,7 @@ namespace Jint.Native
                 }
 
                 var separator = arguments[0];
-                int limit = arguments.Length > 1 ? Convert.ToInt32(JsValue.ToNumber(arguments[1])) : Int32.MaxValue;
+                int limit = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : Int32.MaxValue;
                 string[] result;
 
                 RegExpManager regexp;

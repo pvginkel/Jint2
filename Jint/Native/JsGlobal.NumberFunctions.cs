@@ -103,7 +103,7 @@ namespace Jint.Native
             {
                 int fractions = 0;
                 if (arguments.Length > 0)
-                    fractions = Convert.ToInt32(JsValue.ToNumber(arguments[0]));
+                    fractions = (int)JsValue.ToNumber(arguments[0]);
 
                 if (fractions > 20 || fractions < 0)
                     throw new JsException(JsErrorType.SyntaxError, "Fraction Digits must be greater than 0 and lesser than 20");
@@ -126,7 +126,7 @@ namespace Jint.Native
 
                 int fractions = 16;
                 if (arguments.Length > 0)
-                    fractions = Convert.ToInt32(JsValue.ToNumber(arguments[0]));
+                    fractions = (int)JsValue.ToNumber(arguments[0]);
 
                 if (fractions > 20 || fractions < 0)
                     throw new JsException(JsErrorType.SyntaxError, "Fraction Digits must be greater than 0 and lesser than 20");
@@ -152,7 +152,7 @@ namespace Jint.Native
                 int precision = 0;
                 if (arguments.Length > 0)
                 {
-                    precision = Convert.ToInt32(JsValue.ToNumber(arguments[0]));
+                    precision = (int)JsValue.ToNumber(arguments[0]);
                 }
 
                 if (precision < 1 || precision > 21)

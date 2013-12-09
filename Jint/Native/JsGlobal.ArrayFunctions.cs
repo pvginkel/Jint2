@@ -407,7 +407,7 @@ namespace Jint.Native
 
                 int n = 0;
                 if (arguments.Length > 1)
-                    n = Convert.ToInt32(JsValue.ToNumber(arguments[1]));
+                    n = (int)JsValue.ToNumber(arguments[1]);
 
                 if (n >= length)
                     return (double)(-1);
