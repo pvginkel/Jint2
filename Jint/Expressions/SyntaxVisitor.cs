@@ -97,7 +97,7 @@ namespace Jint.Expressions
                     @case.Body.Accept(this);
             }
             if (syntax.Default != null)
-                syntax.Default.Accept(this);
+                syntax.Default.Body.Accept(this);
         }
 
         public virtual void VisitWith(WithSyntax syntax)

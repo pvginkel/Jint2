@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Jint.Compiler;
 using Jint.Expressions;
 
 namespace Jint.Parser
@@ -77,14 +78,15 @@ namespace Jint.Parser
 
             public ExpressionSyntax Increment { get; set; }
 
-            public SyntaxNode CreateFor()
+            public SyntaxNode CreateFor(SourceLocation location)
             {
                 if (Expression != null)
                 {
                     return new ForEachInSyntax(
                         Initialization,
                         Expression,
-                        Body
+                        Body,
+                        location
                     );
                 }
 
@@ -92,7 +94,8 @@ namespace Jint.Parser
                     Initialization,
                     Test,
                     Increment,
-                    Body
+                    Body,
+                    location
                 );
             }
         }

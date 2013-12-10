@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class ContinueSyntax : SyntaxNode
+    public class ContinueSyntax : SyntaxNode, ISourceLocation
     {
         public override SyntaxType Type
         {
@@ -13,9 +14,14 @@ namespace Jint.Expressions
         }
 
         public string Target { get; private set; }
+        public SourceLocation Location { get; private set; }
 
-        public ContinueSyntax(string target)
+        public ContinueSyntax(string target, SourceLocation location)
         {
+            if (location == null)
+                throw new ArgumentNullException("location");
+
+            Location = location;
             Target = target;
         }
 

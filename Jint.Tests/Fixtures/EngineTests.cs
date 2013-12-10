@@ -39,7 +39,7 @@ namespace Jint.Tests.Fixtures
             // The DLR compiler won't compile with permissions set
             engine.DisableSecurity();
 
-            engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader); } }));
+            engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader, filename); } }));
             engine.SetFunction("print", new Action<string>(Console.WriteLine));
             engine.Run("var a='foo'; load('" + JintEngine.EscapeStringLiteral(filename) + "'); print(a);");
 
@@ -55,7 +55,7 @@ namespace Jint.Tests.Fixtures
 
             var engine = new JintEngine().AddPermission(new FileIOPermission(PermissionState.None));
             engine.AllowClr();
-            engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader); } }));
+            engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader, fileName); } }));
             engine.SetFunction("print", new Action<string>(Console.WriteLine));
             engine.Run("var a='foo'; load('" + JintEngine.EscapeStringLiteral(filename) + "'); print(a);");
         }

@@ -65,6 +65,8 @@
     <Compile Include="ExpressionExtensions\ForEachExpression.cs" />
     <Compile Include="ExpressionExtensions\UsingExpression.cs" />
     <Compile Include="Expressions\ClosedOverVariable.cs" />
+    <Compile Include="Expressions\DefaultClause.cs" />
+    <Compile Include="Expressions\ISourceLocation.cs" />
     <Compile Include="Expressions\JsonProperty.cs" />
     <Compile Include="Expressions\JsonAccessorProperty.cs" />
     <Compile Include="Expressions\JsonDataProperty.cs" />
@@ -140,7 +142,7 @@
     <Compile Include="Parser\ES3Additions.cs" />
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="Parser\ES3Util.cs" />
-    <Compile Include="Compiler\SourceLocation.cs" />
+    <Compile Include="Expressions\SourceLocation.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Native\JsComparer.cs" />

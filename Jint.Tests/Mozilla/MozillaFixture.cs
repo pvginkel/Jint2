@@ -27,20 +27,20 @@ namespace Jint.Tests.Mozilla
             _basePath = Path.Combine(_basePath, "Mozilla", "Tests");
         }
 
-        protected override string GetInclude(string file)
+        protected override void RunInclude(JintEngine engine, string fileName)
         {
             string source;
 
-            if (!_includeCache.TryGetValue(file, out source))
+            if (!_includeCache.TryGetValue(fileName, out source))
             {
                 source =
-                    GetSpecialInclude(file) ??
-                    File.ReadAllText(Path.Combine(_libPath, file));
+                    GetSpecialInclude(fileName) ??
+                    File.ReadAllText(Path.Combine(_libPath, fileName));
 
-                _includeCache.Add(file, source);
+                _includeCache.Add(fileName, source);
             }
 
-            return source;
+            engine.Run(source, fileName);
         }
 
         public MozillaFixture(string testsPath)
@@ -56,7 +56,7 @@ namespace Jint.Tests.Mozilla
             );
 
             if (File.Exists(shellPath))
-                ctx.Run(File.ReadAllText(shellPath));
+                ctx.Run(File.ReadAllText(shellPath), shellPath);
 
             return base.RunFile(ctx, fileName);
         }
@@ -66,8 +66,8 @@ namespace Jint.Tests.Mozilla
             var engine = base.CreateContext(errorAction);
 
             engine.DisableSecurity();
-            engine.Run(GetInclude("shell.js"));
-            engine.Run(GetInclude("environment.js"));
+            RunInclude(engine, "shell.js");
+            RunInclude(engine, "environment.js");
 
             engine.SetFunction("print", new Action<string>(e =>
             {

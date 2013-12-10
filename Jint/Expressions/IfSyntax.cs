@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class IfSyntax : SyntaxNode
+    public class IfSyntax : SyntaxNode, ISourceLocation
     {
         public override SyntaxType Type
         {
@@ -15,17 +16,21 @@ namespace Jint.Expressions
         public ExpressionSyntax Test { get; private set; }
         public SyntaxNode Then { get; private set; }
         public SyntaxNode Else { get; private set; }
+        public SourceLocation Location { get; private set; }
 
-        public IfSyntax(ExpressionSyntax test, SyntaxNode then, SyntaxNode @else)
+        public IfSyntax(ExpressionSyntax test, SyntaxNode then, SyntaxNode @else, SourceLocation location)
         {
             if (test == null)
                 throw new ArgumentNullException("test");
             if (then == null)
                 throw new ArgumentNullException("then");
+            if (location == null)
+                throw new ArgumentNullException("location");
 
             Test = test;
             Then = then;
             Else = @else;
+            Location = location;
         }
 
         [DebuggerStepThrough]

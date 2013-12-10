@@ -719,11 +719,9 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
         new FunctionSyntax(
             name,
             parameters,
-            body
-        )
-        {
-            Location = GetLocation(start, input.LT(-1))
-        },
+            body,
+            GetLocation(start, input.LT(-1))
+        ),
         mode
     );
 }
@@ -829,13 +827,10 @@ leftHandSideExpression returns [ExpressionSyntax value]
 @init {
 	List<ExpressionSyntax> gens = new List<ExpressionSyntax>();
     bool isNew = false;
-    var start = input.LT(1);
 }
 @after{
     if (isNew)
         $value = new NewSyntax($value);
-
-	$value.Location = GetLocation(start, input.LT(-1));
 }
 	:
         (
@@ -1275,21 +1270,6 @@ options
 	;
 	
 statementTail returns [SyntaxNode value] 
-@init {
-    var start = input.LT(1);
-}
-@after{
-    if (!(
-        $value is ForSyntax ||
-        $value is BlockSyntax ||
-        $value is WhileSyntax ||
-        $value is DoWhileSyntax ||
-        $value is SwitchSyntax ||
-        $value is TrySyntax ||
-        $value is IfSyntax
-    ))
-        $value.Location = GetLocation(start, input.LT(-1));
-}
 	: vst=variableStatement { $value = vst; }
 	| est=emptyStatement { $value = est; }
 	| exst=expressionStatement { $value = exst; }
@@ -1310,13 +1290,9 @@ statementTail returns [SyntaxNode value]
 block returns [BlockSyntax value] 
 @init {
     var statements = new List<SyntaxNode>();
-    var start = input.LT(1);
 }
 @after{
-    $value = new BlockSyntax(statements)
-    {
-        Location = GetLocation(start, input.LT(-1))
-    };
+    $value = new BlockSyntax(statements);
 }
 	:
         lb=LBRACE
@@ -1331,13 +1307,11 @@ block returns [BlockSyntax value]
 
 blockStatements returns [BlockSyntax value]
 @init{
-    var start = input.LT(1);
     var tempBody = _currentBody;
     _currentBody = new BlockBuilder();
 }
 @after{
     $value = _currentBody.CreateBlock();
-	$value.Location = GetLocation(start, input.LT(-1));
     _currentBody = tempBody;
 }
 	:
@@ -1355,6 +1329,7 @@ blockStatements returns [BlockSyntax value]
 variableStatement returns [SyntaxNode value]
 @init {
     List<SyntaxNode> statements = null;
+    var start = input.LT(1);
 }
 @after {
     if (statements != null)
@@ -1366,13 +1341,15 @@ variableStatement returns [SyntaxNode value]
             $value = new VariableDeclarationSyntax(
                 first.Identifier,
                 first.Expression,
-                false
+                false,
+                GetLocation(start, input.LT(-1))
             )
             {
                 Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
             };
         }
         (
+            { start = input.LT(1); }
             COMMA follow=variableDeclaration
             {
                 if (statements == null)
@@ -1382,7 +1359,8 @@ variableStatement returns [SyntaxNode value]
                     new VariableDeclarationSyntax(
                         follow.Identifier,
                         follow.Expression,
-                        false
+                        false,
+                        GetLocation(start, input.LT(-1))
                     )
                     {
                         Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
@@ -1396,6 +1374,7 @@ variableStatement returns [SyntaxNode value]
 variableDeclaration returns [VariableDeclarationSyntax value]
 @init {
     ExpressionSyntax expression = null;
+    var start = input.LT(1);
 }
 	:
         id=Identifier
@@ -1403,12 +1382,13 @@ variableDeclaration returns [VariableDeclarationSyntax value]
             ASSIGN ass=assignmentExpression
             { expression = ass; }
         )?
-        { $value = new VariableDeclarationSyntax($id.Text, expression, true); }
+        { $value = new VariableDeclarationSyntax($id.Text, expression, true, GetLocation(start, input.LT(-1))); }
 	;
 	
 variableDeclarationNoIn returns [VariableDeclarationSyntax value]
 @init {
 	ExpressionSyntax expression = null;
+    var start = input.LT(1);
 }
 	:
         id=Identifier
@@ -1416,7 +1396,7 @@ variableDeclarationNoIn returns [VariableDeclarationSyntax value]
             ASSIGN ass=assignmentExpressionNoIn
             { expression = ass; }
         )?
-        { $value = new VariableDeclarationSyntax($id.Text, expression, true); }
+        { $value = new VariableDeclarationSyntax($id.Text, expression, true, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1438,7 +1418,12 @@ The look ahead check on LBRACE and FUNCTION the specification mentions has been 
 are moved to the statement and sourceElement rules.
 */
 expressionStatement returns [SyntaxNode value]
-	: e=expression semic { $value = new ExpressionStatementSyntax(e); }
+@init {
+    var start = input.LT(1);
+}
+	:
+        e=expression semic
+        { $value = new ExpressionStatementSyntax(e, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1448,16 +1433,20 @@ expressionStatement returns [SyntaxNode value]
 ifStatement returns [SyntaxNode value]
 @init {
     SyntaxNode elseStatement = null;
+    var start = input.LT(1);
+    IToken end;
 }
 // The predicate is there just to get rid of the warning. ANTLR will handle the dangling else just fine.
 	:
-        IF LPAREN e=expression RPAREN then=statement
+        IF LPAREN e=expression RPAREN
+        { end = input.LT(-1); }
+        then=statement
         (
             { input.LA(1) == ELSE }?
             ELSE els=statement
             { elseStatement = els; }
         )?
-        { $value = new IfSyntax(e, then, elseStatement); }
+        { $value = new IfSyntax(e, then, elseStatement, GetLocation(start, end)); }
 	;
 
 // $>
@@ -1471,15 +1460,26 @@ iterationStatement returns [SyntaxNode value]
 	;
 	
 doStatement returns [SyntaxNode value]
+@init {
+    IToken start;
+}
 	:
-        DO st=statement WHILE LPAREN e=expression RPAREN semic
-        { $value = new DoWhileSyntax(e, st); }
+        DO st=statement
+        { start = input.LT(1); }
+        WHILE LPAREN e=expression RPAREN semic
+        { $value = new DoWhileSyntax(e, st, GetLocation(start, input.LT(-1))); }
 	;
 	
 whileStatement returns [SyntaxNode value]
+@init {
+    var start = input.LT(1);
+    IToken end;
+}
 	:
-        WHILE LPAREN e=expression RPAREN st=statement
-        { $value = new WhileSyntax(e, st); }
+        WHILE LPAREN e=expression RPAREN
+        { end = input.LT(-1); }
+        st=statement
+        { $value = new WhileSyntax(e, st, GetLocation(start, end)); }
 	;
 
 /*
@@ -1527,16 +1527,20 @@ Furthermore backtracking seemed to have 3 major drawbacks:
 forStatement returns [SyntaxNode value]
 @init {
     ForBuilder builder;
+    var start = input.LT(1);
+    IToken end;
 }
 @after {
-    $value = builder.CreateFor();
+    $value = builder.CreateFor(GetLocation(start, end));
 }
 	:
         FOR
         LPAREN
         fo=forControl
         { builder = fo; }
-        RPAREN st=statement
+        RPAREN
+        { end = input.LT(-1); }
+        st=statement
         { builder.Body = st; }
 	;
 
@@ -1556,19 +1560,20 @@ forControlVar returns [ForBuilder value]
 @init {
     $value = new ForBuilder();
     List<SyntaxNode> statements = null;
+    var start = input.LT(1);
 }
 @after {
     if (statements != null)
         $value.Initialization = new CommaOperatorSyntax(statements);
 }
-
 	:
         VAR first=variableDeclarationNoIn
         {
             $value.Initialization = new VariableDeclarationSyntax(
                 first.Identifier,
                 first.Expression,
-                false
+                false,
+                GetLocation(start, input.LT(-1))
             )
             {
                 Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
@@ -1582,6 +1587,7 @@ forControlVar returns [ForBuilder value]
 		    |
 		    (
 			    (
+                    { start = input.LT(1); }
                     COMMA follow=variableDeclarationNoIn
                     {
                         if (statements == null)
@@ -1591,7 +1597,8 @@ forControlVar returns [ForBuilder value]
                             new VariableDeclarationSyntax(
                                 follow.Identifier,
                                 follow.Expression,
-                                false
+                                false,
+                                GetLocation(start, input.LT(-1))
                             )
                             {
                                 Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
@@ -1673,6 +1680,7 @@ As an optimization we check the la first to decide whether there is an identier 
 continueStatement returns [SyntaxNode value]
 @init { 
 	string label = null;
+    var start = input.LT(1);
 }
 	:
         CONTINUE
@@ -1682,7 +1690,7 @@ continueStatement returns [SyntaxNode value]
             { label = $lb.Text; }
         )?
         semic
-        { $value = new ContinueSyntax(label); }
+        { $value = new ContinueSyntax(label, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1696,7 +1704,8 @@ As an optimization we check the la first to decide whether there is an identier 
 */
 breakStatement returns [SyntaxNode value]
 @init { 
-	string label = null; 
+	string label = null;
+    var start = input.LT(1);
 }
 	:
         BREAK
@@ -1705,7 +1714,7 @@ breakStatement returns [SyntaxNode value]
             lb=Identifier { label = $lb.Text; }
         )?
         semic
-        { $value = new BreakSyntax(label); }
+        { $value = new BreakSyntax(label, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1728,6 +1737,7 @@ return;
 returnStatement returns [ReturnSyntax value]
 @init {
     ExpressionSyntax returnExpression = null;
+    var start = input.LT(1);
 }
 	:
         RETURN
@@ -1737,7 +1747,7 @@ returnStatement returns [ReturnSyntax value]
             { returnExpression = expr; }
         )?
         semic
-        { $value = new ReturnSyntax(returnExpression); }
+        { $value = new ReturnSyntax(returnExpression, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1745,7 +1755,15 @@ returnStatement returns [ReturnSyntax value]
 // $<The with statement (12.10)
 
 withStatement returns [SyntaxNode value]
-	: WITH LPAREN exp=expression RPAREN smt=statement { $value = new WithSyntax(exp, smt); }
+@init {
+    var start = input.LT(1);
+    IToken end;
+}
+	:
+        WITH LPAREN exp=expression RPAREN
+        { end = input.LT(-1); }
+        smt=statement
+        { $value = new WithSyntax(exp, smt, GetLocation(start, end)); }
 	;
 
 // $>
@@ -1754,11 +1772,15 @@ withStatement returns [SyntaxNode value]
 
 switchStatement returns [SyntaxNode value]
 @init {
-    BlockSyntax block = null;
+    DefaultClause block = null;
     var cases = new List<CaseClause>();
+    var start = input.LT(1);
+    IToken end;
 }
 	:
-        SWITCH LPAREN e=expression RPAREN LBRACE
+        SWITCH LPAREN e=expression RPAREN
+        { end = input.LT(-1); }
+        LBRACE
         (
             { block == null }?=>
             def=defaultClause
@@ -1768,33 +1790,50 @@ switchStatement returns [SyntaxNode value]
             { cases.Add(cc); }
         )*
         RBRACE
-        { $value = new SwitchSyntax(e, cases, block); }
+        { $value = new SwitchSyntax(e, cases, block, GetLocation(start, end)); }
 	;
 
 caseClause returns [CaseClause value]
 @init {
     var statements = new List<SyntaxNode>();
+    var start = input.LT(1);
+    IToken end;
 }
 	:
         CASE e=expression COLON
+        { end = input.LT(-1); }
         (
             st=statement
             { statements.Add(st); }
         )*
-        { $value = new CaseClause(e, new BlockSyntax(statements)); }
+        {
+            $value = new CaseClause(
+                e,
+                new BlockSyntax(statements),
+                GetLocation(start, end)
+            );
+        }
 	;
 	
-defaultClause returns [BlockSyntax value]
+defaultClause returns [DefaultClause value]
 @init {
     var statements = new List<SyntaxNode>();
+    var start = input.LT(1);
+    IToken end;
 }
 	:
         DEFAULT COLON
+        { end = input.LT(-1); }
         (
             st=statement
             { statements.Add(st); }
         ) *
-        { $value = new BlockSyntax(statements); }
+        {
+            $value = new DefaultClause(
+                new BlockSyntax(statements),
+                GetLocation(start, end)
+            );
+        }
 	;
 
 // $>
@@ -1827,7 +1866,12 @@ new Error();
 which will yield a recognition exception!
 */
 throwStatement returns [SyntaxNode value]
-	: THROW { PromoteEol(); } exp=expression { $value = new ThrowSyntax(exp); } semic
+@init {
+    var start = input.LT(1);
+}
+	:
+        THROW { PromoteEol(); } exp=expression semic
+        { $value = new ThrowSyntax(exp, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1892,11 +1936,11 @@ functionDeclaration returns [SyntaxNode value]
         new FunctionDeclarationSyntax(
             name,
             parameters,
-            body
+            body,
+            GetLocation(start, input.LT(-1))
         )
         {
-            Target = _currentBody.DeclaredVariables.AddOrGet(name, true),
-            Location = GetLocation(start, input.LT(-1))
+            Target = _currentBody.DeclaredVariables.AddOrGet(name, true)
         }
     );
 
@@ -1919,10 +1963,7 @@ functionExpression returns [FunctionSyntax value]
     BlockSyntax body;
 }
 @after {
-	$value = new FunctionSyntax(name, parameters, body)
-    {
-        Location = GetLocation(start, input.LT(-1))
-    };
+	$value = new FunctionSyntax(name, parameters, body, GetLocation(start, input.LT(-1)));
 
     if (name != null)
         $value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
@@ -1961,6 +2002,7 @@ functionBody returns [BlockSyntax value]
 @init{
     var tempBody = _currentBody;
     _currentBody = new BlockBuilder();
+    var start = input.LT(1);
 }
 @after{
     $value = _currentBody.CreateBlock();

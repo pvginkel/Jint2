@@ -14,18 +14,19 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            var program = File.ReadAllText(@"..\..\..\Jint.Tests\SunSpider\Tests\bitops-bitwise-and.js");
+            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\access-fannkuch.js";
+            var program = File.ReadAllText(fileName);
 
             var jint = new JintEngine();
 
 #if false
-            jint.Run(program);
+            jint.Run(program, fileName);
             Console.WriteLine("Attach");
             Console.ReadLine();
-            jint.Run(program);
+            jint.Run(program, fileName);
 #else
 
-            jint.Run(program);
+            jint.Run(program, fileName);
 
             var times = new TimeSpan[20];
             int timeOffset = 0;
@@ -39,7 +40,7 @@ namespace Jint.Play
 
                 var stopwatch = Stopwatch.StartNew();
 
-                jint.Run(program);
+                jint.Run(program, fileName);
 
                 var elapsed = stopwatch.Elapsed;
 

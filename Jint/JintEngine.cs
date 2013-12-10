@@ -133,7 +133,20 @@ namespace Jint
         /// <exception cref="Jint.JintException" />
         public object Run(string script)
         {
-            return Run(script, true);
+            return Run(script, null);
+        }
+
+        /// <summary>
+        /// Runs a set of JavaScript statements and optionally returns a value if return is called
+        /// </summary>
+        /// <param name="script">The script to execute</param>
+        /// <returns>Optionally, returns a value from the scripts</returns>
+        /// <exception cref="System.ArgumentException" />
+        /// <exception cref="System.Security.SecurityException" />
+        /// <exception cref="Jint.JintException" />
+        public object Run(string script, string fileName)
+        {
+            return Run(script, true, fileName);
         }
 
         /// <summary>
@@ -144,9 +157,9 @@ namespace Jint
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(ProgramSyntax program)
+        public object Run(ProgramSyntax program, string fileName)
         {
-            return Run(program, true);
+            return Run(program, true, fileName);
         }
 
         /// <summary>
@@ -157,9 +170,9 @@ namespace Jint
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(TextReader reader)
+        public object Run(TextReader reader, string fileName)
         {
-            return Run(reader.ReadToEnd());
+            return Run(reader.ReadToEnd(), fileName);
         }
 
         /// <summary>
@@ -171,9 +184,9 @@ namespace Jint
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(TextReader reader, bool unwrap)
+        public object Run(TextReader reader, bool unwrap, string fileName)
         {
-            return Run(reader.ReadToEnd(), unwrap);
+            return Run(reader.ReadToEnd(), unwrap, fileName);
         }
 
         /// <summary>
@@ -186,6 +199,20 @@ namespace Jint
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
         public object Run(string script, bool unwrap)
+        {
+            return Run(script, unwrap, null);
+        }
+
+        /// <summary>
+        /// Runs a set of JavaScript statements and optionally returns a value if return is called
+        /// </summary>
+        /// <param name="script">The script to execute</param>
+        /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
+        /// <returns>Optionally, returns a value from the scripts</returns>
+        /// <exception cref="System.ArgumentException" />
+        /// <exception cref="System.Security.SecurityException" />
+        /// <exception cref="Jint.JintException" />
+        public object Run(string script, bool unwrap, string fileName)
         {
             if (script == null)
                 throw new
@@ -205,7 +232,7 @@ namespace Jint
             if (program == null)
                 return null;
 
-            return Run(program, unwrap);
+            return Run(program, unwrap, fileName);
         }
 
         /// <summary>
@@ -214,10 +241,7 @@ namespace Jint
         /// <param name="program">The expression tree to execute</param>
         /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
         /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(ProgramSyntax program, bool unwrap)
+        public object Run(ProgramSyntax program, bool unwrap, string fileName)
         {
             // Don't wrap exceptions while debugging to make stack traces
             // easier to read.
@@ -226,7 +250,7 @@ namespace Jint
             try
             {
 #endif
-                return CompileAndRun(program, unwrap);
+            return CompileAndRun(program, unwrap, fileName);
 #if !DEBUG
             }
             catch (SecurityException)
@@ -379,7 +403,7 @@ namespace Jint
             return this;
         }
 
-        private object CompileAndRun(ProgramSyntax program, bool unwrap)
+        private object CompileAndRun(ProgramSyntax program, bool unwrap, string fileName)
         {
             if (program == null)
                 throw new ArgumentNullException("program");
@@ -397,7 +421,7 @@ namespace Jint
             }
             else
             {
-                var visitor = new ExpressionVisitor(Global);
+                var visitor = new ExpressionVisitor(Global, fileName);
                 var expression = program.Accept(visitor);
 
                 PrintExpression(expression);
@@ -467,13 +491,13 @@ namespace Jint
                 newBody = new BlockSyntax(SyntaxNode.EmptyList);
             }
 
-            var function = new FunctionSyntax(null, newParameters, newBody);
+            var function = new FunctionSyntax(null, newParameters, newBody, null);
 
             PrepareTree(function);
 
             return _runtime.CreateFunction(
                 function.Name,
-                new ExpressionVisitor(Global).DeclareFunction(function),
+                new ExpressionVisitor(Global, null).DeclareFunction(function),
                 null,
                 function.Parameters.ToArray(),
                 sourceCode
@@ -567,7 +591,7 @@ namespace Jint
 
             try
             {
-                return (object)Run(program, false);
+                return Run(program, false, null);
             }
             catch (Exception e)
             {

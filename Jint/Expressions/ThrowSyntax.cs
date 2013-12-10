@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class ThrowSyntax : SyntaxNode
+    public class ThrowSyntax : SyntaxNode, ISourceLocation
     {
         public ExpressionSyntax Expression { get; private set; }
+        public SourceLocation Location { get; private set; }
 
-        public ThrowSyntax(ExpressionSyntax expression)
+        public ThrowSyntax(ExpressionSyntax expression, SourceLocation location)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
+            if (location == null)
+                throw new ArgumentNullException("location");
 
             Expression = expression;
+            Location = location;
         }
 
         public override SyntaxType Type

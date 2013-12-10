@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class ForEachInSyntax : SyntaxNode, IForStatement
+    public class ForEachInSyntax : SyntaxNode, IForStatement, ISourceLocation
     {
         public SyntaxNode Initialization { get; private set; }
         public ExpressionSyntax Expression { get; private set; }
         public SyntaxNode Body { get; private set; }
+        public SourceLocation Location { get; private set; }
 
         public override SyntaxType Type
         {
             get { return SyntaxType.ForEachIn; }
         }
 
-        public ForEachInSyntax(SyntaxNode initialization, ExpressionSyntax expression, SyntaxNode body)
+        public ForEachInSyntax(SyntaxNode initialization, ExpressionSyntax expression, SyntaxNode body, SourceLocation location)
         {
             if (initialization == null)
                 throw new ArgumentNullException("initialization");
@@ -24,10 +26,13 @@ namespace Jint.Expressions
                 throw new ArgumentNullException("expression");
             if (body == null)
                 throw new ArgumentNullException("body");
+            if (location == null)
+                throw new ArgumentNullException("location");
 
             Initialization = initialization;
             Expression = expression;
             Body = body;
+            Location = location;
         }
 
         [DebuggerStepThrough]

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Text;
 using Antlr.Runtime;
 using Jint.Compiler;
@@ -109,7 +110,7 @@ namespace Jint.Parser
 
     partial class ES3Parser
     {
-        private string _sourceCode;
+        private readonly string _sourceCode;
 
         public ES3Parser(ITokenStream input, string sourceCode)
             : base(input)

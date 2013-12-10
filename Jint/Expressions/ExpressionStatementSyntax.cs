@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class ExpressionStatementSyntax : SyntaxNode
+    public class ExpressionStatementSyntax : SyntaxNode, ISourceLocation
     {
         public ExpressionSyntax Expression { get; private set; }
+        public SourceLocation Location { get; private set; }
 
         internal override bool IsLiteral
         {
@@ -19,12 +21,15 @@ namespace Jint.Expressions
             get { return SyntaxType.ExpressionStatement; }
         }
 
-        public ExpressionStatementSyntax(ExpressionSyntax expression)
+        public ExpressionStatementSyntax(ExpressionSyntax expression, SourceLocation location)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
+            if (location == null)
+                throw new ArgumentNullException("location");
 
             Expression = expression;
+            Location = location;
         }
 
         [DebuggerStepThrough]

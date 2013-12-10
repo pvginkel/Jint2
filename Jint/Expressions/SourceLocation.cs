@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jint.Compiler
+namespace Jint.Expressions
 {
-    internal class SourceLocation
+    public class SourceLocation
     {
         public int StartOffset { get; private set; }
         public int StartLine { get; private set; }

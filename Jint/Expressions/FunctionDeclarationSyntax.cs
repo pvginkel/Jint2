@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
@@ -13,8 +14,9 @@ namespace Jint.Expressions
         public IList<string> Parameters { get; private set; }
         public BlockSyntax Body { get; private set; }
         internal Variable Target { get; set; }
+        public SourceLocation Location { get; private set; }
 
-        public FunctionDeclarationSyntax(string name, IEnumerable<string> parameters, BlockSyntax body)
+        public FunctionDeclarationSyntax(string name, IEnumerable<string> parameters, BlockSyntax body, SourceLocation location)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -22,10 +24,13 @@ namespace Jint.Expressions
                 throw new ArgumentNullException("parameters");
             if (body == null)
                 throw new ArgumentNullException("body");
+            if (location == null)
+                throw new ArgumentNullException("location");
 
             Name = name;
             Parameters = parameters.ToReadOnly();
             Body = body;
+            Location = location;
         }
 
         public override SyntaxType Type

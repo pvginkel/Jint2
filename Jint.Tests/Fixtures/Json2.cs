@@ -23,7 +23,7 @@ namespace Jint.Tests.Fixtures
                 "underscore-suite.js"
             );
 
-            return ctx.Run(File.ReadAllText(suitePath));
+            return ctx.Run(File.ReadAllText(suitePath), suitePath);
         }
 
         [TestCase("underscore.js")]

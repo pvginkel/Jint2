@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
 using Jint.ExpressionExtensions;
@@ -31,13 +31,24 @@ namespace Jint.Compiler
         private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
         private Scope _scope;
         private readonly JsGlobal _global;
+        private readonly SymbolDocumentInfo _document;
 
-        public ExpressionVisitor(JsGlobal global)
+        public ExpressionVisitor(JsGlobal global, string fileName)
         {
             if (global == null)
                 throw new ArgumentNullException("global");
 
             _global = global;
+
+            if (fileName != null)
+            {
+                _document = Expression.SymbolDocument(
+                    Path.GetFullPath(fileName),
+                    SymLanguageType.JScript,
+                    SymLanguageVendor.Microsoft,
+                    SymDocumentType.Text
+                );
+            }
         }
 
         public Func<JintRuntime, object> BuildMainMethod(LambdaExpression lambda)
@@ -81,7 +92,7 @@ namespace Jint.Compiler
                 parameterTypes
             );
 
-            lambda.CompileToMethod(method);
+            lambda.CompileToMethod(method, DynamicAssemblyManager.PdbGenerator);
 
             return typeBuilder.CreateType().GetMethod(name);
         }
@@ -257,12 +268,30 @@ namespace Jint.Compiler
 
             foreach (var item in syntax.Statements)
             {
+                if (_document != null && !(item is FunctionDeclarationSyntax))
+                {
+                    var location = item as ISourceLocation;
+                    if (location != null)
+                        statements.Add(GetDebugInfo(location));
+                }
+
                 statements.Add(item.Accept(this));
             }
 
             return Expression.Block(
                 parameters,
                 statements
+            );
+        }
+
+        private DebugInfoExpression GetDebugInfo(ISourceLocation sourceLocation)
+        {
+            return Expression.DebugInfo(
+                _document,
+                sourceLocation.Location.StartLine,
+                sourceLocation.Location.StartColumn + 1,
+                sourceLocation.Location.EndLine,
+                sourceLocation.Location.EndColumn + 1
             );
         }
 
@@ -284,10 +313,11 @@ namespace Jint.Compiler
                         right = new FunctionSyntax(
                             identifier.Name,
                             function.Parameters,
-                            function.Body
+                            function.Body,
+                            function.Location
                         )
                         {
-                            Location = function.Location
+                            Target = function.Target
                         };
                     }
                 }
@@ -310,9 +340,21 @@ namespace Jint.Compiler
             if (syntax.Statements.Count == 0)
                 return Expression.Empty();
 
-            return Expression.Block(
-                syntax.Statements.Select(p => p.Accept(this))
-            );
+            var statements = new List<Expression>();
+
+            foreach (var statement in syntax.Statements)
+            {
+                if (_document != null)
+                {
+                    var location = statement as ISourceLocation;
+                    if (location != null)
+                        statements.Add(GetDebugInfo(location));
+                }
+
+                statements.Add(statement.Accept(this));
+            }
+
+            return Expression.Block(statements);
         }
 
         public Expression VisitBreak(BreakSyntax syntax)
@@ -564,6 +606,9 @@ namespace Jint.Compiler
             {
                 var target = Expression.Label("target" + bodies.Count);
 
+                if (_document != null)
+                    statements.Add(GetDebugInfo(caseClause));
+
                 statements.Add(Expression.IfThen(
                     BuildOperationCall(
                         SyntaxExpressionType.Equal,
@@ -578,11 +623,14 @@ namespace Jint.Compiler
 
             if (syntax.Default != null)
             {
+                if (_document != null)
+                    statements.Add(GetDebugInfo(syntax.Default));
+
                 var target = Expression.Label("default");
 
                 statements.Add(Expression.Goto(target));
 
-                bodies.Add(Tuple.Create(target, syntax.Default.Accept(this)));
+                bodies.Add(Tuple.Create(target, syntax.Default.Body.Accept(this)));
             }
 
             foreach (var body in bodies)
@@ -821,15 +869,6 @@ namespace Jint.Compiler
 
             var statements = new List<Expression>();
 
-#if TRACE_CALLSTACK
-            var source = ((SyntaxNode)function).Source;
-
-            statements.Add(Expression.Call(
-                typeof(Trace).GetMethod("WriteLine", new[] { typeof(string) }),
-                Expression.Constant(String.Format("Entering {0}:{1}", source.Start.Line, source.Start.Char))
-            ));
-#endif
-
             _scope = new Scope(
                 this,
                 thisParameter,
@@ -957,20 +996,20 @@ namespace Jint.Compiler
 
             var bodyExpression = body.Accept(this);
 
-#if TRACE_CALLSTACK
-            // Exit trace.
-
-            bodyExpression = Expression.TryFinally(
-                bodyExpression,
-                Expression.Call(
-                    typeof(Trace).GetMethod("WriteLine", new[] { typeof(string) }),
-                    Expression.Constant(String.Format("Exiting {0}:{1}", source.Stop.Line, source.Stop.Char))
-                )
-            );
-
-#endif
-
             statements.Add(bodyExpression);
+
+            // Put a debug location at the end of the function.
+
+            if (_document != null && function.Location != null)
+            {
+                statements.Add(Expression.DebugInfo(
+                    _document,
+                    function.Location.EndLine,
+                    function.Location.EndColumn,
+                    function.Location.EndLine,
+                    function.Location.EndColumn + 1
+                ));
+            }
 
             // Add the return label.
 
@@ -1288,10 +1327,11 @@ namespace Jint.Compiler
                         expression = new FunctionSyntax(
                             dataProperty.Name,
                             function.Parameters,
-                            function.Body
+                            function.Body,
+                            function.Location
                         )
                         {
-                            Location = function.Location
+                            Target = function.Target
                         };
                     }
 

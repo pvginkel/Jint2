@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class BreakSyntax : SyntaxNode
+    public class BreakSyntax : SyntaxNode, ISourceLocation
     {
         public override SyntaxType Type
         {
@@ -13,10 +14,15 @@ namespace Jint.Expressions
         }
 
         public string Target { get; private set; }
+        public SourceLocation Location { get; private set; }
 
-        public BreakSyntax(string target)
+        public BreakSyntax(string target, SourceLocation location)
         {
+            if (location == null)
+                throw new ArgumentNullException("location");
+
             Target = target;
+            Location = location;
         }
 
         [DebuggerStepThrough]

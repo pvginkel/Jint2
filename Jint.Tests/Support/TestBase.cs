@@ -49,7 +49,7 @@ namespace Jint.Tests.Support
                 _testsPath = Path.Combine(_testsPath, testsPath);
         }
 
-        protected abstract string GetInclude(string file);
+        protected abstract void RunInclude(JintEngine engine, string fileName);
 
         protected string GetSpecialInclude(string file)
         {
@@ -95,7 +95,7 @@ namespace Jint.Tests.Support
 
             Action<string> failAction = Assert.Fail;
             Action<string> printAction = message => Trace.WriteLine(message);
-            Action<string> includeAction = file => ctx.Run(GetInclude(file));
+            Action<string> includeAction = file => RunInclude(ctx, file);
 
             ctx.SetFunction("$FAIL", failAction);
             ctx.SetFunction("ERROR", errorAction);
@@ -152,7 +152,7 @@ namespace Jint.Tests.Support
 
         protected virtual object RunFile(JintEngine ctx, string fileName)
         {
-            return ctx.Run(File.ReadAllText(fileName));
+            return ctx.Run(File.ReadAllText(fileName), fileName);
         }
 
         [DebuggerStepThrough]

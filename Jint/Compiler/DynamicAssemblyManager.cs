@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace Jint.Compiler
         public static bool SaveAssembly { get; set; }
 
         public static ModuleBuilder ModuleBuilder { get; private set; }
+        public static DebugInfoGenerator PdbGenerator { get; private set; }
 
         static DynamicAssemblyManager()
         {
@@ -49,9 +51,12 @@ namespace Jint.Compiler
                 assemblyAccess
             );
 
+            PdbGenerator = DebugInfoGenerator.CreatePdbGenerator();
+
             ModuleBuilder = _assemblyBuilder.DefineDynamicModule(
                 assemblyName.Name,
-                assemblyName.Name + ".dll"
+                assemblyName.Name + ".dll",
+                true
             );
         }
 
