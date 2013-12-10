@@ -73,7 +73,7 @@ namespace Jint
             if (!string.IsNullOrEmpty(source))
             {
                 var lexer = new ES3Lexer(new ANTLRStringStream(source));
-                var parser = new ES3Parser(new CommonTokenStream(lexer));
+                var parser = new ES3Parser(new CommonTokenStream(lexer), source);
 
                 program = parser.Execute();
 
@@ -90,7 +90,7 @@ namespace Jint
             if (!string.IsNullOrEmpty(source))
             {
                 var lexer = new ES3Lexer(new ANTLRStringStream(source));
-                var parser = new ES3Parser(new CommonTokenStream(lexer));
+                var parser = new ES3Parser(new CommonTokenStream(lexer), source);
 
                 block = parser.ExecuteBlockStatements();
 
@@ -455,12 +455,12 @@ namespace Jint
             }
 
             BlockSyntax newBody;
+            string sourceCode = null;
 
             if (parameters.Length >= 1)
             {
-                newBody = CompileBlockStatements(
-                    JsValue.ToString(parameters[parameters.Length - 1])
-                );
+                sourceCode = JsValue.ToString(parameters[parameters.Length - 1]);
+                newBody = CompileBlockStatements(sourceCode);
             }
             else
             {
@@ -475,7 +475,8 @@ namespace Jint
                 function.Name,
                 new ExpressionVisitor(Global).DeclareFunction(function),
                 null,
-                function.Parameters.ToArray()
+                function.Parameters.ToArray(),
+                sourceCode
             );
         }
 

@@ -26,7 +26,7 @@ namespace Jint.Native
 
             public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
             {
-                return String.Format("function {0} ( ) {{ [native code] }}", ((JsObject)@this).Delegate.Name);
+                return ((JsObject)@this).Delegate.ToString();
             }
 
             public static object Call(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)

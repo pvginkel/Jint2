@@ -146,7 +146,7 @@ namespace Jint.Native.Interop
                 typeof(object).GetMethod("ToString")
             ));
 
-            var result = global.CreateFunction(
+            var result = global.CreateNakedFunction(
                 type.FullName,
                 new Constructor(type, overloads, propertyStoreFactory, properties).Execute,
                 0,

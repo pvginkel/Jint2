@@ -11,8 +11,9 @@ namespace Jint.Native
         public JsFunction Delegate { get; private set; }
         public int ArgumentCount { get; private set; }
         public object Closure { get; private set; }
+        public string SourceCode { get; private set; }
 
-        public JsDelegate(string name, JsFunction @delegate, int argumentCount, object closure)
+        public JsDelegate(string name, JsFunction @delegate, int argumentCount, object closure, string sourceCode)
         {
             if (@delegate == null)
                 throw new ArgumentNullException("delegate");
@@ -21,6 +22,16 @@ namespace Jint.Native
             Delegate = @delegate;
             ArgumentCount = argumentCount;
             Closure = closure;
+            SourceCode = sourceCode;
+        }
+
+        public override string ToString()
+        {
+            if (SourceCode != null)
+                return SourceCode;
+            if (Name != null)
+                return String.Format("function {0} ( ) {{ [native code] }}", Name);
+            return "(anonymous function)";
         }
     }
 }

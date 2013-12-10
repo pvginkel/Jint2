@@ -11,7 +11,7 @@ namespace Jint.Expressions
         public abstract SyntaxType Type { get; }
         internal virtual bool IsAssignable { get { return false; } }
         internal virtual bool IsLiteral { get { return false; } }
-        internal SourceCodeDescriptor Source { get; set; }
+        internal SourceLocation Location { get; set; }
 
         public abstract void Accept(ISyntaxVisitor visitor);
 

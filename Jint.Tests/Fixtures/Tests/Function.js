@@ -158,3 +158,14 @@ f3.length = 7;
 assert(2, f3.length);
 f3.length = 'hello';
 assert(2, f3.length);
+
+assert('function f3(a, b) {\r\n\
+}', f3.toString());
+
+var f4 = function (c, d) {
+    f3(a, b);
+}
+
+assert('function (c, d) {\r\n\
+    f3(a, b);\r\n\
+}', f4.toString());

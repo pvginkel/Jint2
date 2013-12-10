@@ -269,7 +269,31 @@ namespace Jint.Compiler
         public Expression VisitAssignment(AssignmentSyntax syntax)
         {
             if (syntax.Operation == AssignmentOperator.Assign)
-                return BuildSet(syntax.Left, syntax.Right.Accept(this));
+            {
+                // Name anonymous function with the name if the identifier its
+                // initialized to.
+
+                var identifier = syntax.Left as IdentifierSyntax;
+                var right = syntax.Right;
+
+                if (identifier != null)
+                {
+                    var function = right as FunctionSyntax;
+                    if (function != null && function.Name == null)
+                    {
+                        right = new FunctionSyntax(
+                            identifier.Name,
+                            function.Parameters,
+                            function.Body
+                        )
+                        {
+                            Location = function.Location
+                        };
+                    }
+                }
+                
+                return BuildSet(syntax.Left, right.Accept(this));
+            }
 
             return BuildSet(
                 syntax.Left,
@@ -751,7 +775,8 @@ namespace Jint.Compiler
                 return compiledFunction;
         }
 
-        private Expression CreateFunctionSyntax(IFunctionDeclaration function, MethodInfo compiledFunction)
+        private Expression CreateFunctionSyntax<T>(T function, MethodInfo compiledFunction)
+            where T : SyntaxNode, IFunctionDeclaration
         {
             return Expression.Call(
                 _scope.Runtime,
@@ -759,7 +784,8 @@ namespace Jint.Compiler
                 Expression.Constant(function.Name, typeof(string)),
                 Expression.Constant(compiledFunction, typeof(MethodInfo)),
                 _scope.ClosureLocal != null ? (Expression)_scope.ClosureLocal : Expression.Constant(null),
-                MakeArrayInit(function.Parameters.Select(Expression.Constant), typeof(string), true)
+                MakeArrayInit(function.Parameters.Select(Expression.Constant), typeof(string), true),
+                Expression.Constant(function.Location.GetSourceCode(), typeof(string))
             );
         }
 
@@ -1255,10 +1281,24 @@ namespace Jint.Compiler
                 var dataProperty = property as JsonDataProperty;
                 if (dataProperty != null)
                 {
+                    var expression = dataProperty.Expression;
+                    var function = expression as FunctionSyntax;
+                    if (function != null && function.Name == null)
+                    {
+                        expression = new FunctionSyntax(
+                            dataProperty.Name,
+                            function.Parameters,
+                            function.Body
+                        )
+                        {
+                            Location = function.Location
+                        };
+                    }
+
                     statements.Add(BuildSetMember(
                         obj,
                         dataProperty.Name,
-                        dataProperty.Expression.Accept(this)
+                        expression.Accept(this)
                     ));
                 }
                 else

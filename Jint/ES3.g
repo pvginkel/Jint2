@@ -711,6 +711,7 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
     BlockSyntax body;
     List<string> parameters = null;
     string name;
+    IToken start = null;
 }
 @after {
     $value = new PropertyDeclaration(
@@ -719,7 +720,10 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
             name,
             parameters,
             body
-        ),
+        )
+        {
+            Location = GetLocation(start, input.LT(-1))
+        },
         mode
     );
 }
@@ -729,9 +733,14 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
         prop2=propertyName
         { name = prop2; }
         (
+            { start = input.LT(1); }
             parms=formalParameterList
             { parameters = parms; }
         )?
+        {
+            if (start == null)
+                start = input.LT(1);
+        }
         statements=functionBody
         { body = statements; } 
     ;
@@ -826,7 +835,7 @@ leftHandSideExpression returns [ExpressionSyntax value]
     if (isNew)
         $value = new NewSyntax($value);
 
-	$value.Source = ExtractSourceCode(start, input.LT(-1));
+	$value.Location = GetLocation(start, input.LT(-1));
 }
 	:
         (
@@ -1279,7 +1288,7 @@ statementTail returns [SyntaxNode value]
         $value is TrySyntax ||
         $value is IfSyntax
     ))
-        $value.Source = ExtractSourceCode(start, input.LT(-1));
+        $value.Location = GetLocation(start, input.LT(-1));
 }
 	: vst=variableStatement { $value = vst; }
 	| est=emptyStatement { $value = est; }
@@ -1306,7 +1315,7 @@ block returns [BlockSyntax value]
 @after{
     $value = new BlockSyntax(statements)
     {
-        Source = ExtractSourceCode(start, input.LT(-1))
+        Location = GetLocation(start, input.LT(-1))
     };
 }
 	:
@@ -1328,7 +1337,7 @@ blockStatements returns [BlockSyntax value]
 }
 @after{
     $value = _currentBody.CreateBlock();
-	$value.Source = ExtractSourceCode(start, input.LT(-1));
+	$value.Location = GetLocation(start, input.LT(-1));
     _currentBody = tempBody;
 }
 	:
@@ -1887,7 +1896,7 @@ functionDeclaration returns [SyntaxNode value]
         )
         {
             Target = _currentBody.DeclaredVariables.AddOrGet(name, true),
-            Source = ExtractSourceCode(start, input.LT(-1))
+            Location = GetLocation(start, input.LT(-1))
         }
     );
 
@@ -1910,13 +1919,13 @@ functionExpression returns [FunctionSyntax value]
     BlockSyntax body;
 }
 @after {
-	$value = new FunctionSyntax(name, parameters, body);
+	$value = new FunctionSyntax(name, parameters, body)
+    {
+        Location = GetLocation(start, input.LT(-1))
+    };
 
     if (name != null)
-    {
         $value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
-        $value.Source = ExtractSourceCode(start, input.LT(-1));
-    }
 }
 	:
         FUNCTION

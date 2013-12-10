@@ -140,7 +140,7 @@
     <Compile Include="Parser\ES3Additions.cs" />
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="Parser\ES3Util.cs" />
-    <Compile Include="Compiler\SourceCodeDescriptor.cs" />
+    <Compile Include="Compiler\SourceLocation.cs" />
     <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Native\JsComparer.cs" />

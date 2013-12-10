@@ -109,6 +109,20 @@ namespace Jint.Parser
 
     partial class ES3Parser
     {
+        private string _sourceCode;
+
+        public ES3Parser(ITokenStream input, string sourceCode)
+            : base(input)
+        {
+            _sourceCode = sourceCode;
+        }
+
+        public ES3Parser(ITokenStream input, RecognizerSharedState state, string sourceCode)
+            : base(input, state)
+        {
+            _sourceCode = sourceCode;
+        }
+
         public override void ReportError(RecognitionException e)
         {
             throw e;
@@ -249,9 +263,17 @@ namespace Jint.Parser
             Errors.Add(msg + " at " + hdr);
         }
 
-        private SourceCodeDescriptor ExtractSourceCode(IToken start, IToken stop)
+        private SourceLocation GetLocation(IToken start, IToken stop)
         {
-            return new SourceCodeDescriptor(start.Line, start.CharPositionInLine, stop.Line, stop.CharPositionInLine);
+            return new SourceLocation(
+                start.StartIndex,
+                start.Line,
+                start.CharPositionInLine,
+                stop.StopIndex + stop.Text.Length,
+                stop.Line,
+                stop.CharPositionInLine + stop.Text.Length,
+                _sourceCode
+            );
         }
 
         public AssignmentOperator ResolveAssignmentOperator(string op)
