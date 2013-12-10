@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class FunctionDeclarationSyntax : SyntaxNode, IFunctionDeclaration
     {
         public string Name { get; private set; }

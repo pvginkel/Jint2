@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class ProgramSyntax : BlockSyntax
     {
         private bool? _isLiteral;

@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class SwitchSyntax : SyntaxNode
     {
         public SyntaxNode Expression { get; private set; }

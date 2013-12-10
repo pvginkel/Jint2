@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Jint.Native
 {
-    [Serializable]
     public sealed class JsUndefined
     {
         internal string Name { get; private set; }

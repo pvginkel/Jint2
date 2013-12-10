@@ -6,7 +6,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class ArrayDeclarationSyntax : ExpressionSyntax
     {
         private bool? _isLiteral;

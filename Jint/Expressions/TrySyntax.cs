@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class TrySyntax : SyntaxNode
     {
         public SyntaxNode Body { get; private set; }

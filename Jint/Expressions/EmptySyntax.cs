@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class EmptySyntax : SyntaxNode
     {
         public override SyntaxType Type

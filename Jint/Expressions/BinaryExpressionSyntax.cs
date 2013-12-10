@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class BinaryExpressionSyntax : ExpressionSyntax
     {
         public override SyntaxType Type

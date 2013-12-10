@@ -4,7 +4,6 @@ using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public abstract class SyntaxNode
     {
         public static readonly IList<SyntaxNode> EmptyList = new SyntaxNode[0];

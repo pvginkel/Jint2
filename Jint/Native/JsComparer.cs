@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Jint.Native
 {
-    [Serializable]
     public class JsComparer : IComparer<object>
     {
         public JintEngine Engine { get; private set; }

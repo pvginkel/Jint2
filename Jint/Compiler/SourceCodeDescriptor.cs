@@ -4,10 +4,8 @@ using System.Text;
 
 namespace Jint.Compiler
 {
-    [Serializable]
     internal class SourceCodeDescriptor
     {
-        [Serializable]
         public class Location
         {
             public Location(int line, int c)

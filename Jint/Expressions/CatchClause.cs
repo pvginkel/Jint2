@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class CatchClause
     {
         public string Identifier { get; private set; }

@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class ForEachInSyntax : SyntaxNode, IForStatement
     {
         public SyntaxNode Initialization { get; private set; }

@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class CaseClause
     {
         public ExpressionSyntax Expression { get; private set; }

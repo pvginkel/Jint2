@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Jint.Native
 {
-    [Serializable]
     public class JsException : Exception
     {
         public JsErrorType Type { get; private set; }

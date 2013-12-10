@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class WhileSyntax : SyntaxNode
     {
         public ExpressionSyntax Test { get; private set; }

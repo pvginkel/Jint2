@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class JsonExpressionSyntax : ExpressionSyntax
     {
         private bool? _isLiteral;

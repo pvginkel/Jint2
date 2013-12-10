@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class DoWhileSyntax : SyntaxNode
     {
         public ExpressionSyntax Test { get; private set; }

@@ -6,7 +6,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class FunctionSyntax : ExpressionSyntax, IFunctionDeclaration
     {
         public override SyntaxType Type

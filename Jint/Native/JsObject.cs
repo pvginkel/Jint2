@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Jint.Native
 {
-    [Serializable]
     public sealed partial class JsObject : IComparable<JsObject>
     {
         internal static readonly ReadOnlyCollection<KeyValuePair<int, object>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, object>>(new KeyValuePair<int, object>[0]);

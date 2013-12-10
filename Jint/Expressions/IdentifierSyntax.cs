@@ -4,7 +4,6 @@ using Jint.Native;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class IdentifierSyntax : ExpressionSyntax
     {
         public override SyntaxType Type

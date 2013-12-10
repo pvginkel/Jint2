@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class MethodCallSyntax : ExpressionSyntax
     {
         public override SyntaxType Type

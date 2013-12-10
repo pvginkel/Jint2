@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class CommaOperatorSyntax : ExpressionSyntax
     {
         public override SyntaxType Type

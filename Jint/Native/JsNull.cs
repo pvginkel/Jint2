@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Jint.Native
 {
-    [Serializable]
     public sealed class JsNull
     {
         public static JsNull Instance = new JsNull();

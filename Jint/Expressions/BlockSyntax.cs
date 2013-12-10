@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public class BlockSyntax : SyntaxNode
     {
         public override SyntaxType Type

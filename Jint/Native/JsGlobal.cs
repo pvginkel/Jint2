@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Native
 {
-    [Serializable]
     public partial class JsGlobal
     {
         private readonly JintRuntime _runtime;

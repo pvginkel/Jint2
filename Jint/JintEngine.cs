@@ -21,7 +21,6 @@ using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint
 {
-    [Serializable]
     public class JintEngine
     {
         private readonly JintRuntime _runtime;
@@ -378,22 +377,6 @@ namespace Jint
         {
             PermissionSet = new PermissionSet(PermissionState.None);
             return this;
-        }
-
-        public void Save(Stream stream)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            new BinaryFormatter().Serialize(stream, this);
-        }
-
-        public static JintEngine Load(Stream stream)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            return (JintEngine)new BinaryFormatter().Deserialize(stream);
         }
 
         private object CompileAndRun(ProgramSyntax program, bool unwrap)

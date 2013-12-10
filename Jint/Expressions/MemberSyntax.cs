@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    [Serializable]
     public abstract class MemberSyntax : ExpressionSyntax
     {
         public ExpressionSyntax Expression { get; private set; }
