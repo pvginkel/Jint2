@@ -17,28 +17,36 @@ namespace Jint.Compiler
 #if DEBUG || SAVE_ASSEMBLY
         private static int _lastAssemblyId;
 #endif
+        public static bool SaveAssembly { get; set; }
 
         public static ModuleBuilder ModuleBuilder { get; private set; }
 
         static DynamicAssemblyManager()
         {
+#if DEBUG || SAVE_ASSEMBLY
+            SaveAssembly = true;
+#endif
             CreateAssemblyBuilder();
         }
 
         private static void CreateAssemblyBuilder()
         {
             string name = "DynamicJintAssembly";
+            var assemblyAccess = AssemblyBuilderAccess.RunAndCollect;
 
 #if DEBUG || SAVE_ASSEMBLY
             int assemblyId = Interlocked.Increment(ref _lastAssemblyId);
             name += assemblyId.ToString(CultureInfo.InvariantCulture);
+
+            if (SaveAssembly)
+                assemblyAccess = AssemblyBuilderAccess.RunAndSave;
 #endif
 
             var assemblyName = new AssemblyName(name);
 
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
                 assemblyName,
-                AssemblyBuilderAccess.RunAndSave
+                assemblyAccess
             );
 
             ModuleBuilder = _assemblyBuilder.DefineDynamicModule(
@@ -70,9 +78,12 @@ namespace Jint.Compiler
         public static void FlushAssembly()
         {
 #if DEBUG || SAVE_ASSEMBLY
-            _assemblyBuilder.Save(_assemblyBuilder.GetName().Name + ".dll");
+            if (SaveAssembly)
+            {
+                _assemblyBuilder.Save(_assemblyBuilder.GetName().Name + ".dll");
 
-            CreateAssemblyBuilder();
+                CreateAssemblyBuilder();
+            }
 #endif
         }
     }

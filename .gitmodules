@@ -1,0 +1,4 @@
+[submodule "Jint.Test262"]
+	path = Jint.Test262
+	url = git@github.com:pvginkel/Jint2-Test262.git
+	branch = master
