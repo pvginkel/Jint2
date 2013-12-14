@@ -15,7 +15,7 @@ namespace Jint.Expressions
 
         public string Name { get; private set; }
         public IList<string> Parameters { get; private set; }
-        public BlockSyntax Body { get; private set; }
+        public BodySyntax Body { get; private set; }
         public Variable Target { get; private set; }
         public SourceLocation Location { get; private set; }
 
@@ -24,7 +24,7 @@ namespace Jint.Expressions
             get { return ValueType.Unknown; }
         }
 
-        public FunctionSyntax(string name, IEnumerable<string> parameters, BlockSyntax body, Variable target, SourceLocation location)
+        public FunctionSyntax(string name, IEnumerable<string> parameters, BodySyntax body, Variable target, SourceLocation location)
         {
             if (parameters == null)
                 throw new ArgumentNullException("parameters");

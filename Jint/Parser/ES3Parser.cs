@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 12:21:09
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 17:00:29
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -1907,11 +1907,11 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		PropertyExpressionType acc = default(PropertyExpressionType);
 		string prop2 = default(string);
 		List<string> parms = default(List<string>);
-		BlockSyntax statements = default(BlockSyntax);
+		BodySyntax statements = default(BodySyntax);
 
 
 		    PropertyExpressionType mode;
-		    BlockSyntax body;
+		    BodySyntax body;
 		    List<string> parameters = null;
 		    string name;
 		    IToken start = null;
@@ -6973,20 +6973,20 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_blockStatements();
 
 	// $ANTLR start "blockStatements"
-	// ..\\ES3.g:1313:1: blockStatements returns [BlockSyntax value] : (st= statement )* ;
+	// ..\\ES3.g:1313:1: blockStatements returns [BodySyntax value] : (st= statement )* ;
 	[GrammarRule("blockStatements")]
-	private BlockSyntax blockStatements()
+	private BodySyntax blockStatements()
 	{
 		EnterRule_blockStatements();
 		EnterRule("blockStatements", 55);
 		TraceIn("blockStatements", 55);
-		BlockSyntax value = default(BlockSyntax);
+		BodySyntax value = default(BodySyntax);
 
 		SyntaxNode st = default(SyntaxNode);
 
 
 		    var tempBody = _currentBody;
-		    _currentBody = new BlockBuilder();
+		    _currentBody = new BodyBuilder();
 
 		try { DebugEnterRule(GrammarFileName, "blockStatements");
 		DebugLocation(1313, 1);
@@ -7043,7 +7043,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 
 
-			    value = _currentBody.CreateBlock();
+			    value = _currentBody.CreateBody(BodyType.Function);
 			    _currentBody = tempBody;
 
 		}
@@ -9741,13 +9741,13 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 		IToken id = default(IToken);
 		List<string> parms = default(List<string>);
-		BlockSyntax fb = default(BlockSyntax);
+		BodySyntax fb = default(BodySyntax);
 
 
 		    var start = input.LT(1);
 		    string name;
 		    List<string> parameters;
-		    BlockSyntax body;
+		    BodySyntax body;
 
 		try { DebugEnterRule(GrammarFileName, "functionDeclaration");
 		DebugLocation(1877, 1);
@@ -9828,13 +9828,13 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 		IToken id = default(IToken);
 		List<string> fpl = default(List<string>);
-		BlockSyntax fb = default(BlockSyntax);
+		BodySyntax fb = default(BodySyntax);
 
 
 		    var start = input.LT(1);
 		    string name = null;
 		    List<string> parameters;
-		    BlockSyntax body;
+		    BodySyntax body;
 
 		try { DebugEnterRule(GrammarFileName, "functionExpression");
 		DebugLocation(1906, 1);
@@ -10051,21 +10051,21 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_functionBody();
 
 	// $ANTLR start "functionBody"
-	// ..\\ES3.g:1952:1: functionBody returns [BlockSyntax value] : lb= LBRACE (se= sourceElement )* RBRACE ;
+	// ..\\ES3.g:1952:1: functionBody returns [BodySyntax value] : lb= LBRACE (se= sourceElement )* RBRACE ;
 	[GrammarRule("functionBody")]
-	private BlockSyntax functionBody()
+	private BodySyntax functionBody()
 	{
 		EnterRule_functionBody();
 		EnterRule("functionBody", 85);
 		TraceIn("functionBody", 85);
-		BlockSyntax value = default(BlockSyntax);
+		BodySyntax value = default(BodySyntax);
 
 		IToken lb = default(IToken);
 		SyntaxNode se = default(SyntaxNode);
 
 
 		    var tempBody = _currentBody;
-		    _currentBody = new BlockBuilder();
+		    _currentBody = new BodyBuilder();
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "functionBody");
@@ -10127,7 +10127,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 
 
-			    value = _currentBody.CreateBlock();
+			    value = _currentBody.CreateBody(BodyType.Function);
 			    _currentBody = tempBody;
 
 		}
@@ -10166,7 +10166,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxNode follow = default(SyntaxNode);
 
 
-		    _currentBody = new BlockBuilder();
+		    _currentBody = new BodyBuilder();
 
 		try { DebugEnterRule(GrammarFileName, "program");
 		DebugLocation(1975, 1);
@@ -10220,7 +10220,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			} finally { DebugExitSubRule(90); }
 
 			DebugLocation(1984, 9);
-			 value = _currentBody.CreateProgram(); 
+			 value = new ProgramSyntax(_currentBody.CreateBody(BodyType.Program)); 
 
 			}
 

@@ -14,24 +14,13 @@ namespace Jint.Expressions
         }
 
         public IList<SyntaxNode> Statements { get; private set; }
-        public VariableCollection DeclaredVariables { get; private set; }
-        public Closure Closure { get; set; }
-        public Closure ParentClosure { get; set; }
 
         public BlockSyntax(IEnumerable<SyntaxNode> statements)
-            : this(statements, new VariableCollection())
-        {
-        }
-
-        public BlockSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
         {
             if (statements == null)
                 throw new ArgumentNullException("statements");
-            if (declaredVariables == null)
-                throw new ArgumentNullException("declaredVariables");
 
             Statements = statements.ToReadOnly();
-            DeclaredVariables = declaredVariables;
         }
 
         [DebuggerStepThrough]

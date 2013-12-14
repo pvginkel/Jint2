@@ -20,7 +20,7 @@ namespace Jint.Compiler
         private readonly bool _isStrict;
         private readonly List<BlockManager> _blocks = new List<BlockManager>();
         private readonly List<BlockManager> _pendingClosures = new List<BlockManager>();
-        private BlockSyntax _main;
+        private BodySyntax _main;
         private MarkerWithScope _withScope;
         private int _nextWithScopeIndex = 1;
 
@@ -36,13 +36,13 @@ namespace Jint.Compiler
         {
             // Mark all variables as global.
 
-            foreach (var variable in syntax.DeclaredVariables)
+            foreach (var variable in syntax.Body.DeclaredVariables)
             {
                 variable.Type = VariableType.Global;
             }
 
-            _main = syntax;
-            _blocks.Add(new BlockManager(syntax, null, null));
+            _main = syntax.Body;
+            _blocks.Add(new BlockManager(syntax.Body, null, null));
 
             base.VisitProgram(syntax);
 
@@ -250,7 +250,7 @@ namespace Jint.Compiler
             // If we're parsing a function constructor, we don't have a main,
             // so we don't skip over the global scope.
 
-            bool haveMain = _blocks[0].Block is ProgramSyntax;
+            bool haveMain = _blocks[0].Block.BodyType == BodyType.Program;
 
             int count = _blocks.Count;
             for (int i = count - 1; i >= (haveMain ? 1 : 0); i--)
@@ -332,12 +332,12 @@ namespace Jint.Compiler
 
         private class BlockManager
         {
-            public BlockSyntax Block { get; private set; }
+            public BodySyntax Block { get; private set; }
             public Variable ArgumentsVariable { get; private set; }
             public BlockManager Parent { get; private set; }
             public HashSet<Variable> ClosedOverVariables { get; private set; }
 
-            public BlockManager(BlockSyntax block, Variable argumentsVariable, BlockManager parent)
+            public BlockManager(BodySyntax block, Variable argumentsVariable, BlockManager parent)
             {
                 Block = block;
                 ArgumentsVariable = argumentsVariable;

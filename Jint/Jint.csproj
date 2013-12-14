@@ -64,6 +64,8 @@
     <Compile Include="ExpressionExtensions\ExpressionEx.cs" />
     <Compile Include="ExpressionExtensions\ForEachExpression.cs" />
     <Compile Include="ExpressionExtensions\UsingExpression.cs" />
+    <Compile Include="Expressions\BodySyntax.cs" />
+    <Compile Include="Expressions\BodyType.cs" />
     <Compile Include="Expressions\ClosedOverVariable.cs" />
     <Compile Include="Expressions\DefaultClause.cs" />
     <Compile Include="Expressions\ISourceLocation.cs" />

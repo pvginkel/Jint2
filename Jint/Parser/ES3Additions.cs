@@ -142,14 +142,14 @@ namespace Jint.Parser
             return program();
         }
 
-        public BlockSyntax ExecuteBlockStatements()
+        public BodySyntax ExecuteBlockStatements()
         {
             return blockStatements();
         }
 
         // References the upper level block currently parsed. 
         // This is used to add variable declarations at the top of the body while parsing.
-        private BlockBuilder _currentBody;
+        private BodyBuilder _currentBody;
 
         private bool IsLeftHandSideAssign(ExpressionSyntax lhs)
         {

@@ -9,7 +9,7 @@ namespace Jint.Parser
 {
     partial class ES3Parser
     {
-        private class BlockBuilder
+        private class BodyBuilder
         {
             private List<SyntaxNode> _statements;
             private List<FunctionSyntax> _functionDeclarations;
@@ -38,14 +38,14 @@ namespace Jint.Parser
                 }
             }
 
-            public BlockBuilder()
+            public BodyBuilder()
             {
                 DeclaredVariables = new VariableCollection();
             }
 
-            public BlockSyntax CreateBlock()
+            public BodySyntax CreateBody(BodyType type)
             {
-                return new BlockSyntax(GetStatements(), DeclaredVariables);
+                return new BodySyntax(type, GetStatements(), DeclaredVariables);
             }
 
             private IEnumerable<SyntaxNode> GetStatements()
@@ -65,11 +65,6 @@ namespace Jint.Parser
                         yield return statement;
                     }
                 }
-            }
-
-            public ProgramSyntax CreateProgram()
-            {
-                return new ProgramSyntax(GetStatements(), DeclaredVariables);
             }
         }
 

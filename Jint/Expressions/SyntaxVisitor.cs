@@ -9,7 +9,7 @@ namespace Jint.Expressions
     {
         public virtual void VisitProgram(ProgramSyntax syntax)
         {
-            VisitBlock(syntax);
+            syntax.Body.Accept(this);
         }
 
         public virtual void VisitAssignment(AssignmentSyntax syntax)

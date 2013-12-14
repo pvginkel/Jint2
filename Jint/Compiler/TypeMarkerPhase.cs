@@ -11,7 +11,7 @@ namespace Jint.Compiler
     {
         public override void VisitProgram(ProgramSyntax syntax)
         {
-            foreach (var variable in syntax.DeclaredVariables)
+            foreach (var variable in syntax.Body.DeclaredVariables)
             {
                 if (variable.Type == VariableType.Global)
                 {

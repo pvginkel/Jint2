@@ -83,9 +83,9 @@ namespace Jint
             return program;
         }
 
-        internal static BlockSyntax CompileBlockStatements(string source)
+        internal static BodySyntax CompileBlockStatements(string source)
         {
-            BlockSyntax block = null;
+            BodySyntax block = null;
             if (!string.IsNullOrEmpty(source))
             {
                 var lexer = new ES3Lexer(new ANTLRStringStream(source));
@@ -444,7 +444,7 @@ namespace Jint
         {
             var scope = Global.GlobalScope;
 
-            foreach (var declaredVariable in program.DeclaredVariables)
+            foreach (var declaredVariable in program.Body.DeclaredVariables)
             {
                 if (
                     declaredVariable.IsDeclared &&
@@ -477,7 +477,7 @@ namespace Jint
                 }
             }
 
-            BlockSyntax newBody;
+            BodySyntax newBody;
             string sourceCode = null;
 
             if (parameters.Length >= 1)
@@ -487,7 +487,7 @@ namespace Jint
             }
             else
             {
-                newBody = new BlockSyntax(SyntaxNode.EmptyList);
+                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection());
             }
 
             var function = new FunctionSyntax(null, newParameters, newBody, null, null);

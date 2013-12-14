@@ -169,10 +169,10 @@ namespace Jint.Compiler
 
             ParameterExpression closureLocal = null;
 
-            if (syntax.Closure != null)
+            if (syntax.Body.Closure != null)
             {
                 closureLocal = Expression.Parameter(
-                    syntax.Closure.Type,
+                    syntax.Body.Closure.Type,
                     "closure"
                 );
                 locals.Add(closureLocal);
@@ -181,7 +181,7 @@ namespace Jint.Compiler
             _scope = new Scope(
                 this,
                 that,
-                syntax.Closure,
+                syntax.Body.Closure,
                 null,
                 closureLocal,
                 null,
@@ -195,7 +195,7 @@ namespace Jint.Compiler
             {
                 // We don't add our closureLocal to locals here because
                 // later we add everything from _scope.ClosureLocals.
-                _scope.ClosureLocals.Add(syntax.Closure, closureLocal);
+                _scope.ClosureLocals.Add(syntax.Body.Closure, closureLocal);
 
                 statements.Add(Expression.Assign(
                     closureLocal,
@@ -215,7 +215,7 @@ namespace Jint.Compiler
 
             // Build the body and return label.
 
-            var body = ProcessFunctionBody(syntax, _scope.Runtime);
+            var body = ProcessFunctionBody(syntax.Body, _scope.Runtime);
 
             if (body.Type == typeof(void))
             {
@@ -242,7 +242,7 @@ namespace Jint.Compiler
             );
         }
 
-        private BlockExpression ProcessFunctionBody(BlockSyntax syntax, ParameterExpression runtimeParameter)
+        private BlockExpression ProcessFunctionBody(BodySyntax syntax, ParameterExpression runtimeParameter)
         {
             // Declare the locals.
 
@@ -1074,7 +1074,7 @@ namespace Jint.Compiler
             return name;
         }
 
-        private Closure FindScopedClosure(BlockSyntax body, Scope scope)
+        private Closure FindScopedClosure(BodySyntax body, Scope scope)
         {
             if (body.Closure != null)
                 return body.Closure;

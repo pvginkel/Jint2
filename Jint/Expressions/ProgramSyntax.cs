@@ -5,9 +5,16 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    internal class ProgramSyntax : BlockSyntax
+    internal class ProgramSyntax : SyntaxNode
     {
         private bool? _isLiteral;
+
+        public override SyntaxType Type
+        {
+            get { return SyntaxType.Program; }
+        }
+
+        public BodySyntax Body { get; private set; }
 
         public override bool IsLiteral
         {
@@ -24,7 +31,7 @@ namespace Jint.Expressions
                     // * And skip over empty statements.
                     //
 
-                    foreach (var statement in Statements)
+                    foreach (var statement in Body.Statements)
                     {
                         if (statement.IsLiteral)
                         {
@@ -63,14 +70,12 @@ namespace Jint.Expressions
             }
         }
 
-        public ProgramSyntax(IEnumerable<SyntaxNode> statements)
-            : this(statements, null)
+        public ProgramSyntax(BodySyntax body)
         {
-        }
+            if (body == null)
+                throw new ArgumentNullException("body");
 
-        public ProgramSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
-            : base(statements, declaredVariables)
-        {
+            Body = body;
         }
 
         [DebuggerStepThrough]

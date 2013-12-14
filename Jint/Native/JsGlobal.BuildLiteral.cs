@@ -82,7 +82,7 @@ namespace Jint.Native
                 // single statement that is a literal, or we have a single
                 // return that is a literal.
 
-                foreach (var statement in syntax.Statements)
+                foreach (var statement in syntax.Body.Statements)
                 {
                     if (statement.Type == SyntaxType.Return)
                         return ((ReturnSyntax)statement).Expression.Accept(this);

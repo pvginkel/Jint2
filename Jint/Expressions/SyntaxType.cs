@@ -28,6 +28,7 @@ namespace Jint.Expressions
         Label,
         MethodCall,
         New,
+        Program,
         Property,
         Regexp,
         Return,

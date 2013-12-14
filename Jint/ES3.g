@@ -712,7 +712,7 @@ propertyAssignment returns [PropertyDeclaration value]
 propertyFunctionAssignment returns [PropertyDeclaration value]
 @init {
     PropertyExpressionType mode;
-    BlockSyntax body;
+    BodySyntax body;
     List<string> parameters = null;
     string name;
     IToken start = null;
@@ -1310,13 +1310,13 @@ block returns [BlockSyntax value]
 
 // Used for the Function constructor, because it doesn't have braces.
 
-blockStatements returns [BlockSyntax value]
+blockStatements returns [BodySyntax value]
 @init{
     var tempBody = _currentBody;
-    _currentBody = new BlockBuilder();
+    _currentBody = new BodyBuilder();
 }
 @after{
-    $value = _currentBody.CreateBlock();
+    $value = _currentBody.CreateBody(BodyType.Function);
     _currentBody = tempBody;
 }
 	:
@@ -1879,7 +1879,7 @@ functionDeclaration returns [SyntaxNode value]
     var start = input.LT(1);
     string name;
     List<string> parameters;
-    BlockSyntax body;
+    BodySyntax body;
 }
 @after {
     _currentBody.FunctionDeclarations.Add(
@@ -1908,7 +1908,7 @@ functionExpression returns [FunctionSyntax value]
     var start = input.LT(1);
     string name = null;
     List<string> parameters;
-    BlockSyntax body;
+    BodySyntax body;
 }
 @after {
 	$value = new FunctionSyntax(
@@ -1949,14 +1949,14 @@ formalParameterList returns [List<string> value]
         RPAREN
 	;
 
-functionBody returns [BlockSyntax value]
+functionBody returns [BodySyntax value]
 @init{
     var tempBody = _currentBody;
-    _currentBody = new BlockBuilder();
+    _currentBody = new BodyBuilder();
     var start = input.LT(1);
 }
 @after{
-    $value = _currentBody.CreateBlock();
+    $value = _currentBody.CreateBody(BodyType.Function);
     _currentBody = tempBody;
 }
 	:
@@ -1974,14 +1974,14 @@ functionBody returns [BlockSyntax value]
 
 program returns [ProgramSyntax value]
 @init{
-    _currentBody = new BlockBuilder();
+    _currentBody = new BodyBuilder();
 }
 	:
         (
             follow=sourceElement
             { _currentBody.Statements.Add(follow); }
         )*
-        { $value = _currentBody.CreateProgram(); }
+        { $value = new ProgramSyntax(_currentBody.CreateBody(BodyType.Program)); }
 	;
 
 /*
