@@ -85,12 +85,11 @@ namespace Jint.Expressions
             syntax.Expression.Accept(this);
             foreach (var @case in syntax.Cases)
             {
-                @case.Expression.Accept(this);
+                if (@case.Expression != null)
+                    @case.Expression.Accept(this);
                 if (@case.Body != null)
                     @case.Body.Accept(this);
             }
-            if (syntax.Default != null)
-                syntax.Default.Body.Accept(this);
         }
 
         public virtual void VisitWith(WithSyntax syntax)

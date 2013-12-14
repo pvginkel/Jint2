@@ -71,6 +71,7 @@
     <Compile Include="Fixtures\FixtureSupportClasses.cs" />
     <Compile Include="Fixtures\ParsingTests.cs" />
     <Compile Include="Fixtures\Json2.cs" />
+    <Compile Include="Fixtures\SwitchTests.cs" />
     <Compile Include="Fixtures\Underscore.cs" />
     <Compile Include="Fixtures\DateTests.cs" />
     <Compile Include="Fixtures\FixturesFixture.cs" />

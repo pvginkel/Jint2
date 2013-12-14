@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Jint.Expressions
 {
-    internal class DefaultClause : ISourceLocation
+    internal class SwitchCase : ISourceLocation
     {
+        public ExpressionSyntax Expression { get; private set; }
         public BlockSyntax Body { get; private set; }
+        public bool IsDefault { get { return Expression == null; } }
         public SourceLocation Location { get; private set; }
 
-        public DefaultClause(BlockSyntax body, SourceLocation location)
+        public SwitchCase(ExpressionSyntax expression, BlockSyntax body, SourceLocation location)
         {
             if (body == null)
                 throw new ArgumentNullException("body");
             if (location == null)
                 throw new ArgumentNullException("location");
 
+            Expression = expression;
             Body = body;
             Location = location;
         }

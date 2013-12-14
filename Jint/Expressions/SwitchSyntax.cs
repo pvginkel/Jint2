@@ -9,11 +9,10 @@ namespace Jint.Expressions
     internal class SwitchSyntax : SyntaxNode, ISourceLocation
     {
         public SyntaxNode Expression { get; private set; }
-        public IList<CaseClause> Cases { get; private set; }
-        public DefaultClause Default { get; private set; }
+        public IList<SwitchCase> Cases { get; private set; }
         public SourceLocation Location { get; private set; }
 
-        public SwitchSyntax(SyntaxNode expression, IEnumerable<CaseClause> cases, DefaultClause @default, SourceLocation location)
+        public SwitchSyntax(SyntaxNode expression, IEnumerable<SwitchCase> cases, SourceLocation location)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
@@ -22,7 +21,6 @@ namespace Jint.Expressions
 
             Expression = expression;
             Cases = cases.ToReadOnly();
-            Default = @default;
             Location = location;
         }
 

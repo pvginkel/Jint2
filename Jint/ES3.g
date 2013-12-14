@@ -1725,8 +1725,8 @@ withStatement returns [SyntaxNode value]
 
 switchStatement returns [SyntaxNode value]
 @init {
-    DefaultClause block = null;
-    var cases = new List<CaseClause>();
+    bool hadDefault = false;
+    var cases = new List<SwitchCase>();
     var start = input.LT(1);
     IToken end;
 }
@@ -1735,18 +1735,18 @@ switchStatement returns [SyntaxNode value]
         { end = input.LT(-1); }
         LBRACE
         (
-            { block == null }?=>
+            { !hadDefault }?=>
             def=defaultClause
-            { block = def; }
+            { hadDefault = true; cases.Add(def); }
         |
             cc=caseClause
             { cases.Add(cc); }
         )*
         RBRACE
-        { $value = new SwitchSyntax(e, cases, block, GetLocation(start, end)); }
+        { $value = new SwitchSyntax(e, cases, GetLocation(start, end)); }
 	;
 
-caseClause returns [CaseClause value]
+caseClause returns [SwitchCase value]
 @init {
     var statements = new List<SyntaxNode>();
     var start = input.LT(1);
@@ -1760,7 +1760,7 @@ caseClause returns [CaseClause value]
             { statements.Add(st); }
         )*
         {
-            $value = new CaseClause(
+            $value = new SwitchCase(
                 e,
                 new BlockSyntax(statements),
                 GetLocation(start, end)
@@ -1768,7 +1768,7 @@ caseClause returns [CaseClause value]
         }
 	;
 	
-defaultClause returns [DefaultClause value]
+defaultClause returns [SwitchCase value]
 @init {
     var statements = new List<SyntaxNode>();
     var start = input.LT(1);
@@ -1782,7 +1782,8 @@ defaultClause returns [DefaultClause value]
             { statements.Add(st); }
         ) *
         {
-            $value = new DefaultClause(
+            $value = new SwitchCase(
+                null,
                 new BlockSyntax(statements),
                 GetLocation(start, end)
             );

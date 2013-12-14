@@ -67,7 +67,6 @@
     <Compile Include="Expressions\BodySyntax.cs" />
     <Compile Include="Expressions\BodyType.cs" />
     <Compile Include="Expressions\ClosedOverVariable.cs" />
-    <Compile Include="Expressions\DefaultClause.cs" />
     <Compile Include="Expressions\ISourceLocation.cs" />
     <Compile Include="Expressions\JsonProperty.cs" />
     <Compile Include="Expressions\JsonAccessorProperty.cs" />
@@ -167,7 +166,7 @@
     <Compile Include="JintEngine.cs" />
     <Compile Include="Expressions\BinarySyntax.cs" />
     <Compile Include="Expressions\BlockSyntax.cs" />
-    <Compile Include="Expressions\CaseClause.cs" />
+    <Compile Include="Expressions\SwitchCase.cs" />
     <Compile Include="Expressions\AssignmentSyntax.cs" />
     <Compile Include="Expressions\CatchClause.cs" />
     <Compile Include="Expressions\ContinueSyntax.cs" />

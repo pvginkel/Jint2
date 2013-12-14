@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.SymbolStore;
 using System.Globalization;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Threading;
 using Jint.ExpressionExtensions;
 using Jint.Expressions;
 using Jint.Native;
+using SwitchCase = Jint.Expressions.SwitchCase;
 using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.Compiler
@@ -592,36 +594,40 @@ namespace Jint.Compiler
 
             var bodies = new List<Tuple<LabelTarget, Expression>>();
 
-            foreach (var caseClause in syntax.Cases)
+            LabelTarget defaultTarget = null;
+
+            foreach (var @case in syntax.Cases)
             {
-                var target = Expression.Label("target" + bodies.Count);
+                if (@case.IsDefault)
+                {
+                    if (_document != null)
+                        statements.Add(GetDebugInfo(@case));
 
-                if (_document != null)
-                    statements.Add(GetDebugInfo(caseClause));
+                    defaultTarget = Expression.Label("default");
 
-                statements.Add(Expression.IfThen(
-                    BuildOperationCall(
-                        SyntaxExpressionType.Equal,
-                        expressionLocal,
-                        caseClause.Expression.Accept(this)
-                    ),
-                    Expression.Goto(target)
-                ));
+                    bodies.Add(Tuple.Create(defaultTarget, @case.Body.Accept(this)));
+                }
+                else
+                {
+                    var target = Expression.Label("target" + bodies.Count);
 
-                bodies.Add(Tuple.Create(target, caseClause.Body.Accept(this)));
+                    if (_document != null)
+                        statements.Add(GetDebugInfo(@case));
+
+                    statements.Add(Expression.IfThen(
+                        BuildOperationCall(
+                            SyntaxExpressionType.Equal,
+                            expressionLocal,
+                            @case.Expression.Accept(this)
+                        ),
+                        Expression.Goto(target)
+                    ));
+
+                    bodies.Add(Tuple.Create(target, @case.Body.Accept(this)));
+                }
             }
 
-            if (syntax.Default != null)
-            {
-                if (_document != null)
-                    statements.Add(GetDebugInfo(syntax.Default));
-
-                var target = Expression.Label("default");
-
-                statements.Add(Expression.Goto(target));
-
-                bodies.Add(Tuple.Create(target, syntax.Default.Body.Accept(this)));
-            }
+            statements.Add(Expression.Goto(defaultTarget ?? after));
 
             foreach (var body in bodies)
             {
