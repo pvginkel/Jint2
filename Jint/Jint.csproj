@@ -150,7 +150,6 @@
     <Compile Include="Expressions\CommaOperatorSyntax.cs" />
     <Compile Include="Expressions\IdentifierSyntax.cs" />
     <Compile Include="Expressions\PropertySyntax.cs" />
-    <Compile Include="Expressions\IForStatement.cs" />
     <Compile Include="JintException.cs" />
     <Compile Include="Native\JsException.cs" />
     <Compile Include="Native\JsNull.cs" />

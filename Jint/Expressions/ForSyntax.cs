@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    internal class ForSyntax : SyntaxNode, IForStatement, ISourceLocation
+    internal class ForSyntax : SyntaxNode, ISourceLocation
     {
         public SyntaxNode Initialization { get; private set; }
         public SyntaxNode Test { get; private set; }
