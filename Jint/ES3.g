@@ -1172,7 +1172,7 @@ assignmentExpressionNoIn returns [ExpressionSyntax value]
 
 expression returns [ExpressionSyntax value]
 @init {
-    List<SyntaxNode> nodes = null;
+    List<ExpressionSyntax> nodes = null;
 }
 @after {
     if (nodes != null)
@@ -1186,7 +1186,7 @@ expression returns [ExpressionSyntax value]
             follow=assignmentExpression
             {
                 if (nodes == null)
-                    nodes = new List<SyntaxNode> { $value };
+                    nodes = new List<ExpressionSyntax> { $value };
 
                 nodes.Add(follow);
             }
@@ -1195,7 +1195,7 @@ expression returns [ExpressionSyntax value]
 
 expressionNoIn returns [ExpressionSyntax value]
 @init {
-    List<SyntaxNode> nodes = null;
+    List<ExpressionSyntax> nodes = null;
 }
 @after {
     if (nodes != null)
@@ -1209,7 +1209,7 @@ expressionNoIn returns [ExpressionSyntax value]
             follow=assignmentExpressionNoIn
             {
                 if (nodes == null)
-                    nodes = new List<SyntaxNode> { $value };
+                    nodes = new List<ExpressionSyntax> { $value };
 
                 nodes.Add(follow);
             }
@@ -1328,53 +1328,25 @@ blockStatements returns [BlockSyntax value]
 
 variableStatement returns [SyntaxNode value]
 @init {
-    List<SyntaxNode> statements = null;
+    var declarations = new List<VariableDeclaration>();
     var start = input.LT(1);
 }
 @after {
-    if (statements != null)
-        $value = new CommaOperatorSyntax(statements);
+    $value = new VariableDeclarationSyntax(declarations, GetLocation(start, input.LT(-1)));
 }
 	:
         VAR first=variableDeclaration
-        {
-            $value = new VariableDeclarationSyntax(
-                first.Identifier,
-                first.Expression,
-                false,
-                GetLocation(start, input.LT(-1))
-            )
-            {
-                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
-            };
-        }
+        { declarations.Add(first); }
         (
-            { start = input.LT(1); }
             COMMA follow=variableDeclaration
-            {
-                if (statements == null)
-                    statements = new List<SyntaxNode> { $value };
-
-                statements.Add(
-                    new VariableDeclarationSyntax(
-                        follow.Identifier,
-                        follow.Expression,
-                        false,
-                        GetLocation(start, input.LT(-1))
-                    )
-                    {
-                        Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
-                    }
-                );
-            }
+            { declarations.Add(follow); }
         )*
         semic
 	;
 
-variableDeclaration returns [VariableDeclarationSyntax value]
+variableDeclaration returns [VariableDeclaration value]
 @init {
-    ExpressionSyntax expression = null;
-    var start = input.LT(1);
+	ExpressionSyntax expression = null;
 }
 	:
         id=Identifier
@@ -1382,13 +1354,17 @@ variableDeclaration returns [VariableDeclarationSyntax value]
             ASSIGN ass=assignmentExpression
             { expression = ass; }
         )?
-        { $value = new VariableDeclarationSyntax($id.Text, expression, true, GetLocation(start, input.LT(-1))); }
+        {
+            $value = new VariableDeclaration($id.Text, expression, true)
+            {
+                Target = _currentBody.DeclaredVariables.AddOrGet($id.Text, true)
+            };
+        }
 	;
 	
-variableDeclarationNoIn returns [VariableDeclarationSyntax value]
+variableDeclarationNoIn returns [VariableDeclaration value]
 @init {
 	ExpressionSyntax expression = null;
-    var start = input.LT(1);
 }
 	:
         id=Identifier
@@ -1396,7 +1372,12 @@ variableDeclarationNoIn returns [VariableDeclarationSyntax value]
             ASSIGN ass=assignmentExpressionNoIn
             { expression = ass; }
         )?
-        { $value = new VariableDeclarationSyntax($id.Text, expression, true, GetLocation(start, input.LT(-1))); }
+        {
+            $value = new VariableDeclaration($id.Text, expression, true)
+            {
+                Target = _currentBody.DeclaredVariables.AddOrGet($id.Text, true)
+            };
+        }
 	;
 
 // $>
@@ -1559,53 +1540,30 @@ forControl returns [ForBuilder value]
 forControlVar returns [ForBuilder value]
 @init {
     $value = new ForBuilder();
-    List<SyntaxNode> statements = null;
-    var start = input.LT(1);
+    var declarations = new List<VariableDeclaration>();
+    IToken start;
+    IToken end = null;
 }
 @after {
-    if (statements != null)
-        $value.Initialization = new CommaOperatorSyntax(statements);
+    $value.Initialization = new VariableDeclarationSyntax(declarations, GetLocation(start, end));
 }
 	:
+        { start = input.LT(1); }
         VAR first=variableDeclarationNoIn
-        {
-            $value.Initialization = new VariableDeclarationSyntax(
-                first.Identifier,
-                first.Expression,
-                false,
-                GetLocation(start, input.LT(-1))
-            )
-            {
-                Target = _currentBody.DeclaredVariables.AddOrGet(first.Identifier, true)
-            };
-        }
+        { declarations.Add(first); }
 	    (
 		    (
+                { end = input.LT(-1); }
 			    IN ex=expression
                 { $value.Expression = ex; }
 		    )
 		    |
 		    (
 			    (
-                    { start = input.LT(1); }
                     COMMA follow=variableDeclarationNoIn
-                    {
-                        if (statements == null)
-                            statements = new List<SyntaxNode> { $value.Initialization };
-                        
-                        statements.Add(
-                            new VariableDeclarationSyntax(
-                                follow.Identifier,
-                                follow.Expression,
-                                false,
-                                GetLocation(start, input.LT(-1))
-                            )
-                            {
-                                Target = _currentBody.DeclaredVariables.AddOrGet(follow.Identifier, true)
-                            }
-                        );
-                    }
-                )* 
+                    { declarations.Add(follow); }
+                )*
+                { end = input.LT(-1); }
 			    SEMIC
                 (
                     ex1=expression

@@ -77,6 +77,7 @@
     <Compile Include="Expressions\SyntaxExpressionType.cs" />
     <Compile Include="Expressions\SyntaxType.cs" />
     <Compile Include="Expressions\SyntaxUtil.cs" />
+    <Compile Include="Expressions\VariableDeclaration.cs" />
     <Compile Include="Expressions\WithScope.cs" />
     <Compile Include="MarshalAccessorProperty.cs" />
     <Compile Include="Native\AbstractPropertyStore.cs" />

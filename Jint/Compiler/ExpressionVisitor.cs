@@ -723,13 +723,23 @@ namespace Jint.Compiler
 
         public Expression VisitVariableDeclaration(VariableDeclarationSyntax syntax)
         {
-            if (syntax.Expression == null)
+            var statements = new List<Expression>();
+
+            foreach (var declaration in syntax.Declarations)
+            {
+                if (declaration.Expression != null)
+                {
+                    statements.Add(_scope.BuildSet(
+                        declaration.Target,
+                        declaration.Expression.Accept(this)
+                    ));
+                }
+            }
+
+            if (statements.Count == 0)
                 return Expression.Empty();
 
-            return _scope.BuildSet(
-                syntax.Target,
-                syntax.Expression.Accept(this)
-            );
+            return Expression.Block(statements);
         }
 
         public Expression VisitWhile(WhileSyntax syntax)

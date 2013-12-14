@@ -18,19 +18,14 @@ namespace Jint.Expressions
             get { return Expressions.Count == 0 || (Expressions.Count == 1 && Expressions[0].IsLiteral); }
         }
 
-        public IList<SyntaxNode> Expressions { get; private set; }
+        public IList<ExpressionSyntax> Expressions { get; private set; }
 
         internal override ValueType ValueType
         {
-            get
-            {
-                var expression = Expressions[Expressions.Count - 1] as ExpressionSyntax;
-
-                return expression != null ? expression.ValueType : ValueType.Unknown;
-            }
+            get { return Expressions[Expressions.Count - 1].ValueType; }
         }
 
-        public CommaOperatorSyntax(IEnumerable<SyntaxNode> expressions)
+        public CommaOperatorSyntax(IEnumerable<ExpressionSyntax> expressions)
         {
             if (expressions == null)
                 throw new ArgumentNullException("expressions");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -26,9 +27,6 @@ namespace Jint.Compiler
         {
             switch (syntax.Type)
             {
-                case SyntaxType.VariableDeclaration:
-                    return _scope.BuildGet(((VariableDeclarationSyntax)syntax).Target, withTarget);
-
                 case SyntaxType.Identifier:
                     return _scope.BuildGet(((IdentifierSyntax)syntax).Target, withTarget);
 
@@ -61,7 +59,11 @@ namespace Jint.Compiler
             switch (syntax.Type)
             {
                 case SyntaxType.VariableDeclaration:
-                    return _scope.BuildSet(((VariableDeclarationSyntax)syntax).Target, value);
+                    var variableDeclaration = (VariableDeclarationSyntax)syntax;
+
+                    Debug.Assert(variableDeclaration.Declarations.Count == 1);
+
+                    return _scope.BuildSet(variableDeclaration.Declarations[0].Target, value);
 
                 case SyntaxType.Identifier:
                     return _scope.BuildSet(((IdentifierSyntax)syntax).Target, value);

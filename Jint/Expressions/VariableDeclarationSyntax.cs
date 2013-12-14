@@ -7,22 +7,15 @@ namespace Jint.Expressions
 {
     public class VariableDeclarationSyntax : SyntaxNode, ISourceLocation
     {
-        public string Identifier { get; private set; }
-        public ExpressionSyntax Expression { get; private set; }
-        public bool Global { get; private set; }
-        internal Variable Target { get; set; }
+        public IList<VariableDeclaration> Declarations { get; private set; }
         public SourceLocation Location { get; private set; }
 
-        public VariableDeclarationSyntax(string identifier, ExpressionSyntax expression, bool global, SourceLocation location)
+        public VariableDeclarationSyntax(IEnumerable<VariableDeclaration> declarations, SourceLocation location)
         {
-            if (identifier == null)
-                throw new ArgumentNullException("identifier");
             if (location == null)
                 throw new ArgumentNullException("location");
 
-            Identifier = identifier;
-            Expression = expression;
-            Global = global;
+            Declarations = declarations.ToReadOnly();
             Location = location;
         }
 

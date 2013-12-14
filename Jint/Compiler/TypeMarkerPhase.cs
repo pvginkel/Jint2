@@ -63,8 +63,11 @@ namespace Jint.Compiler
 
         public override void VisitVariableDeclaration(VariableDeclarationSyntax syntax)
         {
-            if (syntax.Expression != null)
-                MarkAssign(syntax.Target, syntax.Expression.ValueType);
+            foreach (var declaration in syntax.Declarations)
+            {
+                if (declaration.Expression != null)
+                    MarkAssign(declaration.Target, declaration.Expression.ValueType);
+            }
 
             base.VisitVariableDeclaration(syntax);
         }

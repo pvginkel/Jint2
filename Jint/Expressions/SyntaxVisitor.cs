@@ -117,8 +117,11 @@ namespace Jint.Expressions
 
         public virtual void VisitVariableDeclaration(VariableDeclarationSyntax syntax)
         {
-            if (syntax.Expression != null)
-                syntax.Expression.Accept(this);
+            foreach (var declaration in syntax.Declarations)
+            {
+                if (declaration.Expression != null)
+                    declaration.Expression.Accept(this);
+            }
         }
 
         public virtual void VisitWhile(WhileSyntax syntax)
