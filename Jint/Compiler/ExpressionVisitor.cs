@@ -314,11 +314,9 @@ namespace Jint.Compiler
                             identifier.Name,
                             function.Parameters,
                             function.Body,
+                            function.Target,
                             function.Location
-                        )
-                        {
-                            Target = function.Target
-                        };
+                        );
                     }
                 }
                 
@@ -1329,11 +1327,9 @@ namespace Jint.Compiler
                             dataProperty.Name,
                             function.Parameters,
                             function.Body,
+                            function.Target,
                             function.Location
-                        )
-                        {
-                            Target = function.Target
-                        };
+                        );
                     }
 
                     statements.Add(BuildSetMember(

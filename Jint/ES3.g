@@ -724,6 +724,7 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
             name,
             parameters,
             body,
+            null,
             GetLocation(start, input.LT(-1))
         ),
         mode
@@ -1358,12 +1359,7 @@ variableDeclaration returns [VariableDeclaration value]
             ASSIGN ass=assignmentExpression
             { expression = ass; }
         )?
-        {
-            $value = new VariableDeclaration($id.Text, expression, true)
-            {
-                Target = _currentBody.DeclaredVariables.AddOrGet($id.Text, true)
-            };
-        }
+        { $value = new VariableDeclaration($id.Text, expression, true, _currentBody.DeclaredVariables.AddOrGet($id.Text, true)); }
 	;
 	
 variableDeclarationNoIn returns [VariableDeclaration value]
@@ -1376,12 +1372,7 @@ variableDeclarationNoIn returns [VariableDeclaration value]
             ASSIGN ass=assignmentExpressionNoIn
             { expression = ass; }
         )?
-        {
-            $value = new VariableDeclaration($id.Text, expression, true)
-            {
-                Target = _currentBody.DeclaredVariables.AddOrGet($id.Text, true)
-            };
-        }
+        { $value = new VariableDeclaration($id.Text, expression, true, _currentBody.DeclaredVariables.AddOrGet($id.Text, true)); }
 	;
 
 // $>
@@ -1862,12 +1853,9 @@ tryStatement returns [TrySyntax value]
 	;
 	
 catchClause returns [CatchClause value]
-@after{
-    $value.Target = _currentBody.DeclaredVariables.AddOrGet($value.Identifier, true);
-}
 	:
         CATCH LPAREN id=Identifier RPAREN b=block
-        { $value = new CatchClause($id.text, b); }
+        { $value = new CatchClause($id.text, b, _currentBody.DeclaredVariables.AddOrGet($id.text, true)); }
 	;
 	
 finallyClause returns [FinallyClause value]
@@ -1899,11 +1887,9 @@ functionDeclaration returns [SyntaxNode value]
             name,
             parameters,
             body,
+            _currentBody.DeclaredVariables.AddOrGet(name, true),
             GetLocation(start, input.LT(-1))
         )
-        {
-            Target = _currentBody.DeclaredVariables.AddOrGet(name, true)
-        }
     );
 
     $value = new EmptySyntax();
@@ -1925,10 +1911,13 @@ functionExpression returns [FunctionSyntax value]
     BlockSyntax body;
 }
 @after {
-	$value = new FunctionSyntax(name, parameters, body, GetLocation(start, input.LT(-1)));
-
-    if (name != null)
-        $value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
+	$value = new FunctionSyntax(
+        name,
+        parameters,
+        body,
+        name == null ? null : _currentBody.DeclaredVariables.AddOrGet(name, true),
+        GetLocation(start, input.LT(-1))
+    );
 }
 	:
         FUNCTION

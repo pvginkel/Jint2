@@ -490,7 +490,7 @@ namespace Jint
                 newBody = new BlockSyntax(SyntaxNode.EmptyList);
             }
 
-            var function = new FunctionSyntax(null, newParameters, newBody, null);
+            var function = new FunctionSyntax(null, newParameters, newBody, null, null);
 
             PrepareTree(function);
 

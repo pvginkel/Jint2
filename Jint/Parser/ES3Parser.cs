@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 11:55:44
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 12:01:12
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -1920,26 +1920,26 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		DebugLocation(712, 4);
 		try
 		{
-			// ..\\ES3.g:732:5: (acc= accessor prop2= propertyName (parms= formalParameterList )? statements= functionBody )
+			// ..\\ES3.g:733:5: (acc= accessor prop2= propertyName (parms= formalParameterList )? statements= functionBody )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:733:9: acc= accessor prop2= propertyName (parms= formalParameterList )? statements= functionBody
+			// ..\\ES3.g:734:9: acc= accessor prop2= propertyName (parms= formalParameterList )? statements= functionBody
 			{
-			DebugLocation(733, 12);
+			DebugLocation(734, 12);
 			PushFollow(Follow._accessor_in_propertyFunctionAssignment3669);
 			acc=accessor();
 			PopFollow();
 
-			DebugLocation(734, 9);
+			DebugLocation(735, 9);
 			 mode = acc; 
-			DebugLocation(735, 14);
+			DebugLocation(736, 14);
 			PushFollow(Follow._propertyName_in_propertyFunctionAssignment3691);
 			prop2=propertyName();
 			PopFollow();
 
-			DebugLocation(736, 9);
-			 name = prop2; 
 			DebugLocation(737, 9);
-			// ..\\ES3.g:737:9: (parms= formalParameterList )?
+			 name = prop2; 
+			DebugLocation(738, 9);
+			// ..\\ES3.g:738:9: (parms= formalParameterList )?
 			int alt13=2;
 			try { DebugEnterSubRule(13);
 			try { DebugEnterDecision(13, false);
@@ -1954,16 +1954,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:738:13: parms= formalParameterList
+				// ..\\ES3.g:739:13: parms= formalParameterList
 				{
-				DebugLocation(738, 13);
+				DebugLocation(739, 13);
 				 start = input.LT(1); 
-				DebugLocation(739, 18);
+				DebugLocation(740, 18);
 				PushFollow(Follow._formalParameterList_in_propertyFunctionAssignment3741);
 				parms=formalParameterList();
 				PopFollow();
 
-				DebugLocation(740, 13);
+				DebugLocation(741, 13);
 				 parameters = parms; 
 
 				}
@@ -1972,17 +1972,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(13); }
 
-			DebugLocation(742, 9);
+			DebugLocation(743, 9);
 
 			            if (start == null)
 			                start = input.LT(1);
 			        
-			DebugLocation(746, 19);
+			DebugLocation(747, 19);
 			PushFollow(Follow._functionBody_in_propertyFunctionAssignment3788);
 			statements=functionBody();
 			PopFollow();
 
-			DebugLocation(747, 9);
+			DebugLocation(748, 9);
 			 body = statements; 
 
 			}
@@ -1994,6 +1994,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			            name,
 			            parameters,
 			            body,
+			            null,
 			            GetLocation(start, input.LT(-1))
 			        ),
 			        mode
@@ -2011,7 +2012,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("propertyFunctionAssignment", 14);
 			LeaveRule_propertyFunctionAssignment();
 		}
-		DebugLocation(748, 4);
+		DebugLocation(749, 4);
 		} finally { DebugExitRule(GrammarFileName, "propertyFunctionAssignment"); }
 		return value;
 
@@ -2023,7 +2024,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_propertyValueAssignment();
 
 	// $ANTLR start "propertyValueAssignment"
-	// ..\\ES3.g:750:1: propertyValueAssignment returns [PropertyDeclaration value] : prop1= propertyName COLON ass= assignmentExpression ;
+	// ..\\ES3.g:751:1: propertyValueAssignment returns [PropertyDeclaration value] : prop1= propertyName COLON ass= assignmentExpression ;
 	[GrammarRule("propertyValueAssignment")]
 	private PropertyDeclaration propertyValueAssignment()
 	{
@@ -2040,28 +2041,28 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    ExpressionSyntax expression;
 
 		try { DebugEnterRule(GrammarFileName, "propertyValueAssignment");
-		DebugLocation(750, 4);
+		DebugLocation(751, 4);
 		try
 		{
-			// ..\\ES3.g:762:5: (prop1= propertyName COLON ass= assignmentExpression )
+			// ..\\ES3.g:763:5: (prop1= propertyName COLON ass= assignmentExpression )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:763:9: prop1= propertyName COLON ass= assignmentExpression
+			// ..\\ES3.g:764:9: prop1= propertyName COLON ass= assignmentExpression
 			{
-			DebugLocation(763, 14);
+			DebugLocation(764, 14);
 			PushFollow(Follow._propertyName_in_propertyValueAssignment3840);
 			prop1=propertyName();
 			PopFollow();
 
-			DebugLocation(764, 9);
-			 name = prop1; 
 			DebugLocation(765, 9);
+			 name = prop1; 
+			DebugLocation(766, 9);
 			Match(input,COLON,Follow._COLON_in_propertyValueAssignment3860); 
-			DebugLocation(766, 12);
+			DebugLocation(767, 12);
 			PushFollow(Follow._assignmentExpression_in_propertyValueAssignment3872);
 			ass=assignmentExpression();
 			PopFollow();
 
-			DebugLocation(767, 9);
+			DebugLocation(768, 9);
 			 expression = ass; 
 
 			}
@@ -2085,7 +2086,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("propertyValueAssignment", 15);
 			LeaveRule_propertyValueAssignment();
 		}
-		DebugLocation(768, 4);
+		DebugLocation(769, 4);
 		} finally { DebugExitRule(GrammarFileName, "propertyValueAssignment"); }
 		return value;
 
@@ -2097,7 +2098,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_accessor();
 
 	// $ANTLR start "accessor"
-	// ..\\ES3.g:770:1: accessor returns [PropertyExpressionType value] : ex1= Identifier {...}? =>;
+	// ..\\ES3.g:771:1: accessor returns [PropertyExpressionType value] : ex1= Identifier {...}? =>;
 	[GrammarRule("accessor")]
 	private PropertyExpressionType accessor()
 	{
@@ -2109,21 +2110,21 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		IToken ex1 = default(IToken);
 
 		try { DebugEnterRule(GrammarFileName, "accessor");
-		DebugLocation(770, 1);
+		DebugLocation(771, 1);
 		try
 		{
-			// ..\\ES3.g:771:2: (ex1= Identifier {...}? =>)
+			// ..\\ES3.g:772:2: (ex1= Identifier {...}? =>)
 			DebugEnterAlt(1);
-			// ..\\ES3.g:771:4: ex1= Identifier {...}? =>
+			// ..\\ES3.g:772:4: ex1= Identifier {...}? =>
 			{
-			DebugLocation(771, 7);
+			DebugLocation(772, 7);
 			ex1=(IToken)Match(input,Identifier,Follow._Identifier_in_accessor3910); 
-			DebugLocation(771, 19);
+			DebugLocation(772, 19);
 			if (!(( ex1.Text=="get" || ex1.Text=="set" )))
 			{
 				throw new FailedPredicateException(input, "accessor", " ex1.Text==\"get\" || ex1.Text==\"set\" ");
 			}
-			DebugLocation(771, 61);
+			DebugLocation(772, 61);
 			 if(ex1.Text=="get") value = PropertyExpressionType.Get; if(ex1.Text=="set") value =PropertyExpressionType.Set; 
 
 			}
@@ -2140,7 +2141,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("accessor", 16);
 			LeaveRule_accessor();
 		}
-		DebugLocation(772, 1);
+		DebugLocation(773, 1);
 		} finally { DebugExitRule(GrammarFileName, "accessor"); }
 		return value;
 
@@ -2152,7 +2153,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_propertyName();
 
 	// $ANTLR start "propertyName"
-	// ..\\ES3.g:774:1: propertyName returns [string value] : (ex1= Identifier |ex2= StringLiteral |ex3= numericLiteral );
+	// ..\\ES3.g:775:1: propertyName returns [string value] : (ex1= Identifier |ex2= StringLiteral |ex3= numericLiteral );
 	[GrammarRule("propertyName")]
 	private string propertyName()
 	{
@@ -2166,10 +2167,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		double ex3 = default(double);
 
 		try { DebugEnterRule(GrammarFileName, "propertyName");
-		DebugLocation(774, 1);
+		DebugLocation(775, 1);
 		try
 		{
-			// ..\\ES3.g:775:2: (ex1= Identifier |ex2= StringLiteral |ex3= numericLiteral )
+			// ..\\ES3.g:776:2: (ex1= Identifier |ex2= StringLiteral |ex3= numericLiteral )
 			int alt14=3;
 			try { DebugEnterDecision(14, false);
 			switch (input.LA(1))
@@ -2204,36 +2205,36 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:775:4: ex1= Identifier
+				// ..\\ES3.g:776:4: ex1= Identifier
 				{
-				DebugLocation(775, 7);
+				DebugLocation(776, 7);
 				ex1=(IToken)Match(input,Identifier,Follow._Identifier_in_propertyName3932); 
-				DebugLocation(775, 19);
+				DebugLocation(776, 19);
 				 value = ex1.Text; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:776:4: ex2= StringLiteral
+				// ..\\ES3.g:777:4: ex2= StringLiteral
 				{
-				DebugLocation(776, 7);
+				DebugLocation(777, 7);
 				ex2=(IToken)Match(input,StringLiteral,Follow._StringLiteral_in_propertyName3941); 
-				DebugLocation(776, 22);
+				DebugLocation(777, 22);
 				 value = ExtractString(ex2.Text); 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:777:4: ex3= numericLiteral
+				// ..\\ES3.g:778:4: ex3= numericLiteral
 				{
-				DebugLocation(777, 7);
+				DebugLocation(778, 7);
 				PushFollow(Follow._numericLiteral_in_propertyName3950);
 				ex3=numericLiteral();
 				PopFollow();
 
-				DebugLocation(777, 23);
+				DebugLocation(778, 23);
 				 value = ex3.ToString(); 
 
 				}
@@ -2252,7 +2253,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("propertyName", 17);
 			LeaveRule_propertyName();
 		}
-		DebugLocation(778, 1);
+		DebugLocation(779, 1);
 		} finally { DebugExitRule(GrammarFileName, "propertyName"); }
 		return value;
 
@@ -2264,7 +2265,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_memberExpression();
 
 	// $ANTLR start "memberExpression"
-	// ..\\ES3.g:789:1: memberExpression returns [ExpressionSyntax value] : (prim= primaryExpression |func= functionExpression );
+	// ..\\ES3.g:790:1: memberExpression returns [ExpressionSyntax value] : (prim= primaryExpression |func= functionExpression );
 	[GrammarRule("memberExpression")]
 	private ExpressionSyntax memberExpression()
 	{
@@ -2277,10 +2278,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		FunctionSyntax func = default(FunctionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "memberExpression");
-		DebugLocation(789, 1);
+		DebugLocation(790, 1);
 		try
 		{
-			// ..\\ES3.g:790:2: (prim= primaryExpression |func= functionExpression )
+			// ..\\ES3.g:791:2: (prim= primaryExpression |func= functionExpression )
 			int alt15=2;
 			try { DebugEnterDecision(15, false);
 			int LA15_0 = input.LA(1);
@@ -2304,28 +2305,28 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:790:4: prim= primaryExpression
+				// ..\\ES3.g:791:4: prim= primaryExpression
 				{
-				DebugLocation(790, 8);
+				DebugLocation(791, 8);
 				PushFollow(Follow._primaryExpression_in_memberExpression3976);
 				prim=primaryExpression();
 				PopFollow();
 
-				DebugLocation(790, 27);
+				DebugLocation(791, 27);
 				 value = prim; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:791:4: func= functionExpression
+				// ..\\ES3.g:792:4: func= functionExpression
 				{
-				DebugLocation(791, 8);
+				DebugLocation(792, 8);
 				PushFollow(Follow._functionExpression_in_memberExpression3985);
 				func=functionExpression();
 				PopFollow();
 
-				DebugLocation(791, 28);
+				DebugLocation(792, 28);
 				 value = func; 
 
 				}
@@ -2344,7 +2345,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("memberExpression", 18);
 			LeaveRule_memberExpression();
 		}
-		DebugLocation(792, 1);
+		DebugLocation(793, 1);
 		} finally { DebugExitRule(GrammarFileName, "memberExpression"); }
 		return value;
 
@@ -2356,7 +2357,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_arguments();
 
 	// $ANTLR start "arguments"
-	// ..\\ES3.g:794:1: arguments returns [List<MethodArgument> value] : LPAREN (first= argument ( COMMA follow= argument )* )? RPAREN ;
+	// ..\\ES3.g:795:1: arguments returns [List<MethodArgument> value] : LPAREN (first= argument ( COMMA follow= argument )* )? RPAREN ;
 	[GrammarRule("arguments")]
 	private List<MethodArgument> arguments()
 	{
@@ -2372,17 +2373,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			value = new List<MethodArgument>();
 
 		try { DebugEnterRule(GrammarFileName, "arguments");
-		DebugLocation(794, 1);
+		DebugLocation(795, 1);
 		try
 		{
-			// ..\\ES3.g:798:2: ( LPAREN (first= argument ( COMMA follow= argument )* )? RPAREN )
+			// ..\\ES3.g:799:2: ( LPAREN (first= argument ( COMMA follow= argument )* )? RPAREN )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:799:9: LPAREN (first= argument ( COMMA follow= argument )* )? RPAREN
+			// ..\\ES3.g:800:9: LPAREN (first= argument ( COMMA follow= argument )* )? RPAREN
 			{
-			DebugLocation(799, 9);
-			Match(input,LPAREN,Follow._LPAREN_in_arguments4016); 
 			DebugLocation(800, 9);
-			// ..\\ES3.g:800:9: (first= argument ( COMMA follow= argument )* )?
+			Match(input,LPAREN,Follow._LPAREN_in_arguments4016); 
+			DebugLocation(801, 9);
+			// ..\\ES3.g:801:9: (first= argument ( COMMA follow= argument )* )?
 			int alt17=2;
 			try { DebugEnterSubRule(17);
 			try { DebugEnterDecision(17, false);
@@ -2397,17 +2398,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:801:13: first= argument ( COMMA follow= argument )*
+				// ..\\ES3.g:802:13: first= argument ( COMMA follow= argument )*
 				{
-				DebugLocation(801, 18);
+				DebugLocation(802, 18);
 				PushFollow(Follow._argument_in_arguments4042);
 				first=argument();
 				PopFollow();
 
-				DebugLocation(802, 13);
-				 value.Add(first); 
 				DebugLocation(803, 13);
-				// ..\\ES3.g:803:13: ( COMMA follow= argument )*
+				 value.Add(first); 
+				DebugLocation(804, 13);
+				// ..\\ES3.g:804:13: ( COMMA follow= argument )*
 				try { DebugEnterSubRule(16);
 				while (true)
 				{
@@ -2426,16 +2427,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:804:17: COMMA follow= argument
+						// ..\\ES3.g:805:17: COMMA follow= argument
 						{
-						DebugLocation(804, 17);
+						DebugLocation(805, 17);
 						Match(input,COMMA,Follow._COMMA_in_arguments4088); 
-						DebugLocation(805, 23);
+						DebugLocation(806, 23);
 						PushFollow(Follow._argument_in_arguments4108);
 						follow=argument();
 						PopFollow();
 
-						DebugLocation(806, 17);
+						DebugLocation(807, 17);
 						 value.Add(follow); 
 
 						}
@@ -2458,7 +2459,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(17); }
 
-			DebugLocation(809, 9);
+			DebugLocation(810, 9);
 			Match(input,RPAREN,Follow._RPAREN_in_arguments4162); 
 
 			}
@@ -2475,7 +2476,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("arguments", 19);
 			LeaveRule_arguments();
 		}
-		DebugLocation(810, 1);
+		DebugLocation(811, 1);
 		} finally { DebugExitRule(GrammarFileName, "arguments"); }
 		return value;
 
@@ -2487,7 +2488,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_argument();
 
 	// $ANTLR start "argument"
-	// ..\\ES3.g:812:1: argument returns [MethodArgument value] : ( REF )? ex= assignmentExpression ;
+	// ..\\ES3.g:813:1: argument returns [MethodArgument value] : ( REF )? ex= assignmentExpression ;
 	[GrammarRule("argument")]
 	private MethodArgument argument()
 	{
@@ -2502,15 +2503,15 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    bool isRef = false;
 
 		try { DebugEnterRule(GrammarFileName, "argument");
-		DebugLocation(812, 4);
+		DebugLocation(813, 4);
 		try
 		{
-			// ..\\ES3.g:816:5: ( ( REF )? ex= assignmentExpression )
+			// ..\\ES3.g:817:5: ( ( REF )? ex= assignmentExpression )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:817:9: ( REF )? ex= assignmentExpression
+			// ..\\ES3.g:818:9: ( REF )? ex= assignmentExpression
 			{
-			DebugLocation(817, 9);
-			// ..\\ES3.g:817:9: ( REF )?
+			DebugLocation(818, 9);
+			// ..\\ES3.g:818:9: ( REF )?
 			int alt18=2;
 			try { DebugEnterSubRule(18);
 			try { DebugEnterDecision(18, false);
@@ -2525,11 +2526,11 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:817:11: REF
+				// ..\\ES3.g:818:11: REF
 				{
-				DebugLocation(817, 11);
+				DebugLocation(818, 11);
 				Match(input,REF,Follow._REF_in_argument4195); 
-				DebugLocation(817, 15);
+				DebugLocation(818, 15);
 				 isRef = true; 
 
 				}
@@ -2538,12 +2539,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(18); }
 
-			DebugLocation(818, 11);
+			DebugLocation(819, 11);
 			PushFollow(Follow._assignmentExpression_in_argument4212);
 			ex=assignmentExpression();
 			PopFollow();
 
-			DebugLocation(819, 9);
+			DebugLocation(820, 9);
 			 value = new MethodArgument(ex, isRef); 
 
 			}
@@ -2560,7 +2561,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("argument", 20);
 			LeaveRule_argument();
 		}
-		DebugLocation(820, 4);
+		DebugLocation(821, 4);
 		} finally { DebugExitRule(GrammarFileName, "argument"); }
 		return value;
 
@@ -2572,7 +2573,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_generics();
 
 	// $ANTLR start "generics"
-	// ..\\ES3.g:822:1: generics returns [List<ExpressionSyntax> value] : LBRACE (first= assignmentExpression ( COMMA follow= assignmentExpression )* )? RBRACE ;
+	// ..\\ES3.g:823:1: generics returns [List<ExpressionSyntax> value] : LBRACE (first= assignmentExpression ( COMMA follow= assignmentExpression )* )? RBRACE ;
 	[GrammarRule("generics")]
 	private List<ExpressionSyntax> generics()
 	{
@@ -2588,17 +2589,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			value = new List<ExpressionSyntax>();
 
 		try { DebugEnterRule(GrammarFileName, "generics");
-		DebugLocation(822, 1);
+		DebugLocation(823, 1);
 		try
 		{
-			// ..\\ES3.g:826:2: ( LBRACE (first= assignmentExpression ( COMMA follow= assignmentExpression )* )? RBRACE )
+			// ..\\ES3.g:827:2: ( LBRACE (first= assignmentExpression ( COMMA follow= assignmentExpression )* )? RBRACE )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:826:4: LBRACE (first= assignmentExpression ( COMMA follow= assignmentExpression )* )? RBRACE
+			// ..\\ES3.g:827:4: LBRACE (first= assignmentExpression ( COMMA follow= assignmentExpression )* )? RBRACE
 			{
-			DebugLocation(826, 4);
+			DebugLocation(827, 4);
 			Match(input,LBRACE,Follow._LBRACE_in_generics4245); 
-			DebugLocation(826, 11);
-			// ..\\ES3.g:826:11: (first= assignmentExpression ( COMMA follow= assignmentExpression )* )?
+			DebugLocation(827, 11);
+			// ..\\ES3.g:827:11: (first= assignmentExpression ( COMMA follow= assignmentExpression )* )?
 			int alt20=2;
 			try { DebugEnterSubRule(20);
 			try { DebugEnterDecision(20, false);
@@ -2613,17 +2614,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:826:13: first= assignmentExpression ( COMMA follow= assignmentExpression )*
+				// ..\\ES3.g:827:13: first= assignmentExpression ( COMMA follow= assignmentExpression )*
 				{
-				DebugLocation(826, 18);
+				DebugLocation(827, 18);
 				PushFollow(Follow._assignmentExpression_in_generics4251);
 				first=assignmentExpression();
 				PopFollow();
 
-				DebugLocation(826, 40);
+				DebugLocation(827, 40);
 				 value.Add(first); 
-				DebugLocation(826, 63);
-				// ..\\ES3.g:826:63: ( COMMA follow= assignmentExpression )*
+				DebugLocation(827, 63);
+				// ..\\ES3.g:827:63: ( COMMA follow= assignmentExpression )*
 				try { DebugEnterSubRule(19);
 				while (true)
 				{
@@ -2642,16 +2643,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:826:65: COMMA follow= assignmentExpression
+						// ..\\ES3.g:827:65: COMMA follow= assignmentExpression
 						{
-						DebugLocation(826, 65);
+						DebugLocation(827, 65);
 						Match(input,COMMA,Follow._COMMA_in_generics4257); 
-						DebugLocation(826, 77);
+						DebugLocation(827, 77);
 						PushFollow(Follow._assignmentExpression_in_generics4261);
 						follow=assignmentExpression();
 						PopFollow();
 
-						DebugLocation(826, 99);
+						DebugLocation(827, 99);
 						 value.Add(follow); 
 
 						}
@@ -2674,7 +2675,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(20); }
 
-			DebugLocation(826, 128);
+			DebugLocation(827, 128);
 			Match(input,RBRACE,Follow._RBRACE_in_generics4270); 
 
 			}
@@ -2691,7 +2692,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("generics", 21);
 			LeaveRule_generics();
 		}
-		DebugLocation(828, 1);
+		DebugLocation(829, 1);
 		} finally { DebugExitRule(GrammarFileName, "generics"); }
 		return value;
 
@@ -2703,7 +2704,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_leftHandSideExpression();
 
 	// $ANTLR start "leftHandSideExpression"
-	// ..\\ES3.g:830:1: leftHandSideExpression returns [ExpressionSyntax value] : ( NEW )? mem= memberExpression ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )* ;
+	// ..\\ES3.g:831:1: leftHandSideExpression returns [ExpressionSyntax value] : ( NEW )? mem= memberExpression ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )* ;
 	[GrammarRule("leftHandSideExpression")]
 	private ExpressionSyntax leftHandSideExpression()
 	{
@@ -2723,15 +2724,15 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    bool isNew = false;
 
 		try { DebugEnterRule(GrammarFileName, "leftHandSideExpression");
-		DebugLocation(830, 1);
+		DebugLocation(831, 1);
 		try
 		{
-			// ..\\ES3.g:839:2: ( ( NEW )? mem= memberExpression ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )* )
+			// ..\\ES3.g:840:2: ( ( NEW )? mem= memberExpression ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:840:9: ( NEW )? mem= memberExpression ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )*
+			// ..\\ES3.g:841:9: ( NEW )? mem= memberExpression ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )*
 			{
-			DebugLocation(840, 9);
-			// ..\\ES3.g:840:9: ( NEW )?
+			DebugLocation(841, 9);
+			// ..\\ES3.g:841:9: ( NEW )?
 			int alt21=2;
 			try { DebugEnterSubRule(21);
 			try { DebugEnterDecision(21, false);
@@ -2746,11 +2747,11 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:841:13: NEW
+				// ..\\ES3.g:842:13: NEW
 				{
-				DebugLocation(841, 13);
-				Match(input,NEW,Follow._NEW_in_leftHandSideExpression4319); 
 				DebugLocation(842, 13);
+				Match(input,NEW,Follow._NEW_in_leftHandSideExpression4319); 
+				DebugLocation(843, 13);
 				 isNew = true; 
 
 				}
@@ -2759,15 +2760,15 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(21); }
 
-			DebugLocation(844, 9);
+			DebugLocation(845, 9);
 			PushFollow(Follow._memberExpression_in_leftHandSideExpression4353);
 			mem=memberExpression();
 			PopFollow();
 
-			DebugLocation(845, 9);
+			DebugLocation(846, 9);
 			 value = mem; 
-			DebugLocation(846, 6);
-			// ..\\ES3.g:846:6: ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )*
+			DebugLocation(847, 6);
+			// ..\\ES3.g:847:6: ( (gen= generics )? arg= arguments | LBRACK exp= expression RBRACK | DOT id= Identifier )*
 			try { DebugEnterSubRule(23);
 			while (true)
 			{
@@ -2799,10 +2800,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:847:7: (gen= generics )? arg= arguments
+					// ..\\ES3.g:848:7: (gen= generics )? arg= arguments
 					{
-					DebugLocation(847, 7);
-					// ..\\ES3.g:847:7: (gen= generics )?
+					DebugLocation(848, 7);
+					// ..\\ES3.g:848:7: (gen= generics )?
 					int alt22=2;
 					try { DebugEnterSubRule(22);
 					try { DebugEnterDecision(22, false);
@@ -2817,14 +2818,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:848:17: gen= generics
+						// ..\\ES3.g:849:17: gen= generics
 						{
-						DebugLocation(848, 20);
+						DebugLocation(849, 20);
 						PushFollow(Follow._generics_in_leftHandSideExpression4398);
 						gen=generics();
 						PopFollow();
 
-						DebugLocation(849, 17);
+						DebugLocation(850, 17);
 						 gens = gen; 
 
 						}
@@ -2833,12 +2834,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(22); }
 
-					DebugLocation(851, 16);
+					DebugLocation(852, 16);
 					PushFollow(Follow._arguments_in_leftHandSideExpression4447);
 					arg=arguments();
 					PopFollow();
 
-					DebugLocation(852, 13);
+					DebugLocation(853, 13);
 
 					                value = new MethodCallSyntax(
 					                    value,
@@ -2857,18 +2858,18 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					break;
 				case 2:
 					DebugEnterAlt(2);
-					// ..\\ES3.g:867:13: LBRACK exp= expression RBRACK
+					// ..\\ES3.g:868:13: LBRACK exp= expression RBRACK
 					{
-					DebugLocation(867, 13);
+					DebugLocation(868, 13);
 					Match(input,LBRACK,Follow._LBRACK_in_leftHandSideExpression4482); 
-					DebugLocation(867, 23);
+					DebugLocation(868, 23);
 					PushFollow(Follow._expression_in_leftHandSideExpression4486);
 					exp=expression();
 					PopFollow();
 
-					DebugLocation(867, 35);
+					DebugLocation(868, 35);
 					Match(input,RBRACK,Follow._RBRACK_in_leftHandSideExpression4488); 
-					DebugLocation(868, 13);
+					DebugLocation(869, 13);
 
 					                value = new IndexerSyntax(
 					                    value,
@@ -2880,13 +2881,13 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					break;
 				case 3:
 					DebugEnterAlt(3);
-					// ..\\ES3.g:876:13: DOT id= Identifier
+					// ..\\ES3.g:877:13: DOT id= Identifier
 					{
-					DebugLocation(876, 13);
-					Match(input,DOT,Follow._DOT_in_leftHandSideExpression4525); 
-					DebugLocation(876, 19);
-					id=(IToken)Match(input,Identifier,Follow._Identifier_in_leftHandSideExpression4529); 
 					DebugLocation(877, 13);
+					Match(input,DOT,Follow._DOT_in_leftHandSideExpression4525); 
+					DebugLocation(877, 19);
+					id=(IToken)Match(input,Identifier,Follow._Identifier_in_leftHandSideExpression4529); 
+					DebugLocation(878, 13);
 
 					                value = new PropertySyntax(
 					                    value,
@@ -2926,7 +2927,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("leftHandSideExpression", 22);
 			LeaveRule_leftHandSideExpression();
 		}
-		DebugLocation(884, 1);
+		DebugLocation(885, 1);
 		} finally { DebugExitRule(GrammarFileName, "leftHandSideExpression"); }
 		return value;
 
@@ -2938,7 +2939,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_postfixExpression();
 
 	// $ANTLR start "postfixExpression"
-	// ..\\ES3.g:896:1: postfixExpression returns [ExpressionSyntax value] : left= leftHandSideExpression (post= postfixOperator )? ;
+	// ..\\ES3.g:897:1: postfixExpression returns [ExpressionSyntax value] : left= leftHandSideExpression (post= postfixOperator )? ;
 	[GrammarRule("postfixExpression")]
 	private ExpressionSyntax postfixExpression()
 	{
@@ -2951,22 +2952,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxExpressionType post = default(SyntaxExpressionType);
 
 		try { DebugEnterRule(GrammarFileName, "postfixExpression");
-		DebugLocation(896, 1);
+		DebugLocation(897, 1);
 		try
 		{
-			// ..\\ES3.g:897:2: (left= leftHandSideExpression (post= postfixOperator )? )
+			// ..\\ES3.g:898:2: (left= leftHandSideExpression (post= postfixOperator )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:897:4: left= leftHandSideExpression (post= postfixOperator )?
+			// ..\\ES3.g:898:4: left= leftHandSideExpression (post= postfixOperator )?
 			{
-			DebugLocation(897, 8);
+			DebugLocation(898, 8);
 			PushFollow(Follow._leftHandSideExpression_in_postfixExpression4575);
 			left=leftHandSideExpression();
 			PopFollow();
 
-			DebugLocation(897, 32);
+			DebugLocation(898, 32);
 			 value = left; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEol();  
-			DebugLocation(897, 112);
-			// ..\\ES3.g:897:112: (post= postfixOperator )?
+			DebugLocation(898, 112);
+			// ..\\ES3.g:898:112: (post= postfixOperator )?
 			int alt24=2;
 			try { DebugEnterSubRule(24);
 			try { DebugEnterDecision(24, false);
@@ -2981,14 +2982,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:897:114: post= postfixOperator
+				// ..\\ES3.g:898:114: post= postfixOperator
 				{
-				DebugLocation(897, 118);
+				DebugLocation(898, 118);
 				PushFollow(Follow._postfixOperator_in_postfixExpression4583);
 				post=postfixOperator();
 				PopFollow();
 
-				DebugLocation(897, 135);
+				DebugLocation(898, 135);
 				 value = new UnarySyntax(post, value); 
 
 				}
@@ -3012,7 +3013,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("postfixExpression", 23);
 			LeaveRule_postfixExpression();
 		}
-		DebugLocation(898, 1);
+		DebugLocation(899, 1);
 		} finally { DebugExitRule(GrammarFileName, "postfixExpression"); }
 		return value;
 
@@ -3024,7 +3025,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_postfixOperator();
 
 	// $ANTLR start "postfixOperator"
-	// ..\\ES3.g:900:1: postfixOperator returns [SyntaxExpressionType value] : (op= INC |op= DEC );
+	// ..\\ES3.g:901:1: postfixOperator returns [SyntaxExpressionType value] : (op= INC |op= DEC );
 	[GrammarRule("postfixOperator")]
 	private SyntaxExpressionType postfixOperator()
 	{
@@ -3036,10 +3037,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		IToken op = default(IToken);
 
 		try { DebugEnterRule(GrammarFileName, "postfixOperator");
-		DebugLocation(900, 1);
+		DebugLocation(901, 1);
 		try
 		{
-			// ..\\ES3.g:901:2: (op= INC |op= DEC )
+			// ..\\ES3.g:902:2: (op= INC |op= DEC )
 			int alt25=2;
 			try { DebugEnterDecision(25, false);
 			int LA25_0 = input.LA(1);
@@ -3063,22 +3064,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:901:4: op= INC
+				// ..\\ES3.g:902:4: op= INC
 				{
-				DebugLocation(901, 6);
+				DebugLocation(902, 6);
 				op=(IToken)Match(input,INC,Follow._INC_in_postfixOperator4605); 
-				DebugLocation(901, 11);
+				DebugLocation(902, 11);
 				 op.Type = PINC; value = SyntaxExpressionType.PostIncrementAssign; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:902:4: op= DEC
+				// ..\\ES3.g:903:4: op= DEC
 				{
-				DebugLocation(902, 6);
+				DebugLocation(903, 6);
 				op=(IToken)Match(input,DEC,Follow._DEC_in_postfixOperator4614); 
-				DebugLocation(902, 11);
+				DebugLocation(903, 11);
 				 op.Type = PDEC; value = SyntaxExpressionType.PostDecrementAssign; 
 
 				}
@@ -3097,7 +3098,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("postfixOperator", 24);
 			LeaveRule_postfixOperator();
 		}
-		DebugLocation(903, 1);
+		DebugLocation(904, 1);
 		} finally { DebugExitRule(GrammarFileName, "postfixOperator"); }
 		return value;
 
@@ -3109,7 +3110,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_unaryExpression();
 
 	// $ANTLR start "unaryExpression"
-	// ..\\ES3.g:909:1: unaryExpression returns [ExpressionSyntax value] : (post= postfixExpression |op= unaryOperator exp= unaryExpression );
+	// ..\\ES3.g:910:1: unaryExpression returns [ExpressionSyntax value] : (post= postfixExpression |op= unaryOperator exp= unaryExpression );
 	[GrammarRule("unaryExpression")]
 	private ExpressionSyntax unaryExpression()
 	{
@@ -3123,10 +3124,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax exp = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "unaryExpression");
-		DebugLocation(909, 1);
+		DebugLocation(910, 1);
 		try
 		{
-			// ..\\ES3.g:910:2: (post= postfixExpression |op= unaryOperator exp= unaryExpression )
+			// ..\\ES3.g:911:2: (post= postfixExpression |op= unaryOperator exp= unaryExpression )
 			int alt26=2;
 			try { DebugEnterDecision(26, false);
 			int LA26_0 = input.LA(1);
@@ -3150,33 +3151,33 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:910:4: post= postfixExpression
+				// ..\\ES3.g:911:4: post= postfixExpression
 				{
-				DebugLocation(910, 8);
+				DebugLocation(911, 8);
 				PushFollow(Follow._postfixExpression_in_unaryExpression4637);
 				post=postfixExpression();
 				PopFollow();
 
-				DebugLocation(910, 27);
+				DebugLocation(911, 27);
 				 value = post; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:911:4: op= unaryOperator exp= unaryExpression
+				// ..\\ES3.g:912:4: op= unaryOperator exp= unaryExpression
 				{
-				DebugLocation(911, 6);
+				DebugLocation(912, 6);
 				PushFollow(Follow._unaryOperator_in_unaryExpression4646);
 				op=unaryOperator();
 				PopFollow();
 
-				DebugLocation(911, 24);
+				DebugLocation(912, 24);
 				PushFollow(Follow._unaryExpression_in_unaryExpression4650);
 				exp=unaryExpression();
 				PopFollow();
 
-				DebugLocation(911, 41);
+				DebugLocation(912, 41);
 				 value = new UnarySyntax(op, exp); 
 
 				}
@@ -3195,7 +3196,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("unaryExpression", 25);
 			LeaveRule_unaryExpression();
 		}
-		DebugLocation(912, 1);
+		DebugLocation(913, 1);
 		} finally { DebugExitRule(GrammarFileName, "unaryExpression"); }
 		return value;
 
@@ -3207,7 +3208,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_unaryOperator();
 
 	// $ANTLR start "unaryOperator"
-	// ..\\ES3.g:914:1: unaryOperator returns [SyntaxExpressionType value] : ( DELETE | VOID | TYPEOF | INC | DEC |op= ADD |op= SUB | INV | NOT );
+	// ..\\ES3.g:915:1: unaryOperator returns [SyntaxExpressionType value] : ( DELETE | VOID | TYPEOF | INC | DEC |op= ADD |op= SUB | INV | NOT );
 	[GrammarRule("unaryOperator")]
 	private SyntaxExpressionType unaryOperator()
 	{
@@ -3219,10 +3220,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		IToken op = default(IToken);
 
 		try { DebugEnterRule(GrammarFileName, "unaryOperator");
-		DebugLocation(914, 1);
+		DebugLocation(915, 1);
 		try
 		{
-			// ..\\ES3.g:915:2: ( DELETE | VOID | TYPEOF | INC | DEC |op= ADD |op= SUB | INV | NOT )
+			// ..\\ES3.g:916:2: ( DELETE | VOID | TYPEOF | INC | DEC |op= ADD |op= SUB | INV | NOT )
 			int alt27=9;
 			try { DebugEnterDecision(27, false);
 			switch (input.LA(1))
@@ -3285,99 +3286,99 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:915:4: DELETE
+				// ..\\ES3.g:916:4: DELETE
 				{
-				DebugLocation(915, 4);
+				DebugLocation(916, 4);
 				Match(input,DELETE,Follow._DELETE_in_unaryOperator4668); 
-				DebugLocation(915, 11);
+				DebugLocation(916, 11);
 				 value = SyntaxExpressionType.Delete; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:916:4: VOID
+				// ..\\ES3.g:917:4: VOID
 				{
-				DebugLocation(916, 4);
+				DebugLocation(917, 4);
 				Match(input,VOID,Follow._VOID_in_unaryOperator4675); 
-				DebugLocation(916, 9);
+				DebugLocation(917, 9);
 				 value = SyntaxExpressionType.Void; 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:917:4: TYPEOF
+				// ..\\ES3.g:918:4: TYPEOF
 				{
-				DebugLocation(917, 4);
+				DebugLocation(918, 4);
 				Match(input,TYPEOF,Follow._TYPEOF_in_unaryOperator4682); 
-				DebugLocation(917, 11);
+				DebugLocation(918, 11);
 				 value = SyntaxExpressionType.TypeOf; 
 
 				}
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:918:4: INC
+				// ..\\ES3.g:919:4: INC
 				{
-				DebugLocation(918, 4);
+				DebugLocation(919, 4);
 				Match(input,INC,Follow._INC_in_unaryOperator4689); 
-				DebugLocation(918, 8);
+				DebugLocation(919, 8);
 				 value = SyntaxExpressionType.PreIncrementAssign; 
 
 				}
 				break;
 			case 5:
 				DebugEnterAlt(5);
-				// ..\\ES3.g:919:4: DEC
+				// ..\\ES3.g:920:4: DEC
 				{
-				DebugLocation(919, 4);
+				DebugLocation(920, 4);
 				Match(input,DEC,Follow._DEC_in_unaryOperator4696); 
-				DebugLocation(919, 8);
+				DebugLocation(920, 8);
 				 value = SyntaxExpressionType.PreDecrementAssign; 
 
 				}
 				break;
 			case 6:
 				DebugEnterAlt(6);
-				// ..\\ES3.g:920:4: op= ADD
+				// ..\\ES3.g:921:4: op= ADD
 				{
-				DebugLocation(920, 6);
+				DebugLocation(921, 6);
 				op=(IToken)Match(input,ADD,Follow._ADD_in_unaryOperator4705); 
-				DebugLocation(920, 11);
+				DebugLocation(921, 11);
 				 op.Type = POS; value = SyntaxExpressionType.UnaryPlus; 
 
 				}
 				break;
 			case 7:
 				DebugEnterAlt(7);
-				// ..\\ES3.g:921:4: op= SUB
+				// ..\\ES3.g:922:4: op= SUB
 				{
-				DebugLocation(921, 6);
+				DebugLocation(922, 6);
 				op=(IToken)Match(input,SUB,Follow._SUB_in_unaryOperator4714); 
-				DebugLocation(921, 11);
+				DebugLocation(922, 11);
 				 op.Type = NEG; value = SyntaxExpressionType.Negate; 
 
 				}
 				break;
 			case 8:
 				DebugEnterAlt(8);
-				// ..\\ES3.g:922:4: INV
+				// ..\\ES3.g:923:4: INV
 				{
-				DebugLocation(922, 4);
+				DebugLocation(923, 4);
 				Match(input,INV,Follow._INV_in_unaryOperator4721); 
-				DebugLocation(922, 8);
+				DebugLocation(923, 8);
 				 value = SyntaxExpressionType.BitwiseNot; 
 
 				}
 				break;
 			case 9:
 				DebugEnterAlt(9);
-				// ..\\ES3.g:923:4: NOT
+				// ..\\ES3.g:924:4: NOT
 				{
-				DebugLocation(923, 4);
+				DebugLocation(924, 4);
 				Match(input,NOT,Follow._NOT_in_unaryOperator4728); 
-				DebugLocation(923, 8);
+				DebugLocation(924, 8);
 				 value = SyntaxExpressionType.Not; 
 
 				}
@@ -3396,7 +3397,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("unaryOperator", 26);
 			LeaveRule_unaryOperator();
 		}
-		DebugLocation(924, 1);
+		DebugLocation(925, 1);
 		} finally { DebugExitRule(GrammarFileName, "unaryOperator"); }
 		return value;
 
@@ -3408,7 +3409,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_multiplicativeExpression();
 
 	// $ANTLR start "multiplicativeExpression"
-	// ..\\ES3.g:930:1: multiplicativeExpression returns [ExpressionSyntax value] : left= unaryExpression ( ( MUL | DIV | MOD ) right= unaryExpression )* ;
+	// ..\\ES3.g:931:1: multiplicativeExpression returns [ExpressionSyntax value] : left= unaryExpression ( ( MUL | DIV | MOD ) right= unaryExpression )* ;
 	[GrammarRule("multiplicativeExpression")]
 	private ExpressionSyntax multiplicativeExpression()
 	{
@@ -3424,22 +3425,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "multiplicativeExpression");
-		DebugLocation(930, 1);
+		DebugLocation(931, 1);
 		try
 		{
-			// ..\\ES3.g:934:2: (left= unaryExpression ( ( MUL | DIV | MOD ) right= unaryExpression )* )
+			// ..\\ES3.g:935:2: (left= unaryExpression ( ( MUL | DIV | MOD ) right= unaryExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:934:4: left= unaryExpression ( ( MUL | DIV | MOD ) right= unaryExpression )*
+			// ..\\ES3.g:935:4: left= unaryExpression ( ( MUL | DIV | MOD ) right= unaryExpression )*
 			{
-			DebugLocation(934, 8);
+			DebugLocation(935, 8);
 			PushFollow(Follow._unaryExpression_in_multiplicativeExpression4756);
 			left=unaryExpression();
 			PopFollow();
 
-			DebugLocation(934, 25);
+			DebugLocation(935, 25);
 			 value = left; 
-			DebugLocation(934, 44);
-			// ..\\ES3.g:934:44: ( ( MUL | DIV | MOD ) right= unaryExpression )*
+			DebugLocation(935, 44);
+			// ..\\ES3.g:935:44: ( ( MUL | DIV | MOD ) right= unaryExpression )*
 			try { DebugEnterSubRule(29);
 			while (true)
 			{
@@ -3458,10 +3459,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:935:3: ( MUL | DIV | MOD ) right= unaryExpression
+					// ..\\ES3.g:936:3: ( MUL | DIV | MOD ) right= unaryExpression
 					{
-					DebugLocation(935, 3);
-					// ..\\ES3.g:935:3: ( MUL | DIV | MOD )
+					DebugLocation(936, 3);
+					// ..\\ES3.g:936:3: ( MUL | DIV | MOD )
 					int alt28=3;
 					try { DebugEnterSubRule(28);
 					try { DebugEnterDecision(28, false);
@@ -3495,33 +3496,33 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:935:5: MUL
+						// ..\\ES3.g:936:5: MUL
 						{
-						DebugLocation(935, 5);
+						DebugLocation(936, 5);
 						Match(input,MUL,Follow._MUL_in_multiplicativeExpression4767); 
-						DebugLocation(935, 9);
+						DebugLocation(936, 9);
 						 type= SyntaxExpressionType.Multiply; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:936:5: DIV
+						// ..\\ES3.g:937:5: DIV
 						{
-						DebugLocation(936, 5);
+						DebugLocation(937, 5);
 						Match(input,DIV,Follow._DIV_in_multiplicativeExpression4776); 
-						DebugLocation(936, 9);
+						DebugLocation(937, 9);
 						 type= SyntaxExpressionType.Divide; 
 
 						}
 						break;
 					case 3:
 						DebugEnterAlt(3);
-						// ..\\ES3.g:937:5: MOD
+						// ..\\ES3.g:938:5: MOD
 						{
-						DebugLocation(937, 5);
+						DebugLocation(938, 5);
 						Match(input,MOD,Follow._MOD_in_multiplicativeExpression4784); 
-						DebugLocation(937, 9);
+						DebugLocation(938, 9);
 						 type= SyntaxExpressionType.Modulo; 
 
 						}
@@ -3530,12 +3531,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(28); }
 
-					DebugLocation(938, 8);
+					DebugLocation(939, 8);
 					PushFollow(Follow._unaryExpression_in_multiplicativeExpression4794);
 					right=unaryExpression();
 					PopFollow();
 
-					DebugLocation(938, 25);
+					DebugLocation(939, 25);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -3566,7 +3567,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("multiplicativeExpression", 27);
 			LeaveRule_multiplicativeExpression();
 		}
-		DebugLocation(939, 1);
+		DebugLocation(940, 1);
 		} finally { DebugExitRule(GrammarFileName, "multiplicativeExpression"); }
 		return value;
 
@@ -3578,7 +3579,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_additiveExpression();
 
 	// $ANTLR start "additiveExpression"
-	// ..\\ES3.g:945:1: additiveExpression returns [ExpressionSyntax value] : left= multiplicativeExpression ( ( ADD | SUB ) right= multiplicativeExpression )* ;
+	// ..\\ES3.g:946:1: additiveExpression returns [ExpressionSyntax value] : left= multiplicativeExpression ( ( ADD | SUB ) right= multiplicativeExpression )* ;
 	[GrammarRule("additiveExpression")]
 	private ExpressionSyntax additiveExpression()
 	{
@@ -3594,22 +3595,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "additiveExpression");
-		DebugLocation(945, 1);
+		DebugLocation(946, 1);
 		try
 		{
-			// ..\\ES3.g:949:2: (left= multiplicativeExpression ( ( ADD | SUB ) right= multiplicativeExpression )* )
+			// ..\\ES3.g:950:2: (left= multiplicativeExpression ( ( ADD | SUB ) right= multiplicativeExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:949:4: left= multiplicativeExpression ( ( ADD | SUB ) right= multiplicativeExpression )*
+			// ..\\ES3.g:950:4: left= multiplicativeExpression ( ( ADD | SUB ) right= multiplicativeExpression )*
 			{
-			DebugLocation(949, 8);
+			DebugLocation(950, 8);
 			PushFollow(Follow._multiplicativeExpression_in_additiveExpression4824);
 			left=multiplicativeExpression();
 			PopFollow();
 
-			DebugLocation(949, 34);
+			DebugLocation(950, 34);
 			 value = left; 
-			DebugLocation(949, 53);
-			// ..\\ES3.g:949:53: ( ( ADD | SUB ) right= multiplicativeExpression )*
+			DebugLocation(950, 53);
+			// ..\\ES3.g:950:53: ( ( ADD | SUB ) right= multiplicativeExpression )*
 			try { DebugEnterSubRule(31);
 			while (true)
 			{
@@ -3628,10 +3629,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:950:3: ( ADD | SUB ) right= multiplicativeExpression
+					// ..\\ES3.g:951:3: ( ADD | SUB ) right= multiplicativeExpression
 					{
-					DebugLocation(950, 3);
-					// ..\\ES3.g:950:3: ( ADD | SUB )
+					DebugLocation(951, 3);
+					// ..\\ES3.g:951:3: ( ADD | SUB )
 					int alt30=2;
 					try { DebugEnterSubRule(30);
 					try { DebugEnterDecision(30, false);
@@ -3656,22 +3657,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:950:5: ADD
+						// ..\\ES3.g:951:5: ADD
 						{
-						DebugLocation(950, 5);
+						DebugLocation(951, 5);
 						Match(input,ADD,Follow._ADD_in_additiveExpression4835); 
-						DebugLocation(950, 9);
+						DebugLocation(951, 9);
 						 type= SyntaxExpressionType.Add; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:951:5: SUB
+						// ..\\ES3.g:952:5: SUB
 						{
-						DebugLocation(951, 5);
+						DebugLocation(952, 5);
 						Match(input,SUB,Follow._SUB_in_additiveExpression4843); 
-						DebugLocation(951, 9);
+						DebugLocation(952, 9);
 						 type= SyntaxExpressionType.Subtract; 
 
 						}
@@ -3680,12 +3681,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(30); }
 
-					DebugLocation(952, 8);
+					DebugLocation(953, 8);
 					PushFollow(Follow._multiplicativeExpression_in_additiveExpression4853);
 					right=multiplicativeExpression();
 					PopFollow();
 
-					DebugLocation(952, 34);
+					DebugLocation(953, 34);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -3716,7 +3717,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("additiveExpression", 28);
 			LeaveRule_additiveExpression();
 		}
-		DebugLocation(953, 1);
+		DebugLocation(954, 1);
 		} finally { DebugExitRule(GrammarFileName, "additiveExpression"); }
 		return value;
 
@@ -3728,7 +3729,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_shiftExpression();
 
 	// $ANTLR start "shiftExpression"
-	// ..\\ES3.g:959:1: shiftExpression returns [ExpressionSyntax value] : left= additiveExpression ( ( SHL | SHR | SHU ) right= additiveExpression )* ;
+	// ..\\ES3.g:960:1: shiftExpression returns [ExpressionSyntax value] : left= additiveExpression ( ( SHL | SHR | SHU ) right= additiveExpression )* ;
 	[GrammarRule("shiftExpression")]
 	private ExpressionSyntax shiftExpression()
 	{
@@ -3744,22 +3745,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "shiftExpression");
-		DebugLocation(959, 1);
+		DebugLocation(960, 1);
 		try
 		{
-			// ..\\ES3.g:963:2: (left= additiveExpression ( ( SHL | SHR | SHU ) right= additiveExpression )* )
+			// ..\\ES3.g:964:2: (left= additiveExpression ( ( SHL | SHR | SHU ) right= additiveExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:963:4: left= additiveExpression ( ( SHL | SHR | SHU ) right= additiveExpression )*
+			// ..\\ES3.g:964:4: left= additiveExpression ( ( SHL | SHR | SHU ) right= additiveExpression )*
 			{
-			DebugLocation(963, 8);
+			DebugLocation(964, 8);
 			PushFollow(Follow._additiveExpression_in_shiftExpression4884);
 			left=additiveExpression();
 			PopFollow();
 
-			DebugLocation(963, 28);
+			DebugLocation(964, 28);
 			 value = left; 
-			DebugLocation(963, 47);
-			// ..\\ES3.g:963:47: ( ( SHL | SHR | SHU ) right= additiveExpression )*
+			DebugLocation(964, 47);
+			// ..\\ES3.g:964:47: ( ( SHL | SHR | SHU ) right= additiveExpression )*
 			try { DebugEnterSubRule(33);
 			while (true)
 			{
@@ -3778,10 +3779,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:964:3: ( SHL | SHR | SHU ) right= additiveExpression
+					// ..\\ES3.g:965:3: ( SHL | SHR | SHU ) right= additiveExpression
 					{
-					DebugLocation(964, 3);
-					// ..\\ES3.g:964:3: ( SHL | SHR | SHU )
+					DebugLocation(965, 3);
+					// ..\\ES3.g:965:3: ( SHL | SHR | SHU )
 					int alt32=3;
 					try { DebugEnterSubRule(32);
 					try { DebugEnterDecision(32, false);
@@ -3815,33 +3816,33 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:964:5: SHL
+						// ..\\ES3.g:965:5: SHL
 						{
-						DebugLocation(964, 5);
+						DebugLocation(965, 5);
 						Match(input,SHL,Follow._SHL_in_shiftExpression4895); 
-						DebugLocation(964, 9);
+						DebugLocation(965, 9);
 						 type= SyntaxExpressionType.LeftShift; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:965:5: SHR
+						// ..\\ES3.g:966:5: SHR
 						{
-						DebugLocation(965, 5);
+						DebugLocation(966, 5);
 						Match(input,SHR,Follow._SHR_in_shiftExpression4903); 
-						DebugLocation(965, 9);
+						DebugLocation(966, 9);
 						 type= SyntaxExpressionType.RightShift; 
 
 						}
 						break;
 					case 3:
 						DebugEnterAlt(3);
-						// ..\\ES3.g:966:5: SHU
+						// ..\\ES3.g:967:5: SHU
 						{
-						DebugLocation(966, 5);
+						DebugLocation(967, 5);
 						Match(input,SHU,Follow._SHU_in_shiftExpression4911); 
-						DebugLocation(966, 9);
+						DebugLocation(967, 9);
 						 type= SyntaxExpressionType.UnsignedRightShift; 
 
 						}
@@ -3850,12 +3851,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(32); }
 
-					DebugLocation(967, 8);
+					DebugLocation(968, 8);
 					PushFollow(Follow._additiveExpression_in_shiftExpression4921);
 					right=additiveExpression();
 					PopFollow();
 
-					DebugLocation(967, 28);
+					DebugLocation(968, 28);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -3886,7 +3887,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("shiftExpression", 29);
 			LeaveRule_shiftExpression();
 		}
-		DebugLocation(968, 1);
+		DebugLocation(969, 1);
 		} finally { DebugExitRule(GrammarFileName, "shiftExpression"); }
 		return value;
 
@@ -3898,7 +3899,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_relationalExpression();
 
 	// $ANTLR start "relationalExpression"
-	// ..\\ES3.g:974:1: relationalExpression returns [ExpressionSyntax value] : left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )* ;
+	// ..\\ES3.g:975:1: relationalExpression returns [ExpressionSyntax value] : left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )* ;
 	[GrammarRule("relationalExpression")]
 	private ExpressionSyntax relationalExpression()
 	{
@@ -3914,22 +3915,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "relationalExpression");
-		DebugLocation(974, 1);
+		DebugLocation(975, 1);
 		try
 		{
-			// ..\\ES3.g:978:2: (left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )* )
+			// ..\\ES3.g:979:2: (left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:978:4: left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )*
+			// ..\\ES3.g:979:4: left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )*
 			{
-			DebugLocation(978, 8);
+			DebugLocation(979, 8);
 			PushFollow(Follow._shiftExpression_in_relationalExpression4952);
 			left=shiftExpression();
 			PopFollow();
 
-			DebugLocation(978, 25);
+			DebugLocation(979, 25);
 			 value = left; 
-			DebugLocation(978, 44);
-			// ..\\ES3.g:978:44: ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )*
+			DebugLocation(979, 44);
+			// ..\\ES3.g:979:44: ( ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression )*
 			try { DebugEnterSubRule(35);
 			while (true)
 			{
@@ -3948,10 +3949,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:979:3: ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression
+					// ..\\ES3.g:980:3: ( LT | GT | LTE | GTE | INSTANCEOF | IN ) right= shiftExpression
 					{
-					DebugLocation(979, 3);
-					// ..\\ES3.g:979:3: ( LT | GT | LTE | GTE | INSTANCEOF | IN )
+					DebugLocation(980, 3);
+					// ..\\ES3.g:980:3: ( LT | GT | LTE | GTE | INSTANCEOF | IN )
 					int alt34=6;
 					try { DebugEnterSubRule(34);
 					try { DebugEnterDecision(34, false);
@@ -4000,66 +4001,66 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:979:5: LT
+						// ..\\ES3.g:980:5: LT
 						{
-						DebugLocation(979, 5);
+						DebugLocation(980, 5);
 						Match(input,LT,Follow._LT_in_relationalExpression4963); 
-						DebugLocation(979, 8);
+						DebugLocation(980, 8);
 						 type= SyntaxExpressionType.LessThan; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:980:5: GT
+						// ..\\ES3.g:981:5: GT
 						{
-						DebugLocation(980, 5);
+						DebugLocation(981, 5);
 						Match(input,GT,Follow._GT_in_relationalExpression4971); 
-						DebugLocation(980, 8);
+						DebugLocation(981, 8);
 						 type= SyntaxExpressionType.GreaterThan; 
 
 						}
 						break;
 					case 3:
 						DebugEnterAlt(3);
-						// ..\\ES3.g:981:5: LTE
+						// ..\\ES3.g:982:5: LTE
 						{
-						DebugLocation(981, 5);
+						DebugLocation(982, 5);
 						Match(input,LTE,Follow._LTE_in_relationalExpression4979); 
-						DebugLocation(981, 9);
+						DebugLocation(982, 9);
 						 type= SyntaxExpressionType.LessThanOrEqual; 
 
 						}
 						break;
 					case 4:
 						DebugEnterAlt(4);
-						// ..\\ES3.g:982:5: GTE
+						// ..\\ES3.g:983:5: GTE
 						{
-						DebugLocation(982, 5);
+						DebugLocation(983, 5);
 						Match(input,GTE,Follow._GTE_in_relationalExpression4987); 
-						DebugLocation(982, 9);
+						DebugLocation(983, 9);
 						 type= SyntaxExpressionType.GreaterThanOrEqual; 
 
 						}
 						break;
 					case 5:
 						DebugEnterAlt(5);
-						// ..\\ES3.g:983:5: INSTANCEOF
+						// ..\\ES3.g:984:5: INSTANCEOF
 						{
-						DebugLocation(983, 5);
+						DebugLocation(984, 5);
 						Match(input,INSTANCEOF,Follow._INSTANCEOF_in_relationalExpression4995); 
-						DebugLocation(983, 16);
+						DebugLocation(984, 16);
 						 type= SyntaxExpressionType.InstanceOf;  
 
 						}
 						break;
 					case 6:
 						DebugEnterAlt(6);
-						// ..\\ES3.g:984:5: IN
+						// ..\\ES3.g:985:5: IN
 						{
-						DebugLocation(984, 5);
+						DebugLocation(985, 5);
 						Match(input,IN,Follow._IN_in_relationalExpression5003); 
-						DebugLocation(984, 8);
+						DebugLocation(985, 8);
 						 type= SyntaxExpressionType.In;  
 
 						}
@@ -4068,12 +4069,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(34); }
 
-					DebugLocation(985, 8);
+					DebugLocation(986, 8);
 					PushFollow(Follow._shiftExpression_in_relationalExpression5013);
 					right=shiftExpression();
 					PopFollow();
 
-					DebugLocation(985, 25);
+					DebugLocation(986, 25);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -4104,7 +4105,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("relationalExpression", 30);
 			LeaveRule_relationalExpression();
 		}
-		DebugLocation(986, 1);
+		DebugLocation(987, 1);
 		} finally { DebugExitRule(GrammarFileName, "relationalExpression"); }
 		return value;
 
@@ -4116,7 +4117,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_relationalExpressionNoIn();
 
 	// $ANTLR start "relationalExpressionNoIn"
-	// ..\\ES3.g:988:1: relationalExpressionNoIn returns [ExpressionSyntax value] : left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )* ;
+	// ..\\ES3.g:989:1: relationalExpressionNoIn returns [ExpressionSyntax value] : left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )* ;
 	[GrammarRule("relationalExpressionNoIn")]
 	private ExpressionSyntax relationalExpressionNoIn()
 	{
@@ -4132,22 +4133,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "relationalExpressionNoIn");
-		DebugLocation(988, 1);
+		DebugLocation(989, 1);
 		try
 		{
-			// ..\\ES3.g:992:2: (left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )* )
+			// ..\\ES3.g:993:2: (left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:992:4: left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )*
+			// ..\\ES3.g:993:4: left= shiftExpression ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )*
 			{
-			DebugLocation(992, 8);
+			DebugLocation(993, 8);
 			PushFollow(Follow._shiftExpression_in_relationalExpressionNoIn5039);
 			left=shiftExpression();
 			PopFollow();
 
-			DebugLocation(992, 25);
+			DebugLocation(993, 25);
 			 value = left; 
-			DebugLocation(992, 44);
-			// ..\\ES3.g:992:44: ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )*
+			DebugLocation(993, 44);
+			// ..\\ES3.g:993:44: ( ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression )*
 			try { DebugEnterSubRule(37);
 			while (true)
 			{
@@ -4166,10 +4167,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:993:3: ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression
+					// ..\\ES3.g:994:3: ( LT | GT | LTE | GTE | INSTANCEOF ) right= shiftExpression
 					{
-					DebugLocation(993, 3);
-					// ..\\ES3.g:993:3: ( LT | GT | LTE | GTE | INSTANCEOF )
+					DebugLocation(994, 3);
+					// ..\\ES3.g:994:3: ( LT | GT | LTE | GTE | INSTANCEOF )
 					int alt36=5;
 					try { DebugEnterSubRule(36);
 					try { DebugEnterDecision(36, false);
@@ -4213,55 +4214,55 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:993:5: LT
+						// ..\\ES3.g:994:5: LT
 						{
-						DebugLocation(993, 5);
+						DebugLocation(994, 5);
 						Match(input,LT,Follow._LT_in_relationalExpressionNoIn5050); 
-						DebugLocation(993, 8);
+						DebugLocation(994, 8);
 						 type= SyntaxExpressionType.LessThan; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:994:5: GT
+						// ..\\ES3.g:995:5: GT
 						{
-						DebugLocation(994, 5);
+						DebugLocation(995, 5);
 						Match(input,GT,Follow._GT_in_relationalExpressionNoIn5058); 
-						DebugLocation(994, 8);
+						DebugLocation(995, 8);
 						 type= SyntaxExpressionType.GreaterThan; 
 
 						}
 						break;
 					case 3:
 						DebugEnterAlt(3);
-						// ..\\ES3.g:995:5: LTE
+						// ..\\ES3.g:996:5: LTE
 						{
-						DebugLocation(995, 5);
+						DebugLocation(996, 5);
 						Match(input,LTE,Follow._LTE_in_relationalExpressionNoIn5066); 
-						DebugLocation(995, 9);
+						DebugLocation(996, 9);
 						 type= SyntaxExpressionType.LessThanOrEqual; 
 
 						}
 						break;
 					case 4:
 						DebugEnterAlt(4);
-						// ..\\ES3.g:996:5: GTE
+						// ..\\ES3.g:997:5: GTE
 						{
-						DebugLocation(996, 5);
+						DebugLocation(997, 5);
 						Match(input,GTE,Follow._GTE_in_relationalExpressionNoIn5074); 
-						DebugLocation(996, 9);
+						DebugLocation(997, 9);
 						 type= SyntaxExpressionType.GreaterThanOrEqual; 
 
 						}
 						break;
 					case 5:
 						DebugEnterAlt(5);
-						// ..\\ES3.g:997:5: INSTANCEOF
+						// ..\\ES3.g:998:5: INSTANCEOF
 						{
-						DebugLocation(997, 5);
+						DebugLocation(998, 5);
 						Match(input,INSTANCEOF,Follow._INSTANCEOF_in_relationalExpressionNoIn5082); 
-						DebugLocation(997, 16);
+						DebugLocation(998, 16);
 						 type= SyntaxExpressionType.InstanceOf;  
 
 						}
@@ -4270,12 +4271,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(36); }
 
-					DebugLocation(998, 8);
+					DebugLocation(999, 8);
 					PushFollow(Follow._shiftExpression_in_relationalExpressionNoIn5093);
 					right=shiftExpression();
 					PopFollow();
 
-					DebugLocation(998, 25);
+					DebugLocation(999, 25);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -4306,7 +4307,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("relationalExpressionNoIn", 31);
 			LeaveRule_relationalExpressionNoIn();
 		}
-		DebugLocation(999, 1);
+		DebugLocation(1000, 1);
 		} finally { DebugExitRule(GrammarFileName, "relationalExpressionNoIn"); }
 		return value;
 
@@ -4318,7 +4319,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_equalityExpression();
 
 	// $ANTLR start "equalityExpression"
-	// ..\\ES3.g:1005:1: equalityExpression returns [ExpressionSyntax value] : left= relationalExpression ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )* ;
+	// ..\\ES3.g:1006:1: equalityExpression returns [ExpressionSyntax value] : left= relationalExpression ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )* ;
 	[GrammarRule("equalityExpression")]
 	private ExpressionSyntax equalityExpression()
 	{
@@ -4334,22 +4335,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "equalityExpression");
-		DebugLocation(1005, 1);
+		DebugLocation(1006, 1);
 		try
 		{
-			// ..\\ES3.g:1009:2: (left= relationalExpression ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )* )
+			// ..\\ES3.g:1010:2: (left= relationalExpression ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1009:4: left= relationalExpression ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )*
+			// ..\\ES3.g:1010:4: left= relationalExpression ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )*
 			{
-			DebugLocation(1009, 8);
+			DebugLocation(1010, 8);
 			PushFollow(Follow._relationalExpression_in_equalityExpression5124);
 			left=relationalExpression();
 			PopFollow();
 
-			DebugLocation(1009, 30);
+			DebugLocation(1010, 30);
 			 value = left; 
-			DebugLocation(1009, 49);
-			// ..\\ES3.g:1009:49: ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )*
+			DebugLocation(1010, 49);
+			// ..\\ES3.g:1010:49: ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpression )*
 			try { DebugEnterSubRule(39);
 			while (true)
 			{
@@ -4368,10 +4369,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1010:3: ( EQ | NEQ | SAME | NSAME ) right= relationalExpression
+					// ..\\ES3.g:1011:3: ( EQ | NEQ | SAME | NSAME ) right= relationalExpression
 					{
-					DebugLocation(1010, 3);
-					// ..\\ES3.g:1010:3: ( EQ | NEQ | SAME | NSAME )
+					DebugLocation(1011, 3);
+					// ..\\ES3.g:1011:3: ( EQ | NEQ | SAME | NSAME )
 					int alt38=4;
 					try { DebugEnterSubRule(38);
 					try { DebugEnterDecision(38, false);
@@ -4410,44 +4411,44 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:1010:5: EQ
+						// ..\\ES3.g:1011:5: EQ
 						{
-						DebugLocation(1010, 5);
+						DebugLocation(1011, 5);
 						Match(input,EQ,Follow._EQ_in_equalityExpression5135); 
-						DebugLocation(1010, 8);
+						DebugLocation(1011, 8);
 						 type= SyntaxExpressionType.Equal; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:1011:5: NEQ
+						// ..\\ES3.g:1012:5: NEQ
 						{
-						DebugLocation(1011, 5);
+						DebugLocation(1012, 5);
 						Match(input,NEQ,Follow._NEQ_in_equalityExpression5143); 
-						DebugLocation(1011, 9);
+						DebugLocation(1012, 9);
 						 type= SyntaxExpressionType.NotEqual; 
 
 						}
 						break;
 					case 3:
 						DebugEnterAlt(3);
-						// ..\\ES3.g:1012:5: SAME
+						// ..\\ES3.g:1013:5: SAME
 						{
-						DebugLocation(1012, 5);
+						DebugLocation(1013, 5);
 						Match(input,SAME,Follow._SAME_in_equalityExpression5151); 
-						DebugLocation(1012, 10);
+						DebugLocation(1013, 10);
 						 type= SyntaxExpressionType.Same; 
 
 						}
 						break;
 					case 4:
 						DebugEnterAlt(4);
-						// ..\\ES3.g:1013:5: NSAME
+						// ..\\ES3.g:1014:5: NSAME
 						{
-						DebugLocation(1013, 5);
+						DebugLocation(1014, 5);
 						Match(input,NSAME,Follow._NSAME_in_equalityExpression5159); 
-						DebugLocation(1013, 11);
+						DebugLocation(1014, 11);
 						 type= SyntaxExpressionType.NotSame; 
 
 						}
@@ -4456,12 +4457,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(38); }
 
-					DebugLocation(1014, 8);
+					DebugLocation(1015, 8);
 					PushFollow(Follow._relationalExpression_in_equalityExpression5169);
 					right=relationalExpression();
 					PopFollow();
 
-					DebugLocation(1014, 30);
+					DebugLocation(1015, 30);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -4492,7 +4493,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("equalityExpression", 32);
 			LeaveRule_equalityExpression();
 		}
-		DebugLocation(1015, 1);
+		DebugLocation(1016, 1);
 		} finally { DebugExitRule(GrammarFileName, "equalityExpression"); }
 		return value;
 
@@ -4504,7 +4505,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_equalityExpressionNoIn();
 
 	// $ANTLR start "equalityExpressionNoIn"
-	// ..\\ES3.g:1017:1: equalityExpressionNoIn returns [ExpressionSyntax value] : left= relationalExpressionNoIn ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )* ;
+	// ..\\ES3.g:1018:1: equalityExpressionNoIn returns [ExpressionSyntax value] : left= relationalExpressionNoIn ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )* ;
 	[GrammarRule("equalityExpressionNoIn")]
 	private ExpressionSyntax equalityExpressionNoIn()
 	{
@@ -4520,22 +4521,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			SyntaxExpressionType type = SyntaxExpressionType.Unknown;
 
 		try { DebugEnterRule(GrammarFileName, "equalityExpressionNoIn");
-		DebugLocation(1017, 1);
+		DebugLocation(1018, 1);
 		try
 		{
-			// ..\\ES3.g:1021:2: (left= relationalExpressionNoIn ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )* )
+			// ..\\ES3.g:1022:2: (left= relationalExpressionNoIn ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1021:4: left= relationalExpressionNoIn ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )*
+			// ..\\ES3.g:1022:4: left= relationalExpressionNoIn ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )*
 			{
-			DebugLocation(1021, 8);
+			DebugLocation(1022, 8);
 			PushFollow(Follow._relationalExpressionNoIn_in_equalityExpressionNoIn5195);
 			left=relationalExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1021, 34);
+			DebugLocation(1022, 34);
 			 value = left; 
-			DebugLocation(1021, 53);
-			// ..\\ES3.g:1021:53: ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )*
+			DebugLocation(1022, 53);
+			// ..\\ES3.g:1022:53: ( ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn )*
 			try { DebugEnterSubRule(41);
 			while (true)
 			{
@@ -4554,10 +4555,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1022:3: ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn
+					// ..\\ES3.g:1023:3: ( EQ | NEQ | SAME | NSAME ) right= relationalExpressionNoIn
 					{
-					DebugLocation(1022, 3);
-					// ..\\ES3.g:1022:3: ( EQ | NEQ | SAME | NSAME )
+					DebugLocation(1023, 3);
+					// ..\\ES3.g:1023:3: ( EQ | NEQ | SAME | NSAME )
 					int alt40=4;
 					try { DebugEnterSubRule(40);
 					try { DebugEnterDecision(40, false);
@@ -4596,44 +4597,44 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:1022:5: EQ
+						// ..\\ES3.g:1023:5: EQ
 						{
-						DebugLocation(1022, 5);
+						DebugLocation(1023, 5);
 						Match(input,EQ,Follow._EQ_in_equalityExpressionNoIn5206); 
-						DebugLocation(1022, 8);
+						DebugLocation(1023, 8);
 						 type= SyntaxExpressionType.Equal; 
 
 						}
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:1023:5: NEQ
+						// ..\\ES3.g:1024:5: NEQ
 						{
-						DebugLocation(1023, 5);
+						DebugLocation(1024, 5);
 						Match(input,NEQ,Follow._NEQ_in_equalityExpressionNoIn5214); 
-						DebugLocation(1023, 9);
+						DebugLocation(1024, 9);
 						 type= SyntaxExpressionType.NotEqual; 
 
 						}
 						break;
 					case 3:
 						DebugEnterAlt(3);
-						// ..\\ES3.g:1024:5: SAME
+						// ..\\ES3.g:1025:5: SAME
 						{
-						DebugLocation(1024, 5);
+						DebugLocation(1025, 5);
 						Match(input,SAME,Follow._SAME_in_equalityExpressionNoIn5222); 
-						DebugLocation(1024, 10);
+						DebugLocation(1025, 10);
 						 type= SyntaxExpressionType.Same; 
 
 						}
 						break;
 					case 4:
 						DebugEnterAlt(4);
-						// ..\\ES3.g:1025:5: NSAME
+						// ..\\ES3.g:1026:5: NSAME
 						{
-						DebugLocation(1025, 5);
+						DebugLocation(1026, 5);
 						Match(input,NSAME,Follow._NSAME_in_equalityExpressionNoIn5230); 
-						DebugLocation(1025, 11);
+						DebugLocation(1026, 11);
 						 type= SyntaxExpressionType.NotSame; 
 
 						}
@@ -4642,12 +4643,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					}
 					} finally { DebugExitSubRule(40); }
 
-					DebugLocation(1026, 8);
+					DebugLocation(1027, 8);
 					PushFollow(Follow._relationalExpressionNoIn_in_equalityExpressionNoIn5240);
 					right=relationalExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1026, 34);
+					DebugLocation(1027, 34);
 					 value = new BinarySyntax(type, value, right); 
 
 					}
@@ -4678,7 +4679,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("equalityExpressionNoIn", 33);
 			LeaveRule_equalityExpressionNoIn();
 		}
-		DebugLocation(1027, 1);
+		DebugLocation(1028, 1);
 		} finally { DebugExitRule(GrammarFileName, "equalityExpressionNoIn"); }
 		return value;
 
@@ -4690,7 +4691,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_bitwiseANDExpression();
 
 	// $ANTLR start "bitwiseANDExpression"
-	// ..\\ES3.g:1033:1: bitwiseANDExpression returns [ExpressionSyntax value] : left= equalityExpression ( AND right= equalityExpression )* ;
+	// ..\\ES3.g:1034:1: bitwiseANDExpression returns [ExpressionSyntax value] : left= equalityExpression ( AND right= equalityExpression )* ;
 	[GrammarRule("bitwiseANDExpression")]
 	private ExpressionSyntax bitwiseANDExpression()
 	{
@@ -4703,22 +4704,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "bitwiseANDExpression");
-		DebugLocation(1033, 1);
+		DebugLocation(1034, 1);
 		try
 		{
-			// ..\\ES3.g:1034:2: (left= equalityExpression ( AND right= equalityExpression )* )
+			// ..\\ES3.g:1035:2: (left= equalityExpression ( AND right= equalityExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1034:4: left= equalityExpression ( AND right= equalityExpression )*
+			// ..\\ES3.g:1035:4: left= equalityExpression ( AND right= equalityExpression )*
 			{
-			DebugLocation(1034, 8);
+			DebugLocation(1035, 8);
 			PushFollow(Follow._equalityExpression_in_bitwiseANDExpression5267);
 			left=equalityExpression();
 			PopFollow();
 
-			DebugLocation(1034, 28);
+			DebugLocation(1035, 28);
 			 value = left; 
-			DebugLocation(1034, 47);
-			// ..\\ES3.g:1034:47: ( AND right= equalityExpression )*
+			DebugLocation(1035, 47);
+			// ..\\ES3.g:1035:47: ( AND right= equalityExpression )*
 			try { DebugEnterSubRule(42);
 			while (true)
 			{
@@ -4737,16 +4738,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1034:49: AND right= equalityExpression
+					// ..\\ES3.g:1035:49: AND right= equalityExpression
 					{
-					DebugLocation(1034, 49);
+					DebugLocation(1035, 49);
 					Match(input,AND,Follow._AND_in_bitwiseANDExpression5273); 
-					DebugLocation(1034, 58);
+					DebugLocation(1035, 58);
 					PushFollow(Follow._equalityExpression_in_bitwiseANDExpression5277);
 					right=equalityExpression();
 					PopFollow();
 
-					DebugLocation(1034, 78);
+					DebugLocation(1035, 78);
 					 value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, value, right); 
 
 					}
@@ -4777,7 +4778,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("bitwiseANDExpression", 34);
 			LeaveRule_bitwiseANDExpression();
 		}
-		DebugLocation(1035, 1);
+		DebugLocation(1036, 1);
 		} finally { DebugExitRule(GrammarFileName, "bitwiseANDExpression"); }
 		return value;
 
@@ -4789,7 +4790,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_bitwiseANDExpressionNoIn();
 
 	// $ANTLR start "bitwiseANDExpressionNoIn"
-	// ..\\ES3.g:1037:1: bitwiseANDExpressionNoIn returns [ExpressionSyntax value] : left= equalityExpressionNoIn ( AND right= equalityExpressionNoIn )* ;
+	// ..\\ES3.g:1038:1: bitwiseANDExpressionNoIn returns [ExpressionSyntax value] : left= equalityExpressionNoIn ( AND right= equalityExpressionNoIn )* ;
 	[GrammarRule("bitwiseANDExpressionNoIn")]
 	private ExpressionSyntax bitwiseANDExpressionNoIn()
 	{
@@ -4802,22 +4803,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "bitwiseANDExpressionNoIn");
-		DebugLocation(1037, 1);
+		DebugLocation(1038, 1);
 		try
 		{
-			// ..\\ES3.g:1038:2: (left= equalityExpressionNoIn ( AND right= equalityExpressionNoIn )* )
+			// ..\\ES3.g:1039:2: (left= equalityExpressionNoIn ( AND right= equalityExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1038:4: left= equalityExpressionNoIn ( AND right= equalityExpressionNoIn )*
+			// ..\\ES3.g:1039:4: left= equalityExpressionNoIn ( AND right= equalityExpressionNoIn )*
 			{
-			DebugLocation(1038, 8);
+			DebugLocation(1039, 8);
 			PushFollow(Follow._equalityExpressionNoIn_in_bitwiseANDExpressionNoIn5298);
 			left=equalityExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1038, 32);
+			DebugLocation(1039, 32);
 			 value = left; 
-			DebugLocation(1038, 51);
-			// ..\\ES3.g:1038:51: ( AND right= equalityExpressionNoIn )*
+			DebugLocation(1039, 51);
+			// ..\\ES3.g:1039:51: ( AND right= equalityExpressionNoIn )*
 			try { DebugEnterSubRule(43);
 			while (true)
 			{
@@ -4836,16 +4837,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1038:53: AND right= equalityExpressionNoIn
+					// ..\\ES3.g:1039:53: AND right= equalityExpressionNoIn
 					{
-					DebugLocation(1038, 53);
+					DebugLocation(1039, 53);
 					Match(input,AND,Follow._AND_in_bitwiseANDExpressionNoIn5304); 
-					DebugLocation(1038, 62);
+					DebugLocation(1039, 62);
 					PushFollow(Follow._equalityExpressionNoIn_in_bitwiseANDExpressionNoIn5308);
 					right=equalityExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1038, 86);
+					DebugLocation(1039, 86);
 					 value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, value, right); 
 
 					}
@@ -4876,7 +4877,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("bitwiseANDExpressionNoIn", 35);
 			LeaveRule_bitwiseANDExpressionNoIn();
 		}
-		DebugLocation(1039, 1);
+		DebugLocation(1040, 1);
 		} finally { DebugExitRule(GrammarFileName, "bitwiseANDExpressionNoIn"); }
 		return value;
 
@@ -4888,7 +4889,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_bitwiseXORExpression();
 
 	// $ANTLR start "bitwiseXORExpression"
-	// ..\\ES3.g:1041:1: bitwiseXORExpression returns [ExpressionSyntax value] : left= bitwiseANDExpression ( XOR right= bitwiseANDExpression )* ;
+	// ..\\ES3.g:1042:1: bitwiseXORExpression returns [ExpressionSyntax value] : left= bitwiseANDExpression ( XOR right= bitwiseANDExpression )* ;
 	[GrammarRule("bitwiseXORExpression")]
 	private ExpressionSyntax bitwiseXORExpression()
 	{
@@ -4901,22 +4902,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "bitwiseXORExpression");
-		DebugLocation(1041, 1);
+		DebugLocation(1042, 1);
 		try
 		{
-			// ..\\ES3.g:1042:2: (left= bitwiseANDExpression ( XOR right= bitwiseANDExpression )* )
+			// ..\\ES3.g:1043:2: (left= bitwiseANDExpression ( XOR right= bitwiseANDExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1042:4: left= bitwiseANDExpression ( XOR right= bitwiseANDExpression )*
+			// ..\\ES3.g:1043:4: left= bitwiseANDExpression ( XOR right= bitwiseANDExpression )*
 			{
-			DebugLocation(1042, 8);
+			DebugLocation(1043, 8);
 			PushFollow(Follow._bitwiseANDExpression_in_bitwiseXORExpression5331);
 			left=bitwiseANDExpression();
 			PopFollow();
 
-			DebugLocation(1042, 30);
+			DebugLocation(1043, 30);
 			 value = left; 
-			DebugLocation(1042, 49);
-			// ..\\ES3.g:1042:49: ( XOR right= bitwiseANDExpression )*
+			DebugLocation(1043, 49);
+			// ..\\ES3.g:1043:49: ( XOR right= bitwiseANDExpression )*
 			try { DebugEnterSubRule(44);
 			while (true)
 			{
@@ -4935,16 +4936,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1042:51: XOR right= bitwiseANDExpression
+					// ..\\ES3.g:1043:51: XOR right= bitwiseANDExpression
 					{
-					DebugLocation(1042, 51);
+					DebugLocation(1043, 51);
 					Match(input,XOR,Follow._XOR_in_bitwiseXORExpression5337); 
-					DebugLocation(1042, 60);
+					DebugLocation(1043, 60);
 					PushFollow(Follow._bitwiseANDExpression_in_bitwiseXORExpression5341);
 					right=bitwiseANDExpression();
 					PopFollow();
 
-					DebugLocation(1042, 82);
+					DebugLocation(1043, 82);
 					 value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, value, right); 
 
 					}
@@ -4975,7 +4976,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("bitwiseXORExpression", 36);
 			LeaveRule_bitwiseXORExpression();
 		}
-		DebugLocation(1043, 1);
+		DebugLocation(1044, 1);
 		} finally { DebugExitRule(GrammarFileName, "bitwiseXORExpression"); }
 		return value;
 
@@ -4987,7 +4988,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_bitwiseXORExpressionNoIn();
 
 	// $ANTLR start "bitwiseXORExpressionNoIn"
-	// ..\\ES3.g:1045:1: bitwiseXORExpressionNoIn returns [ExpressionSyntax value] : left= bitwiseANDExpressionNoIn ( XOR right= bitwiseANDExpressionNoIn )* ;
+	// ..\\ES3.g:1046:1: bitwiseXORExpressionNoIn returns [ExpressionSyntax value] : left= bitwiseANDExpressionNoIn ( XOR right= bitwiseANDExpressionNoIn )* ;
 	[GrammarRule("bitwiseXORExpressionNoIn")]
 	private ExpressionSyntax bitwiseXORExpressionNoIn()
 	{
@@ -5000,22 +5001,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "bitwiseXORExpressionNoIn");
-		DebugLocation(1045, 1);
+		DebugLocation(1046, 1);
 		try
 		{
-			// ..\\ES3.g:1046:2: (left= bitwiseANDExpressionNoIn ( XOR right= bitwiseANDExpressionNoIn )* )
+			// ..\\ES3.g:1047:2: (left= bitwiseANDExpressionNoIn ( XOR right= bitwiseANDExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1046:4: left= bitwiseANDExpressionNoIn ( XOR right= bitwiseANDExpressionNoIn )*
+			// ..\\ES3.g:1047:4: left= bitwiseANDExpressionNoIn ( XOR right= bitwiseANDExpressionNoIn )*
 			{
-			DebugLocation(1046, 8);
+			DebugLocation(1047, 8);
 			PushFollow(Follow._bitwiseANDExpressionNoIn_in_bitwiseXORExpressionNoIn5364);
 			left=bitwiseANDExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1046, 34);
+			DebugLocation(1047, 34);
 			 value = left; 
-			DebugLocation(1046, 53);
-			// ..\\ES3.g:1046:53: ( XOR right= bitwiseANDExpressionNoIn )*
+			DebugLocation(1047, 53);
+			// ..\\ES3.g:1047:53: ( XOR right= bitwiseANDExpressionNoIn )*
 			try { DebugEnterSubRule(45);
 			while (true)
 			{
@@ -5034,16 +5035,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1046:55: XOR right= bitwiseANDExpressionNoIn
+					// ..\\ES3.g:1047:55: XOR right= bitwiseANDExpressionNoIn
 					{
-					DebugLocation(1046, 55);
+					DebugLocation(1047, 55);
 					Match(input,XOR,Follow._XOR_in_bitwiseXORExpressionNoIn5370); 
-					DebugLocation(1046, 64);
+					DebugLocation(1047, 64);
 					PushFollow(Follow._bitwiseANDExpressionNoIn_in_bitwiseXORExpressionNoIn5374);
 					right=bitwiseANDExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1046, 90);
+					DebugLocation(1047, 90);
 					 value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, value, right); 
 
 					}
@@ -5074,7 +5075,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("bitwiseXORExpressionNoIn", 37);
 			LeaveRule_bitwiseXORExpressionNoIn();
 		}
-		DebugLocation(1047, 1);
+		DebugLocation(1048, 1);
 		} finally { DebugExitRule(GrammarFileName, "bitwiseXORExpressionNoIn"); }
 		return value;
 
@@ -5086,7 +5087,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_bitwiseORExpression();
 
 	// $ANTLR start "bitwiseORExpression"
-	// ..\\ES3.g:1049:1: bitwiseORExpression returns [ExpressionSyntax value] : left= bitwiseXORExpression ( OR right= bitwiseXORExpression )* ;
+	// ..\\ES3.g:1050:1: bitwiseORExpression returns [ExpressionSyntax value] : left= bitwiseXORExpression ( OR right= bitwiseXORExpression )* ;
 	[GrammarRule("bitwiseORExpression")]
 	private ExpressionSyntax bitwiseORExpression()
 	{
@@ -5099,22 +5100,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "bitwiseORExpression");
-		DebugLocation(1049, 1);
+		DebugLocation(1050, 1);
 		try
 		{
-			// ..\\ES3.g:1050:2: (left= bitwiseXORExpression ( OR right= bitwiseXORExpression )* )
+			// ..\\ES3.g:1051:2: (left= bitwiseXORExpression ( OR right= bitwiseXORExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1050:4: left= bitwiseXORExpression ( OR right= bitwiseXORExpression )*
+			// ..\\ES3.g:1051:4: left= bitwiseXORExpression ( OR right= bitwiseXORExpression )*
 			{
-			DebugLocation(1050, 8);
+			DebugLocation(1051, 8);
 			PushFollow(Follow._bitwiseXORExpression_in_bitwiseORExpression5396);
 			left=bitwiseXORExpression();
 			PopFollow();
 
-			DebugLocation(1050, 30);
+			DebugLocation(1051, 30);
 			 value = left; 
-			DebugLocation(1050, 49);
-			// ..\\ES3.g:1050:49: ( OR right= bitwiseXORExpression )*
+			DebugLocation(1051, 49);
+			// ..\\ES3.g:1051:49: ( OR right= bitwiseXORExpression )*
 			try { DebugEnterSubRule(46);
 			while (true)
 			{
@@ -5133,16 +5134,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1050:51: OR right= bitwiseXORExpression
+					// ..\\ES3.g:1051:51: OR right= bitwiseXORExpression
 					{
-					DebugLocation(1050, 51);
+					DebugLocation(1051, 51);
 					Match(input,OR,Follow._OR_in_bitwiseORExpression5402); 
-					DebugLocation(1050, 59);
+					DebugLocation(1051, 59);
 					PushFollow(Follow._bitwiseXORExpression_in_bitwiseORExpression5406);
 					right=bitwiseXORExpression();
 					PopFollow();
 
-					DebugLocation(1050, 81);
+					DebugLocation(1051, 81);
 					 value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, value, right); 
 
 					}
@@ -5173,7 +5174,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("bitwiseORExpression", 38);
 			LeaveRule_bitwiseORExpression();
 		}
-		DebugLocation(1051, 1);
+		DebugLocation(1052, 1);
 		} finally { DebugExitRule(GrammarFileName, "bitwiseORExpression"); }
 		return value;
 
@@ -5185,7 +5186,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_bitwiseORExpressionNoIn();
 
 	// $ANTLR start "bitwiseORExpressionNoIn"
-	// ..\\ES3.g:1053:1: bitwiseORExpressionNoIn returns [ExpressionSyntax value] : left= bitwiseXORExpressionNoIn ( OR right= bitwiseXORExpressionNoIn )* ;
+	// ..\\ES3.g:1054:1: bitwiseORExpressionNoIn returns [ExpressionSyntax value] : left= bitwiseXORExpressionNoIn ( OR right= bitwiseXORExpressionNoIn )* ;
 	[GrammarRule("bitwiseORExpressionNoIn")]
 	private ExpressionSyntax bitwiseORExpressionNoIn()
 	{
@@ -5198,22 +5199,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "bitwiseORExpressionNoIn");
-		DebugLocation(1053, 1);
+		DebugLocation(1054, 1);
 		try
 		{
-			// ..\\ES3.g:1054:2: (left= bitwiseXORExpressionNoIn ( OR right= bitwiseXORExpressionNoIn )* )
+			// ..\\ES3.g:1055:2: (left= bitwiseXORExpressionNoIn ( OR right= bitwiseXORExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1054:4: left= bitwiseXORExpressionNoIn ( OR right= bitwiseXORExpressionNoIn )*
+			// ..\\ES3.g:1055:4: left= bitwiseXORExpressionNoIn ( OR right= bitwiseXORExpressionNoIn )*
 			{
-			DebugLocation(1054, 8);
+			DebugLocation(1055, 8);
 			PushFollow(Follow._bitwiseXORExpressionNoIn_in_bitwiseORExpressionNoIn5428);
 			left=bitwiseXORExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1054, 34);
+			DebugLocation(1055, 34);
 			 value = left; 
-			DebugLocation(1054, 53);
-			// ..\\ES3.g:1054:53: ( OR right= bitwiseXORExpressionNoIn )*
+			DebugLocation(1055, 53);
+			// ..\\ES3.g:1055:53: ( OR right= bitwiseXORExpressionNoIn )*
 			try { DebugEnterSubRule(47);
 			while (true)
 			{
@@ -5232,16 +5233,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1054:55: OR right= bitwiseXORExpressionNoIn
+					// ..\\ES3.g:1055:55: OR right= bitwiseXORExpressionNoIn
 					{
-					DebugLocation(1054, 55);
+					DebugLocation(1055, 55);
 					Match(input,OR,Follow._OR_in_bitwiseORExpressionNoIn5434); 
-					DebugLocation(1054, 63);
+					DebugLocation(1055, 63);
 					PushFollow(Follow._bitwiseXORExpressionNoIn_in_bitwiseORExpressionNoIn5438);
 					right=bitwiseXORExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1054, 89);
+					DebugLocation(1055, 89);
 					 value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, value, right); 
 
 					}
@@ -5272,7 +5273,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("bitwiseORExpressionNoIn", 39);
 			LeaveRule_bitwiseORExpressionNoIn();
 		}
-		DebugLocation(1055, 1);
+		DebugLocation(1056, 1);
 		} finally { DebugExitRule(GrammarFileName, "bitwiseORExpressionNoIn"); }
 		return value;
 
@@ -5284,7 +5285,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_logicalANDExpression();
 
 	// $ANTLR start "logicalANDExpression"
-	// ..\\ES3.g:1061:1: logicalANDExpression returns [ExpressionSyntax value] : left= bitwiseORExpression ( LAND right= bitwiseORExpression )* ;
+	// ..\\ES3.g:1062:1: logicalANDExpression returns [ExpressionSyntax value] : left= bitwiseORExpression ( LAND right= bitwiseORExpression )* ;
 	[GrammarRule("logicalANDExpression")]
 	private ExpressionSyntax logicalANDExpression()
 	{
@@ -5297,22 +5298,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "logicalANDExpression");
-		DebugLocation(1061, 1);
+		DebugLocation(1062, 1);
 		try
 		{
-			// ..\\ES3.g:1062:2: (left= bitwiseORExpression ( LAND right= bitwiseORExpression )* )
+			// ..\\ES3.g:1063:2: (left= bitwiseORExpression ( LAND right= bitwiseORExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1062:3: left= bitwiseORExpression ( LAND right= bitwiseORExpression )*
+			// ..\\ES3.g:1063:3: left= bitwiseORExpression ( LAND right= bitwiseORExpression )*
 			{
-			DebugLocation(1062, 7);
+			DebugLocation(1063, 7);
 			PushFollow(Follow._bitwiseORExpression_in_logicalANDExpression5464);
 			left=bitwiseORExpression();
 			PopFollow();
 
-			DebugLocation(1062, 29);
+			DebugLocation(1063, 29);
 			 value = left; 
-			DebugLocation(1062, 48);
-			// ..\\ES3.g:1062:48: ( LAND right= bitwiseORExpression )*
+			DebugLocation(1063, 48);
+			// ..\\ES3.g:1063:48: ( LAND right= bitwiseORExpression )*
 			try { DebugEnterSubRule(48);
 			while (true)
 			{
@@ -5331,16 +5332,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1062:50: LAND right= bitwiseORExpression
+					// ..\\ES3.g:1063:50: LAND right= bitwiseORExpression
 					{
-					DebugLocation(1062, 50);
+					DebugLocation(1063, 50);
 					Match(input,LAND,Follow._LAND_in_logicalANDExpression5470); 
-					DebugLocation(1062, 60);
+					DebugLocation(1063, 60);
 					PushFollow(Follow._bitwiseORExpression_in_logicalANDExpression5474);
 					right=bitwiseORExpression();
 					PopFollow();
 
-					DebugLocation(1062, 81);
+					DebugLocation(1063, 81);
 					 value = new BinarySyntax(SyntaxExpressionType.And, value, right); 
 
 					}
@@ -5371,7 +5372,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("logicalANDExpression", 40);
 			LeaveRule_logicalANDExpression();
 		}
-		DebugLocation(1063, 1);
+		DebugLocation(1064, 1);
 		} finally { DebugExitRule(GrammarFileName, "logicalANDExpression"); }
 		return value;
 
@@ -5383,7 +5384,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_logicalANDExpressionNoIn();
 
 	// $ANTLR start "logicalANDExpressionNoIn"
-	// ..\\ES3.g:1065:1: logicalANDExpressionNoIn returns [ExpressionSyntax value] : left= bitwiseORExpressionNoIn ( LAND right= bitwiseORExpressionNoIn )* ;
+	// ..\\ES3.g:1066:1: logicalANDExpressionNoIn returns [ExpressionSyntax value] : left= bitwiseORExpressionNoIn ( LAND right= bitwiseORExpressionNoIn )* ;
 	[GrammarRule("logicalANDExpressionNoIn")]
 	private ExpressionSyntax logicalANDExpressionNoIn()
 	{
@@ -5396,22 +5397,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "logicalANDExpressionNoIn");
-		DebugLocation(1065, 1);
+		DebugLocation(1066, 1);
 		try
 		{
-			// ..\\ES3.g:1066:2: (left= bitwiseORExpressionNoIn ( LAND right= bitwiseORExpressionNoIn )* )
+			// ..\\ES3.g:1067:2: (left= bitwiseORExpressionNoIn ( LAND right= bitwiseORExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1066:3: left= bitwiseORExpressionNoIn ( LAND right= bitwiseORExpressionNoIn )*
+			// ..\\ES3.g:1067:3: left= bitwiseORExpressionNoIn ( LAND right= bitwiseORExpressionNoIn )*
 			{
-			DebugLocation(1066, 7);
+			DebugLocation(1067, 7);
 			PushFollow(Follow._bitwiseORExpressionNoIn_in_logicalANDExpressionNoIn5495);
 			left=bitwiseORExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1066, 33);
+			DebugLocation(1067, 33);
 			 value = left; 
-			DebugLocation(1066, 52);
-			// ..\\ES3.g:1066:52: ( LAND right= bitwiseORExpressionNoIn )*
+			DebugLocation(1067, 52);
+			// ..\\ES3.g:1067:52: ( LAND right= bitwiseORExpressionNoIn )*
 			try { DebugEnterSubRule(49);
 			while (true)
 			{
@@ -5430,16 +5431,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1066:54: LAND right= bitwiseORExpressionNoIn
+					// ..\\ES3.g:1067:54: LAND right= bitwiseORExpressionNoIn
 					{
-					DebugLocation(1066, 54);
+					DebugLocation(1067, 54);
 					Match(input,LAND,Follow._LAND_in_logicalANDExpressionNoIn5501); 
-					DebugLocation(1066, 64);
+					DebugLocation(1067, 64);
 					PushFollow(Follow._bitwiseORExpressionNoIn_in_logicalANDExpressionNoIn5505);
 					right=bitwiseORExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1066, 89);
+					DebugLocation(1067, 89);
 					 value = new BinarySyntax(SyntaxExpressionType.And, value, right); 
 
 					}
@@ -5470,7 +5471,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("logicalANDExpressionNoIn", 41);
 			LeaveRule_logicalANDExpressionNoIn();
 		}
-		DebugLocation(1067, 1);
+		DebugLocation(1068, 1);
 		} finally { DebugExitRule(GrammarFileName, "logicalANDExpressionNoIn"); }
 		return value;
 
@@ -5482,7 +5483,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_logicalORExpression();
 
 	// $ANTLR start "logicalORExpression"
-	// ..\\ES3.g:1069:1: logicalORExpression returns [ExpressionSyntax value] : left= logicalANDExpression ( LOR right= logicalANDExpression )* ;
+	// ..\\ES3.g:1070:1: logicalORExpression returns [ExpressionSyntax value] : left= logicalANDExpression ( LOR right= logicalANDExpression )* ;
 	[GrammarRule("logicalORExpression")]
 	private ExpressionSyntax logicalORExpression()
 	{
@@ -5495,22 +5496,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "logicalORExpression");
-		DebugLocation(1069, 1);
+		DebugLocation(1070, 1);
 		try
 		{
-			// ..\\ES3.g:1070:2: (left= logicalANDExpression ( LOR right= logicalANDExpression )* )
+			// ..\\ES3.g:1071:2: (left= logicalANDExpression ( LOR right= logicalANDExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1070:4: left= logicalANDExpression ( LOR right= logicalANDExpression )*
+			// ..\\ES3.g:1071:4: left= logicalANDExpression ( LOR right= logicalANDExpression )*
 			{
-			DebugLocation(1070, 8);
+			DebugLocation(1071, 8);
 			PushFollow(Follow._logicalANDExpression_in_logicalORExpression5527);
 			left=logicalANDExpression();
 			PopFollow();
 
-			DebugLocation(1070, 30);
+			DebugLocation(1071, 30);
 			 value = left; 
-			DebugLocation(1070, 49);
-			// ..\\ES3.g:1070:49: ( LOR right= logicalANDExpression )*
+			DebugLocation(1071, 49);
+			// ..\\ES3.g:1071:49: ( LOR right= logicalANDExpression )*
 			try { DebugEnterSubRule(50);
 			while (true)
 			{
@@ -5529,16 +5530,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1070:51: LOR right= logicalANDExpression
+					// ..\\ES3.g:1071:51: LOR right= logicalANDExpression
 					{
-					DebugLocation(1070, 51);
+					DebugLocation(1071, 51);
 					Match(input,LOR,Follow._LOR_in_logicalORExpression5533); 
-					DebugLocation(1070, 60);
+					DebugLocation(1071, 60);
 					PushFollow(Follow._logicalANDExpression_in_logicalORExpression5537);
 					right=logicalANDExpression();
 					PopFollow();
 
-					DebugLocation(1070, 82);
+					DebugLocation(1071, 82);
 					 value = new BinarySyntax(SyntaxExpressionType.Or, value, right); 
 
 					}
@@ -5569,7 +5570,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("logicalORExpression", 42);
 			LeaveRule_logicalORExpression();
 		}
-		DebugLocation(1071, 1);
+		DebugLocation(1072, 1);
 		} finally { DebugExitRule(GrammarFileName, "logicalORExpression"); }
 		return value;
 
@@ -5581,7 +5582,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_logicalORExpressionNoIn();
 
 	// $ANTLR start "logicalORExpressionNoIn"
-	// ..\\ES3.g:1073:1: logicalORExpressionNoIn returns [ExpressionSyntax value] : left= logicalANDExpressionNoIn ( LOR right= logicalANDExpressionNoIn )* ;
+	// ..\\ES3.g:1074:1: logicalORExpressionNoIn returns [ExpressionSyntax value] : left= logicalANDExpressionNoIn ( LOR right= logicalANDExpressionNoIn )* ;
 	[GrammarRule("logicalORExpressionNoIn")]
 	private ExpressionSyntax logicalORExpressionNoIn()
 	{
@@ -5594,22 +5595,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax right = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "logicalORExpressionNoIn");
-		DebugLocation(1073, 1);
+		DebugLocation(1074, 1);
 		try
 		{
-			// ..\\ES3.g:1074:2: (left= logicalANDExpressionNoIn ( LOR right= logicalANDExpressionNoIn )* )
+			// ..\\ES3.g:1075:2: (left= logicalANDExpressionNoIn ( LOR right= logicalANDExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1074:4: left= logicalANDExpressionNoIn ( LOR right= logicalANDExpressionNoIn )*
+			// ..\\ES3.g:1075:4: left= logicalANDExpressionNoIn ( LOR right= logicalANDExpressionNoIn )*
 			{
-			DebugLocation(1074, 8);
+			DebugLocation(1075, 8);
 			PushFollow(Follow._logicalANDExpressionNoIn_in_logicalORExpressionNoIn5559);
 			left=logicalANDExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1074, 34);
+			DebugLocation(1075, 34);
 			 value = left; 
-			DebugLocation(1074, 53);
-			// ..\\ES3.g:1074:53: ( LOR right= logicalANDExpressionNoIn )*
+			DebugLocation(1075, 53);
+			// ..\\ES3.g:1075:53: ( LOR right= logicalANDExpressionNoIn )*
 			try { DebugEnterSubRule(51);
 			while (true)
 			{
@@ -5628,16 +5629,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1074:55: LOR right= logicalANDExpressionNoIn
+					// ..\\ES3.g:1075:55: LOR right= logicalANDExpressionNoIn
 					{
-					DebugLocation(1074, 55);
+					DebugLocation(1075, 55);
 					Match(input,LOR,Follow._LOR_in_logicalORExpressionNoIn5565); 
-					DebugLocation(1074, 64);
+					DebugLocation(1075, 64);
 					PushFollow(Follow._logicalANDExpressionNoIn_in_logicalORExpressionNoIn5569);
 					right=logicalANDExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1074, 90);
+					DebugLocation(1075, 90);
 					 value = new BinarySyntax(SyntaxExpressionType.Or, value, right); 
 
 					}
@@ -5668,7 +5669,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("logicalORExpressionNoIn", 43);
 			LeaveRule_logicalORExpressionNoIn();
 		}
-		DebugLocation(1075, 1);
+		DebugLocation(1076, 1);
 		} finally { DebugExitRule(GrammarFileName, "logicalORExpressionNoIn"); }
 		return value;
 
@@ -5680,7 +5681,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_conditionalExpression();
 
 	// $ANTLR start "conditionalExpression"
-	// ..\\ES3.g:1081:1: conditionalExpression returns [ExpressionSyntax value] : expr1= logicalORExpression ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )? ;
+	// ..\\ES3.g:1082:1: conditionalExpression returns [ExpressionSyntax value] : expr1= logicalORExpression ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )? ;
 	[GrammarRule("conditionalExpression")]
 	private ExpressionSyntax conditionalExpression()
 	{
@@ -5694,22 +5695,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax expr3 = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "conditionalExpression");
-		DebugLocation(1081, 1);
+		DebugLocation(1082, 1);
 		try
 		{
-			// ..\\ES3.g:1082:2: (expr1= logicalORExpression ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )? )
+			// ..\\ES3.g:1083:2: (expr1= logicalORExpression ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1082:4: expr1= logicalORExpression ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )?
+			// ..\\ES3.g:1083:4: expr1= logicalORExpression ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )?
 			{
-			DebugLocation(1082, 9);
+			DebugLocation(1083, 9);
 			PushFollow(Follow._logicalORExpression_in_conditionalExpression5596);
 			expr1=logicalORExpression();
 			PopFollow();
 
-			DebugLocation(1082, 30);
+			DebugLocation(1083, 30);
 			 value = expr1; 
-			DebugLocation(1082, 50);
-			// ..\\ES3.g:1082:50: ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )?
+			DebugLocation(1083, 50);
+			// ..\\ES3.g:1083:50: ( QUE expr2= assignmentExpression COLON expr3= assignmentExpression )?
 			int alt52=2;
 			try { DebugEnterSubRule(52);
 			try { DebugEnterDecision(52, false);
@@ -5724,23 +5725,23 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1082:52: QUE expr2= assignmentExpression COLON expr3= assignmentExpression
+				// ..\\ES3.g:1083:52: QUE expr2= assignmentExpression COLON expr3= assignmentExpression
 				{
-				DebugLocation(1082, 52);
+				DebugLocation(1083, 52);
 				Match(input,QUE,Follow._QUE_in_conditionalExpression5602); 
-				DebugLocation(1082, 61);
+				DebugLocation(1083, 61);
 				PushFollow(Follow._assignmentExpression_in_conditionalExpression5606);
 				expr2=assignmentExpression();
 				PopFollow();
 
-				DebugLocation(1082, 83);
+				DebugLocation(1083, 83);
 				Match(input,COLON,Follow._COLON_in_conditionalExpression5608); 
-				DebugLocation(1082, 94);
+				DebugLocation(1083, 94);
 				PushFollow(Follow._assignmentExpression_in_conditionalExpression5612);
 				expr3=assignmentExpression();
 				PopFollow();
 
-				DebugLocation(1082, 116);
+				DebugLocation(1083, 116);
 				 value = new TernarySyntax(expr1, expr2, expr3); 
 
 				}
@@ -5764,7 +5765,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("conditionalExpression", 44);
 			LeaveRule_conditionalExpression();
 		}
-		DebugLocation(1083, 1);
+		DebugLocation(1084, 1);
 		} finally { DebugExitRule(GrammarFileName, "conditionalExpression"); }
 		return value;
 
@@ -5776,7 +5777,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_conditionalExpressionNoIn();
 
 	// $ANTLR start "conditionalExpressionNoIn"
-	// ..\\ES3.g:1085:1: conditionalExpressionNoIn returns [ExpressionSyntax value] : expr1= logicalORExpressionNoIn ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )? ;
+	// ..\\ES3.g:1086:1: conditionalExpressionNoIn returns [ExpressionSyntax value] : expr1= logicalORExpressionNoIn ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )? ;
 	[GrammarRule("conditionalExpressionNoIn")]
 	private ExpressionSyntax conditionalExpressionNoIn()
 	{
@@ -5790,22 +5791,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ExpressionSyntax expr3 = default(ExpressionSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "conditionalExpressionNoIn");
-		DebugLocation(1085, 1);
+		DebugLocation(1086, 1);
 		try
 		{
-			// ..\\ES3.g:1086:2: (expr1= logicalORExpressionNoIn ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )? )
+			// ..\\ES3.g:1087:2: (expr1= logicalORExpressionNoIn ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1086:4: expr1= logicalORExpressionNoIn ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )?
+			// ..\\ES3.g:1087:4: expr1= logicalORExpressionNoIn ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )?
 			{
-			DebugLocation(1086, 9);
+			DebugLocation(1087, 9);
 			PushFollow(Follow._logicalORExpressionNoIn_in_conditionalExpressionNoIn5633);
 			expr1=logicalORExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1086, 34);
+			DebugLocation(1087, 34);
 			 value = expr1; 
-			DebugLocation(1086, 54);
-			// ..\\ES3.g:1086:54: ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )?
+			DebugLocation(1087, 54);
+			// ..\\ES3.g:1087:54: ( QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn )?
 			int alt53=2;
 			try { DebugEnterSubRule(53);
 			try { DebugEnterDecision(53, false);
@@ -5820,23 +5821,23 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1086:56: QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn
+				// ..\\ES3.g:1087:56: QUE expr2= assignmentExpressionNoIn COLON expr3= assignmentExpressionNoIn
 				{
-				DebugLocation(1086, 56);
+				DebugLocation(1087, 56);
 				Match(input,QUE,Follow._QUE_in_conditionalExpressionNoIn5639); 
-				DebugLocation(1086, 65);
+				DebugLocation(1087, 65);
 				PushFollow(Follow._assignmentExpressionNoIn_in_conditionalExpressionNoIn5643);
 				expr2=assignmentExpressionNoIn();
 				PopFollow();
 
-				DebugLocation(1086, 91);
+				DebugLocation(1087, 91);
 				Match(input,COLON,Follow._COLON_in_conditionalExpressionNoIn5645); 
-				DebugLocation(1086, 102);
+				DebugLocation(1087, 102);
 				PushFollow(Follow._assignmentExpressionNoIn_in_conditionalExpressionNoIn5649);
 				expr3=assignmentExpressionNoIn();
 				PopFollow();
 
-				DebugLocation(1086, 128);
+				DebugLocation(1087, 128);
 				 value = new TernarySyntax(expr1, expr2, expr3); 
 
 				}
@@ -5860,7 +5861,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("conditionalExpressionNoIn", 45);
 			LeaveRule_conditionalExpressionNoIn();
 		}
-		DebugLocation(1087, 1);
+		DebugLocation(1088, 1);
 		} finally { DebugExitRule(GrammarFileName, "conditionalExpressionNoIn"); }
 		return value;
 
@@ -5872,7 +5873,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_assignmentExpression();
 
 	// $ANTLR start "assignmentExpression"
-	// ..\\ES3.g:1115:1: assignmentExpression returns [ExpressionSyntax value] : lhs= conditionalExpression ({...}?ass= assignmentOperator exp= assignmentExpression )? ;
+	// ..\\ES3.g:1116:1: assignmentExpression returns [ExpressionSyntax value] : lhs= conditionalExpression ({...}?ass= assignmentOperator exp= assignmentExpression )? ;
 	[GrammarRule("assignmentExpression")]
 	private ExpressionSyntax assignmentExpression()
 	{
@@ -5889,22 +5890,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    bool isLhs;
 
 		try { DebugEnterRule(GrammarFileName, "assignmentExpression");
-		DebugLocation(1115, 1);
+		DebugLocation(1116, 1);
 		try
 		{
-			// ..\\ES3.g:1119:2: (lhs= conditionalExpression ({...}?ass= assignmentOperator exp= assignmentExpression )? )
+			// ..\\ES3.g:1120:2: (lhs= conditionalExpression ({...}?ass= assignmentOperator exp= assignmentExpression )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1120:9: lhs= conditionalExpression ({...}?ass= assignmentOperator exp= assignmentExpression )?
+			// ..\\ES3.g:1121:9: lhs= conditionalExpression ({...}?ass= assignmentOperator exp= assignmentExpression )?
 			{
-			DebugLocation(1120, 12);
+			DebugLocation(1121, 12);
 			PushFollow(Follow._conditionalExpression_in_assignmentExpression5690);
 			lhs=conditionalExpression();
 			PopFollow();
 
-			DebugLocation(1121, 9);
+			DebugLocation(1122, 9);
 			 value = lhs; isLhs = IsLeftHandSideAssign(lhs); 
-			DebugLocation(1122, 6);
-			// ..\\ES3.g:1122:6: ({...}?ass= assignmentOperator exp= assignmentExpression )?
+			DebugLocation(1123, 6);
+			// ..\\ES3.g:1123:6: ({...}?ass= assignmentOperator exp= assignmentExpression )?
 			int alt54=2;
 			try { DebugEnterSubRule(54);
 			try { DebugEnterDecision(54, false);
@@ -5924,24 +5925,24 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1123:13: {...}?ass= assignmentOperator exp= assignmentExpression
+				// ..\\ES3.g:1124:13: {...}?ass= assignmentOperator exp= assignmentExpression
 				{
-				DebugLocation(1123, 13);
+				DebugLocation(1124, 13);
 				if (!(( isLhs )))
 				{
 					throw new FailedPredicateException(input, "assignmentExpression", " isLhs ");
 				}
-				DebugLocation(1124, 16);
+				DebugLocation(1125, 16);
 				PushFollow(Follow._assignmentOperator_in_assignmentExpression5737);
 				ass=assignmentOperator();
 				PopFollow();
 
-				DebugLocation(1125, 16);
+				DebugLocation(1126, 16);
 				PushFollow(Follow._assignmentExpression_in_assignmentExpression5753);
 				exp=assignmentExpression();
 				PopFollow();
 
-				DebugLocation(1126, 13);
+				DebugLocation(1127, 13);
 
 				                value = new AssignmentSyntax(
 				                    ResolveAssignmentOperator((ass!=null?input.ToString(ass.Start,ass.Stop):null)),
@@ -5971,7 +5972,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("assignmentExpression", 46);
 			LeaveRule_assignmentExpression();
 		}
-		DebugLocation(1134, 1);
+		DebugLocation(1135, 1);
 		} finally { DebugExitRule(GrammarFileName, "assignmentExpression"); }
 		return value;
 
@@ -5988,7 +5989,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_assignmentOperator();
 
 	// $ANTLR start "assignmentOperator"
-	// ..\\ES3.g:1136:1: assignmentOperator : ( ASSIGN | MULASS | DIVASS | MODASS | ADDASS | SUBASS | SHLASS | SHRASS | SHUASS | ANDASS | XORASS | ORASS );
+	// ..\\ES3.g:1137:1: assignmentOperator : ( ASSIGN | MULASS | DIVASS | MODASS | ADDASS | SUBASS | SHLASS | SHRASS | SHUASS | ANDASS | XORASS | ORASS );
 	[GrammarRule("assignmentOperator")]
 	private ES3Parser.assignmentOperator_return assignmentOperator()
 	{
@@ -5999,14 +6000,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		retval.Start = (IToken)input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "assignmentOperator");
-		DebugLocation(1136, 1);
+		DebugLocation(1137, 1);
 		try
 		{
-			// ..\\ES3.g:1137:2: ( ASSIGN | MULASS | DIVASS | MODASS | ADDASS | SUBASS | SHLASS | SHRASS | SHUASS | ANDASS | XORASS | ORASS )
+			// ..\\ES3.g:1138:2: ( ASSIGN | MULASS | DIVASS | MODASS | ADDASS | SUBASS | SHLASS | SHRASS | SHUASS | ANDASS | XORASS | ORASS )
 			DebugEnterAlt(1);
 			// ..\\ES3.g:
 			{
-			DebugLocation(1137, 2);
+			DebugLocation(1138, 2);
 			if (input.LA(1)==ADDASS||input.LA(1)==ANDASS||input.LA(1)==ASSIGN||input.LA(1)==DIVASS||input.LA(1)==MODASS||input.LA(1)==MULASS||input.LA(1)==ORASS||input.LA(1)==SHLASS||input.LA(1)==SHRASS||input.LA(1)==SHUASS||input.LA(1)==SUBASS||input.LA(1)==XORASS)
 			{
 				input.Consume();
@@ -6036,7 +6037,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("assignmentOperator", 47);
 			LeaveRule_assignmentOperator();
 		}
-		DebugLocation(1149, 1);
+		DebugLocation(1150, 1);
 		} finally { DebugExitRule(GrammarFileName, "assignmentOperator"); }
 		return retval;
 
@@ -6048,7 +6049,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_assignmentExpressionNoIn();
 
 	// $ANTLR start "assignmentExpressionNoIn"
-	// ..\\ES3.g:1151:1: assignmentExpressionNoIn returns [ExpressionSyntax value] : lhs= conditionalExpressionNoIn ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )? ;
+	// ..\\ES3.g:1152:1: assignmentExpressionNoIn returns [ExpressionSyntax value] : lhs= conditionalExpressionNoIn ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )? ;
 	[GrammarRule("assignmentExpressionNoIn")]
 	private ExpressionSyntax assignmentExpressionNoIn()
 	{
@@ -6065,22 +6066,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			bool isLhs;
 
 		try { DebugEnterRule(GrammarFileName, "assignmentExpressionNoIn");
-		DebugLocation(1151, 1);
+		DebugLocation(1152, 1);
 		try
 		{
-			// ..\\ES3.g:1156:2: (lhs= conditionalExpressionNoIn ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )? )
+			// ..\\ES3.g:1157:2: (lhs= conditionalExpressionNoIn ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1157:9: lhs= conditionalExpressionNoIn ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )?
+			// ..\\ES3.g:1158:9: lhs= conditionalExpressionNoIn ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )?
 			{
-			DebugLocation(1157, 12);
+			DebugLocation(1158, 12);
 			PushFollow(Follow._conditionalExpressionNoIn_in_assignmentExpressionNoIn5876);
 			lhs=conditionalExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1158, 9);
+			DebugLocation(1159, 9);
 			 value = lhs; isLhs = IsLeftHandSideAssign(lhs); 
-			DebugLocation(1159, 6);
-			// ..\\ES3.g:1159:6: ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )?
+			DebugLocation(1160, 6);
+			// ..\\ES3.g:1160:6: ({...}?ass= assignmentOperator exp= assignmentExpressionNoIn )?
 			int alt55=2;
 			try { DebugEnterSubRule(55);
 			try { DebugEnterDecision(55, false);
@@ -6100,24 +6101,24 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1160:13: {...}?ass= assignmentOperator exp= assignmentExpressionNoIn
+				// ..\\ES3.g:1161:13: {...}?ass= assignmentOperator exp= assignmentExpressionNoIn
 				{
-				DebugLocation(1160, 13);
+				DebugLocation(1161, 13);
 				if (!(( isLhs )))
 				{
 					throw new FailedPredicateException(input, "assignmentExpressionNoIn", " isLhs ");
 				}
-				DebugLocation(1161, 16);
+				DebugLocation(1162, 16);
 				PushFollow(Follow._assignmentOperator_in_assignmentExpressionNoIn5924);
 				ass=assignmentOperator();
 				PopFollow();
 
-				DebugLocation(1162, 16);
+				DebugLocation(1163, 16);
 				PushFollow(Follow._assignmentExpressionNoIn_in_assignmentExpressionNoIn5940);
 				exp=assignmentExpressionNoIn();
 				PopFollow();
 
-				DebugLocation(1163, 13);
+				DebugLocation(1164, 13);
 
 				                value = new AssignmentSyntax(
 				                    ResolveAssignmentOperator((ass!=null?input.ToString(ass.Start,ass.Stop):null)),
@@ -6147,7 +6148,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("assignmentExpressionNoIn", 48);
 			LeaveRule_assignmentExpressionNoIn();
 		}
-		DebugLocation(1171, 1);
+		DebugLocation(1172, 1);
 		} finally { DebugExitRule(GrammarFileName, "assignmentExpressionNoIn"); }
 		return value;
 
@@ -6159,7 +6160,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_expression();
 
 	// $ANTLR start "expression"
-	// ..\\ES3.g:1177:1: expression returns [ExpressionSyntax value] : first= assignmentExpression ( COMMA follow= assignmentExpression )* ;
+	// ..\\ES3.g:1178:1: expression returns [ExpressionSyntax value] : first= assignmentExpression ( COMMA follow= assignmentExpression )* ;
 	[GrammarRule("expression")]
 	private ExpressionSyntax expression()
 	{
@@ -6175,22 +6176,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    List<ExpressionSyntax> nodes = null;
 
 		try { DebugEnterRule(GrammarFileName, "expression");
-		DebugLocation(1177, 1);
+		DebugLocation(1178, 1);
 		try
 		{
-			// ..\\ES3.g:1185:2: (first= assignmentExpression ( COMMA follow= assignmentExpression )* )
+			// ..\\ES3.g:1186:2: (first= assignmentExpression ( COMMA follow= assignmentExpression )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1186:9: first= assignmentExpression ( COMMA follow= assignmentExpression )*
+			// ..\\ES3.g:1187:9: first= assignmentExpression ( COMMA follow= assignmentExpression )*
 			{
-			DebugLocation(1186, 14);
+			DebugLocation(1187, 14);
 			PushFollow(Follow._assignmentExpression_in_expression6006);
 			first=assignmentExpression();
 			PopFollow();
 
-			DebugLocation(1187, 9);
-			 value = first; 
 			DebugLocation(1188, 9);
-			// ..\\ES3.g:1188:9: ( COMMA follow= assignmentExpression )*
+			 value = first; 
+			DebugLocation(1189, 9);
+			// ..\\ES3.g:1189:9: ( COMMA follow= assignmentExpression )*
 			try { DebugEnterSubRule(56);
 			while (true)
 			{
@@ -6209,16 +6210,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1189:13: COMMA follow= assignmentExpression
+					// ..\\ES3.g:1190:13: COMMA follow= assignmentExpression
 					{
-					DebugLocation(1189, 13);
+					DebugLocation(1190, 13);
 					Match(input,COMMA,Follow._COMMA_in_expression6040); 
-					DebugLocation(1190, 19);
+					DebugLocation(1191, 19);
 					PushFollow(Follow._assignmentExpression_in_expression6056);
 					follow=assignmentExpression();
 					PopFollow();
 
-					DebugLocation(1191, 13);
+					DebugLocation(1192, 13);
 
 					                if (nodes == null)
 					                    nodes = new List<ExpressionSyntax> { value };
@@ -6258,7 +6259,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("expression", 49);
 			LeaveRule_expression();
 		}
-		DebugLocation(1198, 1);
+		DebugLocation(1199, 1);
 		} finally { DebugExitRule(GrammarFileName, "expression"); }
 		return value;
 
@@ -6270,7 +6271,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_expressionNoIn();
 
 	// $ANTLR start "expressionNoIn"
-	// ..\\ES3.g:1200:1: expressionNoIn returns [ExpressionSyntax value] : first= assignmentExpressionNoIn ( COMMA follow= assignmentExpressionNoIn )* ;
+	// ..\\ES3.g:1201:1: expressionNoIn returns [ExpressionSyntax value] : first= assignmentExpressionNoIn ( COMMA follow= assignmentExpressionNoIn )* ;
 	[GrammarRule("expressionNoIn")]
 	private ExpressionSyntax expressionNoIn()
 	{
@@ -6286,22 +6287,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    List<ExpressionSyntax> nodes = null;
 
 		try { DebugEnterRule(GrammarFileName, "expressionNoIn");
-		DebugLocation(1200, 1);
+		DebugLocation(1201, 1);
 		try
 		{
-			// ..\\ES3.g:1208:2: (first= assignmentExpressionNoIn ( COMMA follow= assignmentExpressionNoIn )* )
+			// ..\\ES3.g:1209:2: (first= assignmentExpressionNoIn ( COMMA follow= assignmentExpressionNoIn )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1209:9: first= assignmentExpressionNoIn ( COMMA follow= assignmentExpressionNoIn )*
+			// ..\\ES3.g:1210:9: first= assignmentExpressionNoIn ( COMMA follow= assignmentExpressionNoIn )*
 			{
-			DebugLocation(1209, 14);
+			DebugLocation(1210, 14);
 			PushFollow(Follow._assignmentExpressionNoIn_in_expressionNoIn6116);
 			first=assignmentExpressionNoIn();
 			PopFollow();
 
-			DebugLocation(1210, 9);
-			 value = first; 
 			DebugLocation(1211, 9);
-			// ..\\ES3.g:1211:9: ( COMMA follow= assignmentExpressionNoIn )*
+			 value = first; 
+			DebugLocation(1212, 9);
+			// ..\\ES3.g:1212:9: ( COMMA follow= assignmentExpressionNoIn )*
 			try { DebugEnterSubRule(57);
 			while (true)
 			{
@@ -6320,16 +6321,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1212:13: COMMA follow= assignmentExpressionNoIn
+					// ..\\ES3.g:1213:13: COMMA follow= assignmentExpressionNoIn
 					{
-					DebugLocation(1212, 13);
+					DebugLocation(1213, 13);
 					Match(input,COMMA,Follow._COMMA_in_expressionNoIn6150); 
-					DebugLocation(1213, 19);
+					DebugLocation(1214, 19);
 					PushFollow(Follow._assignmentExpressionNoIn_in_expressionNoIn6166);
 					follow=assignmentExpressionNoIn();
 					PopFollow();
 
-					DebugLocation(1214, 13);
+					DebugLocation(1215, 13);
 
 					                if (nodes == null)
 					                    nodes = new List<ExpressionSyntax> { value };
@@ -6369,7 +6370,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("expressionNoIn", 50);
 			LeaveRule_expressionNoIn();
 		}
-		DebugLocation(1221, 1);
+		DebugLocation(1222, 1);
 		} finally { DebugExitRule(GrammarFileName, "expressionNoIn"); }
 		return value;
 
@@ -6381,7 +6382,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_semic();
 
 	// $ANTLR start "semic"
-	// ..\\ES3.g:1245:1: semic : ( SEMIC | EOF | RBRACE | EOL | MultiLineComment );
+	// ..\\ES3.g:1246:1: semic : ( SEMIC | EOF | RBRACE | EOL | MultiLineComment );
 	[GrammarRule("semic")]
 	private void semic()
 	{
@@ -6395,10 +6396,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			PromoteEol();
 
 		try { DebugEnterRule(GrammarFileName, "semic");
-		DebugLocation(1245, 1);
+		DebugLocation(1246, 1);
 		try
 		{
-			// ..\\ES3.g:1253:2: ( SEMIC | EOF | RBRACE | EOL | MultiLineComment )
+			// ..\\ES3.g:1254:2: ( SEMIC | EOF | RBRACE | EOL | MultiLineComment )
 			int alt58=5;
 			try { DebugEnterDecision(58, false);
 			switch (input.LA(1))
@@ -6441,47 +6442,47 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1253:4: SEMIC
+				// ..\\ES3.g:1254:4: SEMIC
 				{
-				DebugLocation(1253, 4);
+				DebugLocation(1254, 4);
 				Match(input,SEMIC,Follow._SEMIC_in_semic6219); 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1254:4: EOF
+				// ..\\ES3.g:1255:4: EOF
 				{
-				DebugLocation(1254, 4);
+				DebugLocation(1255, 4);
 				Match(input,EOF,Follow._EOF_in_semic6224); 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:1255:4: RBRACE
+				// ..\\ES3.g:1256:4: RBRACE
 				{
-				DebugLocation(1255, 4);
+				DebugLocation(1256, 4);
 				Match(input,RBRACE,Follow._RBRACE_in_semic6229); 
-				DebugLocation(1255, 11);
+				DebugLocation(1256, 11);
 				 input.Rewind(marker); 
 
 				}
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:1256:4: EOL
+				// ..\\ES3.g:1257:4: EOL
 				{
-				DebugLocation(1256, 4);
+				DebugLocation(1257, 4);
 				Match(input,EOL,Follow._EOL_in_semic6236); 
 
 				}
 				break;
 			case 5:
 				DebugEnterAlt(5);
-				// ..\\ES3.g:1257:7: MultiLineComment
+				// ..\\ES3.g:1258:7: MultiLineComment
 				{
-				DebugLocation(1257, 7);
+				DebugLocation(1258, 7);
 				Match(input,MultiLineComment,Follow._MultiLineComment_in_semic6244); 
 
 				}
@@ -6500,7 +6501,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("semic", 51);
 			LeaveRule_semic();
 		}
-		DebugLocation(1258, 1);
+		DebugLocation(1259, 1);
 		} finally { DebugExitRule(GrammarFileName, "semic"); }
 		return;
 
@@ -6512,7 +6513,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_statement();
 
 	// $ANTLR start "statement"
-	// ..\\ES3.g:1265:1: statement returns [SyntaxNode value] options {k=1; } : ({...}?b= block |{...}?func= functionDeclaration |st= statementTail );
+	// ..\\ES3.g:1266:1: statement returns [SyntaxNode value] options {k=1; } : ({...}?b= block |{...}?func= functionDeclaration |st= statementTail );
 	[GrammarRule("statement")]
 	private SyntaxNode statement()
 	{
@@ -6526,10 +6527,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxNode st = default(SyntaxNode);
 
 		try { DebugEnterRule(GrammarFileName, "statement");
-		DebugLocation(1265, 1);
+		DebugLocation(1266, 1);
 		try
 		{
-			// ..\\ES3.g:1271:2: ({...}?b= block |{...}?func= functionDeclaration |st= statementTail )
+			// ..\\ES3.g:1272:2: ({...}?b= block |{...}?func= functionDeclaration |st= statementTail )
 			int alt59=3;
 			try { DebugEnterDecision(59, false);
 			try
@@ -6546,52 +6547,52 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1271:4: {...}?b= block
+				// ..\\ES3.g:1272:4: {...}?b= block
 				{
-				DebugLocation(1271, 4);
+				DebugLocation(1272, 4);
 				if (!(( input.LA(1) == LBRACE )))
 				{
 					throw new FailedPredicateException(input, "statement", " input.LA(1) == LBRACE ");
 				}
-				DebugLocation(1271, 32);
+				DebugLocation(1272, 32);
 				PushFollow(Follow._block_in_statement6280);
 				b=block();
 				PopFollow();
 
-				DebugLocation(1271, 39);
+				DebugLocation(1272, 39);
 				 value = b; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1272:4: {...}?func= functionDeclaration
+				// ..\\ES3.g:1273:4: {...}?func= functionDeclaration
 				{
-				DebugLocation(1272, 4);
+				DebugLocation(1273, 4);
 				if (!(( input.LA(1) == FUNCTION )))
 				{
 					throw new FailedPredicateException(input, "statement", " input.LA(1) == FUNCTION ");
 				}
-				DebugLocation(1272, 37);
+				DebugLocation(1273, 37);
 				PushFollow(Follow._functionDeclaration_in_statement6291);
 				func=functionDeclaration();
 				PopFollow();
 
-				DebugLocation(1272, 58);
+				DebugLocation(1273, 58);
 				 value = func; 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:1273:4: st= statementTail
+				// ..\\ES3.g:1274:4: st= statementTail
 				{
-				DebugLocation(1273, 6);
+				DebugLocation(1274, 6);
 				PushFollow(Follow._statementTail_in_statement6300);
 				st=statementTail();
 				PopFollow();
 
-				DebugLocation(1273, 21);
+				DebugLocation(1274, 21);
 				 value = st; 
 
 				}
@@ -6610,7 +6611,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("statement", 52);
 			LeaveRule_statement();
 		}
-		DebugLocation(1274, 1);
+		DebugLocation(1275, 1);
 		} finally { DebugExitRule(GrammarFileName, "statement"); }
 		return value;
 
@@ -6622,7 +6623,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_statementTail();
 
 	// $ANTLR start "statementTail"
-	// ..\\ES3.g:1276:1: statementTail returns [SyntaxNode value] : (vst= variableStatement |est= emptyStatement |exst= expressionStatement |ifst= ifStatement |itst= iterationStatement |cost= continueStatement |brst= breakStatement |rst= returnStatement |wist= withStatement |last= labelledStatement |swst= switchStatement |thst= throwStatement |trst= tryStatement );
+	// ..\\ES3.g:1277:1: statementTail returns [SyntaxNode value] : (vst= variableStatement |est= emptyStatement |exst= expressionStatement |ifst= ifStatement |itst= iterationStatement |cost= continueStatement |brst= breakStatement |rst= returnStatement |wist= withStatement |last= labelledStatement |swst= switchStatement |thst= throwStatement |trst= tryStatement );
 	[GrammarRule("statementTail")]
 	private SyntaxNode statementTail()
 	{
@@ -6646,10 +6647,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		TrySyntax trst = default(TrySyntax);
 
 		try { DebugEnterRule(GrammarFileName, "statementTail");
-		DebugLocation(1276, 1);
+		DebugLocation(1277, 1);
 		try
 		{
-			// ..\\ES3.g:1277:2: (vst= variableStatement |est= emptyStatement |exst= expressionStatement |ifst= ifStatement |itst= iterationStatement |cost= continueStatement |brst= breakStatement |rst= returnStatement |wist= withStatement |last= labelledStatement |swst= switchStatement |thst= throwStatement |trst= tryStatement )
+			// ..\\ES3.g:1278:2: (vst= variableStatement |est= emptyStatement |exst= expressionStatement |ifst= ifStatement |itst= iterationStatement |cost= continueStatement |brst= breakStatement |rst= returnStatement |wist= withStatement |last= labelledStatement |swst= switchStatement |thst= throwStatement |trst= tryStatement )
 			int alt60=13;
 			try { DebugEnterDecision(60, false);
 			try
@@ -6666,182 +6667,182 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1277:4: vst= variableStatement
+				// ..\\ES3.g:1278:4: vst= variableStatement
 				{
-				DebugLocation(1277, 7);
+				DebugLocation(1278, 7);
 				PushFollow(Follow._variableStatement_in_statementTail6321);
 				vst=variableStatement();
 				PopFollow();
 
-				DebugLocation(1277, 26);
+				DebugLocation(1278, 26);
 				 value = vst; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1278:4: est= emptyStatement
+				// ..\\ES3.g:1279:4: est= emptyStatement
 				{
-				DebugLocation(1278, 7);
+				DebugLocation(1279, 7);
 				PushFollow(Follow._emptyStatement_in_statementTail6330);
 				est=emptyStatement();
 				PopFollow();
 
-				DebugLocation(1278, 23);
+				DebugLocation(1279, 23);
 				 value = est; 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:1279:4: exst= expressionStatement
+				// ..\\ES3.g:1280:4: exst= expressionStatement
 				{
-				DebugLocation(1279, 8);
+				DebugLocation(1280, 8);
 				PushFollow(Follow._expressionStatement_in_statementTail6339);
 				exst=expressionStatement();
 				PopFollow();
 
-				DebugLocation(1279, 29);
+				DebugLocation(1280, 29);
 				 value = exst; 
 
 				}
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:1280:4: ifst= ifStatement
+				// ..\\ES3.g:1281:4: ifst= ifStatement
 				{
-				DebugLocation(1280, 8);
+				DebugLocation(1281, 8);
 				PushFollow(Follow._ifStatement_in_statementTail6348);
 				ifst=ifStatement();
 				PopFollow();
 
-				DebugLocation(1280, 21);
+				DebugLocation(1281, 21);
 				 value = ifst; 
 
 				}
 				break;
 			case 5:
 				DebugEnterAlt(5);
-				// ..\\ES3.g:1281:4: itst= iterationStatement
+				// ..\\ES3.g:1282:4: itst= iterationStatement
 				{
-				DebugLocation(1281, 8);
+				DebugLocation(1282, 8);
 				PushFollow(Follow._iterationStatement_in_statementTail6357);
 				itst=iterationStatement();
 				PopFollow();
 
-				DebugLocation(1281, 28);
+				DebugLocation(1282, 28);
 				 value = itst; 
 
 				}
 				break;
 			case 6:
 				DebugEnterAlt(6);
-				// ..\\ES3.g:1282:4: cost= continueStatement
+				// ..\\ES3.g:1283:4: cost= continueStatement
 				{
-				DebugLocation(1282, 8);
+				DebugLocation(1283, 8);
 				PushFollow(Follow._continueStatement_in_statementTail6366);
 				cost=continueStatement();
 				PopFollow();
 
-				DebugLocation(1282, 27);
+				DebugLocation(1283, 27);
 				 value = cost; 
 
 				}
 				break;
 			case 7:
 				DebugEnterAlt(7);
-				// ..\\ES3.g:1283:4: brst= breakStatement
+				// ..\\ES3.g:1284:4: brst= breakStatement
 				{
-				DebugLocation(1283, 8);
+				DebugLocation(1284, 8);
 				PushFollow(Follow._breakStatement_in_statementTail6375);
 				brst=breakStatement();
 				PopFollow();
 
-				DebugLocation(1283, 24);
+				DebugLocation(1284, 24);
 				 value = brst; 
 
 				}
 				break;
 			case 8:
 				DebugEnterAlt(8);
-				// ..\\ES3.g:1284:4: rst= returnStatement
+				// ..\\ES3.g:1285:4: rst= returnStatement
 				{
-				DebugLocation(1284, 7);
+				DebugLocation(1285, 7);
 				PushFollow(Follow._returnStatement_in_statementTail6384);
 				rst=returnStatement();
 				PopFollow();
 
-				DebugLocation(1284, 24);
+				DebugLocation(1285, 24);
 				 value = rst; 
 
 				}
 				break;
 			case 9:
 				DebugEnterAlt(9);
-				// ..\\ES3.g:1285:4: wist= withStatement
+				// ..\\ES3.g:1286:4: wist= withStatement
 				{
-				DebugLocation(1285, 8);
+				DebugLocation(1286, 8);
 				PushFollow(Follow._withStatement_in_statementTail6393);
 				wist=withStatement();
 				PopFollow();
 
-				DebugLocation(1285, 23);
+				DebugLocation(1286, 23);
 				 value = wist; 
 
 				}
 				break;
 			case 10:
 				DebugEnterAlt(10);
-				// ..\\ES3.g:1286:4: last= labelledStatement
+				// ..\\ES3.g:1287:4: last= labelledStatement
 				{
-				DebugLocation(1286, 8);
+				DebugLocation(1287, 8);
 				PushFollow(Follow._labelledStatement_in_statementTail6402);
 				last=labelledStatement();
 				PopFollow();
 
-				DebugLocation(1286, 27);
+				DebugLocation(1287, 27);
 				 value = last; 
 
 				}
 				break;
 			case 11:
 				DebugEnterAlt(11);
-				// ..\\ES3.g:1287:4: swst= switchStatement
+				// ..\\ES3.g:1288:4: swst= switchStatement
 				{
-				DebugLocation(1287, 8);
+				DebugLocation(1288, 8);
 				PushFollow(Follow._switchStatement_in_statementTail6411);
 				swst=switchStatement();
 				PopFollow();
 
-				DebugLocation(1287, 25);
+				DebugLocation(1288, 25);
 				 value = swst; 
 
 				}
 				break;
 			case 12:
 				DebugEnterAlt(12);
-				// ..\\ES3.g:1288:4: thst= throwStatement
+				// ..\\ES3.g:1289:4: thst= throwStatement
 				{
-				DebugLocation(1288, 8);
+				DebugLocation(1289, 8);
 				PushFollow(Follow._throwStatement_in_statementTail6420);
 				thst=throwStatement();
 				PopFollow();
 
-				DebugLocation(1288, 24);
+				DebugLocation(1289, 24);
 				 value = thst; 
 
 				}
 				break;
 			case 13:
 				DebugEnterAlt(13);
-				// ..\\ES3.g:1289:4: trst= tryStatement
+				// ..\\ES3.g:1290:4: trst= tryStatement
 				{
-				DebugLocation(1289, 8);
+				DebugLocation(1290, 8);
 				PushFollow(Follow._tryStatement_in_statementTail6429);
 				trst=tryStatement();
 				PopFollow();
 
-				DebugLocation(1289, 22);
+				DebugLocation(1290, 22);
 				 value = trst; 
 
 				}
@@ -6860,7 +6861,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("statementTail", 53);
 			LeaveRule_statementTail();
 		}
-		DebugLocation(1290, 1);
+		DebugLocation(1291, 1);
 		} finally { DebugExitRule(GrammarFileName, "statementTail"); }
 		return value;
 
@@ -6872,7 +6873,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_block();
 
 	// $ANTLR start "block"
-	// ..\\ES3.g:1294:1: block returns [BlockSyntax value] : lb= LBRACE (st= statement )* RBRACE ;
+	// ..\\ES3.g:1295:1: block returns [BlockSyntax value] : lb= LBRACE (st= statement )* RBRACE ;
 	[GrammarRule("block")]
 	private BlockSyntax block()
 	{
@@ -6888,17 +6889,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var statements = new List<SyntaxNode>();
 
 		try { DebugEnterRule(GrammarFileName, "block");
-		DebugLocation(1294, 1);
+		DebugLocation(1295, 1);
 		try
 		{
-			// ..\\ES3.g:1301:2: (lb= LBRACE (st= statement )* RBRACE )
+			// ..\\ES3.g:1302:2: (lb= LBRACE (st= statement )* RBRACE )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1302:9: lb= LBRACE (st= statement )* RBRACE
+			// ..\\ES3.g:1303:9: lb= LBRACE (st= statement )* RBRACE
 			{
-			DebugLocation(1302, 11);
+			DebugLocation(1303, 11);
 			lb=(IToken)Match(input,LBRACE,Follow._LBRACE_in_block6468); 
-			DebugLocation(1303, 9);
-			// ..\\ES3.g:1303:9: (st= statement )*
+			DebugLocation(1304, 9);
+			// ..\\ES3.g:1304:9: (st= statement )*
 			try { DebugEnterSubRule(61);
 			while (true)
 			{
@@ -6917,14 +6918,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1304:13: st= statement
+					// ..\\ES3.g:1305:13: st= statement
 					{
-					DebugLocation(1304, 15);
+					DebugLocation(1305, 15);
 					PushFollow(Follow._statement_in_block6494);
 					st=statement();
 					PopFollow();
 
-					DebugLocation(1305, 13);
+					DebugLocation(1306, 13);
 					 statements.Add(st); 
 
 					}
@@ -6940,7 +6941,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(61); }
 
-			DebugLocation(1307, 9);
+			DebugLocation(1308, 9);
 			Match(input,RBRACE,Follow._RBRACE_in_block6529); 
 
 			}
@@ -6960,7 +6961,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("block", 54);
 			LeaveRule_block();
 		}
-		DebugLocation(1308, 1);
+		DebugLocation(1309, 1);
 		} finally { DebugExitRule(GrammarFileName, "block"); }
 		return value;
 
@@ -6972,7 +6973,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_blockStatements();
 
 	// $ANTLR start "blockStatements"
-	// ..\\ES3.g:1312:1: blockStatements returns [BlockSyntax value] : (st= statement )* ;
+	// ..\\ES3.g:1313:1: blockStatements returns [BlockSyntax value] : (st= statement )* ;
 	[GrammarRule("blockStatements")]
 	private BlockSyntax blockStatements()
 	{
@@ -6988,15 +6989,15 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    _currentBody = new BlockBuilder();
 
 		try { DebugEnterRule(GrammarFileName, "blockStatements");
-		DebugLocation(1312, 1);
+		DebugLocation(1313, 1);
 		try
 		{
-			// ..\\ES3.g:1321:2: ( (st= statement )* )
+			// ..\\ES3.g:1322:2: ( (st= statement )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1322:9: (st= statement )*
+			// ..\\ES3.g:1323:9: (st= statement )*
 			{
-			DebugLocation(1322, 9);
-			// ..\\ES3.g:1322:9: (st= statement )*
+			DebugLocation(1323, 9);
+			// ..\\ES3.g:1323:9: (st= statement )*
 			try { DebugEnterSubRule(62);
 			while (true)
 			{
@@ -7015,14 +7016,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1323:13: st= statement
+					// ..\\ES3.g:1324:13: st= statement
 					{
-					DebugLocation(1323, 15);
+					DebugLocation(1324, 15);
 					PushFollow(Follow._statement_in_blockStatements6578);
 					st=statement();
 					PopFollow();
 
-					DebugLocation(1324, 13);
+					DebugLocation(1325, 13);
 					 _currentBody.Statements.Add(st); 
 
 					}
@@ -7057,7 +7058,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("blockStatements", 55);
 			LeaveRule_blockStatements();
 		}
-		DebugLocation(1326, 1);
+		DebugLocation(1327, 1);
 		} finally { DebugExitRule(GrammarFileName, "blockStatements"); }
 		return value;
 
@@ -7069,7 +7070,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_variableStatement();
 
 	// $ANTLR start "variableStatement"
-	// ..\\ES3.g:1333:1: variableStatement returns [SyntaxNode value] : VAR first= variableDeclaration ( COMMA follow= variableDeclaration )* semic ;
+	// ..\\ES3.g:1334:1: variableStatement returns [SyntaxNode value] : VAR first= variableDeclaration ( COMMA follow= variableDeclaration )* semic ;
 	[GrammarRule("variableStatement")]
 	private SyntaxNode variableStatement()
 	{
@@ -7086,24 +7087,24 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "variableStatement");
-		DebugLocation(1333, 1);
+		DebugLocation(1334, 1);
 		try
 		{
-			// ..\\ES3.g:1341:2: ( VAR first= variableDeclaration ( COMMA follow= variableDeclaration )* semic )
+			// ..\\ES3.g:1342:2: ( VAR first= variableDeclaration ( COMMA follow= variableDeclaration )* semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1342:9: VAR first= variableDeclaration ( COMMA follow= variableDeclaration )* semic
+			// ..\\ES3.g:1343:9: VAR first= variableDeclaration ( COMMA follow= variableDeclaration )* semic
 			{
-			DebugLocation(1342, 9);
+			DebugLocation(1343, 9);
 			Match(input,VAR,Follow._VAR_in_variableStatement6642); 
-			DebugLocation(1342, 18);
+			DebugLocation(1343, 18);
 			PushFollow(Follow._variableDeclaration_in_variableStatement6646);
 			first=variableDeclaration();
 			PopFollow();
 
-			DebugLocation(1343, 9);
-			 declarations.Add(first); 
 			DebugLocation(1344, 9);
-			// ..\\ES3.g:1344:9: ( COMMA follow= variableDeclaration )*
+			 declarations.Add(first); 
+			DebugLocation(1345, 9);
+			// ..\\ES3.g:1345:9: ( COMMA follow= variableDeclaration )*
 			try { DebugEnterSubRule(63);
 			while (true)
 			{
@@ -7122,16 +7123,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1345:13: COMMA follow= variableDeclaration
+					// ..\\ES3.g:1346:13: COMMA follow= variableDeclaration
 					{
-					DebugLocation(1345, 13);
+					DebugLocation(1346, 13);
 					Match(input,COMMA,Follow._COMMA_in_variableStatement6680); 
-					DebugLocation(1345, 25);
+					DebugLocation(1346, 25);
 					PushFollow(Follow._variableDeclaration_in_variableStatement6684);
 					follow=variableDeclaration();
 					PopFollow();
 
-					DebugLocation(1346, 13);
+					DebugLocation(1347, 13);
 					 declarations.Add(follow); 
 
 					}
@@ -7147,7 +7148,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(63); }
 
-			DebugLocation(1348, 9);
+			DebugLocation(1349, 9);
 			PushFollow(Follow._semic_in_variableStatement6719);
 			semic();
 			PopFollow();
@@ -7170,7 +7171,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("variableStatement", 56);
 			LeaveRule_variableStatement();
 		}
-		DebugLocation(1349, 1);
+		DebugLocation(1350, 1);
 		} finally { DebugExitRule(GrammarFileName, "variableStatement"); }
 		return value;
 
@@ -7182,7 +7183,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_variableDeclaration();
 
 	// $ANTLR start "variableDeclaration"
-	// ..\\ES3.g:1351:1: variableDeclaration returns [VariableDeclaration value] : id= Identifier ( ASSIGN ass= assignmentExpression )? ;
+	// ..\\ES3.g:1352:1: variableDeclaration returns [VariableDeclaration value] : id= Identifier ( ASSIGN ass= assignmentExpression )? ;
 	[GrammarRule("variableDeclaration")]
 	private VariableDeclaration variableDeclaration()
 	{
@@ -7198,17 +7199,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			ExpressionSyntax expression = null;
 
 		try { DebugEnterRule(GrammarFileName, "variableDeclaration");
-		DebugLocation(1351, 1);
+		DebugLocation(1352, 1);
 		try
 		{
-			// ..\\ES3.g:1355:2: (id= Identifier ( ASSIGN ass= assignmentExpression )? )
+			// ..\\ES3.g:1356:2: (id= Identifier ( ASSIGN ass= assignmentExpression )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1356:9: id= Identifier ( ASSIGN ass= assignmentExpression )?
+			// ..\\ES3.g:1357:9: id= Identifier ( ASSIGN ass= assignmentExpression )?
 			{
-			DebugLocation(1356, 11);
+			DebugLocation(1357, 11);
 			id=(IToken)Match(input,Identifier,Follow._Identifier_in_variableDeclaration6749); 
-			DebugLocation(1357, 9);
-			// ..\\ES3.g:1357:9: ( ASSIGN ass= assignmentExpression )?
+			DebugLocation(1358, 9);
+			// ..\\ES3.g:1358:9: ( ASSIGN ass= assignmentExpression )?
 			int alt64=2;
 			try { DebugEnterSubRule(64);
 			try { DebugEnterDecision(64, false);
@@ -7223,16 +7224,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1358:13: ASSIGN ass= assignmentExpression
+				// ..\\ES3.g:1359:13: ASSIGN ass= assignmentExpression
 				{
-				DebugLocation(1358, 13);
+				DebugLocation(1359, 13);
 				Match(input,ASSIGN,Follow._ASSIGN_in_variableDeclaration6773); 
-				DebugLocation(1358, 23);
+				DebugLocation(1359, 23);
 				PushFollow(Follow._assignmentExpression_in_variableDeclaration6777);
 				ass=assignmentExpression();
 				PopFollow();
 
-				DebugLocation(1359, 13);
+				DebugLocation(1360, 13);
 				 expression = ass; 
 
 				}
@@ -7241,13 +7242,8 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(64); }
 
-			DebugLocation(1361, 9);
-
-			            value = new VariableDeclaration(id.Text, expression, true)
-			            {
-			                Target = _currentBody.DeclaredVariables.AddOrGet(id.Text, true)
-			            };
-			        
+			DebugLocation(1362, 9);
+			 value = new VariableDeclaration(id.Text, expression, true, _currentBody.DeclaredVariables.AddOrGet(id.Text, true)); 
 
 			}
 
@@ -7263,7 +7259,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("variableDeclaration", 57);
 			LeaveRule_variableDeclaration();
 		}
-		DebugLocation(1367, 1);
+		DebugLocation(1363, 1);
 		} finally { DebugExitRule(GrammarFileName, "variableDeclaration"); }
 		return value;
 
@@ -7275,7 +7271,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_variableDeclarationNoIn();
 
 	// $ANTLR start "variableDeclarationNoIn"
-	// ..\\ES3.g:1369:1: variableDeclarationNoIn returns [VariableDeclaration value] : id= Identifier ( ASSIGN ass= assignmentExpressionNoIn )? ;
+	// ..\\ES3.g:1365:1: variableDeclarationNoIn returns [VariableDeclaration value] : id= Identifier ( ASSIGN ass= assignmentExpressionNoIn )? ;
 	[GrammarRule("variableDeclarationNoIn")]
 	private VariableDeclaration variableDeclarationNoIn()
 	{
@@ -7291,17 +7287,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			ExpressionSyntax expression = null;
 
 		try { DebugEnterRule(GrammarFileName, "variableDeclarationNoIn");
-		DebugLocation(1369, 1);
+		DebugLocation(1365, 1);
 		try
 		{
-			// ..\\ES3.g:1373:2: (id= Identifier ( ASSIGN ass= assignmentExpressionNoIn )? )
+			// ..\\ES3.g:1369:2: (id= Identifier ( ASSIGN ass= assignmentExpressionNoIn )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1374:9: id= Identifier ( ASSIGN ass= assignmentExpressionNoIn )?
+			// ..\\ES3.g:1370:9: id= Identifier ( ASSIGN ass= assignmentExpressionNoIn )?
 			{
-			DebugLocation(1374, 11);
+			DebugLocation(1370, 11);
 			id=(IToken)Match(input,Identifier,Follow._Identifier_in_variableDeclarationNoIn6843); 
-			DebugLocation(1375, 9);
-			// ..\\ES3.g:1375:9: ( ASSIGN ass= assignmentExpressionNoIn )?
+			DebugLocation(1371, 9);
+			// ..\\ES3.g:1371:9: ( ASSIGN ass= assignmentExpressionNoIn )?
 			int alt65=2;
 			try { DebugEnterSubRule(65);
 			try { DebugEnterDecision(65, false);
@@ -7316,16 +7312,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1376:13: ASSIGN ass= assignmentExpressionNoIn
+				// ..\\ES3.g:1372:13: ASSIGN ass= assignmentExpressionNoIn
 				{
-				DebugLocation(1376, 13);
+				DebugLocation(1372, 13);
 				Match(input,ASSIGN,Follow._ASSIGN_in_variableDeclarationNoIn6867); 
-				DebugLocation(1376, 23);
+				DebugLocation(1372, 23);
 				PushFollow(Follow._assignmentExpressionNoIn_in_variableDeclarationNoIn6871);
 				ass=assignmentExpressionNoIn();
 				PopFollow();
 
-				DebugLocation(1377, 13);
+				DebugLocation(1373, 13);
 				 expression = ass; 
 
 				}
@@ -7334,13 +7330,8 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(65); }
 
-			DebugLocation(1379, 9);
-
-			            value = new VariableDeclaration(id.Text, expression, true)
-			            {
-			                Target = _currentBody.DeclaredVariables.AddOrGet(id.Text, true)
-			            };
-			        
+			DebugLocation(1375, 9);
+			 value = new VariableDeclaration(id.Text, expression, true, _currentBody.DeclaredVariables.AddOrGet(id.Text, true)); 
 
 			}
 
@@ -7356,7 +7347,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("variableDeclarationNoIn", 58);
 			LeaveRule_variableDeclarationNoIn();
 		}
-		DebugLocation(1385, 1);
+		DebugLocation(1376, 1);
 		} finally { DebugExitRule(GrammarFileName, "variableDeclarationNoIn"); }
 		return value;
 
@@ -7368,7 +7359,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_emptyStatement();
 
 	// $ANTLR start "emptyStatement"
-	// ..\\ES3.g:1391:1: emptyStatement returns [SyntaxNode value] : SEMIC ;
+	// ..\\ES3.g:1382:1: emptyStatement returns [SyntaxNode value] : SEMIC ;
 	[GrammarRule("emptyStatement")]
 	private SyntaxNode emptyStatement()
 	{
@@ -7378,16 +7369,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxNode value = default(SyntaxNode);
 
 		try { DebugEnterRule(GrammarFileName, "emptyStatement");
-		DebugLocation(1391, 1);
+		DebugLocation(1382, 1);
 		try
 		{
-			// ..\\ES3.g:1392:2: ( SEMIC )
+			// ..\\ES3.g:1383:2: ( SEMIC )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1392:4: SEMIC
+			// ..\\ES3.g:1383:4: SEMIC
 			{
-			DebugLocation(1392, 4);
+			DebugLocation(1383, 4);
 			Match(input,SEMIC,Follow._SEMIC_in_emptyStatement6926); 
-			DebugLocation(1392, 10);
+			DebugLocation(1383, 10);
 			 value = new EmptySyntax(); 
 
 			}
@@ -7404,7 +7395,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("emptyStatement", 59);
 			LeaveRule_emptyStatement();
 		}
-		DebugLocation(1393, 1);
+		DebugLocation(1384, 1);
 		} finally { DebugExitRule(GrammarFileName, "emptyStatement"); }
 		return value;
 
@@ -7416,7 +7407,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_expressionStatement();
 
 	// $ANTLR start "expressionStatement"
-	// ..\\ES3.g:1405:1: expressionStatement returns [SyntaxNode value] : e= expression semic ;
+	// ..\\ES3.g:1396:1: expressionStatement returns [SyntaxNode value] : e= expression semic ;
 	[GrammarRule("expressionStatement")]
 	private SyntaxNode expressionStatement()
 	{
@@ -7431,24 +7422,24 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "expressionStatement");
-		DebugLocation(1405, 1);
+		DebugLocation(1396, 1);
 		try
 		{
-			// ..\\ES3.g:1409:2: (e= expression semic )
+			// ..\\ES3.g:1400:2: (e= expression semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1410:9: e= expression semic
+			// ..\\ES3.g:1401:9: e= expression semic
 			{
-			DebugLocation(1410, 10);
+			DebugLocation(1401, 10);
 			PushFollow(Follow._expression_in_expressionStatement6965);
 			e=expression();
 			PopFollow();
 
-			DebugLocation(1410, 22);
+			DebugLocation(1401, 22);
 			PushFollow(Follow._semic_in_expressionStatement6967);
 			semic();
 			PopFollow();
 
-			DebugLocation(1411, 9);
+			DebugLocation(1402, 9);
 			 value = new ExpressionStatementSyntax(e, GetLocation(start, input.LT(-1))); 
 
 			}
@@ -7465,7 +7456,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("expressionStatement", 60);
 			LeaveRule_expressionStatement();
 		}
-		DebugLocation(1412, 1);
+		DebugLocation(1403, 1);
 		} finally { DebugExitRule(GrammarFileName, "expressionStatement"); }
 		return value;
 
@@ -7477,7 +7468,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_ifStatement();
 
 	// $ANTLR start "ifStatement"
-	// ..\\ES3.g:1418:1: ifStatement returns [SyntaxNode value] : IF LPAREN e= expression RPAREN then= statement ({...}? ELSE els= statement )? ;
+	// ..\\ES3.g:1409:1: ifStatement returns [SyntaxNode value] : IF LPAREN e= expression RPAREN then= statement ({...}? ELSE els= statement )? ;
 	[GrammarRule("ifStatement")]
 	private SyntaxNode ifStatement()
 	{
@@ -7496,33 +7487,33 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "ifStatement");
-		DebugLocation(1418, 1);
+		DebugLocation(1409, 1);
 		try
 		{
-			// ..\\ES3.g:1425:2: ( IF LPAREN e= expression RPAREN then= statement ({...}? ELSE els= statement )? )
+			// ..\\ES3.g:1416:2: ( IF LPAREN e= expression RPAREN then= statement ({...}? ELSE els= statement )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1426:9: IF LPAREN e= expression RPAREN then= statement ({...}? ELSE els= statement )?
+			// ..\\ES3.g:1417:9: IF LPAREN e= expression RPAREN then= statement ({...}? ELSE els= statement )?
 			{
-			DebugLocation(1426, 9);
+			DebugLocation(1417, 9);
 			Match(input,IF,Follow._IF_in_ifStatement7011); 
-			DebugLocation(1426, 12);
+			DebugLocation(1417, 12);
 			Match(input,LPAREN,Follow._LPAREN_in_ifStatement7013); 
-			DebugLocation(1426, 20);
+			DebugLocation(1417, 20);
 			PushFollow(Follow._expression_in_ifStatement7017);
 			e=expression();
 			PopFollow();
 
-			DebugLocation(1426, 32);
+			DebugLocation(1417, 32);
 			Match(input,RPAREN,Follow._RPAREN_in_ifStatement7019); 
-			DebugLocation(1427, 9);
+			DebugLocation(1418, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1428, 13);
+			DebugLocation(1419, 13);
 			PushFollow(Follow._statement_in_ifStatement7041);
 			then=statement();
 			PopFollow();
 
-			DebugLocation(1429, 9);
-			// ..\\ES3.g:1429:9: ({...}? ELSE els= statement )?
+			DebugLocation(1420, 9);
+			// ..\\ES3.g:1420:9: ({...}? ELSE els= statement )?
 			int alt66=2;
 			try { DebugEnterSubRule(66);
 			try { DebugEnterDecision(66, false);
@@ -7542,21 +7533,21 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1430:13: {...}? ELSE els= statement
+				// ..\\ES3.g:1421:13: {...}? ELSE els= statement
 				{
-				DebugLocation(1430, 13);
+				DebugLocation(1421, 13);
 				if (!(( input.LA(1) == ELSE )))
 				{
 					throw new FailedPredicateException(input, "ifStatement", " input.LA(1) == ELSE ");
 				}
-				DebugLocation(1431, 13);
+				DebugLocation(1422, 13);
 				Match(input,ELSE,Follow._ELSE_in_ifStatement7079); 
-				DebugLocation(1431, 21);
+				DebugLocation(1422, 21);
 				PushFollow(Follow._statement_in_ifStatement7083);
 				els=statement();
 				PopFollow();
 
-				DebugLocation(1432, 13);
+				DebugLocation(1423, 13);
 				 elseStatement = els; 
 
 				}
@@ -7565,7 +7556,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(66); }
 
-			DebugLocation(1434, 9);
+			DebugLocation(1425, 9);
 			 value = new IfSyntax(e, then, elseStatement, GetLocation(start, end)); 
 
 			}
@@ -7582,7 +7573,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("ifStatement", 61);
 			LeaveRule_ifStatement();
 		}
-		DebugLocation(1435, 1);
+		DebugLocation(1426, 1);
 		} finally { DebugExitRule(GrammarFileName, "ifStatement"); }
 		return value;
 
@@ -7594,7 +7585,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_iterationStatement();
 
 	// $ANTLR start "iterationStatement"
-	// ..\\ES3.g:1441:1: iterationStatement returns [SyntaxNode value] : (dos= doStatement |wh= whileStatement |fo= forStatement );
+	// ..\\ES3.g:1432:1: iterationStatement returns [SyntaxNode value] : (dos= doStatement |wh= whileStatement |fo= forStatement );
 	[GrammarRule("iterationStatement")]
 	private SyntaxNode iterationStatement()
 	{
@@ -7608,10 +7599,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxNode fo = default(SyntaxNode);
 
 		try { DebugEnterRule(GrammarFileName, "iterationStatement");
-		DebugLocation(1441, 1);
+		DebugLocation(1432, 1);
 		try
 		{
-			// ..\\ES3.g:1442:2: (dos= doStatement |wh= whileStatement |fo= forStatement )
+			// ..\\ES3.g:1433:2: (dos= doStatement |wh= whileStatement |fo= forStatement )
 			int alt67=3;
 			try { DebugEnterDecision(67, false);
 			switch (input.LA(1))
@@ -7644,42 +7635,42 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1442:4: dos= doStatement
+				// ..\\ES3.g:1433:4: dos= doStatement
 				{
-				DebugLocation(1442, 7);
+				DebugLocation(1433, 7);
 				PushFollow(Follow._doStatement_in_iterationStatement7140);
 				dos=doStatement();
 				PopFollow();
 
-				DebugLocation(1442, 20);
+				DebugLocation(1433, 20);
 				 value = dos; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1443:4: wh= whileStatement
+				// ..\\ES3.g:1434:4: wh= whileStatement
 				{
-				DebugLocation(1443, 6);
+				DebugLocation(1434, 6);
 				PushFollow(Follow._whileStatement_in_iterationStatement7149);
 				wh=whileStatement();
 				PopFollow();
 
-				DebugLocation(1443, 23);
+				DebugLocation(1434, 23);
 				 value = wh; 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:1444:4: fo= forStatement
+				// ..\\ES3.g:1435:4: fo= forStatement
 				{
-				DebugLocation(1444, 6);
+				DebugLocation(1435, 6);
 				PushFollow(Follow._forStatement_in_iterationStatement7159);
 				fo=forStatement();
 				PopFollow();
 
-				DebugLocation(1444, 21);
+				DebugLocation(1435, 21);
 				 value = fo; 
 
 				}
@@ -7698,7 +7689,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("iterationStatement", 62);
 			LeaveRule_iterationStatement();
 		}
-		DebugLocation(1445, 1);
+		DebugLocation(1436, 1);
 		} finally { DebugExitRule(GrammarFileName, "iterationStatement"); }
 		return value;
 
@@ -7710,7 +7701,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_doStatement();
 
 	// $ANTLR start "doStatement"
-	// ..\\ES3.g:1447:1: doStatement returns [SyntaxNode value] : DO st= statement WHILE LPAREN e= expression RPAREN semic ;
+	// ..\\ES3.g:1438:1: doStatement returns [SyntaxNode value] : DO st= statement WHILE LPAREN e= expression RPAREN semic ;
 	[GrammarRule("doStatement")]
 	private SyntaxNode doStatement()
 	{
@@ -7726,39 +7717,39 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken start;
 
 		try { DebugEnterRule(GrammarFileName, "doStatement");
-		DebugLocation(1447, 1);
+		DebugLocation(1438, 1);
 		try
 		{
-			// ..\\ES3.g:1451:2: ( DO st= statement WHILE LPAREN e= expression RPAREN semic )
+			// ..\\ES3.g:1442:2: ( DO st= statement WHILE LPAREN e= expression RPAREN semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1452:9: DO st= statement WHILE LPAREN e= expression RPAREN semic
+			// ..\\ES3.g:1443:9: DO st= statement WHILE LPAREN e= expression RPAREN semic
 			{
-			DebugLocation(1452, 9);
+			DebugLocation(1443, 9);
 			Match(input,DO,Follow._DO_in_doStatement7191); 
-			DebugLocation(1452, 14);
+			DebugLocation(1443, 14);
 			PushFollow(Follow._statement_in_doStatement7195);
 			st=statement();
 			PopFollow();
 
-			DebugLocation(1453, 9);
+			DebugLocation(1444, 9);
 			 start = input.LT(1); 
-			DebugLocation(1454, 9);
+			DebugLocation(1445, 9);
 			Match(input,WHILE,Follow._WHILE_in_doStatement7215); 
-			DebugLocation(1454, 15);
+			DebugLocation(1445, 15);
 			Match(input,LPAREN,Follow._LPAREN_in_doStatement7217); 
-			DebugLocation(1454, 23);
+			DebugLocation(1445, 23);
 			PushFollow(Follow._expression_in_doStatement7221);
 			e=expression();
 			PopFollow();
 
-			DebugLocation(1454, 35);
+			DebugLocation(1445, 35);
 			Match(input,RPAREN,Follow._RPAREN_in_doStatement7223); 
-			DebugLocation(1454, 42);
+			DebugLocation(1445, 42);
 			PushFollow(Follow._semic_in_doStatement7225);
 			semic();
 			PopFollow();
 
-			DebugLocation(1455, 9);
+			DebugLocation(1446, 9);
 			 value = new DoWhileSyntax(e, st, GetLocation(start, input.LT(-1))); 
 
 			}
@@ -7775,7 +7766,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("doStatement", 63);
 			LeaveRule_doStatement();
 		}
-		DebugLocation(1456, 1);
+		DebugLocation(1447, 1);
 		} finally { DebugExitRule(GrammarFileName, "doStatement"); }
 		return value;
 
@@ -7787,7 +7778,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_whileStatement();
 
 	// $ANTLR start "whileStatement"
-	// ..\\ES3.g:1458:1: whileStatement returns [SyntaxNode value] : WHILE LPAREN e= expression RPAREN st= statement ;
+	// ..\\ES3.g:1449:1: whileStatement returns [SyntaxNode value] : WHILE LPAREN e= expression RPAREN st= statement ;
 	[GrammarRule("whileStatement")]
 	private SyntaxNode whileStatement()
 	{
@@ -7804,32 +7795,32 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "whileStatement");
-		DebugLocation(1458, 1);
+		DebugLocation(1449, 1);
 		try
 		{
-			// ..\\ES3.g:1463:2: ( WHILE LPAREN e= expression RPAREN st= statement )
+			// ..\\ES3.g:1454:2: ( WHILE LPAREN e= expression RPAREN st= statement )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1464:9: WHILE LPAREN e= expression RPAREN st= statement
+			// ..\\ES3.g:1455:9: WHILE LPAREN e= expression RPAREN st= statement
 			{
-			DebugLocation(1464, 9);
+			DebugLocation(1455, 9);
 			Match(input,WHILE,Follow._WHILE_in_whileStatement7264); 
-			DebugLocation(1464, 15);
+			DebugLocation(1455, 15);
 			Match(input,LPAREN,Follow._LPAREN_in_whileStatement7266); 
-			DebugLocation(1464, 23);
+			DebugLocation(1455, 23);
 			PushFollow(Follow._expression_in_whileStatement7270);
 			e=expression();
 			PopFollow();
 
-			DebugLocation(1464, 35);
+			DebugLocation(1455, 35);
 			Match(input,RPAREN,Follow._RPAREN_in_whileStatement7272); 
-			DebugLocation(1465, 9);
+			DebugLocation(1456, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1466, 11);
+			DebugLocation(1457, 11);
 			PushFollow(Follow._statement_in_whileStatement7294);
 			st=statement();
 			PopFollow();
 
-			DebugLocation(1467, 9);
+			DebugLocation(1458, 9);
 			 value = new WhileSyntax(e, st, GetLocation(start, end)); 
 
 			}
@@ -7846,7 +7837,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("whileStatement", 64);
 			LeaveRule_whileStatement();
 		}
-		DebugLocation(1468, 1);
+		DebugLocation(1459, 1);
 		} finally { DebugExitRule(GrammarFileName, "whileStatement"); }
 		return value;
 
@@ -7858,7 +7849,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_forStatement();
 
 	// $ANTLR start "forStatement"
-	// ..\\ES3.g:1512:1: forStatement returns [SyntaxNode value] : FOR LPAREN fo= forControl RPAREN st= statement ;
+	// ..\\ES3.g:1503:1: forStatement returns [SyntaxNode value] : FOR LPAREN fo= forControl RPAREN st= statement ;
 	[GrammarRule("forStatement")]
 	private SyntaxNode forStatement()
 	{
@@ -7876,34 +7867,34 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "forStatement");
-		DebugLocation(1512, 1);
+		DebugLocation(1503, 1);
 		try
 		{
-			// ..\\ES3.g:1521:2: ( FOR LPAREN fo= forControl RPAREN st= statement )
+			// ..\\ES3.g:1512:2: ( FOR LPAREN fo= forControl RPAREN st= statement )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1522:9: FOR LPAREN fo= forControl RPAREN st= statement
+			// ..\\ES3.g:1513:9: FOR LPAREN fo= forControl RPAREN st= statement
 			{
-			DebugLocation(1522, 9);
+			DebugLocation(1513, 9);
 			Match(input,FOR,Follow._FOR_in_forStatement7339); 
-			DebugLocation(1523, 9);
+			DebugLocation(1514, 9);
 			Match(input,LPAREN,Follow._LPAREN_in_forStatement7349); 
-			DebugLocation(1524, 11);
+			DebugLocation(1515, 11);
 			PushFollow(Follow._forControl_in_forStatement7361);
 			fo=forControl();
 			PopFollow();
 
-			DebugLocation(1525, 9);
+			DebugLocation(1516, 9);
 			 builder = fo; 
-			DebugLocation(1526, 9);
+			DebugLocation(1517, 9);
 			Match(input,RPAREN,Follow._RPAREN_in_forStatement7381); 
-			DebugLocation(1527, 9);
+			DebugLocation(1518, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1528, 11);
+			DebugLocation(1519, 11);
 			PushFollow(Follow._statement_in_forStatement7403);
 			st=statement();
 			PopFollow();
 
-			DebugLocation(1529, 9);
+			DebugLocation(1520, 9);
 			 builder.Body = st; 
 
 			}
@@ -7923,7 +7914,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("forStatement", 65);
 			LeaveRule_forStatement();
 		}
-		DebugLocation(1530, 1);
+		DebugLocation(1521, 1);
 		} finally { DebugExitRule(GrammarFileName, "forStatement"); }
 		return value;
 
@@ -7935,7 +7926,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_forControl();
 
 	// $ANTLR start "forControl"
-	// ..\\ES3.g:1532:1: forControl returns [ForBuilder value] : (ex1= forControlVar |ex2= forControlExpression |ex3= forControlSemic );
+	// ..\\ES3.g:1523:1: forControl returns [ForBuilder value] : (ex1= forControlVar |ex2= forControlExpression |ex3= forControlSemic );
 	[GrammarRule("forControl")]
 	private ForBuilder forControl()
 	{
@@ -7949,10 +7940,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		ForBuilder ex3 = default(ForBuilder);
 
 		try { DebugEnterRule(GrammarFileName, "forControl");
-		DebugLocation(1532, 1);
+		DebugLocation(1523, 1);
 		try
 		{
-			// ..\\ES3.g:1533:2: (ex1= forControlVar |ex2= forControlExpression |ex3= forControlSemic )
+			// ..\\ES3.g:1524:2: (ex1= forControlVar |ex2= forControlExpression |ex3= forControlSemic )
 			int alt68=3;
 			try { DebugEnterDecision(68, false);
 			switch (input.LA(1))
@@ -8008,42 +7999,42 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1534:9: ex1= forControlVar
+				// ..\\ES3.g:1525:9: ex1= forControlVar
 				{
-				DebugLocation(1534, 12);
+				DebugLocation(1525, 12);
 				PushFollow(Follow._forControlVar_in_forControl7438);
 				ex1=forControlVar();
 				PopFollow();
 
-				DebugLocation(1535, 9);
+				DebugLocation(1526, 9);
 				 value = ex1; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1537:9: ex2= forControlExpression
+				// ..\\ES3.g:1528:9: ex2= forControlExpression
 				{
-				DebugLocation(1537, 12);
+				DebugLocation(1528, 12);
 				PushFollow(Follow._forControlExpression_in_forControl7463);
 				ex2=forControlExpression();
 				PopFollow();
 
-				DebugLocation(1538, 9);
+				DebugLocation(1529, 9);
 				 value = ex2; 
 
 				}
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:1540:9: ex3= forControlSemic
+				// ..\\ES3.g:1531:9: ex3= forControlSemic
 				{
-				DebugLocation(1540, 12);
+				DebugLocation(1531, 12);
 				PushFollow(Follow._forControlSemic_in_forControl7488);
 				ex3=forControlSemic();
 				PopFollow();
 
-				DebugLocation(1541, 9);
+				DebugLocation(1532, 9);
 				 value = ex3; 
 
 				}
@@ -8062,7 +8053,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("forControl", 66);
 			LeaveRule_forControl();
 		}
-		DebugLocation(1542, 1);
+		DebugLocation(1533, 1);
 		} finally { DebugExitRule(GrammarFileName, "forControl"); }
 		return value;
 
@@ -8074,7 +8065,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_forControlVar();
 
 	// $ANTLR start "forControlVar"
-	// ..\\ES3.g:1544:1: forControlVar returns [ForBuilder value] : VAR first= variableDeclarationNoIn ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) ) ;
+	// ..\\ES3.g:1535:1: forControlVar returns [ForBuilder value] : VAR first= variableDeclarationNoIn ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) ) ;
 	[GrammarRule("forControlVar")]
 	private ForBuilder forControlVar()
 	{
@@ -8096,26 +8087,26 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end = null;
 
 		try { DebugEnterRule(GrammarFileName, "forControlVar");
-		DebugLocation(1544, 1);
+		DebugLocation(1535, 1);
 		try
 		{
-			// ..\\ES3.g:1554:2: ( VAR first= variableDeclarationNoIn ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) ) )
+			// ..\\ES3.g:1545:2: ( VAR first= variableDeclarationNoIn ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1555:9: VAR first= variableDeclarationNoIn ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) )
+			// ..\\ES3.g:1546:9: VAR first= variableDeclarationNoIn ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) )
 			{
-			DebugLocation(1555, 9);
+			DebugLocation(1546, 9);
 			 start = input.LT(1); 
-			DebugLocation(1556, 9);
+			DebugLocation(1547, 9);
 			Match(input,VAR,Follow._VAR_in_forControlVar7541); 
-			DebugLocation(1556, 18);
+			DebugLocation(1547, 18);
 			PushFollow(Follow._variableDeclarationNoIn_in_forControlVar7545);
 			first=variableDeclarationNoIn();
 			PopFollow();
 
-			DebugLocation(1557, 9);
+			DebugLocation(1548, 9);
 			 declarations.Add(first); 
-			DebugLocation(1558, 6);
-			// ..\\ES3.g:1558:6: ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) )
+			DebugLocation(1549, 6);
+			// ..\\ES3.g:1549:6: ( ( IN ex= expression ) | ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? ) )
 			int alt72=2;
 			try { DebugEnterSubRule(72);
 			try { DebugEnterDecision(72, false);
@@ -8140,23 +8131,23 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1559:7: ( IN ex= expression )
+				// ..\\ES3.g:1550:7: ( IN ex= expression )
 				{
-				DebugLocation(1559, 7);
-				// ..\\ES3.g:1559:7: ( IN ex= expression )
+				DebugLocation(1550, 7);
+				// ..\\ES3.g:1550:7: ( IN ex= expression )
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1560:17: IN ex= expression
+				// ..\\ES3.g:1551:17: IN ex= expression
 				{
-				DebugLocation(1560, 17);
+				DebugLocation(1551, 17);
 				 end = input.LT(-1); 
-				DebugLocation(1561, 8);
+				DebugLocation(1552, 8);
 				Match(input,IN,Follow._IN_in_forControlVar7597); 
-				DebugLocation(1561, 13);
+				DebugLocation(1552, 13);
 				PushFollow(Follow._expression_in_forControlVar7601);
 				ex=expression();
 				PopFollow();
 
-				DebugLocation(1562, 17);
+				DebugLocation(1553, 17);
 				 value.Expression = ex; 
 
 				}
@@ -8166,15 +8157,15 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1565:7: ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? )
+				// ..\\ES3.g:1556:7: ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? )
 				{
-				DebugLocation(1565, 7);
-				// ..\\ES3.g:1565:7: ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? )
+				DebugLocation(1556, 7);
+				// ..\\ES3.g:1556:7: ( ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )? )
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1566:8: ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )?
+				// ..\\ES3.g:1557:8: ( COMMA follow= variableDeclarationNoIn )* SEMIC (ex1= expression )? SEMIC (ex2= expression )?
 				{
-				DebugLocation(1566, 8);
-				// ..\\ES3.g:1566:8: ( COMMA follow= variableDeclarationNoIn )*
+				DebugLocation(1557, 8);
+				// ..\\ES3.g:1557:8: ( COMMA follow= variableDeclarationNoIn )*
 				try { DebugEnterSubRule(69);
 				while (true)
 				{
@@ -8193,16 +8184,16 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:1567:21: COMMA follow= variableDeclarationNoIn
+						// ..\\ES3.g:1558:21: COMMA follow= variableDeclarationNoIn
 						{
-						DebugLocation(1567, 21);
+						DebugLocation(1558, 21);
 						Match(input,COMMA,Follow._COMMA_in_forControlVar7674); 
-						DebugLocation(1567, 33);
+						DebugLocation(1558, 33);
 						PushFollow(Follow._variableDeclarationNoIn_in_forControlVar7678);
 						follow=variableDeclarationNoIn();
 						PopFollow();
 
-						DebugLocation(1568, 21);
+						DebugLocation(1559, 21);
 						 declarations.Add(follow); 
 
 						}
@@ -8218,12 +8209,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 				} finally { DebugExitSubRule(69); }
 
-				DebugLocation(1570, 17);
+				DebugLocation(1561, 17);
 				 end = input.LT(-1); 
-				DebugLocation(1571, 8);
+				DebugLocation(1562, 8);
 				Match(input,SEMIC,Follow._SEMIC_in_forControlVar7746); 
-				DebugLocation(1572, 17);
-				// ..\\ES3.g:1572:17: (ex1= expression )?
+				DebugLocation(1563, 17);
+				// ..\\ES3.g:1563:17: (ex1= expression )?
 				int alt70=2;
 				try { DebugEnterSubRule(70);
 				try { DebugEnterDecision(70, false);
@@ -8238,14 +8229,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1573:21: ex1= expression
+					// ..\\ES3.g:1564:21: ex1= expression
 					{
-					DebugLocation(1573, 24);
+					DebugLocation(1564, 24);
 					PushFollow(Follow._expression_in_forControlVar7788);
 					ex1=expression();
 					PopFollow();
 
-					DebugLocation(1574, 21);
+					DebugLocation(1565, 21);
 					 value.Test = ex1;
 
 					}
@@ -8254,10 +8245,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				}
 				} finally { DebugExitSubRule(70); }
 
-				DebugLocation(1576, 17);
+				DebugLocation(1567, 17);
 				Match(input,SEMIC,Follow._SEMIC_in_forControlVar7847); 
-				DebugLocation(1577, 17);
-				// ..\\ES3.g:1577:17: (ex2= expression )?
+				DebugLocation(1568, 17);
+				// ..\\ES3.g:1568:17: (ex2= expression )?
 				int alt71=2;
 				try { DebugEnterSubRule(71);
 				try { DebugEnterDecision(71, false);
@@ -8272,14 +8263,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1578:21: ex2= expression
+					// ..\\ES3.g:1569:21: ex2= expression
 					{
-					DebugLocation(1578, 24);
+					DebugLocation(1569, 24);
 					PushFollow(Follow._expression_in_forControlVar7889);
 					ex2=expression();
 					PopFollow();
 
-					DebugLocation(1579, 21);
+					DebugLocation(1570, 21);
 					 value.Increment = ex2; 
 
 					}
@@ -8316,7 +8307,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("forControlVar", 67);
 			LeaveRule_forControlVar();
 		}
-		DebugLocation(1583, 1);
+		DebugLocation(1574, 1);
 		} finally { DebugExitRule(GrammarFileName, "forControlVar"); }
 		return value;
 
@@ -8328,7 +8319,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_forControlExpression();
 
 	// $ANTLR start "forControlExpression"
-	// ..\\ES3.g:1585:1: forControlExpression returns [ForBuilder value] : ex1= expressionNoIn ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) ) ;
+	// ..\\ES3.g:1576:1: forControlExpression returns [ForBuilder value] : ex1= expressionNoIn ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) ) ;
 	[GrammarRule("forControlExpression")]
 	private ForBuilder forControlExpression()
 	{
@@ -8346,22 +8337,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			bool isLhs;
 
 		try { DebugEnterRule(GrammarFileName, "forControlExpression");
-		DebugLocation(1585, 1);
+		DebugLocation(1576, 1);
 		try
 		{
-			// ..\\ES3.g:1591:2: (ex1= expressionNoIn ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) ) )
+			// ..\\ES3.g:1582:2: (ex1= expressionNoIn ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1592:9: ex1= expressionNoIn ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) )
+			// ..\\ES3.g:1583:9: ex1= expressionNoIn ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) )
 			{
-			DebugLocation(1592, 12);
+			DebugLocation(1583, 12);
 			PushFollow(Follow._expressionNoIn_in_forControlExpression7975);
 			ex1=expressionNoIn();
 			PopFollow();
 
-			DebugLocation(1593, 9);
+			DebugLocation(1584, 9);
 			 value.Initialization = ex1; isLhs = IsLeftHandSideIn(ex1); 
-			DebugLocation(1594, 6);
-			// ..\\ES3.g:1594:6: ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) )
+			DebugLocation(1585, 6);
+			// ..\\ES3.g:1585:6: ({...}? ( IN ex2= expression ) | ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? ) )
 			int alt75=2;
 			try { DebugEnterSubRule(75);
 			try { DebugEnterDecision(75, false);
@@ -8386,26 +8377,26 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1595:7: {...}? ( IN ex2= expression )
+				// ..\\ES3.g:1586:7: {...}? ( IN ex2= expression )
 				{
-				DebugLocation(1595, 7);
+				DebugLocation(1586, 7);
 				if (!(( isLhs )))
 				{
 					throw new FailedPredicateException(input, "forControlExpression", " isLhs ");
 				}
-				DebugLocation(1596, 13);
-				// ..\\ES3.g:1596:13: ( IN ex2= expression )
+				DebugLocation(1587, 13);
+				// ..\\ES3.g:1587:13: ( IN ex2= expression )
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1597:8: IN ex2= expression
+				// ..\\ES3.g:1588:8: IN ex2= expression
 				{
-				DebugLocation(1597, 8);
+				DebugLocation(1588, 8);
 				Match(input,IN,Follow._IN_in_forControlExpression8024); 
-				DebugLocation(1597, 14);
+				DebugLocation(1588, 14);
 				PushFollow(Follow._expression_in_forControlExpression8028);
 				ex2=expression();
 				PopFollow();
 
-				DebugLocation(1598, 17);
+				DebugLocation(1589, 17);
 				 value.Expression = ex2; 
 
 				}
@@ -8415,17 +8406,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1601:7: ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? )
+				// ..\\ES3.g:1592:7: ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? )
 				{
-				DebugLocation(1601, 7);
-				// ..\\ES3.g:1601:7: ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? )
+				DebugLocation(1592, 7);
+				// ..\\ES3.g:1592:7: ( SEMIC (ex2= expression )? SEMIC (ex3= expression )? )
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1602:8: SEMIC (ex2= expression )? SEMIC (ex3= expression )?
+				// ..\\ES3.g:1593:8: SEMIC (ex2= expression )? SEMIC (ex3= expression )?
 				{
-				DebugLocation(1602, 8);
+				DebugLocation(1593, 8);
 				Match(input,SEMIC,Follow._SEMIC_in_forControlExpression8079); 
-				DebugLocation(1603, 17);
-				// ..\\ES3.g:1603:17: (ex2= expression )?
+				DebugLocation(1594, 17);
+				// ..\\ES3.g:1594:17: (ex2= expression )?
 				int alt73=2;
 				try { DebugEnterSubRule(73);
 				try { DebugEnterDecision(73, false);
@@ -8440,14 +8431,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1604:21: ex2= expression
+					// ..\\ES3.g:1595:21: ex2= expression
 					{
-					DebugLocation(1604, 24);
+					DebugLocation(1595, 24);
 					PushFollow(Follow._expression_in_forControlExpression8121);
 					ex2=expression();
 					PopFollow();
 
-					DebugLocation(1605, 21);
+					DebugLocation(1596, 21);
 					 value.Test = ex2;
 
 					}
@@ -8456,10 +8447,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				}
 				} finally { DebugExitSubRule(73); }
 
-				DebugLocation(1607, 17);
+				DebugLocation(1598, 17);
 				Match(input,SEMIC,Follow._SEMIC_in_forControlExpression8180); 
-				DebugLocation(1608, 17);
-				// ..\\ES3.g:1608:17: (ex3= expression )?
+				DebugLocation(1599, 17);
+				// ..\\ES3.g:1599:17: (ex3= expression )?
 				int alt74=2;
 				try { DebugEnterSubRule(74);
 				try { DebugEnterDecision(74, false);
@@ -8474,14 +8465,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1609:21: ex3= expression
+					// ..\\ES3.g:1600:21: ex3= expression
 					{
-					DebugLocation(1609, 24);
+					DebugLocation(1600, 24);
 					PushFollow(Follow._expression_in_forControlExpression8222);
 					ex3=expression();
 					PopFollow();
 
-					DebugLocation(1610, 21);
+					DebugLocation(1601, 21);
 					 value.Increment = ex3; 
 
 					}
@@ -8515,7 +8506,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("forControlExpression", 68);
 			LeaveRule_forControlExpression();
 		}
-		DebugLocation(1614, 1);
+		DebugLocation(1605, 1);
 		} finally { DebugExitRule(GrammarFileName, "forControlExpression"); }
 		return value;
 
@@ -8527,7 +8518,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_forControlSemic();
 
 	// $ANTLR start "forControlSemic"
-	// ..\\ES3.g:1616:1: forControlSemic returns [ForBuilder value] : SEMIC (ex1= expression )? SEMIC (ex2= expression )? ;
+	// ..\\ES3.g:1607:1: forControlSemic returns [ForBuilder value] : SEMIC (ex1= expression )? SEMIC (ex2= expression )? ;
 	[GrammarRule("forControlSemic")]
 	private ForBuilder forControlSemic()
 	{
@@ -8543,17 +8534,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			value = new ForBuilder();
 
 		try { DebugEnterRule(GrammarFileName, "forControlSemic");
-		DebugLocation(1616, 1);
+		DebugLocation(1607, 1);
 		try
 		{
-			// ..\\ES3.g:1620:2: ( SEMIC (ex1= expression )? SEMIC (ex2= expression )? )
+			// ..\\ES3.g:1611:2: ( SEMIC (ex1= expression )? SEMIC (ex2= expression )? )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1621:9: SEMIC (ex1= expression )? SEMIC (ex2= expression )?
+			// ..\\ES3.g:1612:9: SEMIC (ex1= expression )? SEMIC (ex2= expression )?
 			{
-			DebugLocation(1621, 9);
+			DebugLocation(1612, 9);
 			Match(input,SEMIC,Follow._SEMIC_in_forControlSemic8305); 
-			DebugLocation(1622, 9);
-			// ..\\ES3.g:1622:9: (ex1= expression )?
+			DebugLocation(1613, 9);
+			// ..\\ES3.g:1613:9: (ex1= expression )?
 			int alt76=2;
 			try { DebugEnterSubRule(76);
 			try { DebugEnterDecision(76, false);
@@ -8568,14 +8559,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1623:13: ex1= expression
+				// ..\\ES3.g:1614:13: ex1= expression
 				{
-				DebugLocation(1623, 16);
+				DebugLocation(1614, 16);
 				PushFollow(Follow._expression_in_forControlSemic8331);
 				ex1=expression();
 				PopFollow();
 
-				DebugLocation(1624, 13);
+				DebugLocation(1615, 13);
 				 value.Test = ex1;
 
 				}
@@ -8584,10 +8575,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(76); }
 
-			DebugLocation(1626, 9);
+			DebugLocation(1617, 9);
 			Match(input,SEMIC,Follow._SEMIC_in_forControlSemic8366); 
-			DebugLocation(1627, 9);
-			// ..\\ES3.g:1627:9: (ex2= expression )?
+			DebugLocation(1618, 9);
+			// ..\\ES3.g:1618:9: (ex2= expression )?
 			int alt77=2;
 			try { DebugEnterSubRule(77);
 			try { DebugEnterDecision(77, false);
@@ -8602,14 +8593,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1628:13: ex2= expression
+				// ..\\ES3.g:1619:13: ex2= expression
 				{
-				DebugLocation(1628, 16);
+				DebugLocation(1619, 16);
 				PushFollow(Follow._expression_in_forControlSemic8392);
 				ex2=expression();
 				PopFollow();
 
-				DebugLocation(1629, 13);
+				DebugLocation(1620, 13);
 				 value.Increment = ex2; 
 
 				}
@@ -8633,7 +8624,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("forControlSemic", 69);
 			LeaveRule_forControlSemic();
 		}
-		DebugLocation(1631, 1);
+		DebugLocation(1622, 1);
 		} finally { DebugExitRule(GrammarFileName, "forControlSemic"); }
 		return value;
 
@@ -8645,7 +8636,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_continueStatement();
 
 	// $ANTLR start "continueStatement"
-	// ..\\ES3.g:1642:1: continueStatement returns [SyntaxNode value] : CONTINUE (lb= Identifier )? semic ;
+	// ..\\ES3.g:1633:1: continueStatement returns [SyntaxNode value] : CONTINUE (lb= Identifier )? semic ;
 	[GrammarRule("continueStatement")]
 	private SyntaxNode continueStatement()
 	{
@@ -8661,19 +8652,19 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "continueStatement");
-		DebugLocation(1642, 1);
+		DebugLocation(1633, 1);
 		try
 		{
-			// ..\\ES3.g:1647:2: ( CONTINUE (lb= Identifier )? semic )
+			// ..\\ES3.g:1638:2: ( CONTINUE (lb= Identifier )? semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1648:9: CONTINUE (lb= Identifier )? semic
+			// ..\\ES3.g:1639:9: CONTINUE (lb= Identifier )? semic
 			{
-			DebugLocation(1648, 9);
+			DebugLocation(1639, 9);
 			Match(input,CONTINUE,Follow._CONTINUE_in_continueStatement8452); 
-			DebugLocation(1649, 9);
+			DebugLocation(1640, 9);
 			 if (input.LA(1) == Identifier) PromoteEol(); 
-			DebugLocation(1650, 9);
-			// ..\\ES3.g:1650:9: (lb= Identifier )?
+			DebugLocation(1641, 9);
+			// ..\\ES3.g:1641:9: (lb= Identifier )?
 			int alt78=2;
 			try { DebugEnterSubRule(78);
 			try { DebugEnterDecision(78, false);
@@ -8688,11 +8679,11 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1651:13: lb= Identifier
+				// ..\\ES3.g:1642:13: lb= Identifier
 				{
-				DebugLocation(1651, 15);
+				DebugLocation(1642, 15);
 				lb=(IToken)Match(input,Identifier,Follow._Identifier_in_continueStatement8488); 
-				DebugLocation(1652, 13);
+				DebugLocation(1643, 13);
 				 label = lb.Text; 
 
 				}
@@ -8701,12 +8692,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(78); }
 
-			DebugLocation(1654, 9);
+			DebugLocation(1645, 9);
 			PushFollow(Follow._semic_in_continueStatement8523);
 			semic();
 			PopFollow();
 
-			DebugLocation(1655, 9);
+			DebugLocation(1646, 9);
 			 value = new ContinueSyntax(label, GetLocation(start, input.LT(-1))); 
 
 			}
@@ -8723,7 +8714,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("continueStatement", 70);
 			LeaveRule_continueStatement();
 		}
-		DebugLocation(1656, 1);
+		DebugLocation(1647, 1);
 		} finally { DebugExitRule(GrammarFileName, "continueStatement"); }
 		return value;
 
@@ -8735,7 +8726,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_breakStatement();
 
 	// $ANTLR start "breakStatement"
-	// ..\\ES3.g:1667:1: breakStatement returns [SyntaxNode value] : BREAK (lb= Identifier )? semic ;
+	// ..\\ES3.g:1658:1: breakStatement returns [SyntaxNode value] : BREAK (lb= Identifier )? semic ;
 	[GrammarRule("breakStatement")]
 	private SyntaxNode breakStatement()
 	{
@@ -8751,19 +8742,19 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "breakStatement");
-		DebugLocation(1667, 1);
+		DebugLocation(1658, 1);
 		try
 		{
-			// ..\\ES3.g:1672:2: ( BREAK (lb= Identifier )? semic )
+			// ..\\ES3.g:1663:2: ( BREAK (lb= Identifier )? semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1673:9: BREAK (lb= Identifier )? semic
+			// ..\\ES3.g:1664:9: BREAK (lb= Identifier )? semic
 			{
-			DebugLocation(1673, 9);
+			DebugLocation(1664, 9);
 			Match(input,BREAK,Follow._BREAK_in_breakStatement8568); 
-			DebugLocation(1674, 9);
+			DebugLocation(1665, 9);
 			 if (input.LA(1) == Identifier) PromoteEol(); 
-			DebugLocation(1675, 9);
-			// ..\\ES3.g:1675:9: (lb= Identifier )?
+			DebugLocation(1666, 9);
+			// ..\\ES3.g:1666:9: (lb= Identifier )?
 			int alt79=2;
 			try { DebugEnterSubRule(79);
 			try { DebugEnterDecision(79, false);
@@ -8778,11 +8769,11 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1676:13: lb= Identifier
+				// ..\\ES3.g:1667:13: lb= Identifier
 				{
-				DebugLocation(1676, 15);
+				DebugLocation(1667, 15);
 				lb=(IToken)Match(input,Identifier,Follow._Identifier_in_breakStatement8604); 
-				DebugLocation(1676, 27);
+				DebugLocation(1667, 27);
 				 label = lb.Text; 
 
 				}
@@ -8791,12 +8782,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(79); }
 
-			DebugLocation(1678, 9);
+			DebugLocation(1669, 9);
 			PushFollow(Follow._semic_in_breakStatement8627);
 			semic();
 			PopFollow();
 
-			DebugLocation(1679, 9);
+			DebugLocation(1670, 9);
 			 value = new BreakSyntax(label, GetLocation(start, input.LT(-1))); 
 
 			}
@@ -8813,7 +8804,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("breakStatement", 71);
 			LeaveRule_breakStatement();
 		}
-		DebugLocation(1680, 1);
+		DebugLocation(1671, 1);
 		} finally { DebugExitRule(GrammarFileName, "breakStatement"); }
 		return value;
 
@@ -8825,7 +8816,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_returnStatement();
 
 	// $ANTLR start "returnStatement"
-	// ..\\ES3.g:1699:1: returnStatement returns [ReturnSyntax value] : RETURN (expr= expression )? semic ;
+	// ..\\ES3.g:1690:1: returnStatement returns [ReturnSyntax value] : RETURN (expr= expression )? semic ;
 	[GrammarRule("returnStatement")]
 	private ReturnSyntax returnStatement()
 	{
@@ -8841,19 +8832,19 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "returnStatement");
-		DebugLocation(1699, 1);
+		DebugLocation(1690, 1);
 		try
 		{
-			// ..\\ES3.g:1704:2: ( RETURN (expr= expression )? semic )
+			// ..\\ES3.g:1695:2: ( RETURN (expr= expression )? semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1705:9: RETURN (expr= expression )? semic
+			// ..\\ES3.g:1696:9: RETURN (expr= expression )? semic
 			{
-			DebugLocation(1705, 9);
+			DebugLocation(1696, 9);
 			Match(input,RETURN,Follow._RETURN_in_returnStatement8672); 
-			DebugLocation(1706, 9);
+			DebugLocation(1697, 9);
 			 PromoteEol(); 
-			DebugLocation(1707, 9);
-			// ..\\ES3.g:1707:9: (expr= expression )?
+			DebugLocation(1698, 9);
+			// ..\\ES3.g:1698:9: (expr= expression )?
 			int alt80=2;
 			try { DebugEnterSubRule(80);
 			try { DebugEnterDecision(80, false);
@@ -8868,14 +8859,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1708:13: expr= expression
+				// ..\\ES3.g:1699:13: expr= expression
 				{
-				DebugLocation(1708, 17);
+				DebugLocation(1699, 17);
 				PushFollow(Follow._expression_in_returnStatement8708);
 				expr=expression();
 				PopFollow();
 
-				DebugLocation(1709, 13);
+				DebugLocation(1700, 13);
 				 returnExpression = expr; 
 
 				}
@@ -8884,12 +8875,12 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(80); }
 
-			DebugLocation(1711, 9);
+			DebugLocation(1702, 9);
 			PushFollow(Follow._semic_in_returnStatement8743);
 			semic();
 			PopFollow();
 
-			DebugLocation(1712, 9);
+			DebugLocation(1703, 9);
 			 value = new ReturnSyntax(returnExpression, GetLocation(start, input.LT(-1))); 
 
 			}
@@ -8906,7 +8897,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("returnStatement", 72);
 			LeaveRule_returnStatement();
 		}
-		DebugLocation(1713, 1);
+		DebugLocation(1704, 1);
 		} finally { DebugExitRule(GrammarFileName, "returnStatement"); }
 		return value;
 
@@ -8918,7 +8909,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_withStatement();
 
 	// $ANTLR start "withStatement"
-	// ..\\ES3.g:1719:1: withStatement returns [SyntaxNode value] : WITH LPAREN exp= expression RPAREN smt= statement ;
+	// ..\\ES3.g:1710:1: withStatement returns [SyntaxNode value] : WITH LPAREN exp= expression RPAREN smt= statement ;
 	[GrammarRule("withStatement")]
 	private SyntaxNode withStatement()
 	{
@@ -8935,32 +8926,32 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "withStatement");
-		DebugLocation(1719, 1);
+		DebugLocation(1710, 1);
 		try
 		{
-			// ..\\ES3.g:1724:2: ( WITH LPAREN exp= expression RPAREN smt= statement )
+			// ..\\ES3.g:1715:2: ( WITH LPAREN exp= expression RPAREN smt= statement )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1725:9: WITH LPAREN exp= expression RPAREN smt= statement
+			// ..\\ES3.g:1716:9: WITH LPAREN exp= expression RPAREN smt= statement
 			{
-			DebugLocation(1725, 9);
+			DebugLocation(1716, 9);
 			Match(input,WITH,Follow._WITH_in_withStatement8786); 
-			DebugLocation(1725, 14);
+			DebugLocation(1716, 14);
 			Match(input,LPAREN,Follow._LPAREN_in_withStatement8788); 
-			DebugLocation(1725, 24);
+			DebugLocation(1716, 24);
 			PushFollow(Follow._expression_in_withStatement8792);
 			exp=expression();
 			PopFollow();
 
-			DebugLocation(1725, 36);
+			DebugLocation(1716, 36);
 			Match(input,RPAREN,Follow._RPAREN_in_withStatement8794); 
-			DebugLocation(1726, 9);
+			DebugLocation(1717, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1727, 12);
+			DebugLocation(1718, 12);
 			PushFollow(Follow._statement_in_withStatement8816);
 			smt=statement();
 			PopFollow();
 
-			DebugLocation(1728, 9);
+			DebugLocation(1719, 9);
 			 value = new WithSyntax(exp, smt, GetLocation(start, end)); 
 
 			}
@@ -8977,7 +8968,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("withStatement", 73);
 			LeaveRule_withStatement();
 		}
-		DebugLocation(1729, 1);
+		DebugLocation(1720, 1);
 		} finally { DebugExitRule(GrammarFileName, "withStatement"); }
 		return value;
 
@@ -8989,7 +8980,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_switchStatement();
 
 	// $ANTLR start "switchStatement"
-	// ..\\ES3.g:1735:1: switchStatement returns [SyntaxNode value] : SWITCH LPAREN e= expression RPAREN LBRACE ({...}? =>def= defaultClause |cc= caseClause )* RBRACE ;
+	// ..\\ES3.g:1726:1: switchStatement returns [SyntaxNode value] : SWITCH LPAREN e= expression RPAREN LBRACE ({...}? =>def= defaultClause |cc= caseClause )* RBRACE ;
 	[GrammarRule("switchStatement")]
 	private SyntaxNode switchStatement()
 	{
@@ -9009,30 +9000,30 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "switchStatement");
-		DebugLocation(1735, 1);
+		DebugLocation(1726, 1);
 		try
 		{
-			// ..\\ES3.g:1742:2: ( SWITCH LPAREN e= expression RPAREN LBRACE ({...}? =>def= defaultClause |cc= caseClause )* RBRACE )
+			// ..\\ES3.g:1733:2: ( SWITCH LPAREN e= expression RPAREN LBRACE ({...}? =>def= defaultClause |cc= caseClause )* RBRACE )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1743:9: SWITCH LPAREN e= expression RPAREN LBRACE ({...}? =>def= defaultClause |cc= caseClause )* RBRACE
+			// ..\\ES3.g:1734:9: SWITCH LPAREN e= expression RPAREN LBRACE ({...}? =>def= defaultClause |cc= caseClause )* RBRACE
 			{
-			DebugLocation(1743, 9);
+			DebugLocation(1734, 9);
 			Match(input,SWITCH,Follow._SWITCH_in_switchStatement8859); 
-			DebugLocation(1743, 16);
+			DebugLocation(1734, 16);
 			Match(input,LPAREN,Follow._LPAREN_in_switchStatement8861); 
-			DebugLocation(1743, 24);
+			DebugLocation(1734, 24);
 			PushFollow(Follow._expression_in_switchStatement8865);
 			e=expression();
 			PopFollow();
 
-			DebugLocation(1743, 36);
+			DebugLocation(1734, 36);
 			Match(input,RPAREN,Follow._RPAREN_in_switchStatement8867); 
-			DebugLocation(1744, 9);
+			DebugLocation(1735, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1745, 9);
+			DebugLocation(1736, 9);
 			Match(input,LBRACE,Follow._LBRACE_in_switchStatement8887); 
-			DebugLocation(1746, 9);
-			// ..\\ES3.g:1746:9: ({...}? =>def= defaultClause |cc= caseClause )*
+			DebugLocation(1737, 9);
+			// ..\\ES3.g:1737:9: ({...}? =>def= defaultClause |cc= caseClause )*
 			try { DebugEnterSubRule(81);
 			while (true)
 			{
@@ -9055,33 +9046,33 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1747:13: {...}? =>def= defaultClause
+					// ..\\ES3.g:1738:13: {...}? =>def= defaultClause
 					{
-					DebugLocation(1747, 13);
+					DebugLocation(1738, 13);
 					if (!(( block == null )))
 					{
 						throw new FailedPredicateException(input, "switchStatement", " block == null ");
 					}
-					DebugLocation(1748, 16);
+					DebugLocation(1739, 16);
 					PushFollow(Follow._defaultClause_in_switchStatement8928);
 					def=defaultClause();
 					PopFollow();
 
-					DebugLocation(1749, 13);
+					DebugLocation(1740, 13);
 					 block = def; 
 
 					}
 					break;
 				case 2:
 					DebugEnterAlt(2);
-					// ..\\ES3.g:1751:13: cc= caseClause
+					// ..\\ES3.g:1742:13: cc= caseClause
 					{
-					DebugLocation(1751, 15);
+					DebugLocation(1742, 15);
 					PushFollow(Follow._caseClause_in_switchStatement8968);
 					cc=caseClause();
 					PopFollow();
 
-					DebugLocation(1752, 13);
+					DebugLocation(1743, 13);
 					 cases.Add(cc); 
 
 					}
@@ -9097,9 +9088,9 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(81); }
 
-			DebugLocation(1754, 9);
+			DebugLocation(1745, 9);
 			Match(input,RBRACE,Follow._RBRACE_in_switchStatement9003); 
-			DebugLocation(1755, 9);
+			DebugLocation(1746, 9);
 			 value = new SwitchSyntax(e, cases, block, GetLocation(start, end)); 
 
 			}
@@ -9116,7 +9107,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("switchStatement", 74);
 			LeaveRule_switchStatement();
 		}
-		DebugLocation(1756, 1);
+		DebugLocation(1747, 1);
 		} finally { DebugExitRule(GrammarFileName, "switchStatement"); }
 		return value;
 
@@ -9128,7 +9119,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_caseClause();
 
 	// $ANTLR start "caseClause"
-	// ..\\ES3.g:1758:1: caseClause returns [CaseClause value] : CASE e= expression COLON (st= statement )* ;
+	// ..\\ES3.g:1749:1: caseClause returns [CaseClause value] : CASE e= expression COLON (st= statement )* ;
 	[GrammarRule("caseClause")]
 	private CaseClause caseClause()
 	{
@@ -9146,26 +9137,26 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "caseClause");
-		DebugLocation(1758, 1);
+		DebugLocation(1749, 1);
 		try
 		{
-			// ..\\ES3.g:1764:2: ( CASE e= expression COLON (st= statement )* )
+			// ..\\ES3.g:1755:2: ( CASE e= expression COLON (st= statement )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1765:9: CASE e= expression COLON (st= statement )*
+			// ..\\ES3.g:1756:9: CASE e= expression COLON (st= statement )*
 			{
-			DebugLocation(1765, 9);
+			DebugLocation(1756, 9);
 			Match(input,CASE,Follow._CASE_in_caseClause9041); 
-			DebugLocation(1765, 15);
+			DebugLocation(1756, 15);
 			PushFollow(Follow._expression_in_caseClause9045);
 			e=expression();
 			PopFollow();
 
-			DebugLocation(1765, 27);
+			DebugLocation(1756, 27);
 			Match(input,COLON,Follow._COLON_in_caseClause9047); 
-			DebugLocation(1766, 9);
+			DebugLocation(1757, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1767, 9);
-			// ..\\ES3.g:1767:9: (st= statement )*
+			DebugLocation(1758, 9);
+			// ..\\ES3.g:1758:9: (st= statement )*
 			try { DebugEnterSubRule(82);
 			while (true)
 			{
@@ -9184,14 +9175,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1768:13: st= statement
+					// ..\\ES3.g:1759:13: st= statement
 					{
-					DebugLocation(1768, 15);
+					DebugLocation(1759, 15);
 					PushFollow(Follow._statement_in_caseClause9083);
 					st=statement();
 					PopFollow();
 
-					DebugLocation(1769, 13);
+					DebugLocation(1760, 13);
 					 statements.Add(st); 
 
 					}
@@ -9207,7 +9198,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(82); }
 
-			DebugLocation(1771, 9);
+			DebugLocation(1762, 9);
 
 			            value = new CaseClause(
 			                e,
@@ -9230,7 +9221,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("caseClause", 75);
 			LeaveRule_caseClause();
 		}
-		DebugLocation(1778, 1);
+		DebugLocation(1769, 1);
 		} finally { DebugExitRule(GrammarFileName, "caseClause"); }
 		return value;
 
@@ -9242,7 +9233,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_defaultClause();
 
 	// $ANTLR start "defaultClause"
-	// ..\\ES3.g:1780:1: defaultClause returns [DefaultClause value] : DEFAULT COLON (st= statement )* ;
+	// ..\\ES3.g:1771:1: defaultClause returns [DefaultClause value] : DEFAULT COLON (st= statement )* ;
 	[GrammarRule("defaultClause")]
 	private DefaultClause defaultClause()
 	{
@@ -9259,21 +9250,21 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    IToken end;
 
 		try { DebugEnterRule(GrammarFileName, "defaultClause");
-		DebugLocation(1780, 1);
+		DebugLocation(1771, 1);
 		try
 		{
-			// ..\\ES3.g:1786:2: ( DEFAULT COLON (st= statement )* )
+			// ..\\ES3.g:1777:2: ( DEFAULT COLON (st= statement )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1787:9: DEFAULT COLON (st= statement )*
+			// ..\\ES3.g:1778:9: DEFAULT COLON (st= statement )*
 			{
-			DebugLocation(1787, 9);
+			DebugLocation(1778, 9);
 			Match(input,DEFAULT,Follow._DEFAULT_in_defaultClause9147); 
-			DebugLocation(1787, 17);
+			DebugLocation(1778, 17);
 			Match(input,COLON,Follow._COLON_in_defaultClause9149); 
-			DebugLocation(1788, 9);
+			DebugLocation(1779, 9);
 			 end = input.LT(-1); 
-			DebugLocation(1789, 9);
-			// ..\\ES3.g:1789:9: (st= statement )*
+			DebugLocation(1780, 9);
+			// ..\\ES3.g:1780:9: (st= statement )*
 			try { DebugEnterSubRule(83);
 			while (true)
 			{
@@ -9292,14 +9283,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1790:13: st= statement
+					// ..\\ES3.g:1781:13: st= statement
 					{
-					DebugLocation(1790, 15);
+					DebugLocation(1781, 15);
 					PushFollow(Follow._statement_in_defaultClause9185);
 					st=statement();
 					PopFollow();
 
-					DebugLocation(1791, 13);
+					DebugLocation(1782, 13);
 					 statements.Add(st); 
 
 					}
@@ -9315,7 +9306,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(83); }
 
-			DebugLocation(1793, 9);
+			DebugLocation(1784, 9);
 
 			            value = new DefaultClause(
 			                new BlockSyntax(statements),
@@ -9337,7 +9328,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("defaultClause", 76);
 			LeaveRule_defaultClause();
 		}
-		DebugLocation(1799, 1);
+		DebugLocation(1790, 1);
 		} finally { DebugExitRule(GrammarFileName, "defaultClause"); }
 		return value;
 
@@ -9349,7 +9340,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_labelledStatement();
 
 	// $ANTLR start "labelledStatement"
-	// ..\\ES3.g:1805:1: labelledStatement returns [SyntaxNode value] : lb= Identifier COLON st= statement ;
+	// ..\\ES3.g:1796:1: labelledStatement returns [SyntaxNode value] : lb= Identifier COLON st= statement ;
 	[GrammarRule("labelledStatement")]
 	private SyntaxNode labelledStatement()
 	{
@@ -9362,23 +9353,23 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxNode st = default(SyntaxNode);
 
 		try { DebugEnterRule(GrammarFileName, "labelledStatement");
-		DebugLocation(1805, 1);
+		DebugLocation(1796, 1);
 		try
 		{
-			// ..\\ES3.g:1806:2: (lb= Identifier COLON st= statement )
+			// ..\\ES3.g:1797:2: (lb= Identifier COLON st= statement )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1807:9: lb= Identifier COLON st= statement
+			// ..\\ES3.g:1798:9: lb= Identifier COLON st= statement
 			{
-			DebugLocation(1807, 11);
+			DebugLocation(1798, 11);
 			lb=(IToken)Match(input,Identifier,Follow._Identifier_in_labelledStatement9251); 
-			DebugLocation(1807, 23);
+			DebugLocation(1798, 23);
 			Match(input,COLON,Follow._COLON_in_labelledStatement9253); 
-			DebugLocation(1807, 31);
+			DebugLocation(1798, 31);
 			PushFollow(Follow._statement_in_labelledStatement9257);
 			st=statement();
 			PopFollow();
 
-			DebugLocation(1808, 9);
+			DebugLocation(1799, 9);
 			 value = new LabelSyntax(lb.Text, st); 
 
 			}
@@ -9395,7 +9386,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("labelledStatement", 77);
 			LeaveRule_labelledStatement();
 		}
-		DebugLocation(1809, 1);
+		DebugLocation(1800, 1);
 		} finally { DebugExitRule(GrammarFileName, "labelledStatement"); }
 		return value;
 
@@ -9407,7 +9398,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_throwStatement();
 
 	// $ANTLR start "throwStatement"
-	// ..\\ES3.g:1830:1: throwStatement returns [SyntaxNode value] : THROW exp= expression semic ;
+	// ..\\ES3.g:1821:1: throwStatement returns [SyntaxNode value] : THROW exp= expression semic ;
 	[GrammarRule("throwStatement")]
 	private SyntaxNode throwStatement()
 	{
@@ -9422,28 +9413,28 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "throwStatement");
-		DebugLocation(1830, 1);
+		DebugLocation(1821, 1);
 		try
 		{
-			// ..\\ES3.g:1834:2: ( THROW exp= expression semic )
+			// ..\\ES3.g:1825:2: ( THROW exp= expression semic )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1835:9: THROW exp= expression semic
+			// ..\\ES3.g:1826:9: THROW exp= expression semic
 			{
-			DebugLocation(1835, 9);
+			DebugLocation(1826, 9);
 			Match(input,THROW,Follow._THROW_in_throwStatement9302); 
-			DebugLocation(1835, 15);
+			DebugLocation(1826, 15);
 			 PromoteEol(); 
-			DebugLocation(1835, 36);
+			DebugLocation(1826, 36);
 			PushFollow(Follow._expression_in_throwStatement9308);
 			exp=expression();
 			PopFollow();
 
-			DebugLocation(1835, 48);
+			DebugLocation(1826, 48);
 			PushFollow(Follow._semic_in_throwStatement9310);
 			semic();
 			PopFollow();
 
-			DebugLocation(1836, 9);
+			DebugLocation(1827, 9);
 			 value = new ThrowSyntax(exp, GetLocation(start, input.LT(-1))); 
 
 			}
@@ -9460,7 +9451,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("throwStatement", 78);
 			LeaveRule_throwStatement();
 		}
-		DebugLocation(1837, 1);
+		DebugLocation(1828, 1);
 		} finally { DebugExitRule(GrammarFileName, "throwStatement"); }
 		return value;
 
@@ -9472,7 +9463,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_tryStatement();
 
 	// $ANTLR start "tryStatement"
-	// ..\\ES3.g:1843:1: tryStatement returns [TrySyntax value] : TRY b= block (c= catchClause (first= finallyClause )? |last= finallyClause ) ;
+	// ..\\ES3.g:1834:1: tryStatement returns [TrySyntax value] : TRY b= block (c= catchClause (first= finallyClause )? |last= finallyClause ) ;
 	[GrammarRule("tryStatement")]
 	private TrySyntax tryStatement()
 	{
@@ -9491,22 +9482,22 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    FinallyClause @finally = null;
 
 		try { DebugEnterRule(GrammarFileName, "tryStatement");
-		DebugLocation(1843, 1);
+		DebugLocation(1834, 1);
 		try
 		{
-			// ..\\ES3.g:1848:2: ( TRY b= block (c= catchClause (first= finallyClause )? |last= finallyClause ) )
+			// ..\\ES3.g:1839:2: ( TRY b= block (c= catchClause (first= finallyClause )? |last= finallyClause ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1849:9: TRY b= block (c= catchClause (first= finallyClause )? |last= finallyClause )
+			// ..\\ES3.g:1840:9: TRY b= block (c= catchClause (first= finallyClause )? |last= finallyClause )
 			{
-			DebugLocation(1849, 9);
+			DebugLocation(1840, 9);
 			Match(input,TRY,Follow._TRY_in_tryStatement9352); 
-			DebugLocation(1849, 14);
+			DebugLocation(1840, 14);
 			PushFollow(Follow._block_in_tryStatement9356);
 			b=block();
 			PopFollow();
 
-			DebugLocation(1850, 9);
-			// ..\\ES3.g:1850:9: (c= catchClause (first= finallyClause )? |last= finallyClause )
+			DebugLocation(1841, 9);
+			// ..\\ES3.g:1841:9: (c= catchClause (first= finallyClause )? |last= finallyClause )
 			int alt85=2;
 			try { DebugEnterSubRule(85);
 			try { DebugEnterDecision(85, false);
@@ -9531,17 +9522,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1851:13: c= catchClause (first= finallyClause )?
+				// ..\\ES3.g:1842:13: c= catchClause (first= finallyClause )?
 				{
-				DebugLocation(1851, 14);
+				DebugLocation(1842, 14);
 				PushFollow(Follow._catchClause_in_tryStatement9382);
 				c=catchClause();
 				PopFollow();
 
-				DebugLocation(1852, 13);
+				DebugLocation(1843, 13);
 				 @catch = c; 
-				DebugLocation(1853, 13);
-				// ..\\ES3.g:1853:13: (first= finallyClause )?
+				DebugLocation(1844, 13);
+				// ..\\ES3.g:1844:13: (first= finallyClause )?
 				int alt84=2;
 				try { DebugEnterSubRule(84);
 				try { DebugEnterDecision(84, false);
@@ -9556,14 +9547,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1854:17: first= finallyClause
+					// ..\\ES3.g:1845:17: first= finallyClause
 					{
-					DebugLocation(1854, 22);
+					DebugLocation(1845, 22);
 					PushFollow(Follow._finallyClause_in_tryStatement9430);
 					first=finallyClause();
 					PopFollow();
 
-					DebugLocation(1855, 17);
+					DebugLocation(1846, 17);
 					 @finally = first; 
 
 					}
@@ -9577,14 +9568,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:1858:13: last= finallyClause
+				// ..\\ES3.g:1849:13: last= finallyClause
 				{
-				DebugLocation(1858, 17);
+				DebugLocation(1849, 17);
 				PushFollow(Follow._finallyClause_in_tryStatement9489);
 				last=finallyClause();
 				PopFollow();
 
-				DebugLocation(1859, 13);
+				DebugLocation(1850, 13);
 				 @finally = last; 
 
 				}
@@ -9593,7 +9584,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(85); }
 
-			DebugLocation(1861, 9);
+			DebugLocation(1852, 9);
 			 value = new TrySyntax(b, @catch, @finally); 
 
 			}
@@ -9610,7 +9601,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("tryStatement", 79);
 			LeaveRule_tryStatement();
 		}
-		DebugLocation(1862, 1);
+		DebugLocation(1853, 1);
 		} finally { DebugExitRule(GrammarFileName, "tryStatement"); }
 		return value;
 
@@ -9622,7 +9613,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_catchClause();
 
 	// $ANTLR start "catchClause"
-	// ..\\ES3.g:1864:1: catchClause returns [CatchClause value] : CATCH LPAREN id= Identifier RPAREN b= block ;
+	// ..\\ES3.g:1855:1: catchClause returns [CatchClause value] : CATCH LPAREN id= Identifier RPAREN b= block ;
 	[GrammarRule("catchClause")]
 	private CatchClause catchClause()
 	{
@@ -9635,33 +9626,30 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		BlockSyntax b = default(BlockSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "catchClause");
-		DebugLocation(1864, 1);
+		DebugLocation(1855, 1);
 		try
 		{
-			// ..\\ES3.g:1868:2: ( CATCH LPAREN id= Identifier RPAREN b= block )
+			// ..\\ES3.g:1856:2: ( CATCH LPAREN id= Identifier RPAREN b= block )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1869:9: CATCH LPAREN id= Identifier RPAREN b= block
+			// ..\\ES3.g:1857:9: CATCH LPAREN id= Identifier RPAREN b= block
 			{
-			DebugLocation(1869, 9);
-			Match(input,CATCH,Follow._CATCH_in_catchClause9551); 
-			DebugLocation(1869, 15);
-			Match(input,LPAREN,Follow._LPAREN_in_catchClause9553); 
-			DebugLocation(1869, 24);
-			id=(IToken)Match(input,Identifier,Follow._Identifier_in_catchClause9557); 
-			DebugLocation(1869, 36);
-			Match(input,RPAREN,Follow._RPAREN_in_catchClause9559); 
-			DebugLocation(1869, 44);
-			PushFollow(Follow._block_in_catchClause9563);
+			DebugLocation(1857, 9);
+			Match(input,CATCH,Follow._CATCH_in_catchClause9547); 
+			DebugLocation(1857, 15);
+			Match(input,LPAREN,Follow._LPAREN_in_catchClause9549); 
+			DebugLocation(1857, 24);
+			id=(IToken)Match(input,Identifier,Follow._Identifier_in_catchClause9553); 
+			DebugLocation(1857, 36);
+			Match(input,RPAREN,Follow._RPAREN_in_catchClause9555); 
+			DebugLocation(1857, 44);
+			PushFollow(Follow._block_in_catchClause9559);
 			b=block();
 			PopFollow();
 
-			DebugLocation(1870, 9);
-			 value = new CatchClause((id!=null?id.Text:null), b); 
+			DebugLocation(1858, 9);
+			 value = new CatchClause((id!=null?id.Text:null), b, _currentBody.DeclaredVariables.AddOrGet((id!=null?id.Text:null), true)); 
 
 			}
-
-
-			    value.Target = _currentBody.DeclaredVariables.AddOrGet(value.Identifier, true);
 
 		}
 		catch (RecognitionException re)
@@ -9675,7 +9663,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("catchClause", 80);
 			LeaveRule_catchClause();
 		}
-		DebugLocation(1871, 1);
+		DebugLocation(1859, 1);
 		} finally { DebugExitRule(GrammarFileName, "catchClause"); }
 		return value;
 
@@ -9687,7 +9675,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_finallyClause();
 
 	// $ANTLR start "finallyClause"
-	// ..\\ES3.g:1873:1: finallyClause returns [FinallyClause value] : FINALLY b= block ;
+	// ..\\ES3.g:1861:1: finallyClause returns [FinallyClause value] : FINALLY b= block ;
 	[GrammarRule("finallyClause")]
 	private FinallyClause finallyClause()
 	{
@@ -9699,21 +9687,21 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		BlockSyntax b = default(BlockSyntax);
 
 		try { DebugEnterRule(GrammarFileName, "finallyClause");
-		DebugLocation(1873, 1);
+		DebugLocation(1861, 1);
 		try
 		{
-			// ..\\ES3.g:1874:2: ( FINALLY b= block )
+			// ..\\ES3.g:1862:2: ( FINALLY b= block )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1875:9: FINALLY b= block
+			// ..\\ES3.g:1863:9: FINALLY b= block
 			{
-			DebugLocation(1875, 9);
-			Match(input,FINALLY,Follow._FINALLY_in_finallyClause9597); 
-			DebugLocation(1875, 18);
-			PushFollow(Follow._block_in_finallyClause9601);
+			DebugLocation(1863, 9);
+			Match(input,FINALLY,Follow._FINALLY_in_finallyClause9593); 
+			DebugLocation(1863, 18);
+			PushFollow(Follow._block_in_finallyClause9597);
 			b=block();
 			PopFollow();
 
-			DebugLocation(1876, 9);
+			DebugLocation(1864, 9);
 			 value = new FinallyClause(b); 
 
 			}
@@ -9730,7 +9718,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("finallyClause", 81);
 			LeaveRule_finallyClause();
 		}
-		DebugLocation(1877, 1);
+		DebugLocation(1865, 1);
 		} finally { DebugExitRule(GrammarFileName, "finallyClause"); }
 		return value;
 
@@ -9742,7 +9730,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_functionDeclaration();
 
 	// $ANTLR start "functionDeclaration"
-	// ..\\ES3.g:1889:1: functionDeclaration returns [SyntaxNode value] : FUNCTION id= Identifier parms= formalParameterList fb= functionBody ;
+	// ..\\ES3.g:1877:1: functionDeclaration returns [SyntaxNode value] : FUNCTION id= Identifier parms= formalParameterList fb= functionBody ;
 	[GrammarRule("functionDeclaration")]
 	private SyntaxNode functionDeclaration()
 	{
@@ -9762,32 +9750,32 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    BlockSyntax body;
 
 		try { DebugEnterRule(GrammarFileName, "functionDeclaration");
-		DebugLocation(1889, 1);
+		DebugLocation(1877, 1);
 		try
 		{
-			// ..\\ES3.g:1911:2: ( FUNCTION id= Identifier parms= formalParameterList fb= functionBody )
+			// ..\\ES3.g:1897:2: ( FUNCTION id= Identifier parms= formalParameterList fb= functionBody )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1912:9: FUNCTION id= Identifier parms= formalParameterList fb= functionBody
+			// ..\\ES3.g:1898:9: FUNCTION id= Identifier parms= formalParameterList fb= functionBody
 			{
-			DebugLocation(1912, 9);
-			Match(input,FUNCTION,Follow._FUNCTION_in_functionDeclaration9654); 
-			DebugLocation(1912, 20);
-			id=(IToken)Match(input,Identifier,Follow._Identifier_in_functionDeclaration9658); 
-			DebugLocation(1913, 9);
+			DebugLocation(1898, 9);
+			Match(input,FUNCTION,Follow._FUNCTION_in_functionDeclaration9650); 
+			DebugLocation(1898, 20);
+			id=(IToken)Match(input,Identifier,Follow._Identifier_in_functionDeclaration9654); 
+			DebugLocation(1899, 9);
 			 name = id.Text; 
-			DebugLocation(1914, 8);
-			PushFollow(Follow._formalParameterList_in_functionDeclaration9675);
+			DebugLocation(1900, 8);
+			PushFollow(Follow._formalParameterList_in_functionDeclaration9671);
 			parms=formalParameterList();
 			PopFollow();
 
-			DebugLocation(1915, 9);
+			DebugLocation(1901, 9);
 			 parameters = parms; 
-			DebugLocation(1916, 5);
-			PushFollow(Follow._functionBody_in_functionDeclaration9691);
+			DebugLocation(1902, 5);
+			PushFollow(Follow._functionBody_in_functionDeclaration9687);
 			fb=functionBody();
 			PopFollow();
 
-			DebugLocation(1917, 9);
+			DebugLocation(1903, 9);
 			 body = fb; 
 
 			}
@@ -9798,11 +9786,9 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			            name,
 			            parameters,
 			            body,
+			            _currentBody.DeclaredVariables.AddOrGet(name, true),
 			            GetLocation(start, input.LT(-1))
 			        )
-			        {
-			            Target = _currentBody.DeclaredVariables.AddOrGet(name, true)
-			        }
 			    );
 
 			    value = new EmptySyntax();
@@ -9819,7 +9805,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("functionDeclaration", 82);
 			LeaveRule_functionDeclaration();
 		}
-		DebugLocation(1918, 1);
+		DebugLocation(1904, 1);
 		} finally { DebugExitRule(GrammarFileName, "functionDeclaration"); }
 		return value;
 
@@ -9831,7 +9817,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_functionExpression();
 
 	// $ANTLR start "functionExpression"
-	// ..\\ES3.g:1920:1: functionExpression returns [FunctionSyntax value] : FUNCTION (id= Identifier )? fpl= formalParameterList fb= functionBody ;
+	// ..\\ES3.g:1906:1: functionExpression returns [FunctionSyntax value] : FUNCTION (id= Identifier )? fpl= formalParameterList fb= functionBody ;
 	[GrammarRule("functionExpression")]
 	private FunctionSyntax functionExpression()
 	{
@@ -9851,17 +9837,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    BlockSyntax body;
 
 		try { DebugEnterRule(GrammarFileName, "functionExpression");
-		DebugLocation(1920, 1);
+		DebugLocation(1906, 1);
 		try
 		{
-			// ..\\ES3.g:1933:2: ( FUNCTION (id= Identifier )? fpl= formalParameterList fb= functionBody )
+			// ..\\ES3.g:1922:2: ( FUNCTION (id= Identifier )? fpl= formalParameterList fb= functionBody )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1934:9: FUNCTION (id= Identifier )? fpl= formalParameterList fb= functionBody
+			// ..\\ES3.g:1923:9: FUNCTION (id= Identifier )? fpl= formalParameterList fb= functionBody
 			{
-			DebugLocation(1934, 9);
-			Match(input,FUNCTION,Follow._FUNCTION_in_functionExpression9734); 
-			DebugLocation(1935, 9);
-			// ..\\ES3.g:1935:9: (id= Identifier )?
+			DebugLocation(1923, 9);
+			Match(input,FUNCTION,Follow._FUNCTION_in_functionExpression9730); 
+			DebugLocation(1924, 9);
+			// ..\\ES3.g:1924:9: (id= Identifier )?
 			int alt86=2;
 			try { DebugEnterSubRule(86);
 			try { DebugEnterDecision(86, false);
@@ -9876,11 +9862,11 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1936:13: id= Identifier
+				// ..\\ES3.g:1925:13: id= Identifier
 				{
-				DebugLocation(1936, 15);
-				id=(IToken)Match(input,Identifier,Follow._Identifier_in_functionExpression9760); 
-				DebugLocation(1937, 13);
+				DebugLocation(1925, 15);
+				id=(IToken)Match(input,Identifier,Follow._Identifier_in_functionExpression9756); 
+				DebugLocation(1926, 13);
 				 name = id.Text; 
 
 				}
@@ -9889,28 +9875,31 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(86); }
 
-			DebugLocation(1939, 12);
-			PushFollow(Follow._formalParameterList_in_functionExpression9797);
+			DebugLocation(1928, 12);
+			PushFollow(Follow._formalParameterList_in_functionExpression9793);
 			fpl=formalParameterList();
 			PopFollow();
 
-			DebugLocation(1940, 9);
+			DebugLocation(1929, 9);
 			 parameters = fpl; 
-			DebugLocation(1941, 11);
-			PushFollow(Follow._functionBody_in_functionExpression9819);
+			DebugLocation(1930, 11);
+			PushFollow(Follow._functionBody_in_functionExpression9815);
 			fb=functionBody();
 			PopFollow();
 
-			DebugLocation(1942, 9);
+			DebugLocation(1931, 9);
 			 body = fb; 
 
 			}
 
 
-				value = new FunctionSyntax(name, parameters, body, GetLocation(start, input.LT(-1)));
-
-			    if (name != null)
-			        value.Target = _currentBody.DeclaredVariables.AddOrGet(name, true);
+				value = new FunctionSyntax(
+			        name,
+			        parameters,
+			        body,
+			        name == null ? null : _currentBody.DeclaredVariables.AddOrGet(name, true),
+			        GetLocation(start, input.LT(-1))
+			    );
 
 		}
 		catch (RecognitionException re)
@@ -9924,7 +9913,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("functionExpression", 83);
 			LeaveRule_functionExpression();
 		}
-		DebugLocation(1943, 1);
+		DebugLocation(1932, 1);
 		} finally { DebugExitRule(GrammarFileName, "functionExpression"); }
 		return value;
 
@@ -9936,7 +9925,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_formalParameterList();
 
 	// $ANTLR start "formalParameterList"
-	// ..\\ES3.g:1945:1: formalParameterList returns [List<string> value] : LPAREN (first= Identifier ( COMMA follow= Identifier )* )? RPAREN ;
+	// ..\\ES3.g:1934:1: formalParameterList returns [List<string> value] : LPAREN (first= Identifier ( COMMA follow= Identifier )* )? RPAREN ;
 	[GrammarRule("formalParameterList")]
 	private List<string> formalParameterList()
 	{
@@ -9953,17 +9942,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    value = identifiers;
 
 		try { DebugEnterRule(GrammarFileName, "formalParameterList");
-		DebugLocation(1945, 1);
+		DebugLocation(1934, 1);
 		try
 		{
-			// ..\\ES3.g:1950:2: ( LPAREN (first= Identifier ( COMMA follow= Identifier )* )? RPAREN )
+			// ..\\ES3.g:1939:2: ( LPAREN (first= Identifier ( COMMA follow= Identifier )* )? RPAREN )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1951:9: LPAREN (first= Identifier ( COMMA follow= Identifier )* )? RPAREN
+			// ..\\ES3.g:1940:9: LPAREN (first= Identifier ( COMMA follow= Identifier )* )? RPAREN
 			{
-			DebugLocation(1951, 9);
-			Match(input,LPAREN,Follow._LPAREN_in_formalParameterList9857); 
-			DebugLocation(1952, 9);
-			// ..\\ES3.g:1952:9: (first= Identifier ( COMMA follow= Identifier )* )?
+			DebugLocation(1940, 9);
+			Match(input,LPAREN,Follow._LPAREN_in_formalParameterList9853); 
+			DebugLocation(1941, 9);
+			// ..\\ES3.g:1941:9: (first= Identifier ( COMMA follow= Identifier )* )?
 			int alt88=2;
 			try { DebugEnterSubRule(88);
 			try { DebugEnterDecision(88, false);
@@ -9978,14 +9967,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:1953:13: first= Identifier ( COMMA follow= Identifier )*
+				// ..\\ES3.g:1942:13: first= Identifier ( COMMA follow= Identifier )*
 				{
-				DebugLocation(1953, 18);
-				first=(IToken)Match(input,Identifier,Follow._Identifier_in_formalParameterList9883); 
-				DebugLocation(1954, 13);
+				DebugLocation(1942, 18);
+				first=(IToken)Match(input,Identifier,Follow._Identifier_in_formalParameterList9879); 
+				DebugLocation(1943, 13);
 				 identifiers.Add((first!=null?first.Text:null)); 
-				DebugLocation(1955, 13);
-				// ..\\ES3.g:1955:13: ( COMMA follow= Identifier )*
+				DebugLocation(1944, 13);
+				// ..\\ES3.g:1944:13: ( COMMA follow= Identifier )*
 				try { DebugEnterSubRule(87);
 				while (true)
 				{
@@ -10004,13 +9993,13 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:1956:17: COMMA follow= Identifier
+						// ..\\ES3.g:1945:17: COMMA follow= Identifier
 						{
-						DebugLocation(1956, 17);
-						Match(input,COMMA,Follow._COMMA_in_formalParameterList9929); 
-						DebugLocation(1956, 29);
-						follow=(IToken)Match(input,Identifier,Follow._Identifier_in_formalParameterList9933); 
-						DebugLocation(1957, 17);
+						DebugLocation(1945, 17);
+						Match(input,COMMA,Follow._COMMA_in_formalParameterList9925); 
+						DebugLocation(1945, 29);
+						follow=(IToken)Match(input,Identifier,Follow._Identifier_in_formalParameterList9929); 
+						DebugLocation(1946, 17);
 						 identifiers.Add((follow!=null?follow.Text:null)); 
 
 						}
@@ -10033,8 +10022,8 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 			} finally { DebugExitSubRule(88); }
 
-			DebugLocation(1960, 9);
-			Match(input,RPAREN,Follow._RPAREN_in_formalParameterList9987); 
+			DebugLocation(1949, 9);
+			Match(input,RPAREN,Follow._RPAREN_in_formalParameterList9983); 
 
 			}
 
@@ -10050,7 +10039,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("formalParameterList", 84);
 			LeaveRule_formalParameterList();
 		}
-		DebugLocation(1961, 1);
+		DebugLocation(1950, 1);
 		} finally { DebugExitRule(GrammarFileName, "formalParameterList"); }
 		return value;
 
@@ -10062,7 +10051,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_functionBody();
 
 	// $ANTLR start "functionBody"
-	// ..\\ES3.g:1963:1: functionBody returns [BlockSyntax value] : lb= LBRACE (se= sourceElement )* RBRACE ;
+	// ..\\ES3.g:1952:1: functionBody returns [BlockSyntax value] : lb= LBRACE (se= sourceElement )* RBRACE ;
 	[GrammarRule("functionBody")]
 	private BlockSyntax functionBody()
 	{
@@ -10080,17 +10069,17 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    var start = input.LT(1);
 
 		try { DebugEnterRule(GrammarFileName, "functionBody");
-		DebugLocation(1963, 1);
+		DebugLocation(1952, 1);
 		try
 		{
-			// ..\\ES3.g:1973:2: (lb= LBRACE (se= sourceElement )* RBRACE )
+			// ..\\ES3.g:1962:2: (lb= LBRACE (se= sourceElement )* RBRACE )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1974:9: lb= LBRACE (se= sourceElement )* RBRACE
+			// ..\\ES3.g:1963:9: lb= LBRACE (se= sourceElement )* RBRACE
 			{
-			DebugLocation(1974, 11);
-			lb=(IToken)Match(input,LBRACE,Follow._LBRACE_in_functionBody10020); 
-			DebugLocation(1975, 9);
-			// ..\\ES3.g:1975:9: (se= sourceElement )*
+			DebugLocation(1963, 11);
+			lb=(IToken)Match(input,LBRACE,Follow._LBRACE_in_functionBody10016); 
+			DebugLocation(1964, 9);
+			// ..\\ES3.g:1964:9: (se= sourceElement )*
 			try { DebugEnterSubRule(89);
 			while (true)
 			{
@@ -10109,14 +10098,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1976:13: se= sourceElement
+					// ..\\ES3.g:1965:13: se= sourceElement
 					{
-					DebugLocation(1976, 15);
-					PushFollow(Follow._sourceElement_in_functionBody10046);
+					DebugLocation(1965, 15);
+					PushFollow(Follow._sourceElement_in_functionBody10042);
 					se=sourceElement();
 					PopFollow();
 
-					DebugLocation(1977, 13);
+					DebugLocation(1966, 13);
 					 _currentBody.Statements.Add(se); 
 
 					}
@@ -10132,8 +10121,8 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(89); }
 
-			DebugLocation(1979, 9);
-			Match(input,RBRACE,Follow._RBRACE_in_functionBody10081); 
+			DebugLocation(1968, 9);
+			Match(input,RBRACE,Follow._RBRACE_in_functionBody10077); 
 
 			}
 
@@ -10153,7 +10142,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("functionBody", 85);
 			LeaveRule_functionBody();
 		}
-		DebugLocation(1980, 1);
+		DebugLocation(1969, 1);
 		} finally { DebugExitRule(GrammarFileName, "functionBody"); }
 		return value;
 
@@ -10165,7 +10154,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_program();
 
 	// $ANTLR start "program"
-	// ..\\ES3.g:1986:1: program returns [ProgramSyntax value] : (follow= sourceElement )* ;
+	// ..\\ES3.g:1975:1: program returns [ProgramSyntax value] : (follow= sourceElement )* ;
 	[GrammarRule("program")]
 	private ProgramSyntax program()
 	{
@@ -10180,15 +10169,15 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		    _currentBody = new BlockBuilder();
 
 		try { DebugEnterRule(GrammarFileName, "program");
-		DebugLocation(1986, 1);
+		DebugLocation(1975, 1);
 		try
 		{
-			// ..\\ES3.g:1990:2: ( (follow= sourceElement )* )
+			// ..\\ES3.g:1979:2: ( (follow= sourceElement )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1991:9: (follow= sourceElement )*
+			// ..\\ES3.g:1980:9: (follow= sourceElement )*
 			{
-			DebugLocation(1991, 9);
-			// ..\\ES3.g:1991:9: (follow= sourceElement )*
+			DebugLocation(1980, 9);
+			// ..\\ES3.g:1980:9: (follow= sourceElement )*
 			try { DebugEnterSubRule(90);
 			while (true)
 			{
@@ -10207,14 +10196,14 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:1992:13: follow= sourceElement
+					// ..\\ES3.g:1981:13: follow= sourceElement
 					{
-					DebugLocation(1992, 19);
-					PushFollow(Follow._sourceElement_in_program10129);
+					DebugLocation(1981, 19);
+					PushFollow(Follow._sourceElement_in_program10125);
 					follow=sourceElement();
 					PopFollow();
 
-					DebugLocation(1993, 13);
+					DebugLocation(1982, 13);
 					 _currentBody.Statements.Add(follow); 
 
 					}
@@ -10230,7 +10219,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 
 			} finally { DebugExitSubRule(90); }
 
-			DebugLocation(1995, 9);
+			DebugLocation(1984, 9);
 			 value = _currentBody.CreateProgram(); 
 
 			}
@@ -10247,7 +10236,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("program", 86);
 			LeaveRule_program();
 		}
-		DebugLocation(1996, 1);
+		DebugLocation(1985, 1);
 		} finally { DebugExitRule(GrammarFileName, "program"); }
 		return value;
 
@@ -10259,7 +10248,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 	partial void LeaveRule_sourceElement();
 
 	// $ANTLR start "sourceElement"
-	// ..\\ES3.g:2003:1: sourceElement returns [SyntaxNode value] options {k=1; } : ({...}?func= functionDeclaration |stat= statement );
+	// ..\\ES3.g:1992:1: sourceElement returns [SyntaxNode value] options {k=1; } : ({...}?func= functionDeclaration |stat= statement );
 	[GrammarRule("sourceElement")]
 	private SyntaxNode sourceElement()
 	{
@@ -10272,10 +10261,10 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		SyntaxNode stat = default(SyntaxNode);
 
 		try { DebugEnterRule(GrammarFileName, "sourceElement");
-		DebugLocation(2003, 1);
+		DebugLocation(1992, 1);
 		try
 		{
-			// ..\\ES3.g:2009:2: ({...}?func= functionDeclaration |stat= statement )
+			// ..\\ES3.g:1998:2: ({...}?func= functionDeclaration |stat= statement )
 			int alt91=2;
 			try { DebugEnterDecision(91, false);
 			try
@@ -10292,33 +10281,33 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:2009:4: {...}?func= functionDeclaration
+				// ..\\ES3.g:1998:4: {...}?func= functionDeclaration
 				{
-				DebugLocation(2009, 4);
+				DebugLocation(1998, 4);
 				if (!(( input.LA(1) == FUNCTION )))
 				{
 					throw new FailedPredicateException(input, "sourceElement", " input.LA(1) == FUNCTION ");
 				}
-				DebugLocation(2009, 37);
-				PushFollow(Follow._functionDeclaration_in_sourceElement10199);
+				DebugLocation(1998, 37);
+				PushFollow(Follow._functionDeclaration_in_sourceElement10195);
 				func=functionDeclaration();
 				PopFollow();
 
-				DebugLocation(2009, 58);
+				DebugLocation(1998, 58);
 				 value = func; 
 
 				}
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:2010:4: stat= statement
+				// ..\\ES3.g:1999:4: stat= statement
 				{
-				DebugLocation(2010, 8);
-				PushFollow(Follow._statement_in_sourceElement10208);
+				DebugLocation(1999, 8);
+				PushFollow(Follow._statement_in_sourceElement10204);
 				stat=statement();
 				PopFollow();
 
-				DebugLocation(2010, 19);
+				DebugLocation(1999, 19);
 				 value = stat; 
 
 				}
@@ -10337,7 +10326,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			LeaveRule("sourceElement", 87);
 			LeaveRule_sourceElement();
 		}
-		DebugLocation(2011, 1);
+		DebugLocation(2000, 1);
 		} finally { DebugExitRule(GrammarFileName, "sourceElement"); }
 		return value;
 
@@ -10455,7 +10444,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			this.transition = DFA59_transition;
 		}
 
-		public override string Description { get { return "1265:1: statement returns [SyntaxNode value] options {k=1; } : ({...}?b= block |{...}?func= functionDeclaration |st= statementTail );"; } }
+		public override string Description { get { return "1266:1: statement returns [SyntaxNode value] options {k=1; } : ({...}?b= block |{...}?func= functionDeclaration |st= statementTail );"; } }
 
 		public override void Error(NoViableAltException nvae)
 		{
@@ -10579,7 +10568,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			this.transition = DFA60_transition;
 		}
 
-		public override string Description { get { return "1276:1: statementTail returns [SyntaxNode value] : (vst= variableStatement |est= emptyStatement |exst= expressionStatement |ifst= ifStatement |itst= iterationStatement |cost= continueStatement |brst= breakStatement |rst= returnStatement |wist= withStatement |last= labelledStatement |swst= switchStatement |thst= throwStatement |trst= tryStatement );"; } }
+		public override string Description { get { return "1277:1: statementTail returns [SyntaxNode value] : (vst= variableStatement |est= emptyStatement |exst= expressionStatement |ifst= ifStatement |itst= iterationStatement |cost= continueStatement |brst= breakStatement |rst= returnStatement |wist= withStatement |last= labelledStatement |swst= switchStatement |thst= throwStatement |trst= tryStatement );"; } }
 
 		public override void Error(NoViableAltException nvae)
 		{
@@ -10682,7 +10671,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			this.transition = DFA91_transition;
 		}
 
-		public override string Description { get { return "2003:1: sourceElement returns [SyntaxNode value] options {k=1; } : ({...}?func= functionDeclaration |stat= statement );"; } }
+		public override string Description { get { return "1992:1: sourceElement returns [SyntaxNode value] options {k=1; } : ({...}?func= functionDeclaration |stat= statement );"; } }
 
 		public override void Error(NoViableAltException nvae)
 		{
@@ -11039,32 +11028,32 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 		public static readonly BitSet _catchClause_in_tryStatement9382 = new BitSet(new ulong[]{0x200000000400002UL});
 		public static readonly BitSet _finallyClause_in_tryStatement9430 = new BitSet(new ulong[]{0x2UL});
 		public static readonly BitSet _finallyClause_in_tryStatement9489 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _CATCH_in_catchClause9551 = new BitSet(new ulong[]{0x0UL,0x4000000UL});
-		public static readonly BitSet _LPAREN_in_catchClause9553 = new BitSet(new ulong[]{0x0UL,0x8000UL});
-		public static readonly BitSet _Identifier_in_catchClause9557 = new BitSet(new ulong[]{0x0UL,0x0UL,0x2UL});
-		public static readonly BitSet _RPAREN_in_catchClause9559 = new BitSet(new ulong[]{0x0UL,0x200000UL});
-		public static readonly BitSet _block_in_catchClause9563 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _FINALLY_in_finallyClause9597 = new BitSet(new ulong[]{0x0UL,0x200000UL});
-		public static readonly BitSet _block_in_finallyClause9601 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _FUNCTION_in_functionDeclaration9654 = new BitSet(new ulong[]{0x0UL,0x8000UL});
-		public static readonly BitSet _Identifier_in_functionDeclaration9658 = new BitSet(new ulong[]{0x0UL,0x4000000UL});
-		public static readonly BitSet _formalParameterList_in_functionDeclaration9675 = new BitSet(new ulong[]{0x0UL,0x4200000UL});
-		public static readonly BitSet _functionBody_in_functionDeclaration9691 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _FUNCTION_in_functionExpression9734 = new BitSet(new ulong[]{0x0UL,0x4008000UL});
-		public static readonly BitSet _Identifier_in_functionExpression9760 = new BitSet(new ulong[]{0x0UL,0x4000000UL});
-		public static readonly BitSet _formalParameterList_in_functionExpression9797 = new BitSet(new ulong[]{0x0UL,0x4200000UL});
-		public static readonly BitSet _functionBody_in_functionExpression9819 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _LPAREN_in_formalParameterList9857 = new BitSet(new ulong[]{0x0UL,0x8000UL,0x2UL});
-		public static readonly BitSet _Identifier_in_formalParameterList9883 = new BitSet(new ulong[]{0x8000000UL,0x0UL,0x2UL});
-		public static readonly BitSet _COMMA_in_formalParameterList9929 = new BitSet(new ulong[]{0x0UL,0x8000UL});
-		public static readonly BitSet _Identifier_in_formalParameterList9933 = new BitSet(new ulong[]{0x8000000UL,0x0UL,0x2UL});
-		public static readonly BitSet _RPAREN_in_formalParameterList9987 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _LBRACE_in_functionBody10020 = new BitSet(new ulong[]{0x4840104A20004020UL,0x200416000460A230UL,0xCCE6920051UL});
-		public static readonly BitSet _sourceElement_in_functionBody10046 = new BitSet(new ulong[]{0x4840104A20004020UL,0x200416000460A230UL,0xCCE6920051UL});
-		public static readonly BitSet _RBRACE_in_functionBody10081 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _sourceElement_in_program10129 = new BitSet(new ulong[]{0x4840104A20004022UL,0x416000460A230UL,0xCCE6920051UL});
-		public static readonly BitSet _functionDeclaration_in_sourceElement10199 = new BitSet(new ulong[]{0x2UL});
-		public static readonly BitSet _statement_in_sourceElement10208 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _CATCH_in_catchClause9547 = new BitSet(new ulong[]{0x0UL,0x4000000UL});
+		public static readonly BitSet _LPAREN_in_catchClause9549 = new BitSet(new ulong[]{0x0UL,0x8000UL});
+		public static readonly BitSet _Identifier_in_catchClause9553 = new BitSet(new ulong[]{0x0UL,0x0UL,0x2UL});
+		public static readonly BitSet _RPAREN_in_catchClause9555 = new BitSet(new ulong[]{0x0UL,0x200000UL});
+		public static readonly BitSet _block_in_catchClause9559 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _FINALLY_in_finallyClause9593 = new BitSet(new ulong[]{0x0UL,0x200000UL});
+		public static readonly BitSet _block_in_finallyClause9597 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _FUNCTION_in_functionDeclaration9650 = new BitSet(new ulong[]{0x0UL,0x8000UL});
+		public static readonly BitSet _Identifier_in_functionDeclaration9654 = new BitSet(new ulong[]{0x0UL,0x4000000UL});
+		public static readonly BitSet _formalParameterList_in_functionDeclaration9671 = new BitSet(new ulong[]{0x0UL,0x4200000UL});
+		public static readonly BitSet _functionBody_in_functionDeclaration9687 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _FUNCTION_in_functionExpression9730 = new BitSet(new ulong[]{0x0UL,0x4008000UL});
+		public static readonly BitSet _Identifier_in_functionExpression9756 = new BitSet(new ulong[]{0x0UL,0x4000000UL});
+		public static readonly BitSet _formalParameterList_in_functionExpression9793 = new BitSet(new ulong[]{0x0UL,0x4200000UL});
+		public static readonly BitSet _functionBody_in_functionExpression9815 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _LPAREN_in_formalParameterList9853 = new BitSet(new ulong[]{0x0UL,0x8000UL,0x2UL});
+		public static readonly BitSet _Identifier_in_formalParameterList9879 = new BitSet(new ulong[]{0x8000000UL,0x0UL,0x2UL});
+		public static readonly BitSet _COMMA_in_formalParameterList9925 = new BitSet(new ulong[]{0x0UL,0x8000UL});
+		public static readonly BitSet _Identifier_in_formalParameterList9929 = new BitSet(new ulong[]{0x8000000UL,0x0UL,0x2UL});
+		public static readonly BitSet _RPAREN_in_formalParameterList9983 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _LBRACE_in_functionBody10016 = new BitSet(new ulong[]{0x4840104A20004020UL,0x200416000460A230UL,0xCCE6920051UL});
+		public static readonly BitSet _sourceElement_in_functionBody10042 = new BitSet(new ulong[]{0x4840104A20004020UL,0x200416000460A230UL,0xCCE6920051UL});
+		public static readonly BitSet _RBRACE_in_functionBody10077 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _sourceElement_in_program10125 = new BitSet(new ulong[]{0x4840104A20004022UL,0x416000460A230UL,0xCCE6920051UL});
+		public static readonly BitSet _functionDeclaration_in_sourceElement10195 = new BitSet(new ulong[]{0x2UL});
+		public static readonly BitSet _statement_in_sourceElement10204 = new BitSet(new ulong[]{0x2UL});
 
 	}
 	#endregion Follow sets

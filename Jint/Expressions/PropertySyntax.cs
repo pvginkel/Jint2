@@ -13,7 +13,6 @@ namespace Jint.Expressions
         }
 
         public string Name { get; private set; }
-        public Variable Target { get; set; }
 
         public override ValueType ValueType
         {
