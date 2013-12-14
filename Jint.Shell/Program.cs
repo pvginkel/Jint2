@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Antlr.Runtime;
 using System.IO;
 using System.Reflection;
-using Jint.Expressions;
 using System.Text;
-using Jint.Native;
 
 namespace Jint.Shell {
     class Program {

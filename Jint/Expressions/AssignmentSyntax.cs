@@ -23,7 +23,7 @@ namespace Jint.Expressions
                 if (Operation == AssignmentOperator.Assign)
                     return Right.ValueType;
 
-                return BinaryExpressionSyntax.ResolveValueType(
+                return BinarySyntax.ResolveValueType(
                     GetSyntaxType(Operation),
                     Left.ValueType,
                     Right.ValueType

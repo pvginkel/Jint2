@@ -21,11 +21,11 @@ namespace Jint.Expressions
         For,
         ForEachIn,
         Function,
-        FunctionDeclaration,
         Identifier,
         If,
         Indexer,
         Json,
+        Label,
         MethodCall,
         New,
         Property,
@@ -39,7 +39,6 @@ namespace Jint.Expressions
         Value,
         VariableDeclaration,
         While,
-        With,
-        Label
+        With
     }
 }

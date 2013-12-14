@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Jint.Compiler;
 
 namespace Jint.Expressions
 {
-    public class FunctionSyntax : ExpressionSyntax, IFunctionDeclaration
+    public class FunctionSyntax : ExpressionSyntax, ISourceLocation
     {
         public override SyntaxType Type
         {

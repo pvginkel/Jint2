@@ -1,86 +1,80 @@
+using System;
 using System.Collections.Generic;
-using Jint.Native;
+using System.Text;
 
 namespace Jint.Expressions
 {
     public interface ISyntaxVisitor
     {
-        void VisitProgram(ProgramSyntax syntax);
+        void VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
         void VisitAssignment(AssignmentSyntax syntax);
+        void VisitBinary(BinarySyntax syntax);
         void VisitBlock(BlockSyntax syntax);
         void VisitBreak(BreakSyntax syntax);
+        void VisitCommaOperator(CommaOperatorSyntax syntax);
         void VisitContinue(ContinueSyntax syntax);
         void VisitDoWhile(DoWhileSyntax syntax);
         void VisitEmpty(EmptySyntax syntax);
         void VisitExpressionStatement(ExpressionStatementSyntax syntax);
-        void VisitForEachIn(ForEachInSyntax syntax);
         void VisitFor(ForSyntax syntax);
-        void VisitFunctionDeclaration(FunctionDeclarationSyntax syntax);
+        void VisitForEachIn(ForEachInSyntax syntax);
+        void VisitFunction(FunctionSyntax syntax);
+        void VisitIdentifier(IdentifierSyntax syntax);
         void VisitIf(IfSyntax syntax);
+        void VisitIndexer(IndexerSyntax syntax);
+        void VisitJsonExpression(JsonExpressionSyntax syntax);
+        void VisitLabel(LabelSyntax syntax);
+        void VisitMethodCall(MethodCallSyntax syntax);
+        void VisitNew(NewSyntax syntax);
+        void VisitProgram(ProgramSyntax syntax);
+        void VisitProperty(PropertySyntax syntax);
+        void VisitRegexp(RegexpSyntax syntax);
         void VisitReturn(ReturnSyntax syntax);
         void VisitSwitch(SwitchSyntax syntax);
-        void VisitWith(WithSyntax syntax);
+        void VisitTernary(TernarySyntax syntax);
         void VisitThrow(ThrowSyntax syntax);
         void VisitTry(TrySyntax syntax);
+        void VisitUnary(UnarySyntax syntax);
+        void VisitValue(ValueSyntax syntax);
         void VisitVariableDeclaration(VariableDeclarationSyntax syntax);
         void VisitWhile(WhileSyntax syntax);
-        void VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
-        void VisitCommaOperator(CommaOperatorSyntax syntax);
-
-        void VisitFunction(FunctionSyntax syntax);
-        void VisitMethodCall(MethodCallSyntax syntax);
-        void VisitIndexer(IndexerSyntax syntax);
-        void VisitProperty(PropertySyntax syntax);
-        void VisitIdentifier(IdentifierSyntax syntax);
-
-        void VisitJsonExpression(JsonExpressionSyntax syntax);
-        void VisitNew(NewSyntax syntax);
-        void VisitBinaryExpression(BinaryExpressionSyntax syntax);
-        void VisitTernary(TernarySyntax syntax);
-        void VisitUnaryExpression(UnaryExpressionSyntax syntax);
-        void VisitValue(ValueSyntax syntax);
-        void VisitRegexp(RegexpSyntax syntax);
-
-        void VisitLabel(LabelSyntax syntax);
+        void VisitWith(WithSyntax syntax);
     }
 
     public interface ISyntaxVisitor<out T>
     {
-        T VisitProgram(ProgramSyntax syntax);
+        T VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
         T VisitAssignment(AssignmentSyntax syntax);
+        T VisitBinaryExpression(BinarySyntax syntax);
         T VisitBlock(BlockSyntax syntax);
         T VisitBreak(BreakSyntax syntax);
+        T VisitCommaOperator(CommaOperatorSyntax syntax);
         T VisitContinue(ContinueSyntax syntax);
         T VisitDoWhile(DoWhileSyntax syntax);
         T VisitEmpty(EmptySyntax syntax);
         T VisitExpressionStatement(ExpressionStatementSyntax syntax);
-        T VisitForEachIn(ForEachInSyntax syntax);
         T VisitFor(ForSyntax syntax);
-        T VisitFunctionDeclaration(FunctionDeclarationSyntax syntax);
+        T VisitForEachIn(ForEachInSyntax syntax);
+        T VisitFunction(FunctionSyntax syntax);
+        T VisitIdentifier(IdentifierSyntax syntax);
         T VisitIf(IfSyntax syntax);
+        T VisitIndexer(IndexerSyntax syntax);
+        T VisitJsonExpression(JsonExpressionSyntax syntax);
+        T VisitLabel(LabelSyntax syntax);
+        T VisitMethodCall(MethodCallSyntax syntax);
+        T VisitNew(NewSyntax syntax);
+        T VisitProgram(ProgramSyntax syntax);
+        T VisitProperty(PropertySyntax syntax);
+        T VisitRegexp(RegexpSyntax syntax);
         T VisitReturn(ReturnSyntax syntax);
         T VisitSwitch(SwitchSyntax syntax);
-        T VisitWith(WithSyntax syntax);
+        T VisitTernary(TernarySyntax syntax);
         T VisitThrow(ThrowSyntax syntax);
         T VisitTry(TrySyntax syntax);
+        T VisitUnaryExpression(UnarySyntax syntax);
+        T VisitValue(ValueSyntax syntax);
         T VisitVariableDeclaration(VariableDeclarationSyntax syntax);
         T VisitWhile(WhileSyntax syntax);
-        T VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
-        T VisitCommaOperator(CommaOperatorSyntax syntax);
-
-        T VisitFunction(FunctionSyntax syntax);
-        T VisitMethodCall(MethodCallSyntax syntax);
-        T VisitIndexer(IndexerSyntax syntax);
-        T VisitProperty(PropertySyntax syntax);
-        T VisitIdentifier(IdentifierSyntax syntax);
-
-        T VisitJsonExpression(JsonExpressionSyntax syntax);
-        T VisitNew(NewSyntax syntax);
-        T VisitBinaryExpression(BinaryExpressionSyntax syntax);
-        T VisitTernary(TernarySyntax syntax);
-        T VisitUnaryExpression(UnaryExpressionSyntax syntax);
-        T VisitValue(ValueSyntax syntax);
-        T VisitRegexp(RegexpSyntax syntax);
-        T VisitLabel(LabelSyntax syntax);
+        T VisitWith(WithSyntax syntax);
     }
 }

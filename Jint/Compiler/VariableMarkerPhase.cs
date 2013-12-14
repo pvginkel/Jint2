@@ -137,30 +137,12 @@ namespace Jint.Compiler
             }
         }
 
-        public override void VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
-        {
-            EnterFunction(syntax);
-
-            base.VisitFunctionDeclaration(syntax);
-
-            ExitFunction(syntax);
-        }
-
         public override void VisitFunction(FunctionSyntax syntax)
         {
             if (_main == null)
                 _main = syntax.Body;
 
-            EnterFunction(syntax);
-
-            base.VisitFunction(syntax);
-
-            ExitFunction(syntax);
-        }
-
-        private void EnterFunction(IFunctionDeclaration function)
-        {
-            var body = function.Body;
+            var body = syntax.Body;
             var declaredVariables = body.DeclaredVariables;
 
             // Setup the "arguments" and "this" variables.
@@ -188,9 +170,9 @@ namespace Jint.Compiler
 
             // Add or mark the parameters.
 
-            for (int i = function.Parameters.Count - 1; i >= 0; i--)
+            for (int i = syntax.Parameters.Count - 1; i >= 0; i--)
             {
-                var variable = body.DeclaredVariables.AddOrGet(function.Parameters[i], i);
+                var variable = body.DeclaredVariables.AddOrGet(syntax.Parameters[i], i);
 
                 if (variable.Type == VariableType.Unknown)
                     variable.Type = VariableType.Parameter;
@@ -210,11 +192,10 @@ namespace Jint.Compiler
             if (_blocks.Count > 0)
                 parentBlock = _blocks[_blocks.Count - 1];
 
-            _blocks.Add(new BlockManager(function.Body, argumentsVariable, parentBlock));
-        }
+            _blocks.Add(new BlockManager(syntax.Body, argumentsVariable, parentBlock));
 
-        private void ExitFunction(IFunctionDeclaration function)
-        {
+            base.VisitFunction(syntax);
+
             // Add ourselves to the pending closures list if we need a closure
             // to be built.
 

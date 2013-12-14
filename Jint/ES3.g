@@ -890,7 +890,7 @@ We only must promote EOLs when the la is INC or DEC because this production is c
 In other words: only promote EOL when we are really in a postfix expression. A check on the la will ensure this.
 */
 postfixExpression returns [ExpressionSyntax value]
-	: left=leftHandSideExpression { $value = left; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEol();  } ( post=postfixOperator { $value = new UnaryExpressionSyntax(post, $value); })?
+	: left=leftHandSideExpression { $value = left; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEol();  } ( post=postfixOperator { $value = new UnarySyntax(post, $value); })?
 	;
 	
 postfixOperator returns [SyntaxExpressionType value]
@@ -904,7 +904,7 @@ postfixOperator returns [SyntaxExpressionType value]
 
 unaryExpression returns [ExpressionSyntax value]
 	: post=postfixExpression { $value = post; }
-	| op=unaryOperator exp=unaryExpression { $value = new UnaryExpressionSyntax(op, exp); }
+	| op=unaryOperator exp=unaryExpression { $value = new UnarySyntax(op, exp); }
 	;
 	
 unaryOperator returns [SyntaxExpressionType value]
@@ -931,7 +931,7 @@ multiplicativeExpression returns [ExpressionSyntax value]
 		( MUL { type= SyntaxExpressionType.Multiply; } 
 		| DIV { type= SyntaxExpressionType.Divide; }
 		| MOD { type= SyntaxExpressionType.Modulo; }) 
-		right=unaryExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=unaryExpression { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 // $>
@@ -945,7 +945,7 @@ additiveExpression returns [ExpressionSyntax value]
 	: left=multiplicativeExpression { $value = left; } ( 
 		( ADD { type= SyntaxExpressionType.Add; }
 		| SUB { type= SyntaxExpressionType.Subtract; }) 
-		right=multiplicativeExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=multiplicativeExpression { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 // $>
@@ -960,7 +960,7 @@ shiftExpression returns [ExpressionSyntax value]
 		( SHL { type= SyntaxExpressionType.LeftShift; }
 		| SHR { type= SyntaxExpressionType.RightShift; }
 		| SHU { type= SyntaxExpressionType.UnsignedRightShift; }) 
-		right=additiveExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=additiveExpression { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 // $>
@@ -978,7 +978,7 @@ relationalExpression returns [ExpressionSyntax value]
 		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
 		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  }
 		| IN { type= SyntaxExpressionType.In;  }) 
-		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=shiftExpression { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 relationalExpressionNoIn returns [ExpressionSyntax value]
@@ -991,7 +991,7 @@ relationalExpressionNoIn returns [ExpressionSyntax value]
 		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
 		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
 		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  } ) 
-		right=shiftExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=shiftExpression { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 // $>
@@ -1007,7 +1007,7 @@ equalityExpression returns [ExpressionSyntax value]
 		| NEQ { type= SyntaxExpressionType.NotEqual; }
 		| SAME { type= SyntaxExpressionType.Same; }
 		| NSAME { type= SyntaxExpressionType.NotSame; }) 
-		right=relationalExpression { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=relationalExpression { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 equalityExpressionNoIn returns [ExpressionSyntax value]
@@ -1019,7 +1019,7 @@ equalityExpressionNoIn returns [ExpressionSyntax value]
 		| NEQ { type= SyntaxExpressionType.NotEqual; }
 		| SAME { type= SyntaxExpressionType.Same; }
 		| NSAME { type= SyntaxExpressionType.NotSame; }) 
-		right=relationalExpressionNoIn { $value = new BinaryExpressionSyntax(type, $value, right); })*
+		right=relationalExpressionNoIn { $value = new BinarySyntax(type, $value, right); })*
 	;
 
 // $>
@@ -1027,27 +1027,27 @@ equalityExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary bitwise operators (11.10)
 
 bitwiseANDExpression returns [ExpressionSyntax value]
-	: left=equalityExpression { $value = left; } ( AND right=equalityExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
+	: left=equalityExpression { $value = left; } ( AND right=equalityExpression { $value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
 	;
 
 bitwiseANDExpressionNoIn returns [ExpressionSyntax value]
-	: left=equalityExpressionNoIn { $value = left; } ( AND right=equalityExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
+	: left=equalityExpressionNoIn { $value = left; } ( AND right=equalityExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
 	;
 		
 bitwiseXORExpression returns [ExpressionSyntax value]
-	: left=bitwiseANDExpression { $value = left; } ( XOR right=bitwiseANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
+	: left=bitwiseANDExpression { $value = left; } ( XOR right=bitwiseANDExpression { $value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
 	;
 		
 bitwiseXORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseANDExpressionNoIn { $value = left; } ( XOR right=bitwiseANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
+	: left=bitwiseANDExpressionNoIn { $value = left; } ( XOR right=bitwiseANDExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
 	;
 	
 bitwiseORExpression returns [ExpressionSyntax value]
-	: left=bitwiseXORExpression { $value = left; } ( OR right=bitwiseXORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
+	: left=bitwiseXORExpression { $value = left; } ( OR right=bitwiseXORExpression { $value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
 	;
 	
 bitwiseORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseXORExpressionNoIn { $value = left; } ( OR right=bitwiseXORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
+	: left=bitwiseXORExpressionNoIn { $value = left; } ( OR right=bitwiseXORExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
 	;
 
 // $>
@@ -1055,19 +1055,19 @@ bitwiseORExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary logical operators (11.11)
 
 logicalANDExpression returns [ExpressionSyntax value]
-	:left= bitwiseORExpression { $value = left; } ( LAND right=bitwiseORExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right); })*
+	:left= bitwiseORExpression { $value = left; } ( LAND right=bitwiseORExpression { $value = new BinarySyntax(SyntaxExpressionType.And, $value, right); })*
 	;
 
 logicalANDExpressionNoIn returns [ExpressionSyntax value]
-	:left= bitwiseORExpressionNoIn { $value = left; } ( LAND right=bitwiseORExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.And, $value, right); })*
+	:left= bitwiseORExpressionNoIn { $value = left; } ( LAND right=bitwiseORExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.And, $value, right); })*
 	;
 	
 logicalORExpression returns [ExpressionSyntax value]
-	: left=logicalANDExpression { $value = left; } ( LOR right=logicalANDExpression { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right); })*
+	: left=logicalANDExpression { $value = left; } ( LOR right=logicalANDExpression { $value = new BinarySyntax(SyntaxExpressionType.Or, $value, right); })*
 	;
 	
 logicalORExpressionNoIn returns [ExpressionSyntax value]
-	: left=logicalANDExpressionNoIn { $value = left; } ( LOR right=logicalANDExpressionNoIn { $value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, $value, right); } )*
+	: left=logicalANDExpressionNoIn { $value = left; } ( LOR right=logicalANDExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.Or, $value, right); } )*
 	;
 
 // $>
@@ -1933,7 +1933,7 @@ functionDeclaration returns [SyntaxNode value]
 }
 @after {
     _currentBody.FunctionDeclarations.Add(
-        new FunctionDeclarationSyntax(
+        new FunctionSyntax(
             name,
             parameters,
             body,

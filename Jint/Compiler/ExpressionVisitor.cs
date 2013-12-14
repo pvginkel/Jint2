@@ -268,7 +268,7 @@ namespace Jint.Compiler
 
             foreach (var item in syntax.Statements)
             {
-                if (_document != null && !(item is FunctionDeclarationSyntax))
+                if (_document != null && !(item is FunctionSyntax))
                 {
                     var location = item as ISourceLocation;
                     if (location != null)
@@ -327,7 +327,7 @@ namespace Jint.Compiler
 
             return BuildSet(
                 syntax.Left,
-                new BinaryExpressionSyntax(
+                new BinarySyntax(
                     AssignmentSyntax.GetSyntaxType(syntax.Operation),
                     syntax.Left,
                     syntax.Right
@@ -550,14 +550,6 @@ namespace Jint.Compiler
             return Expression.Block(
                 typeof(void),
                 statements
-            );
-        }
-
-        public Expression VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
-        {
-            return _scope.BuildSet(
-                syntax.Target,
-                CreateFunctionSyntax(syntax, DeclareFunction(syntax))
             );
         }
 
@@ -823,23 +815,22 @@ namespace Jint.Compiler
                 return compiledFunction;
         }
 
-        private Expression CreateFunctionSyntax<T>(T function, MethodInfo compiledFunction)
-            where T : SyntaxNode, IFunctionDeclaration
+        private Expression CreateFunctionSyntax(FunctionSyntax syntax, MethodInfo compiledFunction)
         {
             return Expression.Call(
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("CreateFunction"),
-                Expression.Constant(function.Name, typeof(string)),
+                Expression.Constant(syntax.Name, typeof(string)),
                 Expression.Constant(compiledFunction, typeof(MethodInfo)),
                 _scope.ClosureLocal != null ? (Expression)_scope.ClosureLocal : Expression.Constant(null),
-                MakeArrayInit(function.Parameters.Select(Expression.Constant), typeof(string), true),
-                Expression.Constant(function.Location.GetSourceCode(), typeof(string))
+                MakeArrayInit(syntax.Parameters.Select(Expression.Constant), typeof(string), true),
+                Expression.Constant(syntax.Location.GetSourceCode(), typeof(string))
             );
         }
 
-        public MethodInfo DeclareFunction(IFunctionDeclaration function)
+        public MethodInfo DeclareFunction(FunctionSyntax syntax)
         {
-            var body = function.Body;
+            var body = syntax.Body;
 
             var thisParameter = Expression.Parameter(
                 typeof(object),
@@ -1000,14 +991,14 @@ namespace Jint.Compiler
 
             // Put a debug location at the end of the function.
 
-            if (_document != null && function.Location != null)
+            if (_document != null && syntax.Location != null)
             {
                 statements.Add(Expression.DebugInfo(
                     _document,
-                    function.Location.EndLine,
-                    function.Location.EndColumn,
-                    function.Location.EndLine,
-                    function.Location.EndColumn + 1
+                    syntax.Location.EndLine,
+                    syntax.Location.EndColumn,
+                    syntax.Location.EndLine,
+                    syntax.Location.EndColumn + 1
                 ));
             }
 
@@ -1041,14 +1032,14 @@ namespace Jint.Compiler
             JintEngine.PrintExpression(lambda);
 
             return BuildMethod(
-                GetFunctionName(function),
+                GetFunctionName(syntax),
                 typeof(object),
                 new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]), typeof(object[]) },
                 lambda
             );
         }
 
-        private string GetFunctionName(IFunctionDeclaration function)
+        private string GetFunctionName(FunctionSyntax function)
         {
             string name;
 
@@ -1425,7 +1416,7 @@ namespace Jint.Compiler
             return Expression.NewArrayInit(elementType, expressions);
         }
 
-        public Expression VisitBinaryExpression(BinaryExpressionSyntax syntax)
+        public Expression VisitBinaryExpression(BinarySyntax syntax)
         {
             switch (syntax.Operation)
             {
@@ -1551,7 +1542,7 @@ namespace Jint.Compiler
             );
         }
 
-        public Expression VisitUnaryExpression(UnaryExpressionSyntax syntax)
+        public Expression VisitUnaryExpression(UnarySyntax syntax)
         {
             switch (syntax.Operation)
             {

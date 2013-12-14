@@ -110,7 +110,6 @@
     <Compile Include="Expressions\VariableType.cs" />
     <Compile Include="Native\Interop\Delegates.cs" />
     <Compile Include="Native\Interop\ProxyHelper.cs" />
-    <Compile Include="Native\ClrFunction.cs" />
     <Compile Include="Native\JsGlobal.ArrayFunctions.cs" />
     <Compile Include="Native\JsGlobal.BooleanFunctions.cs" />
     <Compile Include="Native\JsGlobal.Builders.cs" />
@@ -143,7 +142,6 @@
     <Compile Include="Parser\ES3Parser.cs" />
     <Compile Include="Parser\ES3Util.cs" />
     <Compile Include="Expressions\SourceLocation.cs" />
-    <Compile Include="Expressions\IFunctionDeclaration.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
     <Compile Include="Native\JsComparer.cs" />
     <Compile Include="Options.cs" />
@@ -165,7 +163,7 @@
     <Compile Include="Expressions\MethodCallSyntax.cs" />
     <Compile Include="ITypeResolver.cs" />
     <Compile Include="JintEngine.cs" />
-    <Compile Include="Expressions\BinaryExpressionSyntax.cs" />
+    <Compile Include="Expressions\BinarySyntax.cs" />
     <Compile Include="Expressions\BlockSyntax.cs" />
     <Compile Include="Expressions\CaseClause.cs" />
     <Compile Include="Expressions\AssignmentSyntax.cs" />
@@ -179,7 +177,6 @@
     <Compile Include="Expressions\ExpressionStatementSyntax.cs" />
     <Compile Include="Expressions\ForEachInSyntax.cs" />
     <Compile Include="Expressions\ForSyntax.cs" />
-    <Compile Include="Expressions\FunctionDeclarationSyntax.cs" />
     <Compile Include="Expressions\IfSyntax.cs" />
     <Compile Include="Expressions\ProgramSyntax.cs" />
     <Compile Include="Expressions\ReturnSyntax.cs" />
@@ -190,7 +187,7 @@
     <Compile Include="Expressions\TernarySyntax.cs" />
     <Compile Include="Expressions\ThrowSyntax.cs" />
     <Compile Include="Expressions\TrySyntax.cs" />
-    <Compile Include="Expressions\UnaryExpressionSyntax.cs" />
+    <Compile Include="Expressions\UnarySyntax.cs" />
     <Compile Include="Expressions\ValueSyntax.cs" />
     <Compile Include="Expressions\VariableDeclarationSyntax.cs" />
     <Compile Include="Expressions\WhileSyntax.cs" />

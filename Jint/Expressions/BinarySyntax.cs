@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace Jint.Expressions
 {
-    public class BinaryExpressionSyntax : ExpressionSyntax
+    public class BinarySyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -66,7 +68,7 @@ namespace Jint.Expressions
             }
         }
 
-        public BinaryExpressionSyntax(SyntaxExpressionType operation, ExpressionSyntax left, ExpressionSyntax right)
+        public BinarySyntax(SyntaxExpressionType operation, ExpressionSyntax left, ExpressionSyntax right)
         {
             if (left == null)
                 throw new ArgumentNullException("left");
@@ -81,7 +83,7 @@ namespace Jint.Expressions
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {
-            visitor.VisitBinaryExpression(this);
+            visitor.VisitBinary(this);
         }
 
         [DebuggerStepThrough]

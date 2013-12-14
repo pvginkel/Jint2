@@ -67,12 +67,6 @@ namespace Jint.Expressions
             syntax.Body.Accept(this);
         }
 
-        public virtual void VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
-        {
-            if (syntax.Body != null)
-                syntax.Body.Accept(this);
-        }
-
         public virtual void VisitIf(IfSyntax syntax)
         {
             syntax.Test.Accept(this);
@@ -207,7 +201,7 @@ namespace Jint.Expressions
             syntax.Expression.Accept(this);
         }
 
-        public virtual void VisitBinaryExpression(BinaryExpressionSyntax syntax)
+        public virtual void VisitBinary(BinarySyntax syntax)
         {
             syntax.Left.Accept(this);
             syntax.Right.Accept(this);
@@ -220,7 +214,7 @@ namespace Jint.Expressions
             syntax.Else.Accept(this);
         }
 
-        public virtual void VisitUnaryExpression(UnaryExpressionSyntax syntax)
+        public virtual void VisitUnary(UnarySyntax syntax)
         {
             syntax.Operand.Accept(this);
         }
@@ -287,11 +281,6 @@ namespace Jint.Expressions
         }
 
         public virtual T VisitFor(ForSyntax syntax)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public virtual T VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
         {
             throw new InvalidOperationException();
         }
@@ -381,7 +370,7 @@ namespace Jint.Expressions
             throw new InvalidOperationException();
         }
 
-        public virtual T VisitBinaryExpression(BinaryExpressionSyntax syntax)
+        public virtual T VisitBinaryExpression(BinarySyntax syntax)
         {
             throw new InvalidOperationException();
         }
@@ -391,7 +380,7 @@ namespace Jint.Expressions
             throw new InvalidOperationException();
         }
 
-        public virtual T VisitUnaryExpression(UnaryExpressionSyntax syntax)
+        public virtual T VisitUnaryExpression(UnarySyntax syntax)
         {
             throw new InvalidOperationException();
         }

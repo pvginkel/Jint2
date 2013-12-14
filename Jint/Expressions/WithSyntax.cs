@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Jint.Compiler;
 
 namespace Jint.Expressions
 {

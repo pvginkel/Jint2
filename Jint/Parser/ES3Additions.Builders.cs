@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Jint.Compiler;
 using Jint.Expressions;
 
 namespace Jint.Parser
@@ -12,7 +11,7 @@ namespace Jint.Parser
         private class BlockBuilder
         {
             private List<SyntaxNode> _statements;
-            private List<SyntaxNode> _functionDeclarations;
+            private List<FunctionSyntax> _functionDeclarations;
 
             public VariableCollection DeclaredVariables { get; private set; }
 
@@ -27,12 +26,12 @@ namespace Jint.Parser
                 }
             }
 
-            public List<SyntaxNode> FunctionDeclarations
+            public List<FunctionSyntax> FunctionDeclarations
             {
                 get
                 {
                     if (_functionDeclarations == null)
-                        _functionDeclarations = new List<SyntaxNode>();
+                        _functionDeclarations = new List<FunctionSyntax>();
 
                     return _functionDeclarations;
                 }
@@ -48,16 +47,23 @@ namespace Jint.Parser
                 return new BlockSyntax(GetStatements(), DeclaredVariables);
             }
 
-            private IList<SyntaxNode> GetStatements()
+            private IEnumerable<SyntaxNode> GetStatements()
             {
-                if (_statements == null && _functionDeclarations == null)
-                    return SyntaxNode.EmptyList;
+                if (_functionDeclarations != null)
+                {
+                    foreach (var functionDeclaration in _functionDeclarations)
+                    {
+                        yield return functionDeclaration;
+                    }
+                }
 
-                if (_statements == null || _functionDeclarations == null)
-                    return _statements ?? _functionDeclarations;
-
-                _functionDeclarations.AddRange(_statements);
-                return _functionDeclarations;
+                if (_statements != null)
+                {
+                    foreach (var statement in _statements)
+                    {
+                        yield return statement;
+                    }
+                }
             }
 
             public ProgramSyntax CreateProgram()

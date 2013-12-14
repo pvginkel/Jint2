@@ -26,25 +26,6 @@ namespace Jint.Compiler
             base.VisitProgram(syntax);
         }
 
-        public override void VisitFunctionDeclaration(FunctionDeclarationSyntax syntax)
-        {
-            MarkAssign(syntax.Target, ValueType.Object);
-
-            foreach (var variable in syntax.Body.DeclaredVariables)
-            {
-                if (variable.Type == VariableType.Parameter)
-                {
-#if TRACE_TYPEMARKING
-                    Trace.WriteLine(String.Format("{0} -> Unknown: Initializing function parameter", variable.Name));
-#endif
-
-                    variable.ValueType = ValueType.Unknown;
-                }
-            }
-
-            base.VisitFunctionDeclaration(syntax);
-        }
-
         public override void VisitFunction(FunctionSyntax syntax)
         {
             if (syntax.Target != null)

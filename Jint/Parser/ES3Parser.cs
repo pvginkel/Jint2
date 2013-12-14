@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-10 21:38:03
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 10:08:50
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -2990,7 +2990,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				PopFollow();
 
 				DebugLocation(893, 135);
-				 value = new UnaryExpressionSyntax(post, value); 
+				 value = new UnarySyntax(post, value); 
 
 				}
 				break;
@@ -3178,7 +3178,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 				PopFollow();
 
 				DebugLocation(907, 41);
-				 value = new UnaryExpressionSyntax(op, exp); 
+				 value = new UnarySyntax(op, exp); 
 
 				}
 				break;
@@ -3537,7 +3537,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(934, 25);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -3687,7 +3687,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(948, 34);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -3857,7 +3857,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(963, 28);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -4075,7 +4075,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(981, 25);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -4277,7 +4277,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(994, 25);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -4463,7 +4463,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1010, 30);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -4649,7 +4649,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1022, 34);
-					 value = new BinaryExpressionSyntax(type, value, right); 
+					 value = new BinarySyntax(type, value, right); 
 
 					}
 					break;
@@ -4748,7 +4748,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1030, 78);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, value, right); 
 
 					}
 					break;
@@ -4847,7 +4847,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1034, 86);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseAnd, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, value, right); 
 
 					}
 					break;
@@ -4946,7 +4946,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1038, 82);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, value, right); 
 
 					}
 					break;
@@ -5045,7 +5045,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1042, 90);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseExclusiveOr, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, value, right); 
 
 					}
 					break;
@@ -5144,7 +5144,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1046, 81);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, value, right); 
 
 					}
 					break;
@@ -5243,7 +5243,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1050, 89);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.BitwiseOr, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, value, right); 
 
 					}
 					break;
@@ -5342,7 +5342,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1058, 81);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.And, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.And, value, right); 
 
 					}
 					break;
@@ -5441,7 +5441,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1062, 89);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.And, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.And, value, right); 
 
 					}
 					break;
@@ -5540,7 +5540,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1066, 82);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.Or, value, right); 
 
 					}
 					break;
@@ -5639,7 +5639,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 					PopFollow();
 
 					DebugLocation(1070, 90);
-					 value = new BinaryExpressionSyntax(SyntaxExpressionType.Or, value, right); 
+					 value = new BinarySyntax(SyntaxExpressionType.Or, value, right); 
 
 					}
 					break;
@@ -9836,7 +9836,7 @@ public partial class ES3Parser : Antlr.Runtime.Parser
 
 
 			    _currentBody.FunctionDeclarations.Add(
-			        new FunctionDeclarationSyntax(
+			        new FunctionSyntax(
 			            name,
 			            parameters,
 			            body,

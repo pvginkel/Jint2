@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Jint.Compiler;
+using System.Text;
 
 namespace Jint.Expressions
 {

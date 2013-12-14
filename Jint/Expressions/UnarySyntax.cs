@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace Jint.Expressions
 {
-    public class UnaryExpressionSyntax : ExpressionSyntax
+    public class UnarySyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -46,7 +48,7 @@ namespace Jint.Expressions
             }
         }
 
-        public UnaryExpressionSyntax(SyntaxExpressionType operation, ExpressionSyntax operand)
+        public UnarySyntax(SyntaxExpressionType operation, ExpressionSyntax operand)
         {
             if (operand == null)
                 throw new ArgumentNullException("operand");
@@ -58,7 +60,7 @@ namespace Jint.Expressions
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {
-            visitor.VisitUnaryExpression(this);
+            visitor.VisitUnary(this);
         }
 
         [DebuggerStepThrough]

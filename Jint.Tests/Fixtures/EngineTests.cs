@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Jint.Native;
 using System.Security.Permissions;
 using System.Text;
+using Jint.Native;
 using NUnit.Framework;
 
 namespace Jint.Tests.Fixtures
