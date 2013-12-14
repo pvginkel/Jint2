@@ -4,7 +4,7 @@ using System;
 
 namespace Jint.Expressions
 {
-    public enum PropertyExpressionType
+    internal enum PropertyExpressionType
     {
         Data,
         Get,

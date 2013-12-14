@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class ProgramSyntax : BlockSyntax
+    internal class ProgramSyntax : BlockSyntax
     {
         private bool? _isLiteral;
 
-        internal override bool IsLiteral
+        public override bool IsLiteral
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Jint.Expressions
         {
         }
 
-        internal ProgramSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
+        public ProgramSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
             : base(statements, declaredVariables)
         {
         }

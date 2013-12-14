@@ -5,12 +5,12 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class ExpressionStatementSyntax : SyntaxNode, ISourceLocation
+    internal class ExpressionStatementSyntax : SyntaxNode, ISourceLocation
     {
         public ExpressionSyntax Expression { get; private set; }
         public SourceLocation Location { get; private set; }
 
-        internal override bool IsLiteral
+        public override bool IsLiteral
         {
             get { return Expression.IsLiteral; }
         }

@@ -6,13 +6,13 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class JsonExpressionSyntax : ExpressionSyntax
+    internal class JsonExpressionSyntax : ExpressionSyntax
     {
         private bool? _isLiteral;
 
         public IList<JsonProperty> Properties { get; private set; }
 
-        internal override bool IsLiteral
+        public override bool IsLiteral
         {
             get
             {
@@ -36,7 +36,7 @@ namespace Jint.Expressions
             get { return SyntaxType.Json; }
         }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ValueType.Object; }
         }

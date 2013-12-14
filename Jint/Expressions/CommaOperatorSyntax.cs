@@ -6,21 +6,21 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class CommaOperatorSyntax : ExpressionSyntax
+    internal class CommaOperatorSyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
             get { return SyntaxType.CommaOperator; }
         }
 
-        internal override bool IsLiteral
+        public override bool IsLiteral
         {
             get { return Expressions.Count == 0 || (Expressions.Count == 1 && Expressions[0].IsLiteral); }
         }
 
         public IList<ExpressionSyntax> Expressions { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return Expressions[Expressions.Count - 1].ValueType; }
         }

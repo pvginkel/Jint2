@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class ArrayDeclarationSyntax : ExpressionSyntax
+    internal class ArrayDeclarationSyntax : ExpressionSyntax
     {
         private bool? _isLiteral;
 
@@ -15,7 +15,7 @@ namespace Jint.Expressions
             get { return SyntaxType.ArrayDeclaration; }
         }
 
-        internal override bool IsLiteral
+        public override bool IsLiteral
         {
             get
             {
@@ -28,7 +28,7 @@ namespace Jint.Expressions
 
         public IList<SyntaxNode> Parameters { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ValueType.Object; }
         }

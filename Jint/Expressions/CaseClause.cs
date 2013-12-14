@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class CaseClause : ISourceLocation
+    internal class CaseClause : ISourceLocation
     {
         public ExpressionSyntax Expression { get; private set; }
         public BlockSyntax Body { get; private set; }

@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public abstract class ExpressionSyntax : SyntaxNode
+    internal abstract class ExpressionSyntax : SyntaxNode
     {
-        internal abstract ValueType ValueType { get; }
+        public abstract ValueType ValueType { get; }
     }
 }

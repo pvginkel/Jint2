@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public enum VariableType
+    internal enum VariableType
     {
         Unknown,
         Parameter,

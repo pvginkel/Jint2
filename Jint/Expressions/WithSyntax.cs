@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class WithSyntax : SyntaxNode, ISourceLocation
+    internal class WithSyntax : SyntaxNode, ISourceLocation
     {
         public override SyntaxType Type
         {
@@ -14,7 +14,7 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Expression { get; private set; }
         public SyntaxNode Body { get; private set; }
-        internal Variable Target { get; set; }
+        public Variable Target { get; set; }
         public SourceLocation Location { get; private set; }
 
         public WithSyntax(ExpressionSyntax expression, SyntaxNode body, SourceLocation location)

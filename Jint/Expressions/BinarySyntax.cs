@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class BinarySyntax : ExpressionSyntax
+    internal class BinarySyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -16,12 +16,12 @@ namespace Jint.Expressions
         public ExpressionSyntax Right { get; private set; }
         public SyntaxExpressionType Operation { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ResolveValueType(Operation, Left.ValueType, Right.ValueType); }
         }
 
-        internal static ValueType ResolveValueType(SyntaxExpressionType operation, ValueType left, ValueType right)
+        public static ValueType ResolveValueType(SyntaxExpressionType operation, ValueType left, ValueType right)
         {
             switch (operation)
             {

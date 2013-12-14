@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class ReturnSyntax : SyntaxNode, ISourceLocation
+    internal class ReturnSyntax : SyntaxNode, ISourceLocation
     {
         public ExpressionSyntax Expression { get; private set; }
         public SourceLocation Location { get; private set; }

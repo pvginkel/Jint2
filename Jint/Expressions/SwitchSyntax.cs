@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class SwitchSyntax : SyntaxNode, ISourceLocation
+    internal class SwitchSyntax : SyntaxNode, ISourceLocation
     {
         public SyntaxNode Expression { get; private set; }
         public IList<CaseClause> Cases { get; private set; }

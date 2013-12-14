@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class MethodArgument
+    internal class MethodArgument
     {
         public ExpressionSyntax Expression { get; private set; }
         public bool IsRef { get; private set; }

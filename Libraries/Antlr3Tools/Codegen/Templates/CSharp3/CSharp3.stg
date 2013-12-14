@@ -109,8 +109,7 @@ lexerInputStreamType() ::= <<
 lexer(grammar, name, tokens, scopes, rules, numRules, labelType="CommonToken",
       filterMode, superClass={<if(actions.(actionScope).superClass)><actions.(actionScope).superClass><else>Antlr.Runtime.Lexer<endif>}) ::= <<
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "<ANTLRVersion>")]
-[System.CLSCompliant(false)]
-public partial class <grammar.recognizerName> : <@superClassName><superClass><@end>
+internal partial class <grammar.recognizerName> : <@superClassName><superClass><@end>
 {
 	<tokens:{public const int <it.name; format="id">=<it.type>;}; separator="\n">
 	<scopes:{<if(it.isDynamicGlobalScope)><globalAttributeScope(scope=it)><endif>}>
@@ -276,8 +275,7 @@ genericParser(grammar, name, scopes, tokens, tokenNames, rules, numRules,
               ASTLabelType="object", labelType, members, rewriteElementType,
               filterMode) ::= <<
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "<ANTLRVersion>")]
-[System.CLSCompliant(false)]
-public partial class <grammar.recognizerName> : <@superClassName><superClass><@end>
+internal partial class <grammar.recognizerName> : <@superClassName><superClass><@end>
 {
 <if(grammar.grammarIsRoot)>
 	internal static readonly string[] tokenNames = new string[] {

@@ -66,7 +66,7 @@ namespace Jint
             return this;
         }
 
-        public static ProgramSyntax Compile(string source)
+        internal static ProgramSyntax Compile(string source)
         {
             ProgramSyntax program = null;
             if (!string.IsNullOrEmpty(source))
@@ -156,7 +156,7 @@ namespace Jint
         /// <exception cref="System.ArgumentException" />
         /// <exception cref="System.Security.SecurityException" />
         /// <exception cref="Jint.JintException" />
-        public object Run(ProgramSyntax program, string fileName)
+        internal object Run(ProgramSyntax program, string fileName)
         {
             return Run(program, true, fileName);
         }
@@ -240,7 +240,7 @@ namespace Jint
         /// <param name="program">The expression tree to execute</param>
         /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
         /// <returns>Optionally, returns a value from the scripts</returns>
-        public object Run(ProgramSyntax program, bool unwrap, string fileName)
+        internal object Run(ProgramSyntax program, bool unwrap, string fileName)
         {
             // Don't wrap exceptions while debugging to make stack traces
             // easier to read.

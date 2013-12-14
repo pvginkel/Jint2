@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class AssignmentSyntax : ExpressionSyntax
+    internal class AssignmentSyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -16,7 +16,7 @@ namespace Jint.Expressions
         public ExpressionSyntax Left { get; private set; }
         public ExpressionSyntax Right { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get
             {
@@ -55,7 +55,7 @@ namespace Jint.Expressions
             return visitor.VisitAssignment(this);
         }
 
-        internal static SyntaxExpressionType GetSyntaxType(AssignmentOperator operation)
+        public static SyntaxExpressionType GetSyntaxType(AssignmentOperator operation)
         {
             switch (operation)
             {

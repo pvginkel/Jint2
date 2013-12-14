@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public abstract class JsonProperty
+    internal abstract class JsonProperty
     {
         public string Name { get; private set; }
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class SourceLocation
+    internal class SourceLocation
     {
         public int StartOffset { get; private set; }
         public int StartLine { get; private set; }

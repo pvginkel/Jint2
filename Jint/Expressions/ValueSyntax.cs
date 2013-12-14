@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class ValueSyntax : ExpressionSyntax
+    internal class ValueSyntax : ExpressionSyntax
     {
         private readonly ValueType _valueType;
 
@@ -16,12 +16,12 @@ namespace Jint.Expressions
 
         public object Value { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return _valueType; }
         }
 
-        internal override bool IsLiteral
+        public override bool IsLiteral
         {
             get { return true; }
         }

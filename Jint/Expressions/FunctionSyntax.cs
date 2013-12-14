@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class FunctionSyntax : ExpressionSyntax, ISourceLocation
+    internal class FunctionSyntax : ExpressionSyntax, ISourceLocation
     {
         public override SyntaxType Type
         {
@@ -16,10 +16,10 @@ namespace Jint.Expressions
         public string Name { get; private set; }
         public IList<string> Parameters { get; private set; }
         public BlockSyntax Body { get; private set; }
-        internal Variable Target { get; set; }
+        public Variable Target { get; set; }
         public SourceLocation Location { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ValueType.Unknown; }
         }

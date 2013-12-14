@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class TernarySyntax : ExpressionSyntax
+    internal class TernarySyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -16,7 +16,7 @@ namespace Jint.Expressions
         public ExpressionSyntax Then { get; private set; }
         public ExpressionSyntax Else { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get
             {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public enum SyntaxType
+    internal enum SyntaxType
     {
         ArrayDeclaration,
         Assignment,

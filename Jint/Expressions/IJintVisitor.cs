@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public interface ISyntaxVisitor
+    internal interface ISyntaxVisitor
     {
         void VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
         void VisitAssignment(AssignmentSyntax syntax);
@@ -41,7 +41,7 @@ namespace Jint.Expressions
         void VisitWith(WithSyntax syntax);
     }
 
-    public interface ISyntaxVisitor<out T>
+    internal interface ISyntaxVisitor<out T>
     {
         T VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
         T VisitAssignment(AssignmentSyntax syntax);

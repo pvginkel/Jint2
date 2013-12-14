@@ -6,14 +6,14 @@ using Jint.Native;
 
 namespace Jint.Expressions
 {
-    public class IdentifierSyntax : ExpressionSyntax
+    internal class IdentifierSyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
             get { return SyntaxType.Identifier; }
         }
 
-        internal override bool IsAssignable
+        public override bool IsAssignable
         {
             get
             {
@@ -25,9 +25,9 @@ namespace Jint.Expressions
         }
 
         public string Name { get; private set; }
-        internal Variable Target { get; set; }
+        public Variable Target { get; set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return Target.ValueType; }
         }

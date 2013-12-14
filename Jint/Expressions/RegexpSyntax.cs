@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class RegexpSyntax : ExpressionSyntax
+    internal class RegexpSyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -15,7 +15,7 @@ namespace Jint.Expressions
         public string Regexp { get; private set; }
         public string Options { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ValueType.Object; }
         }

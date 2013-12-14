@@ -4,7 +4,7 @@ using System;
 
 namespace Jint.Expressions
 {
-    public enum AssignmentOperator
+    internal enum AssignmentOperator
     {
         Assign,
         Multiply,

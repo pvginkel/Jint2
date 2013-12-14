@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class FinallyClause
+    internal class FinallyClause
     {
         public SyntaxNode Body { get; private set; }
 

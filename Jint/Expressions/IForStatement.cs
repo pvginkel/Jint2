@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public interface IForStatement
+    internal interface IForStatement
     {
         SyntaxNode Initialization { get; }
         SyntaxNode Body { get; }

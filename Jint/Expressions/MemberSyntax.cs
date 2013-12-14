@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public abstract class MemberSyntax : ExpressionSyntax
+    internal abstract class MemberSyntax : ExpressionSyntax
     {
         public ExpressionSyntax Expression { get; private set; }
-        internal override bool IsAssignable { get { return true; } }
+        public override bool IsAssignable { get { return true; } }
 
         protected MemberSyntax(ExpressionSyntax expression)
         {

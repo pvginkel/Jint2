@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class SyntaxVisitor : ISyntaxVisitor
+    internal class SyntaxVisitor : ISyntaxVisitor
     {
         public virtual void VisitProgram(ProgramSyntax syntax)
         {
@@ -236,7 +236,7 @@ namespace Jint.Expressions
         }
     }
 
-    public class SyntaxVisitor<T> : ISyntaxVisitor<T>
+    internal class SyntaxVisitor<T> : ISyntaxVisitor<T>
     {
         public virtual T VisitProgram(ProgramSyntax syntax)
         {

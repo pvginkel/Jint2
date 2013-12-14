@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class IndexerSyntax : MemberSyntax
+    internal class IndexerSyntax : MemberSyntax
     {
         public override SyntaxType Type
         {
@@ -14,7 +14,7 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Index { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ValueType.Unknown; }
         }

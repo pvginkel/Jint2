@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class DefaultClause : ISourceLocation
+    internal class DefaultClause : ISourceLocation
     {
         public BlockSyntax Body { get; private set; }
         public SourceLocation Location { get; private set; }

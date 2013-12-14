@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class BlockSyntax : SyntaxNode
+    internal class BlockSyntax : SyntaxNode
     {
         public override SyntaxType Type
         {
@@ -14,16 +14,16 @@ namespace Jint.Expressions
         }
 
         public IList<SyntaxNode> Statements { get; private set; }
-        internal VariableCollection DeclaredVariables { get; private set; }
-        internal Closure Closure { get; set; }
-        internal Closure ParentClosure { get; set; }
+        public VariableCollection DeclaredVariables { get; private set; }
+        public Closure Closure { get; set; }
+        public Closure ParentClosure { get; set; }
 
         public BlockSyntax(IEnumerable<SyntaxNode> statements)
             : this(statements, new VariableCollection())
         {
         }
 
-        internal BlockSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
+        public BlockSyntax(IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
         {
             if (statements == null)
                 throw new ArgumentNullException("statements");

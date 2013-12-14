@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Expressions
 {
-    public class MethodCallSyntax : ExpressionSyntax
+    internal class MethodCallSyntax : ExpressionSyntax
     {
         public override SyntaxType Type
         {
@@ -17,7 +17,7 @@ namespace Jint.Expressions
         public IList<MethodArgument> Arguments { get; private set; }
         public IList<ExpressionSyntax> Generics { get; private set; }
 
-        internal override ValueType ValueType
+        public override ValueType ValueType
         {
             get { return ValueType.Unknown; }
         }

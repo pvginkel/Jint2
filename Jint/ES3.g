@@ -190,8 +190,12 @@ tokens
 
 @lexer::namespace { Jint.Parser }
 @parser::namespace { Jint.Parser }
+/*
+ * These have no effect. Instead, the templates have been changed.
+ *
 @lexer::modifier { internal }
 @parser::modifier { internal }
+ */
 
 @header {
 using System;
