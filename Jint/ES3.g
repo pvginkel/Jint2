@@ -1507,7 +1507,7 @@ forStatement returns [SyntaxNode value]
     IToken end;
 }
 @after {
-    $value = builder.CreateFor(GetLocation(start, end));
+    $value = builder.CreateFor(this, GetLocation(start, end));
 }
 	:
         FOR

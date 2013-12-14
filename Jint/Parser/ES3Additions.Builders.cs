@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
@@ -84,12 +85,36 @@ namespace Jint.Parser
 
             public ExpressionSyntax Increment { get; set; }
 
-            public SyntaxNode CreateFor(SourceLocation location)
+            public SyntaxNode CreateFor(ES3Parser parser, SourceLocation location)
             {
                 if (Expression != null)
                 {
+                    string identifier;
+                    Variable target;
+
+                    if (Initialization is IdentifierSyntax)
+                    {
+                        var identifierSyntax = (IdentifierSyntax)Initialization;
+                        identifier = identifierSyntax.Name;
+                        target = identifierSyntax.Target;
+                    }
+                    else
+                    {
+                        var variableDeclaration = (VariableDeclarationSyntax)Initialization;
+
+                        Debug.Assert(variableDeclaration.Declarations.Count == 1);
+
+                        var declaration = variableDeclaration.Declarations[0];
+
+                        identifier = declaration.Identifier;
+                        target = declaration.Target;
+
+                        Debug.Assert(declaration.Expression == null);
+                    }
+
                     return new ForEachInSyntax(
-                        Initialization,
+                        identifier,
+                        target ?? parser._currentBody.DeclaredVariables.AddOrGet(identifier, true),
                         Expression,
                         Body,
                         location

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 12:01:12
+// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-14 12:21:09
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -7900,7 +7900,7 @@ internal partial class ES3Parser : Antlr.Runtime.Parser
 			}
 
 
-			    value = builder.CreateFor(GetLocation(start, end));
+			    value = builder.CreateFor(this, GetLocation(start, end));
 
 		}
 		catch (RecognitionException re)

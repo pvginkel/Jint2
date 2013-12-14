@@ -7,7 +7,8 @@ namespace Jint.Expressions
 {
     internal class ForEachInSyntax : SyntaxNode, ISourceLocation
     {
-        public SyntaxNode Initialization { get; private set; }
+        public string Identifier { get; private set; }
+        public Variable Target { get; private set; }
         public ExpressionSyntax Expression { get; private set; }
         public SyntaxNode Body { get; private set; }
         public SourceLocation Location { get; private set; }
@@ -17,10 +18,12 @@ namespace Jint.Expressions
             get { return SyntaxType.ForEachIn; }
         }
 
-        public ForEachInSyntax(SyntaxNode initialization, ExpressionSyntax expression, SyntaxNode body, SourceLocation location)
+        public ForEachInSyntax(string identifier, Variable target, ExpressionSyntax expression, SyntaxNode body, SourceLocation location)
         {
-            if (initialization == null)
-                throw new ArgumentNullException("initialization");
+            if (identifier == null)
+                throw new ArgumentNullException("identifier");
+            if (target == null)
+                throw new ArgumentNullException("target");
             if (expression == null)
                 throw new ArgumentNullException("expression");
             if (body == null)
@@ -28,7 +31,8 @@ namespace Jint.Expressions
             if (location == null)
                 throw new ArgumentNullException("location");
 
-            Initialization = initialization;
+            Identifier = identifier;
+            Target = target;
             Expression = expression;
             Body = body;
             Location = location;

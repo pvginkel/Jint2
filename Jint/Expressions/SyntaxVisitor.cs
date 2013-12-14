@@ -51,7 +51,6 @@ namespace Jint.Expressions
 
         public virtual void VisitForEachIn(ForEachInSyntax syntax)
         {
-            syntax.Initialization.Accept(this);
             syntax.Expression.Accept(this);
             syntax.Body.Accept(this);
         }

@@ -458,7 +458,7 @@ namespace Jint.Compiler
                 Expression.Block(
                     typeof(void),
                     // Copy the current key to the provided target.
-                    BuildSet(syntax.Initialization, keyLocal),
+                    _scope.BuildSet(syntax.Target, keyLocal),
                     syntax.Body.Accept(this)
                 ),
                 breakTarget,
