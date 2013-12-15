@@ -100,12 +100,6 @@ namespace Jint.Compiler
             result[GetOperationMethodKey(SyntaxExpressionType.Not, ValueType.Boolean)] =
                 (runtime, arguments) => Expression.Not(arguments[0]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Power, ValueType.Double, ValueType.Double)] =
-                (runtime, arguments) => Expression.Call(
-                    _pow,
-                    arguments
-                );
-
             result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.String)] =
                 (runtime, arguments) => Expression.Constant(JsNames.TypeString);
 

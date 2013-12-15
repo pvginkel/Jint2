@@ -295,21 +295,6 @@ namespace Jint.Native
             return !JsValue.ToBoolean(operand);
         }
 
-        public static double Operation_Power(object left, object right)
-        {
-            return Math.Pow(JsValue.ToNumber(left), JsValue.ToNumber(right));
-        }
-
-        public static double Operation_Power(double left, object right)
-        {
-            return Math.Pow(left, JsValue.ToNumber(right));
-        }
-
-        public static double Operation_Power(object left, double right)
-        {
-            return Math.Pow(JsValue.ToNumber(left), right);
-        }
-
         public static double Operation_RightShift(object left, object right)
         {
             if (JsValue.IsUndefined(left))

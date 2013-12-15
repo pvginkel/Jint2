@@ -47,7 +47,6 @@ namespace Jint.Expressions
                 case SyntaxExpressionType.UnsignedRightShift:
                 case SyntaxExpressionType.Modulo:
                 case SyntaxExpressionType.Multiply:
-                case SyntaxExpressionType.Power:
                 case SyntaxExpressionType.Subtract:
                     return ValueType.Double;
 

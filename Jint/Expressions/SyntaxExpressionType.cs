@@ -34,7 +34,6 @@ namespace Jint.Expressions
         Or,
         PostDecrementAssign,
         PostIncrementAssign,
-        Power,
         PreDecrementAssign,
         PreIncrementAssign,
         RightShift,
