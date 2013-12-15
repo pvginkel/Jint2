@@ -45,7 +45,7 @@ namespace Jint.Expressions
     {
         T VisitArrayDeclaration(ArrayDeclarationSyntax syntax);
         T VisitAssignment(AssignmentSyntax syntax);
-        T VisitBinaryExpression(BinarySyntax syntax);
+        T VisitBinary(BinarySyntax syntax);
         T VisitBlock(BlockSyntax syntax);
         T VisitBreak(BreakSyntax syntax);
         T VisitCommaOperator(CommaOperatorSyntax syntax);
@@ -71,7 +71,7 @@ namespace Jint.Expressions
         T VisitTernary(TernarySyntax syntax);
         T VisitThrow(ThrowSyntax syntax);
         T VisitTry(TrySyntax syntax);
-        T VisitUnaryExpression(UnarySyntax syntax);
+        T VisitUnary(UnarySyntax syntax);
         T VisitValue(ValueSyntax syntax);
         T VisitVariableDeclaration(VariableDeclarationSyntax syntax);
         T VisitWhile(WhileSyntax syntax);

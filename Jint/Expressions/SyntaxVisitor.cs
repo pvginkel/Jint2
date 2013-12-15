@@ -371,7 +371,7 @@ namespace Jint.Expressions
             throw new InvalidOperationException();
         }
 
-        public virtual T VisitBinaryExpression(BinarySyntax syntax)
+        public virtual T VisitBinary(BinarySyntax syntax)
         {
             throw new InvalidOperationException();
         }
@@ -381,7 +381,7 @@ namespace Jint.Expressions
             throw new InvalidOperationException();
         }
 
-        public virtual T VisitUnaryExpression(UnarySyntax syntax)
+        public virtual T VisitUnary(UnarySyntax syntax)
         {
             throw new InvalidOperationException();
         }

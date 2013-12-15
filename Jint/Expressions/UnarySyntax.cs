@@ -66,7 +66,7 @@ namespace Jint.Expressions
         [DebuggerStepThrough]
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
-            return visitor.VisitUnaryExpression(this);
+            return visitor.VisitUnary(this);
         }
     }
 }

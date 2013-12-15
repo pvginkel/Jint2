@@ -89,7 +89,7 @@ namespace Jint.Expressions
         [DebuggerStepThrough]
         public override T Accept<T>(ISyntaxVisitor<T> visitor)
         {
-            return visitor.VisitBinaryExpression(this);
+            return visitor.VisitBinary(this);
         }
 
         public override string ToString()

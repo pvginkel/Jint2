@@ -1428,7 +1428,7 @@ namespace Jint.Compiler
             return Expression.NewArrayInit(elementType, expressions);
         }
 
-        public Expression VisitBinaryExpression(BinarySyntax syntax)
+        public Expression VisitBinary(BinarySyntax syntax)
         {
             switch (syntax.Operation)
             {
@@ -1554,7 +1554,7 @@ namespace Jint.Compiler
             );
         }
 
-        public Expression VisitUnaryExpression(UnarySyntax syntax)
+        public Expression VisitUnary(UnarySyntax syntax)
         {
             switch (syntax.Operation)
             {
