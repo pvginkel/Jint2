@@ -9,6 +9,8 @@ namespace Jint.Bound
     {
         BoundValueType ValueType { get; }
         bool DefinitelyAssigned { get; }
+        BoundTypeType Type { get; }
+
         void MarkUnused();
     }
 }

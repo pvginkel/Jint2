@@ -44,6 +44,11 @@ namespace Jint.Bound
             if (value is string && (string)value == "")
                 return EmptyString;
 
+            if (value is int)
+                value = (double)(int)value;
+
+            Debug.Assert(value is string || value is double);
+
             return new BoundConstant(value);
         }
 

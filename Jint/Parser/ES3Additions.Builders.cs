@@ -12,7 +12,6 @@ namespace Jint.Parser
         private class BodyBuilder
         {
             private List<SyntaxNode> _statements;
-            private List<FunctionSyntax> _functionDeclarations;
 
             public VariableCollection DeclaredVariables { get; private set; }
 
@@ -24,17 +23,6 @@ namespace Jint.Parser
                         _statements = new List<SyntaxNode>();
 
                     return _statements;
-                }
-            }
-
-            public List<FunctionSyntax> FunctionDeclarations
-            {
-                get
-                {
-                    if (_functionDeclarations == null)
-                        _functionDeclarations = new List<FunctionSyntax>();
-
-                    return _functionDeclarations;
                 }
             }
 
@@ -50,21 +38,7 @@ namespace Jint.Parser
 
             private IEnumerable<SyntaxNode> GetStatements()
             {
-                if (_functionDeclarations != null)
-                {
-                    foreach (var functionDeclaration in _functionDeclarations)
-                    {
-                        yield return functionDeclaration;
-                    }
-                }
-
-                if (_statements != null)
-                {
-                    foreach (var statement in _statements)
-                    {
-                        yield return statement;
-                    }
-                }
+                return _statements ?? SyntaxNode.EmptyList;
             }
         }
 

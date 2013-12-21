@@ -11,26 +11,28 @@ namespace Jint.Bound
     {
         public static void Perform(BoundProgram node)
         {
-            Perform(node.Body, false);
+            Perform(node.Body, false, null);
         }
 
-        private static void Perform(BoundBody node, bool isFunction)
+        private static void Perform(BoundBody node, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
         {
-            new Marker(node.TypeManager, isFunction).Visit(node);
+            new Marker(node.TypeManager, isFunction, parentBranch).Visit(node);
         }
 
         private class Marker : BoundTreeWalker
         {
             private readonly BoundTypeManager _typeManager;
             private readonly bool _isFunction;
+            private readonly BoundTypeManager.DefiniteAssignmentMarker.Branch _parentBranch;
             private readonly List<Block> _blocks = new List<Block>();
             private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
             private BoundTypeManager.DefiniteAssignmentMarker.Branch _branch;
 
-            public Marker(BoundTypeManager typeManager, bool isFunction)
+            public Marker(BoundTypeManager typeManager, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
             {
                 _typeManager = typeManager;
                 _isFunction = isFunction;
+                _parentBranch = parentBranch;
             }
 
             private void PushBlock(Block block)
@@ -155,7 +157,7 @@ namespace Jint.Bound
 
             public override void VisitBody(BoundBody node)
             {
-                using (var marker = _typeManager.CreateDefiniteAssignmentMarker())
+                using (var marker = _typeManager.CreateDefiniteAssignmentMarker(_parentBranch))
                 {
                     _branch = marker.CreateDefaultBranch();
 
@@ -635,10 +637,7 @@ namespace Jint.Bound
                 // definitely assigned. However, we do know it isn't before the
                 // function reference is created, so we do it here.
 
-                // TODO: This doesn't yet work. We should do something like
-                // pass the current branch to the new marker.
-
-                Perform(node.Function.Body, true);
+                Perform(node.Function.Body, true, _branch);
             }
 
             private class Block

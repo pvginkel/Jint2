@@ -8,6 +8,7 @@ namespace Jint.Bound
     internal enum BoundTypeType
     {
         Local,
-        Temporary
+        Temporary,
+        ClosureField
     }
 }

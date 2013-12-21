@@ -11,12 +11,14 @@ namespace Jint.Bound
         public class DefiniteAssignmentMarker : IDisposable
         {
             private readonly BoundTypeManager _typeManager;
+            private readonly Branch _parentBranch;
             private readonly HashSet<IBoundType> _unassignedWrites = new HashSet<IBoundType>();
             private bool _disposed;
 
-            public DefiniteAssignmentMarker(BoundTypeManager typeManager)
+            public DefiniteAssignmentMarker(BoundTypeManager typeManager, Branch parentBranch)
             {
                 _typeManager = typeManager;
+                _parentBranch = parentBranch;
             }
 
             public Branch CreateDefaultBranch()
@@ -154,17 +156,32 @@ namespace Jint.Bound
                         branch = branch._baseBranch;
                     }
 
-                    // If we didn't find an assignment, we have an unassigned
-                    // variable. We do two things. First we add it to the list we're
-                    // keeping of these variables, and we're marking it as written
-                    // to. The reason for this is that we're actually reading an
-                    // implicitly assigned 'undefined', so we can create an optimization
-                    // here to stop further marking of the variable as being
-                    // an unassigned write.
+                    // If this is a closed over variable, we may need to go to the
+                    // parent branch and handle the read there.
 
-                    _manager._unassignedWrites.Add(variable.Type);
+                    if (
+                        variable.Type.Type == BoundTypeType.ClosureField &&
+                        !_manager._typeManager._types.Contains(variable.Type)
+                    )
+                    {
+                        Debug.Assert(_manager._parentBranch != null);
 
-                    MarkWrite(variable);
+                        _manager._parentBranch.MarkRead(variable);
+                    }
+                    else
+                    {
+                        // If we didn't find an assignment, we have an unassigned
+                        // variable. We do two things. First we add it to the list we're
+                        // keeping of these variables, and we're marking it as written
+                        // to. The reason for this is that we're actually reading an
+                        // implicitly assigned 'undefined', so we can create an optimization
+                        // here to stop further marking of the variable as being
+                        // an unassigned write.
+
+                        _manager._unassignedWrites.Add(variable.Type);
+
+                        MarkWrite(variable);
+                    }
                 }
 
                 public void MarkWrite(IHasBoundType variable)

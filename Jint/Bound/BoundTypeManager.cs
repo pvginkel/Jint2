@@ -28,9 +28,9 @@ namespace Jint.Bound
             return new TypeMarker(this);
         }
 
-        public DefiniteAssignmentMarker CreateDefiniteAssignmentMarker()
+        public DefiniteAssignmentMarker CreateDefiniteAssignmentMarker(DefiniteAssignmentMarker.Branch parentBranch)
         {
-            return new DefiniteAssignmentMarker(this);
+            return new DefiniteAssignmentMarker(this, parentBranch);
         }
 
         private class BoundType : IBoundType

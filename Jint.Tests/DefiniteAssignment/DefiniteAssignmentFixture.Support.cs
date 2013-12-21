@@ -24,6 +24,8 @@ namespace Jint.Tests.DefiniteAssignment
 
             var definitelyAssigned = function.Body.TypeManager.Types.Where(p => p.DefinitelyAssigned).ToList();
             var assignedLocals = function.Body.Locals.Where(p => definitelyAssigned.Contains(p.Type)).Select(p => p.Name).ToList();
+            if (function.Body.Closure != null)
+                assignedLocals.AddRange(function.Body.Closure.Fields.Where(p => p.Type.DefinitelyAssigned).Select(p => p.Name));
 
             // Ignore the arguments local; it's always assigned to.
 

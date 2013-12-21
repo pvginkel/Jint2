@@ -888,5 +888,34 @@ i = j;
 "
             );
         }
+
+        [Test]
+        public void ClosedOverUninitialized()
+        {
+            TestBody(
+                new[] { "f" },
+@"
+var i;
+function f() {
+    var j = i;
+}
+i = 0;
+"
+            );
+        }
+
+        [Test]
+        public void ClosedOverInitialized()
+        {
+            TestBody(
+                new[] { "f", "i" },
+@"
+var i = 0;
+function f() {
+    var j = i;
+}
+"
+            );
+        }
     }
 }
