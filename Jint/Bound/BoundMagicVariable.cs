@@ -15,6 +15,11 @@ namespace Jint.Bound
 
         public BoundMagicVariableType VariableType { get; private set; }
 
+        public BoundValueType ValueType
+        {
+            get { return BoundValueType.Object; }
+        }
+
         private BoundMagicVariable(BoundMagicVariableType variableType)
         {
             VariableType = variableType;

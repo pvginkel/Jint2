@@ -5,18 +5,14 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal class BoundTemporary : IBoundWritable, IHasBoundType
+    internal class BoundTemporary : BoundVariable
     {
         public int Index { get; private set; }
-        public IBoundType Type { get; set; }
 
         public BoundTemporary(int index, IBoundType type)
+            : base(type)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
             Index = index;
-            Type = type;
         }
 
         public override string ToString()

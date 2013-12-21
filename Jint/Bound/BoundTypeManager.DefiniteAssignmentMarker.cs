@@ -53,7 +53,7 @@ namespace Jint.Bound
                 // We specifically use a list here and not a hash set because
                 // we expect a small number of variables in this list and
                 // HashSet has a considerable memory overhead.
-                private List<IHasBoundType> _assigned;
+                private List<BoundVariable> _assigned;
 
                 public bool IsKilled { get; set; }
 
@@ -96,7 +96,7 @@ namespace Jint.Bound
                     // Otherwise, we need to get the intersection of all
                     // branches.
 
-                    var assigned = new List<IHasBoundType>(branches[0]._assigned);
+                    var assigned = new List<BoundVariable>(branches[0]._assigned);
 
                     for (int i = 1; i < branches.Count; i++)
                     {
@@ -125,7 +125,7 @@ namespace Jint.Bound
                         MergeAssigned(assigned);
                 }
 
-                private void MergeAssigned(List<IHasBoundType> assigned)
+                private void MergeAssigned(List<BoundVariable> assigned)
                 {
                     Debug.Assert(assigned != null && assigned.Count > 0);
 
@@ -135,7 +135,7 @@ namespace Jint.Bound
                         _assigned.AddRange(assigned);
                 }
 
-                public void MarkRead(IHasBoundType variable)
+                public void MarkRead(BoundVariable variable)
                 {
                     // Determine whether the variable we're reading from has been
                     // definitely assigned. We need to look at our own list and
@@ -184,10 +184,10 @@ namespace Jint.Bound
                     }
                 }
 
-                public void MarkWrite(IHasBoundType variable)
+                public void MarkWrite(BoundVariable variable)
                 {
                     if (_assigned == null)
-                        _assigned = new List<IHasBoundType>();
+                        _assigned = new List<BoundVariable>();
 
                     _assigned.Add(variable);
                 }

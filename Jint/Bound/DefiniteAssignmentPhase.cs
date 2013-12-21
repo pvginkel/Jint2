@@ -59,7 +59,7 @@ namespace Jint.Bound
             {
                 if (!_branch.IsKilled)
                 {
-                    var hasBoundType = variable as IHasBoundType;
+                    var hasBoundType = variable as BoundVariable;
 
                     if (hasBoundType != null)
                         _branch.MarkRead(hasBoundType);
@@ -70,7 +70,7 @@ namespace Jint.Bound
             {
                 if (!_branch.IsKilled)
                 {
-                    var hasBoundType = variable as IHasBoundType;
+                    var hasBoundType = variable as BoundVariable;
 
                     if (hasBoundType != null)
                         _branch.MarkWrite(hasBoundType);

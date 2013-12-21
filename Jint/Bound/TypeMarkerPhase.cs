@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -9,62 +10,57 @@ namespace Jint.Bound
     {
         public static void Perform(BoundProgram node)
         {
-            Perform(node.Body);
+            Perform(node.Body, false);
         }
 
-        private static void Perform(BoundBody body)
+        private static void Perform(BoundBody body, bool isFunction)
         {
-            new Marker(body.TypeManager).Visit(body);
+            new Marker(body.TypeManager, isFunction).Visit(body);
         }
 
         private class Marker : BoundTreeWalker
         {
+            private readonly bool _isFunction;
             private readonly TypeResolver _typeResolver = new TypeResolver();
-            private readonly BoundTypeManager _typeManager;
-            private readonly List<Block> _blocks = new List<Block>();
-            private readonly Dictionary<BoundStatement, string> _labels = new Dictionary<BoundStatement, string>();
-            private readonly BoundTypeManager.MarkerBlock _rootBlock;
-            private BoundTypeManager.Marker _marker;
+            private readonly BoundTypeManager.TypeMarker _marker;
 
-            public Marker(BoundTypeManager typeManager)
+            public Marker(BoundTypeManager typeManager, bool isFunction)
             {
-                _typeManager = typeManager;
-                _rootBlock = _typeManager.CreateTypeMarker().RootBlock;
-                _blocks.Add(new Block(null, _rootBlock));
-                _marker = _rootBlock.Marker;
+                _isFunction = isFunction;
+                _marker = typeManager.CreateTypeMarker();
             }
 
-            private void MarkRead(IBoundReadable variable)
+            public override void VisitBody(BoundBody node)
             {
-                var hasType = variable as IHasBoundType;
-                if (hasType != null)
-                    _marker.MarkRead(hasType.Type);
+                // Mark the arguments local as object.
+
+                if (_isFunction)
+                {
+                    var argumentsLocal = node.Locals.SingleOrDefault(p => p.Name == "arguments");
+                    if (argumentsLocal != null)
+                        MarkWrite(argumentsLocal, BoundValueType.Object);
+                }
+
+                base.VisitBody(node);
             }
 
             private void MarkWrite(IBoundWritable variable, BoundValueType type)
             {
-                var hasType = variable as IHasBoundType;
+                var hasType = variable as BoundVariable;
                 if (hasType != null)
                     _marker.MarkWrite(hasType.Type, type);
             }
 
             public override void VisitSetVariable(BoundSetVariable node)
             {
-                MarkWrite(node.Variable, node.Value.Accept(_typeResolver));
-
                 base.VisitSetVariable(node);
-            }
 
-            public override void VisitGetVariable(BoundGetVariable node)
-            {
-                MarkRead(node.Variable);
-
-                base.VisitGetVariable(node);
+                MarkWrite(node.Variable, node.Value.Accept(_typeResolver));
             }
 
             public override void VisitForEachIn(BoundForEachIn node)
             {
-                MarkWrite(node.Target, BoundValueType.Object);
+                MarkWrite(node.Target, BoundValueType.String);
 
                 base.VisitForEachIn(node);
             }
@@ -78,50 +74,145 @@ namespace Jint.Bound
 
             public override void VisitCreateFunction(BoundCreateFunction node)
             {
-                base.VisitCreateFunction(node);
-            }
+                // It's the responsibility of the phase to correctly process
+                // functions.
 
-            public override void VisitExpressionBlock(BoundExpressionBlock node)
-            {
-                MarkRead(node.Result);
-
-                base.VisitExpressionBlock(node);
-            }
-
-            public override void VisitLabel(BoundLabel node)
-            {
-                _labels.Add(node.Statement, node.Label);
-
-                base.VisitLabel(node);
-            }
-
-            private class Block
-            {
-                public string Name { get; private set; }
-                public BoundTypeManager.MarkerBlock Marker { get; private set; }
-
-                public Block(string name, BoundTypeManager.MarkerBlock marker)
-                {
-                    Name = name;
-                    Marker = marker;
-                }
+                Perform(node.Function.Body, true);
             }
         }
 
         private class TypeResolver : BoundTreeVisitor<BoundValueType>
         {
-            private readonly Dictionary<BoundNode, BoundValueType> _resolved = new Dictionary<BoundNode, BoundValueType>();
-
             public override BoundValueType DefaultVisit(BoundNode node)
             {
-                BoundValueType result;
-                if (!_resolved.TryGetValue(node, out result))
-                {
-                    result = base.DefaultVisit(node);
-                    _resolved.Add(node, result);
-                }
+                throw new InvalidOperationException("Cannot get type of specified node");
+            }
 
-                return result;
+            public override BoundValueType VisitNewBuiltIn(BoundNewBuiltIn node)
+            {
+                return BoundValueType.Object;
+            }
+
+            public override BoundValueType VisitBinary(BoundBinary node)
+            {
+                var left = node.Left.Accept(this);
+                var right = node.Right.Accept(this);
+
+                switch (node.Operation)
+                {
+                    case BoundExpressionType.Add:
+                        if (left == BoundValueType.String || right == BoundValueType.String)
+                            return BoundValueType.String;
+
+                        return BoundValueType.Number;
+
+                    case BoundExpressionType.BitwiseAnd:
+                    case BoundExpressionType.BitwiseExclusiveOr:
+                    case BoundExpressionType.BitwiseOr:
+                    case BoundExpressionType.Divide:
+                    case BoundExpressionType.LeftShift:
+                    case BoundExpressionType.RightShift:
+                    case BoundExpressionType.UnsignedRightShift:
+                    case BoundExpressionType.Modulo:
+                    case BoundExpressionType.Multiply:
+                    case BoundExpressionType.Subtract:
+                        return BoundValueType.Number;
+
+                    case BoundExpressionType.Equal:
+                    case BoundExpressionType.NotEqual:
+                    case BoundExpressionType.Same:
+                    case BoundExpressionType.NotSame:
+                    case BoundExpressionType.LessThan:
+                    case BoundExpressionType.LessThanOrEqual:
+                    case BoundExpressionType.GreaterThan:
+                    case BoundExpressionType.GreaterThanOrEqual:
+                    case BoundExpressionType.In:
+                    case BoundExpressionType.InstanceOf:
+                        return BoundValueType.Boolean;
+
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
+
+            public override BoundValueType VisitGetVariable(BoundGetVariable node)
+            {
+                return node.Variable.ValueType;
+            }
+
+            public override BoundValueType VisitGetMember(BoundGetMember node)
+            {
+                return BoundValueType.Unknown;
+            }
+
+            public override BoundValueType VisitCreateFunction(BoundCreateFunction node)
+            {
+                return BoundValueType.Object;
+            }
+
+            public override BoundValueType VisitCall(BoundCall node)
+            {
+                return BoundValueType.Unknown;
+            }
+
+            public override BoundValueType VisitNew(BoundNew node)
+            {
+                return BoundValueType.Object;
+            }
+
+            public override BoundValueType VisitRegex(BoundRegex node)
+            {
+                return BoundValueType.Object;
+            }
+
+            public override BoundValueType VisitUnary(BoundUnary node)
+            {
+                switch (node.Operation)
+                {
+                    case BoundExpressionType.BitwiseNot:
+                    case BoundExpressionType.Negate:
+                    case BoundExpressionType.UnaryPlus:
+                        return BoundValueType.Number;
+
+                    case BoundExpressionType.Not:
+                        return BoundValueType.Boolean;
+
+                    case BoundExpressionType.TypeOf:
+                        return BoundValueType.String;
+
+                    case BoundExpressionType.Void:
+                        return BoundValueType.Unknown;
+
+                    default:
+                        throw new ArgumentOutOfRangeException("operand");
+                }
+            }
+
+            public override BoundValueType VisitConstant(BoundConstant node)
+            {
+                if (node.Value is string)
+                    return BoundValueType.String;
+                if (node.Value is double)
+                    return BoundValueType.Number;
+
+                Debug.Assert(node.Value is bool);
+
+                return BoundValueType.Boolean;
+            }
+
+            public override BoundValueType VisitDeleteMember(BoundDeleteMember node)
+            {
+                return BoundValueType.Boolean;
+            }
+
+            public override BoundValueType VisitExpressionBlock(BoundExpressionBlock node)
+            {
+                return node.Result.ValueType;
+            }
+
+            public override BoundValueType VisitHasMember(BoundHasMember node)
+            {
+                return BoundValueType.Boolean;
             }
         }
     }

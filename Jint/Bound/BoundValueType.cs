@@ -11,8 +11,7 @@ namespace Jint.Bound
         Unknown,
         Object,
         String,
-        Double,
-        Integer,
+        Number,
         Boolean
     }
 }

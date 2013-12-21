@@ -5,24 +5,21 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal class BoundClosureField : IBoundWritable, IHasBoundType
+    internal class BoundClosureField : BoundVariable
     {
         public string Name { get; private set; }
         public BoundClosure Closure { get; private set; }
-        public IBoundType Type { get; private set; }
 
         public BoundClosureField(string name, BoundClosure closure, IBoundType type)
+            : base(type)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
             if (closure == null)
                 throw new ArgumentNullException("closure");
-            if (type == null)
-                throw new ArgumentNullException("type");
 
             Name = name;
             Closure = closure;
-            Type = type;
         }
 
         public override string ToString()

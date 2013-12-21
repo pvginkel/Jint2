@@ -10,6 +10,11 @@ namespace Jint.Bound
         public string Name { get; private set; }
         public int Index { get; private set; }
 
+        public BoundValueType ValueType
+        {
+            get { return BoundValueType.Unknown; }
+        }
+
         public BoundArgument(string name, int index)
         {
             if (name == null)

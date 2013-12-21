@@ -25,7 +25,7 @@ namespace Jint.Bound
 
         public TypeMarker CreateTypeMarker()
         {
-            return new TypeMarker(this);
+            return new TypeMarker();
         }
 
         public DefiniteAssignmentMarker CreateDefiniteAssignmentMarker(DefiniteAssignmentMarker.Branch parentBranch)

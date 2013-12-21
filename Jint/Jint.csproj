@@ -112,6 +112,7 @@
     <Compile Include="Bound\BoundTypeManager.DefiniteAssignmentMarker.cs" />
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
     <Compile Include="Bound\BoundTypeType.cs" />
+    <Compile Include="Bound\BoundVariable.cs" />
     <Compile Include="Bound\DefiniteAssignmentPhase.cs" />
     <Compile Include="Bound\FunctionGatherer.cs" />
     <Compile Include="Bound\IBoundType.cs" />
@@ -125,7 +126,6 @@
     <Compile Include="Bound\BoundNewBuiltInType.cs" />
     <Compile Include="Bound\IBoundReadable.cs" />
     <Compile Include="Bound\IBoundWritable.cs" />
-    <Compile Include="Bound\IHasBoundType.cs" />
     <Compile Include="Bound\SquelchPhase.cs" />
     <Compile Include="Bound\TypeMarkerPhase.cs" />
     <Compile Include="Compiler\DynamicAssemblyManager.cs" />
