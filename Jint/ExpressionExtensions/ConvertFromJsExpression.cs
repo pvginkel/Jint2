@@ -53,7 +53,7 @@ namespace Jint.ExpressionExtensions
             switch (valueType)
             {
                 case ValueType.Boolean: _type = typeof(bool); break;
-                case ValueType.Double: _type = typeof(double); break;
+                case ValueType.Number: _type = typeof(double); break;
                 case ValueType.String: _type = typeof(string); break;
                 case ValueType.Object: _type = typeof(JsObject); break;
                 default: throw new ArgumentOutOfRangeException("valueType");
@@ -70,17 +70,17 @@ namespace Jint.ExpressionExtensions
                     switch (SyntaxUtil.GetValueType(Expression.Type))
                     {
                         case ValueType.Boolean: return Expression;
-                        case ValueType.Double: method = _numberToBoolean; break;
+                        case ValueType.Number: method = _numberToBoolean; break;
                         case ValueType.String: method = _stringToBoolean; break;
                         default: method = _toBoolean; break;
                     }
                     break;
 
-                case ValueType.Double:
+                case ValueType.Number:
                     switch (SyntaxUtil.GetValueType(Expression.Type))
                     {
                         case ValueType.Boolean: method = _booleanToNumber; break;
-                        case ValueType.Double: return Expression;
+                        case ValueType.Number: return Expression;
                         case ValueType.String: method = _stringToNumber; break;
                         default: method = _toNumber; break;
                     }
@@ -90,7 +90,7 @@ namespace Jint.ExpressionExtensions
                     switch (SyntaxUtil.GetValueType(Expression.Type))
                     {
                         case ValueType.Boolean: method = _booleanToString; break;
-                        case ValueType.Double: method = _numberToString; break;
+                        case ValueType.Number: method = _numberToString; break;
                         case ValueType.String: return Expression;
                         default: method = _toString; break;
                     }

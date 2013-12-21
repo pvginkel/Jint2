@@ -103,7 +103,8 @@ namespace Jint.Compiler
             var closureType = DynamicAssemblyManager.BuildClosure(fields);
             var closure = new Closure(
                 closureType,
-                parent != null ? parent.Block.Closure : null
+                parent != null ? parent.Block.Closure : null,
+                fields.Select(p => p.Key)
             );
 
             block.Block.Closure = closure;
@@ -148,7 +149,7 @@ namespace Jint.Compiler
             // Setup the "arguments" and "this" variables.
 
             Variable argumentsVariable;
-            if (declaredVariables.TryGetItem(JsNames.Arguments, out argumentsVariable))
+            if (declaredVariables.TryGetValue(JsNames.Arguments, out argumentsVariable))
             {
                 if (_isStrict)
                     throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
@@ -255,7 +256,7 @@ namespace Jint.Compiler
             int count = _blocks.Count;
             for (int i = count - 1; i >= (haveMain ? 1 : 0); i--)
             {
-                if (_blocks[i].Block.DeclaredVariables.TryGetItem(identifier, out variable))
+                if (_blocks[i].Block.DeclaredVariables.TryGetValue(identifier, out variable))
                 {
                     if (variable.Type != VariableType.Global && i < count - 1)
                     {

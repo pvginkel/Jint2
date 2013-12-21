@@ -14,7 +14,7 @@ namespace Jint.Expressions
         public VariableType Type { get; set; }
         public ClosedOverVariable ClosureField { get; set; }
         public WithScope WithScope { get; set; }
-        public Variable FallbackVariable { get; set; }
+        public Variable FallbackVariable { get; private set; }
         public ValueType ValueType { get; set; }
         public bool IsDeclared { get; set; }
 
@@ -56,7 +56,7 @@ namespace Jint.Expressions
                 switch (ValueType)
                 {
                     case Expressions.ValueType.Boolean: return typeof(bool);
-                    case Expressions.ValueType.Double: return typeof(double);
+                    case Expressions.ValueType.Number: return typeof(double);
                     case Expressions.ValueType.String: return typeof(string);
                     default: return typeof(object);
                 }

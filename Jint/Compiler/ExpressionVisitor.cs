@@ -1524,10 +1524,10 @@ namespace Jint.Compiler
 
         private Expression EnsureNumber(Expression expression)
         {
-            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Double)
+            if (SyntaxUtil.GetValueType(expression.Type) == ValueType.Number)
                 return expression;
 
-            return new ConvertFromJsExpression(EnsureJs(expression), ValueType.Double);
+            return new ConvertFromJsExpression(EnsureJs(expression), ValueType.Number);
         }
 
         private Expression EnsureObject(Expression expression)

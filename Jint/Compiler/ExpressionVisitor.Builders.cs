@@ -319,7 +319,7 @@ namespace Jint.Compiler
                     case ValueType.Unknown: value = EnsureJs(value); break;
                     case ValueType.Boolean: value = EnsureBoolean(value); break;
                     case ValueType.String: value = EnsureString(value); break;
-                    case ValueType.Double: value = EnsureNumber(value); break;
+                    case ValueType.Number: value = EnsureNumber(value); break;
                     case ValueType.Object: value = EnsureObject(value); break;
                     default: throw new InvalidOperationException();
                 }

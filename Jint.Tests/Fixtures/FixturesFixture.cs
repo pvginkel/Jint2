@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Jint.Tests.Fixtures
 {
-    public abstract class FixturesFixture : TestBase
+    public abstract class FixturesFixture : ScriptTestBase
     {
         private static readonly string _basePath;
         private static readonly string _libPath;

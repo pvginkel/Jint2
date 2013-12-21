@@ -34,7 +34,7 @@ namespace Jint.Expressions
                 throw new ArgumentNullException("variableName");
 
             Variable variable;
-            if (!TryGetItem(variableName, out variable))
+            if (!TryGetValue(variableName, out variable))
             {
                 variable = new Variable(variableName, index);
                 Add(variable);

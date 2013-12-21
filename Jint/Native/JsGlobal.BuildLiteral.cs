@@ -46,7 +46,7 @@ namespace Jint.Native
                 switch (syntax.ValueType)
                 {
                     case ValueType.Boolean: return BooleanBoxes.Box((bool)syntax.Value);
-                    case ValueType.Double: return (double)syntax.Value;
+                    case ValueType.Number: return (double)syntax.Value;
                     case ValueType.String: return (string)syntax.Value;
                     default: throw new InvalidOperationException();
                 }

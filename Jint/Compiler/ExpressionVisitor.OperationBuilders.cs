@@ -31,13 +31,13 @@ namespace Jint.Compiler
                     arguments
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Add, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Add, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Add(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Subtract, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Subtract, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Subtract(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseAnd, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseAnd, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Convert(
                     Expression.And(
                         Expression.Convert(arguments[0], typeof(long)),
@@ -46,7 +46,7 @@ namespace Jint.Compiler
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseExclusiveOr, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseExclusiveOr, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Convert(
                     Expression.ExclusiveOr(
                         Expression.Convert(arguments[0], typeof(long)),
@@ -55,7 +55,7 @@ namespace Jint.Compiler
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseOr, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.BitwiseOr, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Convert(
                     Expression.Or(
                         Expression.Convert(arguments[0], typeof(long)),
@@ -64,7 +64,7 @@ namespace Jint.Compiler
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.LeftShift, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.LeftShift, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Convert(
                     Expression.LeftShift(
                         Expression.Convert(arguments[0], typeof(long)),
@@ -73,7 +73,7 @@ namespace Jint.Compiler
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.RightShift, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.RightShift, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Convert(
                     Expression.RightShift(
                         Expression.Convert(arguments[0], typeof(long)),
@@ -82,7 +82,7 @@ namespace Jint.Compiler
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.UnsignedRightShift, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.UnsignedRightShift, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Convert(
                     Expression.RightShift(
                         Expression.Convert(arguments[0], typeof(long)),
@@ -91,10 +91,10 @@ namespace Jint.Compiler
                     typeof(double)
                 );
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Multiply, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Multiply, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Multiply(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Negate, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Negate, ValueType.Number)] =
                 (runtime, arguments) => Expression.Negate(arguments[0]);
 
             result[GetOperationMethodKey(SyntaxExpressionType.Not, ValueType.Boolean)] =
@@ -103,16 +103,16 @@ namespace Jint.Compiler
             result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.String)] =
                 (runtime, arguments) => Expression.Constant(JsNames.TypeString);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.Number)] =
                 (runtime, arguments) => Expression.Constant(JsNames.TypeNumber);
 
             result[GetOperationMethodKey(SyntaxExpressionType.TypeOf, ValueType.Boolean)] =
                 (runtime, arguments) => Expression.Constant(JsNames.TypeBoolean);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.UnaryPlus, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.UnaryPlus, ValueType.Number)] =
                 (runtime, arguments) => arguments[0];
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Index, ValueType.String, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Index, ValueType.String, ValueType.Number)] =
                 (runtime, arguments) => Expression.Call(
                     arguments[0],
                     _substring,
@@ -137,7 +137,7 @@ namespace Jint.Compiler
             result[GetOperationMethodKey(SyntaxExpressionType.Equal, ValueType.Boolean, ValueType.Boolean)] =
                 (runtime, arguments) => Expression.Equal(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Equal, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Equal, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Equal(arguments[0], arguments[1]);
 
             result[GetOperationMethodKey(SyntaxExpressionType.Equal, ValueType.String, ValueType.String)] =
@@ -146,7 +146,7 @@ namespace Jint.Compiler
             result[GetOperationMethodKey(SyntaxExpressionType.Same, ValueType.Boolean, ValueType.Boolean)] =
                 (runtime, arguments) => Expression.Equal(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.Same, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.Same, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.Equal(arguments[0], arguments[1]);
 
             result[GetOperationMethodKey(SyntaxExpressionType.Same, ValueType.String, ValueType.String)] =
@@ -155,7 +155,7 @@ namespace Jint.Compiler
             result[GetOperationMethodKey(SyntaxExpressionType.NotEqual, ValueType.Boolean, ValueType.Boolean)] =
                 (runtime, arguments) => Expression.NotEqual(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.NotEqual, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.NotEqual, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.NotEqual(arguments[0], arguments[1]);
 
             result[GetOperationMethodKey(SyntaxExpressionType.NotEqual, ValueType.String, ValueType.String)] =
@@ -164,22 +164,22 @@ namespace Jint.Compiler
             result[GetOperationMethodKey(SyntaxExpressionType.NotSame, ValueType.Boolean, ValueType.Boolean)] =
                 (runtime, arguments) => Expression.NotEqual(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.NotSame, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.NotSame, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.NotEqual(arguments[0], arguments[1]);
 
             result[GetOperationMethodKey(SyntaxExpressionType.NotSame, ValueType.String, ValueType.String)] =
                 (runtime, arguments) => Expression.Not(Expression.Call(_stringEquals, arguments));
 
-            result[GetOperationMethodKey(SyntaxExpressionType.LessThan, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.LessThan, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.LessThan(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.LessThanOrEqual, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.LessThanOrEqual, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.LessThanOrEqual(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.GreaterThan, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.GreaterThan, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.GreaterThan(arguments[0], arguments[1]);
 
-            result[GetOperationMethodKey(SyntaxExpressionType.GreaterThanOrEqual, ValueType.Double, ValueType.Double)] =
+            result[GetOperationMethodKey(SyntaxExpressionType.GreaterThanOrEqual, ValueType.Number, ValueType.Number)] =
                 (runtime, arguments) => Expression.GreaterThanOrEqual(arguments[0], arguments[1]);
 
             // I don't now why, but using these is slower than using the operation

@@ -17,14 +17,18 @@ namespace Jint.Expressions
 
         public Type Type { get; private set; }
         public Closure Parent { get; private set; }
+        public IList<string> Fields { get; private set; }
 
-        public Closure(Type type, Closure parent)
+        public Closure(Type type, Closure parent, IEnumerable<string> fields)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
+            if (fields == null)
+                throw new ArgumentNullException("fields");
 
             Type = type;
             Parent = parent;
+            Fields = fields.ToReadOnly();
         }
     }
 }

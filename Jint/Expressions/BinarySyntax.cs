@@ -36,7 +36,7 @@ namespace Jint.Expressions
                     if (left == ValueType.String || right == ValueType.String)
                         return ValueType.String;
 
-                    return ValueType.Double;
+                    return ValueType.Number;
 
                 case SyntaxExpressionType.BitwiseAnd:
                 case SyntaxExpressionType.BitwiseExclusiveOr:
@@ -48,7 +48,7 @@ namespace Jint.Expressions
                 case SyntaxExpressionType.Modulo:
                 case SyntaxExpressionType.Multiply:
                 case SyntaxExpressionType.Subtract:
-                    return ValueType.Double;
+                    return ValueType.Number;
 
                 case SyntaxExpressionType.Equal:
                 case SyntaxExpressionType.NotEqual:

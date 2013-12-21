@@ -26,7 +26,7 @@ namespace Jint.Expressions
                     case SyntaxExpressionType.UnaryPlus:
                     case SyntaxExpressionType.PreIncrementAssign:
                     case SyntaxExpressionType.PreDecrementAssign:
-                        return ValueType.Double;
+                        return ValueType.Number;
 
                     case SyntaxExpressionType.Not:
                     case SyntaxExpressionType.Delete:

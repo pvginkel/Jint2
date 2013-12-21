@@ -11,7 +11,7 @@ namespace Jint.Expressions
         Unknown,
         Boolean,
         String,
-        Double,
+        Number,
         Object
     }
 }

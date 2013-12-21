@@ -56,6 +56,78 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bound\BindingVisitor.Builders.cs" />
+    <Compile Include="Bound\BindingVisitor.cs" />
+    <Compile Include="Bound\BindingVisitor.Scope.cs" />
+    <Compile Include="Bound\BoundArgument.cs" />
+    <Compile Include="Bound\BoundBinary.cs" />
+    <Compile Include="Bound\BoundBlock.cs" />
+    <Compile Include="Bound\BoundBody.cs" />
+    <Compile Include="Bound\BoundBreak.cs" />
+    <Compile Include="Bound\BoundClosureFieldCollection.cs" />
+    <Compile Include="Bound\BoundExpressionStatement.cs" />
+    <Compile Include="Bound\BoundLabel.cs" />
+    <Compile Include="Bound\BoundTypeManager.cs" />
+    <Compile Include="Bound\BoundMagicVariable.cs" />
+    <Compile Include="Bound\BoundCatch.cs" />
+    <Compile Include="Bound\BoundClosure.cs" />
+    <Compile Include="Bound\BoundClosureField.cs" />
+    <Compile Include="Bound\BoundConstant.cs" />
+    <Compile Include="Bound\BoundContinue.cs" />
+    <Compile Include="Bound\BoundCreateFunction.cs" />
+    <Compile Include="Bound\BoundDeleteMember.cs" />
+    <Compile Include="Bound\BoundDoWhile.cs" />
+    <Compile Include="Bound\BoundEmpty.cs" />
+    <Compile Include="Bound\BoundExpression.cs" />
+    <Compile Include="Bound\BoundExpressionBlock.cs" />
+    <Compile Include="Bound\BoundExpressionType.cs" />
+    <Compile Include="Bound\BoundFinally.cs" />
+    <Compile Include="Bound\BoundFor.cs" />
+    <Compile Include="Bound\BoundForEachIn.cs" />
+    <Compile Include="Bound\BoundFunction.cs" />
+    <Compile Include="Bound\BoundGetMember.cs" />
+    <Compile Include="Bound\BoundGetVariable.cs" />
+    <Compile Include="Bound\BoundHasMember.cs" />
+    <Compile Include="Bound\BoundIf.cs" />
+    <Compile Include="Bound\BoundCallArgument.cs" />
+    <Compile Include="Bound\BoundCall.cs" />
+    <Compile Include="Bound\BoundMagicVariableType.cs" />
+    <Compile Include="Bound\BoundNewBuiltIn.cs" />
+    <Compile Include="Bound\BoundNew.cs" />
+    <Compile Include="Bound\BoundNode.cs" />
+    <Compile Include="Bound\BoundNodeType.cs" />
+    <Compile Include="Bound\BoundTreePrettyPrintVisitor.cs" />
+    <Compile Include="Bound\BoundProgram.cs" />
+    <Compile Include="Bound\BoundRegEx.cs" />
+    <Compile Include="Bound\BoundReturn.cs" />
+    <Compile Include="Bound\BoundTreeRewriter.cs" />
+    <Compile Include="Bound\BoundSetVariable.cs" />
+    <Compile Include="Bound\BoundSetMember.cs" />
+    <Compile Include="Bound\BoundStatement.cs" />
+    <Compile Include="Bound\BoundSwitch.cs" />
+    <Compile Include="Bound\BoundSwitchCase.cs" />
+    <Compile Include="Bound\BoundTemporary.cs" />
+    <Compile Include="Bound\BoundThrow.cs" />
+    <Compile Include="Bound\BoundTry.cs" />
+    <Compile Include="Bound\BoundTypeManager.DefiniteAssignmentMarker.cs" />
+    <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
+    <Compile Include="Bound\BoundTypeType.cs" />
+    <Compile Include="Bound\DefiniteAssignmentPhase.cs" />
+    <Compile Include="Bound\FunctionGatherer.cs" />
+    <Compile Include="Bound\IBoundType.cs" />
+    <Compile Include="Bound\BoundUnary.cs" />
+    <Compile Include="Bound\BoundLocal.cs" />
+    <Compile Include="Bound\BoundTreeVisitor.cs" />
+    <Compile Include="Bound\BoundTreeWalker.cs" />
+    <Compile Include="Bound\BoundValueType.cs" />
+    <Compile Include="Bound\BoundWhile.cs" />
+    <Compile Include="Bound\BoundSetAccessor.cs" />
+    <Compile Include="Bound\BoundNewBuiltInType.cs" />
+    <Compile Include="Bound\IBoundReadable.cs" />
+    <Compile Include="Bound\IBoundWritable.cs" />
+    <Compile Include="Bound\IHasBoundType.cs" />
+    <Compile Include="Bound\SquelchPhase.cs" />
+    <Compile Include="Bound\TypeMarkerPhase.cs" />
     <Compile Include="Compiler\DynamicAssemblyManager.cs" />
     <Compile Include="Compiler\ExpressionVisitor.Builders.cs" />
     <Compile Include="Compiler\ExpressionVisitor.OperationBuilders.cs" />
@@ -205,10 +277,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>JintRuntime.Operations.Generated.tt</DependentUpon>
     </Compile>
+    <Compile Include="Support\CollectionExtensions.cs" />
     <Compile Include="Support\FastPropertyStore.cs" />
     <Compile Include="Support\FastPropertyStoreDebugView.cs" />
+    <Compile Include="Support\IKeyedCollection.cs" />
+    <Compile Include="Support\KeyedCollectionDebugView.cs" />
     <Compile Include="Support\PrimesHelper.cs" />
     <Compile Include="Support\KeyedCollection.cs" />
+    <Compile Include="ReadOnlyArray.cs" />
+    <Compile Include="Support\ReadOnlyKeyedCollection.cs" />
     <Compile Include="Support\SparseArray.cs" />
   </ItemGroup>
   <ItemGroup>

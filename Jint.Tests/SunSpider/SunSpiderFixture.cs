@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace Jint.Tests.SunSpider
 {
-    public class SunSpiderFixture : TestBase
+    public class SunSpiderFixture : ScriptTestBase
     {
         private static readonly string _basePath;
         private static readonly string _libPath;
@@ -21,7 +21,7 @@ namespace Jint.Tests.SunSpider
 
         static SunSpiderFixture()
         {
-            var assemblyDirectory = new DirectoryInfo(Path.GetDirectoryName(typeof(TestBase).Assembly.Location));
+            var assemblyDirectory = new DirectoryInfo(Path.GetDirectoryName(typeof(ScriptTestBase).Assembly.Location));
 
             _basePath = assemblyDirectory.Parent.Parent.FullName;
             _libPath = Path.Combine(_basePath, "SunSpider", "Lib");

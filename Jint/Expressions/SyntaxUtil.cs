@@ -23,7 +23,7 @@ namespace Jint.Expressions
             switch (self)
             {
                 case ValueType.Boolean: return typeof(bool);
-                case ValueType.Double: return typeof(double);
+                case ValueType.Number: return typeof(double);
                 case ValueType.String: return typeof(string);
                 case ValueType.Object: return typeof(JsObject);
                 case ValueType.Unknown: return typeof(object);
@@ -40,7 +40,7 @@ namespace Jint.Expressions
         {
             switch (Type.GetTypeCode(type))
             {
-                case TypeCode.Double: return ValueType.Double;
+                case TypeCode.Double: return ValueType.Number;
                 case TypeCode.Boolean: return ValueType.Boolean;
                 case TypeCode.String: return ValueType.String;
 

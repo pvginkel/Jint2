@@ -10,6 +10,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Text;
 using Antlr.Runtime;
+using Jint.Bound;
 using Jint.Compiler;
 using Jint.Expressions;
 using Jint.Native;
@@ -17,6 +18,7 @@ using Jint.Native.Interop;
 using Jint.Parser;
 using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
+using TypeMarkerPhase = Jint.Bound.TypeMarkerPhase;
 
 namespace Jint
 {
@@ -68,17 +70,16 @@ namespace Jint
 
         internal static ProgramSyntax Compile(string source)
         {
-            ProgramSyntax program = null;
-            if (!string.IsNullOrEmpty(source))
-            {
-                var lexer = new ES3Lexer(new ANTLRStringStream(source));
-                var parser = new ES3Parser(new CommonTokenStream(lexer), source);
+            if (String.IsNullOrEmpty(source))
+                return null;
 
-                program = parser.Execute();
+            var lexer = new ES3Lexer(new ANTLRStringStream(source));
+            var parser = new ES3Parser(new CommonTokenStream(lexer), source);
 
-                if (parser.Errors != null && parser.Errors.Count > 0)
-                    throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
-            }
+            var program = parser.Execute();
+
+            if (parser.Errors != null && parser.Errors.Count > 0)
+                throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
 
             return program;
         }
@@ -249,7 +250,7 @@ namespace Jint
             try
             {
 #endif
-            return CompileAndRun(program, unwrap, fileName);
+                return CompileAndRun(program, unwrap, fileName);
 #if !DEBUG
             }
             catch (SecurityException)
@@ -423,6 +424,8 @@ namespace Jint
                 var visitor = new ExpressionVisitor(Global, fileName);
                 var expression = program.Accept(visitor);
 
+                PrintBound(program);
+
                 PrintExpression(expression);
 
                 EnsureGlobalsDeclared(program);
@@ -438,6 +441,37 @@ namespace Jint
                 : unwrap
                     ? Global.Marshaller.MarshalJsValue<object>(result)
                     : result;
+        }
+
+        [Conditional("DEBUG")]
+        private void PrintBound(ProgramSyntax programSyntax)
+        {
+            var visitor = new BindingVisitor();
+            
+            programSyntax.Accept(visitor);
+
+            var program = SquelchPhase.Perform(visitor.Program);
+            DefiniteAssignmentPhase.Perform(program);
+            TypeMarkerPhase.Perform(program);
+            var functions = FunctionGatherer.Gather(program);
+
+            var bodies = new List<BoundBody> { program.Body };
+            bodies.AddRange(functions.Select(p => p.Body));
+
+            using (var writer = File.CreateText("Bound Dump.txt"))
+            {
+                for (int i = 0; i < bodies.Count; i++)
+                {
+                    if (i == 0)
+                        writer.WriteLine("Program:");
+                    else
+                        writer.WriteLine("Function:");
+
+                    writer.WriteLine();
+                    new BoundTreePrettyPrintVisitor(writer).Visit(bodies[i]);
+                    writer.WriteLine();
+                }
+            }
         }
 
         private void EnsureGlobalsDeclared(ProgramSyntax program)
@@ -457,7 +491,7 @@ namespace Jint
         private void PrepareTree(SyntaxNode node)
         {
             node.Accept(new VariableMarkerPhase(this));
-            node.Accept(new TypeMarkerPhase());
+            node.Accept(new Compiler.TypeMarkerPhase());
         }
 
         internal JsObject CompileFunction(object[] parameters)
@@ -578,7 +612,7 @@ namespace Jint
 
             try
             {
-                program = JintEngine.Compile((string)arguments[0]);
+                program = Compile((string)arguments[0]);
             }
             catch (Exception e)
             {

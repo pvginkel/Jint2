@@ -7,7 +7,7 @@ using Jint.Tests.Support;
 
 namespace Jint.Tests.Mozilla
 {
-    public abstract class MozillaFixture : TestBase
+    public abstract class MozillaFixture : ScriptTestBase
     {
         private static readonly string _basePath;
         private static readonly string _libPath;
@@ -20,7 +20,7 @@ namespace Jint.Tests.Mozilla
 
         static MozillaFixture()
         {
-            var assemblyDirectory = new DirectoryInfo(Path.GetDirectoryName(typeof(TestBase).Assembly.Location));
+            var assemblyDirectory = new DirectoryInfo(Path.GetDirectoryName(typeof(ScriptTestBase).Assembly.Location));
 
             _basePath = assemblyDirectory.Parent.Parent.FullName;
             _libPath = Path.Combine(_basePath, "Mozilla", "Lib");
