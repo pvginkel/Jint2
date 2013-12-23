@@ -14,6 +14,11 @@ namespace Jint.Bound
             Perform(node.Body, false, null);
         }
 
+        public static void Perform(BoundFunction node)
+        {
+            Perform(node.Body, true, null);
+        }
+
         private static void Perform(BoundBody node, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
         {
             new Marker(node.TypeManager, isFunction, parentBranch).Visit(node);

@@ -149,6 +149,8 @@ namespace Jint.Bound
         public override void VisitNew(BoundNew node)
         {
             Visit(node.Expression);
+            VisitList(node.Arguments);
+            VisitList(node.Generics);
         }
 
         public override void VisitNewBuiltIn(BoundNewBuiltIn node)

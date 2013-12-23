@@ -149,18 +149,14 @@ namespace Jint.Bound
             return new BoundThrow(
                 // Instantiate the new error class.
                 new BoundNew(
-                    // Call the constructor.
-                    new BoundCall(
+                    // Get the error class.
+                    new BoundGetMember(
                         new BoundGetVariable(BoundMagicVariable.Global),
-                        // Get the error class.
-                        new BoundGetMember(
-                            new BoundGetVariable(BoundMagicVariable.Global),
-                            BoundConstant.Create(@class)
-                        ),
-                        // Pass the arguments (the message).
-                        arguments.ToReadOnly(),
-                        ReadOnlyArray<BoundExpression>.Null
-                    )
+                        BoundConstant.Create(@class)
+                    ),
+                    // Pass the arguments (the message).
+                    arguments.ToReadOnly(),
+                    ReadOnlyArray<BoundExpression>.Null
                 )
             );
         }

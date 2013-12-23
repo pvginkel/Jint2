@@ -13,6 +13,11 @@ namespace Jint.Bound
             Perform(node.Body, false);
         }
 
+        public static void Perform(BoundFunction node)
+        {
+            Perform(node.Body, true);
+        }
+
         private static void Perform(BoundBody body, bool isFunction)
         {
             new Marker(body.TypeManager, isFunction).Visit(body);

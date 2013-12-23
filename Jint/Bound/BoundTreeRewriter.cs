@@ -224,7 +224,9 @@ namespace Jint.Bound
         public override BoundNode VisitNew(BoundNew node)
         {
             return node.Update(
-                Visit(node.Expression)
+                Visit(node.Expression),
+                VisitList(node.Arguments),
+                VisitList(node.Generics)
             );
         }
 

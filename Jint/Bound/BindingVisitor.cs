@@ -284,15 +284,7 @@ namespace Jint.Bound
 
         public BoundNode VisitFunction(FunctionSyntax syntax)
         {
-            _scope = new Scope(_scope, syntax.Body);
-
-            var function = new BoundFunction(
-                syntax.Name,
-                syntax.Parameters.ToReadOnlyArray(),
-                VisitBody(syntax.Body)
-            );
-
-            _scope = _scope.Parent;
+            var function = DeclareFunction(syntax);
 
             _functions.Add(function);
 
@@ -316,6 +308,21 @@ namespace Jint.Bound
             ));
 
             return builder.BuildExpression(temporary);
+        }
+
+        public BoundFunction DeclareFunction(FunctionSyntax syntax)
+        {
+            _scope = new Scope(_scope, syntax.Body);
+
+            var function = new BoundFunction(
+                syntax.Name,
+                syntax.Parameters.ToReadOnlyArray(),
+                VisitBody(syntax.Body)
+            );
+
+            _scope = _scope.Parent;
+
+            return function;
         }
 
         private BoundBody VisitBody(BodySyntax syntax)
@@ -491,8 +498,30 @@ namespace Jint.Bound
 
         public BoundNode VisitNew(NewSyntax syntax)
         {
+            var methodCall = syntax.Expression as MethodCallSyntax;
+
+            ExpressionSyntax expression = syntax.Expression;
+            var arguments = ReadOnlyArray<BoundCallArgument>.Empty;
+            var generics = ReadOnlyArray<BoundExpression>.Empty;
+
+            if (methodCall != null)
+            {
+                expression = methodCall.Expression;
+
+                arguments = methodCall.Arguments.Select(p =>
+                    new BoundCallArgument(
+                        BuildExpression(p.Expression),
+                        p.IsRef
+                    )
+                ).ToReadOnlyArray();
+
+                generics = methodCall.Generics.Select(BuildExpression).ToReadOnlyArray();
+            }
+
             return new BoundNew(
-                BuildExpression(syntax.Expression)
+                BuildExpression(expression),
+                arguments,
+                generics
             );
         }
 

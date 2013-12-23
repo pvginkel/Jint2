@@ -25,6 +25,15 @@ namespace Jint.Bound
             return node.Update(Perform(node.Body));
         }
 
+        public static BoundFunction Perform(BoundFunction node)
+        {
+            return node.Update(
+                node.Name,
+                node.Parameters,
+                Perform(node.Body)
+            );
+        }
+
         private static BoundBody Perform(BoundBody node)
         {
             if (node == null)

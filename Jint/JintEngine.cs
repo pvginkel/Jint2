@@ -421,16 +421,19 @@ namespace Jint
             }
             else
             {
-                var visitor = new ExpressionVisitor(Global, fileName);
-                var expression = program.Accept(visitor);
+                var bindingVisitor = new BindingVisitor();
 
-                PrintBound(program);
+                program.Accept(bindingVisitor);
 
-                PrintExpression(expression);
+                var boundProgram = SquelchPhase.Perform(bindingVisitor.Program);
+                DefiniteAssignmentPhase.Perform(boundProgram);
+                TypeMarkerPhase.Perform(boundProgram);
+
+                PrintBound(boundProgram);
 
                 EnsureGlobalsDeclared(program);
 
-                var method = visitor.BuildMainMethod((LambdaExpression)expression);
+                var method = new CodeGenerator(this).BuildMainMethod(boundProgram);
 
                 result = method(_runtime);
             }
@@ -444,15 +447,8 @@ namespace Jint
         }
 
         [Conditional("DEBUG")]
-        private void PrintBound(ProgramSyntax programSyntax)
+        private void PrintBound(BoundProgram program)
         {
-            var visitor = new BindingVisitor();
-            
-            programSyntax.Accept(visitor);
-
-            var program = SquelchPhase.Perform(visitor.Program);
-            DefiniteAssignmentPhase.Perform(program);
-            TypeMarkerPhase.Perform(program);
             var functions = FunctionGatherer.Gather(program);
 
             var bodies = new List<BoundBody> { program.Body };
@@ -528,9 +524,17 @@ namespace Jint
 
             PrepareTree(function);
 
+            var bindingVisitor = new BindingVisitor();
+
+            var boundFunction = bindingVisitor.DeclareFunction(function);
+
+            boundFunction = SquelchPhase.Perform(boundFunction);
+            DefiniteAssignmentPhase.Perform(boundFunction);
+            TypeMarkerPhase.Perform(boundFunction);
+
             return _runtime.CreateFunction(
                 function.Name,
-                new ExpressionVisitor(Global, null).DeclareFunction(function),
+                new CodeGenerator(this).BuildFunction(boundFunction),
                 null,
                 function.Parameters.ToArray(),
                 sourceCode

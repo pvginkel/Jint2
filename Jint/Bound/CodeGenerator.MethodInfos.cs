@@ -33,6 +33,7 @@ namespace Jint.Bound
         private static readonly MethodInfo _booleanToString = typeof(JsConvert).GetMethod("ToString", new[] { typeof(bool) });
         private static readonly MethodInfo _objectExecute = typeof(JsObject).GetMethod("Execute");
         private static readonly MethodInfo _methodBaseGetMethodFromHandle = typeof(MethodBase).GetMethod("GetMethodFromHandle", new[] { typeof(RuntimeMethodHandle) });
+        private static readonly MethodInfo _runtimeNew = typeof(JintRuntime).GetMethod("New");
 
         private static readonly FieldInfo _nullInstance = typeof(JsNull).GetField("Instance");
         private static readonly FieldInfo _undefinedInstance = typeof(JsUndefined).GetField("Instance");

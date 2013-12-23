@@ -36,9 +36,15 @@ return i;
         }
 
         [Test]
-        public void Fannkuch()
+        public void NewFunction()
         {
-            Test(JsUndefined.Instance, File.ReadAllText(@"..\..\SunSpider\Tests\access-fannkuch.js"));
+            Test(
+                7d,
+@"
+var f = new Function('x', 'return x * 3.5');
+return f(2);
+"
+            );
         }
     }
 }

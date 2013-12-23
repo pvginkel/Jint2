@@ -26,7 +26,7 @@ namespace Jint.Bound
         private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
         private readonly JintEngine _engine;
         private Scope _scope;
-        private TypeBuilder _typeBuilder;
+        private readonly TypeBuilder _typeBuilder;
         private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
 
         private ILBuilder IL
@@ -40,12 +40,6 @@ namespace Jint.Bound
                 throw new ArgumentNullException("engine");
 
             _engine = engine;
-        }
-
-        public Func<JintRuntime, object> BuildMainMethod(BoundProgram program)
-        {
-            if (program == null)
-                throw new ArgumentNullException("program");
 
             int typeId = Interlocked.Increment(ref _lastTypeId);
 
@@ -53,6 +47,12 @@ namespace Jint.Bound
                 "CompiledExpression" + typeId.ToString(CultureInfo.InvariantCulture),
                  TypeAttributes.Public
             );
+        }
+
+        public Func<JintRuntime, object> BuildMainMethod(BoundProgram program)
+        {
+            if (program == null)
+                throw new ArgumentNullException("program");
 
             var methodBuilder = BuildMethod(
                 MainMethodName,
@@ -91,6 +91,20 @@ namespace Jint.Bound
             DynamicAssemblyManager.FlushAssembly();
 
             return result;
+        }
+
+        public MethodInfo BuildFunction(BoundFunction function)
+        {
+            var method = DeclareFunction(function);
+
+            var methodInfo = _typeBuilder.CreateType().GetMethod(method.Name);
+
+            // We've build a complete script. Dump the assembly (with the right
+            // constants defined) so the generated assembly can be inspected.
+
+            DynamicAssemblyManager.FlushAssembly();
+
+            return methodInfo;
         }
 
         private MethodBuilder BuildMethod(string name, Type returnType, Type[] parameterTypes)
@@ -463,7 +477,7 @@ namespace Jint.Bound
                 case BoundKind.GetMember: return EmitGetMember((BoundGetMember)node);
                 case BoundKind.GetVariable: return EmitGetVariable((BoundGetVariable)node);
                 case BoundKind.HasMember: throw new NotImplementedException();
-                case BoundKind.New: throw new NotImplementedException();
+                case BoundKind.New: return EmitNew((BoundNew)node);
                 case BoundKind.NewBuiltIn: throw new NotImplementedException();
                 case BoundKind.RegEx: throw new NotImplementedException();
                 case BoundKind.Unary: return EmitUnary((BoundUnary)node);
@@ -471,10 +485,20 @@ namespace Jint.Bound
             }
         }
 
+        private BoundValueType EmitNew(BoundNew node)
+        {
+            _scope.EmitLoad(SpecialLocal.Runtime);
+            EmitBox(EmitExpression(node.Expression));
+
+            return EmitMethodArgumentsAndGenerics(
+                _runtimeNew,
+                node.Arguments,
+                node.Generics
+            );
+        }
+
         private BoundValueType EmitCall(BoundCall node)
         {
-            bool needWriteBack = node.Arguments.Any(p => p.IsRef && p.Expression.IsAssignable());
-
             // Emit the arguments to the call.
 
             EmitExpression(node.Method);
@@ -482,13 +506,24 @@ namespace Jint.Bound
             _scope.EmitLoad(SpecialLocal.Runtime);
             EmitBox(EmitExpression(node.Target));
 
+            return EmitMethodArgumentsAndGenerics(
+                _objectExecute,
+                node.Arguments,
+                node.Generics
+            );
+        }
+
+        private BoundValueType EmitMethodArgumentsAndGenerics(MethodInfo method, ReadOnlyArray<BoundCallArgument> arguments, ReadOnlyArray<BoundExpression> generics)
+        {
+            bool needWriteBack = arguments.Any(p => p.IsRef && p.Expression.IsAssignable());
+
             // Load the arguments array.
 
             LocalBuilder arrayLocal = null;
 
-            if (node.Arguments.Count > 0)
+            if (arguments.Count > 0)
             {
-                EmitObjectArrayInit(node.Arguments.Select(p => p.Expression));
+                EmitObjectArrayInit(arguments.Select(p => p.Expression));
 
                 // If we're doing a write back, we need to hold on to a reference
                 // to the array, so dup the stack element here and store it in
@@ -507,14 +542,14 @@ namespace Jint.Bound
             }
 
             // Emit the generics array.
-            if (node.Generics.Count > 0)
-                EmitObjectArrayInit(node.Generics);
+            if (generics.Count > 0)
+                EmitObjectArrayInit(generics);
             else
                 IL.Emit(OpCodes.Ldnull);
 
             // And execute the method.
 
-            IL.EmitCall(_objectExecute);
+            IL.EmitCall(method);
 
             // The result is now on the stack, which we leave there as the result
             // of this emit.
@@ -524,9 +559,9 @@ namespace Jint.Bound
                 // We need to read the arguments back for when the ExecuteFunction
                 // has out parameters for native calls.
 
-                for (int i = 0; i < node.Arguments.Count; i++)
+                for (int i = 0; i < arguments.Count; i++)
                 {
-                    var argument = node.Arguments[i];
+                    var argument = arguments[i];
 
                     if (!argument.IsRef || !argument.IsAssignable())
                         continue;
@@ -674,7 +709,7 @@ namespace Jint.Bound
             return BoundValueType.Object;
         }
 
-        public MethodInfo DeclareFunction(BoundFunction function)
+        private MethodInfo DeclareFunction(BoundFunction function)
         {
             var methodBuilder = BuildMethod(
                 GetFunctionName(function),
@@ -1021,194 +1056,6 @@ namespace Jint.Bound
             IL.EmitConstant(node.Value);
             return node.ValueType;
         }
-
-        /*
-        public override void VisitBinary(BoundBinary node)
-        {
-            Visit(node.Left);
-            Visit(node.Right);
-        }
-
-        public override void VisitBlock(BoundBlock node)
-        {
-            VisitList(node.Nodes);
-        }
-
-        public override void VisitBody(BoundBody node)
-        {
-            Visit(node.Body);
-        }
-
-        public override void VisitBreak(BoundBreak node)
-        {
-        }
-
-        public override void VisitCall(BoundCall node)
-        {
-            Visit(node.Target);
-            Visit(node.Method);
-            VisitList(node.Arguments);
-            VisitList(node.Generics);
-        }
-
-        public override void VisitCallArgument(BoundCallArgument node)
-        {
-            Visit(node.Expression);
-        }
-
-        public override void VisitCatch(BoundCatch node)
-        {
-            Visit(node.Body);
-        }
-
-        public override void VisitContinue(BoundContinue node)
-        {
-        }
-
-        public override void VisitCreateFunction(BoundCreateFunction node)
-        {
-        }
-
-        public override void VisitDeleteMember(BoundDeleteMember node)
-        {
-            Visit(node.Expression);
-            Visit(node.Index);
-        }
-
-        public override void VisitDoWhile(BoundDoWhile node)
-        {
-            Visit(node.Test);
-            Visit(node.Body);
-        }
-
-        public override void VisitEmpty(BoundEmpty node)
-        {
-        }
-
-        public override void VisitExpressionBlock(BoundExpressionBlock node)
-        {
-            Visit(node.Body);
-        }
-
-        public override void VisitExpressionStatement(BoundExpressionStatement node)
-        {
-            Visit(node.Expression);
-        }
-
-        public override void VisitFinally(BoundFinally node)
-        {
-            Visit(node.Body);
-        }
-
-        public override void VisitFor(BoundFor node)
-        {
-            Visit(node.Initialization);
-            Visit(node.Test);
-            Visit(node.Increment);
-            Visit(node.Body);
-        }
-
-        public override void VisitForEachIn(BoundForEachIn node)
-        {
-            Visit(node.Expression);
-            Visit(node.Body);
-        }
-
-        public override void VisitGetMember(BoundGetMember node)
-        {
-            Visit(node.Expression);
-            Visit(node.Index);
-        }
-
-        public override void VisitGetVariable(BoundGetVariable node)
-        {
-        }
-
-        public override void VisitHasMember(BoundHasMember node)
-        {
-            Visit(node.Expression);
-            Visit(node.Index);
-        }
-
-        public override void VisitIf(BoundIf node)
-        {
-            Visit(node.Test);
-            Visit(node.Then);
-            Visit(node.Else);
-        }
-
-        public override void VisitLabel(BoundLabel node)
-        {
-            Visit(node.Statement);
-        }
-
-        public override void VisitNew(BoundNew node)
-        {
-            Visit(node.Expression);
-        }
-
-        public override void VisitNewBuiltIn(BoundNewBuiltIn node)
-        {
-        }
-
-        public override void VisitRegex(BoundRegex node)
-        {
-        }
-
-        public override void VisitSetAccessor(BoundSetAccessor node)
-        {
-            Visit(node.Expression);
-            Visit(node.Index);
-            Visit(node.GetFunction);
-            Visit(node.SetFunction);
-        }
-
-        public override void VisitSetMember(BoundSetMember node)
-        {
-            Visit(node.Expression);
-            Visit(node.Index);
-            Visit(node.Value);
-        }
-
-        public override void VisitSetVariable(BoundSetVariable node)
-        {
-            Visit(node.Value);
-        }
-
-        public override void VisitSwitch(BoundSwitch node)
-        {
-            VisitList(node.Cases);
-        }
-
-        public override void VisitSwitchCase(BoundSwitchCase node)
-        {
-            Visit(node.Expression);
-            Visit(node.Body);
-        }
-
-        public override void VisitThrow(BoundThrow node)
-        {
-            Visit(node.Expression);
-        }
-
-        public override void VisitTry(BoundTry node)
-        {
-            Visit(node.Try);
-            Visit(node.Catch);
-            Visit(node.Finally);
-        }
-
-        public override void VisitUnary(BoundUnary node)
-        {
-            Visit(node.Operand);
-        }
-
-        public override void VisitWhile(BoundWhile node)
-        {
-            Visit(node.Test);
-            Visit(node.Body);
-        }
-         * */
 
         private enum SpecialLocal
         {
