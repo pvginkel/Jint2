@@ -7,19 +7,12 @@ namespace Jint.Expressions
 {
     internal class ValueSyntax : ExpressionSyntax
     {
-        private readonly ValueType _valueType;
-
         public override SyntaxType Type
         {
             get { return SyntaxType.Value; }
         }
 
         public object Value { get; private set; }
-
-        public override ValueType ValueType
-        {
-            get { return _valueType; }
-        }
 
         public override bool IsLiteral
         {
@@ -32,7 +25,6 @@ namespace Jint.Expressions
                 throw new ArgumentNullException("value");
 
             Value = value;
-            _valueType = SyntaxUtil.GetValueType(value.GetType());
         }
 
         [DebuggerStepThrough]

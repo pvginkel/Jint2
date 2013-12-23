@@ -23,16 +23,6 @@ namespace Jint.Bound
                 {
                     var name = method.Name.Substring(prefix.Length);
 
-#if DEBUG
-                    // TODO: Once syntax is gone, we can rename Operation_SetIndex
-                    // to Operation_SetMember.
-
-                    if (name == "SetIndex")
-                        name = "SetMember";
-                    if (name == "Index")
-                        name = "Member";
-#endif
-
                     var operation = (Operation)Enum.Parse(typeof(Operation), name);
 
                     var parameters = method.GetParameters();

@@ -55,7 +55,6 @@ namespace Jint.Tests.TypeMarking
             var programSyntax = JintEngine.Compile(script);
 
             programSyntax.Accept(new VariableMarkerPhase(new JintEngine()));
-            programSyntax.Accept(new Compiler.TypeMarkerPhase());
 
             var visitor = new BindingVisitor();
 

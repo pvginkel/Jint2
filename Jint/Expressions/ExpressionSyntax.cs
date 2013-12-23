@@ -6,6 +6,5 @@ namespace Jint.Expressions
 {
     internal abstract class ExpressionSyntax : SyntaxNode
     {
-        public abstract ValueType ValueType { get; }
     }
 }

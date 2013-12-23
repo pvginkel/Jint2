@@ -16,7 +16,6 @@ using Jint.Expressions;
 using Jint.Native;
 using Jint.Native.Interop;
 using Jint.Parser;
-using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
 using TypeMarkerPhase = Jint.Bound.TypeMarkerPhase;
 
@@ -408,8 +407,6 @@ namespace Jint
             if (program == null)
                 throw new ArgumentNullException("program");
 
-            PrepareTree(program);
-
             object result;
 
             if (program.IsLiteral)
@@ -421,6 +418,8 @@ namespace Jint
             }
             else
             {
+                PrepareTree(program);
+
                 var bindingVisitor = new BindingVisitor();
 
                 program.Accept(bindingVisitor);
@@ -431,7 +430,7 @@ namespace Jint
 
                 PrintBound(boundProgram);
 
-                EnsureGlobalsDeclared(program);
+                EnsureGlobalsDeclared(boundProgram);
 
                 var method = new CodeGenerator(this).BuildMainMethod(boundProgram);
 
@@ -470,24 +469,23 @@ namespace Jint
             }
         }
 
-        private void EnsureGlobalsDeclared(ProgramSyntax program)
+        private void EnsureGlobalsDeclared(BoundProgram program)
         {
             var scope = Global.GlobalScope;
 
-            foreach (var declaredVariable in program.Body.DeclaredVariables)
+            foreach (var local in program.Body.Locals)
             {
                 if (
-                    declaredVariable.IsDeclared &&
-                    !scope.HasOwnProperty(declaredVariable.Name)
+                    local.IsDeclared &&
+                    !scope.HasOwnProperty(local.Name)
                 )
-                    scope.DefineProperty(declaredVariable.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
+                    scope.DefineProperty(local.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
             }
         }
 
         private void PrepareTree(SyntaxNode node)
         {
             node.Accept(new VariableMarkerPhase(this));
-            node.Accept(new Compiler.TypeMarkerPhase());
         }
 
         internal JsObject CompileFunction(object[] parameters)

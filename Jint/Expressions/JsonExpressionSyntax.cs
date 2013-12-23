@@ -36,11 +36,6 @@ namespace Jint.Expressions
             get { return SyntaxType.Json; }
         }
 
-        public override ValueType ValueType
-        {
-            get { return ValueType.Object; }
-        }
-
         [DebuggerStepThrough]
         public override void Accept(ISyntaxVisitor visitor)
         {

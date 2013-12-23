@@ -27,11 +27,6 @@ namespace Jint.Expressions
         public string Name { get; private set; }
         public Variable Target { get; set; }
 
-        public override ValueType ValueType
-        {
-            get { return Target.ValueType; }
-        }
-
         public IdentifierSyntax(string name)
         {
             if (name == null)

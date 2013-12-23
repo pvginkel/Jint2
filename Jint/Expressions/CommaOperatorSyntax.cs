@@ -20,11 +20,6 @@ namespace Jint.Expressions
 
         public IList<ExpressionSyntax> Expressions { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return Expressions[Expressions.Count - 1].ValueType; }
-        }
-
         public CommaOperatorSyntax(IEnumerable<ExpressionSyntax> expressions)
         {
             if (expressions == null)

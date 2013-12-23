@@ -16,57 +16,6 @@ namespace Jint.Expressions
         public ExpressionSyntax Right { get; private set; }
         public SyntaxExpressionType Operation { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return ResolveValueType(Operation, Left.ValueType, Right.ValueType); }
-        }
-
-        public static ValueType ResolveValueType(SyntaxExpressionType operation, ValueType left, ValueType right)
-        {
-            switch (operation)
-            {
-                case SyntaxExpressionType.And:
-                case SyntaxExpressionType.Or:
-                    if (left == right)
-                        return left;
-
-                    return ValueType.Unknown;
-
-                case SyntaxExpressionType.Add:
-                    if (left == ValueType.String || right == ValueType.String)
-                        return ValueType.String;
-
-                    return ValueType.Number;
-
-                case SyntaxExpressionType.BitwiseAnd:
-                case SyntaxExpressionType.BitwiseExclusiveOr:
-                case SyntaxExpressionType.BitwiseOr:
-                case SyntaxExpressionType.Divide:
-                case SyntaxExpressionType.LeftShift:
-                case SyntaxExpressionType.RightShift:
-                case SyntaxExpressionType.UnsignedRightShift:
-                case SyntaxExpressionType.Modulo:
-                case SyntaxExpressionType.Multiply:
-                case SyntaxExpressionType.Subtract:
-                    return ValueType.Number;
-
-                case SyntaxExpressionType.Equal:
-                case SyntaxExpressionType.NotEqual:
-                case SyntaxExpressionType.Same:
-                case SyntaxExpressionType.NotSame:
-                case SyntaxExpressionType.LessThan:
-                case SyntaxExpressionType.LessThanOrEqual:
-                case SyntaxExpressionType.GreaterThan:
-                case SyntaxExpressionType.GreaterThanOrEqual:
-                case SyntaxExpressionType.In:
-                case SyntaxExpressionType.InstanceOf:
-                    return ValueType.Boolean;
-
-                default:
-                    throw new ArgumentOutOfRangeException("operation");
-            }
-        }
-
         public BinarySyntax(SyntaxExpressionType operation, ExpressionSyntax left, ExpressionSyntax right)
         {
             if (left == null)

@@ -16,21 +16,6 @@ namespace Jint.Expressions
         public ExpressionSyntax Left { get; private set; }
         public ExpressionSyntax Right { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get
-            {
-                if (Operation == AssignmentOperator.Assign)
-                    return Right.ValueType;
-
-                return BinarySyntax.ResolveValueType(
-                    GetSyntaxType(Operation),
-                    Left.ValueType,
-                    Right.ValueType
-                );
-            }
-        }
-
         public AssignmentSyntax(AssignmentOperator operation, ExpressionSyntax left, ExpressionSyntax right)
         {
             if (left == null)

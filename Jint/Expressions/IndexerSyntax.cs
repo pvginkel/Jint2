@@ -14,11 +14,6 @@ namespace Jint.Expressions
 
         public ExpressionSyntax Index { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return ValueType.Unknown; }
-        }
-
         public IndexerSyntax(ExpressionSyntax expression, ExpressionSyntax index)
             : base(expression)
         {

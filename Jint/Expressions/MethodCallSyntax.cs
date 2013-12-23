@@ -17,11 +17,6 @@ namespace Jint.Expressions
         public IList<MethodArgument> Arguments { get; private set; }
         public IList<ExpressionSyntax> Generics { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return ValueType.Unknown; }
-        }
-
         public MethodCallSyntax(ExpressionSyntax expression, IEnumerable<MethodArgument> arguments, IEnumerable<ExpressionSyntax> generics)
         {
             if (expression == null)

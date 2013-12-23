@@ -15,11 +15,6 @@ namespace Jint.Expressions
         public string Regexp { get; private set; }
         public string Options { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return ValueType.Object; }
-        }
-
         public RegexpSyntax(string regexp, string options)
         {
             if (regexp == null)

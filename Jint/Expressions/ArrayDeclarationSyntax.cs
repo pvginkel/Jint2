@@ -28,11 +28,6 @@ namespace Jint.Expressions
 
         public IList<SyntaxNode> Parameters { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return ValueType.Object; }
-        }
-
         public ArrayDeclarationSyntax(IEnumerable<SyntaxNode> parameters)
         {
             if (parameters == null)

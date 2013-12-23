@@ -39,7 +39,7 @@ namespace Jint.Bound
                     if (variable.Index >= 0)
                         _arguments.Add(variable, new BoundArgument(variable.Name, variable.Index));
                     else if (variable.ClosureField == null)
-                        _locals.Add(variable, new BoundLocal(variable.Name, TypeManager.CreateType(BoundTypeKind.Local)));
+                        _locals.Add(variable, new BoundLocal(variable.Name, variable.IsDeclared, TypeManager.CreateType(BoundTypeKind.Local)));
                 }
             }
 

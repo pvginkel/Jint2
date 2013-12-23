@@ -379,7 +379,7 @@ namespace Jint.Native
             return (long)JsValue.ToNumber(left) >> (ushort)right;
         }
 
-        public object Operation_Index(object obj, object index)
+        public object Operation_Member(object obj, object index)
         {
             var @object = obj as JsObject;
             if (@object != null)
@@ -392,21 +392,21 @@ namespace Jint.Native
             return GetMemberOnPrototype(obj, index);
         }
 
-        public object Operation_Index(JsObject obj, object index)
+        public object Operation_Member(JsObject obj, object index)
         {
             return obj.GetProperty(index);
         }
 
-        public object Operation_Index(object obj, double index)
+        public object Operation_Member(object obj, double index)
         {
             var @object = obj as JsObject;
             if (@object != null)
-                return Operation_Index(@object, index);
+                return Operation_Member(@object, index);
 
-            return Operation_Index(obj, (object)index);
+            return Operation_Member(obj, (object)index);
         }
 
-        public object Operation_Index(JsObject obj, double index)
+        public object Operation_Member(JsObject obj, double index)
         {
             int intIndex = (int)index;
             if (index == intIndex)
@@ -419,12 +419,12 @@ namespace Jint.Native
             return obj.GetProperty(index);
         }
 
-        public static object Operation_SetIndex(object obj, double index, object value)
+        public static object Operation_SetMember(object obj, double index, object value)
         {
-            return Operation_SetIndex((JsObject)obj, index, value);
+            return Operation_SetMember((JsObject)obj, index, value);
         }
 
-        public static object Operation_SetIndex(JsObject obj, double index, object value)
+        public static object Operation_SetMember(JsObject obj, double index, object value)
         {
             int intIndex = (int)index;
             if (index == intIndex)
@@ -442,7 +442,7 @@ namespace Jint.Native
             return value;
         }
 
-        public static object Operation_SetIndex(object obj, object index, object value)
+        public static object Operation_SetMember(object obj, object index, object value)
         {
             ((JsObject)obj).SetProperty(index, value);
 

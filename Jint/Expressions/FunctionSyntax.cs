@@ -19,11 +19,6 @@ namespace Jint.Expressions
         public Variable Target { get; private set; }
         public SourceLocation Location { get; private set; }
 
-        public override ValueType ValueType
-        {
-            get { return ValueType.Unknown; }
-        }
-
         public FunctionSyntax(string name, IEnumerable<string> parameters, BodySyntax body, Variable target, SourceLocation location)
         {
             if (parameters == null)

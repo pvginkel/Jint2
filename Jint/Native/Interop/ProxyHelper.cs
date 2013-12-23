@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using ExpressionVisitor = Jint.Compiler.ExpressionVisitor;
 
 namespace Jint.Native.Interop
 {
@@ -581,7 +580,7 @@ namespace Jint.Native.Interop
                 typeof(JsObject).GetMethod("Execute"),
                 Expression.Constant(runtime),
                 Expression.Constant(that),
-                ExpressionVisitor.MakeArrayInit(
+                MakeArrayInit(
                     parameters.Select(p => Expression.Call(
                         Expression.Constant(runtime.Global.Marshaller),
                         typeof(Marshaller).GetMethod("MarshalClrValue").MakeGenericMethod(p.Type),
@@ -611,6 +610,24 @@ namespace Jint.Native.Interop
             );
 
             return lambda.Compile();
+        }
+
+        private static Expression MakeArrayInit(IEnumerable<Expression> initializers, Type elementType, bool nullWhenEmpty)
+        {
+            var expressions = initializers.ToList();
+
+            if (expressions.Count == 0)
+            {
+                if (nullWhenEmpty)
+                    return Expression.Constant(null, elementType.MakeArrayType());
+
+                if (elementType == typeof(object[]))
+                    return Expression.Field(null, typeof(JsValue).GetField("EmptyArray"));
+
+                return Expression.NewArrayBounds(elementType, Expression.Constant(0));
+            }
+
+            return Expression.NewArrayInit(elementType, expressions);
         }
     }
 }

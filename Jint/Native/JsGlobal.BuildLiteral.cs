@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
-using ValueType = Jint.Expressions.ValueType;
 
 namespace Jint.Native
 {
@@ -43,13 +42,7 @@ namespace Jint.Native
 
             public override object VisitValue(ValueSyntax syntax)
             {
-                switch (syntax.ValueType)
-                {
-                    case ValueType.Boolean: return BooleanBoxes.Box((bool)syntax.Value);
-                    case ValueType.Number: return (double)syntax.Value;
-                    case ValueType.String: return (string)syntax.Value;
-                    default: throw new InvalidOperationException();
-                }
+                return syntax.Value;
             }
 
             public override object VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
