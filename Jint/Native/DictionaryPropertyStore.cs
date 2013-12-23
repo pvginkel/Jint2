@@ -24,6 +24,13 @@ namespace Jint.Native
 
         public object GetOwnPropertyRaw(object index)
         {
+            // Overload resolution prefers this overload instead of
+            // FastPropertyStore.GetOwnPropertyRaw(int). Because of this, references
+            // to the DictionaryPropertyStore that need that overload, need to
+            // cast the reference to FastPropertyStore.
+
+            Debug.Assert(!(index is int));
+
             return base.GetOwnPropertyRaw(_global.ResolveIdentifier(JsValue.ToString(index)));
         }
 
@@ -33,7 +40,7 @@ namespace Jint.Native
             // existing, property in the store. GetAttributes throws when the
             // entry is not in the set.
 
-            Debug.Assert(!(GetOwnPropertyRaw(index) is PropertyAccessor));
+            Debug.Assert(!(base.GetOwnPropertyRaw(index) is PropertyAccessor));
 
             var attributes = GetAttributes(index);
             if ((attributes & PropertyAttributes.ReadOnly) != 0)
@@ -72,7 +79,7 @@ namespace Jint.Native
 
         public void DefineProperty(int index, object value, PropertyAttributes attributes)
         {
-            Debug.Assert(GetOwnPropertyRaw(index) == null);
+            Debug.Assert(base.GetOwnPropertyRaw(index) == null);
 
             Add(
                 index,

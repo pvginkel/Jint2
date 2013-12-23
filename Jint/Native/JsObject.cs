@@ -142,8 +142,7 @@ namespace Jint.Native
             var result = Global.ExecuteFunction(
                 (JsObject)function,
                 this,
-                JsValue.EmptyArray,
-                null
+                JsValue.EmptyArray
             );
 
             if (JsValue.IsPrimitive(result))
@@ -241,7 +240,7 @@ namespace Jint.Native
             var @this = Global.CreateObject((JsObject)GetProperty(Id.prototype));
             var boxedThis = (object)@this;
 
-            var result = Delegate.Delegate(runtime, boxedThis, this, Delegate.Closure, arguments, null) as JsObject;
+            var result = Delegate.Delegate(runtime, boxedThis, this, Delegate.Closure, arguments) as JsObject;
 
             if (result != null)
                 return result;
@@ -249,12 +248,12 @@ namespace Jint.Native
             return boxedThis;
         }
 
-        public object Execute(JintRuntime runtime, object @this, object[] arguments, object[] genericArguments)
+        public object Execute(JintRuntime runtime, object @this, object[] arguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
 
-            return Delegate.Delegate(runtime, @this, this, Delegate.Closure, arguments, genericArguments);
+            return Delegate.Delegate(runtime, @this, this, Delegate.Closure, arguments);
         }
 
         public override int GetHashCode()

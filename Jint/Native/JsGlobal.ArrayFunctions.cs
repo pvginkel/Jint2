@@ -9,7 +9,7 @@ namespace Jint.Native
     {
         private static class ArrayFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
@@ -30,13 +30,13 @@ namespace Jint.Native
             }
 
             // 15.4.4.2
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
-                return ((JsObject)runtime.Global.ArrayClass.GetProperty(Id.join)).Execute(runtime, @this, JsValue.EmptyArray, null);
+                return ((JsObject)runtime.Global.ArrayClass.GetProperty(Id.join)).Execute(runtime, @this, JsValue.EmptyArray);
             }
 
             // 15.4.4.3
-            public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var global = runtime.Global;
                 var store = @this.FindArrayStore();
@@ -50,7 +50,7 @@ namespace Jint.Native
                     resultStore.DefineOrSetPropertyValue(
                         i,
                         ((JsObject)obj.GetProperty(Id.toLocaleString)).Execute(
-                            runtime, obj, arguments, null
+                            runtime, obj, arguments
                         )
                     );
                 }
@@ -59,7 +59,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.4
-            public static object Concat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Concat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
@@ -73,7 +73,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.5
-            public static object Join(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Join(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
@@ -83,7 +83,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.6
-            public static object Pop(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Pop(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
@@ -99,7 +99,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.7
-            public static object Push(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Push(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var store = @this.FindArrayStore();
 
@@ -128,7 +128,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.8
-            public static object Reverse(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Reverse(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
@@ -158,7 +158,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.9
-            public static object Shift(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Shift(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var store = @this.FindArrayStore();
                 if (store == null)
@@ -198,7 +198,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.10
-            public static object Slice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Slice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var global = runtime.Global;
                 var target = (JsObject)@this;
@@ -225,8 +225,7 @@ namespace Jint.Native
                     push.Execute(
                         runtime,
                         boxedResult,
-                        new[] { target.GetProperty(i) },
-                        null
+                        new[] { target.GetProperty(i) }
                     );
                 }
 
@@ -234,7 +233,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.11
-            public static object Sort(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Sort(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 int length = 0;
                 var target = @this as JsObject;
@@ -284,7 +283,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.12
-            public static object Splice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Splice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
@@ -367,7 +366,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.13
-            public static object UnShift(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object UnShift(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
@@ -395,7 +394,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.15
-            public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length == 0)
                     return (double)(-1);
@@ -435,7 +434,7 @@ namespace Jint.Native
             }
 
             // 15.4.4.15
-            public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length == 0)
                     return (double)(-1);
@@ -471,12 +470,12 @@ namespace Jint.Native
                 return (double)(-1);
             }
 
-            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)@this.FindArrayStore().Length;
             }
 
-            public static object SetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object SetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 var store = target.FindArrayStore();

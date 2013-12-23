@@ -139,7 +139,7 @@ namespace Jint
 
             var @this = Global.CreateObject(NativeFactory.WrappingMarker, constructor.Prototype);
 
-            constructor.Execute(_runtime, @this, JsValue.EmptyArray, null);
+            constructor.Execute(_runtime, @this, JsValue.EmptyArray);
 
             @this.IsClr = true;
             @this.Value = value;
@@ -304,7 +304,7 @@ namespace Jint
             );
         }
 
-        private object DummyPropertyGetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+        private object DummyPropertyGetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
         {
             return JsUndefined.Instance;
         }

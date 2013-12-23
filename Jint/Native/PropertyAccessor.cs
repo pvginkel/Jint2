@@ -24,8 +24,7 @@ namespace Jint.Native
             return Getter.Global.ExecuteFunction(
                 Getter,
                 @this,
-                JsValue.EmptyArray,
-                null
+                JsValue.EmptyArray
             );
         }
 
@@ -34,8 +33,7 @@ namespace Jint.Native
             Setter.Global.ExecuteFunction(
                 Setter,
                 @this,
-                new[] { value },
-                null
+                new[] { value }
             );
         }
     }

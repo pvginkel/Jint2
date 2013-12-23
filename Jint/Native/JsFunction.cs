@@ -10,7 +10,6 @@ namespace Jint.Native
         object @this,
         JsObject callee,
         object closure,
-        object[] arguments,
-        object[] genericArguments
+        object[] arguments
     );
 }

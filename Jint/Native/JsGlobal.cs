@@ -127,12 +127,12 @@ namespace Jint.Native
             return _identifiersByIndex[-index];
         }
 
-        public object ExecuteFunction(JsObject function, object that, object[] arguments, object[] genericParameters)
+        public object ExecuteFunction(JsObject function, object that, object[] arguments)
         {
             if (function == null)
                 throw new ArgumentNullException("function");
 
-            return function.Execute(_runtime, that, arguments, genericParameters);
+            return function.Execute(_runtime, that, arguments);
         }
     }
 }

@@ -71,77 +71,77 @@ namespace Jint.Native
 
         private static class GlobalFunctions
         {
-            public static object ToBoolean(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToBoolean(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return BooleanBoxes.Box(Convert.ToBoolean(JsValue.UnwrapValue(arguments[0])));
             }
 
-            public static object ToByte(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToByte(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToByte(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToChar(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToChar(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToChar(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToDateTime(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToDateTime(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return runtime.Global.CreateDate((DateTime)JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToDecimal(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToDecimal(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToDecimal(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToDouble(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToDouble(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return Convert.ToDouble(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToInt16(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToInt16(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToInt16(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToInt32(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToInt32(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToInt32(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToInt64(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToInt64(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToInt64(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToSByte(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToSByte(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToSByte(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToSingle(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToSingle(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToSingle(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return JsValue.ToString(@this);
             }
 
-            public static object ToUInt16(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToUInt16(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToUInt16(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToUInt32(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToUInt32(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToUInt32(JsValue.UnwrapValue(arguments[0]));
             }
 
-            public static object ToUInt64(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToUInt64(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return (double)Convert.ToUInt64(JsValue.UnwrapValue(arguments[0]));
             }
@@ -149,7 +149,7 @@ namespace Jint.Native
             /// <summary>
             /// 15.1.2.1
             /// </summary>
-            public static object Eval(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Eval(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (!(arguments[0] is string))
                     return arguments[0];
@@ -160,7 +160,7 @@ namespace Jint.Native
             /// <summary>
             /// 15.1.2.2
             /// </summary>
-            public static object ParseInt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ParseInt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return JsUndefined.Instance;
@@ -235,7 +235,7 @@ namespace Jint.Native
             /// <summary>
             /// 15.1.2.3
             /// </summary>
-            public static object ParseFloat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ParseFloat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return JsUndefined.Instance;
@@ -256,7 +256,7 @@ namespace Jint.Native
             /// <summary>
             /// 15.1.2.4
             /// </summary>
-            public static object IsNaN(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object IsNaN(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1)
                 {
@@ -269,7 +269,7 @@ namespace Jint.Native
             /// <summary>
             /// 15.1.2.5
             /// </summary>
-            public static object IsFinite(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object IsFinite(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return BooleanBoxes.False;
@@ -283,7 +283,7 @@ namespace Jint.Native
                 );
             }
 
-            public static object DecodeURI(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object DecodeURI(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return String.Empty;
@@ -291,7 +291,7 @@ namespace Jint.Native
                 return Uri.UnescapeDataString(JsValue.ToString(arguments[0]).Replace("+", " "));
             }
 
-            public static object EncodeURI(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object EncodeURI(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return String.Empty;
@@ -311,7 +311,7 @@ namespace Jint.Native
                 return encoded.ToUpper();
             }
 
-            public static object DecodeURIComponent(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object DecodeURIComponent(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return String.Empty;
@@ -319,7 +319,7 @@ namespace Jint.Native
                 return Uri.UnescapeDataString(JsValue.ToString(arguments[0]).Replace("+", " "));
             }
 
-            public static object EncodeURIComponent(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object EncodeURIComponent(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (arguments.Length < 1 || JsValue.IsUndefined(arguments[0]))
                     return String.Empty;

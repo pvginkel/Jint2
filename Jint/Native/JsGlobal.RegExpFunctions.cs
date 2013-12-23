@@ -10,7 +10,7 @@ namespace Jint.Native
     {
         private static class RegExpFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
 
@@ -48,7 +48,7 @@ namespace Jint.Native
                 return target;
             }
 
-            public static object Exec(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Exec(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 var regexp = (RegExpManager)target.Value;
@@ -78,16 +78,16 @@ namespace Jint.Native
                 return array;
             }
 
-            public static object Test(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Test(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var regexp = (JsObject)@this;
-                var matches = ((JsObject)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments, null);
+                var matches = ((JsObject)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments);
                 var store = matches.FindArrayStore();
 
                 return BooleanBoxes.Box(store != null && store.Length > 0);
             }
 
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var regexp = (RegExpManager)((JsObject)@this).Value;
 
@@ -99,7 +99,7 @@ namespace Jint.Native
                     (regexp.IsMultiLine ? "m" : String.Empty);
             }
 
-            public static object GetLastIndex(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object GetLastIndex(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 return ((JsObject)@this).GetProperty(Id.lastIndex);
             }

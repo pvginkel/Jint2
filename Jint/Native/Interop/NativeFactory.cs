@@ -244,7 +244,7 @@ namespace Jint.Native.Interop
                 _properties = properties;
             }
 
-            public object Execute(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public object Execute(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
 

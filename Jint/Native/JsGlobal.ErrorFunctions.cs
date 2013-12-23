@@ -9,7 +9,7 @@ namespace Jint.Native
     {
         private static class ErrorFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
@@ -24,7 +24,7 @@ namespace Jint.Native
                 return target;
             }
 
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
 

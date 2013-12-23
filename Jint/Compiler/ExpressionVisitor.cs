@@ -898,8 +898,7 @@ namespace Jint.Compiler
                 thisParameter,
                 functionParameter,
                 closureParameter,
-                argumentsParameter,
-                Expression.Parameter(typeof(object[]), "genericArguments")
+                argumentsParameter
             };
 
             // Initialize our closure.
@@ -1181,7 +1180,7 @@ namespace Jint.Compiler
 
             Expression argumentsExpression;
 
-            if (syntax.Arguments.Count > 0)
+            if (syntax.Arguments.Count > 0 || syntax.Generics.Count > 0)
             {
                 var expressions = new List<Expression>();
 
@@ -1197,6 +1196,14 @@ namespace Jint.Compiler
 
                     if (argument.IsRef && argument.Expression.IsAssignable)
                         needWriteBack = true;
+                }
+
+                if (syntax.Generics.Count > 0)
+                {
+                    expressions.Add(Expression.New(
+                        typeof(JsGenericArguments).GetConstructor(new[] { typeof(object[]) }),
+                        MakeArrayInit(syntax.Generics, typeof(object), true)
+                    ));
                 }
 
                 var argumentsInit = MakeArrayInit(expressions, typeof(object), false);
@@ -1228,8 +1235,7 @@ namespace Jint.Compiler
                 typeof(JsObject).GetMethod("Execute"),
                 _scope.Runtime,
                 target,
-                argumentsExpression,
-                MakeArrayInit(syntax.Generics, typeof(object), true)
+                argumentsExpression
             );
 
             if (needWriteBack)
@@ -1378,14 +1384,24 @@ namespace Jint.Compiler
         {
             var methodCall = syntax.Expression as MethodCallSyntax;
 
-            IList<MethodArgument> arguments = null;
-            IList<ExpressionSyntax> generics = null;
+            var arguments = new List<Expression>();
             var expression = syntax.Expression;
 
             if (methodCall != null)
             {
-                arguments = methodCall.Arguments;
-                generics = methodCall.Generics;
+                if (methodCall.Arguments.Count > 0 || methodCall.Generics.Count > 0)
+                {
+                    arguments.AddRange(methodCall.Arguments.Select(p => EnsureJs(p.Expression.Accept(this))));
+
+                    if (methodCall.Generics.Count > 0)
+                    {
+                        arguments.Add(Expression.New(
+                            typeof(JsGenericArguments).GetConstructor(new[] { typeof(object[]) }),
+                            MakeArrayInit(methodCall.Generics, typeof(object), true)
+                        ));
+                    }
+                }
+
                 expression = methodCall.Expression;
             }
 
@@ -1393,12 +1409,7 @@ namespace Jint.Compiler
                 _scope.Runtime,
                 typeof(JintRuntime).GetMethod("New"),
                 EnsureJs(expression.Accept(this)),
-                MakeArrayInit(
-                    arguments == null ? null : arguments.Select(p => p.Expression),
-                    typeof(object),
-                    false
-                ),
-                MakeArrayInit(generics, typeof(object), true)
+                MakeArrayInit(arguments, typeof(object), false)
             );
         }
 

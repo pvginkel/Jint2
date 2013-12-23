@@ -559,7 +559,7 @@ namespace Jint
             var original = new object[argumentsCopy.Length];
             Array.Copy(argumentsCopy, original, argumentsCopy.Length);
 
-            var result = function.Execute(_runtime, JsNull.Instance, argumentsCopy, null);
+            var result = function.Execute(_runtime, JsNull.Instance, argumentsCopy);
 
             for (int i = 0; i < arguments.Length; i++)
             {
@@ -603,8 +603,7 @@ namespace Jint
             var result = function.Execute(
                 _runtime,
                 JsNull.Instance,
-                new[] { x, y },
-                null
+                new[] { x, y }
             );
 
             return (int)JsValue.ToNumber(result);

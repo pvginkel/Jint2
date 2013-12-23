@@ -10,7 +10,7 @@ namespace Jint.Native
     {
         private static class NumberFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
@@ -28,7 +28,7 @@ namespace Jint.Native
                 return @this;
             }
 
-            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 if (@this is double)
                     return @this;
@@ -36,10 +36,10 @@ namespace Jint.Native
                 return Convert.ToDouble(JsValue.UnwrapValue(@this));
             }
 
-            public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 // Remove arguments
-                return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
+                return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray);
             }
 
             private static readonly char[] RDigits =
@@ -50,7 +50,7 @@ namespace Jint.Native
                 'U', 'V', 'W', 'X', 'Y', 'Z'
             };
 
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 double value = JsValue.ToNumber(@this);
 
@@ -99,7 +99,7 @@ namespace Jint.Native
             }
 
             // 15.7.4.5
-            public static object ToFixed(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToFixed(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 int fractions = 0;
                 if (arguments.Length > 0)
@@ -117,12 +117,12 @@ namespace Jint.Native
             }
 
             // 15.7.4.6
-            public static object ToExponential(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToExponential(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 double value = JsValue.ToNumber(@this);
 
                 if (Double.IsInfinity(value) || Double.IsNaN(value))
-                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
+                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray);
 
                 int fractions = 16;
                 if (arguments.Length > 0)
@@ -136,18 +136,18 @@ namespace Jint.Native
             }
 
             // 15.7.4.7
-            public static object ToPrecision(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments, object[] genericArguments)
+            public static object ToPrecision(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
             {
                 double value = JsValue.ToNumber(@this);
 
                 if (Double.IsInfinity(value) || Double.IsNaN(value))
-                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
+                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray);
 
                 if (arguments.Length == 0)
                     throw new JsException(JsErrorType.SyntaxError, "Precision missing");
 
                 if (JsValue.IsUndefined(arguments[0]))
-                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray, null);
+                    return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray);
 
                 int precision = 0;
                 if (arguments.Length > 0)

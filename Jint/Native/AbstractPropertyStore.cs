@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Jint.Support;
 
 namespace Jint.Native
 {
@@ -19,7 +20,7 @@ namespace Jint.Native
 
         public virtual object GetOwnPropertyRaw(int index)
         {
-            return BaseStore.GetOwnPropertyRaw(index);
+            return ((FastPropertyStore)BaseStore).GetOwnPropertyRaw(index);
         }
 
         public virtual object GetOwnPropertyRaw(object index)

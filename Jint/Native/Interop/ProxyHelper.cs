@@ -59,7 +59,6 @@ namespace Jint.Native.Interop
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
-            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var methodThis = builder.MarshalThis(method.DeclaringType, method.IsStatic);
 
@@ -230,7 +229,6 @@ namespace Jint.Native.Interop
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
-            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var method = @delegate.Method;
 
@@ -311,7 +309,6 @@ namespace Jint.Native.Interop
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             builder.AddParameter(typeof(object[]), "arguments");
-            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var method = property.GetGetMethod();
 
@@ -343,7 +340,6 @@ namespace Jint.Native.Interop
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
-            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var method = property.GetSetMethod();
 
@@ -390,7 +386,6 @@ namespace Jint.Native.Interop
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             builder.AddParameter(typeof(object[]), "arguments");
-            builder.AddParameter(typeof(object[]), "genericArguments");
 
             builder.AddStatement(builder.UnMarshal(
                 Expression.Field(
@@ -423,7 +418,6 @@ namespace Jint.Native.Interop
             builder.AddParameter(typeof(JsObject), "callee");
             builder.AddParameter(typeof(object), "closure");
             var argumentsParameter = builder.AddParameter(typeof(object[]), "arguments");
-            builder.AddParameter(typeof(object[]), "genericArguments");
 
             var local = builder.AddLocal(typeof(object), "value");
 
@@ -595,8 +589,7 @@ namespace Jint.Native.Interop
                     )),
                     typeof(object),
                     false
-                ),
-                Expression.Constant(null, typeof(object[]))
+                )
             );
 
             if (invokeMethod.ReturnType != typeof(void))

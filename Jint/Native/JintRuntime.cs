@@ -97,26 +97,29 @@ namespace Jint.Native
             return Global.CreateError(errorClass, exception.Message);
         }
 
-        public object New(object target, object[] arguments, object[] generics)
+        public object New(object target, object[] arguments)
         {
             if (
                 _engine.IsClrAllowed &&
                 JsValue.IsUndefined(target)
             )
             {
+                var genericArguments = ExtractGenericArguments(ref arguments);
+
                 var undefined = (JsUndefined)target;
                 if (
                     !String.IsNullOrEmpty(undefined.Name) &&
-                    generics.Length > 0
+                    genericArguments != null &&
+                    genericArguments.Length > 0
                 )
                 {
-                    var genericParameters = new Type[generics.Length];
+                    var genericParameters = new Type[genericArguments.Length];
 
                     try
                     {
-                        for (int i = 0; i < generics.Length; i++)
+                        for (int i = 0; i < genericArguments.Length; i++)
                         {
-                            genericParameters[i] = (Type)JsValue.UnwrapValue(generics[i]);
+                            genericParameters[i] = (Type)JsValue.UnwrapValue(genericArguments[i]);
                         }
                     }
                     catch (Exception e)
@@ -132,6 +135,21 @@ namespace Jint.Native
                 throw new JsException(JsErrorType.Error, "Function expected.");
 
             return ((JsObject)target).Construct(this, arguments);
+        }
+
+        internal static object[] ExtractGenericArguments(ref object[] arguments)
+        {
+            if (arguments.Length > 0)
+            {
+                var genericArguments = arguments[arguments.Length - 1] as JsGenericArguments;
+                if (genericArguments != null)
+                {
+                    Array.Resize(ref arguments, arguments.Length - 1);
+                    return genericArguments.Arguments;
+                }
+            }
+
+            return null;
         }
 
         public int ResolveIdentifier(string name)
