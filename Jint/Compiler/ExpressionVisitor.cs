@@ -1047,7 +1047,7 @@ namespace Jint.Compiler
             return BuildMethod(
                 GetFunctionName(syntax),
                 typeof(object),
-                new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]), typeof(object[]) },
+                new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]) },
                 lambda
             );
         }

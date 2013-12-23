@@ -35,6 +35,8 @@ namespace Jint.Bound
         private static readonly MethodInfo _methodBaseGetMethodFromHandle = typeof(MethodBase).GetMethod("GetMethodFromHandle", new[] { typeof(RuntimeMethodHandle) });
         private static readonly MethodInfo _runtimeNew = typeof(JintRuntime).GetMethod("New");
 
+        private static readonly ConstructorInfo _genericArgumentsConstructor = typeof(JsGenericArguments).GetConstructor(new[] { typeof(object[]) });
+
         private static readonly FieldInfo _nullInstance = typeof(JsNull).GetField("Instance");
         private static readonly FieldInfo _undefinedInstance = typeof(JsUndefined).GetField("Instance");
         private static readonly FieldInfo _emptyObjectArray = typeof(JsValue).GetField("EmptyArray");

@@ -521,9 +521,43 @@ namespace Jint.Bound
 
             LocalBuilder arrayLocal = null;
 
-            if (arguments.Count > 0)
+            if (arguments.Count > 0 || generics.Count > 0)
             {
-                EmitObjectArrayInit(arguments.Select(p => p.Expression));
+                int count = arguments.Count;
+                if (generics.Count > 0)
+                    count++;
+
+                // Create the array to hold the arguments.
+                IL.EmitConstant(count);
+                IL.Emit(OpCodes.Newarr, typeof(object));
+
+                // Emit store for the elements.
+                EmitArrayElementsStore(arguments.Select(p => p.Expression));
+
+                // We smuggle the generic arguments into the last entry of the
+                // arguments array. If we have generic arguments, create a
+                // JsGenericArguments object to hold them and put it at the end
+                // of the array.
+
+                if (generics.Count > 0)
+                {
+                    // Dup the array reference for the Stelem. We're going to leave
+                    // the array reference on the stack.
+                    IL.Emit(OpCodes.Dup);
+                    // Emit the index the item is at.
+                    IL.EmitConstant(count - 1);
+
+                    // Emit the array to hold the generic arguments.
+                    IL.EmitConstant(generics.Count);
+                    IL.Emit(OpCodes.Newarr, typeof(object));
+                    // Store the generic arguments.
+                    EmitArrayElementsStore(generics);
+                    // Emit the JsGenericArguments object.
+                    IL.Emit(OpCodes.Newobj, _genericArgumentsConstructor);
+
+                    // Store the generic arguments in the array.
+                    IL.Emit(OpCodes.Stelem_Ref);
+                }
 
                 // If we're doing a write back, we need to hold on to a reference
                 // to the array, so dup the stack element here and store it in
@@ -540,12 +574,6 @@ namespace Jint.Bound
             {
                 IL.Emit(OpCodes.Ldsfld, _emptyObjectArray);
             }
-
-            // Emit the generics array.
-            if (generics.Count > 0)
-                EmitObjectArrayInit(generics);
-            else
-                IL.Emit(OpCodes.Ldnull);
 
             // And execute the method.
 
@@ -595,25 +623,19 @@ namespace Jint.Bound
             return BoundValueType.Object;
         }
 
-        private void EmitObjectArrayInit(IEnumerable<BoundExpression> expressions)
+        private void EmitArrayElementsStore(IEnumerable<BoundExpression> elements)
         {
-            var items = expressions.ToList();
-
-            // Create the array to hold the expressions.
-            IL.EmitConstant(items.Count);
-            IL.Emit(OpCodes.Newarr, typeof(object));
+            var items = elements.ToList();
 
             for (int i = 0; i < items.Count; i++)
             {
-                var item = items[i];
-
                 // Dup the array reference for the Stelem. We're going to leave
                 // the array reference on the stack.
                 IL.Emit(OpCodes.Dup);
                 // Emit the index the item is at.
                 IL.EmitConstant(i);
                 // Emit the expression and ensure its a reference.
-                EmitBox(EmitExpression(item));
+                EmitBox(EmitExpression(items[i]));
                 // Store the element.
                 IL.Emit(OpCodes.Stelem_Ref);
             }
@@ -714,7 +736,7 @@ namespace Jint.Bound
             var methodBuilder = BuildMethod(
                 GetFunctionName(function),
                 typeof(object),
-                new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]), typeof(object[]) }
+                new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]) }
             );
 
             _scope = new Scope(
