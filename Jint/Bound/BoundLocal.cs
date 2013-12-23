@@ -9,6 +9,11 @@ namespace Jint.Bound
     {
         public string Name { get; private set; }
 
+        public override BoundVariableKind Kind
+        {
+            get { return BoundVariableKind.Local; }
+        }
+
         public BoundLocal(string name, IBoundType type)
             : base(type)
         {

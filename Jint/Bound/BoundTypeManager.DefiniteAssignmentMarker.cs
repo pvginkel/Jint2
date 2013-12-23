@@ -160,7 +160,7 @@ namespace Jint.Bound
                     // parent branch and handle the read there.
 
                     if (
-                        variable.Type.Type == BoundTypeType.ClosureField &&
+                        variable.Type.Kind == BoundTypeKind.ClosureField &&
                         !_manager._typeManager._types.Contains(variable.Type)
                     )
                     {

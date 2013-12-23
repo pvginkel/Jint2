@@ -8,9 +8,9 @@ namespace Jint.Bound
 {
     internal class BoundEmpty : BoundStatement
     {
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Empty; }
+            get { return BoundKind.Empty; }
         }
 
         [DebuggerStepThrough]

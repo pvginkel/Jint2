@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -14,7 +15,9 @@ namespace Jint.Bound
             get { return _types; }
         }
 
-        public IBoundType CreateType(BoundTypeType type)
+        public ReadOnlyArray<BoundClosure> UsedClosures { get; private set; }
+
+        public IBoundType CreateType(BoundTypeKind type)
         {
             var result = new BoundType(this, type);
 
@@ -25,7 +28,7 @@ namespace Jint.Bound
 
         public TypeMarker CreateTypeMarker()
         {
-            return new TypeMarker();
+            return new TypeMarker(this);
         }
 
         public DefiniteAssignmentMarker CreateDefiniteAssignmentMarker(DefiniteAssignmentMarker.Branch parentBranch)
@@ -33,18 +36,19 @@ namespace Jint.Bound
             return new DefiniteAssignmentMarker(this, parentBranch);
         }
 
+        [DebuggerDisplay("Kind={Kind}, Type={Type}, DefinitelyAssigned={DefinitelyAssigned}")]
         private class BoundType : IBoundType
         {
             private readonly BoundTypeManager _typeManager;
 
-            public BoundTypeType Type { get; private set; }
-            public BoundValueType ValueType { get; set; }
+            public BoundTypeKind Kind { get; private set; }
+            public BoundValueType Type { get; set; }
             public bool DefinitelyAssigned { get; set; }
 
-            public BoundType(BoundTypeManager typeManager, BoundTypeType type)
+            public BoundType(BoundTypeManager typeManager, BoundTypeKind kind)
             {
                 _typeManager = typeManager;
-                Type = type;
+                Kind = kind;
             }
 
             public void MarkUnused()

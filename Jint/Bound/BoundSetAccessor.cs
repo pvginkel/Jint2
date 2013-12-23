@@ -13,9 +13,9 @@ namespace Jint.Bound
         public BoundExpression GetFunction { get; private set; }
         public BoundExpression SetFunction { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.SetAccessor; }
+            get { return BoundKind.SetAccessor; }
         }
 
         public BoundSetAccessor(BoundExpression expression, BoundExpression index, BoundExpression getFunction, BoundExpression setFunction)

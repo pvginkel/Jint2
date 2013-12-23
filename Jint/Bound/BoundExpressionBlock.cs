@@ -11,9 +11,14 @@ namespace Jint.Bound
         public IBoundReadable Result { get; private set; }
         public BoundBlock Body { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.ExpressionBlock; }
+            get { return BoundKind.ExpressionBlock; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return Result.ValueType; }
         }
 
         public BoundExpressionBlock(IBoundReadable result, BoundBlock body)

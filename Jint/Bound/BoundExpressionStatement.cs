@@ -9,9 +9,9 @@ namespace Jint.Bound
     {
         public BoundExpression Expression { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.ExpressionStatement; }
+            get { return BoundKind.ExpressionStatement; }
         }
 
         public BoundExpressionStatement(BoundExpression expression)

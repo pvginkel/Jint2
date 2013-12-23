@@ -12,9 +12,9 @@ namespace Jint.Bound
         public BoundBlock Then { get; private set; }
         public BoundBlock Else { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.If; }
+            get { return BoundKind.If; }
         }
 
         public BoundIf(BoundExpression test, BoundBlock @then, BoundBlock @else)

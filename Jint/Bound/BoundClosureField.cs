@@ -10,6 +10,11 @@ namespace Jint.Bound
         public string Name { get; private set; }
         public BoundClosure Closure { get; private set; }
 
+        public override BoundVariableKind Kind
+        {
+            get { return BoundVariableKind.ClosureField; }
+        }
+
         public BoundClosureField(string name, BoundClosure closure, IBoundType type)
             : base(type)
         {

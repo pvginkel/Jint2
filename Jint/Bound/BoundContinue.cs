@@ -10,9 +10,9 @@ namespace Jint.Bound
     {
         public string Target { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Continue; }
+            get { return BoundKind.Continue; }
         }
 
         public BoundContinue(string target)

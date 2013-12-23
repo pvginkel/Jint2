@@ -9,9 +9,11 @@ namespace Jint.Bound
     {
         public IBoundType Type { get; private set; }
 
+        public abstract BoundVariableKind Kind { get; }
+
         public BoundValueType ValueType
         {
-            get { return Type.DefinitelyAssigned ? Type.ValueType : BoundValueType.Unknown; }
+            get { return Type.DefinitelyAssigned ? Type.Type : BoundValueType.Unknown; }
         }
 
         protected BoundVariable(IBoundType type)

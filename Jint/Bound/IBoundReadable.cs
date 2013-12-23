@@ -7,6 +7,7 @@ namespace Jint.Bound
 {
     internal interface IBoundReadable
     {
+        BoundVariableKind Kind { get; }
         BoundValueType ValueType { get; }
     }
 }

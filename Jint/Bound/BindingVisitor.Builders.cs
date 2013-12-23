@@ -452,7 +452,7 @@ namespace Jint.Bound
             {
                 var result = new BoundTemporary(
                     _visitor._scope.GetNextTemporaryIndex(),
-                    _visitor._scope.TypeManager.CreateType(BoundTypeType.Temporary)
+                    _visitor._scope.TypeManager.CreateType(BoundTypeKind.Temporary)
                 );
 
                 if (_temporaries == null)

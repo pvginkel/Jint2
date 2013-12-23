@@ -10,9 +10,9 @@ namespace Jint.Bound
     {
         public BoundBlock Body { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Finally; }
+            get { return BoundKind.Finally; }
         }
 
         public BoundFinally(BoundBlock body)

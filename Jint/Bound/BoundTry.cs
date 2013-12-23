@@ -12,9 +12,9 @@ namespace Jint.Bound
         public BoundCatch Catch { get; private set; }
         public BoundFinally Finally { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Try; }
+            get { return BoundKind.Try; }
         }
 
         public BoundTry(BoundBlock @try, BoundCatch @catch, BoundFinally @finally)

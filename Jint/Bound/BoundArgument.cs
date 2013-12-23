@@ -15,6 +15,11 @@ namespace Jint.Bound
             get { return BoundValueType.Unknown; }
         }
 
+        public BoundVariableKind Kind
+        {
+            get { return BoundVariableKind.Argument; }
+        }
+
         public BoundArgument(string name, int index)
         {
             if (name == null)

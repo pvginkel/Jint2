@@ -11,9 +11,9 @@ namespace Jint.Bound
         public BoundExpression Test { get; private set; }
         public BoundBlock Body { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.While; }
+            get { return BoundKind.While; }
         }
 
         public BoundWhile(BoundExpression test, BoundBlock body)

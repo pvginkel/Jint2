@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal enum BoundNodeType
+    internal enum BoundKind
     {
         Binary,
         Block,
@@ -19,6 +19,7 @@ namespace Jint.Bound
         CreateFunction,
         DeleteMember,
         DoWhile,
+        Emit,
         Empty,
         ExpressionBlock,
         ExpressionStatement,
@@ -32,7 +33,7 @@ namespace Jint.Bound
         Label,
         New,
         NewBuiltIn,
-        Regex,
+        RegEx,
         Return,
         SetAccessor,
         SetMember,

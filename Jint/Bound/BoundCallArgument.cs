@@ -11,9 +11,9 @@ namespace Jint.Bound
         public BoundExpression Expression { get; private set; }
         public bool IsRef { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.CallArgument; }
+            get { return BoundKind.CallArgument; }
         }
 
         public BoundCallArgument(BoundExpression expression, bool isRef)

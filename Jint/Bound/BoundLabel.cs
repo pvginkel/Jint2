@@ -10,9 +10,9 @@ namespace Jint.Bound
         public string Label { get; private set; }
         public BoundStatement Statement { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Label; }
+            get { return BoundKind.Label; }
         }
 
         public BoundLabel(string label, BoundStatement statement)

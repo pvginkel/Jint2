@@ -10,7 +10,7 @@ namespace Jint.Bound
         Global,
         This,
         //Arguments,
-        //Null,
-        //Undefined
+        Null,
+        Undefined
     }
 }

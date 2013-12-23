@@ -10,9 +10,14 @@ namespace Jint.Bound
     {
         public BoundFunction Function { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.CreateFunction; }
+            get { return BoundKind.CreateFunction; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return BoundValueType.Object; }
         }
 
         public BoundCreateFunction(BoundFunction function)

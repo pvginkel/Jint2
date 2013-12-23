@@ -60,6 +60,7 @@
     <Compile Include="Bound\BindingVisitor.cs" />
     <Compile Include="Bound\BindingVisitor.Scope.cs" />
     <Compile Include="Bound\BoundArgument.cs" />
+    <Compile Include="Bound\BoundEmitExpression.cs" />
     <Compile Include="Bound\BoundBinary.cs" />
     <Compile Include="Bound\BoundBlock.cs" />
     <Compile Include="Bound\BoundBody.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Bound\BoundClosureFieldCollection.cs" />
     <Compile Include="Bound\BoundExpressionStatement.cs" />
     <Compile Include="Bound\BoundLabel.cs" />
+    <Compile Include="Bound\BoundNodeExtensions.cs" />
     <Compile Include="Bound\BoundTypeManager.cs" />
     <Compile Include="Bound\BoundMagicVariable.cs" />
     <Compile Include="Bound\BoundCatch.cs" />
@@ -95,7 +97,7 @@
     <Compile Include="Bound\BoundNewBuiltIn.cs" />
     <Compile Include="Bound\BoundNew.cs" />
     <Compile Include="Bound\BoundNode.cs" />
-    <Compile Include="Bound\BoundNodeType.cs" />
+    <Compile Include="Bound\BoundKind.cs" />
     <Compile Include="Bound\BoundTreePrettyPrintVisitor.cs" />
     <Compile Include="Bound\BoundProgram.cs" />
     <Compile Include="Bound\BoundRegEx.cs" />
@@ -111,8 +113,15 @@
     <Compile Include="Bound\BoundTry.cs" />
     <Compile Include="Bound\BoundTypeManager.DefiniteAssignmentMarker.cs" />
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
-    <Compile Include="Bound\BoundTypeType.cs" />
+    <Compile Include="Bound\BoundTypeKind.cs" />
+    <Compile Include="Bound\BoundValueTypeExtensions.cs" />
     <Compile Include="Bound\BoundVariable.cs" />
+    <Compile Include="Bound\BoundVariableKind.cs" />
+    <Compile Include="Bound\CodeGenerator.Builders.cs" />
+    <Compile Include="Bound\CodeGenerator.MethodInfos.cs" />
+    <Compile Include="Bound\CodeGenerator.OperationBuilders.cs" />
+    <Compile Include="Bound\CodeGenerator.cs" />
+    <Compile Include="Bound\CodeGenerator.Scope.cs" />
     <Compile Include="Bound\DefiniteAssignmentPhase.cs" />
     <Compile Include="Bound\FunctionGatherer.cs" />
     <Compile Include="Bound\IBoundType.cs" />
@@ -281,7 +290,9 @@
     <Compile Include="Support\FastPropertyStore.cs" />
     <Compile Include="Support\FastPropertyStoreDebugView.cs" />
     <Compile Include="Support\IKeyedCollection.cs" />
+    <Compile Include="Support\ILBuilder.cs" />
     <Compile Include="Support\KeyedCollectionDebugView.cs" />
+    <Compile Include="Support\NamedLabel.cs" />
     <Compile Include="Support\PrimesHelper.cs" />
     <Compile Include="Support\KeyedCollection.cs" />
     <Compile Include="ReadOnlyArray.cs" />

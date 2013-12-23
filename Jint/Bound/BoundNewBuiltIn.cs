@@ -10,9 +10,14 @@ namespace Jint.Bound
     {
         public BoundNewBuiltInType NewBuiltInType { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.NewBuiltIn; }
+            get { return BoundKind.NewBuiltIn; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return BoundValueType.Object; }
         }
 
         public BoundNewBuiltIn(BoundNewBuiltInType newBuiltInType)

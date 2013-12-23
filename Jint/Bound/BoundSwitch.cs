@@ -12,9 +12,9 @@ namespace Jint.Bound
         public BoundTemporary Temporary { get; private set; }
         public ReadOnlyArray<BoundSwitchCase> Cases { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Switch; }
+            get { return BoundKind.Switch; }
         }
 
         public BoundSwitch(BoundTemporary temporary, ReadOnlyArray<BoundSwitchCase> cases)

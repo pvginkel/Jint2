@@ -30,7 +30,7 @@ namespace Jint.Bound
                     _sourceClosure = body.Closure;
                     Closure = new BoundClosure(
                         body.ParentClosure != null ? GetClosure(body.ParentClosure) : null,
-                        body.Closure.Fields.ToDictionary(p => p, p => TypeManager.CreateType(BoundTypeType.ClosureField))
+                        body.Closure.Fields.ToDictionary(p => p, p => TypeManager.CreateType(BoundTypeKind.ClosureField))
                     );
                 }
 
@@ -39,7 +39,7 @@ namespace Jint.Bound
                     if (variable.Index >= 0)
                         _arguments.Add(variable, new BoundArgument(variable.Name, variable.Index));
                     else if (variable.ClosureField == null)
-                        _locals.Add(variable, new BoundLocal(variable.Name, TypeManager.CreateType(BoundTypeType.Local)));
+                        _locals.Add(variable, new BoundLocal(variable.Name, TypeManager.CreateType(BoundTypeKind.Local)));
                 }
             }
 

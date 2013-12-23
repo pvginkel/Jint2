@@ -11,9 +11,37 @@ namespace Jint.Bound
         public BoundExpressionType Operation { get; private set; }
         public BoundExpression Operand { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Unary; }
+            get { return BoundKind.Unary; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return ResolveValueType(); }
+        }
+
+        private BoundValueType ResolveValueType()
+        {
+            switch (Operation)
+            {
+                case BoundExpressionType.BitwiseNot:
+                case BoundExpressionType.Negate:
+                case BoundExpressionType.UnaryPlus:
+                    return BoundValueType.Number;
+
+                case BoundExpressionType.Not:
+                    return BoundValueType.Boolean;
+
+                case BoundExpressionType.TypeOf:
+                    return BoundValueType.String;
+
+                case BoundExpressionType.Void:
+                    return BoundValueType.Unknown;
+
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         public BoundUnary(BoundExpressionType operation, BoundExpression operand)

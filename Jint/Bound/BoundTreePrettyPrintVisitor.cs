@@ -48,7 +48,7 @@ namespace Jint.Bound
 
         private void DefaultBefore(BoundNode node)
         {
-            WriteLine("{0} (", node.NodeType);
+            WriteLine("{0} (", node.Kind);
 
             _indent++;
 

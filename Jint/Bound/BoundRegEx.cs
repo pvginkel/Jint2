@@ -11,9 +11,14 @@ namespace Jint.Bound
         public string Regex { get; private set; }
         public string Options { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Regex; }
+            get { return BoundKind.RegEx; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return BoundValueType.Object; }
         }
 
         public BoundRegex(string regex, string options)

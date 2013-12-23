@@ -12,9 +12,9 @@ namespace Jint.Bound
         public BoundExpression Index { get; private set; }
         public BoundExpression Value { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.SetMember; }
+            get { return BoundKind.SetMember; }
         }
 
         public BoundSetMember(BoundExpression expression, BoundExpression index, BoundExpression value)

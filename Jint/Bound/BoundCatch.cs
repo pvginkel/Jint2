@@ -11,9 +11,9 @@ namespace Jint.Bound
         public IBoundWritable Target { get; private set; }
         public BoundBlock Body { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Catch; }
+            get { return BoundKind.Catch; }
         }
 
         public BoundCatch(IBoundWritable target, BoundBlock body)

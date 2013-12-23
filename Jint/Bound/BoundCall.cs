@@ -15,9 +15,14 @@ namespace Jint.Bound
         public ReadOnlyArray<BoundCallArgument> Arguments { get; private set; }
         public ReadOnlyArray<BoundExpression> Generics { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Call; }
+            get { return BoundKind.Call; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return BoundValueType.Unknown; }
         }
 
         public BoundCall(BoundExpression target, BoundExpression method, ReadOnlyArray<BoundCallArgument> arguments, ReadOnlyArray<BoundExpression> generics)

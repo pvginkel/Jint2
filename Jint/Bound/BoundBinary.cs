@@ -12,9 +12,56 @@ namespace Jint.Bound
         public BoundExpression Left { get; set; }
         public BoundExpression Right { get; set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Binary; }
+            get { return BoundKind.Binary; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get { return ResolveValueType(); }
+        }
+
+        private BoundValueType ResolveValueType()
+        {
+            var left = Left.ValueType;
+            var right = Right.ValueType;
+
+            switch (Operation)
+            {
+                case BoundExpressionType.Add:
+                    if (left == BoundValueType.String || right == BoundValueType.String)
+                        return BoundValueType.String;
+
+                    return BoundValueType.Number;
+
+                case BoundExpressionType.BitwiseAnd:
+                case BoundExpressionType.BitwiseExclusiveOr:
+                case BoundExpressionType.BitwiseOr:
+                case BoundExpressionType.Divide:
+                case BoundExpressionType.LeftShift:
+                case BoundExpressionType.RightShift:
+                case BoundExpressionType.UnsignedRightShift:
+                case BoundExpressionType.Modulo:
+                case BoundExpressionType.Multiply:
+                case BoundExpressionType.Subtract:
+                    return BoundValueType.Number;
+
+                case BoundExpressionType.Equal:
+                case BoundExpressionType.NotEqual:
+                case BoundExpressionType.Same:
+                case BoundExpressionType.NotSame:
+                case BoundExpressionType.LessThan:
+                case BoundExpressionType.LessThanOrEqual:
+                case BoundExpressionType.GreaterThan:
+                case BoundExpressionType.GreaterThanOrEqual:
+                case BoundExpressionType.In:
+                case BoundExpressionType.InstanceOf:
+                    return BoundValueType.Boolean;
+
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         public BoundBinary(BoundExpressionType operation, BoundExpression left, BoundExpression right)

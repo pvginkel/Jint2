@@ -9,6 +9,11 @@ namespace Jint.Bound
     {
         public int Index { get; private set; }
 
+        public override BoundVariableKind Kind
+        {
+            get { return BoundVariableKind.Temporary; }
+        }
+
         public BoundTemporary(int index, IBoundType type)
             : base(type)
         {

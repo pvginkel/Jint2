@@ -13,9 +13,9 @@ namespace Jint.Bound
         public ReadOnlyArray<BoundTemporary> Temporaries { get; private set; }
         public ReadOnlyArray<BoundStatement> Nodes { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Block; }
+            get { return BoundKind.Block; }
         }
 
         public BoundBlock(ReadOnlyArray<BoundTemporary> temporaries, ReadOnlyArray<BoundStatement> nodes)

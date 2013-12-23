@@ -12,9 +12,24 @@ namespace Jint.Bound
         public static readonly BoundConstant False = new BoundConstant(false);
         public static readonly BoundConstant EmptyString = new BoundConstant("");
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Constant; }
+            get { return BoundKind.Constant; }
+        }
+
+        public override BoundValueType ValueType
+        {
+            get
+            {
+                if (Value is string)
+                    return BoundValueType.String;
+                if (Value is double)
+                    return BoundValueType.Number;
+
+                Debug.Assert(Value is bool);
+
+                return BoundValueType.Boolean;
+            }
         }
 
         public static BoundConstant Create(bool value)

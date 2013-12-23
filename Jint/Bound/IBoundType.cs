@@ -7,9 +7,9 @@ namespace Jint.Bound
 {
     internal interface IBoundType
     {
-        BoundValueType ValueType { get; }
+        BoundValueType Type { get; }
         bool DefinitelyAssigned { get; }
-        BoundTypeType Type { get; }
+        BoundTypeKind Kind { get; }
 
         void MarkUnused();
     }

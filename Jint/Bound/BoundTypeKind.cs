@@ -5,13 +5,10 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal enum BoundValueType
+    internal enum BoundTypeKind
     {
-        Unset,
-        Unknown,
-        Boolean,
-        String,
-        Number,
-        Object
+        Local,
+        Temporary,
+        ClosureField
     }
 }

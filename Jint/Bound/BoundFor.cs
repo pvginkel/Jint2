@@ -13,9 +13,9 @@ namespace Jint.Bound
         public BoundBlock Increment { get; private set; }
         public BoundBlock Body { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.For; }
+            get { return BoundKind.For; }
         }
 
         public BoundFor(BoundBlock initialization, BoundExpression test, BoundBlock increment, BoundBlock body)

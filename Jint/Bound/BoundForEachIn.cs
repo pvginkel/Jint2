@@ -12,9 +12,9 @@ namespace Jint.Bound
         public BoundExpression Expression { get; private set; }
         public BoundBlock Body { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.ForEachIn; }
+            get { return BoundKind.ForEachIn; }
         }
 
         public BoundForEachIn(IBoundWritable target, BoundExpression expression, BoundBlock body)

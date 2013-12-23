@@ -12,7 +12,7 @@ namespace Jint.Bound
     {
         public abstract void Accept(BoundTreeVisitor visitor);
         public abstract T Accept<T>(BoundTreeVisitor<T> visitor);
-        public abstract BoundNodeType NodeType { get; }
+        public abstract BoundKind Kind { get; }
 
         internal string DebuggerDisplay
         {

@@ -15,9 +15,9 @@ namespace Jint.Bound
         public ReadOnlyArray<BoundLocal> Locals { get; private set; }
         public BoundTypeManager TypeManager { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.Body; }
+            get { return BoundKind.Body; }
         }
 
         public BoundBody(BoundBlock body, BoundClosure closure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)

@@ -11,9 +11,9 @@ namespace Jint.Bound
         public IBoundWritable Variable { get; private set; }
         public BoundExpression Value { get; private set; }
 
-        public override BoundNodeType NodeType
+        public override BoundKind Kind
         {
-            get { return BoundNodeType.SetVariable; }
+            get { return BoundKind.SetVariable; }
         }
 
         public BoundSetVariable(IBoundWritable variable, BoundExpression value)
