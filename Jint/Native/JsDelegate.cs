@@ -10,10 +10,9 @@ namespace Jint.Native
         public string Name { get; private set; }
         public JsFunction Delegate { get; private set; }
         public int ArgumentCount { get; private set; }
-        public object Closure { get; private set; }
         public string SourceCode { get; private set; }
 
-        public JsDelegate(string name, JsFunction @delegate, int argumentCount, object closure, string sourceCode)
+        public JsDelegate(string name, JsFunction @delegate, int argumentCount, string sourceCode)
         {
             if (@delegate == null)
                 throw new ArgumentNullException("delegate");
@@ -21,7 +20,6 @@ namespace Jint.Native
             Name = name;
             Delegate = @delegate;
             ArgumentCount = argumentCount;
-            Closure = closure;
             SourceCode = sourceCode;
         }
 

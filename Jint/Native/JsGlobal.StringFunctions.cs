@@ -15,7 +15,7 @@ namespace Jint.Native
     {
         private static class StringFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
 
@@ -62,13 +62,13 @@ namespace Jint.Native
             }
 
             // 15.5.4.2
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return ((JsObject)runtime.GetMemberByIndex(@this, Id.valueOf)).Execute(runtime, @this, arguments);
             }
 
             // 15.5.4.3
-            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (@this is string)
                     return @this;
@@ -77,7 +77,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.4
-            public static object CharAt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object CharAt(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return ((JsObject)runtime.GetMemberByIndex(@this, Id.substring)).Execute(
                     runtime,
@@ -87,7 +87,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.5
-            public static object CharCodeAt(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object CharCodeAt(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var r = JsValue.ToString(@this);
                 var at = (int)JsValue.ToNumber(arguments[0]);
@@ -99,7 +99,7 @@ namespace Jint.Native
             }
 
             // 15.5.3.2
-            public static object FromCharCode(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object FromCharCode(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 //var r = @this.ToString();
 
@@ -121,7 +121,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.6
-            public static object Concat(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Concat(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -136,7 +136,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.7
-            public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 string source = JsValue.ToString(@this);
                 string searchString = JsValue.ToString(arguments[0]);
@@ -163,7 +163,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.8
-            public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 string source = JsValue.ToString(@this);
                 string searchString = JsValue.ToString(arguments[0]);
@@ -173,13 +173,13 @@ namespace Jint.Native
             }
 
             // 15.5.4.9
-            public static object LocaleCompare(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object LocaleCompare(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return (double)JsValue.ToString(@this).CompareTo(JsValue.ToString(arguments[0]));
             }
 
             // 15.5.4.10
-            public static object Match(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Match(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 JsObject regexpObject;
                 RegExpManager regexp;
@@ -225,7 +225,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.11
-            public static object Replace(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Replace(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (arguments.Length == 0)
                     return JsValue.ToString(@this);
@@ -355,7 +355,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.12
-            public static object Search(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Search(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 // Converts the arguments to a regex
 
@@ -375,7 +375,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.13
-            public static object Slice(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Slice(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 string source = JsValue.ToString(@this);
                 int start = (int)JsValue.ToNumber(arguments[0]);
@@ -397,7 +397,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.14
-            public static object Split(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Split(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 JsObject array = runtime.Global.CreateArray();
                 string target = JsValue.ToString(@this);
@@ -426,7 +426,7 @@ namespace Jint.Native
             }
 
             // 15.5.4.15
-            public static object Substring(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Substring(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 string target = JsValue.ToString(@this);
                 int start = 0, end = target.Length;
@@ -448,7 +448,7 @@ namespace Jint.Native
                 return target;
             }
 
-            public static object Substr(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Substr(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 string target = JsValue.ToString(@this);
                 int start = 0, end = target.Length;
@@ -471,31 +471,31 @@ namespace Jint.Native
             }
 
             // 15.5.4.16
-            public static object ToLowerCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToLowerCase(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return JsValue.ToString(@this).ToLowerInvariant();
             }
 
             // 15.5.4.17
-            public static object ToLocaleLowerCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToLocaleLowerCase(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return JsValue.ToString(@this).ToLower();
             }
 
             // 15.5.4.18
-            public static object ToUpperCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToUpperCase(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return JsValue.ToString(@this).ToUpperInvariant();
             }
 
             // 15.5.4.19
-            public static object ToLocaleUpperCase(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToLocaleUpperCase(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return JsValue.ToString(@this).ToUpper();
             }
 
             // 15.5.5.1
-            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return (double)JsValue.ToString(@this).Length;
             }

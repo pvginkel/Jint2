@@ -304,7 +304,7 @@ namespace Jint
             );
         }
 
-        private object DummyPropertyGetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+        private object DummyPropertyGetter(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
         {
             return JsUndefined.Instance;
         }

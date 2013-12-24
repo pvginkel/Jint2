@@ -60,6 +60,7 @@ namespace Jint.Bound
             return node.Update(
                 Visit(node.Body),
                 node.Closure,
+                node.ScopedClosure,
                 node.Arguments,
                 node.Locals,
                 node.TypeManager

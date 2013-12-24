@@ -7,14 +7,14 @@ namespace Jint.Bound
 {
     internal static class FunctionGatherer
     {
-        public static ReadOnlyArray<BoundFunction> Gather(BoundProgram program)
+        public static ReadOnlyArray<BoundFunction> Gather(BoundBody body)
         {
-            if (program == null)
-                throw new ArgumentNullException("program");
+            if (body == null)
+                throw new ArgumentNullException("body");
 
             var functions = new ReadOnlyArray<BoundFunction>.Builder();
 
-            new Gatherer(functions).Visit(program.Body);
+            new Gatherer(functions).Visit(body);
 
             return functions.ToReadOnlyArray();
         }

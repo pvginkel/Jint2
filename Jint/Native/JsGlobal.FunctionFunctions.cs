@@ -9,27 +9,27 @@ namespace Jint.Native
     {
         private static class FunctionFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return runtime.Global.Engine.CompileFunction(arguments);
             }
 
-            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return (double)((JsObject)@this).Delegate.ArgumentCount;
             }
 
-            public static object SetLength(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object SetLength(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return arguments[0];
             }
 
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return ((JsObject)@this).Delegate.ToString();
             }
 
-            public static object Call(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Call(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (!JsValue.IsFunction(@this))
                     throw new ArgumentException("the target of call() must be a function");
@@ -58,7 +58,7 @@ namespace Jint.Native
                 return ((JsObject)@this).Execute(runtime, obj, argumentsCopy);
             }
 
-            public static object Apply(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Apply(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (!JsValue.IsFunction(@this))
                     throw new ArgumentException("The target of call() must be a function");
@@ -99,7 +99,7 @@ namespace Jint.Native
                 return ((JsObject)@this).Execute(runtime, obj, argumentsCopy);
             }
 
-            public static object BaseConstructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object BaseConstructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return JsUndefined.Instance;
             }

@@ -11,6 +11,7 @@ namespace Jint.Bound
     {
         public BoundBlock Body { get; private set; }
         public BoundClosure Closure { get; private set; }
+        public BoundClosure ScopedClosure { get; private set; }
         public ReadOnlyArray<BoundArgument> Arguments { get; private set; }
         public ReadOnlyArray<BoundLocal> Locals { get; private set; }
         public BoundTypeManager TypeManager { get; private set; }
@@ -20,7 +21,7 @@ namespace Jint.Bound
             get { return BoundKind.Body; }
         }
 
-        public BoundBody(BoundBlock body, BoundClosure closure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)
+        public BoundBody(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)
         {
             if (body == null)
                 throw new ArgumentNullException("body");
@@ -33,6 +34,7 @@ namespace Jint.Bound
 
             Body = body;
             Closure = closure;
+            ScopedClosure = scopedClosure;
             Arguments = arguments;
             Locals = locals;
             TypeManager = typeManager;
@@ -50,18 +52,19 @@ namespace Jint.Bound
             return visitor.VisitBody(this);
         }
 
-        public BoundBody Update(BoundBlock body, BoundClosure closure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)
+        public BoundBody Update(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)
         {
             if (
                 body == Body &&
                 closure == Closure &&
+                scopedClosure == ScopedClosure &&
                 arguments == Arguments &&
                 locals == Locals &&
                 typeManager == TypeManager
             )
                 return this;
 
-            return new BoundBody(body, closure, arguments, locals, typeManager);
+            return new BoundBody(body, closure, scopedClosure, arguments, locals, typeManager);
         }
     }
 }

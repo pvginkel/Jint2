@@ -34,7 +34,7 @@ namespace Jint.Native.Interop
             );
         }
 
-        public object Execute(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+        public object Execute(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
         {
             var genericArguments = JintRuntime.ExtractGenericArguments(ref arguments);
 
@@ -52,7 +52,7 @@ namespace Jint.Native.Interop
             if (implementation == null)
                 throw new JintException(String.Format("No matching overload found {0}<{1}>", callee.Delegate.Name, genericArguments));
 
-            return implementation(runtime, @this, callee, closure, arguments);
+            return implementation(runtime, @this, callee, arguments);
         }
 
         private IEnumerable<MethodInfo> GetMembers(Type[] genericArguments, int argumentCount)

@@ -149,7 +149,6 @@ namespace Jint.Native.Interop
                 type.FullName,
                 new Constructor(type, overloads, propertyStoreFactory, properties).Execute,
                 0,
-                null,
                 prototype,
                 true
             );
@@ -244,7 +243,7 @@ namespace Jint.Native.Interop
                 _properties = properties;
             }
 
-            public object Execute(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public object Execute(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
 

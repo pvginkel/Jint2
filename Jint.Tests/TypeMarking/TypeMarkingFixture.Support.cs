@@ -21,7 +21,7 @@ namespace Jint.Tests.TypeMarking
 
             var program = Compile(script);
 
-            var function = FunctionGatherer.Gather(program).Single(p => p.Name == "__body");
+            var function = FunctionGatherer.Gather(program.Body).Single(p => p.Name == "__body");
 
             var actual = function.Body.Locals.ToDictionary(p => p.Name, p => p.ValueType);
 

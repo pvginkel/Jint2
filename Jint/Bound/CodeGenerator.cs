@@ -24,6 +24,7 @@ namespace Jint.Bound
         private const string MainMethodName = "Main";
 
         private static int _lastTypeId;
+        private static int _lastClosureId;
 
         private int _lastMethodId;
         private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
@@ -32,6 +33,8 @@ namespace Jint.Bound
         private readonly TypeBuilder _typeBuilder;
         private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
         private readonly ISymbolDocumentWriter _document;
+        private readonly Dictionary<BoundFunction, MethodInfo> _functions = new Dictionary<BoundFunction, MethodInfo>();
+        private readonly Dictionary<BoundClosure, RuntimeClosure> _closures = new Dictionary<BoundClosure, RuntimeClosure>();
 
         private ILBuilder IL
         {
@@ -68,7 +71,10 @@ namespace Jint.Bound
             if (program == null)
                 throw new ArgumentNullException("program");
 
+            BuildFunctionsAndClosures(program.Body);
+
             var methodBuilder = BuildMethod(
+                null,
                 MainMethodName,
                 typeof(object),
                 new[] { typeof(JintRuntime) }
@@ -79,6 +85,7 @@ namespace Jint.Bound
             _scope = new Scope(
                 new ILBuilder(methodBuilder.GetILGenerator(), _document),
                 false,
+                true,
                 null,
                 null,
                 null
@@ -109,7 +116,9 @@ namespace Jint.Bound
 
         public MethodInfo BuildFunction(BoundFunction function)
         {
-            var method = DeclareFunction(function);
+            BuildFunctionsAndClosures(function.Body);
+
+            var method = DeclareFunction(function, null);
 
             var methodInfo = _typeBuilder.CreateType().GetMethod(method.Name);
 
@@ -121,11 +130,174 @@ namespace Jint.Bound
             return methodInfo;
         }
 
-        private MethodBuilder BuildMethod(string name, Type returnType, Type[] parameterTypes)
+        private void BuildFunctionsAndClosures(BoundBody body)
         {
-            return _typeBuilder.DefineMethod(
+            var functions = FunctionGatherer.Gather(body);
+
+            // Group the functions by closure.
+
+            var functionClosures = new Dictionary<BoundFunction, BoundClosure>();
+            var closures = new Dictionary<BoundClosure, List<BoundFunction>>();
+            var closuresOrder = new List<BoundClosure>();
+
+            foreach (var function in functions)
+            {
+                BoundClosure parentClosure;
+                if (function.Body.Closure != null)
+                    parentClosure = function.Body.Closure.Parent;
+                else
+                    parentClosure = function.Body.ScopedClosure;
+
+                if (parentClosure != null)
+                {
+                    functionClosures.Add(function, parentClosure);
+
+                    List<BoundFunction> closureFunctions;
+                    if (!closures.TryGetValue(parentClosure, out closureFunctions))
+                    {
+                        closureFunctions = new List<BoundFunction>();
+                        closures.Add(parentClosure, closureFunctions);
+                        closuresOrder.Add(parentClosure);
+                    }
+
+                    closureFunctions.Add(function);
+                }
+            }
+
+            // Create the types for all closures.
+
+            foreach (var closure in closuresOrder)
+            {
+                EmitClosure(closure, closures[closure]);
+            }
+
+            // Build all functions. This is done in reverse order, so the
+            // functions can reference each other.
+
+            foreach (var function in functions.Reverse())
+            {
+                TypeBuilder closureType;
+
+                BoundClosure closure;
+                if (functionClosures.TryGetValue(function, out closure))
+                    closureType = _closures[closure].Type;
+                else
+                    closureType = null;
+
+                _functions.Add(function, DeclareFunction(function, closureType));
+            }
+
+            // And create all types.
+
+            foreach (var closure in _closures.Values)
+            {
+                closure.Type.CreateType();
+            }
+        }
+
+        private void EmitClosure(BoundClosure closure, IEnumerable<BoundFunction> functions)
+        {
+            int id = Interlocked.Increment(ref _lastClosureId);
+
+            var dynamicType = DynamicAssemblyManager.ModuleBuilder.DefineType(
+                "<>JintClosure_" + id.ToString(CultureInfo.InvariantCulture),
+                TypeAttributes.SpecialName
+            );
+
+            var fields = new Dictionary<string, FieldInfo>();
+
+            foreach (var field in closure.Fields.OrderBy(p => p.Name))
+            {
+                var attributes = FieldAttributes.Public;
+                Type fieldType;
+
+                if (field.Name == Expressions.Closure.ParentFieldName)
+                {
+                    attributes |= FieldAttributes.InitOnly;
+                    fieldType = _closures[closure.Parent].Type;
+                }
+                else if (field.Name == Expressions.Closure.ArgumentsFieldName)
+                {
+                    // TODO: This should have been set correctly, but field.Type
+                    // can be Unset at this point.
+                    fieldType = typeof(JsObject);
+                }
+                else
+                {
+                    fieldType = field.ValueType.GetNativeType();
+                }
+
+                fields.Add(
+                    field.Name,
+                    dynamicType.DefineField(field.Name, fieldType, attributes)
+                );
+            }
+
+            _closures.Add(closure, new RuntimeClosure(
+                closure,
+                dynamicType,
+                EmitClosureConstructor(closure, dynamicType, fields),
+                fields
+            ));
+        }
+
+        private ConstructorBuilder EmitClosureConstructor(BoundClosure closure, TypeBuilder closureType, Dictionary<string, FieldInfo> fields)
+        {
+            var parameterTypes = Type.EmptyTypes;
+
+            if (closure.Parent != null)
+                parameterTypes = new[] { _closures[closure.Parent].Type };
+
+            var constructor = closureType.DefineConstructor(
+                MethodAttributes.Public,
+                CallingConventions.Standard,
+                parameterTypes
+            );
+
+            var il = new ILBuilder(constructor.GetILGenerator(), null);
+
+            // Call the base constructor.
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, _objectConstructor);
+
+            // Initialize the parent field if we have one.
+
+            if (closure.Parent != null)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Stfld, fields[Expressions.Closure.ParentFieldName]);
+            }
+
+            // Initialize object fields to undefined.
+
+            foreach (var field in fields)
+            {
+                if (field.Value.FieldType == typeof(object))
+                {
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldsfld, _undefinedInstance);
+                    il.Emit(OpCodes.Stfld, field.Value);
+                }
+            }
+
+            // Return from the constructor.
+
+            il.Emit(OpCodes.Ret);
+
+            return constructor;
+        }
+
+        private MethodBuilder BuildMethod(TypeBuilder typeBuilder, string name, Type returnType, Type[] parameterTypes)
+        {
+            var attributes = MethodAttributes.Public | MethodAttributes.HideBySig;
+            if (typeBuilder == null)
+                attributes |= MethodAttributes.Static;
+
+            return (typeBuilder ?? _typeBuilder).DefineMethod(
                 name,
-                MethodAttributes.Static | MethodAttributes.Public | MethodAttributes.HideBySig,
+                attributes,
                 returnType,
                 parameterTypes
             );
@@ -469,15 +641,14 @@ namespace Jint.Bound
 
                 case BoundVariableKind.ClosureField:
                     var closureField = (BoundClosureField)variable;
+                    var closure = closureField.Closure;
 
                     // Push the closure onto the stack.
-                    var closure = closureField.Closure;
-                    var closureLocal = _scope.ClosureLocals[closure.Type];
-                    IL.Emit(OpCodes.Ldloc, closureLocal);
+                    _scope.EmitLoadClosure(_closures[closure].Type);
                     // Push the value onto the stack.
                     EmitCast(EmitExpression(value), variable.ValueType);
                     // Set the closure field.
-                    IL.Emit(OpCodes.Stfld, closure.GetFieldInfo(closureField.Name));
+                    IL.Emit(OpCodes.Stfld, _closures[closure].Fields[closureField.Name]);
                     return;
 
                 default:
@@ -795,7 +966,7 @@ namespace Jint.Bound
 
         private BoundValueType EmitCreateFunction(BoundCreateFunction node)
         {
-            var function = DeclareFunction(node.Function);
+            var function = _functions[node.Function];
 
             var array = IL.EmitArray(node.Function.Parameters);
 
@@ -803,15 +974,15 @@ namespace Jint.Bound
 
             IL.EmitConstant(function.Name);
 
-            // Load the method and convert to a MethodInfo.
-            IL.Emit(OpCodes.Ldtoken, function);
-            IL.EmitCall(_methodBaseGetMethodFromHandle);
-            IL.Emit(OpCodes.Castclass, typeof(MethodInfo));
-
-            if (_scope.ClosureLocal != null)
-                IL.Emit(OpCodes.Ldloc, _scope.ClosureLocal);
-            else
+            // Create a delegate to the method. First load the instance reference.
+            if (function.IsStatic)
                 IL.Emit(OpCodes.Ldnull);
+            else
+                _scope.EmitLoadClosure(_closures[_scope.Closure].Type);
+            // Load the function.
+            IL.Emit(OpCodes.Ldftn, function);
+            // Construct the delegate.
+            IL.Emit(OpCodes.Newobj, _functionConstructor);
 
             IL.Emit(OpCodes.Ldloc, array);
 
@@ -823,26 +994,27 @@ namespace Jint.Bound
             return BoundValueType.Object;
         }
 
-        private MethodInfo DeclareFunction(BoundFunction function)
+        private MethodInfo DeclareFunction(BoundFunction function, TypeBuilder typeBuilder)
         {
             var methodBuilder = BuildMethod(
+                typeBuilder,
                 GetFunctionName(function),
                 typeof(object),
-                new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]) }
+                new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object[]) }
             );
 
-            var closure = FindScopedClosure(function.Body, _scope);
             var argumentsLocal = (BoundVariable)function.Body.Locals.SingleOrDefault(p => p.Name == "arguments");
             if (argumentsLocal == null)
             {
-                Debug.Assert(closure != null);
-                argumentsLocal = closure.Fields[Expressions.Closure.ArgumentsFieldName];
+                Debug.Assert(function.Body.Closure != null);
+                argumentsLocal = function.Body.Closure.Fields[Expressions.Closure.ArgumentsFieldName];
             }
 
             _scope = new Scope(
                 new ILBuilder(methodBuilder.GetILGenerator(), _document),
                 true,
-                closure,
+                typeBuilder == null,
+                function.Body.ScopedClosure,
                 argumentsLocal,
                 _scope
             );
@@ -853,24 +1025,18 @@ namespace Jint.Bound
 
             var usedClosures = function.Body.TypeManager.UsedClosures;
 
-            if (_scope.ClosureLocal != null && usedClosures != null)
-            {
+            // Instantiate the closure if we own it.
+            if (function.Body.Closure != null)
                 EmitClosureSetup(function);
 
-                // Emit locals for all used closures.
-
-                EmitClosureLocals(
-                    _scope.Closure.Type,
-                    _scope.ClosureLocal,
-                    usedClosures
-                );
-            }
+            // Emit locals for all used closures.
+            if (function.Body.ScopedClosure != null && usedClosures != null)
+                EmitClosureLocals(_closures[function.Body.ScopedClosure], usedClosures);
 
             // Put the closure local onto the stack if we're going to store
             // the arguments in the closure.
-
             if (argumentsLocal.Kind == BoundVariableKind.ClosureField)
-                IL.Emit(OpCodes.Ldloc, _scope.ClosureLocal);
+                _scope.EmitLoadClosure(_closures[_scope.Closure].Type);
 
             // Initialize the arguments array.
 
@@ -884,7 +1050,7 @@ namespace Jint.Bound
             {
                 var argumentsClosureField = (BoundClosureField)argumentsLocal;
 
-                IL.Emit(OpCodes.Stfld, _scope.Closure.GetFieldInfo(argumentsClosureField.Name));
+                IL.Emit(OpCodes.Stfld, _closures[function.Body.ScopedClosure].Fields[argumentsClosureField.Name]);
             }
             else
             {
@@ -921,45 +1087,35 @@ namespace Jint.Bound
 
         private void EmitClosureSetup(BoundFunction function)
         {
-            // Only instantiate the closure when its our closure (and not
-            // just a copy of the parent closure).
+            Debug.Assert(function.Body.Closure != null);
 
-            var closureType = _scope.Closure.Type;
+            var closure = _closures[function.Body.Closure];
+            var constructor = closure.Constructor;
 
-            if (function.Body.Closure != null)
-            {
-                var constructor = closureType.GetConstructors()[0];
+            // Check whether the constructor expects a parent.
+            if (function.Body.Closure.Parent != null)
+                IL.Emit(OpCodes.Ldarg_0);
 
-                // Check whether the constructor expects a parent.
-                var parameters = constructor.GetParameters();
-                if (parameters.Length == 1)
-                {
-                    _scope.EmitLoad(SpecialLocal.Closure);
-                    IL.Emit(OpCodes.Castclass, parameters[0].ParameterType);
-                }
+            // Instantiate the closure.
+            IL.Emit(OpCodes.Newobj, constructor);
 
-                IL.Emit(OpCodes.Newobj, constructor);
-                IL.Emit(OpCodes.Stloc, _scope.ClosureLocal);
-            }
-            else
-            {
-                _scope.EmitLoad(SpecialLocal.Closure);
-                IL.Emit(OpCodes.Castclass, closureType);
-                IL.Emit(OpCodes.Stloc, _scope.ClosureLocal);
-            }
+            // Store the reference to the closure in the scope.
+
+            var closureLocal = IL.DeclareLocal(closure.Type);
+            _scope.RegisterClosureLocal(closureLocal);
+            IL.Emit(OpCodes.Stloc, closureLocal);
         }
 
-        private void EmitClosureLocals(Type closureType, LocalBuilder closureLocal, ReadOnlyArray<BoundClosure> usedClosures)
+        private void EmitClosureLocals(RuntimeClosure closure, ReadOnlyArray<BoundClosure> usedClosures)
         {
             // If we don't have a parent field, there is no work.
 
-            var parentField = closureType.GetField(Expressions.Closure.ParentFieldName);
-            if (parentField == null)
+            if (closure.Closure.Parent == null)
                 return;
 
             var usage = new Dictionary<Type, ClosureUsage>();
 
-            var parentUsage = DetermineClosureUsage(usage, parentField.DeclaringType, usedClosures);
+            var parentUsage = DetermineClosureUsage(usage, _closures[closure.Closure.Parent], usedClosures);
 
             // If the parent isn't used, there is no work.
 
@@ -969,29 +1125,29 @@ namespace Jint.Bound
             // Emit all locals. We put the reference to the closure local on the
             // stack so the parent can be loaded from it.
 
-            IL.Emit(OpCodes.Ldloc, closureLocal);
+            _scope.EmitLoadClosure(closure.Type);
 
-            while (parentField != null)
+            while (closure.Closure.Parent != null)
             {
                 // Put the parent field on the stack. Above a check has already
                 // been done to make sure at least one of the parent closures is
                 // used, so we know that this is going to be popped.
 
+                var parentField = closure.Fields[Expressions.Closure.ParentFieldName];
                 IL.Emit(OpCodes.Ldfld, parentField);
 
-                var parentParentField = parentField.FieldType.GetField(Expressions.Closure.ParentFieldName);
-
-                switch (usage[parentField.FieldType])
+                var parentClosure = _closures[closure.Closure.Parent];
+                switch (usage[parentClosure.Type])
                 {
                     case ClosureUsage.Directly:
                         // Declare the local for the closure and put it in the map.
 
                         var thisLocal = IL.DeclareLocal(parentField.FieldType);
-                        _scope.ClosureLocals.Add(parentField.FieldType, thisLocal);
+                        _scope.RegisterClosureLocal(thisLocal);
 
                         bool isLast =
-                            parentParentField == null ||
-                            usage[parentParentField.FieldType] == ClosureUsage.NotUsed;
+                            parentClosure.Closure.Parent == null ||
+                            usage[_closures[parentClosure.Closure.Parent].Type] == ClosureUsage.NotUsed;
 
                         // If we're not the last, we need to keep the reference
                         // to the closure on the stack for the next parent.
@@ -1021,21 +1177,21 @@ namespace Jint.Bound
                         throw new InvalidOperationException();
                 }
 
-                parentField = parentParentField;
+                closure = _closures[closure.Closure.Parent];
             }
 
             Debug.Fail("We shouldn't get here because all usages should have been marked");
         }
 
-        private ClosureUsage DetermineClosureUsage(Dictionary<Type, ClosureUsage> usage, Type closureType, ReadOnlyArray<BoundClosure> usedClosures)
+        private ClosureUsage DetermineClosureUsage(Dictionary<Type, ClosureUsage> usage, RuntimeClosure runtimeClosure, ReadOnlyArray<BoundClosure> usedClosures)
         {
             // Determine the usage of the parent.
 
             var parentUsage = ClosureUsage.NotUsed;
 
-            var parentField = closureType.GetField(Expressions.Closure.ParentFieldName);
-            if (parentField != null)
-                parentUsage = DetermineClosureUsage(usage, parentField.FieldType, usedClosures);
+            FieldInfo parentField;
+            if (runtimeClosure.Fields.TryGetValue(Expressions.Closure.ParentFieldName, out parentField))
+                parentUsage = DetermineClosureUsage(usage, _closures[runtimeClosure.Closure.Parent], usedClosures);
 
             // Determine whether this closure is used.
 
@@ -1043,7 +1199,7 @@ namespace Jint.Bound
 
             foreach (var closure in usedClosures)
             {
-                if (closure.Type == closureType)
+                if (_closures[closure] == runtimeClosure)
                 {
                     used = ClosureUsage.Directly;
                     break;
@@ -1055,25 +1211,9 @@ namespace Jint.Bound
             if (used != ClosureUsage.Directly && parentUsage != ClosureUsage.Indirectly)
                 used = ClosureUsage.Indirectly;
 
-            usage[closureType] = used;
+            usage[runtimeClosure.Type] = used;
 
             return used;
-        }
-
-        private BoundClosure FindScopedClosure(BoundBody body, Scope scope)
-        {
-            if (body.Closure != null)
-                return body.Closure;
-
-            while (scope != null)
-            {
-                if (scope.Closure != null)
-                    return scope.Closure;
-
-                scope = scope.Parent;
-            }
-
-            return null;
         }
 
         private string GetFunctionName(BoundFunction function)
@@ -1152,12 +1292,12 @@ namespace Jint.Bound
 
                 case BoundVariableKind.ClosureField:
                     var closureField = (BoundClosureField)variable;
+                    var closure = closureField.Closure;
 
                     // Push the closure onto the stack.
-                    var closure = closureField.Closure;
-                    IL.Emit(OpCodes.Ldloc, _scope.ClosureLocals[closure.Type]);
+                    _scope.EmitLoadClosure(_closures[closure].Type);
                     // Load the closure field.
-                    IL.Emit(OpCodes.Ldfld, closureField.Closure.GetFieldInfo(closureField.Name));
+                    IL.Emit(OpCodes.Ldfld, _closures[closure].Fields[closureField.Name]);
 
                     return variable.ValueType;
 
@@ -1206,7 +1346,6 @@ namespace Jint.Bound
             Null,
             Undefined,
             Callee,
-            Closure,
             Arguments
         }
 
@@ -1215,6 +1354,22 @@ namespace Jint.Bound
             NotUsed,
             Directly,
             Indirectly
+        }
+
+        private class RuntimeClosure
+        {
+            public BoundClosure Closure { get; private set; }
+            public TypeBuilder Type { get; private set; }
+            public ConstructorBuilder Constructor { get; private set; }
+            public Dictionary<string, FieldInfo> Fields { get; private set; }
+
+            public RuntimeClosure(BoundClosure closure, TypeBuilder type, ConstructorBuilder constructor, Dictionary<string, FieldInfo> fields)
+            {
+                Closure = closure;
+                Fields = fields;
+                Type = type;
+                Constructor = constructor;
+            }
         }
     }
 }

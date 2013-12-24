@@ -38,7 +38,9 @@ namespace Jint.Bound
         private static readonly MethodInfo _globalCreateObject = typeof(JsGlobal).GetMethod("CreateObject", Type.EmptyTypes);
         private static readonly MethodInfo _objectDefineAccessor = typeof(JsObject).GetMethod("DefineAccessor", new[] { typeof(int), typeof(JsObject), typeof(JsObject) });
 
+        private static readonly ConstructorInfo _objectConstructor = typeof(object).GetConstructors()[0];
         private static readonly ConstructorInfo _genericArgumentsConstructor = typeof(JsGenericArguments).GetConstructor(new[] { typeof(object[]) });
+        private static readonly ConstructorInfo _functionConstructor = typeof(JsFunction).GetConstructors()[0];
 
         private static readonly FieldInfo _nullInstance = typeof(JsNull).GetField("Instance");
         private static readonly FieldInfo _undefinedInstance = typeof(JsUndefined).GetField("Instance");

@@ -448,7 +448,7 @@ namespace Jint
         [Conditional("DEBUG")]
         private void PrintBound(BoundProgram program)
         {
-            var functions = FunctionGatherer.Gather(program);
+            var functions = FunctionGatherer.Gather(program.Body);
 
             var bodies = new List<BoundBody> { program.Body };
             bodies.AddRange(functions.Select(p => p.Body));
@@ -532,8 +532,10 @@ namespace Jint
 
             return _runtime.CreateFunction(
                 function.Name,
-                new CodeGenerator(this, null).BuildFunction(boundFunction),
-                null,
+                (JsFunction)Delegate.CreateDelegate(
+                    typeof(JsFunction),
+                    new CodeGenerator(this, null).BuildFunction(boundFunction)
+                ),
                 function.Parameters.ToArray(),
                 sourceCode
             );

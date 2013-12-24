@@ -9,7 +9,6 @@ namespace Jint.Native
         JintRuntime runtime,
         object @this,
         JsObject callee,
-        object closure,
         object[] arguments
     );
 }

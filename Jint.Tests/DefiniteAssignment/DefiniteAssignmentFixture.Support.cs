@@ -20,7 +20,7 @@ namespace Jint.Tests.DefiniteAssignment
 
             var program = Compile(script);
 
-            var function = FunctionGatherer.Gather(program).Single(p => p.Name == "__body");
+            var function = FunctionGatherer.Gather(program.Body).Single(p => p.Name == "__body");
 
             var definitelyAssigned = function.Body.TypeManager.Types.Where(p => p.DefinitelyAssigned).ToList();
             var assignedLocals = function.Body.Locals.Where(p => definitelyAssigned.Contains(p.Type)).Select(p => p.Name).ToList();

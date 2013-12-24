@@ -81,30 +81,29 @@ namespace Jint.Compiler
 
             // Build the closure.
 
-            var fields = new Dictionary<string, Type>();
+            var fields = new List<string>();
 
             // Add the variables that were closed over.
 
             foreach (var variable in block.ClosedOverVariables)
             {
                 if (variable.Type == VariableType.Local)
-                    fields.Add(variable.Name, typeof(object));
-                else if (!fields.ContainsKey(Closure.ArgumentsFieldName))
-                    fields.Add(Closure.ArgumentsFieldName, typeof(JsObject));
+                    fields.Add(variable.Name);
             }
+
+            if (!fields.Contains(Closure.ArgumentsFieldName))
+                fields.Add(Closure.ArgumentsFieldName);
 
             // If we have a parent closure, add a variable for that.
 
             if (parent != null)
-                fields.Add(Closure.ParentFieldName, parent.Block.Closure.Type);
+                fields.Add(Closure.ParentFieldName);
 
             // Build the closure.
 
-            var closureType = DynamicAssemblyManager.BuildClosure(fields);
             var closure = new Closure(
-                closureType,
                 parent != null ? parent.Block.Closure : null,
-                fields.Select(p => p.Key)
+                fields
             );
 
             block.Block.Closure = closure;
@@ -120,8 +119,7 @@ namespace Jint.Compiler
                     {
                         block.ArgumentsVariable.ClosureField = new ClosedOverVariable(
                             closure,
-                            block.ArgumentsVariable,
-                            closureType.GetField(Closure.ArgumentsFieldName)
+                            block.ArgumentsVariable
                         );
                     }
 
@@ -131,8 +129,7 @@ namespace Jint.Compiler
                 {
                     variable.ClosureField = new ClosedOverVariable(
                         closure,
-                        variable,
-                        closureType.GetField(variable.Name)
+                        variable
                     );
                 }
             }

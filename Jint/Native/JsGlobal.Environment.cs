@@ -10,7 +10,7 @@ namespace Jint.Native
         private void BuildEnvironment()
         {
             var objectPrototype = CreateObject(PrototypeSink);
-            var functionPrototype = CreateNakedFunction(null, FunctionFunctions.BaseConstructor, 0, null, objectPrototype);
+            var functionPrototype = CreateNakedFunction(null, FunctionFunctions.BaseConstructor, 0, objectPrototype);
 
             // These two must be initialized special because they depend on
             // each other being available.
@@ -53,7 +53,7 @@ namespace Jint.Native
                 prototype.DefineProperty(Id.__lookupSetter__, ObjectFunctions.LookupSetter, 1, PropertyAttributes.DontEnum);
             }
 
-            return CreateNakedFunction("Object", ObjectFunctions.Constructor, 0, null, prototype);
+            return CreateNakedFunction("Object", ObjectFunctions.Constructor, 0, prototype);
         }
 
         private JsObject BuildFunctionClass(JsObject functionPrototype)
@@ -67,7 +67,6 @@ namespace Jint.Native
                     "Function",
                     FunctionFunctions.Constructor,
                     0,
-                    null,
                     null
                 )
             );
@@ -110,7 +109,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.indexOf, ArrayFunctions.IndexOf, 1, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.lastIndexOf, ArrayFunctions.LastIndexOf, 1, PropertyAttributes.DontEnum);
 
-            return CreateNakedFunction("Array", ArrayFunctions.Constructor, 0, null, prototype);
+            return CreateNakedFunction("Array", ArrayFunctions.Constructor, 0, prototype);
         }
 
         private JsObject BuildBooleanClass()
@@ -121,7 +120,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.toLocaleString, BooleanFunctions.ToString, 0, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.valueOf, BooleanFunctions.ValueOf, 0, PropertyAttributes.DontEnum);
 
-            return CreateNakedFunction("Boolean", BooleanFunctions.Constructor, 0, null, prototype);
+            return CreateNakedFunction("Boolean", BooleanFunctions.Constructor, 0, prototype);
         }
 
         private JsObject BuildDateClass()
@@ -170,7 +169,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.setUTCFullYear, DateFunctions.SetUTCFullYear, 3, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.toUTCString, DateFunctions.ToUTCString, 0, PropertyAttributes.DontEnum);
 
-            var result = CreateNakedFunction("Date", DateFunctions.Constructor, 0, null, prototype);
+            var result = CreateNakedFunction("Date", DateFunctions.Constructor, 0, prototype);
 
             result.DefineAccessor(Id.now, DateFunctions.Now, null, PropertyAttributes.DontEnum);
             result.DefineProperty(Id.parse, DateFunctions.Parse, 1, PropertyAttributes.DontEnum);
@@ -191,7 +190,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.toPrecision, NumberFunctions.ToPrecision, 0, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.valueOf, NumberFunctions.ValueOf, 0, PropertyAttributes.DontEnum);
 
-            var result = CreateNakedFunction("Number", NumberFunctions.Constructor, 0, null, prototype);
+            var result = CreateNakedFunction("Number", NumberFunctions.Constructor, 0, prototype);
 
             result.DefineProperty(Id.MAX_VALUE, DoubleBoxes.MaxValue, PropertyAttributes.None);
             result.DefineProperty(Id.MIN_VALUE, DoubleBoxes.MinValue, PropertyAttributes.None);
@@ -212,7 +211,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.exec, RegExpFunctions.Exec, 0, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.test, RegExpFunctions.Test, 0, PropertyAttributes.DontEnum);
 
-            return CreateNakedFunction("RegExp", RegExpFunctions.Constructor, 0, null, prototype);
+            return CreateNakedFunction("RegExp", RegExpFunctions.Constructor, 0, prototype);
         }
 
         private JsObject BuildStringClass()
@@ -241,7 +240,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.slice, StringFunctions.Slice, 2, PropertyAttributes.DontEnum);
             prototype.DefineAccessor(Id.length, StringFunctions.GetLength, null, PropertyAttributes.DontEnum);
 
-            var result = CreateNakedFunction("String", StringFunctions.Constructor, 0, null, prototype);
+            var result = CreateNakedFunction("String", StringFunctions.Constructor, 0, prototype);
 
             result.DefineProperty(Id.fromCharCode, StringFunctions.FromCharCode, 1, PropertyAttributes.DontEnum);
 
@@ -289,7 +288,7 @@ namespace Jint.Native
             prototype.DefineProperty(Id.toString, ErrorFunctions.ToString, 0, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.toLocaleString, ErrorFunctions.ToString, 0, PropertyAttributes.DontEnum);
 
-            return CreateNakedFunction(name, ErrorFunctions.Constructor, 0, null, prototype);
+            return CreateNakedFunction(name, ErrorFunctions.Constructor, 0, prototype);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Jint.Native
     {
         private static class BooleanFunctions
         {
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (target == runtime.Global.GlobalScope)
@@ -24,12 +24,12 @@ namespace Jint.Native
                 return @this;
             }
 
-            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return BooleanBoxes.Box(JsValue.ToBoolean(@this));
             }
 
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return JsConvert.ToString(JsValue.ToBoolean(@this));
             }

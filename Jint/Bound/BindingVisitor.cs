@@ -356,9 +356,27 @@ namespace Jint.Bound
 
         private BoundBody VisitBody(BodySyntax syntax)
         {
+            // Find the scoped closure; the function is going to be built on
+            // that.
+
+            var scopedClosure = _scope.Closure;
+            var scope = _scope;
+
+            while (scope != null)
+            {
+                if (scope.Closure != null)
+                {
+                    scopedClosure = scope.Closure;
+                    break;
+                }
+
+                scope = scope.Parent;
+            }
+
             return new BoundBody(
                 BuildBlock(syntax),
                 _scope.Closure,
+                scopedClosure,
                 _scope.GetArguments().ToReadOnlyArray(),
                 _scope.GetLocals().ToReadOnlyArray(),
                 _scope.TypeManager

@@ -10,7 +10,7 @@ namespace Jint.Native
         private static class ObjectFunctions
         {
             // 15.2.2.1
-            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 // TODO: This looks wrong. It looks like this should be returning
                 // a JsObject that has the value set to the parameter. Chrome returns
@@ -47,13 +47,13 @@ namespace Jint.Native
             }
 
             // 15.2.4.3 and 15.2.4.4
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 return "[object " + JsValue.GetClass(@this) + "]";
             }
 
             // 15.2.4.4
-            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 // TODO: This looks wrong and it looks like the Value should be returned
                 // here. E.g. typeof(new Object(7).valueOf()) returns 'number' in Chrome.
@@ -62,14 +62,14 @@ namespace Jint.Native
             }
 
             // 15.2.4.5
-            public static object HasOwnProperty(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object HasOwnProperty(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
                 return BooleanBoxes.Box(target.HasOwnProperty(arguments[0]));
             }
 
             // 15.2.4.6
-            public static object IsPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object IsPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (
@@ -83,7 +83,7 @@ namespace Jint.Native
             }
 
             // 15.2.4.7
-            public static object PropertyIsEnumerable(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object PropertyIsEnumerable(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 throw new NotImplementedException();
                 /*
@@ -97,7 +97,7 @@ namespace Jint.Native
             }
 
             // 15.2.3.2
-            public static object GetPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object GetPrototypeOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var @object = arguments[0] as JsObject;
                 if (@object == null)
@@ -111,7 +111,7 @@ namespace Jint.Native
             }
 
             // 15.2.3.6
-            public static object DefineProperty(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object DefineProperty(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var instance = arguments[0] as JsObject;
                 if (instance == null)
@@ -200,7 +200,7 @@ namespace Jint.Native
                 }
             }
 
-            public static object LookupGetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object LookupGetter(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (arguments.Length == 0)
@@ -226,7 +226,7 @@ namespace Jint.Native
                 return JsUndefined.Instance;
             }
 
-            public static object LookupSetter(JintRuntime runtime, object @this, JsObject callee, object closure, object[] arguments)
+            public static object LookupSetter(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
                 if (arguments.Length <= 0)
