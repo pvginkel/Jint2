@@ -4,9 +4,9 @@ using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Jint.Bound;
+using Jint.Expressions;
 
 namespace Jint.Support
 {
@@ -15,15 +15,15 @@ namespace Jint.Support
         private static readonly FieldInfo _stringEmpty = typeof(string).GetField("Empty");
 
         private readonly ILGenerator _il;
-        private readonly DebugInfoGenerator _pdb;
+        private readonly ISymbolDocumentWriter _document;
 
-        public ILBuilder(ILGenerator il, DebugInfoGenerator pdb)
+        public ILBuilder(ILGenerator il, ISymbolDocumentWriter document)
         {
             if (il == null)
                 throw new ArgumentNullException("il");
 
             _il = il;
-            _pdb = pdb;
+            _document = document;
         }
 
         public void Emit(OpCode opcode)
@@ -355,6 +355,22 @@ namespace Jint.Support
                 throw new ArgumentNullException("label");
 
             MarkLabel(label.Label);
+        }
+
+        public void MarkSequencePoint(SourceLocation location)
+        {
+            if (location == null)
+                throw new ArgumentNullException("location");
+            if (_document == null || location == SourceLocation.Missing)
+                return;
+
+            MarkSequencePoint(
+                _document,
+                location.StartLine,
+                location.StartColumn + 1,
+                location.EndLine,
+                location.EndColumn + 1
+            );
         }
     }
 }

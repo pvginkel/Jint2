@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -15,7 +16,8 @@ namespace Jint.Bound
             get { return BoundKind.Label; }
         }
 
-        public BoundLabel(string label, BoundStatement statement)
+        public BoundLabel(string label, BoundStatement statement, SourceLocation location)
+            : base(location)
         {
             if (label == null)
                 throw new ArgumentNullException("label");
@@ -36,15 +38,16 @@ namespace Jint.Bound
             return visitor.VisitLabel(this);
         }
 
-        public BoundLabel Update(string label, BoundStatement statement)
+        public BoundLabel Update(string label, BoundStatement statement, SourceLocation location)
         {
             if (
                 label == Label &&
-                statement == Statement
+                statement == Statement &&
+                location == Location
             )
                 return this;
 
-            return new BoundLabel(label, statement);
+            return new BoundLabel(label, statement, location);
         }
     }
 }

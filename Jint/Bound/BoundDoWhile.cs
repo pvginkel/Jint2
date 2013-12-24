@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -16,7 +17,8 @@ namespace Jint.Bound
             get { return BoundKind.DoWhile; }
         }
 
-        public BoundDoWhile(BoundExpression test, BoundBlock body)
+        public BoundDoWhile(BoundExpression test, BoundBlock body, SourceLocation location)
+            : base(location)
         {
             if (test == null)
                 throw new ArgumentNullException("test");
@@ -39,15 +41,16 @@ namespace Jint.Bound
             return visitor.VisitDoWhile(this);
         }
 
-        public BoundDoWhile Update(BoundExpression test, BoundBlock body)
+        public BoundDoWhile Update(BoundExpression test, BoundBlock body, SourceLocation location)
         {
             if (
                 test == Test &&
-                body == Body
+                body == Body &&
+                location == Location
             )
                 return this;
 
-            return new BoundDoWhile(test, body);
+            return new BoundDoWhile(test, body, location);
         }
     }
 }

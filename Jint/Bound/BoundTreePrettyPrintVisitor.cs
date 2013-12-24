@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 using Jint.Support;
 
 namespace Jint.Bound
@@ -97,6 +98,7 @@ namespace Jint.Bound
 
         public override void VisitBlock(BoundBlock node)
         {
+            WriteLocation(node.Location);
             if (node.Temporaries.Count > 0)
                 Write("<" + String.Join(", ", node.Temporaries) + "> ");
 
@@ -128,6 +130,7 @@ namespace Jint.Bound
 
         public override void VisitBreak(BoundBreak node)
         {
+            WriteLocation(node.Location);
             Write("Break");
             if (node.Target != null)
             {
@@ -201,6 +204,7 @@ namespace Jint.Bound
 
         public override void VisitContinue(BoundContinue node)
         {
+            WriteLocation(node.Location);
             Write("Continue");
             if (node.Target != null)
             {
@@ -212,6 +216,7 @@ namespace Jint.Bound
 
         public override void VisitCreateFunction(BoundCreateFunction node)
         {
+            WriteLocation(node.Function.Location);
             Write("CreateFunction(" + node.Function.Name + ")");
         }
 
@@ -224,6 +229,7 @@ namespace Jint.Bound
 
         public override void VisitDoWhile(BoundDoWhile node)
         {
+            WriteLocation(node.Location);
             Write("Do ");
             Visit(node.Body);
             Write(" While (");
@@ -233,6 +239,7 @@ namespace Jint.Bound
 
         public override void VisitEmpty(BoundEmpty node)
         {
+            WriteLocation(node.Location);
             Write("Empty()");
         }
 
@@ -251,6 +258,7 @@ namespace Jint.Bound
 
         public override void VisitFor(BoundFor node)
         {
+            WriteLocation(node.Location);
             Write("For (");
             Visit(node.Initialization);
             Write(", ");
@@ -263,6 +271,7 @@ namespace Jint.Bound
 
         public override void VisitForEachIn(BoundForEachIn node)
         {
+            WriteLocation(node.Location);
             DefaultBefore(node);
             base.VisitForEachIn(node);
             DefaultAfter();
@@ -290,6 +299,7 @@ namespace Jint.Bound
 
         public override void VisitIf(BoundIf node)
         {
+            WriteLocation(node.Location);
             Write("If (");
             Visit(node.Test);
             Write(") ");
@@ -324,6 +334,7 @@ namespace Jint.Bound
 
         public override void VisitReturn(BoundReturn node)
         {
+            WriteLocation(node.Location);
             Write("Return");
             if (node.Expression != null)
             {
@@ -334,6 +345,7 @@ namespace Jint.Bound
 
         public override void VisitSetAccessor(BoundSetAccessor node)
         {
+            WriteLocation(node.Location);
             DefaultBefore(node);
             base.VisitSetAccessor(node);
             DefaultAfter();
@@ -341,6 +353,7 @@ namespace Jint.Bound
 
         public override void VisitSetMember(BoundSetMember node)
         {
+            WriteLocation(node.Location);
             Visit(node.Expression);
             Write("[");
             Visit(node.Index);
@@ -350,6 +363,7 @@ namespace Jint.Bound
 
         public override void VisitSetVariable(BoundSetVariable node)
         {
+            WriteLocation(node.Location);
             Write(node.Variable.ToString());
             Write(" = ");
             Visit(node.Value);
@@ -357,6 +371,7 @@ namespace Jint.Bound
 
         public override void VisitSwitch(BoundSwitch node)
         {
+            WriteLocation(node.Location);
             WriteLine("Switch <{0}> (", node.Temporary);
 
             _indent++;
@@ -371,6 +386,7 @@ namespace Jint.Bound
         public override void VisitSwitchCase(BoundSwitchCase node)
         {
             DefaultBefore(node);
+            WriteLocation(node.Location);
             base.VisitSwitchCase(node);
             DefaultAfter();
         }
@@ -378,6 +394,7 @@ namespace Jint.Bound
         public override void VisitThrow(BoundThrow node)
         {
             DefaultBefore(node);
+            WriteLocation(node.Location);
             base.VisitThrow(node);
             DefaultAfter();
         }
@@ -398,10 +415,17 @@ namespace Jint.Bound
 
         public override void VisitWhile(BoundWhile node)
         {
+            WriteLocation(node.Location);
             Write("While (");
             Visit(node.Test);
             Write(") ");
             Visit(node.Body);
+        }
+
+        private void WriteLocation(SourceLocation location)
+        {
+            if (location != SourceLocation.Missing)
+                Write("<{0}, {1}, {2}, {3}> ", location.StartLine, location.StartColumn, location.EndLine, location.EndColumn);
         }
 
         private string GetOperation(BoundExpressionType type)

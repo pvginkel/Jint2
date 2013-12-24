@@ -6,6 +6,8 @@ namespace Jint.Expressions
 {
     internal class SourceLocation
     {
+        public static readonly SourceLocation Missing = new SourceLocation(-1, -1, -1, -1, -1, -1, null);
+
         public int StartOffset { get; private set; }
         public int StartLine { get; private set; }
         public int StartColumn { get; private set; }

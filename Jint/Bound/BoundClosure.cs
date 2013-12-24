@@ -17,7 +17,7 @@ namespace Jint.Bound
 
         public Type Type { get; private set; }
 
-        public BoundClosure(BoundClosure parent, IEnumerable<KeyValuePair<string, IBoundType>> fields)
+        public BoundClosure(BoundClosure parent, IEnumerable<IBoundType> fields)
         {
             if (fields == null)
                 throw new ArgumentNullException("fields");
@@ -28,7 +28,7 @@ namespace Jint.Bound
 
             foreach (var field in fields)
             {
-                fieldCollection.Add(new BoundClosureField(field.Key, this, field.Value));
+                fieldCollection.Add(new BoundClosureField(this, field));
             }
 
             Fields = ReadOnlyKeyedCollection.Create(fieldCollection);

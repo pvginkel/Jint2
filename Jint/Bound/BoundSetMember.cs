@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -17,7 +18,8 @@ namespace Jint.Bound
             get { return BoundKind.SetMember; }
         }
 
-        public BoundSetMember(BoundExpression expression, BoundExpression index, BoundExpression value)
+        public BoundSetMember(BoundExpression expression, BoundExpression index, BoundExpression value, SourceLocation location)
+            : base(location)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
@@ -43,16 +45,17 @@ namespace Jint.Bound
             return visitor.VisitSetMember(this);
         }
 
-        public BoundSetMember Update(BoundExpression expression, BoundExpression index, BoundExpression value)
+        public BoundSetMember Update(BoundExpression expression, BoundExpression index, BoundExpression value, SourceLocation location)
         {
             if (
                 expression == Expression &&
                 index == Index &&
-                value == Value
+                value == Value &&
+                location == Location
             )
                 return this;
 
-            return new BoundSetMember(expression, index, value);
+            return new BoundSetMember(expression, index, value, location);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Jint.Bound
 {
     internal interface IBoundType
     {
+        string Name { get; }
         BoundValueType Type { get; }
         bool DefinitelyAssigned { get; }
         BoundTypeKind Kind { get; }

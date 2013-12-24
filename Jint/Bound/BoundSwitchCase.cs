@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -10,18 +11,20 @@ namespace Jint.Bound
     {
         public BoundExpression Expression { get; private set; }
         public BoundBlock Body { get; private set; }
+        public SourceLocation Location { get; private set; }
 
         public override BoundKind Kind
         {
             get { return BoundKind.SwitchCase; }
         }
 
-        public BoundSwitchCase(BoundExpression expression, BoundBlock body)
+        public BoundSwitchCase(BoundExpression expression, BoundBlock body, SourceLocation location)
         {
             Debug.Assert(expression != null || body != null);
 
             Expression = expression;
             Body = body;
+            Location = location;
         }
 
         [DebuggerStepThrough]
@@ -36,15 +39,16 @@ namespace Jint.Bound
             return visitor.VisitSwitchCase(this);
         }
 
-        public BoundSwitchCase Update(BoundExpression expression, BoundBlock body)
+        public BoundSwitchCase Update(BoundExpression expression, BoundBlock body, SourceLocation location)
         {
             if (
                 expression == Expression &&
-                body == Body
+                body == Body &&
+                location == Location
             )
                 return this;
 
-            return new BoundSwitchCase(expression, body);
+            return new BoundSwitchCase(expression, body, location);
         }
     }
 }

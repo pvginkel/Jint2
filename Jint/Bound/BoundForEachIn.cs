@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -17,7 +18,8 @@ namespace Jint.Bound
             get { return BoundKind.ForEachIn; }
         }
 
-        public BoundForEachIn(IBoundWritable target, BoundExpression expression, BoundBlock body)
+        public BoundForEachIn(IBoundWritable target, BoundExpression expression, BoundBlock body, SourceLocation location)
+            : base(location)
         {
             if (target == null)
                 throw new ArgumentNullException("target");
@@ -43,16 +45,17 @@ namespace Jint.Bound
             return visitor.VisitForEachIn(this);
         }
 
-        public BoundForEachIn Update(IBoundWritable target, BoundExpression expression, BoundBlock body)
+        public BoundForEachIn Update(IBoundWritable target, BoundExpression expression, BoundBlock body, SourceLocation location)
         {
             if (
                 target == Target &&
                 expression == Expression &&
-                body == Body
+                body == Body &&
+                location == Location
             )
                 return this;
 
-            return new BoundForEachIn(target, expression, body);
+            return new BoundForEachIn(target, expression, body, location);
         }
     }
 }

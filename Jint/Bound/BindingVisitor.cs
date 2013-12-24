@@ -31,7 +31,8 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 temporary,
-                creation
+                creation,
+                SourceLocation.Missing
             ));
 
             for (int i = 0; i < syntax.Parameters.Count; i++)
@@ -43,7 +44,7 @@ namespace Jint.Bound
                 ));
             }
 
-            return builder.BuildExpression(temporary);
+            return builder.BuildExpression(temporary, SourceLocation.Missing);
         }
 
         public BoundNode VisitAssignment(AssignmentSyntax syntax)
@@ -77,7 +78,8 @@ namespace Jint.Bound
 
                 builder.Add(new BoundSetVariable(
                     temporary,
-                    BuildExpression(right)
+                    BuildExpression(right),
+                    SourceLocation.Missing
                 ));
 
                 builder.Add(BuildSet(
@@ -85,7 +87,7 @@ namespace Jint.Bound
                     new BoundGetVariable(temporary)
                 ));
 
-                return builder.BuildExpression(temporary);
+                return builder.BuildExpression(temporary, SourceLocation.Missing);
             }
             else
             {
@@ -95,7 +97,8 @@ namespace Jint.Bound
 
                 builder.Add(new BoundSetVariable(
                     temporary,
-                    BuildExpression(syntax.Left)
+                    BuildExpression(syntax.Left),
+                    SourceLocation.Missing
                 ));
 
                 builder.Add(new BoundSetVariable(
@@ -104,7 +107,8 @@ namespace Jint.Bound
                         AssignmentSyntax.GetSyntaxType(syntax.Operation),
                         new BoundGetVariable(temporary),
                         BuildExpression(syntax.Right)
-                    )
+                    ),
+                    SourceLocation.Missing
                 ));
 
                 builder.Add(BuildSet(
@@ -112,7 +116,7 @@ namespace Jint.Bound
                     new BoundGetVariable(temporary)
                 ));
 
-                return builder.BuildExpression(temporary);
+                return builder.BuildExpression(temporary, SourceLocation.Missing);
             }
         }
 
@@ -138,42 +142,50 @@ namespace Jint.Bound
                     {
                         builder.Add(new BoundSetVariable(
                             leftTemporary,
-                            left
+                            left,
+                            SourceLocation.Missing
                         ));
 
                         builder.Add(new BoundIf(
                             new BoundGetVariable(leftTemporary),
                             BuildBlock(new BoundSetVariable(
                                 resultTemporary,
-                                right
+                                right,
+                                SourceLocation.Missing
                             )),
                             BuildBlock(new BoundSetVariable(
                                 resultTemporary,
-                                new BoundGetVariable(leftTemporary)
-                            ))
+                                new BoundGetVariable(leftTemporary),
+                                SourceLocation.Missing
+                            )),
+                            SourceLocation.Missing
                         ));
                     }
                     else
                     {
                         builder.Add(new BoundSetVariable(
                             leftTemporary,
-                            left
+                            left,
+                            SourceLocation.Missing
                         ));
 
                         builder.Add(new BoundIf(
                             new BoundGetVariable(leftTemporary),
                             BuildBlock(new BoundSetVariable(
                                 resultTemporary,
-                                new BoundGetVariable(leftTemporary)
+                                new BoundGetVariable(leftTemporary),
+                                SourceLocation.Missing
                             )),
                             BuildBlock(new BoundSetVariable(
                                 resultTemporary,
-                                right
-                            ))
+                                right,
+                                SourceLocation.Missing
+                            )),
+                            SourceLocation.Missing
                         ));
                     }
 
-                    return builder.BuildExpression(resultTemporary);
+                    return builder.BuildExpression(resultTemporary, SourceLocation.Missing);
 
                 case SyntaxExpressionType.Add: type = BoundExpressionType.Add; break;
                 case SyntaxExpressionType.BitwiseAnd: type = BoundExpressionType.BitwiseAnd; break;
@@ -209,7 +221,7 @@ namespace Jint.Bound
 
         public BoundNode VisitBreak(BreakSyntax syntax)
         {
-            return new BoundBreak(syntax.Target);
+            return new BoundBreak(syntax.Target, syntax.Location);
         }
 
         public BoundNode VisitCommaOperator(CommaOperatorSyntax syntax)
@@ -226,41 +238,44 @@ namespace Jint.Bound
                 {
                     builder.Add(new BoundSetVariable(
                         resultTemporary,
-                        (BoundExpression)expression.Accept(this)
+                        (BoundExpression)expression.Accept(this),
+                        SourceLocation.Missing
                     ));
                 }
                 else
                 {
                     builder.Add(new BoundExpressionStatement(
-                        (BoundExpression)expression.Accept(this)
+                        (BoundExpression)expression.Accept(this),
+                        SourceLocation.Missing
                     ));
                 }
             }
 
-            return builder.BuildExpression(resultTemporary);
+            return builder.BuildExpression(resultTemporary, SourceLocation.Missing);
         }
 
         public BoundNode VisitContinue(ContinueSyntax syntax)
         {
-            return new BoundContinue(syntax.Target);
+            return new BoundContinue(syntax.Target, syntax.Location);
         }
 
         public BoundNode VisitDoWhile(DoWhileSyntax syntax)
         {
             return new BoundDoWhile(
                 BuildExpression(syntax.Test),
-                BuildBlock(syntax.Body)
+                BuildBlock(syntax.Body),
+                syntax.Location
             );
         }
 
         public BoundNode VisitEmpty(EmptySyntax syntax)
         {
-            return new BoundEmpty();
+            return new BoundEmpty(SourceLocation.Missing);
         }
 
         public BoundNode VisitExpressionStatement(ExpressionStatementSyntax syntax)
         {
-            return BuildBlock(syntax.Expression);
+            return BuildBlock(syntax.Expression, syntax.Location);
         }
 
         public BoundNode VisitFor(ForSyntax syntax)
@@ -269,8 +284,19 @@ namespace Jint.Bound
                 syntax.Initialization != null ? BuildBlock(syntax.Initialization) : null,
                 syntax.Test != null ? BuildExpression(syntax.Test) : null,
                 syntax.Increment != null ? BuildBlock(syntax.Increment) : null,
-                BuildBlock(syntax.Body)
+                BuildBlock(syntax.Body),
+                // Don't emit the location because the separate parts of the for
+                // statement are the locations.
+                SourceLocation.Missing
             );
+        }
+
+        private SourceLocation GetLocation(SyntaxNode syntax)
+        {
+            var hasLocation = syntax as ISourceLocation;
+            if (hasLocation != null)
+                return hasLocation.Location;
+            return SourceLocation.Missing;
         }
 
         public BoundNode VisitForEachIn(ForEachInSyntax syntax)
@@ -278,7 +304,8 @@ namespace Jint.Bound
             return new BoundForEachIn(
                 _scope.GetWritable(syntax.Target),
                 BuildExpression(syntax.Expression),
-                BuildBlock(syntax.Body)
+                BuildBlock(syntax.Body),
+                syntax.Location
             );
         }
 
@@ -299,7 +326,8 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 temporary,
-                functionObject
+                functionObject,
+                SourceLocation.Missing
             ));
 
             builder.Add(BuildSet(
@@ -307,7 +335,7 @@ namespace Jint.Bound
                 new BoundGetVariable(temporary)
             ));
 
-            return builder.BuildExpression(temporary);
+            return builder.BuildExpression(temporary, syntax.Location);
         }
 
         public BoundFunction DeclareFunction(FunctionSyntax syntax)
@@ -317,7 +345,8 @@ namespace Jint.Bound
             var function = new BoundFunction(
                 syntax.Name,
                 syntax.Parameters.ToReadOnlyArray(),
-                VisitBody(syntax.Body)
+                VisitBody(syntax.Body),
+                syntax.Location
             );
 
             _scope = _scope.Parent;
@@ -346,7 +375,8 @@ namespace Jint.Bound
             return new BoundIf(
                 BuildExpression(syntax.Test),
                 BuildBlock(syntax.Then),
-                syntax.Else == null ? null : BuildBlock(syntax.Else)
+                syntax.Else == null ? null : BuildBlock(syntax.Else),
+                syntax.Location
             );
         }
 
@@ -366,7 +396,7 @@ namespace Jint.Bound
 
             var temporary = builder.CreateTemporary();
 
-            builder.Add(new BoundSetVariable(temporary, creation));
+            builder.Add(new BoundSetVariable(temporary, creation, SourceLocation.Missing));
 
             foreach (var property in syntax.Properties)
             {
@@ -376,8 +406,7 @@ namespace Jint.Bound
                     builder.Add(new BoundSetMember(
                         new BoundGetVariable(temporary),
                         BoundConstant.Create(dataProperty.Name),
-                        BuildExpression(dataProperty.Expression)
-                    ));
+                        BuildExpression(dataProperty.Expression), SourceLocation.Missing));
                 }
                 else
                 {
@@ -387,19 +416,21 @@ namespace Jint.Bound
                         new BoundGetVariable(temporary),
                         BoundConstant.Create(accessorProperty.Name),
                         accessorProperty.GetExpression != null ? BuildExpression(accessorProperty.GetExpression) : null,
-                        accessorProperty.SetExpression != null ? BuildExpression(accessorProperty.SetExpression) : null
+                        accessorProperty.SetExpression != null ? BuildExpression(accessorProperty.SetExpression) : null,
+                        SourceLocation.Missing
                     ));
                 }
             }
 
-            return builder.BuildExpression(temporary);
+            return builder.BuildExpression(temporary, SourceLocation.Missing);
         }
 
         public BoundNode VisitLabel(LabelSyntax syntax)
         {
             return new BoundLabel(
                 syntax.Label,
-                (BoundStatement)syntax.Expression.Accept(this)
+                (BoundStatement)syntax.Expression.Accept(this),
+                SourceLocation.Missing
             );
         }
 
@@ -429,7 +460,8 @@ namespace Jint.Bound
 
                     builder.Add(new BoundSetVariable(
                         targetTemporary,
-                        targetAssignment
+                        targetAssignment,
+                        SourceLocation.Missing
                     ));
 
                     target = new BoundGetVariable(targetTemporary);
@@ -459,7 +491,8 @@ namespace Jint.Bound
 
                     builder.Add(new BoundSetVariable(
                         method,
-                        BuildGet(identifierSyntax, withTarget)
+                        BuildGet(identifierSyntax, withTarget),
+                        SourceLocation.Missing
                     ));
 
                     getter = new BoundGetVariable(method);
@@ -487,13 +520,14 @@ namespace Jint.Bound
                         new BoundCallArgument(
                             BuildExpression(p.Expression),
                             p.IsRef
-                        )
-                    ).ToReadOnlyArray(),
+                            )
+                        ).ToReadOnlyArray(),
                     syntax.Generics.Select(BuildExpression).ToReadOnlyArray()
-                )
+                ),
+                SourceLocation.Missing
             ));
 
-            return builder.BuildExpression(resultTemporary);
+            return builder.BuildExpression(resultTemporary, SourceLocation.Missing);
         }
 
         public BoundNode VisitNew(NewSyntax syntax)
@@ -553,7 +587,8 @@ namespace Jint.Bound
         public BoundNode VisitReturn(ReturnSyntax syntax)
         {
             return new BoundReturn(
-                syntax.Expression != null ? BuildExpression(syntax.Expression) : null
+                syntax.Expression != null ? BuildExpression(syntax.Expression) : null,
+                syntax.Location
             );
         }
 
@@ -565,18 +600,21 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 temporary,
-                BuildExpression(syntax.Expression)
+                BuildExpression(syntax.Expression),
+                SourceLocation.Missing
             ));
 
             builder.Add(new BoundSwitch(
                 temporary,
                 syntax.Cases.Select(p => new BoundSwitchCase(
                     p.Expression != null ? BuildExpression(p.Expression) : null,
-                    p.Body != null ? BuildBlock(p.Body) : null
-                )).ToReadOnlyArray()
+                    p.Body != null ? BuildBlock(p.Body) : null,
+                    syntax.Location
+                )).ToReadOnlyArray(),
+                syntax.Location
             ));
 
-            return builder.BuildBlock();
+            return builder.BuildBlock(SourceLocation.Missing);
         }
 
         public BoundNode VisitTernary(TernarySyntax syntax)
@@ -589,21 +627,25 @@ namespace Jint.Bound
                 BuildExpression(syntax.Test),
                 BuildBlock(new BoundSetVariable(
                     temporary,
-                    BuildExpression(syntax.Then)
+                    BuildExpression(syntax.Then),
+                    SourceLocation.Missing
                 )),
                 BuildBlock(new BoundSetVariable(
                     temporary,
-                    BuildExpression(syntax.Else)
-                ))
+                    BuildExpression(syntax.Else),
+                    SourceLocation.Missing
+                )),
+                SourceLocation.Missing
             ));
 
-            return builder.BuildExpression(temporary);
+            return builder.BuildExpression(temporary, SourceLocation.Missing);
         }
 
         public BoundNode VisitThrow(ThrowSyntax syntax)
         {
             return new BoundThrow(
-                BuildExpression(syntax.Expression)
+                BuildExpression(syntax.Expression),
+                syntax.Location
             );
         }
 
@@ -617,7 +659,8 @@ namespace Jint.Bound
                 ),
                 syntax.Finally == null ? null : new BoundFinally(
                     BuildBlock(syntax.Finally.Body)
-                )
+                ),
+                SourceLocation.Missing
             );
         }
 
@@ -635,7 +678,8 @@ namespace Jint.Bound
 
                     builder.Add(new BoundSetVariable(
                         temporary,
-                        BuildExpression(syntax.Operand)
+                        BuildExpression(syntax.Operand),
+                        SourceLocation.Missing
                     ));
 
                     bool before =
@@ -656,7 +700,8 @@ namespace Jint.Bound
                                 BoundExpressionType.Add,
                                 new BoundGetVariable(temporary),
                                 BoundConstant.Create(offset)
-                            )
+                            ),
+                            SourceLocation.Missing
                         ));
 
                         builder.Add(BuildSet(
@@ -676,7 +721,7 @@ namespace Jint.Bound
                         ));
                     }
 
-                    return builder.BuildExpression(temporary);
+                    return builder.BuildExpression(temporary, SourceLocation.Missing);
 
                 case SyntaxExpressionType.Delete:
                     return BuildDeleteMember(syntax.Operand);
@@ -744,17 +789,19 @@ namespace Jint.Bound
                     var builder = new BlockBuilder(this);
 
                     builder.Add(new BoundExpressionStatement(
-                        BuildExpression(syntax)
+                        BuildExpression(syntax),
+                        SourceLocation.Missing
                     ));
 
                     var temporary = builder.CreateTemporary();
 
                     builder.Add(new BoundSetVariable(
                         temporary,
-                        BoundConstant.Create(true)
+                        BoundConstant.Create(true),
+                        SourceLocation.Missing
                     ));
 
-                    return builder.BuildExpression(temporary);
+                    return builder.BuildExpression(temporary, SourceLocation.Missing);
             }
         }
 
@@ -766,11 +813,13 @@ namespace Jint.Bound
         public BoundNode VisitVariableDeclaration(VariableDeclarationSyntax syntax)
         {
             var builder = new BlockBuilder(this);
+            bool hadOne = false;
 
             foreach (var declaration in syntax.Declarations)
             {
                 if (declaration.Expression != null)
                 {
+                    hadOne = true;
                     builder.Add(BuildSet(
                         declaration.Target,
                         BuildExpression(declaration.Expression)
@@ -778,14 +827,18 @@ namespace Jint.Bound
                 }
             }
 
-            return builder.BuildBlock();
+            if (!hadOne)
+                return new BoundEmpty(SourceLocation.Missing);
+
+            return builder.BuildBlock(syntax.Location);
         }
 
         public BoundNode VisitWhile(WhileSyntax syntax)
         {
             return new BoundWhile(
                 BuildExpression(syntax.Test),
-                BuildBlock(syntax.Body)
+                BuildBlock(syntax.Body),
+                syntax.Location
             );
         }
 
@@ -797,7 +850,8 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 temporary,
-                BuildExpression(syntax.Expression)
+                BuildExpression(syntax.Expression),
+                SourceLocation.Missing
             ));
 
             _withTemporaries.Add(syntax.Target, temporary);
@@ -806,7 +860,7 @@ namespace Jint.Bound
 
             _withTemporaries.Remove(syntax.Target);
 
-            return builder.BuildBlock();
+            return builder.BuildBlock(syntax.Location);
         }
     }
 }

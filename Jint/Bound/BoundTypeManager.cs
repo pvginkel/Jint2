@@ -17,9 +17,9 @@ namespace Jint.Bound
 
         public ReadOnlyArray<BoundClosure> UsedClosures { get; private set; }
 
-        public IBoundType CreateType(BoundTypeKind type)
+        public IBoundType CreateType(string name, BoundTypeKind type)
         {
-            var result = new BoundType(this, type);
+            var result = new BoundType(this, name, type);
 
             _types.Add(result);
 
@@ -41,13 +41,15 @@ namespace Jint.Bound
         {
             private readonly BoundTypeManager _typeManager;
 
+            public string Name { get; private set; }
             public BoundTypeKind Kind { get; private set; }
             public BoundValueType Type { get; set; }
             public bool DefinitelyAssigned { get; set; }
 
-            public BoundType(BoundTypeManager typeManager, BoundTypeKind kind)
+            public BoundType(BoundTypeManager typeManager, string name, BoundTypeKind kind)
             {
                 _typeManager = typeManager;
+                Name = name;
                 Kind = kind;
             }
 

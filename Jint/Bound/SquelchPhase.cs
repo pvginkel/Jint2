@@ -30,7 +30,8 @@ namespace Jint.Bound
             return node.Update(
                 node.Name,
                 node.Parameters,
-                Perform(node.Body)
+                Perform(node.Body),
+                node.Location
             );
         }
 
@@ -280,7 +281,7 @@ namespace Jint.Bound
 
                 // Return the new block.
 
-                return new BoundBlock(temporaries, nodes.ToReadOnly());
+                return new BoundBlock(temporaries, nodes.ToReadOnly(), node.Location);
             }
 
             public override BoundNode VisitSetVariable(BoundSetVariable node)
@@ -297,7 +298,8 @@ namespace Jint.Bound
 
                 return node.Update(
                     variable,
-                    Visit(node.Value)
+                    Visit(node.Value),
+                    node.Location
                 );
             }
 
@@ -326,7 +328,8 @@ namespace Jint.Bound
                     node.Function.Update(
                         node.Function.Name,
                         node.Function.Parameters,
-                        Perform(node.Function.Body)
+                        Perform(node.Function.Body),
+                        node.Function.Location
                     )
                 );
             }

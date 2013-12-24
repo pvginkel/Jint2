@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -11,6 +12,11 @@ namespace Jint.Bound
         public override BoundKind Kind
         {
             get { return BoundKind.Empty; }
+        }
+
+        public BoundEmpty(SourceLocation location)
+            : base(location)
+        {
         }
 
         [DebuggerStepThrough]
@@ -25,9 +31,12 @@ namespace Jint.Bound
             return visitor.VisitEmpty(this);
         }
 
-        public BoundEmpty Update()
+        public BoundEmpty Update(SourceLocation location)
         {
-            return this;
+            if (location == Location)
+                return this;
+
+            return new BoundEmpty(location);
         }
     }
 }

@@ -18,7 +18,8 @@ namespace Jint.Bound
             get { return BoundKind.Block; }
         }
 
-        public BoundBlock(ReadOnlyArray<BoundTemporary> temporaries, ReadOnlyArray<BoundStatement> nodes)
+        public BoundBlock(ReadOnlyArray<BoundTemporary> temporaries, ReadOnlyArray<BoundStatement> nodes, SourceLocation location)
+            : base(location)
         {
             if (temporaries == null)
                 throw new ArgumentNullException("temporaries");
@@ -41,15 +42,16 @@ namespace Jint.Bound
             return visitor.VisitBlock(this);
         }
 
-        public BoundBlock Update(ReadOnlyArray<BoundTemporary> temporaries, ReadOnlyArray<BoundStatement> nodes)
+        public BoundBlock Update(ReadOnlyArray<BoundTemporary> temporaries, ReadOnlyArray<BoundStatement> nodes, SourceLocation location)
         {
             if (
                 temporaries == Temporaries &&
-                nodes == Nodes
+                nodes == Nodes &&
+                location == Location
             )
                 return this;
 
-            return new BoundBlock(temporaries, nodes);
+            return new BoundBlock(temporaries, nodes, location);
         }
     }
 }

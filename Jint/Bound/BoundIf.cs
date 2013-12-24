@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -17,7 +18,8 @@ namespace Jint.Bound
             get { return BoundKind.If; }
         }
 
-        public BoundIf(BoundExpression test, BoundBlock @then, BoundBlock @else)
+        public BoundIf(BoundExpression test, BoundBlock then, BoundBlock @else, SourceLocation location)
+            : base(location)
         {
             if (test == null)
                 throw new ArgumentNullException("test");
@@ -41,16 +43,17 @@ namespace Jint.Bound
             return visitor.VisitIf(this);
         }
 
-        public BoundIf Update(BoundExpression test, BoundBlock @then, BoundBlock @else)
+        public BoundIf Update(BoundExpression test, BoundBlock then, BoundBlock @else, SourceLocation location)
         {
             if (
                 test == Test &&
                 @then == Then &&
-                @else == Else
+                @else == Else &&
+                location == Location
             )
                 return this;
 
-            return new BoundIf(test, @then, @else);
+            return new BoundIf(test, @then, @else, location);
         }
     }
 }

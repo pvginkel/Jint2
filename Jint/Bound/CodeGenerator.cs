@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -11,6 +13,7 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using Jint.Compiler;
+using Jint.Expressions;
 using Jint.Native;
 using Jint.Support;
 
@@ -28,13 +31,14 @@ namespace Jint.Bound
         private Scope _scope;
         private readonly TypeBuilder _typeBuilder;
         private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
+        private readonly ISymbolDocumentWriter _document;
 
         private ILBuilder IL
         {
             get { return _scope.IL; }
         }
 
-        public CodeGenerator(JintEngine engine)
+        public CodeGenerator(JintEngine engine, string fileName)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
@@ -47,6 +51,16 @@ namespace Jint.Bound
                 "CompiledExpression" + typeId.ToString(CultureInfo.InvariantCulture),
                  TypeAttributes.Public
             );
+
+            if (fileName != null)
+            {
+                _document = DynamicAssemblyManager.ModuleBuilder.DefineDocument(
+                    Path.GetFullPath(fileName),
+                    SymLanguageType.JScript,
+                    SymLanguageVendor.Microsoft,
+                    SymDocumentType.Text
+                );
+            }
         }
 
         public Func<JintRuntime, object> BuildMainMethod(BoundProgram program)
@@ -63,7 +77,7 @@ namespace Jint.Bound
             Debug.Assert(program.Body.Closure == null);
 
             _scope = new Scope(
-                new ILBuilder(methodBuilder.GetILGenerator(), DynamicAssemblyManager.PdbGenerator),
+                new ILBuilder(methodBuilder.GetILGenerator(), _document),
                 false,
                 null,
                 null,
@@ -76,7 +90,7 @@ namespace Jint.Bound
 
             // Ensure that we return something.
 
-            EmitReturn(new BoundReturn(null));
+            EmitReturn(new BoundReturn(null, SourceLocation.Missing));
 
             var methodInfo = _typeBuilder.CreateType().GetMethod(MainMethodName);
 
@@ -124,6 +138,8 @@ namespace Jint.Bound
 
         private void EmitStatements(BoundBlock node)
         {
+            IL.MarkSequencePoint(node.Location);
+
             foreach (var statement in node.Nodes)
             {
                 EmitStatement(statement);
@@ -132,13 +148,15 @@ namespace Jint.Bound
 
         private void EmitStatement(BoundStatement node)
         {
+            IL.MarkSequencePoint(node.Location);
+
             switch (node.Kind)
             {
                 case BoundKind.Block: EmitStatements((BoundBlock)node); return;
                 case BoundKind.Break: EmitBreak((BoundBreak)node); return;
                 case BoundKind.Continue: EmitContinue((BoundContinue)node); return;
                 case BoundKind.DoWhile: throw new NotImplementedException();
-                case BoundKind.Empty: throw new NotImplementedException();
+                case BoundKind.Empty: return;
                 case BoundKind.ExpressionStatement: EmitExpressionStatement((BoundExpressionStatement)node); return;
                 case BoundKind.For: EmitFor((BoundFor)node); return;
                 case BoundKind.ForEachIn: throw new NotImplementedException();
@@ -745,7 +763,7 @@ namespace Jint.Bound
             );
 
             _scope = new Scope(
-                new ILBuilder(methodBuilder.GetILGenerator(), DynamicAssemblyManager.PdbGenerator),
+                new ILBuilder(methodBuilder.GetILGenerator(), _document),
                 true,
                 FindScopedClosure(function.Body, _scope),
                 function.Body.Locals.Single(p => p.Name == "arguments"),
@@ -790,7 +808,22 @@ namespace Jint.Bound
 
             // Ensure that we return something.
 
-            EmitReturn(new BoundReturn(null));
+            EmitReturn(new BoundReturn(null, SourceLocation.Missing));
+
+            // Put a debug location at the end of the function.
+
+            if (function.Location != null)
+            {
+                IL.MarkSequencePoint(new SourceLocation(
+                    function.Location.EndOffset,
+                    function.Location.EndLine,
+                    function.Location.EndColumn,
+                    function.Location.EndOffset + 1,
+                    function.Location.EndLine,
+                    function.Location.EndColumn + 1,
+                    null
+                ));
+            }
 
             _scope = _scope.Parent;
 

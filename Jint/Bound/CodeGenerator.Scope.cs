@@ -70,6 +70,9 @@ namespace Jint.Bound
                     {
                         var local = IL.DeclareLocal(type.Type.GetNativeType());
 
+                        if (type.Kind == BoundTypeKind.Local)
+                            local.SetLocalSymInfo(type.Name);
+
                         _locals.Add(type, local);
 
                         if (!type.DefinitelyAssigned)

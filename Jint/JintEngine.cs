@@ -432,7 +432,7 @@ namespace Jint
 
                 EnsureGlobalsDeclared(boundProgram);
 
-                var method = new CodeGenerator(this).BuildMainMethod(boundProgram);
+                var method = new CodeGenerator(this, fileName).BuildMainMethod(boundProgram);
 
                 result = method(_runtime);
             }
@@ -532,7 +532,7 @@ namespace Jint
 
             return _runtime.CreateFunction(
                 function.Name,
-                new CodeGenerator(this).BuildFunction(boundFunction),
+                new CodeGenerator(this, null).BuildFunction(boundFunction),
                 null,
                 function.Parameters.ToArray(),
                 sourceCode

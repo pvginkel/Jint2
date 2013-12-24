@@ -1,4 +1,5 @@
-﻿using Jint.Support;
+﻿using Jint.Expressions;
+using Jint.Support;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,7 +18,8 @@ namespace Jint.Bound
             get { return BoundKind.Switch; }
         }
 
-        public BoundSwitch(BoundTemporary temporary, ReadOnlyArray<BoundSwitchCase> cases)
+        public BoundSwitch(BoundTemporary temporary, ReadOnlyArray<BoundSwitchCase> cases, SourceLocation location)
+            : base(location)
         {
             if (temporary == null)
                 throw new ArgumentNullException("temporary");
@@ -40,15 +42,16 @@ namespace Jint.Bound
             return visitor.VisitSwitch(this);
         }
 
-        public BoundSwitch Update(BoundTemporary temporary, ReadOnlyArray<BoundSwitchCase> cases)
+        public BoundSwitch Update(BoundTemporary temporary, ReadOnlyArray<BoundSwitchCase> cases, SourceLocation location)
         {
             if (
                 temporary == Temporary &&
-                cases == Cases
+                cases == Cases &&
+                location == Location
             )
                 return this;
 
-            return new BoundSwitch(temporary, cases);
+            return new BoundSwitch(temporary, cases, location);
         }
     }
 }

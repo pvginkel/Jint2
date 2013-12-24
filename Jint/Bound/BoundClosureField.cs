@@ -7,7 +7,11 @@ namespace Jint.Bound
 {
     internal class BoundClosureField : BoundVariable
     {
-        public string Name { get; private set; }
+        public string Name
+        {
+            get { return Type.Name; }
+        }
+
         public BoundClosure Closure { get; private set; }
 
         public override BoundVariableKind Kind
@@ -15,15 +19,12 @@ namespace Jint.Bound
             get { return BoundVariableKind.ClosureField; }
         }
 
-        public BoundClosureField(string name, BoundClosure closure, IBoundType type)
+        public BoundClosureField(BoundClosure closure, IBoundType type)
             : base(type)
         {
-            if (name == null)
-                throw new ArgumentNullException("name");
             if (closure == null)
                 throw new ArgumentNullException("closure");
 
-            Name = name;
             Closure = closure;
         }
 

@@ -54,7 +54,8 @@ namespace Jint.Bound
                 case VariableType.Parameter:
                     return new BoundSetVariable(
                         _scope.GetArgument(variable),
-                        value
+                        value,
+                        SourceLocation.Missing
                     );
 
                 case VariableType.WithScope:
@@ -64,12 +65,13 @@ namespace Jint.Bound
 
                     builder.Add(new BoundSetVariable(
                         valueTemporary,
-                        value
+                        value,
+                        SourceLocation.Missing
                     ));
 
                     builder.Add(BuildSetWithScope(builder, variable.WithScope, variable.FallbackVariable, valueTemporary));
 
-                    return builder.BuildBlock();
+                    return builder.BuildBlock(SourceLocation.Missing);
 
                 case VariableType.This:
                     return BuildThrow("ReferenceError", "Invalid left-hand side in assignment");
@@ -77,11 +79,12 @@ namespace Jint.Bound
                 case VariableType.Local:
                 case VariableType.Arguments:
                     if (variable.ClosureField == null)
-                        return new BoundSetVariable(_scope.GetLocal(variable), value);
+                        return new BoundSetVariable(_scope.GetLocal(variable), value, SourceLocation.Missing);
 
                     return new BoundSetVariable(
                         _scope.GetClosureField(variable),
-                        value
+                        value,
+                        SourceLocation.Missing
                     );
 
                 default:
@@ -95,13 +98,14 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 withLocal,
-                new BoundGetVariable(_withTemporaries[withScope.Variable])
+                new BoundGetVariable(_withTemporaries[withScope.Variable]), SourceLocation.Missing
             ));
 
             var setter = new BoundSetMember(
                 new BoundGetVariable(withLocal),
                 BoundConstant.Create(fallbackVariable.Name),
-                new BoundGetVariable(value)
+                new BoundGetVariable(value),
+                SourceLocation.Missing
             );
 
             BoundBlock @else;
@@ -129,7 +133,8 @@ namespace Jint.Bound
                     BoundConstant.Create(fallbackVariable.Name)
                 ),
                 BuildBlock(setter),
-                @else
+                @else,
+                SourceLocation.Missing
             );
         }
 
@@ -153,11 +158,12 @@ namespace Jint.Bound
                     new BoundGetMember(
                         new BoundGetVariable(BoundMagicVariable.Global),
                         BoundConstant.Create(@class)
-                    ),
+                        ),
                     // Pass the arguments (the message).
                     arguments.ToReadOnly(),
                     ReadOnlyArray<BoundExpression>.Null
-                )
+                ),
+                SourceLocation.Missing
             );
         }
 
@@ -215,7 +221,7 @@ namespace Jint.Bound
                         BuildGetWithScope(builder, variable.WithScope, variable.FallbackVariable, result, withTarget)
                     );
 
-                    return builder.BuildExpression(result);
+                    return builder.BuildExpression(result, SourceLocation.Missing);
 
                 case VariableType.This:
                     return new BoundGetVariable(BoundMagicVariable.This);
@@ -238,8 +244,7 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 withLocal,
-                new BoundGetVariable(_withTemporaries[withScope.Variable])
-            ));
+                new BoundGetVariable(_withTemporaries[withScope.Variable]), SourceLocation.Missing));
 
             var getter = new BlockBuilder(this);
 
@@ -247,7 +252,8 @@ namespace Jint.Bound
             {
                 getter.Add(new BoundSetVariable(
                     withTarget,
-                    new BoundGetVariable(withLocal)
+                    new BoundGetVariable(withLocal),
+                    SourceLocation.Missing
                 ));
             }
 
@@ -256,8 +262,9 @@ namespace Jint.Bound
                 BuildGetMember(
                     new BoundGetVariable(withLocal),
                     BoundConstant.Create(fallbackVariable.Name)
-                )
-            ));
+                    ),
+                    SourceLocation.Missing
+                ));
 
             BoundBlock @else;
 
@@ -268,7 +275,8 @@ namespace Jint.Bound
                     BuildGet(
                         fallbackVariable,
                         null
-                    )
+                    ),
+                    SourceLocation.Missing
                 ));
             }
             else
@@ -286,9 +294,10 @@ namespace Jint.Bound
                 new BoundHasMember(
                     new BoundGetVariable(withLocal),
                     BoundConstant.Create(fallbackVariable.Name)
-                ),
-                getter.BuildBlock(),
-                @else
+                    ),
+                getter.BuildBlock(SourceLocation.Missing),
+                @else,
+                SourceLocation.Missing
             ); 
         }
 
@@ -302,7 +311,7 @@ namespace Jint.Bound
 
             builder.Add(node);
 
-            return builder.BuildBlock();
+            return builder.BuildBlock(node.Location);
         }
 
         private BoundExpression BuildGetMember(BoundExpression expression, BoundExpression index)
@@ -318,11 +327,17 @@ namespace Jint.Bound
             return new BoundSetMember(
                 expression,
                 index,
-                value
+                value,
+                SourceLocation.Missing
             );
         }
 
         private BoundBlock BuildBlock(SyntaxNode syntax)
+        {
+            return BuildBlock(syntax, null);
+        }
+
+        private BoundBlock BuildBlock(SyntaxNode syntax, SourceLocation location)
         {
             IEnumerable<SyntaxNode> items;
             var block = syntax as BlockSyntax;
@@ -339,12 +354,12 @@ namespace Jint.Bound
 
                 var statement =
                     node as BoundStatement ??
-                    new BoundExpressionStatement((BoundExpression)node);
+                    new BoundExpressionStatement((BoundExpression)node, GetLocation(item));
 
                 builder.Add(statement);
             }
 
-            return builder.BuildBlock();
+            return builder.BuildBlock(location ?? SourceLocation.Missing);
         }
 
         private BoundExpression BuildExpression(SyntaxNode syntax)
@@ -369,24 +384,25 @@ namespace Jint.Bound
                     _nodes = new ReadOnlyArray<BoundStatement>.Builder();
 
                 var block = node as BoundBlock;
-                if (block != null && block.Nodes.Count == 1)
+                if (block != null && block.Nodes.Count == 1 && block.Location == SourceLocation.Missing)
                     _nodes.Add(block.Nodes[0]);
                 else
                     _nodes.Add(node);
             }
 
-            public BoundExpression BuildExpression(BoundTemporary result)
+            public BoundExpression BuildExpression(BoundTemporary result, SourceLocation location)
             {
                 return new BoundExpressionBlock(
                     result,
                     new BoundBlock(
                         _temporaries == null ? ReadOnlyArray<BoundTemporary>.Empty : _temporaries.ToReadOnly(),
-                        _nodes == null ? ReadOnlyArray<BoundStatement>.Empty : _nodes.ToReadOnly()
+                        _nodes == null ? ReadOnlyArray<BoundStatement>.Empty : _nodes.ToReadOnly(),
+                        location
                     )
                 );
             }
 
-            public BoundBlock BuildBlock()
+            public BoundBlock BuildBlock(SourceLocation location)
             {
                 if (_nodes == null)
                 {
@@ -394,7 +410,8 @@ namespace Jint.Bound
 
                     return new BoundBlock(
                         ReadOnlyArray<BoundTemporary>.Empty,
-                        ReadOnlyArray<BoundStatement>.Empty
+                        ReadOnlyArray<BoundStatement>.Empty,
+                        location
                     );
                 }
 
@@ -402,9 +419,6 @@ namespace Jint.Bound
 
                 foreach (var node in _nodes.ToReadOnly())
                 {
-                    if (node is BoundEmpty)
-                        continue;
-
                     // Flatten blocks. Nested blocks have no use, so we flatten
                     // them into this block. First we try to see whether the node
                     // is a block. If not, we try to see whether the node is an
@@ -419,6 +433,8 @@ namespace Jint.Bound
                             _temporaries = new ReadOnlyArray<BoundTemporary>.Builder();
 
                         _temporaries.AddRange(block.Temporaries);
+                        if (block.Location != SourceLocation.Missing)
+                            nodes.Add(new BoundEmpty(block.Location));
                         nodes.AddRange(block.Nodes);
                         continue;
                     }
@@ -446,6 +462,9 @@ namespace Jint.Bound
                                 setVariable.Variable == expressionBlock.Result
                             )
                             {
+                                if (statement.Location != SourceLocation.Missing)
+                                    nodes.Add(new BoundEmpty(statement.Location));
+
                                 for (int i = 0; i < block.Nodes.Count - 2; i++)
                                 {
                                     nodes.Add(block.Nodes[i]);
@@ -454,7 +473,8 @@ namespace Jint.Bound
                                 Debug.Assert(!(setVariable.Value is BoundGetVariable));
 
                                 nodes.Add(new BoundExpressionStatement(
-                                    setVariable.Value
+                                    setVariable.Value,
+                                    SourceLocation.Missing
                                 ));
 
                                 foreach (var temporary in block.Temporaries)
@@ -478,7 +498,8 @@ namespace Jint.Bound
 
                 return new BoundBlock(
                     _temporaries == null ? ReadOnlyArray<BoundTemporary>.Empty : _temporaries.ToReadOnly(),
-                    nodes.ToReadOnly()
+                    nodes.ToReadOnly(),
+                    location
                 );
             }
 
@@ -486,7 +507,7 @@ namespace Jint.Bound
             {
                 var result = new BoundTemporary(
                     _visitor._scope.GetNextTemporaryIndex(),
-                    _visitor._scope.TypeManager.CreateType(BoundTypeKind.Temporary)
+                    _visitor._scope.TypeManager.CreateType(null, BoundTypeKind.Temporary)
                 );
 
                 if (_temporaries == null)
