@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Jint.Native;
+using Jint.Tests.Support;
 using NUnit.Framework;
 
 namespace Jint.Tests.CodeGeneration
 {
     [TestFixture]
-    partial class CodeGenerationFixture
+    partial class CodeGenerationFixture : TestBase
     {
         [Test]
         public void SimpleBody()
@@ -43,6 +44,18 @@ return i;
 @"
 var f = new Function('x', 'return x * 3.5');
 return f(2);
+"
+            );
+        }
+
+        [Test]
+        public void FunctionResultSquelching()
+        {
+            Test(
+                null,
+@"
+function f() { }
+f();
 "
             );
         }

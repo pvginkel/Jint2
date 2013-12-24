@@ -8,13 +8,13 @@ using NUnit.Framework;
 
 namespace Jint.Tests.Support
 {
-    public abstract class ScriptTestBase
+    public abstract class ScriptTestBase : TestBase
     {
         private readonly string _testsPath;
 
         protected abstract string BasePath { get; }
 
-        public ScriptTestBase(string testsPath)
+        protected ScriptTestBase(string testsPath)
         {
             _testsPath = BasePath;
 

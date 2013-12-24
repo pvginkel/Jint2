@@ -139,7 +139,7 @@ namespace Jint.Bound
                 case BoundKind.Continue: EmitContinue((BoundContinue)node); return;
                 case BoundKind.DoWhile: throw new NotImplementedException();
                 case BoundKind.Empty: throw new NotImplementedException();
-                case BoundKind.ExpressionStatement: throw new NotImplementedException();
+                case BoundKind.ExpressionStatement: EmitExpressionStatement((BoundExpressionStatement)node); return;
                 case BoundKind.For: EmitFor((BoundFor)node); return;
                 case BoundKind.ForEachIn: throw new NotImplementedException();
                 case BoundKind.If: EmitIf((BoundIf)node); return;
@@ -154,6 +154,11 @@ namespace Jint.Bound
                 case BoundKind.While: EmitWhile((BoundWhile)node); return;
                 default: throw new InvalidOperationException();
             }
+        }
+
+        private void EmitExpressionStatement(BoundExpressionStatement node)
+        {
+            EmitPop(EmitExpression(node.Expression));
         }
 
         private void EmitBreak(BoundBreak node)

@@ -413,17 +413,6 @@ namespace Jint.Bound
                     // an expression block without doing anything with it.
 
                     var block = node as BoundBlock;
-                    if (block == null)
-                    {
-                        var statement = node as BoundExpressionStatement;
-                        if (statement != null)
-                        {
-                            var expressionBlock = statement.Expression as BoundExpressionBlock;
-                            if (expressionBlock != null)
-                                block = expressionBlock.Body;
-                        }
-                    }
-
                     if (block != null)
                     {
                         if (_temporaries == null)
@@ -432,6 +421,55 @@ namespace Jint.Bound
                         _temporaries.AddRange(block.Temporaries);
                         nodes.AddRange(block.Nodes);
                         continue;
+                    }
+
+                    var statement = node as BoundExpressionStatement;
+                    if (statement != null)
+                    {
+                        var expressionBlock = statement.Expression as BoundExpressionBlock;
+                        if (expressionBlock != null)
+                        {
+                            block = expressionBlock.Body;
+
+                            if (_temporaries == null)
+                                _temporaries = new ReadOnlyArray<BoundTemporary>.Builder();
+
+                            // If the last statement of the expression block is
+                            // the set of the result temporary, we can dump the
+                            // temporary and replace the set variable with an
+                            // expression statement. This occurs e.g. on a
+                            // method call where the result isn't assigned.
+
+                            var setVariable = block.Nodes[block.Nodes.Count - 1] as BoundSetVariable;
+                            if (
+                                setVariable != null &&
+                                setVariable.Variable == expressionBlock.Result
+                            )
+                            {
+                                for (int i = 0; i < block.Nodes.Count - 2; i++)
+                                {
+                                    nodes.Add(block.Nodes[i]);
+                                }
+
+                                Debug.Assert(!(setVariable.Value is BoundGetVariable));
+
+                                nodes.Add(new BoundExpressionStatement(
+                                    setVariable.Value
+                                ));
+
+                                foreach (var temporary in block.Temporaries)
+                                {
+                                    if (temporary != setVariable.Variable)
+                                        _temporaries.Add(temporary);
+                                }
+                            }
+                            else
+                            {
+                                _temporaries.AddRange(block.Temporaries);
+                                nodes.AddRange(block.Nodes);
+                            }
+                            continue;
+                        }
                     }
 
                     // Otherwise, we keep the node unchanged.
