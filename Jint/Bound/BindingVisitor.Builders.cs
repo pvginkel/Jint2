@@ -228,10 +228,10 @@ namespace Jint.Bound
 
                 case VariableType.Local:
                 case VariableType.Arguments:
-                    if (variable.ClosureField == null)
-                        return new BoundGetVariable(_scope.GetLocal(variable));
+                    if (variable.ClosureField != null)
+                        return new BoundGetVariable(_scope.GetClosureField(variable));
 
-                    return new BoundGetVariable(_scope.GetClosureField(variable));
+                    return new BoundGetVariable(_scope.GetLocal(variable));
 
                 default:
                     throw new InvalidOperationException("Cannot find variable of argument");
@@ -465,7 +465,7 @@ namespace Jint.Bound
                                 if (statement.Location != SourceLocation.Missing)
                                     nodes.Add(new BoundEmpty(statement.Location));
 
-                                for (int i = 0; i < block.Nodes.Count - 2; i++)
+                                for (int i = 0; i < block.Nodes.Count - 1; i++)
                                 {
                                     nodes.Add(block.Nodes[i]);
                                 }

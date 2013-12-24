@@ -216,7 +216,7 @@ namespace Jint.Bound
 
         public BoundNode VisitBlock(BlockSyntax syntax)
         {
-            throw new InvalidOperationException("Call BuildBlock instead");
+            return BuildBlock(syntax);
         }
 
         public BoundNode VisitBreak(BreakSyntax syntax)
@@ -414,7 +414,7 @@ namespace Jint.Bound
 
                     builder.Add(new BoundSetAccessor(
                         new BoundGetVariable(temporary),
-                        BoundConstant.Create(accessorProperty.Name),
+                        accessorProperty.Name,
                         accessorProperty.GetExpression != null ? BuildExpression(accessorProperty.GetExpression) : null,
                         accessorProperty.SetExpression != null ? BuildExpression(accessorProperty.SetExpression) : null,
                         SourceLocation.Missing

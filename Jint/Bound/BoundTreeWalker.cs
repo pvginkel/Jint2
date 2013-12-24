@@ -169,7 +169,6 @@ namespace Jint.Bound
         public override void VisitSetAccessor(BoundSetAccessor node)
         {
             Visit(node.Expression);
-            Visit(node.Index);
             Visit(node.GetFunction);
             Visit(node.SetFunction);
         }

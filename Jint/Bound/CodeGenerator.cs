@@ -163,7 +163,7 @@ namespace Jint.Bound
                 case BoundKind.If: EmitIf((BoundIf)node); return;
                 case BoundKind.Label: EmitLabel((BoundLabel)node); return;
                 case BoundKind.Return: EmitReturn((BoundReturn)node); return;
-                case BoundKind.SetAccessor: throw new NotImplementedException();
+                case BoundKind.SetAccessor: EmitSetAccessor((BoundSetAccessor)node); return;
                 case BoundKind.SetMember: EmitSetMember((BoundSetMember)node); return;
                 case BoundKind.SetVariable: EmitSetVariable((BoundSetVariable)node); return;
                 case BoundKind.Switch: throw new NotImplementedException();
@@ -172,6 +172,26 @@ namespace Jint.Bound
                 case BoundKind.While: EmitWhile((BoundWhile)node); return;
                 default: throw new InvalidOperationException();
             }
+        }
+
+        private void EmitSetAccessor(BoundSetAccessor node)
+        {
+            // Push the target onto the stack.
+            EmitExpression(node.Expression);
+            // Push the identifier onto the stack.
+            IL.EmitConstant(_engine.Global.ResolveIdentifier(node.Name));
+            // Push the getter onto the stack.
+            if (node.GetFunction != null)
+                EmitExpression(node.GetFunction);
+            else
+                IL.Emit(OpCodes.Ldnull);
+            // Push the setter onto the stack.
+            if (node.SetFunction != null)
+                EmitExpression(node.SetFunction);
+            else
+                IL.Emit(OpCodes.Ldnull);
+            // Call the define accessor.
+            IL.EmitCall(_objectDefineAccessor);
         }
 
         private void EmitExpressionStatement(BoundExpressionStatement node)
@@ -420,15 +440,45 @@ namespace Jint.Bound
 
         private void EmitSetVariable(IBoundWritable variable, BoundExpression value)
         {
-            // Push the value onto the stack.
-            EmitCast(EmitExpression(value), variable.ValueType);
-
             switch (variable.Kind)
             {
                 case BoundVariableKind.Local:
                 case BoundVariableKind.Temporary:
+                    // Push the value onto the stack.
+                    EmitCast(EmitExpression(value), variable.ValueType);
+                    // Set the local.
                     IL.Emit(OpCodes.Stloc, _scope.GetLocal(((BoundVariable)variable).Type));
                     break;
+
+                case BoundVariableKind.Argument:
+                    var argument = (BoundArgument)variable;
+
+                    // Push the arguments variable onto the stack.
+                    if (argument.ArgumentsClosureField != null)
+                        EmitGetVariable(argument.ArgumentsClosureField);
+                    else
+                        EmitGetVariable(_scope.ArgumentsVariable);
+
+                    // Emit the member on the arguments object to set.
+                    IL.EmitConstant(argument.Index);
+                    // Push the value onto the stack.
+                    EmitCast(EmitExpression(value), variable.ValueType);
+                    // Set the property.
+                    IL.EmitCall(_objectSetProperty);
+                    return;
+
+                case BoundVariableKind.ClosureField:
+                    var closureField = (BoundClosureField)variable;
+
+                    // Push the closure onto the stack.
+                    var closure = closureField.Closure;
+                    var closureLocal = _scope.ClosureLocals[closure.Type];
+                    IL.Emit(OpCodes.Ldloc, closureLocal);
+                    // Push the value onto the stack.
+                    EmitCast(EmitExpression(value), variable.ValueType);
+                    // Set the closure field.
+                    IL.Emit(OpCodes.Stfld, closure.GetFieldInfo(closureField.Name));
+                    return;
 
                 default:
                     throw new NotImplementedException();
@@ -501,10 +551,29 @@ namespace Jint.Bound
                 case BoundKind.GetVariable: return EmitGetVariable((BoundGetVariable)node);
                 case BoundKind.HasMember: throw new NotImplementedException();
                 case BoundKind.New: return EmitNew((BoundNew)node);
-                case BoundKind.NewBuiltIn: throw new NotImplementedException();
+                case BoundKind.NewBuiltIn: return EmitNewBuiltIn((BoundNewBuiltIn)node);
                 case BoundKind.RegEx: throw new NotImplementedException();
                 case BoundKind.Unary: return EmitUnary((BoundUnary)node);
                 default: throw new InvalidOperationException();
+            }
+        }
+
+        private BoundValueType EmitNewBuiltIn(BoundNewBuiltIn node)
+        {
+            switch (node.NewBuiltInType)
+            {
+                case BoundNewBuiltInType.Array:
+                    _scope.EmitLoad(SpecialLocal.Global);
+                    IL.EmitCall(_globalCreateArray);
+                    return BoundValueType.Object;
+
+                case BoundNewBuiltInType.Object:
+                    _scope.EmitLoad(SpecialLocal.Global);
+                    IL.EmitCall(_globalCreateObject);
+                    return BoundValueType.Object;
+
+                default:
+                    throw new InvalidOperationException();
             }
         }
 
@@ -762,11 +831,19 @@ namespace Jint.Bound
                 new[] { typeof(JintRuntime), typeof(object), typeof(JsObject), typeof(object), typeof(object[]) }
             );
 
+            var closure = FindScopedClosure(function.Body, _scope);
+            var argumentsLocal = (BoundVariable)function.Body.Locals.SingleOrDefault(p => p.Name == "arguments");
+            if (argumentsLocal == null)
+            {
+                Debug.Assert(closure != null);
+                argumentsLocal = closure.Fields[Expressions.Closure.ArgumentsFieldName];
+            }
+
             _scope = new Scope(
                 new ILBuilder(methodBuilder.GetILGenerator(), _document),
                 true,
-                FindScopedClosure(function.Body, _scope),
-                function.Body.Locals.Single(p => p.Name == "arguments"),
+                closure,
+                argumentsLocal,
                 _scope
             );
 
@@ -783,24 +860,36 @@ namespace Jint.Bound
                 // Emit locals for all used closures.
 
                 EmitClosureLocals(
-                    function.Body.Closure.Type,
+                    _scope.Closure.Type,
                     _scope.ClosureLocal,
                     usedClosures
                 );
             }
+
+            // Put the closure local onto the stack if we're going to store
+            // the arguments in the closure.
+
+            if (argumentsLocal.Kind == BoundVariableKind.ClosureField)
+                IL.Emit(OpCodes.Ldloc, _scope.ClosureLocal);
 
             // Initialize the arguments array.
 
             _scope.EmitLoad(SpecialLocal.Runtime);
             _scope.EmitLoad(SpecialLocal.Callee);
             _scope.EmitLoad(SpecialLocal.Arguments);
+
             IL.EmitCall(_runtimeCreateArguments);
 
-            var argumentsLocal = function.Body.Locals.Single(p => p.Name == "arguments");
-            if (argumentsLocal.Kind == BoundVariableKind.Local)
-                IL.Emit(OpCodes.Stloc, _scope.GetLocal(argumentsLocal.Type));
+            if (argumentsLocal.Kind == BoundVariableKind.ClosureField)
+            {
+                var argumentsClosureField = (BoundClosureField)argumentsLocal;
+
+                IL.Emit(OpCodes.Stfld, _scope.Closure.GetFieldInfo(argumentsClosureField.Name));
+            }
             else
-                throw new NotImplementedException(); // TODO: Assign to local; maybe re-use some code.
+            {
+                IL.Emit(OpCodes.Stloc, _scope.GetLocal(argumentsLocal.Type));
+            }
 
             // Emit the body.
 
@@ -832,9 +921,6 @@ namespace Jint.Bound
 
         private void EmitClosureSetup(BoundFunction function)
         {
-            // Add the local to our own closure to the set.
-            _scope.ClosureLocals.Add(_scope.Closure.Type, _scope.ClosureLocal);
-
             // Only instantiate the closure when its our closure (and not
             // just a copy of the parent closure).
 
@@ -842,30 +928,18 @@ namespace Jint.Bound
 
             if (function.Body.Closure != null)
             {
-                IL.Emit(OpCodes.Newobj, closureType.GetConstructors()[0]);
-                IL.Emit(OpCodes.Stloc, _scope.ClosureLocal);
+                var constructor = closureType.GetConstructors()[0];
 
-                // If the closure contains a link to a parent closure,
-                // assign it here.
-
-                var parentField = closureType.GetField(Expressions.Closure.ParentFieldName);
-                if (parentField != null)
+                // Check whether the constructor expects a parent.
+                var parameters = constructor.GetParameters();
+                if (parameters.Length == 1)
                 {
                     _scope.EmitLoad(SpecialLocal.Closure);
-                    IL.Emit(OpCodes.Castclass, closureType);
-                    IL.Emit(OpCodes.Stfld, parentField);
+                    IL.Emit(OpCodes.Castclass, parameters[0].ParameterType);
                 }
 
-                // Initialize all fields of the closure.
-
-                foreach (var field in closureType.GetFields())
-                {
-                    if (field.FieldType == typeof(object))
-                    {
-                        _scope.EmitLoad(SpecialLocal.Undefined);
-                        IL.Emit(OpCodes.Stfld, field);
-                    }
-                }
+                IL.Emit(OpCodes.Newobj, constructor);
+                IL.Emit(OpCodes.Stloc, _scope.ClosureLocal);
             }
             else
             {
@@ -961,7 +1035,7 @@ namespace Jint.Bound
 
             var parentField = closureType.GetField(Expressions.Closure.ParentFieldName);
             if (parentField != null)
-                parentUsage = DetermineClosureUsage(usage, parentField.DeclaringType, usedClosures);
+                parentUsage = DetermineClosureUsage(usage, parentField.FieldType, usedClosures);
 
             // Determine whether this closure is used.
 
@@ -1079,9 +1153,10 @@ namespace Jint.Bound
                 case BoundVariableKind.ClosureField:
                     var closureField = (BoundClosureField)variable;
 
-                    // Push the closure local onto the stack and get the
-                    // value of the correct field.
-                    IL.Emit(OpCodes.Ldloc, _scope.ClosureLocals[closureField.Closure.Type]);
+                    // Push the closure onto the stack.
+                    var closure = closureField.Closure;
+                    IL.Emit(OpCodes.Ldloc, _scope.ClosureLocals[closure.Type]);
+                    // Load the closure field.
                     IL.Emit(OpCodes.Ldfld, closureField.Closure.GetFieldInfo(closureField.Name));
 
                     return variable.ValueType;
@@ -1097,11 +1172,16 @@ namespace Jint.Bound
                     }
 
                 case BoundVariableKind.Argument:
+                    var argument = (BoundArgument)variable;
+
                     // Push the arguments variable onto the stack.
-                    EmitGetVariable(_scope.ArgumentsVariable);
+                    if (argument.ArgumentsClosureField != null)
+                        EmitGetVariable(argument.ArgumentsClosureField);
+                    else
+                        EmitGetVariable(_scope.ArgumentsVariable);
 
                     // Get the correct member from the arguments object.
-                    IL.EmitConstant(((BoundArgument)variable).Index);
+                    IL.EmitConstant(argument.Index);
                     IL.EmitCall(_objectGetProperty);
 
                     return BoundValueType.Unknown;

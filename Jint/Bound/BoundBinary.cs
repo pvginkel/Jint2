@@ -32,6 +32,8 @@ namespace Jint.Bound
                 case BoundExpressionType.Add:
                     if (left == BoundValueType.String || right == BoundValueType.String)
                         return BoundValueType.String;
+                    if (left == BoundValueType.Unknown || right == BoundValueType.Unknown)
+                        return BoundValueType.Unknown;
 
                     return BoundValueType.Number;
 

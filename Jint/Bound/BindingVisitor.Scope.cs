@@ -37,9 +37,21 @@ namespace Jint.Bound
                 foreach (var variable in body.DeclaredVariables)
                 {
                     if (variable.Index >= 0)
-                        _arguments.Add(variable, new BoundArgument(variable.Name, variable.Index));
+                    {
+                        BoundClosureField closureField = null;
+
+                        if (variable.ClosureField != null)
+                        {
+                            var closure = GetClosure(variable.ClosureField.Closure);
+                            closureField = closure.Fields[Expressions.Closure.ArgumentsFieldName];
+                        }
+
+                        _arguments.Add(variable, new BoundArgument(variable.Name, variable.Index, closureField));
+                    }
                     else if (variable.ClosureField == null)
+                    {
                         _locals.Add(variable, new BoundLocal(variable.IsDeclared, TypeManager.CreateType(variable.Name, BoundTypeKind.Local)));
+                    }
                 }
             }
 
@@ -60,6 +72,23 @@ namespace Jint.Bound
 
             public BoundArgument GetArgument(Variable variable)
             {
+                if (variable.ClosureField != null)
+                {
+                    // Find the scope this argument belongs to.
+
+                    var scope = this;
+
+                    while (scope != null)
+                    {
+                        if (variable.ClosureField.Closure == scope._sourceClosure)
+                            return scope._arguments[variable];
+
+                        scope = scope.Parent;
+                    }
+
+                    throw new InvalidOperationException("Cannot find bound closure");
+                }
+
                 return _arguments[variable];
             }
 

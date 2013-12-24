@@ -10,7 +10,7 @@ namespace Jint.Bound
     internal class BoundSetAccessor : BoundStatement
     {
         public BoundExpression Expression { get; private set; }
-        public BoundExpression Index { get; private set; }
+        public string Name { get; private set; }
         public BoundExpression GetFunction { get; private set; }
         public BoundExpression SetFunction { get; private set; }
 
@@ -19,18 +19,18 @@ namespace Jint.Bound
             get { return BoundKind.SetAccessor; }
         }
 
-        public BoundSetAccessor(BoundExpression expression, BoundExpression index, BoundExpression getFunction, BoundExpression setFunction, SourceLocation location)
+        public BoundSetAccessor(BoundExpression expression, string name, BoundExpression getFunction, BoundExpression setFunction, SourceLocation location)
             : base(location)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
-            if (index == null)
-                throw new ArgumentNullException("index");
+            if (name == null)
+                throw new ArgumentNullException("name");
 
             Debug.Assert(getFunction != null || setFunction != null);
 
             Expression = expression;
-            Index = index;
+            Name = name;
             GetFunction = getFunction;
             SetFunction = setFunction;
         }
@@ -47,18 +47,18 @@ namespace Jint.Bound
             return visitor.VisitSetAccessor(this);
         }
 
-        public BoundSetAccessor Update(BoundExpression expression, BoundExpression index, BoundExpression getFunction, BoundExpression setFunction, SourceLocation location)
+        public BoundSetAccessor Update(BoundExpression expression, string name, BoundExpression getFunction, BoundExpression setFunction, SourceLocation location)
         {
             if (
                 expression == Expression &&
-                index == Index &&
+                name == Name &&
                 getFunction == GetFunction &&
                 setFunction == SetFunction &&
                 location == Location
             )
                 return this;
 
-            return new BoundSetAccessor(expression, index, getFunction, setFunction, location);
+            return new BoundSetAccessor(expression, name, getFunction, setFunction, location);
         }
     }
 }

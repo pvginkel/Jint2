@@ -268,7 +268,7 @@ namespace Jint.Bound
         {
             return node.Update(
                 Visit(node.Expression),
-                Visit(node.Index),
+                node.Name,
                 Visit(node.GetFunction),
                 Visit(node.SetFunction),
                 node.Location

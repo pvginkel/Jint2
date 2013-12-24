@@ -59,5 +59,17 @@ f();
 "
             );
         }
+
+        [Test]
+        public void Dummy()
+        {
+            Test(
+                null,
+@"
+var myArray = new Array('Hello', myVar, 3.14159);
+myArray.push(undefined);
+"
+            );
+        }
     }
 }

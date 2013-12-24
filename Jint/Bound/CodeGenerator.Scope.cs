@@ -59,7 +59,10 @@ namespace Jint.Bound
                 IL.Emit(OpCodes.Stloc, _globalScopeLocal);
 
                 if (Closure != null)
+                {
                     ClosureLocal = IL.DeclareLocal(Closure.Type);
+                    ClosureLocals.Add(Closure.Type, ClosureLocal);
+                }
 
                 foreach (var type in typeManager.Types)
                 {

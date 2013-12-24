@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
@@ -43,24 +44,60 @@ namespace Jint.Bound
 
                     if (_isFunction)
                     {
-                        var argumentsLocal = node.Locals.SingleOrDefault(p => p.Name == "arguments");
-                        if (argumentsLocal != null)
-                            MarkWrite(argumentsLocal, BoundValueType.Object);
+                        var argumentsLocal = (BoundVariable)node.Locals.SingleOrDefault(p => p.Name == "arguments");
+                        if (argumentsLocal == null)
+                        {
+                            Debug.Assert(node.Closure != null);
+                            argumentsLocal = node.Closure.Fields[Closure.ArgumentsFieldName];
+                        }
+
+                        MarkWrite(argumentsLocal, BoundValueType.Object);
                     }
 
                     base.VisitBody(node);
                 }
             }
 
+            private void MarkRead(IBoundReadable variable)
+            {
+                MarkClosureUsage(variable);
+            }
+
             private void MarkWrite(IBoundWritable variable, BoundValueType type)
             {
                 var hasType = variable as BoundVariable;
                 if (hasType != null)
-                {
                     _marker.MarkWrite(hasType.Type, type);
-                    if (hasType.Kind == BoundVariableKind.ClosureField)
-                        _marker.MarkClosureUsage(((BoundClosureField)hasType).Closure);
+
+                MarkClosureUsage(variable);
+            }
+
+            private void MarkClosureUsage(IBoundReadable variable)
+            {
+                switch (variable.Kind)
+                {
+                    case BoundVariableKind.ClosureField:
+                        _marker.MarkClosureUsage(((BoundClosureField)variable).Closure);
+                        break;
+
+                    case BoundVariableKind.Argument:
+                        var argument = (BoundArgument)variable;
+                        if (argument.ArgumentsClosureField != null)
+                            _marker.MarkClosureUsage(argument.ArgumentsClosureField.Closure);
+                        break;
                 }
+            }
+
+            public override void VisitGetVariable(BoundGetVariable node)
+            {
+                MarkRead(node.Variable);
+            }
+
+            public override void VisitExpressionBlock(BoundExpressionBlock node)
+            {
+                base.VisitExpressionBlock(node);
+
+                MarkRead(node.Result);
             }
 
             public override void VisitSetVariable(BoundSetVariable node)

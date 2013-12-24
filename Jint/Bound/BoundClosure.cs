@@ -42,7 +42,9 @@ namespace Jint.Bound
             Type = DynamicAssemblyManager.BuildClosure(
                 Fields.ToDictionary(
                     p => p.Name,
-                    p => p.ValueType.GetNativeType()
+                    p => p.Name == Expressions.Closure.ParentFieldName
+                        ? Parent.Type
+                        : p.ValueType.GetNativeType()
                 )
             );
 

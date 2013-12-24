@@ -248,7 +248,10 @@ namespace Jint.Support
                 return;
 
             if (returnType == BoundValueType.Unset)
+            {
                 Emit(OpCodes.Pop);
+                return;
+            }
 
             throw new InvalidOperationException();
 

@@ -8,11 +8,16 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Jint.Native;
+using Jint.Support;
 
 namespace Jint.Compiler
 {
     internal static class DynamicAssemblyManager
     {
+        private static readonly FieldInfo _undefinedInstance = typeof(JsUndefined).GetField("Instance");
+        private static readonly ConstructorInfo _objectConstructor = typeof(object).GetConstructors()[0];
+
         private static int _lastId;
         private static AssemblyBuilder _assemblyBuilder;
 #if DEBUG || SAVE_ASSEMBLY
@@ -72,10 +77,63 @@ namespace Jint.Compiler
                 TypeAttributes.SpecialName
             );
 
+            var typeFields = new Dictionary<string, FieldBuilder>();
+
             foreach (var field in fields.OrderBy(p => p.Key))
             {
-                dynamicType.DefineField(field.Key, field.Value, FieldAttributes.Public);
+                var attributes = FieldAttributes.Public;
+                if (field.Key == Expressions.Closure.ParentFieldName)
+                    attributes |= FieldAttributes.InitOnly;
+
+                typeFields.Add(
+                    field.Key,
+                    dynamicType.DefineField(field.Key, field.Value, attributes)
+                );
             }
+
+            var parameterTypes = Type.EmptyTypes;
+
+            var parentField = fields.SingleOrDefault(p => p.Key == Expressions.Closure.ParentFieldName).Value;
+            if (parentField != null)
+                parameterTypes = new[] { parentField };
+
+            var constructor = dynamicType.DefineConstructor(
+                MethodAttributes.Public,
+                CallingConventions.Standard,
+                parameterTypes
+            );
+
+            var il = new ILBuilder(constructor.GetILGenerator(), null);
+
+            // Call the base constructor.
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, _objectConstructor);
+
+            // Initialize the parent field if we have one.
+
+            if (parentField != null)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Stfld, typeFields[Expressions.Closure.ParentFieldName]);
+            }
+
+            // Initialize object fields to undefined.
+
+            foreach (var field in typeFields)
+            {
+                if (field.Value.FieldType == typeof(object))
+                {
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldsfld, _undefinedInstance);
+                    il.Emit(OpCodes.Stfld, field.Value);
+                }
+            }
+
+            // Return from the constructor.
+
+            il.Emit(OpCodes.Ret);
 
             return dynamicType.CreateType();
         }
