@@ -14,7 +14,7 @@ namespace Jint.Bound
         {
             private readonly Closure _sourceClosure;
             private readonly Dictionary<Variable, BoundArgument> _arguments = new Dictionary<Variable, BoundArgument>();
-            private readonly Dictionary<Variable, BoundLocal> _locals = new Dictionary<Variable, BoundLocal>();
+            private readonly Dictionary<Variable, BoundLocalBase> _locals = new Dictionary<Variable, BoundLocalBase>();
             private int _lastTemporaryIndex;
 
             public Scope Parent { get; private set; }
@@ -52,7 +52,13 @@ namespace Jint.Bound
                     }
                     else if (variable.ClosureField == null)
                     {
-                        _locals.Add(variable, new BoundLocal(variable.IsDeclared, TypeManager.CreateType(variable.Name, BoundTypeKind.Local)));
+                        BoundLocalBase local;
+                        if (variable.Type == VariableType.Global)
+                            local = new BoundGlobal(variable.IsDeclared, TypeManager.CreateType(variable.Name, BoundTypeKind.Global));
+                        else
+                            local = new BoundLocal(variable.IsDeclared, TypeManager.CreateType(variable.Name, BoundTypeKind.Local));
+
+                        _locals.Add(variable, local);
                     }
                 }
             }
@@ -94,9 +100,18 @@ namespace Jint.Bound
                 return _arguments[variable];
             }
 
-            public BoundLocal GetLocal(Variable variable)
+            public BoundLocalBase GetLocal(Variable variable)
             {
-                return _locals[variable];
+                BoundLocalBase result;
+                if (!_locals.TryGetValue(variable, out result))
+                {
+                    Debug.Assert(variable.Type == VariableType.Global);
+
+                    result = new BoundGlobal(false, TypeManager.CreateType(variable.Name, BoundTypeKind.Global));
+                    _locals.Add(variable, result);
+                }
+
+                return result;
             }
 
             public BoundClosureField GetClosureField(Variable variable)
@@ -104,6 +119,9 @@ namespace Jint.Bound
                 Debug.Assert(variable.ClosureField != null);
 
                 var closure = GetClosure(variable.ClosureField.Closure);
+
+                if (variable.Type == VariableType.Arguments)
+                    return closure.Fields[Expressions.Closure.ArgumentsFieldName];
 
                 return closure.Fields[variable.Name];
             }
@@ -113,7 +131,7 @@ namespace Jint.Bound
                 return _arguments.Values;
             }
 
-            public IEnumerable<BoundLocal> GetLocals()
+            public IEnumerable<BoundLocalBase> GetLocals()
             {
                 return _locals.Values;
             }

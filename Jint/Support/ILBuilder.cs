@@ -168,6 +168,9 @@ namespace Jint.Support
 
         internal BoundValueType EmitConstant(object value)
         {
+            if (value == null)
+                Emit(OpCodes.Ldnull);
+
             var stringValue = value as string;
 
             if (stringValue != null)

@@ -5,29 +5,16 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal class BoundLocal : BoundVariable
+    internal class BoundLocal : BoundLocalBase
     {
-        public string Name
-        {
-            get { return Type.Name; }
-        }
-
-        public bool IsDeclared { get; private set; }
-
         public override BoundVariableKind Kind
         {
             get { return BoundVariableKind.Local; }
         }
 
         public BoundLocal(bool isDeclared, IBoundType type)
-            : base(type)
+            : base(isDeclared, type)
         {
-            IsDeclared = isDeclared;
-        }
-
-        public override string ToString()
-        {
-            return Name;
         }
     }
 }

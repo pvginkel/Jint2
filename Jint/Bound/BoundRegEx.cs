@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal class BoundRegex : BoundExpression
+    internal class BoundRegEx : BoundExpression
     {
         public string Regex { get; private set; }
         public string Options { get; private set; }
@@ -21,7 +21,7 @@ namespace Jint.Bound
             get { return BoundValueType.Object; }
         }
 
-        public BoundRegex(string regex, string options)
+        public BoundRegEx(string regex, string options)
         {
             if (regex == null)
                 throw new ArgumentNullException("regex");
@@ -42,7 +42,7 @@ namespace Jint.Bound
             return visitor.VisitRegex(this);
         }
 
-        public BoundRegex Update(string regex, string options)
+        public BoundRegEx Update(string regex, string options)
         {
             if (
                 regex == Regex &&
@@ -50,7 +50,7 @@ namespace Jint.Bound
             )
                 return this;
 
-            return new BoundRegex(regex, options);
+            return new BoundRegEx(regex, options);
         }
     }
 }

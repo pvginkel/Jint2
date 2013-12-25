@@ -518,6 +518,15 @@ namespace Jint.Native
             return GetMemberOnPrototype(obj, index);
         }
 
+        public bool HasMemberByIndex(object obj, int index)
+        {
+            var @object = obj as JsObject;
+            if (@object != null)
+                return @object.HasProperty(index);
+
+            return false;
+        }
+
         public static object Operation_SetMember(object obj, string name, object value)
         {
             return SetMember(obj, name, value);

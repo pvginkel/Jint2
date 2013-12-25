@@ -32,11 +32,9 @@ namespace Jint.Native.Interop
 
         public override object GetOwnPropertyRaw(object index)
         {
-            var result = _marshaller.MarshalClrValue(
+            return _marshaller.MarshalClrValue(
                 _marshaller.MarshalJsValue<T[]>(BaseStore.Owner)[_marshaller.MarshalJsValue<int>(index)]
             );
-
-            return result;
         }
 
         public override void DefineProperty(int index, object value, PropertyAttributes attributes)

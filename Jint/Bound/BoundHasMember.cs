@@ -9,7 +9,7 @@ namespace Jint.Bound
     internal class BoundHasMember : BoundExpression
     {
         public BoundExpression Expression { get; private set; }
-        public BoundExpression Index { get; private set; }
+        public string Index { get; private set; }
 
         public override BoundKind Kind
         {
@@ -21,7 +21,7 @@ namespace Jint.Bound
             get { return BoundValueType.Boolean; }
         }
 
-        public BoundHasMember(BoundExpression expression, BoundExpression index)
+        public BoundHasMember(BoundExpression expression, string index)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression");
@@ -44,7 +44,7 @@ namespace Jint.Bound
             return visitor.VisitHasMember(this);
         }
 
-        public BoundHasMember Update(BoundExpression expression, BoundExpression index)
+        public BoundHasMember Update(BoundExpression expression, string index)
         {
             if (
                 expression == Expression &&

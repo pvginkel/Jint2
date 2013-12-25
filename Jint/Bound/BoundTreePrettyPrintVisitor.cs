@@ -291,9 +291,11 @@ namespace Jint.Bound
 
         public override void VisitHasMember(BoundHasMember node)
         {
-            DefaultBefore(node);
-            base.VisitHasMember(node);
-            DefaultAfter();
+            Write("HasMember (");
+            Visit(node.Expression);
+            Write(", ");
+            Write(node.Index);
+            Write(")");
         }
 
         public override void VisitIf(BoundIf node)
@@ -319,12 +321,10 @@ namespace Jint.Bound
 
         public override void VisitNewBuiltIn(BoundNewBuiltIn node)
         {
-            DefaultBefore(node);
-            base.VisitNewBuiltIn(node);
-            DefaultAfter();
+            Write("NewBuiltIn (" + node.NewBuiltInType + ")");
         }
 
-        public override void VisitRegex(BoundRegex node)
+        public override void VisitRegex(BoundRegEx node)
         {
             DefaultBefore(node);
             base.VisitRegex(node);
@@ -384,9 +384,22 @@ namespace Jint.Bound
 
         public override void VisitSwitchCase(BoundSwitchCase node)
         {
-            DefaultBefore(node);
             WriteLocation(node.Location);
+            Write("SwitchCase ");
+            if (node.Expression != null)
+            {
+                Write("<");
+                Visit(node.Expression);
+                Write("> ");
+            }
+            WriteLine("(");
+
+            _indent++;
+
+            WriteIndent();
+
             base.VisitSwitchCase(node);
+
             DefaultAfter();
         }
 

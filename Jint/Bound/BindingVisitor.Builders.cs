@@ -43,13 +43,6 @@ namespace Jint.Bound
         {
             switch (variable.Type)
             {
-                case VariableType.Global:
-                    return BuildSetMember(
-                        new BoundGetVariable(BoundMagicVariable.Global),
-                        BoundConstant.Create(variable.Name),
-                        value
-                    );
-
                 case VariableType.Parameter:
                     return new BoundSetVariable(
                         _scope.GetArgument(variable),
@@ -77,6 +70,7 @@ namespace Jint.Bound
 
                 case VariableType.Local:
                 case VariableType.Arguments:
+                case VariableType.Global:
                     if (variable.ClosureField == null)
                         return new BoundSetVariable(_scope.GetLocal(variable), value, SourceLocation.Missing);
 
@@ -97,7 +91,7 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 withLocal,
-                new BoundGetVariable(_withTemporaries[withScope.Variable]), SourceLocation.Missing
+                new BoundGetVariable(_withVariables[withScope.Variable]), SourceLocation.Missing
             ));
 
             var setter = new BoundSetMember(
@@ -129,7 +123,7 @@ namespace Jint.Bound
             return new BoundIf(
                 new BoundHasMember(
                     new BoundGetVariable(withLocal),
-                    BoundConstant.Create(fallbackVariable.Name)
+                    fallbackVariable.Name
                 ),
                 BuildBlock(setter),
                 @else,
@@ -157,7 +151,7 @@ namespace Jint.Bound
                     new BoundGetMember(
                         new BoundGetVariable(BoundMagicVariable.Global),
                         BoundConstant.Create(@class)
-                        ),
+                    ),
                     // Pass the arguments (the message).
                     arguments.ToReadOnly(),
                     ReadOnlyArray<BoundExpression>.Null
@@ -203,12 +197,6 @@ namespace Jint.Bound
         {
             switch (variable.Type)
             {
-                case VariableType.Global:
-                    return BuildGetMember(
-                        new BoundGetVariable(BoundMagicVariable.Global),
-                        BoundConstant.Create(variable.Name)
-                    );
-
                 case VariableType.Parameter:
                     return new BoundGetVariable(_scope.GetArgument(variable));
 
@@ -227,6 +215,7 @@ namespace Jint.Bound
 
                 case VariableType.Local:
                 case VariableType.Arguments:
+                case VariableType.Global:
                     if (variable.ClosureField != null)
                         return new BoundGetVariable(_scope.GetClosureField(variable));
 
@@ -243,11 +232,13 @@ namespace Jint.Bound
 
             builder.Add(new BoundSetVariable(
                 withLocal,
-                new BoundGetVariable(_withTemporaries[withScope.Variable]), SourceLocation.Missing));
+                new BoundGetVariable(_withVariables[withScope.Variable]),
+                SourceLocation.Missing
+            ));
 
             var getter = new BlockBuilder(this);
 
-            if (withLocal != null)
+            if (withTarget != null)
             {
                 getter.Add(new BoundSetVariable(
                     withTarget,
@@ -261,9 +252,9 @@ namespace Jint.Bound
                 BuildGetMember(
                     new BoundGetVariable(withLocal),
                     BoundConstant.Create(fallbackVariable.Name)
-                    ),
-                    SourceLocation.Missing
-                ));
+                ),
+                SourceLocation.Missing
+            ));
 
             BoundBlock @else;
 
@@ -292,8 +283,8 @@ namespace Jint.Bound
             return new BoundIf(
                 new BoundHasMember(
                     new BoundGetVariable(withLocal),
-                    BoundConstant.Create(fallbackVariable.Name)
-                    ),
+                    fallbackVariable.Name
+                ),
                 getter.BuildBlock(SourceLocation.Missing),
                 @else,
                 SourceLocation.Missing

@@ -64,10 +64,18 @@ f();
         public void Dummy()
         {
             Test(
-                null,
+                1,
 @"
-var myArray = new Array('Hello', myVar, 3.14159);
-myArray.push(undefined);
+function f() {
+    var i = 0;
+    var j = 0;
+    var k = 0;
+    var l = 0;
+    k++;
+    ++l;
+    return (i++) + (++j);
+};
+return f();
 "
             );
         }

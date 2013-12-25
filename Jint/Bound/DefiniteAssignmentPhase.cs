@@ -453,6 +453,9 @@ namespace Jint.Bound
                 // tree has already introduced a temporary for the result of the
                 // expression, so we don't have any handling for that here.
 
+                // Mark a read on the temporary.
+                MarkRead(node.Temporary);
+
                 // No cases means no work.
                 if (node.Cases.Count == 0)
                     return;

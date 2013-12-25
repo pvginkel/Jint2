@@ -36,9 +36,15 @@ namespace Jint.Bound
         private static readonly MethodInfo _globalCreateArray = typeof(JsGlobal).GetMethod("CreateArray");
         private static readonly MethodInfo _globalCreateObject = typeof(JsGlobal).GetMethod("CreateObject", Type.EmptyTypes);
         private static readonly MethodInfo _objectDefineAccessor = typeof(JsObject).GetMethod("DefineAccessor", new[] { typeof(int), typeof(JsObject), typeof(JsObject) });
+        private static readonly MethodInfo _runtimeWrapException = typeof(JintRuntime).GetMethod("WrapException");
+        private static readonly MethodInfo _runtimeGetForEachKeys = typeof(JintRuntime).GetMethod("GetForEachKeys");
+        private static readonly MethodInfo _globalCreateRegExp = typeof(JsGlobal).GetMethod("CreateRegExp", new[] { typeof(string), typeof(string) });
+        private static readonly MethodInfo _objectHasProperty = typeof(JsObject).GetMethod("HasProperty", new[] { typeof(int) });
+        private static readonly MethodInfo _runtimeHasMemberByIndex = typeof(JintRuntime).GetMethod("HasMemberByIndex");
 
         private static readonly ConstructorInfo _genericArgumentsConstructor = typeof(JsGenericArguments).GetConstructor(new[] { typeof(object[]) });
         private static readonly ConstructorInfo _functionConstructor = typeof(JsFunction).GetConstructors()[0];
+        private static readonly ConstructorInfo _exceptionConstructor = typeof(JsException).GetConstructor(new[] { typeof(object) });
 
         private static readonly FieldInfo _nullInstance = typeof(JsNull).GetField("Instance");
         private static readonly FieldInfo _undefinedInstance = typeof(JsUndefined).GetField("Instance");

@@ -11,6 +11,7 @@ namespace Jint.Bound
         Argument,
         ClosureField,
         Local,
-        Temporary
+        Temporary,
+        Global
     }
 }

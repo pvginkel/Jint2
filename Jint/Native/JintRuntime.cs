@@ -33,10 +33,12 @@ namespace Jint.Native
             );
         }
 
-        public IEnumerable<object> GetForEachKeys(object obj)
+        public object[] GetForEachKeys(object obj)
         {
             if (obj == null)
-                yield break;
+                return new object[0];
+
+            var result = new List<object>();
 
             if (JsValue.IsClr(obj))
             {
@@ -46,17 +48,19 @@ namespace Jint.Native
                 {
                     foreach (object value in values)
                     {
-                        yield return Global.WrapClr(value);
+                        result.Add(Global.WrapClr(value));
                     }
 
-                    yield break;
+                    return result.ToArray();
                 }
             }
 
-            foreach (int key in new List<int>(((JsObject)obj).GetKeys()))
+            foreach (int key in ((JsObject)obj).GetKeys())
             {
-                yield return Global.GetIdentifier(key);
+                result.Add(Global.GetIdentifier(key));
             }
+
+            return result.ToArray();
         }
 
         public object WrapException(Exception exception)

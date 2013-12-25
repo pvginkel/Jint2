@@ -1,13 +1,16 @@
-﻿var a, x, y;
+﻿var a, x, y, z;
 var r = 10;
+var t4 = function () { return 7; };
 with (Math) {
     a = PI * r * r;
     x = r * cos(PI);
     y = r * sin(PI / 2);
+    z = t4();
 }
 
 assert(-10, x);
 assert(10, y);
+assert(7, z);
 
 var t = {
     test: function() { return this; }

@@ -17,7 +17,13 @@ namespace Jint.Bound
 
         public BoundValueType ValueType
         {
-            get { return BoundValueType.Object; }
+            get
+            {
+                if (VariableType == BoundMagicVariableType.This)
+                    return BoundValueType.Unknown;
+
+                return BoundValueType.Object;
+            }
         }
 
         public BoundVariableKind Kind

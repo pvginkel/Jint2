@@ -10,9 +10,15 @@ namespace Jint.Bound
 {
     internal partial class BindingVisitor : ISyntaxVisitor<BoundNode>
     {
+#if DEBUG
+        private const string WithPrefix = "__with";
+#else
+        private const string WithPrefix = "<>with";
+#endif
+
         private readonly IScriptBuilder _scriptBuilder;
         private readonly List<BoundFunction> _functions = new List<BoundFunction>();
-        private readonly Dictionary<Variable, BoundTemporary> _withTemporaries = new Dictionary<Variable, BoundTemporary>();
+        private readonly Dictionary<Variable, IBoundReadable> _withVariables = new Dictionary<Variable, IBoundReadable>();
         private readonly Dictionary<FunctionSyntax, string> _functionNameHints = new Dictionary<FunctionSyntax, string>();
 
         private Scope _scope;
@@ -508,6 +514,13 @@ namespace Jint.Bound
                     // is resolved.
 
                     var withTarget = builder.CreateTemporary();
+
+                    builder.Add(new BoundSetVariable(
+                        withTarget,
+                        new BoundGetVariable(BoundMagicVariable.Global),
+                        SourceLocation.Missing
+                    ));
+
                     var method = builder.CreateTemporary();
 
                     builder.Add(new BoundSetVariable(
@@ -602,7 +615,7 @@ namespace Jint.Bound
 
         public BoundNode VisitRegexp(RegexpSyntax syntax)
         {
-            return new BoundRegex(syntax.Regexp, syntax.Options);
+            return new BoundRegEx(syntax.Regexp, syntax.Options);
         }
 
         public BoundNode VisitReturn(ReturnSyntax syntax)
@@ -695,14 +708,6 @@ namespace Jint.Bound
                 case SyntaxExpressionType.PostDecrementAssign:
                     var builder = new BlockBuilder(this);
 
-                    var temporary = builder.CreateTemporary();
-
-                    builder.Add(new BoundSetVariable(
-                        temporary,
-                        BuildExpression(syntax.Operand),
-                        SourceLocation.Missing
-                    ));
-
                     bool before =
                         syntax.Operation == SyntaxExpressionType.PreIncrementAssign ||
                         syntax.Operation == SyntaxExpressionType.PreDecrementAssign;
@@ -713,13 +718,15 @@ namespace Jint.Bound
                         ? 1
                         : -1;
 
+                    var resultTemporary = builder.CreateTemporary();
+
                     if (before)
                     {
                         builder.Add(new BoundSetVariable(
-                            temporary,
+                            resultTemporary,
                             new BoundBinary(
                                 BoundExpressionType.Add,
-                                new BoundGetVariable(temporary),
+                                BuildExpression(syntax.Operand),
                                 BoundConstant.Create(offset)
                             ),
                             SourceLocation.Missing
@@ -727,22 +734,28 @@ namespace Jint.Bound
 
                         builder.Add(BuildSet(
                             syntax.Operand,
-                            new BoundGetVariable(temporary)
+                            new BoundGetVariable(resultTemporary)
                         ));
                     }
                     else
                     {
+                        builder.Add(new BoundSetVariable(
+                            resultTemporary,
+                            BuildExpression(syntax.Operand),
+                            SourceLocation.Missing
+                        ));
+
                         builder.Add(BuildSet(
                             syntax.Operand,
                             new BoundBinary(
                                 BoundExpressionType.Add,
-                                new BoundGetVariable(temporary),
+                                new BoundGetVariable(resultTemporary),
                                 BoundConstant.Create(offset)
                             )
                         ));
                     }
 
-                    return builder.BuildExpression(temporary, SourceLocation.Missing);
+                    return builder.BuildExpression(resultTemporary, SourceLocation.Missing);
 
                 case SyntaxExpressionType.Delete:
                     return BuildDeleteMember(syntax.Operand);
@@ -871,19 +884,23 @@ namespace Jint.Bound
         {
             var builder = new BlockBuilder(this);
 
-            var temporary = builder.CreateTemporary();
+            IBoundWritable variable;
+            if (syntax.Target.ClosureField != null)
+                variable = _scope.GetClosureField(syntax.Target);
+            else
+                variable = _scope.GetLocal(syntax.Target);
 
             builder.Add(new BoundSetVariable(
-                temporary,
+                variable,
                 BuildExpression(syntax.Expression),
                 SourceLocation.Missing
             ));
 
-            _withTemporaries.Add(syntax.Target, temporary);
+            _withVariables.Add(syntax.Target, variable);
 
-            builder.Add(BuildBlock(syntax.Expression));
+            builder.Add(BuildBlock(syntax.Body));
 
-            _withTemporaries.Remove(syntax.Target);
+            _withVariables.Remove(syntax.Target);
 
             return builder.BuildBlock(syntax.Location);
         }

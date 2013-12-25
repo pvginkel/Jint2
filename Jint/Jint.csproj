@@ -67,7 +67,9 @@
     <Compile Include="Bound\BoundBreak.cs" />
     <Compile Include="Bound\BoundClosureFieldCollection.cs" />
     <Compile Include="Bound\BoundExpressionStatement.cs" />
+    <Compile Include="Bound\BoundGlobal.cs" />
     <Compile Include="Bound\BoundLabel.cs" />
+    <Compile Include="Bound\BoundLocalBase.cs" />
     <Compile Include="Bound\BoundNodeExtensions.cs" />
     <Compile Include="Bound\BoundTypeManager.cs" />
     <Compile Include="Bound\BoundMagicVariable.cs" />

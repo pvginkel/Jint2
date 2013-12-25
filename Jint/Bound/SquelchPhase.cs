@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 659
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -62,13 +64,14 @@ namespace Jint.Bound
                 Debug.Assert(item.Value.WriteState != WriteType.Not);
 
                 // We should at least have a single read on a temporary.
-                Debug.Assert(item.Value.Reads > 0);
+                // Debug.Assert(item.Value.Reads > 0);
             }
         }
 
         private class Gatherer : BoundTreeWalker
         {
             private readonly Dictionary<BoundTemporary, Statistics> _statistics;
+            private readonly Dictionary<IBoundWritable, int> _variableWriteCount = new Dictionary<IBoundWritable, int>();
 
             public Gatherer(Dictionary<BoundTemporary, Statistics> statistics)
             {
@@ -77,48 +80,100 @@ namespace Jint.Bound
 
             public override void VisitGetVariable(BoundGetVariable node)
             {
+                base.VisitGetVariable(node);
+
                 var temporary = node.Variable as BoundTemporary;
                 if (temporary != null)
-                    GetStatistic(temporary).Reads++;
+                    MarkRead(temporary);
+            }
 
-                base.VisitGetVariable(node);
+            private void MarkRead(BoundTemporary temporary)
+            {
+                // Check if the local is still valid. If this temporary is
+                // only written to from a local, it is eligible for replacement.
+                // However, we can only do this when the local hasn't been
+                // changed before we read the temporary. This is what is
+                // checked below.
+
+                var statistics = GetStatistic(temporary);
+                if (statistics.WriteState == WriteType.Local && statistics.Value != null)
+                {
+                    var getVariable = statistics.Value.Expression as BoundGetVariable;
+                    if (getVariable != null)
+                    {
+                        var local = getVariable.Variable as BoundLocal;
+                        if (local != null)
+                        {
+                            int writeCount;
+                            _variableWriteCount.TryGetValue(local, out writeCount);
+
+                            if (writeCount != statistics.Value.WriteCount)
+                                statistics.WriteState = WriteType.DoNotRemove;
+                        }
+                    }
+                }
+
+
+                statistics.Reads++;
             }
 
             public override void VisitSetVariable(BoundSetVariable node)
             {
+                base.VisitSetVariable(node);
+
+                // Bump the write count of the target.
+
+                int writeCount;
+                _variableWriteCount.TryGetValue(node.Variable, out writeCount);
+                writeCount++;
+                _variableWriteCount[node.Variable] = writeCount;
+
+                // Update the statistic if the target is a temporary.
+
                 var temporary = node.Variable as BoundTemporary;
                 if (temporary != null)
                 {
                     var statistic = GetStatistic(temporary);
+
                     if (statistic.WriteState == WriteType.Not)
                     {
-                        statistic.Value = node.Value;
-
+                        // If we're reading from a local, we need to get the
+                        // current write count for the local to check whether
+                        // the value the temporary is receiving is going to be
+                        // killed.
+                        int localWriteCount = -1;
                         var getVariable = node.Value as BoundGetVariable;
-                        if (getVariable != null && getVariable.Variable is BoundLocal)
-                            statistic.WriteState = WriteType.Local;
-                        else
-                            statistic.WriteState = WriteType.Expression;
+                        BoundLocal local = null;
+                        if (getVariable != null)
+                        {
+                            local = getVariable.Variable as BoundLocal;
+                            if (local != null)
+                                _variableWriteCount.TryGetValue(local, out localWriteCount);
+                        }
+
+                        statistic.Value = new ReadState(node.Value, localWriteCount);
+
+                        statistic.WriteState = local != null
+                            ? WriteType.Local
+                            : WriteType.Expression;
                     }
                     else if (statistic.WriteState != WriteType.Local)
                     {
-                        statistic.WriteState = WriteType.Multiple;
+                        statistic.WriteState = WriteType.DoNotRemove;
                     }
                 }
-
-                base.VisitSetVariable(node);
             }
 
             public override void VisitExpressionBlock(BoundExpressionBlock node)
             {
+                base.VisitExpressionBlock(node);
+
                 // The BuildingVisitor only allows temporaries to be put into
                 // the result of the expression block. In the Squelch
                 // phase, we're relaxing this requirement, but we can
                 // safely cast here.
 
-                GetStatistic((BoundTemporary)node.Result).Reads++;
-
-                base.VisitExpressionBlock(node);
+                MarkRead((BoundTemporary)node.Result);
             }
 
             public override void VisitCatch(BoundCatch node)
@@ -127,10 +182,8 @@ namespace Jint.Bound
                 if (temporary != null)
                 {
                     var statistic = GetStatistic(temporary);
-                    if (statistic.WriteState == WriteType.Not)
-                        statistic.WriteState = WriteType.Other;
-                    else if (statistic.WriteState != WriteType.Local)
-                        statistic.WriteState = WriteType.Multiple;
+                    if (statistic.WriteState != WriteType.Local)
+                        statistic.WriteState = WriteType.DoNotRemove;
                 }
 
                 base.VisitCatch(node);
@@ -142,10 +195,8 @@ namespace Jint.Bound
                 if (temporary != null)
                 {
                     var statistic = GetStatistic(temporary);
-                    if (statistic.WriteState == WriteType.Not)
-                        statistic.WriteState = WriteType.Other;
-                    else if (statistic.WriteState != WriteType.Local)
-                        statistic.WriteState = WriteType.Multiple;
+                    if (statistic.WriteState != WriteType.Local)
+                        statistic.WriteState = WriteType.DoNotRemove;
                 }
 
                 base.VisitForEachIn(node);
@@ -153,7 +204,12 @@ namespace Jint.Bound
 
             public override void VisitSwitch(BoundSwitch node)
             {
-                GetStatistic(node.Temporary).Reads++;
+                MarkRead(node.Temporary);
+
+                // Mark the write as other to prevent removing of the temporary.
+                // The whole point of the temporary is that we require it for the
+                // switch construct, so it cannot be removed.
+                GetStatistic(node.Temporary).WriteState = WriteType.DoNotRemove;
 
                 base.VisitSwitch(node);
             }
@@ -188,13 +244,13 @@ namespace Jint.Bound
                 // return the expression.
                 var resultStatistic = _statistics[(BoundTemporary)node.Result];
                 if (node.Body.Nodes.Count == 1 && resultStatistic.WriteState == WriteType.Expression)
-                    return resultStatistic.Value.Accept(this);
+                    return resultStatistic.Value.Expression.Accept(this);
 
                 // If we can't squelch the whole expression, we also cannot
                 // squelch the result temporary if it isn't a local.
                 // We for the write state to other to indicate this.
                 if (resultStatistic.ShouldRemove && resultStatistic.WriteState != WriteType.Local)
-                    resultStatistic.WriteState = WriteType.Other;
+                    resultStatistic.WriteState = WriteType.DoNotRemove;
 
                 // Rewrite the body.
                 var body = Visit(node.Body);
@@ -209,7 +265,7 @@ namespace Jint.Bound
                     // block.
                     Debug.Assert(resultStatistic.WriteState == WriteType.Local);
 
-                    result = ((BoundGetVariable)resultStatistic.Value).Variable;
+                    result = ((BoundGetVariable)resultStatistic.Value.Expression).Variable;
                 }
                 else
                 {
@@ -293,7 +349,7 @@ namespace Jint.Bound
                 {
                     var statistic = _statistics[temporary];
                     if (statistic.WriteState == WriteType.Local)
-                        variable = (IBoundWritable)((BoundGetVariable)statistic.Value).Variable;
+                        variable = (IBoundWritable)((BoundGetVariable)statistic.Value.Expression).Variable;
                 }
 
                 return node.Update(
@@ -313,7 +369,7 @@ namespace Jint.Bound
                 {
                     var statistic = _statistics[temporary];
                     if (statistic.ShouldReplace)
-                        return statistic.Value.Accept(this);
+                        return statistic.Value.Expression.Accept(this);
                 }
 
                 return base.VisitGetVariable(node);
@@ -338,23 +394,18 @@ namespace Jint.Bound
         private class Statistics
         {
             public WriteType WriteState { get; set; }
-            public BoundExpression Value { get; set; }
+            public ReadState Value { get; set; }
             public int Reads { get; set; }
 
             public bool ShouldRemove
             {
                 get
                 {
-                    // We can't squelch writes from a catch or for each in.
+                    // We can only remove temporaries that haven't been
+                    // prevented from being removed and that have at most
+                    // one read.
 
-                    if (WriteState == WriteType.Other || WriteState == WriteType.Multiple)
-                        return false;
-
-                    // If we write from a local, the temporary can be
-                    // replaced by the local. Otherwise, we can only
-                    // squelch when we have a single read.
-
-                    return Reads == 1;
+                    return WriteState != WriteType.DoNotRemove && Reads <= 1;
                 }
             }
 
@@ -364,13 +415,33 @@ namespace Jint.Bound
             }
         }
 
+        private class ReadState
+        {
+            public int WriteCount { get; private set; }
+            public BoundExpression Expression { get; private set; }
+
+            public ReadState(BoundExpression expression, int writeCount)
+            {
+                Expression = expression;
+                WriteCount = writeCount;
+            }
+
+            public override bool Equals(object obj)
+            {
+                var other = obj as ReadState;
+                return
+                    other != null &&
+                    Expression == other.Expression &&
+                    WriteCount == other.WriteCount;
+            }
+        }
+
         private enum WriteType
         {
             Not,
             Local,
             Expression,
-            Other,
-            Multiple
+            DoNotRemove
         }
     }
 }

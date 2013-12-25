@@ -15,6 +15,15 @@ namespace Jint.Bound
             public TypeMarker(BoundTypeManager typeManager)
             {
                 _typeManager = typeManager;
+
+                // Initialize all globals to unknown; they come from the
+                // GlobalScope object and are implicitly converted to Get/SetMember's.
+
+                foreach (BoundType type in _typeManager.Types)
+                {
+                    if (type.Kind == BoundTypeKind.Global)
+                        type.Type = BoundValueType.Unknown;
+                }
             }
 
             public void MarkWrite(IBoundType type, BoundValueType valueType)
@@ -31,6 +40,9 @@ namespace Jint.Bound
             {
                 if (!_disposed)
                 {
+                    // Force everything that is not definitely assigned to unknown
+                    // so that we can assign JsUndefined.Instance to it.
+
                     foreach (BoundType type in _typeManager.Types)
                     {
                         if (!type.DefinitelyAssigned)

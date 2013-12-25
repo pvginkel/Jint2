@@ -210,7 +210,7 @@ namespace Jint.Bound
         {
             return node.Update(
                 Visit(node.Expression),
-                Visit(node.Index)
+                node.Index
             );
         }
 
@@ -249,7 +249,7 @@ namespace Jint.Bound
             );
         }
 
-        public override BoundNode VisitRegex(BoundRegex node)
+        public override BoundNode VisitRegex(BoundRegEx node)
         {
             return node.Update(
                 node.Regex,

@@ -12,7 +12,7 @@ namespace Jint.Bound
         public BoundClosure Closure { get; private set; }
         public BoundClosure ScopedClosure { get; private set; }
         public ReadOnlyArray<BoundArgument> Arguments { get; private set; }
-        public ReadOnlyArray<BoundLocal> Locals { get; private set; }
+        public ReadOnlyArray<BoundLocalBase> Locals { get; private set; }
         public BoundTypeManager TypeManager { get; private set; }
 
         public override BoundKind Kind
@@ -20,7 +20,7 @@ namespace Jint.Bound
             get { return BoundKind.Body; }
         }
 
-        public BoundBody(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)
+        public BoundBody(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocalBase> locals, BoundTypeManager typeManager)
         {
             if (body == null)
                 throw new ArgumentNullException("body");
@@ -51,7 +51,7 @@ namespace Jint.Bound
             return visitor.VisitBody(this);
         }
 
-        public BoundBody Update(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocal> locals, BoundTypeManager typeManager)
+        public BoundBody Update(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocalBase> locals, BoundTypeManager typeManager)
         {
             if (
                 body == Body &&

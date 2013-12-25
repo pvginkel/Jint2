@@ -9,6 +9,7 @@ namespace Jint.Bound
     {
         Local,
         Temporary,
-        ClosureField
+        ClosureField,
+        Global
     }
 }

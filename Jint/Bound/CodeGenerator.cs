@@ -47,18 +47,19 @@ namespace Jint.Bound
 
             var method = _scriptBuilder.CreateFunction(typeof(JsMain), MainMethodName, null);
 
-            Debug.Assert(program.Body.Closure == null);
-
             _scope = new Scope(
                 method.GetILBuilder(),
                 false,
                 method.Method.IsStatic,
-                null,
+                program.Body.Closure,
                 null,
                 null
             );
 
             _scope.EmitLocals(program.Body.TypeManager);
+
+            if (program.Body.Closure != null)
+                EmitClosureSetup(program.Body);
 
             EmitStatements(program.Body.Body);
 
@@ -109,23 +110,273 @@ namespace Jint.Bound
                 case BoundKind.Block: EmitStatements((BoundBlock)node); return;
                 case BoundKind.Break: EmitBreak((BoundBreak)node); return;
                 case BoundKind.Continue: EmitContinue((BoundContinue)node); return;
-                case BoundKind.DoWhile: throw new NotImplementedException();
+                case BoundKind.DoWhile: EmitDoWhile((BoundDoWhile)node); return;
                 case BoundKind.Empty: return;
                 case BoundKind.ExpressionStatement: EmitExpressionStatement((BoundExpressionStatement)node); return;
                 case BoundKind.For: EmitFor((BoundFor)node); return;
-                case BoundKind.ForEachIn: throw new NotImplementedException();
+                case BoundKind.ForEachIn: EmitForEachIn((BoundForEachIn)node); return;
                 case BoundKind.If: EmitIf((BoundIf)node); return;
                 case BoundKind.Label: EmitLabel((BoundLabel)node); return;
                 case BoundKind.Return: EmitReturn((BoundReturn)node); return;
                 case BoundKind.SetAccessor: EmitSetAccessor((BoundSetAccessor)node); return;
                 case BoundKind.SetMember: EmitSetMember((BoundSetMember)node); return;
                 case BoundKind.SetVariable: EmitSetVariable((BoundSetVariable)node); return;
-                case BoundKind.Switch: throw new NotImplementedException();
-                case BoundKind.Throw: throw new NotImplementedException();
-                case BoundKind.Try: throw new NotImplementedException();
+                case BoundKind.Switch: EmitSwitch((BoundSwitch)node); return;
+                case BoundKind.Throw: EmitThrow((BoundThrow)node); return;
+                case BoundKind.Try: EmitTry((BoundTry)node); return;
                 case BoundKind.While: EmitWhile((BoundWhile)node); return;
                 default: throw new InvalidOperationException();
             }
+        }
+
+        private void EmitForEachIn(BoundForEachIn node)
+        {
+            // Create break and continue labels and push them onto the stack.
+
+            var breakTarget = IL.DefineLabel(GetLabel(node));
+            _scope.BreakTargets.Push(breakTarget);
+            var continueTarget = IL.DefineLabel(GetLabel(node));
+            _scope.ContinueTargets.Push(continueTarget);
+
+            // Get the keys array.
+
+            var keys = IL.DeclareLocal(typeof(object[]));
+            _scope.EmitLoad(SpecialLocal.Runtime);
+            EmitBox(EmitExpression(node.Expression));
+            IL.EmitCall(_runtimeGetForEachKeys);
+            IL.Emit(OpCodes.Stloc, keys);
+
+            // Declare the index local.
+
+            var index = IL.DeclareLocal(typeof(int));
+            IL.EmitConstant(0);
+            IL.Emit(OpCodes.Stloc, index);
+
+            // Mark the start of the loop.
+
+            IL.MarkLabel(continueTarget);
+
+            // Test whether we're at the end of the loop.
+
+            // Load the current index.
+            IL.Emit(OpCodes.Ldloc, index);
+            // Load the length of the array.
+            IL.Emit(OpCodes.Ldloc, keys);
+            IL.Emit(OpCodes.Ldlen);
+            // (index >= keys.Length) -> breakTarget
+            IL.Emit(OpCodes.Bge, breakTarget.Label);
+
+            // Assign the current key to the target.
+
+            EmitSetVariable(
+                node.Target,
+                new BoundEmitExpression(
+                    BoundValueType.Unknown,
+                    () =>
+                    {
+                        // Load the element out of the index array.
+                        IL.Emit(OpCodes.Ldloc, keys);
+                        IL.Emit(OpCodes.Ldloc, index);
+                        IL.Emit(OpCodes.Ldelem_Ref);
+                    }
+                )
+            );
+
+            // Increment the index.
+
+            IL.Emit(OpCodes.Ldloc, index);
+            IL.EmitConstant(1);
+            IL.Emit(OpCodes.Add);
+            IL.Emit(OpCodes.Stloc, index);
+
+            // Emit the body.
+
+            EmitStatement(node.Body);
+
+            // Jump back to the beginning of the loop.
+
+            IL.Emit(OpCodes.Br, continueTarget.Label);
+
+            // Mark the end of the loop.
+
+            IL.MarkLabel(breakTarget);
+
+            // Pop the break and continue labels to make the previous ones available.
+
+            _scope.BreakTargets.Pop();
+            _scope.ContinueTargets.Pop();
+        }
+
+        private void EmitDoWhile(BoundDoWhile node)
+        {
+            // Create the break and continue targets and push them onto the stack.
+
+            var breakTarget = IL.DefineLabel(GetLabel(node));
+            _scope.BreakTargets.Push(breakTarget);
+            var continueTarget = IL.DefineLabel(GetLabel(node));
+            _scope.ContinueTargets.Push(continueTarget);
+
+            // Mark the start of the loop.
+
+            var startTarget = IL.DefineLabel();
+            IL.MarkLabel(startTarget);
+
+            // Emit the body.
+
+            EmitStatement(node.Body);
+
+            // Begin the test.
+
+            IL.MarkLabel(continueTarget);
+
+            // If the test succeeds, we go again.
+
+            EmitTest(node.Test, startTarget);
+
+            // Mark the end of the loop.
+
+            IL.MarkLabel(breakTarget);
+
+            // Pop the break and continue targets to make the previous ones
+            // available.
+
+            _scope.BreakTargets.Pop();
+            _scope.ContinueTargets.Pop();
+        }
+
+        private void EmitSwitch(BoundSwitch node)
+        {
+            // Create the label that jumps to the end of the switch.
+            var after = IL.DefineLabel(GetLabel(node));
+            _scope.BreakTargets.Push(after);
+
+            // Create the bound node to get the temporary.
+            var temporaryNode = new BoundGetVariable(node.Temporary);
+
+            var bodies = new List<Tuple<Label, BoundBlock>>();
+
+            // Emit the jump table.
+
+            Label? defaultTarget = null;
+
+            foreach (var @case in node.Cases)
+            {
+                if (@case.Expression == null)
+                {
+                    IL.MarkSequencePoint(@case.Location);
+
+                    defaultTarget = IL.DefineLabel();
+
+                    bodies.Add(Tuple.Create(defaultTarget.Value, @case.Body));
+                }
+                else
+                {
+                    var target = IL.DefineLabel();
+
+                    IL.MarkSequencePoint(@case.Location);
+
+                    EmitTest(
+                        new BoundBinary(
+                            BoundExpressionType.Equal,
+                            temporaryNode,
+                            @case.Expression
+                        ),
+                        target
+                    );
+
+                    bodies.Add(Tuple.Create(target, @case.Body));
+                }
+            }
+
+            // Emit the jump to either the default block or after the switch.
+
+            IL.Emit(OpCodes.Br, defaultTarget.GetValueOrDefault(after.Label));
+
+            // Emit the bodies.
+
+            foreach (var body in bodies)
+            {
+                IL.MarkLabel(body.Item1);
+
+                EmitStatement(body.Item2);
+            }
+
+            // Emit the label after the switch.
+
+            IL.MarkLabel(after);
+
+            // Pop the break target to make the previous one available.
+            _scope.BreakTargets.Pop();
+        }
+
+        private void EmitThrow(BoundThrow node)
+        {
+            // Create the exception object.
+
+            EmitBox(EmitExpression(node.Expression));
+
+            IL.Emit(OpCodes.Newobj, _exceptionConstructor);
+
+            // Throw the exception.
+
+            IL.Emit(OpCodes.Throw);
+        }
+
+        private void EmitTry(BoundTry node)
+        {
+            IL.BeginExceptionBlock();
+
+            EmitStatement(node.Try);
+
+            // Emit the catch block.
+
+            if (node.Catch != null)
+            {
+                IL.BeginCatchBlock(typeof(Exception));
+
+                if (node.Catch.Target == null)
+                {
+                    IL.Emit(OpCodes.Pop);
+                }
+                else
+                {
+                    // Store the unwrapped exception in a local.
+                    var exceptionTarget = IL.DeclareLocal(typeof(Exception));
+                    IL.Emit(OpCodes.Stloc, exceptionTarget);
+
+                    // Wrap the exception.
+                    _scope.EmitLoad(SpecialLocal.Runtime);
+                    IL.Emit(OpCodes.Ldloc, exceptionTarget);
+                    IL.EmitCall(_runtimeWrapException);
+
+                    // Assign the exception to a local.
+                    var wrappedExceptionTarget = IL.DeclareLocal(typeof(object));
+                    IL.Emit(OpCodes.Stloc, wrappedExceptionTarget);
+
+                    // Assign the wrapped exception to the target.
+                    EmitSetVariable(
+                        node.Catch.Target,
+                        new BoundEmitExpression(
+                            BoundValueType.Unknown,
+                            () => IL.Emit(OpCodes.Ldloc, wrappedExceptionTarget)
+                        )
+                    );
+                }
+
+                // Emit the body for the catch.
+                EmitStatement(node.Catch.Body);
+            }
+
+            // Emit the finally block.
+
+            if (node.Finally != null)
+            {
+                IL.BeginFinallyBlock();
+
+                EmitStatement(node.Finally.Body);
+            }
+
+            IL.EndExceptionBlock();
         }
 
         private void EmitSetAccessor(BoundSetAccessor node)
@@ -396,6 +647,17 @@ namespace Jint.Bound
         {
             switch (variable.Kind)
             {
+                case BoundVariableKind.Global:
+                    // Push the global scope onto the stack.
+                    _scope.EmitLoad(SpecialLocal.GlobalScope);
+                    // Push the index of the local onto the stack.
+                    IL.EmitConstant(_engine.Global.ResolveIdentifier(((BoundGlobal)variable).Name));
+                    // Push the boxed expression onto the stack.
+                    EmitBox(EmitExpression(value));
+                    // Set the property on the global scope.
+                    IL.EmitCall(_objectSetProperty, BoundValueType.Unset);
+                    break;
+
                 case BoundVariableKind.Local:
                 case BoundVariableKind.Temporary:
                     // Push the value onto the stack.
@@ -498,17 +760,60 @@ namespace Jint.Bound
                 case BoundKind.Call: return EmitCall((BoundCall)node);
                 case BoundKind.Constant: return EmitConstant((BoundConstant)node);
                 case BoundKind.CreateFunction: return EmitCreateFunction((BoundCreateFunction)node);
-                case BoundKind.DeleteMember: throw new NotImplementedException();
+                case BoundKind.DeleteMember: return EmitDeleteMember((BoundDeleteMember)node);
                 case BoundKind.ExpressionBlock: return EmitExpressionBlock((BoundExpressionBlock)node);
                 case BoundKind.GetMember: return EmitGetMember((BoundGetMember)node);
                 case BoundKind.GetVariable: return EmitGetVariable((BoundGetVariable)node);
-                case BoundKind.HasMember: throw new NotImplementedException();
+                case BoundKind.HasMember: return EmitHasMember((BoundHasMember)node);
                 case BoundKind.New: return EmitNew((BoundNew)node);
                 case BoundKind.NewBuiltIn: return EmitNewBuiltIn((BoundNewBuiltIn)node);
-                case BoundKind.RegEx: throw new NotImplementedException();
+                case BoundKind.RegEx: return EmitRegEx((BoundRegEx)node);
                 case BoundKind.Unary: return EmitUnary((BoundUnary)node);
+                case BoundKind.Emit: return EmitEmit((BoundEmitExpression)node);
                 default: throw new InvalidOperationException();
             }
+        }
+
+        private BoundValueType EmitHasMember(BoundHasMember node)
+        {
+            if (node.Expression.ValueType != BoundValueType.Object)
+                _scope.EmitLoad(SpecialLocal.Runtime);
+
+            EmitBox(EmitExpression(node.Expression));
+            IL.EmitConstant(_engine.Global.ResolveIdentifier(node.Index));
+
+            if (node.Expression.ValueType == BoundValueType.Object)
+                return IL.EmitCall(_objectHasProperty);
+
+            return IL.EmitCall(_runtimeHasMemberByIndex);
+        }
+
+        private BoundValueType EmitRegEx(BoundRegEx node)
+        {
+            // Push the global onto the stack.
+            _scope.EmitLoad(SpecialLocal.Global);
+            // Push the regular expression and options onto the stack.
+            IL.EmitConstant(node.Regex);
+            IL.EmitConstant(node.Options);
+            // Create the regular expression object.
+            IL.EmitCall(_globalCreateRegExp);
+
+            return BoundValueType.Object;
+        }
+
+        private BoundValueType EmitDeleteMember(BoundDeleteMember node)
+        {
+            return EmitOperationCall(
+                Operation.Delete,
+                node.Expression,
+                node.Index
+            );
+        }
+
+        private BoundValueType EmitEmit(BoundEmitExpression node)
+        {
+            node.Emit();
+            return node.ValueType;
         }
 
         private BoundValueType EmitNewBuiltIn(BoundNewBuiltIn node)
@@ -806,7 +1111,7 @@ namespace Jint.Bound
 
             // Instantiate the closure if we own it.
             if (function.Body.Closure != null)
-                EmitClosureSetup(function);
+                EmitClosureSetup(function.Body);
 
             // Put the closure local onto the stack if we're going to store
             // the arguments in the closure.
@@ -854,14 +1159,14 @@ namespace Jint.Bound
             return method;
         }
 
-        private void EmitClosureSetup(BoundFunction function)
+        private void EmitClosureSetup(BoundBody body)
         {
-            Debug.Assert(function.Body.Closure != null);
+            Debug.Assert(body.Closure != null);
 
-            var closure = function.Body.Closure;
+            var closure = body.Closure;
 
             // Check whether the constructor expects a parent.
-            if (function.Body.Closure.Parent != null)
+            if (body.Closure.Parent != null)
                 IL.Emit(OpCodes.Ldarg_0);
 
             // Instantiate the closure.
@@ -915,10 +1220,17 @@ namespace Jint.Bound
         {
             switch (variable.Kind)
             {
+                case BoundVariableKind.Global:
+                    // Push the global scope onto the stack.
+                    _scope.EmitLoad(SpecialLocal.GlobalScope);
+                    // Push the index onto the stack.
+                    IL.EmitConstant(_engine.Global.ResolveIdentifier(((BoundGlobal)variable).Name));
+                    // Get the property from the global scope.
+                    return IL.EmitCall(_objectGetProperty);
+
                 case BoundVariableKind.Local:
                 case BoundVariableKind.Temporary:
                     IL.Emit(OpCodes.Ldloc, _scope.GetLocal(((BoundVariable)variable).Type));
-
                     return variable.ValueType;
 
                 case BoundVariableKind.ClosureField:
