@@ -114,6 +114,10 @@
     <Compile Include="Bound\BoundTypeManager.DefiniteAssignmentMarker.cs" />
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
     <Compile Include="Bound\BoundTypeKind.cs" />
+    <Compile Include="Compiler\IFunctionBuilder.cs" />
+    <Compile Include="Compiler\IScriptBuilder.cs" />
+    <Compile Include="Compiler\ITypeBuilder.cs" />
+    <Compile Include="Compiler\TypeSystem.cs" />
     <Compile Include="Bound\BoundValueTypeExtensions.cs" />
     <Compile Include="Bound\BoundVariable.cs" />
     <Compile Include="Bound\BoundVariableKind.cs" />
@@ -124,6 +128,8 @@
     <Compile Include="Bound\CodeGenerator.Scope.cs" />
     <Compile Include="Bound\DefiniteAssignmentPhase.cs" />
     <Compile Include="Bound\FunctionGatherer.cs" />
+    <Compile Include="Compiler\IClosureFieldBuilder.cs" />
+    <Compile Include="Compiler\IClosureBuilder.cs" />
     <Compile Include="Bound\IBoundType.cs" />
     <Compile Include="Bound\BoundUnary.cs" />
     <Compile Include="Bound\BoundLocal.cs" />
@@ -137,7 +143,6 @@
     <Compile Include="Bound\IBoundWritable.cs" />
     <Compile Include="Bound\SquelchPhase.cs" />
     <Compile Include="Bound\TypeMarkerPhase.cs" />
-    <Compile Include="Compiler\DynamicAssemblyManager.cs" />
     <Compile Include="Expressions\BodySyntax.cs" />
     <Compile Include="Expressions\BodyType.cs" />
     <Compile Include="Expressions\ClosedOverVariable.cs" />
@@ -168,6 +173,7 @@
     <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\IPropertyStore.cs" />
     <Compile Include="Native\JsGenericArguments.cs" />
+    <Compile Include="Native\JsMain.cs" />
     <Compile Include="Native\JsValue.cs" />
     <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsDelegate.cs" />

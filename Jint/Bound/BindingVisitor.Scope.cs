@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Compiler;
 using Jint.Expressions;
 
 namespace Jint.Bound
@@ -20,7 +21,7 @@ namespace Jint.Bound
             public BoundClosure Closure { get; private set; }
             public BoundTypeManager TypeManager { get; private set; }
 
-            public Scope(Scope parent, BodySyntax body)
+            public Scope(Scope parent, BodySyntax body, IScriptBuilder scriptBuilder)
             {
                 Parent = parent;
                 TypeManager = new BoundTypeManager();
@@ -30,7 +31,8 @@ namespace Jint.Bound
                     _sourceClosure = body.Closure;
                     Closure = new BoundClosure(
                         body.ParentClosure != null ? GetClosure(body.ParentClosure) : null,
-                        body.Closure.Fields.Select(p => TypeManager.CreateType(p, BoundTypeKind.ClosureField))
+                        body.Closure.Fields.Select(p => TypeManager.CreateType(p, BoundTypeKind.ClosureField)),
+                        scriptBuilder
                     );
                 }
 

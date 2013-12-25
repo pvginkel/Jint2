@@ -32,13 +32,11 @@ namespace Jint.Bound
         private static readonly MethodInfo _booleanToNumber = typeof(JsConvert).GetMethod("ToNumber", new[] { typeof(bool) });
         private static readonly MethodInfo _booleanToString = typeof(JsConvert).GetMethod("ToString", new[] { typeof(bool) });
         private static readonly MethodInfo _objectExecute = typeof(JsObject).GetMethod("Execute");
-        private static readonly MethodInfo _methodBaseGetMethodFromHandle = typeof(MethodBase).GetMethod("GetMethodFromHandle", new[] { typeof(RuntimeMethodHandle) });
         private static readonly MethodInfo _runtimeNew = typeof(JintRuntime).GetMethod("New");
         private static readonly MethodInfo _globalCreateArray = typeof(JsGlobal).GetMethod("CreateArray");
         private static readonly MethodInfo _globalCreateObject = typeof(JsGlobal).GetMethod("CreateObject", Type.EmptyTypes);
         private static readonly MethodInfo _objectDefineAccessor = typeof(JsObject).GetMethod("DefineAccessor", new[] { typeof(int), typeof(JsObject), typeof(JsObject) });
 
-        private static readonly ConstructorInfo _objectConstructor = typeof(object).GetConstructors()[0];
         private static readonly ConstructorInfo _genericArgumentsConstructor = typeof(JsGenericArguments).GetConstructor(new[] { typeof(object[]) });
         private static readonly ConstructorInfo _functionConstructor = typeof(JsFunction).GetConstructors()[0];
 

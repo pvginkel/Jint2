@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Jint.Expressions;
-using Jint.Support;
 
 namespace Jint.Bound
 {

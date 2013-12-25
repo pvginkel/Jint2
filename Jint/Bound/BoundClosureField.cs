@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Jint.Compiler;
 
 namespace Jint.Bound
 {
@@ -13,6 +14,7 @@ namespace Jint.Bound
         }
 
         public BoundClosure Closure { get; private set; }
+        public IClosureFieldBuilder Builder { get; private set; }
 
         public override BoundVariableKind Kind
         {
@@ -26,6 +28,7 @@ namespace Jint.Bound
                 throw new ArgumentNullException("closure");
 
             Closure = closure;
+            Builder = closure.Builder.CreateClosureFieldBuilder(this);
         }
 
         public override string ToString()

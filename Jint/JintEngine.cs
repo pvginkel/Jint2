@@ -28,11 +28,13 @@ namespace Jint
 
         public Options Options { get; private set; }
         public bool IsClrAllowed { get; set; }
+        internal TypeSystem TypeSystem { get; private set; }
 
         public JintEngine(Options options)
         {
             Options = options;
             PermissionSet = new PermissionSet(PermissionState.None);
+            TypeSystem = new TypeSystem();
 
             _runtime = new JintRuntime(this, Options);
 
@@ -420,7 +422,8 @@ namespace Jint
             {
                 PrepareTree(program);
 
-                var bindingVisitor = new BindingVisitor();
+                var scriptBuilder = TypeSystem.CreateScriptBuilder(fileName);
+                var bindingVisitor = new BindingVisitor(scriptBuilder);
 
                 program.Accept(bindingVisitor);
 
@@ -432,7 +435,7 @@ namespace Jint
 
                 EnsureGlobalsDeclared(boundProgram);
 
-                var method = new CodeGenerator(this, fileName).BuildMainMethod(boundProgram);
+                var method = new CodeGenerator(this, scriptBuilder).BuildMainMethod(boundProgram);
 
                 result = method(_runtime);
             }
@@ -522,7 +525,8 @@ namespace Jint
 
             PrepareTree(function);
 
-            var bindingVisitor = new BindingVisitor();
+            var scriptBuilder = TypeSystem.CreateScriptBuilder(null);
+            var bindingVisitor = new BindingVisitor(scriptBuilder);
 
             var boundFunction = bindingVisitor.DeclareFunction(function);
 
@@ -534,7 +538,7 @@ namespace Jint
                 function.Name,
                 (JsFunction)Delegate.CreateDelegate(
                     typeof(JsFunction),
-                    new CodeGenerator(this, null).BuildFunction(boundFunction)
+                    new CodeGenerator(this, scriptBuilder).BuildFunction(boundFunction)
                 ),
                 function.Parameters.ToArray(),
                 sourceCode

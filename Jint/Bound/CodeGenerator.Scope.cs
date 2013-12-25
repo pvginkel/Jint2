@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -18,7 +17,7 @@ namespace Jint.Bound
             private LocalBuilder _globalScopeLocal;
             private readonly bool _isFunction;
             private readonly bool _isStatic;
-            private readonly Dictionary<Type, LocalBuilder> _closureLocals = new Dictionary<Type, LocalBuilder>();
+            private readonly Dictionary<BoundClosure, LocalBuilder> _closureLocals = new Dictionary<BoundClosure, LocalBuilder>();
 
             public ILBuilder IL { get; private set; }
             public BoundClosure Closure { get; private set; }
@@ -36,7 +35,7 @@ namespace Jint.Bound
                 ArgumentsVariable = argumentsVariable;
                 Parent = parent;
 
-                _closureLocals = new Dictionary<Type, LocalBuilder>();
+                _closureLocals = new Dictionary<BoundClosure, LocalBuilder>();
                 BreakTargets = new Stack<NamedLabel>();
                 ContinueTargets = new Stack<NamedLabel>();
             }
@@ -151,19 +150,19 @@ namespace Jint.Bound
                 return _locals[type];
             }
 
-            public void RegisterClosureLocal(LocalBuilder closureLocal)
+            public void RegisterClosureLocal(BoundClosure closure, LocalBuilder closureLocal)
             {
-                _closureLocals.Add(closureLocal.LocalType, closureLocal);
+                _closureLocals.Add(closure, closureLocal);
             }
 
-            public void EmitLoadClosure(Type closureType)
+            public void EmitLoadClosure(BoundClosure closure)
             {
                 // A sanity check could be added here; this does not check
                 // whether the requested closure type is actually our instance
                 // type.
 
                 LocalBuilder local;
-                if (_closureLocals.TryGetValue(closureType, out local))
+                if (_closureLocals.TryGetValue(closure, out local))
                     IL.Emit(OpCodes.Ldloc, local);
                 else
                     IL.Emit(OpCodes.Ldarg_0);

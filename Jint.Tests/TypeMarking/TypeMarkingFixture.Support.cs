@@ -54,9 +54,10 @@ namespace Jint.Tests.TypeMarking
         {
             var programSyntax = JintEngine.Compile(script);
 
-            programSyntax.Accept(new VariableMarkerPhase(new JintEngine()));
+            var engine = new JintEngine();
+            programSyntax.Accept(new VariableMarkerPhase(engine));
 
-            var visitor = new BindingVisitor();
+            var visitor = new BindingVisitor(engine.TypeSystem.CreateScriptBuilder(null));
 
             programSyntax.Accept(visitor);
 

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Compiler;
 using Jint.Expressions;
 
 namespace Jint.Bound
 {
     internal partial class BindingVisitor : ISyntaxVisitor<BoundNode>
     {
+        private readonly IScriptBuilder _scriptBuilder;
         private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
         private readonly List<BoundFunction> _functions = new List<BoundFunction>();
         private readonly Dictionary<Variable, BoundTemporary> _withTemporaries = new Dictionary<Variable, BoundTemporary>();
@@ -17,6 +18,14 @@ namespace Jint.Bound
         private Scope _scope;
 
         public BoundProgram Program { get; private set; }
+
+        public BindingVisitor(IScriptBuilder scriptBuilder)
+        {
+            if (scriptBuilder == null)
+                throw new ArgumentNullException("scriptBuilder");
+
+            _scriptBuilder = scriptBuilder;
+        }
 
         public BoundNode VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
         {
@@ -340,7 +349,7 @@ namespace Jint.Bound
 
         public BoundFunction DeclareFunction(FunctionSyntax syntax)
         {
-            _scope = new Scope(_scope, syntax.Body);
+            _scope = new Scope(_scope, syntax.Body, _scriptBuilder);
 
             var function = new BoundFunction(
                 syntax.Name,
@@ -581,7 +590,7 @@ namespace Jint.Bound
         {
             Debug.Assert(Program == null);
 
-            _scope = new Scope(_scope, syntax.Body);
+            _scope = new Scope(_scope, syntax.Body, _scriptBuilder);
 
             Program = new BoundProgram(
                 VisitBody(syntax.Body)

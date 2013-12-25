@@ -1,5 +1,4 @@
 ﻿using Jint.Expressions;
-using Jint.Support;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
