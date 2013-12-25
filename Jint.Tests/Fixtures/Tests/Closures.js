@@ -50,36 +50,48 @@ foo();
  * Closures should close over the correct variables.
  */
 
-var i = 1; // This one isn't closed over because it's of the global this.
+var a = 1; // This one isn't closed over because it's of the global this.
 
 function f() {
-    i++;
-    var j = 2; // This one is closed over.
+    a++;
+    var b = 2; // This one is closed over.
 
     var g = function () {
-        i++;
-        j++;
-        var k = 3; // This one is closed over.
+        a++;
+        b++;
+        var c = 3; // This one is closed over.
 
         var h = function () {
-            i++;
-            j++; // Closed over from f.
-            k++; // Closed over from g.
+            a++;
+            b++; // Closed over from f.
+            c++; // Closed over from g.
+            var d = 4; // This one is closed over.
+
+            var i = function () {
+                a++;
+                b++; // Closed over from f.
+                c++; // Closed over from g.
+                d++; // Closed over from h.
+            };
+
+            i();
+
+            assert(d, 5);
         };
 
         h();
 
-        assert(k, 4);
+        assert(c, 5);
     };
 
     g();
 
-    assert(j, 4);
+    assert(b, 5);
 }
 
 f();
 
-assert(i, 4);
+assert(a, 5);
 
 /*
  * Function parameters should be captured.

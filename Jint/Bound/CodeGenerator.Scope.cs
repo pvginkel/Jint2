@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Jint.Bound
             private LocalBuilder _globalScopeLocal;
             private readonly bool _isFunction;
             private readonly bool _isStatic;
-            private readonly Dictionary<BoundClosure, LocalBuilder> _closureLocals = new Dictionary<BoundClosure, LocalBuilder>();
+            private LocalBuilder _closureLocal;
 
             public ILBuilder IL { get; private set; }
             public BoundClosure Closure { get; private set; }
@@ -35,7 +36,6 @@ namespace Jint.Bound
                 ArgumentsVariable = argumentsVariable;
                 Parent = parent;
 
-                _closureLocals = new Dictionary<BoundClosure, LocalBuilder>();
                 BreakTargets = new Stack<NamedLabel>();
                 ContinueTargets = new Stack<NamedLabel>();
             }
@@ -150,22 +150,25 @@ namespace Jint.Bound
                 return _locals[type];
             }
 
-            public void RegisterClosureLocal(BoundClosure closure, LocalBuilder closureLocal)
-            {
-                _closureLocals.Add(closure, closureLocal);
-            }
-
             public void EmitLoadClosure(BoundClosure closure)
             {
-                // A sanity check could be added here; this does not check
-                // whether the requested closure type is actually our instance
-                // type.
-
-                LocalBuilder local;
-                if (_closureLocals.TryGetValue(closure, out local))
-                    IL.Emit(OpCodes.Ldloc, local);
+                // Push our scoped closure onto the stack.
+                if (_closureLocal != null)
+                    IL.Emit(OpCodes.Ldloc, _closureLocal);
                 else
                     IL.Emit(OpCodes.Ldarg_0);
+
+                // If the request wasn't for our scoped closure, but a parent,
+                // resolve the parent.
+                if (Closure != closure)
+                    IL.Emit(OpCodes.Ldfld, Closure.Builder.ParentFields[closure.Builder].Field);
+            }
+
+            public void SetClosureLocal(LocalBuilder closureLocal)
+            {
+                Debug.Assert(_closureLocal == null);
+
+                _closureLocal = closureLocal;
             }
         }
     }

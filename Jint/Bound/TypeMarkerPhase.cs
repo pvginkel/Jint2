@@ -58,46 +58,11 @@ namespace Jint.Bound
                 }
             }
 
-            private void MarkRead(IBoundReadable variable)
-            {
-                MarkClosureUsage(variable);
-            }
-
             private void MarkWrite(IBoundWritable variable, BoundValueType type)
             {
                 var hasType = variable as BoundVariable;
                 if (hasType != null)
                     _marker.MarkWrite(hasType.Type, type);
-
-                MarkClosureUsage(variable);
-            }
-
-            private void MarkClosureUsage(IBoundReadable variable)
-            {
-                switch (variable.Kind)
-                {
-                    case BoundVariableKind.ClosureField:
-                        _marker.MarkClosureUsage(((BoundClosureField)variable).Closure);
-                        break;
-
-                    case BoundVariableKind.Argument:
-                        var argument = (BoundArgument)variable;
-                        if (argument.ArgumentsClosureField != null)
-                            _marker.MarkClosureUsage(argument.ArgumentsClosureField.Closure);
-                        break;
-                }
-            }
-
-            public override void VisitGetVariable(BoundGetVariable node)
-            {
-                MarkRead(node.Variable);
-            }
-
-            public override void VisitExpressionBlock(BoundExpressionBlock node)
-            {
-                base.VisitExpressionBlock(node);
-
-                MarkRead(node.Result);
             }
 
             public override void VisitSetVariable(BoundSetVariable node)

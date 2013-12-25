@@ -85,19 +85,18 @@ namespace Jint.Compiler
 
             // Add the variables that were closed over.
 
+            bool requireArguments = false;
+
             foreach (var variable in block.ClosedOverVariables)
             {
                 if (variable.Type == VariableType.Local)
                     fields.Add(variable.Name);
+                else
+                    requireArguments = true;
             }
 
-            if (!fields.Contains(Closure.ArgumentsFieldName))
+            if (requireArguments)
                 fields.Add(Closure.ArgumentsFieldName);
-
-            // If we have a parent closure, add a variable for that.
-
-            if (parent != null)
-                fields.Add(Closure.ParentFieldName);
 
             // Build the closure.
 

@@ -108,6 +108,8 @@ namespace Jint.Compiler
         private abstract class TypeBuilder : ITypeBuilder
         {
             private readonly List<IFunctionBuilder> _functions = new List<IFunctionBuilder>();
+            private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
+            private int _nextMethodId;
 
             public Type Type { get; private set; }
             protected TypeSystem TypeSystem { get; private set; }
@@ -131,7 +133,7 @@ namespace Jint.Compiler
                 var result = new FunctionBuilder(
                     this,
                     ((System.Reflection.Emit.TypeBuilder)Type).DefineMethod(
-                        name,
+                        GetFunctionName(name),
                         attributes,
                         invoke.ReturnType,
                         invoke.GetParameters().Select(p => p.ParameterType).ToArray()
@@ -141,6 +143,39 @@ namespace Jint.Compiler
                 _functions.Add(result);
 
                 return result;
+            }
+
+            private string GetFunctionName(string name)
+            {
+                if (name == null)
+                {
+                    int id = _nextMethodId++;
+
+                    if (id == 0)
+                        name = "(anonymous function)";
+                    else
+                        name = "(anonymous function " + id.ToString(CultureInfo.InvariantCulture) + ")";
+                }
+                else
+                {
+                    string proposal = name;
+
+                    for (int i = 0; ; i++)
+                    {
+                        if (i > 0)
+                            proposal = name + "$" + i.ToString(CultureInfo.InvariantCulture);
+
+                        if (!_compiledMethodNames.Contains(proposal))
+                        {
+                            name = proposal;
+                            break;
+                        }
+                    }
+                }
+
+                _compiledMethodNames.Add(name);
+
+                return name;
             }
 
             public virtual void Commit()
@@ -247,16 +282,22 @@ namespace Jint.Compiler
 
         private class ClosureBuilder : TypeBuilder, IClosureBuilder
         {
+            private const string ParentFieldName = "<>parent";
+
             private static readonly ConstructorInfo _objectConstructor = typeof(object).GetConstructors()[0];
             private static readonly FieldInfo _undefinedInstance = typeof(JsUndefined).GetField("Instance");
 
+            private readonly ClosureParentFieldCollection _parentFields = new ClosureParentFieldCollection();
+
             public BoundClosure Closure { get; private set; }
             public ConstructorBuilder Constructor { get; private set; }
+            public IKeyedCollection<IClosureBuilder, ClosureParentField> ParentFields { get; private set; }
 
             public ClosureBuilder(BoundClosure closure, TypeSystem typeSystem, System.Reflection.Emit.TypeBuilder type, ISymbolDocumentWriter document)
                 : base(type, typeSystem, document)
             {
                 Closure = closure;
+                ParentFields = ReadOnlyKeyedCollection.Create(_parentFields);
             }
 
             public override IFunctionBuilder CreateFunction(Type delegateType, string name)
@@ -278,29 +319,31 @@ namespace Jint.Compiler
 
                 var typeBuilder = (System.Reflection.Emit.TypeBuilder)Type;
 
+                int index = 1;
+                var parent = Closure.Parent;
+
+                while (parent != null)
+                {
+                    var field = typeBuilder.DefineField(
+                        ParentFieldName + "$" + index.ToString(CultureInfo.InvariantCulture),
+                        parent.Builder.Type,
+                        FieldAttributes.Public | FieldAttributes.InitOnly
+                    );
+
+                    _parentFields.Add(new ClosureParentField(parent.Builder, field));
+
+                    index++;
+
+                    parent = parent.Parent;
+                }
+
                 foreach (var field in Closure.Fields.OrderBy(p => p.Name))
                 {
-                    var attributes = FieldAttributes.Public;
-                    Type fieldType;
-
-                    if (field.Name == Expressions.Closure.ParentFieldName)
-                    {
-                        attributes |= FieldAttributes.InitOnly;
-                        fieldType = Closure.Parent.Builder.Type;
-                    }
-                    else if (field.Name == Expressions.Closure.ArgumentsFieldName)
-                    {
-                        // TODO: This should have been set correctly, but field.Type
-                        // can be Unset at this point.
-                        fieldType = typeof(JsObject);
-                    }
-                    else
-                    {
-                        fieldType = field.ValueType.GetNativeType();
-                    }
-
-                    ((ClosureFieldBuilder)field.Builder).Field =
-                        typeBuilder.DefineField(field.Name, fieldType, attributes);
+                    ((ClosureFieldBuilder)field.Builder).Field = typeBuilder.DefineField(
+                        field.Name,
+                        field.ValueType.GetNativeType(),
+                        FieldAttributes.Public
+                    );
                 }
 
                 Constructor = EmitClosureConstructor();
@@ -326,13 +369,34 @@ namespace Jint.Compiler
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, _objectConstructor);
 
-                // Initialize the parent field if we have one.
+                // Initialize all parent fields.
 
                 if (Closure.Parent != null)
                 {
+                    // Load this.
                     il.Emit(OpCodes.Ldarg_0);
+                    // Load the parent from the arguments.
                     il.Emit(OpCodes.Ldarg_1);
-                    il.Emit(OpCodes.Stfld, Closure.Fields[Expressions.Closure.ParentFieldName].Builder.Field);
+                    // Store in the parent field.
+                    il.Emit(OpCodes.Stfld, _parentFields[Closure.Parent.Builder].Field);
+
+                    var parent = Closure.Parent.Parent;
+
+                    while (parent != null)
+                    {
+                        // Load the this (used for the store).
+                        il.Emit(OpCodes.Ldarg_0);
+
+                        // Load the parent from the arguments.
+                        il.Emit(OpCodes.Ldarg_1);
+                        // Load correct parent from the parent.
+                        il.Emit(OpCodes.Ldfld, Closure.Parent.Builder.ParentFields[parent.Builder].Field);
+
+                        // Store the parent into our field.
+                        il.Emit(OpCodes.Stfld, _parentFields[parent.Builder].Field);
+
+                        parent = parent.Parent;
+                    }
                 }
 
                 // Initialize object fields to undefined.
@@ -352,6 +416,14 @@ namespace Jint.Compiler
                 il.Emit(OpCodes.Ret);
 
                 return constructor;
+            }
+
+            private  class ClosureParentFieldCollection : Support.KeyedCollection<IClosureBuilder, ClosureParentField>
+            {
+                protected override IClosureBuilder GetKeyForItem(ClosureParentField item)
+                {
+                    return item.Closure;
+                }
             }
         }
 

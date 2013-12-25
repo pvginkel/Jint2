@@ -15,8 +15,6 @@ namespace Jint.Bound
             get { return _types; }
         }
 
-        public ReadOnlyArray<BoundClosure> UsedClosures { get; private set; }
-
         public IBoundType CreateType(string name, BoundTypeKind type)
         {
             var result = new BoundType(this, name, type);

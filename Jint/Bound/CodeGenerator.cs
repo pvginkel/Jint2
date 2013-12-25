@@ -15,14 +15,12 @@ namespace Jint.Bound
 {
     internal partial class CodeGenerator
     {
-        private const string MainMethodName = "Main";
+        private const string MainMethodName = "(global)";
 
-        private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
         private readonly JintEngine _engine;
         private readonly IScriptBuilder _scriptBuilder;
         private Scope _scope;
         private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
-        private int _lastMethodId;
 
         private ILBuilder IL
         {
@@ -799,7 +797,7 @@ namespace Jint.Bound
             var method = BuildMethod(
                 typeof(JsFunction),
                 typeBuilder,
-                GetFunctionName(function)
+                function.Name
             );
 
             var argumentsLocal = (BoundVariable)function.Body.Locals.SingleOrDefault(p => p.Name == "arguments");
@@ -820,17 +818,9 @@ namespace Jint.Bound
 
             _scope.EmitLocals(function.Body.TypeManager);
 
-            // Initialize our closure.
-
-            var usedClosures = function.Body.TypeManager.UsedClosures;
-
             // Instantiate the closure if we own it.
             if (function.Body.Closure != null)
                 EmitClosureSetup(function);
-
-            // Emit locals for all used closures.
-            if (function.Body.ScopedClosure != null && usedClosures != null)
-                EmitClosureLocals(function.Body.ScopedClosure, usedClosures);
 
             // Put the closure local onto the stack if we're going to store
             // the arguments in the closure.
@@ -894,145 +884,8 @@ namespace Jint.Bound
             // Store the reference to the closure in the scope.
 
             var closureLocal = IL.DeclareLocal(closure.Builder.Type);
-            _scope.RegisterClosureLocal(closure, closureLocal);
+            _scope.SetClosureLocal(closureLocal);
             IL.Emit(OpCodes.Stloc, closureLocal);
-        }
-
-        private void EmitClosureLocals(BoundClosure closure, ReadOnlyArray<BoundClosure> usedClosures)
-        {
-            // If we don't have a parent field, there is no work.
-
-            if (closure.Parent == null)
-                return;
-
-            var usage = new Dictionary<BoundClosure, ClosureUsage>();
-
-            var parentUsage = DetermineClosureUsage(usage, closure.Parent, usedClosures);
-
-            // If the parent isn't used, there is no work.
-
-            if (parentUsage == ClosureUsage.NotUsed)
-                return;
-
-            // Emit all locals. We put the reference to the closure local on the
-            // stack so the parent can be loaded from it.
-
-            _scope.EmitLoadClosure(closure);
-
-            while (closure.Parent != null)
-            {
-                // Put the parent field on the stack. Above a check has already
-                // been done to make sure at least one of the parent closures is
-                // used, so we know that this is going to be popped.
-
-                var parentField = closure.Fields[Expressions.Closure.ParentFieldName];
-                IL.Emit(OpCodes.Ldfld, parentField.Builder.Field);
-
-                var parentClosure = closure.Parent;
-                switch (usage[parentClosure])
-                {
-                    case ClosureUsage.Directly:
-                        // Declare the local for the closure and put it in the map.
-
-                        var thisLocal = IL.DeclareLocal(parentClosure.Builder.Type);
-                        _scope.RegisterClosureLocal(parentClosure, thisLocal);
-
-                        bool isLast =
-                            parentClosure.Parent == null ||
-                            usage[parentClosure.Parent] == ClosureUsage.NotUsed;
-
-                        // If we're not the last, we need to keep the reference
-                        // to the closure on the stack for the next parent.
-
-                        if (!isLast)
-                            IL.Emit(OpCodes.Dup);
-
-                        // Store the closure in the local.
-
-                        IL.Emit(OpCodes.Stloc, thisLocal);
-
-                        // If we're the last, we can exit here.
-
-                        if (isLast)
-                            return;
-                        break;
-
-                    case ClosureUsage.Indirectly:
-                        // Nothing to do here. The parent closure has already
-                        // been pushed onto the stack at the beginning of the
-                        // loop, so this becomes a no-op.
-                        break;
-
-                    default:
-                        // We shouldn't get here. The NotUsed case is checked in
-                        // the Directly case, and the return is there.
-                        throw new InvalidOperationException();
-                }
-
-                closure = closure.Parent;
-            }
-
-            Debug.Fail("We shouldn't get here because all usages should have been marked");
-        }
-
-        private ClosureUsage DetermineClosureUsage(Dictionary<BoundClosure, ClosureUsage> usage, BoundClosure closure, ReadOnlyArray<BoundClosure> usedClosures)
-        {
-            // Determine the usage of the parent.
-
-            var parentUsage = ClosureUsage.NotUsed;
-
-            BoundClosureField parentField;
-            if (closure.Fields.TryGetValue(Expressions.Closure.ParentFieldName, out parentField))
-                parentUsage = DetermineClosureUsage(usage, closure.Parent, usedClosures);
-
-            // Determine whether this closure is used.
-
-            var used = ClosureUsage.NotUsed;
-
-            foreach (var usedClosure in usedClosures)
-            {
-                if (usedClosure == closure)
-                {
-                    used = ClosureUsage.Directly;
-                    break;
-                }
-            }
-
-            // This closure is used indirectly if the parent is used.
-
-            if (used != ClosureUsage.Directly && parentUsage != ClosureUsage.Indirectly)
-                used = ClosureUsage.Indirectly;
-
-            usage[closure] = used;
-
-            return used;
-        }
-
-        private string GetFunctionName(BoundFunction function)
-        {
-            string name;
-
-            if (function.Name == null)
-            {
-                name = "AnonymousFunction_" + (++_lastMethodId).ToString(CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                name = function.Name;
-
-                for (int i = 0; ; i++)
-                {
-                    if (i > 0)
-                        name = function.Name + "_" + i.ToString(CultureInfo.InvariantCulture);
-
-                    if (!_compiledMethodNames.Contains(name))
-                        break;
-                }
-            }
-
-            _compiledMethodNames.Add(name);
-
-            return name;
         }
 
         private BoundValueType EmitGetMember(BoundGetMember node)
@@ -1139,13 +992,6 @@ namespace Jint.Bound
             Undefined,
             Callee,
             Arguments
-        }
-
-        private enum ClosureUsage
-        {
-            NotUsed,
-            Directly,
-            Indirectly
         }
     }
 }

@@ -9,7 +9,6 @@ namespace Jint.Bound
     {
         public class TypeMarker : IDisposable
         {
-            private HashSet<BoundClosure> _closures;
             private readonly BoundTypeManager _typeManager;
             private bool _disposed;
 
@@ -28,21 +27,10 @@ namespace Jint.Bound
                     internalType.Type = BoundValueType.Unknown;
             }
 
-            public void MarkClosureUsage(BoundClosure closure)
-            {
-                if (_closures == null)
-                    _closures = new HashSet<BoundClosure>();
-
-                _closures.Add(closure);
-            }
-
             public void Dispose()
             {
                 if (!_disposed)
                 {
-                    if (_closures != null)
-                        _typeManager.UsedClosures = _closures.ToReadOnlyArray();
-
                     foreach (BoundType type in _typeManager.Types)
                     {
                         if (!type.DefinitelyAssigned)
