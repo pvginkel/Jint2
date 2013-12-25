@@ -349,7 +349,7 @@ namespace Jint.Bound
                 name,
                 syntax.Parameters.ToReadOnlyArray(),
                 VisitBody(syntax.Body),
-                syntax.Location
+                syntax.Location ?? SourceLocation.Missing
             );
 
             _scope = _scope.Parent;

@@ -107,6 +107,8 @@ namespace Jint.Compiler
 
         private abstract class TypeBuilder : ITypeBuilder
         {
+            private static readonly ConstructorInfo _functionSourceAttributeConstructor = typeof(JsFunctionSourceAttribute).GetConstructors()[0];
+
             private readonly List<IFunctionBuilder> _functions = new List<IFunctionBuilder>();
             private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
             private int _nextMethodId;
@@ -124,21 +126,28 @@ namespace Jint.Compiler
                 Functions = new ReadOnlyCollection<IFunctionBuilder>(_functions);
             }
 
-            public abstract IFunctionBuilder CreateFunction(Type delegateType, string name);
+            public abstract IFunctionBuilder CreateFunction(Type delegateType, string name, string sourceCode);
 
-            protected IFunctionBuilder CreateFunction(Type delegateType, string name, MethodAttributes attributes)
+            protected IFunctionBuilder CreateFunction(Type delegateType, string name, MethodAttributes attributes, string sourceCode)
             {
                 var invoke = delegateType.GetMethod("Invoke");
 
-                var result = new FunctionBuilder(
-                    this,
-                    ((System.Reflection.Emit.TypeBuilder)Type).DefineMethod(
-                        GetFunctionName(name),
-                        attributes,
-                        invoke.ReturnType,
-                        invoke.GetParameters().Select(p => p.ParameterType).ToArray()
-                    )
+                var method = ((System.Reflection.Emit.TypeBuilder)Type).DefineMethod(
+                    GetFunctionName(name),
+                    attributes,
+                    invoke.ReturnType,
+                    invoke.GetParameters().Select(p => p.ParameterType).ToArray()
                 );
+
+                if (sourceCode != null)
+                {
+                    method.SetCustomAttribute(new CustomAttributeBuilder(
+                        _functionSourceAttributeConstructor,
+                        new object[] { sourceCode }
+                    ));
+                }
+
+                var result = new FunctionBuilder(this, method);
 
                 _functions.Add(result);
 
@@ -203,9 +212,9 @@ namespace Jint.Compiler
                 Closures = new ReadOnlyCollection<IClosureBuilder>(_closures);
             }
 
-            public override IFunctionBuilder CreateFunction(Type delegateType, string name)
+            public override IFunctionBuilder CreateFunction(Type delegateType, string name, string sourceCode)
             {
-                return CreateFunction(delegateType, name, MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Static);
+                return CreateFunction(delegateType, name, MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Static, sourceCode);
             }
 
             public override void Commit()
@@ -300,9 +309,9 @@ namespace Jint.Compiler
                 ParentFields = ReadOnlyKeyedCollection.Create(_parentFields);
             }
 
-            public override IFunctionBuilder CreateFunction(Type delegateType, string name)
+            public override IFunctionBuilder CreateFunction(Type delegateType, string name, string sourceCode)
             {
-                return CreateFunction(delegateType, name, MethodAttributes.Public | MethodAttributes.HideBySig);
+                return CreateFunction(delegateType, name, MethodAttributes.Public | MethodAttributes.HideBySig, sourceCode);
             }
 
             public IClosureFieldBuilder CreateClosureFieldBuilder(BoundClosureField field)

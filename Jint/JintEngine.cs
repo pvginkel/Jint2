@@ -538,10 +538,9 @@ namespace Jint
                 function.Name,
                 (JsFunction)Delegate.CreateDelegate(
                     typeof(JsFunction),
-                    new CodeGenerator(this, scriptBuilder).BuildFunction(boundFunction)
+                    new CodeGenerator(this, scriptBuilder).BuildFunction(boundFunction, sourceCode)
                 ),
-                function.Parameters.ToArray(),
-                sourceCode
+                function.Parameters.ToArray()
             );
         }
 

@@ -10,6 +10,6 @@ namespace Jint.Compiler
         Type Type { get; }
         IList<IFunctionBuilder> Functions { get; }
 
-        IFunctionBuilder CreateFunction(Type delegateType, string name);
+        IFunctionBuilder CreateFunction(Type delegateType, string name, string sourceCode);
     }
 }

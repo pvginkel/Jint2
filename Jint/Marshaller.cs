@@ -296,10 +296,10 @@ namespace Jint
 
             return new MarshalAccessorProperty(
                 Global.ResolveIdentifier(property.Name),
-                Global.CreateFunction(null, getter, 0, null),
+                Global.CreateFunction(null, getter, 0),
                 setter == null
                     ? null
-                    : Global.CreateFunction(null, setter, 1, null),
+                    : Global.CreateFunction(null, setter, 1),
                 attributes
             );
         }
@@ -316,8 +316,8 @@ namespace Jint
         {
             return new MarshalAccessorProperty(
                 Global.ResolveIdentifier(field.Name),
-                Global.CreateFunction(null, ProxyHelper.WrapGetField(field), 0, null),
-                Global.CreateFunction(null, ProxyHelper.WrapSetField(field), 1, null),
+                Global.CreateFunction(null, ProxyHelper.WrapGetField(field), 0),
+                Global.CreateFunction(null, ProxyHelper.WrapSetField(field), 1),
                 PropertyAttributes.None
             );
         }

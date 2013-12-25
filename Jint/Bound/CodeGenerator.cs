@@ -45,7 +45,7 @@ namespace Jint.Bound
             if (program == null)
                 throw new ArgumentNullException("program");
 
-            var method = _scriptBuilder.CreateFunction(typeof(JsMain), MainMethodName);
+            var method = _scriptBuilder.CreateFunction(typeof(JsMain), MainMethodName, null);
 
             Debug.Assert(program.Body.Closure == null);
 
@@ -76,9 +76,9 @@ namespace Jint.Bound
             return result;
         }
 
-        public MethodInfo BuildFunction(BoundFunction function)
+        public MethodInfo BuildFunction(BoundFunction function, string sourceCode)
         {
-            var method = DeclareFunction(function, null);
+            var method = DeclareFunction(function, _scriptBuilder, sourceCode);
 
             _scriptBuilder.Commit();
 
@@ -752,7 +752,12 @@ namespace Jint.Bound
             if (_scope.Closure != null)
                 typeBuilder = _scope.Closure.Builder;
 
-            var function = DeclareFunction(node.Function, typeBuilder);
+            var location = node.Function.Location;
+            string sourceCode = null;
+            if (location != null)
+                sourceCode = location.GetSourceCode();
+
+            var function = DeclareFunction(node.Function, typeBuilder, sourceCode);
 
             var array = IL.EmitArray(node.Function.Parameters);
 
@@ -772,17 +777,14 @@ namespace Jint.Bound
 
             IL.Emit(OpCodes.Ldloc, array);
 
-            // TODO: Emit the source code.
-            IL.EmitConstant("");
-
             IL.EmitCall(_runtimeCreateFunction);
 
             return BoundValueType.Object;
         }
 
-        private IFunctionBuilder DeclareFunction(BoundFunction function, ITypeBuilder typeBuilder)
+        private IFunctionBuilder DeclareFunction(BoundFunction function, ITypeBuilder typeBuilder, string sourceCode)
         {
-            var method = typeBuilder.CreateFunction(typeof(JsFunction), function.Name);
+            var method = typeBuilder.CreateFunction(typeof(JsFunction), function.Name, sourceCode);
 
             var argumentsLocal = (BoundVariable)function.Body.Locals.SingleOrDefault(p => p.Name == "arguments");
             if (argumentsLocal == null)

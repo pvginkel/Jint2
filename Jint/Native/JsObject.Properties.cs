@@ -371,7 +371,7 @@ namespace Jint.Native
             EnsurePropertyStore();
             PropertyStore.DefineProperty(
                 index,
-                Global.CreateFunction(Global.GetIdentifier(index), @delegate, argumentCount, null),
+                Global.CreateFunction(Global.GetIdentifier(index), @delegate, argumentCount),
                 attributes
             );
         }
@@ -397,11 +397,11 @@ namespace Jint.Native
         {
             var getterObject =
                 getter != null
-                    ? Global.CreateFunction(null, getter, 0, null)
+                    ? Global.CreateFunction(null, getter, 0)
                     : null;
             var setterObject =
                 setter != null
-                    ? Global.CreateFunction(null, setter, 1, null)
+                    ? Global.CreateFunction(null, setter, 1)
                     : null;
 
             DefineAccessor(index, getterObject, setterObject, attributes);

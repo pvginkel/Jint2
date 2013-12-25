@@ -63,12 +63,7 @@ namespace Jint.Native
             var result = CreateObject(
                 null,
                 functionPrototype,
-                new JsDelegate(
-                    "Function",
-                    FunctionFunctions.Constructor,
-                    0,
-                    null
-                )
+                new JsDelegate("Function", FunctionFunctions.Constructor, 0)
             );
 
             result.SetClass(JsNames.ClassFunction);

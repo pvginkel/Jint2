@@ -36,8 +36,7 @@ namespace Jint.Native.Interop
             return global.CreateFunction(
                 method.Name,
                 WrapMethod(method),
-                method.GetParameters().Length,
-                null
+                method.GetParameters().Length
             );
         }
 
@@ -213,8 +212,7 @@ namespace Jint.Native.Interop
             return global.CreateFunction(
                 @delegate.Method.Name,
                 WrapDelegate(@delegate),
-                @delegate.Method.GetParameters().Length,
-                null
+                @delegate.Method.GetParameters().Length
             );
         }
 

@@ -201,8 +201,7 @@ namespace Jint.Native.Interop
             return global.CreateFunction(
                 methods[0].Name,
                 new NativeMethodOverload(global, methods).Execute,
-                methods[0].GetParameters().Length,
-                null
+                methods[0].GetParameters().Length
             );
         }
 

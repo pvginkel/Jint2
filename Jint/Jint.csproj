@@ -173,6 +173,7 @@
     <Compile Include="Native\Interop\NativeFactory.cs" />
     <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\IPropertyStore.cs" />
+    <Compile Include="Native\JsFunctionSourceAttribute.cs" />
     <Compile Include="Native\JsGenericArguments.cs" />
     <Compile Include="Native\JsMain.cs" />
     <Compile Include="Native\JsValue.cs" />
