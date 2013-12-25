@@ -226,9 +226,9 @@ namespace Jint.Bound
         {
             // Create the break and continue targets and push them onto the stack.
 
-            var breakTarget = IL.DefineLabel(GetLabel(node) ?? "<>break");
+            var breakTarget = IL.DefineLabel(GetLabel(node));
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = IL.DefineLabel(GetLabel(node) ?? "<>continue");
+            var continueTarget = IL.DefineLabel(GetLabel(node));
             _scope.ContinueTargets.Push(continueTarget);
 
             // At the beginning of every iteration, perform the test.
@@ -266,9 +266,9 @@ namespace Jint.Bound
         {
             // Push the break and continue targets onto the stack.
 
-            var breakTarget = IL.DefineLabel(GetLabel(node) ?? "<>break");
+            var breakTarget = IL.DefineLabel(GetLabel(node));
             _scope.BreakTargets.Push(breakTarget);
-            var continueTarget = IL.DefineLabel(GetLabel(node) ?? "<>continue");
+            var continueTarget = IL.DefineLabel(GetLabel(node));
             _scope.ContinueTargets.Push(continueTarget);
 
             // At the start of our block, we perform any initialization.

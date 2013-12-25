@@ -13,9 +13,6 @@ namespace Jint.Support
 
         public NamedLabel(string name, Label label)
         {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
             Name = name;
             Label = label;
         }
