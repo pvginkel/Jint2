@@ -45,11 +45,7 @@ namespace Jint.Bound
             if (program == null)
                 throw new ArgumentNullException("program");
 
-            var method = BuildMethod(
-                typeof(JsMain),
-                null,
-                MainMethodName
-            );
+            var method = _scriptBuilder.CreateFunction(typeof(JsMain), MainMethodName);
 
             Debug.Assert(program.Body.Closure == null);
 
@@ -87,14 +83,6 @@ namespace Jint.Bound
             _scriptBuilder.Commit();
 
             return method.Method;
-        }
-
-        private IFunctionBuilder BuildMethod(Type delegateType, ITypeBuilder typeBuilder, string name)
-        {
-            return (typeBuilder ?? _scriptBuilder).CreateFunction(
-                delegateType,
-                name
-            );
         }
 
         private void EmitBox(BoundValueType type)
@@ -794,11 +782,7 @@ namespace Jint.Bound
 
         private IFunctionBuilder DeclareFunction(BoundFunction function, ITypeBuilder typeBuilder)
         {
-            var method = BuildMethod(
-                typeof(JsFunction),
-                typeBuilder,
-                function.Name
-            );
+            var method = typeBuilder.CreateFunction(typeof(JsFunction), function.Name);
 
             var argumentsLocal = (BoundVariable)function.Body.Locals.SingleOrDefault(p => p.Name == "arguments");
             if (argumentsLocal == null)

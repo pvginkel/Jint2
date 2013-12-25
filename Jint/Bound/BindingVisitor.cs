@@ -11,9 +11,9 @@ namespace Jint.Bound
     internal partial class BindingVisitor : ISyntaxVisitor<BoundNode>
     {
         private readonly IScriptBuilder _scriptBuilder;
-        private readonly Dictionary<SyntaxNode, string> _labels = new Dictionary<SyntaxNode, string>();
         private readonly List<BoundFunction> _functions = new List<BoundFunction>();
         private readonly Dictionary<Variable, BoundTemporary> _withTemporaries = new Dictionary<Variable, BoundTemporary>();
+        private readonly Dictionary<FunctionSyntax, string> _functionNameHints = new Dictionary<FunctionSyntax, string>();
 
         private Scope _scope;
 
@@ -64,21 +64,11 @@ namespace Jint.Bound
                 // initialized to.
 
                 var identifier = syntax.Left as IdentifierSyntax;
-                var right = syntax.Right;
-
                 if (identifier != null)
                 {
-                    var function = right as FunctionSyntax;
+                    var function = syntax.Right as FunctionSyntax;
                     if (function != null && function.Name == null)
-                    {
-                        right = new FunctionSyntax(
-                            identifier.Name,
-                            function.Parameters,
-                            function.Body,
-                            function.Target,
-                            function.Location
-                        );
-                    }
+                        _functionNameHints.Add(function, identifier.Name);
                 }
 
                 var builder = new BlockBuilder(this);
@@ -87,7 +77,7 @@ namespace Jint.Bound
 
                 builder.Add(new BoundSetVariable(
                     temporary,
-                    BuildExpression(right),
+                    BuildExpression(syntax.Right),
                     SourceLocation.Missing
                 ));
 
@@ -351,8 +341,12 @@ namespace Jint.Bound
         {
             _scope = new Scope(_scope, syntax.Body, _scriptBuilder);
 
+            string name = syntax.Name;
+            if (name == null)
+                _functionNameHints.TryGetValue(syntax, out name);
+
             var function = new BoundFunction(
-                syntax.Name,
+                name,
                 syntax.Parameters.ToReadOnlyArray(),
                 VisitBody(syntax.Body),
                 syntax.Location
@@ -846,6 +840,10 @@ namespace Jint.Bound
             {
                 if (declaration.Expression != null)
                 {
+                    var function = declaration.Expression as FunctionSyntax;
+                    if (function != null && function.Name == null)
+                        _functionNameHints.Add(function, declaration.Identifier);
+
                     hadOne = true;
                     builder.Add(BuildSet(
                         declaration.Target,
