@@ -55,8 +55,6 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeGeneration\CodeGenerationFixture.cs" />
-    <Compile Include="CodeGeneration\CodeGenerationFixture.Support.cs" />
     <Compile Include="DefiniteAssignment\DefiniteAssignmentFixture.cs" />
     <Compile Include="DefiniteAssignment\DefiniteAssignmentFixture.Support.cs" />
     <Compile Include="FastPropertyStoreFixture\Fixture.cs" />

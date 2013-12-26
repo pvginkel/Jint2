@@ -232,7 +232,7 @@ namespace Jint.Native
         }
 
         // 13.2.2
-        public object Construct(JintRuntime runtime, object[] arguments)
+        public object Construct(JintRuntime runtime, params object[] arguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
@@ -248,7 +248,7 @@ namespace Jint.Native
             return boxedThis;
         }
 
-        public object Execute(JintRuntime runtime, object @this, object[] arguments)
+        public object Execute(JintRuntime runtime, object @this, params object[] arguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");

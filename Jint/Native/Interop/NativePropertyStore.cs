@@ -39,10 +39,24 @@ namespace Jint.Native.Interop
 
         public override object GetOwnPropertyRaw(int index)
         {
-            if (index >= 0)
-                return GetOwnPropertyRaw(_global.GetIdentifier(index));
+            // We don't make a distinction between member and indexer
+            // getters/setters. Because of this, we have to guess what's trying
+            // to be accomplished here. What we do is check whether the base
+            // store or prototype store has the property. If not, we return our
+            // own index.
 
-            return base.GetOwnPropertyRaw(index);
+            var result = base.GetOwnPropertyRaw(index);
+            if (result != null)
+                return result;
+
+            if (!BaseStore.Owner.IsPrototypeNull)
+            {
+                result = BaseStore.Owner.Prototype.GetOwnPropertyRaw(index);
+                if (result != null)
+                    return result;
+            }
+
+            return GetOwnPropertyRaw(_global.GetIdentifier(index));
         }
 
         public override object GetOwnPropertyRaw(object index)
@@ -56,10 +70,7 @@ namespace Jint.Native.Interop
 
         public override void SetPropertyValue(int index, object value)
         {
-            if (index >= 0)
-                SetPropertyValue(_global.GetIdentifier(index), value);
-            else
-                base.SetPropertyValue(index, value);
+            SetPropertyValue(_global.GetIdentifier(index), value);
         }
 
         public override void SetPropertyValue(object index, object value)

@@ -1875,7 +1875,7 @@ finallyClause returns [FinallyClause value]
 
 // $<	Function Definition (13)
 
-functionDeclaration returns [FunctionSyntax value]
+functionDeclaration returns [SyntaxNode value]
 @init {
     var start = input.LT(1);
     string name;
@@ -1883,13 +1883,15 @@ functionDeclaration returns [FunctionSyntax value]
     BodySyntax body;
 }
 @after {
-    $value = new FunctionSyntax(
+    _currentBody.DeclaredFunctions.Add(new FunctionSyntax(
         name,
         parameters,
         body,
         _currentBody.DeclaredVariables.AddOrGet(name, true),
         GetLocation(start, input.LT(-1))
-    );
+    ));
+
+    $value = new EmptySyntax();
 }
 	:
         FUNCTION id=Identifier

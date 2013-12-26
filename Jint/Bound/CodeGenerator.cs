@@ -940,7 +940,7 @@ namespace Jint.Bound
                 {
                     var argument = arguments[i];
 
-                    if (!argument.IsRef || !argument.IsAssignable())
+                    if (!argument.IsRef || !argument.Expression.IsAssignable())
                         continue;
 
                     var valueExpression = new BoundEmitExpression(
