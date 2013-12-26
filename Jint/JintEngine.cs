@@ -427,9 +427,12 @@ namespace Jint
 
                 program.Accept(bindingVisitor);
 
-                var boundProgram = SquelchPhase.Perform(bindingVisitor.Program);
-                DefiniteAssignmentPhase.Perform(boundProgram);
+                var boundProgram = bindingVisitor.Program;
+                var resultExpressions = DefiniteAssignmentPhase.Perform(boundProgram);
+                boundProgram = ResultRewriterPhase.Perform(boundProgram, resultExpressions);
                 TypeMarkerPhase.Perform(boundProgram);
+
+                boundProgram = SquelchPhase.Perform(boundProgram);
 
                 PrintBound(boundProgram);
 

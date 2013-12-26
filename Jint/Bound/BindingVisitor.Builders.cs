@@ -429,59 +429,6 @@ namespace Jint.Bound
                         continue;
                     }
 
-                    var statement = node as BoundExpressionStatement;
-                    if (statement != null)
-                    {
-                        var expressionBlock = statement.Expression as BoundExpressionBlock;
-                        if (expressionBlock != null)
-                        {
-                            block = expressionBlock.Body;
-
-                            if (_temporaries == null)
-                                _temporaries = new ReadOnlyArray<BoundTemporary>.Builder();
-
-                            // If the last statement of the expression block is
-                            // the set of the result temporary, we can dump the
-                            // temporary and replace the set variable with an
-                            // expression statement. This occurs e.g. on a
-                            // method call where the result isn't assigned.
-
-                            var setVariable = block.Nodes[block.Nodes.Count - 1] as BoundSetVariable;
-                            if (
-                                setVariable != null &&
-                                setVariable.Variable == expressionBlock.Result
-                            )
-                            {
-                                if (statement.Location != SourceLocation.Missing)
-                                    nodes.Add(new BoundEmpty(statement.Location));
-
-                                for (int i = 0; i < block.Nodes.Count - 1; i++)
-                                {
-                                    nodes.Add(block.Nodes[i]);
-                                }
-
-                                Debug.Assert(!(setVariable.Value is BoundGetVariable));
-
-                                nodes.Add(new BoundExpressionStatement(
-                                    setVariable.Value,
-                                    SourceLocation.Missing
-                                ));
-
-                                foreach (var temporary in block.Temporaries)
-                                {
-                                    if (temporary != setVariable.Variable)
-                                        _temporaries.Add(temporary);
-                                }
-                            }
-                            else
-                            {
-                                _temporaries.AddRange(block.Temporaries);
-                                nodes.AddRange(block.Nodes);
-                            }
-                            continue;
-                        }
-                    }
-
                     // Otherwise, we keep the node unchanged.
                     nodes.Add(node);
                 }

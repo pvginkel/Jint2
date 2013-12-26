@@ -7,11 +7,11 @@ namespace Jint.Bound
 {
     internal class BoundTreeRewriter : BoundTreeVisitor<BoundNode>
     {
-        public virtual T Visit<T>(T node)
-            where T : BoundNode
+        public virtual BoundNode Visit(BoundNode node)
         {
             if (node != null)
-                return (T)node.Accept(this);
+                return node.Accept(this);
+
             return null;
         }
 
@@ -28,7 +28,7 @@ namespace Jint.Bound
                 if (updated != item)
                     changed = true;
 
-                result.Add(updated);
+                result.Add((T)updated);
             }
 
             if (changed)
@@ -41,8 +41,8 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Operation,
-                Visit(node.Left),
-                Visit(node.Right)
+                (BoundExpression)Visit(node.Left),
+                (BoundExpression)Visit(node.Right)
             );
         }
 
@@ -58,7 +58,7 @@ namespace Jint.Bound
         public override BoundNode VisitBody(BoundBody node)
         {
             return node.Update(
-                Visit(node.Body),
+                (BoundBlock)Visit(node.Body),
                 node.Closure,
                 node.ScopedClosure,
                 node.Arguments,
@@ -78,8 +78,8 @@ namespace Jint.Bound
         public override BoundNode VisitCall(BoundCall node)
         {
             return node.Update(
-                Visit(node.Target),
-                Visit(node.Method),
+                (BoundExpression)Visit(node.Target),
+                (BoundExpression)Visit(node.Method),
                 VisitList(node.Arguments),
                 VisitList(node.Generics)
             );
@@ -88,7 +88,7 @@ namespace Jint.Bound
         public override BoundNode VisitCallArgument(BoundCallArgument node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 node.IsRef
             );
         }
@@ -97,7 +97,7 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Target,
-                Visit(node.Body)
+                (BoundBlock)Visit(node.Body)
             );
         }
 
@@ -126,16 +126,16 @@ namespace Jint.Bound
         public override BoundNode VisitDeleteMember(BoundDeleteMember node)
         {
             return node.Update(
-                Visit(node.Expression),
-                Visit(node.Index)
+                (BoundExpression)Visit(node.Expression),
+                (BoundExpression)Visit(node.Index)
             );
         }
 
         public override BoundNode VisitDoWhile(BoundDoWhile node)
         {
             return node.Update(
-                Visit(node.Test),
-                Visit(node.Body),
+                (BoundExpression)Visit(node.Test),
+                (BoundBlock)Visit(node.Body),
                 node.Location
             );
         }
@@ -151,14 +151,14 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Result,
-                Visit(node.Body)
+                (BoundBlock)Visit(node.Body)
             );
         }
 
         public override BoundNode VisitExpressionStatement(BoundExpressionStatement node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 node.Location
             );
         }
@@ -166,17 +166,17 @@ namespace Jint.Bound
         public override BoundNode VisitFinally(BoundFinally node)
         {
             return node.Update(
-                Visit(node.Body)
+                (BoundBlock)Visit(node.Body)
             );
         }
 
         public override BoundNode VisitFor(BoundFor node)
         {
             return node.Update(
-                Visit(node.Initialization),
-                Visit(node.Test),
-                Visit(node.Increment),
-                Visit(node.Body),
+                (BoundBlock)Visit(node.Initialization),
+                (BoundExpression)Visit(node.Test),
+                (BoundBlock)Visit(node.Increment),
+                (BoundBlock)Visit(node.Body),
                 node.Location
             );
         }
@@ -185,8 +185,8 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Target,
-                Visit(node.Expression),
-                Visit(node.Body),
+                (BoundExpression)Visit(node.Expression),
+                (BoundBlock)Visit(node.Body),
                 node.Location
             );
         }
@@ -194,8 +194,8 @@ namespace Jint.Bound
         public override BoundNode VisitGetMember(BoundGetMember node)
         {
             return node.Update(
-                Visit(node.Expression),
-                Visit(node.Index)
+                (BoundExpression)Visit(node.Expression),
+                (BoundExpression)Visit(node.Index)
             );
         }
 
@@ -209,7 +209,7 @@ namespace Jint.Bound
         public override BoundNode VisitHasMember(BoundHasMember node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 node.Index
             );
         }
@@ -217,9 +217,9 @@ namespace Jint.Bound
         public override BoundNode VisitIf(BoundIf node)
         {
             return node.Update(
-                Visit(node.Test),
-                Visit(node.Then),
-                Visit(node.Else),
+                (BoundExpression)Visit(node.Test),
+                (BoundBlock)Visit(node.Then),
+                (BoundBlock)Visit(node.Else),
                 node.Location
             );
         }
@@ -228,7 +228,7 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Label,
-                Visit(node.Statement),
+                (BoundStatement)Visit(node.Statement),
                 node.Location
             );
         }
@@ -236,7 +236,7 @@ namespace Jint.Bound
         public override BoundNode VisitNew(BoundNew node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 VisitList(node.Arguments),
                 VisitList(node.Generics)
             );
@@ -260,7 +260,7 @@ namespace Jint.Bound
         public override BoundNode VisitReturn(BoundReturn node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 node.Location
             );
         }
@@ -268,10 +268,10 @@ namespace Jint.Bound
         public override BoundNode VisitSetAccessor(BoundSetAccessor node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 node.Name,
-                Visit(node.GetFunction),
-                Visit(node.SetFunction),
+                (BoundExpression)Visit(node.GetFunction),
+                (BoundExpression)Visit(node.SetFunction),
                 node.Location
             );
         }
@@ -279,9 +279,9 @@ namespace Jint.Bound
         public override BoundNode VisitSetMember(BoundSetMember node)
         {
             return node.Update(
-                Visit(node.Expression),
-                Visit(node.Index),
-                Visit(node.Value),
+                (BoundExpression)Visit(node.Expression),
+                (BoundExpression)Visit(node.Index),
+                (BoundExpression)Visit(node.Value),
                 node.Location
             );
         }
@@ -290,7 +290,7 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Variable,
-                Visit(node.Value),
+                (BoundExpression)Visit(node.Value),
                 node.Location
             );
         }
@@ -307,8 +307,8 @@ namespace Jint.Bound
         public override BoundNode VisitSwitchCase(BoundSwitchCase node)
         {
             return node.Update(
-                Visit(node.Expression),
-                Visit(node.Body),
+                (BoundExpression)Visit(node.Expression),
+                (BoundBlock)Visit(node.Body),
                 node.Location
             );
         }
@@ -316,7 +316,7 @@ namespace Jint.Bound
         public override BoundNode VisitThrow(BoundThrow node)
         {
             return node.Update(
-                Visit(node.Expression),
+                (BoundExpression)Visit(node.Expression),
                 node.Location
             );
         }
@@ -324,9 +324,9 @@ namespace Jint.Bound
         public override BoundNode VisitTry(BoundTry node)
         {
             return node.Update(
-                Visit(node.Try),
-                Visit(node.Catch),
-                Visit(node.Finally),
+                (BoundBlock)Visit(node.Try),
+                (BoundCatch)Visit(node.Catch),
+                (BoundFinally)Visit(node.Finally),
                 node.Location
             );
         }
@@ -335,15 +335,15 @@ namespace Jint.Bound
         {
             return node.Update(
                 node.Operation,
-                Visit(node.Operand)
+                (BoundExpression)Visit(node.Operand)
             );
         }
 
         public override BoundNode VisitWhile(BoundWhile node)
         {
             return node.Update(
-                Visit(node.Test),
-                Visit(node.Body),
+                (BoundExpression)Visit(node.Test),
+                (BoundBlock)Visit(node.Body),
                 node.Location
             );
         }

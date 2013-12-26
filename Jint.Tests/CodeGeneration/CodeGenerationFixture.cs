@@ -64,18 +64,12 @@ f();
         public void Dummy()
         {
             Test(
-                1,
+                9,
 @"
 function f() {
-    var i = 0;
-    var j = 0;
-    var k = 0;
-    var l = 0;
-    k++;
-    ++l;
-    return (i++) + (++j);
-};
-return f();
+    return 'hi';
+}
+f();
 "
             );
         }

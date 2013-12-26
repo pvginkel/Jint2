@@ -72,6 +72,7 @@
     <Compile Include="Fixtures\CommentsTests.cs" />
     <Compile Include="Fixtures\DeclarationTests.cs" />
     <Compile Include="Fixtures\EngineTests.cs" />
+    <Compile Include="Fixtures\EvalTests.cs" />
     <Compile Include="Fixtures\FixtureSupportClasses.cs" />
     <Compile Include="Fixtures\ParsingTests.cs" />
     <Compile Include="Fixtures\Json2.cs" />

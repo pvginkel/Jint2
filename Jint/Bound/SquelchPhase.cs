@@ -48,7 +48,7 @@ namespace Jint.Bound
 
             Validate(statistics);
 
-            node = new Rewriter(statistics).Visit(node);
+            node = (BoundBody)new Rewriter(statistics).Visit(node);
 
             return node;
         }
@@ -253,7 +253,7 @@ namespace Jint.Bound
                     resultStatistic.WriteState = WriteType.DoNotRemove;
 
                 // Rewrite the body.
-                var body = Visit(node.Body);
+                var body = (BoundBlock)Visit(node.Body);
 
                 // Check whether the result must be updated.
                 IBoundReadable result;
@@ -314,7 +314,7 @@ namespace Jint.Bound
                     var setVariable = statement as BoundSetVariable;
                     if (setVariable != null)
                     {
-                        setVariable = Visit(setVariable);
+                        setVariable = (BoundSetVariable)Visit(setVariable);
 
                         // If the set variable reduced to an assignment to itself,
                         // remove the set variable. This happens when the variable
@@ -332,7 +332,7 @@ namespace Jint.Bound
                             continue;
                     }
 
-                    nodes.Add(Visit(statement));
+                    nodes.Add((BoundStatement)Visit(statement));
                 }
 
                 // Return the new block.
@@ -354,7 +354,7 @@ namespace Jint.Bound
 
                 return node.Update(
                     variable,
-                    Visit(node.Value),
+                    (BoundExpression)Visit(node.Value),
                     node.Location
                 );
             }

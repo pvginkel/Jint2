@@ -54,8 +54,10 @@ namespace Jint.Bound
                 // we expect a small number of variables in this list and
                 // HashSet has a considerable memory overhead.
                 private List<BoundVariable> _assigned;
+                // The last expression in the branch.
 
                 public bool IsKilled { get; set; }
+                public BoundExpression[] Expressions { get; private set; }
 
                 public Branch(DefiniteAssignmentMarker manager, Branch baseBranch)
                 {
@@ -84,8 +86,40 @@ namespace Jint.Bound
                         if (branch._assigned != null)
                             MergeAssigned(branch._assigned);
 
+                        // And move the expressions.
+                        Expressions = branch.Expressions;
+
                         return;
                     }
+
+                    // If we don't have a single branch, we have to merge
+                    // the expressions from all branches.
+
+                    BoundExpression[] expressions = null;
+                    foreach (var branch in branches)
+                    {
+                        if (expressions == null)
+                        {
+                            // If we don't have expressions yet, just move them
+                            // from the branch.
+
+                            expressions = branch.Expressions;
+                        }
+                        else if (branch.Expressions != null)
+                        {
+                            // Otherwise, concatenate the two arrays.
+
+                            var a = expressions;
+                            var b = branch.Expressions;
+
+                            var result = new BoundExpression[a.Length + b.Length];
+                            Array.Copy(a, result, a.Length);
+                            Array.Copy(b, 0, result, a.Length, b.Length);
+                            expressions = result;
+                        }
+                    }
+
+                    Expressions = expressions;
 
                     // If we have an empty branch, we don't have to do
                     // any work, because nothing will be definitely assigned.
@@ -190,6 +224,11 @@ namespace Jint.Bound
                         _assigned = new List<BoundVariable>();
 
                     _assigned.Add(variable);
+                }
+
+                public void MarkExpression(BoundExpression expression)
+                {
+                    Expressions = new[] { expression };
                 }
             }
         }

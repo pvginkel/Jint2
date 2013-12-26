@@ -116,6 +116,7 @@
     <Compile Include="Bound\BoundTypeManager.DefiniteAssignmentMarker.cs" />
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
     <Compile Include="Bound\BoundTypeKind.cs" />
+    <Compile Include="Bound\ResultRewriterPhase.cs" />
     <Compile Include="Compiler\ClosureParentField.cs" />
     <Compile Include="Compiler\IFunctionBuilder.cs" />
     <Compile Include="Compiler\IScriptBuilder.cs" />

@@ -9,9 +9,9 @@ namespace Jint.Bound
 {
     internal static class DefiniteAssignmentPhase
     {
-        public static void Perform(BoundProgram node)
+        public static IList<BoundExpression> Perform(BoundProgram node)
         {
-            Perform(node.Body, false, null);
+            return Perform(node.Body, false, null);
         }
 
         public static void Perform(BoundFunction node)
@@ -19,9 +19,13 @@ namespace Jint.Bound
             Perform(node.Body, true, null);
         }
 
-        private static void Perform(BoundBody node, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
+        private static BoundExpression[] Perform(BoundBody node, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
         {
-            new Marker(node.TypeManager, isFunction, parentBranch).Visit(node);
+            var marker = new Marker(node.TypeManager, isFunction, parentBranch);
+
+            marker.Visit(node);
+
+            return marker.ResultExpressions;
         }
 
         private class Marker : BoundTreeWalker
@@ -32,6 +36,8 @@ namespace Jint.Bound
             private readonly List<Block> _blocks = new List<Block>();
             private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
             private BoundTypeManager.DefiniteAssignmentMarker.Branch _branch;
+
+            public BoundExpression[] ResultExpressions { get; private set; }
 
             public Marker(BoundTypeManager typeManager, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
             {
@@ -183,6 +189,18 @@ namespace Jint.Bound
 
                     PopBlock(block);
 
+                    ResultExpressions = _branch.Expressions;
+
+                    // If the last statement of the body is a return, the return
+                    // provides the result expression and we don't have to track
+                    // the result expressions.
+
+                    if (
+                        node.Body.Nodes.Count == 0 ||
+                        node.Body.Nodes[node.Body.Nodes.Count - 1] is BoundReturn
+                    )
+                        ResultExpressions = null;
+
                     _branch.IsKilled = true;
                     _branch = null;
                 }
@@ -193,6 +211,14 @@ namespace Jint.Bound
                 base.VisitSetVariable(node);
 
                 MarkWrite(node.Variable);
+                _branch.MarkExpression(node.Value);
+            }
+
+            public override void VisitExpressionStatement(BoundExpressionStatement node)
+            {
+                base.VisitExpressionStatement(node);
+
+                _branch.MarkExpression(node.Expression);
             }
 
             public override void VisitGetVariable(BoundGetVariable node)
