@@ -117,7 +117,7 @@ namespace Jint.Benchmarks.Suites
             {
                 // Higher is better.
 
-                return new TestRelativeResult(((TestResult)other).Score / Score);
+                return new TestRelativeResult(Score / ((TestResult)other).Score);
             }
         }
     }

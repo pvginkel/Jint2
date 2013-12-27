@@ -39,6 +39,9 @@
     <Reference Include="IronJS">
       <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\IronJS.dll</HintPath>
     </Reference>
+    <Reference Include="Jurassic">
+      <HintPath>..\packages\Jurassic.2.1.1\lib\Jurassic.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Dynamic">
       <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\Microsoft.Dynamic.dll</HintPath>
       <Aliases>ironjs</Aliases>
@@ -69,6 +72,7 @@
     <Compile Include="Engines\IEngine.cs" />
     <Compile Include="Engines\IronJsEngine.cs" />
     <Compile Include="Engines\JintEngine.cs" />
+    <Compile Include="Engines\JurassicEngine.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConsoleEx.cs" />

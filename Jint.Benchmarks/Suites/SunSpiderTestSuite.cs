@@ -129,7 +129,7 @@ namespace Jint.Benchmarks.Suites
 
                 // Lower is better.
 
-                return new TestRelativeResult(thisMean / otherMean);
+                return new TestRelativeResult(otherMean / thisMean);
             }
         }
     }

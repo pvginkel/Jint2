@@ -40,7 +40,7 @@ namespace Jint.Benchmarks
 
             var resultSets = new List<Dictionary<string, ITestResult>>();
 
-            var engines = new IEngine[] { new IronJsEngine(), new Engines.JintEngine() };
+            var engines = new IEngine[] { new Engines.JintEngine(), new IronJsEngine(), new JurassicEngine() };
 
             foreach (var engine in engines)
             {
