@@ -283,7 +283,7 @@ namespace Jint.Parser
                 case "+=": return AssignmentOperator.Add;
                 case "-=": return AssignmentOperator.Subtract;
                 case "*=": return AssignmentOperator.Multiply;
-                case "\\%=": return AssignmentOperator.Modulo;
+                case "%=": return AssignmentOperator.Modulo;
                 case "<<=": return AssignmentOperator.LeftShift;
                 case ">>=": return AssignmentOperator.RightShift;
                 case ">>>=": return AssignmentOperator.UnsignedRightShift;

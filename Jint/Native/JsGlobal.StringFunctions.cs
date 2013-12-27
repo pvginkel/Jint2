@@ -294,61 +294,82 @@ namespace Jint.Native
 
                 if (JsValue.IsFunction(replaceValue))
                 {
-                    result = regexp.Regex.Replace(
-                        source,
-                        m =>
-                        {
-                            var replaceParameters = new List<object>();
-                            if (!regexp.IsGlobal)
-                                regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
-
-                            replaceParameters.Add(m.Value);
-
-                            for (int i = 1; i < m.Groups.Count; i++)
+                    if (lastIndex >= source.Length)
+                    {
+                        result = String.Empty;
+                    }
+                    else
+                    {
+                        result = regexp.Regex.Replace(
+                            source,
+                            m =>
                             {
-                                replaceParameters.Add(
-                                    m.Groups[i].Success
-                                    ? (object)m.Groups[i].Value
-                                    : JsUndefined.Instance
-                                );
-                            }
+                                var replaceParameters = new List<object>();
+                                if (!regexp.IsGlobal)
+                                    regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
 
-                            replaceParameters.Add((double)m.Index);
-                            replaceParameters.Add(source);
+                                replaceParameters.Add(m.Value);
 
-                            return JsValue.ToString(((JsObject)replaceValue).Execute(
-                                runtime,
-                                runtime.GlobalScope,
-                                replaceParameters.ToArray()
-                            ));
-                        },
-                        count,
-                        lastIndex
+                                for (int i = 1; i < m.Groups.Count; i++)
+                                {
+                                    replaceParameters.Add(
+                                        m.Groups[i].Success
+                                        ? (object)m.Groups[i].Value
+                                        : JsUndefined.Instance
+                                    );
+                                }
+
+                                replaceParameters.Add((double)m.Index);
+                                replaceParameters.Add(source);
+
+                                return JsValue.ToString(((JsObject)replaceValue).Execute(
+                                    runtime,
+                                    runtime.GlobalScope,
+                                    replaceParameters.ToArray()
+                                ));
+                            },
+                            count,
+                            lastIndex
                         );
+                    }
                 }
                 else
                 {
-                    string value = JsValue.ToString(replaceValue);
+                    source = JsValue.ToString(@this);
 
-                    result = regexp.Regex.Replace(
-                        JsValue.ToString(@this),
-                        m =>
-                        {
-                            if (!regexp.IsGlobal)
-                                regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
+                    if (lastIndex >= source.Length)
+                    {
+                        result = String.Empty;
+                    }
+                    else
+                    {
+                        string value = JsValue.ToString(replaceValue);
 
-                            string after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
-                            return EvaluateReplacePattern(
-                                m.Value,
-                                source.Substring(0, m.Index),
-                                after,
-                                value,
-                                m.Groups
+                        result = regexp.Regex.Replace(
+                            source,
+                            m =>
+                            {
+                                if (!regexp.IsGlobal)
+                                    regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
+
+                                string after;
+                                if (source.Length > 0)
+                                    after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
+                                else
+                                    after = String.Empty;
+
+                                return EvaluateReplacePattern(
+                                    m.Value,
+                                    source.Substring(0, m.Index),
+                                    after,
+                                    value,
+                                    m.Groups
                                 );
-                        },
-                        count,
-                        lastIndex
+                            },
+                            count,
+                            lastIndex
                         );
+                    }
                 }
 
                 return result;

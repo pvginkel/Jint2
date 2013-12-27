@@ -169,10 +169,19 @@ namespace Jint.Compiler
 
             for (int i = syntax.Parameters.Count - 1; i >= 0; i--)
             {
-                var variable = body.DeclaredVariables.AddOrGet(syntax.Parameters[i], i);
+                // When a parameter is also declared as a local, we remove the
+                // local and reset it to a parameter.
 
-                if (variable.Type == VariableType.Unknown)
-                    variable.Type = VariableType.Parameter;
+                Variable variable;
+                if (body.DeclaredVariables.TryGetValue(syntax.Parameters[i], out variable))
+                {
+                    if (variable.Index < 0)
+                        body.DeclaredVariables.Remove(syntax.Parameters[i]);
+                }
+
+                variable = body.DeclaredVariables.AddOrGet(syntax.Parameters[i], i);
+
+                variable.Type = VariableType.Parameter;
             }
 
             // Mark the rest of the declared variables as locals.

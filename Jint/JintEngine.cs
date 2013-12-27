@@ -459,7 +459,8 @@ namespace Jint
             var bodies = new List<BoundBody> { program.Body };
             bodies.AddRange(functions.Select(p => p.Body));
 
-            using (var writer = File.CreateText("Bound Dump.txt"))
+            using (var stream = File.Create("Bound Dump.txt"))
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
             {
                 for (int i = 0; i < bodies.Count; i++)
                 {

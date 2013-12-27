@@ -67,6 +67,10 @@ namespace Jint.Bound
 
             EmitReturn(new BoundReturn(null, SourceLocation.Missing));
 
+            // Emit the exceptional return block if we need it.
+
+            EmitExceptionalReturn();
+
             _scriptBuilder.Commit();
 
             var result = (Func<JintRuntime, object>)Delegate.CreateDelegate(
@@ -75,6 +79,17 @@ namespace Jint.Bound
             );
 
             return result;
+        }
+
+        private void EmitExceptionalReturn()
+        {
+            var exceptionalReturn = _scope.ExceptionalReturn;
+            if (exceptionalReturn == null)
+                return;
+
+            IL.MarkLabel(exceptionalReturn.Label);
+            IL.Emit(OpCodes.Ldloc, exceptionalReturn.Local);
+            IL.Emit(OpCodes.Ret);
         }
 
         public MethodInfo BuildFunction(BoundFunction function, string sourceCode)
@@ -324,6 +339,8 @@ namespace Jint.Bound
 
         private void EmitTry(BoundTry node)
         {
+            _scope.EntryTryCatch();
+
             IL.BeginExceptionBlock();
 
             EmitStatement(node.Try);
@@ -377,6 +394,8 @@ namespace Jint.Bound
             }
 
             IL.EndExceptionBlock();
+
+            _scope.LeaveTryCatch();
         }
 
         private void EmitSetAccessor(BoundSetAccessor node)
@@ -759,7 +778,18 @@ namespace Jint.Bound
             var expression = node.Expression ?? new BoundGetVariable(BoundMagicVariable.Undefined);
 
             EmitBox(EmitExpression(expression));
-            IL.Emit(OpCodes.Ret);
+
+            if (_scope.InTryCatch)
+            {
+                var exceptionalReturn = _scope.GetExceptionalReturn();
+
+                IL.Emit(OpCodes.Stloc, exceptionalReturn.Local);
+                IL.Emit(OpCodes.Leave, exceptionalReturn.Label);
+            }
+            else
+            {
+                IL.Emit(OpCodes.Ret);
+            }
         }
 
         private void EmitExpressions(IEnumerable<BoundExpression> nodes)
@@ -1156,6 +1186,10 @@ namespace Jint.Bound
             // Ensure that we return something.
 
             EmitReturn(new BoundReturn(null, SourceLocation.Missing));
+
+            // Emit the exceptional return block if we need it.
+
+            EmitExceptionalReturn();
 
             // Put a debug location at the end of the function.
 

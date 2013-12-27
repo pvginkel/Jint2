@@ -95,14 +95,13 @@ namespace Jint.Native
 
         public JsObject CreateRegExp(string pattern, string options)
         {
-            return (JsObject)RegExpClass.Construct(
-                _runtime,
-                new[]
-                {
-                    pattern,
-                    (object)options
-                }
-            );
+            object[] arguments;
+            if (options != null)
+                arguments = new object[] { pattern, options };
+            else
+                arguments = new object[] { pattern };
+
+            return (JsObject)RegExpClass.Construct(_runtime, arguments);
         }
 
         public JsObject CreateArray()

@@ -10,6 +10,9 @@ namespace Jint.Parser
     internal static class ES3Util
     {
         private static readonly Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
+        private const string ValidOctalChars = "01234567";
+        private const string ValidDigitChars = "0123456789";
+        private const string ValidHexChars = "0123456789abcdefABCDEF";
 
         public static string ExtractString(string text, bool skipQuotes)
         {
@@ -42,30 +45,20 @@ namespace Jint.Parser
                         case '5':
                         case '6':
                         case '7':
-                        case '8':
-                        case '9':
-                            string code = text.Substring(i, 3);
-                            char parsed = Latin1.GetChars(new[] { Convert.ToByte(code, 8) })[0];
-                            // insert decoded char
-                            sb.Append(parsed);
-                            // skip encoded char
-                            i += 2;
+                            string code = ExtractCode(text, ref i, 3, ValidOctalChars);
+                            sb.Append(Latin1.GetChars(new[] { Convert.ToByte(code, 8) })[0]);
                             break;
 
                         case 'x':
-                            code = text.Substring(i + 1, 2);
-                            parsed = Latin1.GetChars(new[] { Convert.ToByte(code, 16) })[0];
-                            sb.Append(parsed);
-                            i += 2;
+                            i++;
+                            code = ExtractCode(text, ref i, 2, ValidHexChars);
+                            sb.Append(Latin1.GetChars(new[] { Convert.ToByte(code, 16) })[0]);
                             break;
 
                         case 'u':
-                            parsed = (char)int.Parse(
-                                text.Substring(i + 1, 4),
-                                NumberStyles.AllowHexSpecifier
-                            );
-                            sb.Append(parsed);
-                            i += 4;
+                            i++;
+                            code = ExtractCode(text, ref i, 4, ValidHexChars);
+                            sb.Append((char)int.Parse(code, NumberStyles.AllowHexSpecifier));
                             break;
 
                         case 'b': sb.Append('\b'); break;
@@ -89,6 +82,29 @@ namespace Jint.Parser
             }
 
             return sb.ToString();
+        }
+
+        private static string ExtractCode(string text, ref int offset, int maxLength, string validChars)
+        {
+            int length = Math.Min(maxLength, text.Length - offset);
+            for (int i = 0; i < length; i++)
+            {
+                if (validChars.IndexOf(text[offset + i]) == -1)
+                {
+                    length = i;
+                    break;
+                }
+            }
+
+            Debug.Assert(length > 0);
+
+            string result = text.Substring(offset, length);
+
+            // We need to subtract one from the offset because the for loop
+            // does an i++.
+            offset += length - 1;
+
+            return result;
         }
     }
 }

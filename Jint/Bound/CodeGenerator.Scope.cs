@@ -20,6 +20,7 @@ namespace Jint.Bound
             private readonly bool _isFunction;
             private readonly bool _isStatic;
             private LocalBuilder _closureLocal;
+            private int _tryCatchNesting;
 
             public ILBuilder IL { get; private set; }
             public BoundClosure Closure { get; private set; }
@@ -28,6 +29,12 @@ namespace Jint.Bound
             public Stack<NamedLabel> ContinueTargets { get; private set; }
             public BoundVariable ArgumentsVariable { get; private set; }
             public ITypeBuilder TypeBuilder { get; private set; }
+            public ExceptionalReturn ExceptionalReturn { get; private set; }
+
+            public bool InTryCatch
+            {
+                get { return _tryCatchNesting > 0; }
+            }
 
             public Scope(ILBuilder il, bool isFunction, BoundClosure closure, BoundVariable argumentsVariable, ITypeBuilder typeBuilder, Scope parent)
             {
@@ -173,6 +180,44 @@ namespace Jint.Bound
                 Debug.Assert(_closureLocal == null);
 
                 _closureLocal = closureLocal;
+            }
+
+            public ExceptionalReturn GetExceptionalReturn()
+            {
+                if (ExceptionalReturn == null)
+                {
+                    ExceptionalReturn = new ExceptionalReturn(
+                        IL.DefineLabel(),
+                        IL.DeclareLocal(typeof(object))
+                    );
+                }
+
+                return ExceptionalReturn;
+            }
+
+            public void EntryTryCatch()
+            {
+                _tryCatchNesting++;
+            }
+
+            public void LeaveTryCatch()
+            {
+                _tryCatchNesting--;
+            }
+        }
+
+        private class ExceptionalReturn
+        {
+            public Label Label { get; private set; }
+            public LocalBuilder Local { get; private set; }
+
+            public ExceptionalReturn(Label label, LocalBuilder local)
+            {
+                if (local == null)
+                    throw new ArgumentNullException("local");
+
+                Label = label;
+                Local = local;
             }
         }
     }

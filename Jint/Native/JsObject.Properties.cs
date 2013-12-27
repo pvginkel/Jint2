@@ -229,6 +229,9 @@ namespace Jint.Native
 
         public object GetPropertyRaw(object index)
         {
+            if (this == Global.PrototypeSink || IsPrototypeNull)
+                return null;
+
             var @object = this;
 
             while (true)

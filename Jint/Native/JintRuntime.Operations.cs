@@ -201,7 +201,7 @@ namespace Jint.Native
                 throw new JsException(JsErrorType.TypeError, "Right argument should be a function");
             var leftObject = left as JsObject;
             if (leftObject == null)
-                throw new JsException(JsErrorType.TypeError, "Left argument should be an object");
+                return false;
 
             return rightObject.HasInstance(leftObject);
         }

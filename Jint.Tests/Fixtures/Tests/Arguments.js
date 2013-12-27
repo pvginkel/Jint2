@@ -44,3 +44,16 @@ assert(4, arglength.apply(null, [1, 2, 4, 6]));
     assert(arguments[0], arg1);
     assert(arguments[0], arg2);
 })(1, 2, 3, 4);
+
+function redeclaredArgument(arg) {
+    var arg;
+    return arg;
+}
+
+assert('hello', redeclaredArgument('hello'));
+
+function duplicateArgument(arg1, arg2, arg1, arg2) {
+    return arg1 + ',' + arg2;
+}
+
+assert('c,d', duplicateArgument('a', 'b', 'c', 'd'));

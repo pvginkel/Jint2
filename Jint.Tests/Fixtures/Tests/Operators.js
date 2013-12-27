@@ -110,3 +110,7 @@ assert(undefined, void 0);
 assert(undefined, void(42));
 assert(undefined, void(myNum=3));
 assert(3, myNum);
+
+var i = 7;
+i %= 3;
+assert(1, i);

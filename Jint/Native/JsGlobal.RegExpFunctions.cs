@@ -58,9 +58,12 @@ namespace Jint.Native
                 array.SetProperty(Id.input, input);
 
                 int i = 0;
-                var lastIndex = regexp.IsGlobal ? JsValue.ToNumber(target.GetProperty(Id.lastIndex)) : 0;
+                var lastIndex = regexp.IsGlobal ? (int)JsValue.ToNumber(target.GetProperty(Id.lastIndex)) : 0;
 
-                var matches = Regex.Matches(input.Substring((int)lastIndex), regexp.Pattern, regexp.Options);
+                if (lastIndex >= input.Length)
+                    return JsNull.Instance;
+
+                var matches = Regex.Matches(input.Substring(lastIndex), regexp.Pattern, regexp.Options);
                 if (matches.Count == 0)
                     return JsNull.Instance;
 
@@ -68,7 +71,7 @@ namespace Jint.Native
                 array.SetProperty(Id.index, (double)matches[0].Index);
 
                 if (regexp.IsGlobal)
-                    target.SetProperty(Id.lastIndex, lastIndex + matches[0].Index + matches[0].Value.Length);
+                    target.SetProperty(Id.lastIndex, (double)lastIndex + matches[0].Index + matches[0].Value.Length);
 
                 foreach (Group group in matches[0].Groups)
                 {
