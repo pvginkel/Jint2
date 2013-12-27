@@ -10,7 +10,9 @@ namespace Jint.Bound
     partial class CodeGenerator
     {
         private static readonly MethodInfo _objectGetProperty = typeof(JsObject).GetMethod("GetProperty", new[] { typeof(int) }, null);
+        private static readonly MethodInfo _objectGetPropertyCached = typeof(JsObject).GetMethod("GetProperty", new[] { typeof(int), typeof(DictionaryCacheSlot).MakeByRefType() }, null);
         private static readonly MethodInfo _objectSetProperty = typeof(JsObject).GetMethod("SetProperty", new[] { typeof(int), typeof(object) }, null);
+        private static readonly MethodInfo _objectSetPropertyCached = typeof(JsObject).GetMethod("SetProperty", new[] { typeof(int), typeof(object), typeof(DictionaryCacheSlot).MakeByRefType() }, null);
         private static readonly MethodInfo _runtimeGetMemberByIndex = typeof(JintRuntime).GetMethod("GetMemberByIndex");
         private static readonly MethodInfo _runtimeSetMemberByIndex = typeof(JintRuntime).GetMethod("SetMemberByIndex");
         private static readonly MethodInfo _concat = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });

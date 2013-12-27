@@ -33,9 +33,25 @@ namespace Jint.Native
             return _values[offset];
         }
 
+        public object GetOwnPropertyRaw(int index, ref DictionaryCacheSlot cacheSlot)
+        {
+            int offset = Schema.GetOffset(index);
+            if (offset < 0)
+                return null;
+
+            cacheSlot = new DictionaryCacheSlot(Schema, offset);
+
+            return _values[offset];
+        }
+
         public object GetOwnPropertyRaw(object index)
         {
             return GetOwnPropertyRaw(_global.ResolveIdentifier(JsValue.ToString(index)));
+        }
+
+        public object GetOwnPropertyRawUnchecked(int offset)
+        {
+            return _values[offset];
         }
 
         public void SetPropertyValue(int index, object value)
@@ -56,6 +72,11 @@ namespace Jint.Native
         public void SetPropertyValue(object index, object value)
         {
             SetPropertyValue(_global.ResolveIdentifier(JsValue.ToString(index)), value);
+        }
+
+        public void SetPropertyValueUnchecked(int offset, object value)
+        {
+            _values[offset] = value;
         }
 
         public bool DeleteProperty(int index)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -49,9 +50,9 @@ namespace Jint.Bound
             _scope = new Scope(
                 method.GetILBuilder(),
                 false,
-                method.Method.IsStatic,
                 program.Body.Closure,
                 null,
+                _scriptBuilder,
                 null
             );
 
@@ -650,11 +651,14 @@ namespace Jint.Bound
                     // Push the global scope onto the stack.
                     _scope.EmitLoad(SpecialLocal.GlobalScope);
                     // Push the index of the local onto the stack.
-                    IL.EmitConstant(_engine.Global.ResolveIdentifier(((BoundGlobal)variable).Name));
+                    var boundGlobal = (BoundGlobal)variable;
+                    IL.EmitConstant(_engine.Global.ResolveIdentifier(boundGlobal.Name));
                     // Push the boxed expression onto the stack.
                     EmitBox(EmitExpression(value));
+                    // Push the cache slot.
+                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("global", boundGlobal.Name));
                     // Set the property on the global scope.
-                    IL.EmitCall(_objectSetProperty, BoundValueType.Unset);
+                    IL.EmitCall(_objectSetPropertyCached, BoundValueType.Unset);
                     break;
 
                 case BoundVariableKind.Local:
@@ -678,8 +682,10 @@ namespace Jint.Bound
                     IL.EmitConstant(argument.Index);
                     // Push the value onto the stack.
                     EmitCast(EmitExpression(value), variable.ValueType);
+                    // Push the cache slot.
+                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("arguments", argument.Index.ToString(CultureInfo.InvariantCulture)));
                     // Set the property.
-                    IL.EmitCall(_objectSetProperty);
+                    IL.EmitCall(_objectSetPropertyCached);
                     return;
 
                 case BoundVariableKind.ClosureField:
@@ -695,7 +701,7 @@ namespace Jint.Bound
                     return;
 
                 default:
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException();
             }
         }
 
@@ -719,9 +725,22 @@ namespace Jint.Bound
             EmitBox(EmitExpression(value));
 
             if (expression.ValueType == BoundValueType.Object)
-                IL.EmitCall(_objectSetProperty, BoundValueType.Unset);
+            {
+                var cacheSlot = ResolveCacheSlot(expression, _engine.Global.GetIdentifier(index));
+                if (cacheSlot != null)
+                {
+                    IL.Emit(OpCodes.Ldsflda, cacheSlot);
+                    IL.EmitCall(_objectSetPropertyCached, BoundValueType.Unset);
+                }
+                else
+                {
+                    IL.EmitCall(_objectSetProperty, BoundValueType.Unset);
+                }
+            }
             else
+            {
                 IL.EmitCall(_runtimeSetMemberByIndex, BoundValueType.Unset);
+            }
         }
 
         private void EmitSetMember(BoundExpression expression, BoundExpression index, BoundExpression value)
@@ -1094,15 +1113,15 @@ namespace Jint.Bound
             if (argumentsLocal == null)
             {
                 Debug.Assert(function.Body.Closure != null);
-                argumentsLocal = function.Body.Closure.Fields[Expressions.Closure.ArgumentsFieldName];
+                argumentsLocal = function.Body.Closure.Fields[Closure.ArgumentsFieldName];
             }
 
             _scope = new Scope(
                 method.GetILBuilder(),
                 true,
-                method.Method.IsStatic,
                 function.Body.ScopedClosure,
                 argumentsLocal,
+                typeBuilder,
                 _scope
             );
 
@@ -1200,7 +1219,16 @@ namespace Jint.Bound
             IL.EmitConstant(index);
 
             if (expression.ValueType == BoundValueType.Object)
+            {
+                var cacheSlot = ResolveCacheSlot(expression, _engine.Global.GetIdentifier(index));
+                if (cacheSlot != null)
+                {
+                    IL.Emit(OpCodes.Ldsflda, cacheSlot);
+                    return IL.EmitCall(_objectGetPropertyCached);
+                }
+
                 return IL.EmitCall(_objectGetProperty);
+            }
 
             return IL.EmitCall(_runtimeGetMemberByIndex);
         }
@@ -1223,9 +1251,12 @@ namespace Jint.Bound
                     // Push the global scope onto the stack.
                     _scope.EmitLoad(SpecialLocal.GlobalScope);
                     // Push the index onto the stack.
-                    IL.EmitConstant(_engine.Global.ResolveIdentifier(((BoundGlobal)variable).Name));
+                    var boundGlobal = (BoundGlobal)variable;
+                    IL.EmitConstant(_engine.Global.ResolveIdentifier(boundGlobal.Name));
+                    // Emit the cache slot.
+                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("global", boundGlobal.Name));
                     // Get the property from the global scope.
-                    return IL.EmitCall(_objectGetProperty);
+                    return IL.EmitCall(_objectGetPropertyCached);
 
                 case BoundVariableKind.Local:
                 case BoundVariableKind.Temporary:
@@ -1250,7 +1281,7 @@ namespace Jint.Bound
                         case BoundMagicVariableType.This: return _scope.EmitLoad(SpecialLocal.This);
                         case BoundMagicVariableType.Null: return _scope.EmitLoad(SpecialLocal.Null);
                         case BoundMagicVariableType.Undefined: return _scope.EmitLoad(SpecialLocal.Undefined);
-                        default: throw new NotImplementedException();
+                        default: throw new InvalidOperationException();
                     }
 
                 case BoundVariableKind.Argument:
@@ -1264,12 +1295,15 @@ namespace Jint.Bound
 
                     // Get the correct member from the arguments object.
                     IL.EmitConstant(argument.Index);
-                    IL.EmitCall(_objectGetProperty);
+                    // Emit the cache slot.
+                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("arguments", argument.Index.ToString(CultureInfo.InvariantCulture)));
+                    // Emit the call to get property.
+                    IL.EmitCall(_objectGetPropertyCached);
 
                     return BoundValueType.Unknown;
 
                 default:
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException();
             }
         }
 
@@ -1277,6 +1311,25 @@ namespace Jint.Bound
         {
             IL.EmitConstant(node.Value);
             return node.ValueType;
+        }
+
+        private FieldInfo ResolveCacheSlot(BoundExpression expression, string member)
+        {
+            var getVariable = expression as BoundGetVariable;
+            if (getVariable != null)
+            {
+                if (getVariable.Variable.Kind == BoundVariableKind.Local)
+                    return ResolveCacheSlot(((BoundLocal)getVariable.Variable).Name, member);
+                if (getVariable.Variable.Kind == BoundVariableKind.ClosureField)
+                    return ResolveCacheSlot(((BoundClosureField)getVariable.Variable).Name, member);
+            }
+
+            return null;
+        }
+
+        private FieldInfo ResolveCacheSlot(string @object, string member)
+        {
+            return _scope.TypeBuilder.CreateCacheSlot(@object, member);
         }
 
         private enum SpecialLocal

@@ -56,7 +56,7 @@ namespace Jint.Tests.FastHashSetFixture
 
                 int index = rand.Next() % 200;
 
-                if (store.GetValue(index) == null)
+                if (store.GetValue(index) < 0)
                     store.Add(index, 0, index);
 
                 int numberKeys = 0;

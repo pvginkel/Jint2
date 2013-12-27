@@ -111,6 +111,7 @@ namespace Jint.Compiler
 
             private readonly List<IFunctionBuilder> _functions = new List<IFunctionBuilder>();
             private readonly HashSet<string> _compiledMethodNames = new HashSet<string>();
+            private readonly HashSet<string> _cacheSlotNames = new HashSet<string>();
             private int _nextMethodId;
 
             public Type Type { get; private set; }
@@ -195,6 +196,29 @@ namespace Jint.Compiler
                 {
                     function.Method = Type.GetMethod(function.Method.Name);
                 }
+            }
+
+            public FieldInfo CreateCacheSlot(string @object, string member)
+            {
+                string name = "<>CacheSlot$" + @object + "$" + member;
+
+                for (int i = 0; ; i++)
+                {
+                    string proposal = i == 0 ? name : name + "$" + i.ToString(CultureInfo.InvariantCulture);
+
+                    if (!_cacheSlotNames.Contains(proposal))
+                    {
+                        _cacheSlotNames.Add(proposal);
+                        name = proposal;
+                        break;
+                    }
+                }
+
+                return ((System.Reflection.Emit.TypeBuilder)Type).DefineField(
+                    name,
+                    typeof(DictionaryCacheSlot),
+                    FieldAttributes.Private | FieldAttributes.Static
+                );
             }
         }
 

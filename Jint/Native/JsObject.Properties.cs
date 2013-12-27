@@ -244,6 +244,83 @@ namespace Jint.Native
             }
         }
 
+        public object GetProperty(int index, ref DictionaryCacheSlot cacheSlot)
+        {
+            if (cacheSlot.Schema != null)
+            {
+                if (_dictionaryPropertyStore.Schema == cacheSlot.Schema)
+                    return _dictionaryPropertyStore.GetOwnPropertyRawUnchecked(cacheSlot.Index);
+            }
+
+            return GetPropertySlow(index, ref cacheSlot);
+        }
+
+        public object GetPropertySlow(int index, ref DictionaryCacheSlot cacheSlot)
+        {
+            object value = GetPropertyRaw(index, ref cacheSlot);
+
+            if (value == null)
+            {
+                Trace.WriteLine("Undefined identifier " + Global.GetIdentifier(index));
+
+                return ResolveUndefined(index);
+            }
+
+            return ResolvePropertyValue(value);
+        }
+
+        private object GetPropertyRaw(int index, ref DictionaryCacheSlot cacheSlot)
+        {
+            if (index == Id.prototype)
+            {
+                object value = GetOwnPropertyRaw(index);
+                if (value != null)
+                    return value;
+
+                if (IsPrototypeNull)
+                    return JsNull.Instance;
+
+                return Prototype;
+            }
+
+            if (index == Id.__proto__)
+            {
+                if (IsPrototypeNull)
+                    return JsNull.Instance;
+
+                return Prototype;
+            }
+
+            if (PropertyStore != null)
+            {
+                if (_dictionaryPropertyStore != null)
+                {
+                    object result = _dictionaryPropertyStore.GetOwnPropertyRaw(index, ref cacheSlot);
+                    if (result != null)
+                        return result;
+                }
+                else
+                {
+                    object result = PropertyStore.GetOwnPropertyRaw(index);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            var @object = Prototype;
+
+            while (!@object.IsPrototypeNull)
+            {
+                object result = @object.GetOwnPropertyRaw(index);
+                if (result != null)
+                    return result;
+
+                @object = @object.Prototype;
+            }
+
+            return null;
+        }
+
         public void SetProperty(string name, object value)
         {
             SetProperty(Global.ResolveIdentifier(name), value);
@@ -262,7 +339,7 @@ namespace Jint.Native
             // CLR objects have their own rules concerning how and when a
             // property is set.
 
-            if (IsClr && !(PropertyStore is DictionaryPropertyStore))
+            if (IsClr && _dictionaryPropertyStore == null)
             {
                 PropertyStore.SetPropertyValue(index, value);
                 return;
@@ -306,7 +383,7 @@ namespace Jint.Native
             // CLR objects have their own rules concerning how and when a
             // property is set.
 
-            if (IsClr && !(PropertyStore is DictionaryPropertyStore))
+            if (IsClr && _dictionaryPropertyStore == null)
             {
                 PropertyStore.SetPropertyValue(index, value);
                 return;
@@ -324,6 +401,80 @@ namespace Jint.Native
                     accessor.SetValue(this, value);
                 else
                     PropertyStore.SetPropertyValue(index, value);
+                return;
+            }
+
+            // Check whether the prototype has an accessor.
+
+            if (!IsPrototypeNull)
+            {
+                currentValue = Prototype.GetPropertyRaw(index);
+                var accessor = currentValue as PropertyAccessor;
+                if (accessor != null)
+                {
+                    accessor.SetValue(this, value);
+                    return;
+                }
+            }
+
+            // Otherwise, we're setting a new property.
+
+            DefineProperty(index, value, PropertyAttributes.None);
+        }
+
+        public void SetProperty(int index, object value, ref DictionaryCacheSlot cacheSlot)
+        {
+            if (cacheSlot.Schema != null)
+            {
+                if (_dictionaryPropertyStore.Schema == cacheSlot.Schema)
+                {
+                    _dictionaryPropertyStore.SetPropertyValueUnchecked(cacheSlot.Index, value);
+                    return;
+                }
+            }
+
+            SetPropertySlow(index, value, ref cacheSlot);
+        }
+
+        private void SetPropertySlow(int index, object value, ref DictionaryCacheSlot cacheSlot)
+        {
+            // CLR objects have their own rules concerning how and when a
+            // property is set.
+
+            if (IsClr && _dictionaryPropertyStore == null)
+            {
+                PropertyStore.SetPropertyValue(index, value);
+                return;
+            }
+
+            // If we have this property, either set it through the accessor
+            // or directly on the property store.
+
+            object currentValue = null;
+
+            if (PropertyStore != null)
+            {
+                if (_dictionaryPropertyStore != null)
+                    currentValue = _dictionaryPropertyStore.GetOwnPropertyRaw(index, ref cacheSlot);
+                else
+                    currentValue = PropertyStore.GetOwnPropertyRaw(index);
+            }
+
+            if (currentValue != null)
+            {
+                var accessor = currentValue as PropertyAccessor;
+                if (accessor != null)
+                {
+                    // Cache slots are disabled for accessors. The thinking here
+                    // is that accessors are rare, and this prevents us from
+                    // having to do a get in the fast path.
+                    cacheSlot = new DictionaryCacheSlot();
+                    accessor.SetValue(this, value);
+                }
+                else
+                {
+                    PropertyStore.SetPropertyValue(index, value);
+                }
                 return;
             }
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using Jint.Compiler;
 using Jint.Native;
 using Jint.Support;
 
@@ -26,15 +27,18 @@ namespace Jint.Bound
             public Stack<NamedLabel> BreakTargets { get; private set; }
             public Stack<NamedLabel> ContinueTargets { get; private set; }
             public BoundVariable ArgumentsVariable { get; private set; }
+            public ITypeBuilder TypeBuilder { get; private set; }
 
-            public Scope(ILBuilder il, bool isFunction, bool isStatic, BoundClosure closure, BoundVariable argumentsVariable, Scope parent)
+            public Scope(ILBuilder il, bool isFunction, BoundClosure closure, BoundVariable argumentsVariable, ITypeBuilder typeBuilder, Scope parent)
             {
                 IL = il;
                 _isFunction = isFunction;
-                _isStatic = isStatic;
                 Closure = closure;
                 ArgumentsVariable = argumentsVariable;
+                TypeBuilder = typeBuilder;
                 Parent = parent;
+
+                _isStatic = TypeBuilder is IScriptBuilder;
 
                 BreakTargets = new Stack<NamedLabel>();
                 ContinueTargets = new Stack<NamedLabel>();

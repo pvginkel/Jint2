@@ -7,7 +7,7 @@ using Jint.Support;
 
 namespace Jint.Native
 {
-    public class JsSchema
+    public sealed class JsSchema
     {
         internal const int InitialArraySize = 20;
 

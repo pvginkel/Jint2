@@ -68,7 +68,7 @@ using Jint.Native;
 namespace Jint.Support
 {
     [DebuggerTypeProxy(typeof(<#= configuration.Name #>DebugView))]
-    internal class <#= configuration.Name #>
+    internal sealed class <#= configuration.Name #>
     {
         private Entry[] _entries;
 

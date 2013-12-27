@@ -11,7 +11,19 @@ namespace Jint.Native
     {
         internal static readonly ReadOnlyCollection<KeyValuePair<int, object>> EmptyKeyValues = new ReadOnlyCollection<KeyValuePair<int, object>>(new KeyValuePair<int, object>[0]);
 
-        internal IPropertyStore PropertyStore { get; set; }
+        private IPropertyStore _propertyStore;
+        private DictionaryPropertyStore _dictionaryPropertyStore;
+
+        internal IPropertyStore PropertyStore
+        {
+            get { return _propertyStore; }
+            set
+            {
+                _propertyStore = value;
+                _dictionaryPropertyStore = value as DictionaryPropertyStore;
+            }
+        }
+
         internal JsDelegate Delegate { get; private set; }
 
         public object Value { get; set; }

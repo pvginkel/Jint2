@@ -17,7 +17,7 @@ using Jint.Native;
 namespace Jint.Support
 {
     [DebuggerTypeProxy(typeof(SchemaHashSetDebugView))]
-    internal class SchemaHashSet
+    internal sealed class SchemaHashSet
     {
         private Entry[] _entries;
 
@@ -435,7 +435,7 @@ namespace Jint.Support
 namespace Jint.Support
 {
     [DebuggerTypeProxy(typeof(SchemaTransformationHashSetDebugView))]
-    internal class SchemaTransformationHashSet
+    internal sealed class SchemaTransformationHashSet
     {
         private Entry[] _entries;
 
