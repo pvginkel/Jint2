@@ -7,11 +7,13 @@ using Jint.Support;
 
 namespace Jint.Native
 {
-    internal sealed class DictionaryPropertyStore : FastPropertyStore, IPropertyStore
+    internal sealed class DictionaryPropertyStore : IPropertyStore
     {
         private readonly JsGlobal _global;
+        private object[] _values = new object[JsSchema.InitialArraySize];
 
         public JsObject Owner { get; private set; }
+        public JsSchema Schema { get; private set; }
 
         public DictionaryPropertyStore(JsObject owner)
         {
@@ -20,18 +22,20 @@ namespace Jint.Native
 
             Owner = owner;
             _global = Owner.Global;
+            Schema = _global.RootSchema;
+        }
+
+        public object GetOwnPropertyRaw(int index)
+        {
+            int offset = Schema.GetOffset(index);
+            if (offset < 0)
+                return null;
+            return _values[offset];
         }
 
         public object GetOwnPropertyRaw(object index)
         {
-            // Overload resolution prefers this overload instead of
-            // FastPropertyStore.GetOwnPropertyRaw(int). Because of this, references
-            // to the DictionaryPropertyStore that need that overload, need to
-            // cast the reference to FastPropertyStore.
-
-            Debug.Assert(!(index is int));
-
-            return base.GetOwnPropertyRaw(_global.ResolveIdentifier(JsValue.ToString(index)));
+            return GetOwnPropertyRaw(_global.ResolveIdentifier(JsValue.ToString(index)));
         }
 
         public void SetPropertyValue(int index, object value)
@@ -40,13 +44,13 @@ namespace Jint.Native
             // existing, property in the store. GetAttributes throws when the
             // entry is not in the set.
 
-            Debug.Assert(!(base.GetOwnPropertyRaw(index) is PropertyAccessor));
+            Debug.Assert(!(GetOwnPropertyRaw(index) is PropertyAccessor));
 
-            var attributes = GetAttributes(index);
+            var attributes = Schema.GetAttributes(index);
             if ((attributes & PropertyAttributes.ReadOnly) != 0)
                 throw new JintException("This property is not writable");
 
-            SetValue(index, value);
+            _values[Schema.GetOffset(index)] = value;
         }
 
         public void SetPropertyValue(object index, object value)
@@ -57,12 +61,12 @@ namespace Jint.Native
         public bool DeleteProperty(int index)
         {
             PropertyAttributes attributes;
-            if (!TryGetAttributes(index, out attributes))
+            if (!Schema.TryGetAttributes(index, out attributes))
                 return true;
 
             if ((attributes & PropertyAttributes.DontDelete) == 0)
             {
-                Remove(index);
+                Schema = Schema.Remove(index, ref _values);
                 return true;
             }
 
@@ -79,13 +83,9 @@ namespace Jint.Native
 
         public void DefineProperty(int index, object value, PropertyAttributes attributes)
         {
-            Debug.Assert(base.GetOwnPropertyRaw(index) == null);
+            Debug.Assert(GetOwnPropertyRaw(index) == null);
 
-            Add(
-                index,
-                attributes,
-                value
-            );
+            Schema = Schema.Add(index, attributes, ref _values, value);
         }
 
         public void DefineProperty(object index, object value, PropertyAttributes attributes)
@@ -99,7 +99,7 @@ namespace Jint.Native
 
         public IEnumerable<int> GetKeys()
         {
-            return GetKeys(true);
+            return Schema.GetKeys(true);
         }
     }
 }

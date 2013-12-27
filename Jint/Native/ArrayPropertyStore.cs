@@ -83,7 +83,7 @@ namespace Jint.Native
                 return GetValue(index);
 
             if (_baseStore != null)
-                return ((FastPropertyStore)_baseStore).GetOwnPropertyRaw(index);
+                return _baseStore.GetOwnPropertyRaw(index);
 
             return null;
         }

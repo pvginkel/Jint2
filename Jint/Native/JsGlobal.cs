@@ -17,6 +17,8 @@ namespace Jint.Native
 
         public JsObject GlobalScope { get; private set; }
 
+        public JsSchema RootSchema { get; private set; }
+
         internal JsObject PrototypeSink { get; private set; }
 
         internal Random Random { get; private set; }
@@ -31,7 +33,7 @@ namespace Jint.Native
             Id.SeedGlobal(this);
 
             PrototypeSink = CreatePrototypeSink();
-
+            RootSchema = new JsSchema();
             Options = options;
             Engine = engine;
 

@@ -20,7 +20,7 @@ namespace Jint.Native
 
         public virtual object GetOwnPropertyRaw(int index)
         {
-            return ((FastPropertyStore)BaseStore).GetOwnPropertyRaw(index);
+            return BaseStore.GetOwnPropertyRaw(index);
         }
 
         public virtual object GetOwnPropertyRaw(object index)

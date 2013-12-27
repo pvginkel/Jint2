@@ -179,6 +179,7 @@
     <Compile Include="Native\JsFunctionSourceAttribute.cs" />
     <Compile Include="Native\JsGenericArguments.cs" />
     <Compile Include="Native\JsMain.cs" />
+    <Compile Include="Native\JsSchema.cs" />
     <Compile Include="Native\JsValue.cs" />
     <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsDelegate.cs" />
@@ -289,8 +290,15 @@
       <DependentUpon>JintRuntime.Operations.Generated.tt</DependentUpon>
     </Compile>
     <Compile Include="Support\CollectionExtensions.cs" />
-    <Compile Include="Support\FastPropertyStore.cs" />
-    <Compile Include="Support\FastPropertyStoreDebugView.cs" />
+    <None Include="Support\FastHashSet.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>FastHashSet.cs</LastGenOutput>
+    </None>
+    <Compile Include="Support\FastHashSet.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FastHashSet.tt</DependentUpon>
+    </Compile>
     <Compile Include="Support\IKeyedCollection.cs" />
     <Compile Include="Support\ILBuilder.cs" />
     <Compile Include="Support\KeyedCollectionDebugView.cs" />

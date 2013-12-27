@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="DefiniteAssignment\DefiniteAssignmentFixture.cs" />
     <Compile Include="DefiniteAssignment\DefiniteAssignmentFixture.Support.cs" />
-    <Compile Include="FastPropertyStoreFixture\Fixture.cs" />
+    <Compile Include="FastHashSetFixture\Fixture.cs" />
     <Compile Include="Fixtures\AccessorsTests.cs" />
     <Compile Include="Fixtures\ArgumentsTests.cs" />
     <Compile Include="Fixtures\ArrayTests.cs" />
