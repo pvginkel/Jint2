@@ -27,12 +27,12 @@ namespace Jint.Benchmarks.Engines
 
             public void ExecuteFile(string test)
             {
-                _engine.Run(File.ReadAllText(test), test);
+                _engine.ExecuteFile(test);
             }
 
             public void Execute(string script)
             {
-                _engine.Run(script);
+                _engine.Execute(script);
             }
 
             public void SetFunction(string name, Delegate @delegate)

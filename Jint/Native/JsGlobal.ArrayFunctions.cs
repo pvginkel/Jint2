@@ -259,7 +259,9 @@ namespace Jint.Native
                 {
                     try
                     {
-                        values.Sort(new JsComparer(runtime.Global.Engine, compare));
+                        values.Sort((a, b) => (int)JsValue.ToNumber(
+                            compare.Execute(runtime, JsNull.Instance, a, b)
+                        ));
                     }
                     catch (Exception e)
                     {

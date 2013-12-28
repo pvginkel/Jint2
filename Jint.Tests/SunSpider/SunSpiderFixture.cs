@@ -41,7 +41,7 @@ namespace Jint.Tests.SunSpider
                 _includeCache.Add(fileName, source);
             }
 
-            engine.Run(source, fileName);
+            engine.Execute(source, fileName);
         }
 
         public SunSpiderFixture()

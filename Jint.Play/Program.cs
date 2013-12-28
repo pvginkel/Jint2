@@ -12,7 +12,6 @@ namespace Jint.Play
         static void Main(string[] args)
         {
             const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\access-fannkuch.js";
-            var program = File.ReadAllText(fileName);
 
             var jint = new JintEngine();
 
@@ -23,7 +22,7 @@ namespace Jint.Play
             jint.Run(program, fileName);
 #else
 
-            jint.Run(program, fileName);
+            jint.ExecuteFile(fileName);
 
             var times = new TimeSpan[20];
             int timeOffset = 0;
@@ -37,7 +36,7 @@ namespace Jint.Play
 
                 var stopwatch = Stopwatch.StartNew();
 
-                jint.Run(program, fileName);
+                jint.ExecuteFile(fileName);
 
                 var elapsed = stopwatch.Elapsed;
 

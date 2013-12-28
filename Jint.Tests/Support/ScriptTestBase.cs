@@ -104,7 +104,7 @@ namespace Jint.Tests.Support
 
         protected virtual object RunScript(JintEngine ctx, string script)
         {
-            return ctx.Run(script);
+            return ctx.Execute(script);
         }
 
         public object RunFile(string fileName)
@@ -125,7 +125,7 @@ namespace Jint.Tests.Support
 
         protected virtual object RunFile(JintEngine ctx, string fileName)
         {
-            return ctx.Run(File.ReadAllText(fileName), fileName);
+            return ctx.ExecuteFile(fileName);
         }
     }
 }

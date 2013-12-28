@@ -154,7 +154,21 @@ namespace Jint.Native
                 if (!(arguments[0] is string))
                     return arguments[0];
 
-                return runtime.Global.Engine.Eval(arguments);
+                try
+                {
+                    return runtime.Global.Engine.Execute((string)arguments[0], false);
+                }
+                catch (JsException e)
+                {
+                    if (e.Type == JsErrorType.SyntaxError)
+                        throw;
+
+                    throw new JsException(JsErrorType.EvalError, e.Message);
+                }
+                catch (Exception e)
+                {
+                    throw new JsException(JsErrorType.EvalError, e.Message);
+                }
             }
 
             /// <summary>

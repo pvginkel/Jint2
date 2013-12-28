@@ -231,7 +231,6 @@
     <Compile Include="Parser\ES3Util.cs" />
     <Compile Include="Expressions\SourceLocation.cs" />
     <Compile Include="Expressions\WithSyntax.cs" />
-    <Compile Include="Native\JsComparer.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Expressions\ArrayDeclarationSyntax.cs" />
     <Compile Include="Expressions\CommaOperatorSyntax.cs" />

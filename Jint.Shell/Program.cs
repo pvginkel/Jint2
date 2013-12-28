@@ -49,7 +49,7 @@ namespace Jint.Shell {
                 Console.SetError(new StringWriter(new StringBuilder()));
 
                 try {
-                    jint.Run(script.ToString());
+                    jint.Execute(script.ToString());
                 }
                 catch (Exception e) {
                     Console.ForegroundColor = ConsoleColor.Red;

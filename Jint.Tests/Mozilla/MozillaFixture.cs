@@ -40,7 +40,7 @@ namespace Jint.Tests.Mozilla
                 _includeCache.Add(fileName, source);
             }
 
-            engine.Run(source, fileName);
+            engine.Execute(source, fileName);
         }
 
         public MozillaFixture(string testsPath)
@@ -56,7 +56,7 @@ namespace Jint.Tests.Mozilla
             );
 
             if (File.Exists(shellPath))
-                ctx.Run(File.ReadAllText(shellPath), shellPath);
+                ctx.ExecuteFile(shellPath);
 
             return base.RunFile(ctx, fileName);
         }

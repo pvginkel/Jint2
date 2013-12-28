@@ -192,7 +192,13 @@ namespace Jint.Bound
             if (stringValue != null)
             {
                 Write("\"");
-                Write(JintEngine.EscapeStringLiteral(stringValue));
+
+                Write(stringValue
+                    .Replace("\\", "\\\\")
+                    .Replace("'", "\\'")
+                    .Replace(Environment.NewLine, "\\r\\n")
+                );
+
                 Write("\"");
             }
             else

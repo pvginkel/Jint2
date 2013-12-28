@@ -39,9 +39,9 @@ namespace Jint.Tests.Fixtures
             // The DLR compiler won't compile with permissions set
             engine.DisableSecurity();
 
-            engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader, filename); } }));
+            engine.SetFunction("load", new Action<string>(p => engine.ExecuteFile(p)));
             engine.SetFunction("print", new Action<string>(Console.WriteLine));
-            engine.Run("var a='foo'; load('" + JintEngine.EscapeStringLiteral(filename) + "'); print(a);");
+            engine.Execute("var a='foo'; load('" + EscapeStringLiteral(filename) + "'); print(a);");
 
             File.Delete(filename);
         }
@@ -55,64 +55,69 @@ namespace Jint.Tests.Fixtures
 
             var engine = new JintEngine().AddPermission(new FileIOPermission(PermissionState.None));
             engine.AllowClr();
-            engine.SetFunction("load", new Action<string>(delegate(string fileName) { using (var reader = File.OpenText(fileName)) { engine.Run(reader, fileName); } }));
+            engine.SetFunction("load", new Action<string>(p => engine.ExecuteFile(p)));
             engine.SetFunction("print", new Action<string>(Console.WriteLine));
-            engine.Run("var a='foo'; load('" + JintEngine.EscapeStringLiteral(filename) + "'); print(a);");
+            engine.Execute("var a='foo'; load('" + EscapeStringLiteral(filename) + "'); print(a);");
+        }
+
+        private string EscapeStringLiteral(string value)
+        {
+            return value.Replace("\\", "\\\\").Replace("'", "\\'").Replace(Environment.NewLine, "\\r\\n");
         }
 
         [Test]
         public void ShouldHandleEmptyStatement()
         {
-            Assert.AreEqual(1d, new JintEngine().Run(";;;;var i = 1;;;;;;;; return i;;;;;"));
+            Assert.AreEqual(1d, new JintEngine().Execute(";;;;var i = 1;;;;;;;; return i;;;;;"));
         }
 
         [Test]
         public void ShouldHandleFor()
         {
-            Assert.AreEqual(9d, new JintEngine().Run("var j = 0; for(i = 1; i < 10; i = i + 1) { j = j + 1; } return j;"));
+            Assert.AreEqual(9d, new JintEngine().Execute("var j = 0; for(i = 1; i < 10; i = i + 1) { j = j + 1; } return j;"));
         }
 
         [Test]
         public void ShouldHandleSwitch()
         {
-            Assert.AreEqual(1d, new JintEngine().Run("var j = 0; switch(j) { case 0 : j = 1; break; case 1 : j = 0; break; } return j;"));
-            Assert.AreEqual(2d, new JintEngine().Run("var j = -1; switch(j) { case 0 : j = 1; break; case 1 : j = 0; break; default : j = 2; } return j;"));
+            Assert.AreEqual(1d, new JintEngine().Execute("var j = 0; switch(j) { case 0 : j = 1; break; case 1 : j = 0; break; } return j;"));
+            Assert.AreEqual(2d, new JintEngine().Execute("var j = -1; switch(j) { case 0 : j = 1; break; case 1 : j = 0; break; default : j = 2; } return j;"));
         }
 
         [Test]
         public void ShouldHandleVariableDeclaration()
         {
-            Assert.AreEqual(null, new JintEngine().Run("var i; return i;"));
-            Assert.AreEqual(1d, new JintEngine().Run("var i = 1; return i;"));
-            Assert.AreEqual(2d, new JintEngine().Run("var i = 1 + 1; return i;"));
-            Assert.AreEqual(3d, new JintEngine().Run("var i = 1 + 1; var j = i + 1; return j;"));
+            Assert.AreEqual(null, new JintEngine().Execute("var i; return i;"));
+            Assert.AreEqual(1d, new JintEngine().Execute("var i = 1; return i;"));
+            Assert.AreEqual(2d, new JintEngine().Execute("var i = 1 + 1; return i;"));
+            Assert.AreEqual(3d, new JintEngine().Execute("var i = 1 + 1; var j = i + 1; return j;"));
         }
 
         [Test]
         public void ShouldHandleUndeclaredVariable()
         {
-            Assert.AreEqual(1d, new JintEngine().Run("i = 1; return i;"));
-            Assert.AreEqual(2d, new JintEngine().Run("i = 1 + 1; return i;"));
-            Assert.AreEqual(3d, new JintEngine().Run("i = 1 + 1; j = i + 1; return j;"));
+            Assert.AreEqual(1d, new JintEngine().Execute("i = 1; return i;"));
+            Assert.AreEqual(2d, new JintEngine().Execute("i = 1 + 1; return i;"));
+            Assert.AreEqual(3d, new JintEngine().Execute("i = 1 + 1; j = i + 1; return j;"));
         }
 
         [Test]
         public void ShouldHandleStrings()
         {
-            Assert.AreEqual("hello", new JintEngine().Run("return \"hello\";"));
-            Assert.AreEqual("hello", new JintEngine().Run("return 'hello';"));
+            Assert.AreEqual("hello", new JintEngine().Execute("return \"hello\";"));
+            Assert.AreEqual("hello", new JintEngine().Execute("return 'hello';"));
 
-            Assert.AreEqual("hel'lo", new JintEngine().Run("return \"hel'lo\";"));
-            Assert.AreEqual("hel\"lo", new JintEngine().Run("return 'hel\"lo';"));
+            Assert.AreEqual("hel'lo", new JintEngine().Execute("return \"hel'lo\";"));
+            Assert.AreEqual("hel\"lo", new JintEngine().Execute("return 'hel\"lo';"));
 
-            Assert.AreEqual("hel\"lo", new JintEngine().Run("return \"hel\\\"lo\";"));
-            Assert.AreEqual("hel'lo", new JintEngine().Run("return 'hel\\'lo';"));
+            Assert.AreEqual("hel\"lo", new JintEngine().Execute("return \"hel\\\"lo\";"));
+            Assert.AreEqual("hel'lo", new JintEngine().Execute("return 'hel\\'lo';"));
 
-            Assert.AreEqual("hel\tlo", new JintEngine().Run("return 'hel\tlo';"));
-            Assert.AreEqual("hel/lo", new JintEngine().Run("return 'hel/lo';"));
-            Assert.AreEqual("hel//lo", new JintEngine().Run("return 'hel//lo';"));
-            Assert.AreEqual("/*hello*/", new JintEngine().Run("return '/*hello*/';"));
-            Assert.AreEqual("/hello/", new JintEngine().Run("return '/hello/';"));
+            Assert.AreEqual("hel\tlo", new JintEngine().Execute("return 'hel\tlo';"));
+            Assert.AreEqual("hel/lo", new JintEngine().Execute("return 'hel/lo';"));
+            Assert.AreEqual("hel//lo", new JintEngine().Execute("return 'hel//lo';"));
+            Assert.AreEqual("/*hello*/", new JintEngine().Execute("return '/*hello*/';"));
+            Assert.AreEqual("/hello/", new JintEngine().Execute("return '/hello/';"));
         }
 
         [Test]
@@ -122,7 +127,7 @@ namespace Jint.Tests.Fixtures
                 new JintEngine()
                     .SetParameter("i", 1)
                     .SetParameter("j", 2)
-                    .Run("return i + j;"));
+                    .Execute("return i + j;"));
         }
 
         public bool ShouldBeCalledWithBoolean(TypeCode tc)
@@ -134,12 +139,12 @@ namespace Jint.Tests.Fixtures
         public void ShouldHandleEnums()
         {
             Assert.AreEqual(TypeCode.Boolean,
-                CreateContext(Assert.Fail).Run("System.TypeCode.Boolean"));
+                CreateContext(Assert.Fail).Execute("System.TypeCode.Boolean"));
 
             Assert.AreEqual(true,
                 CreateContext(Assert.Fail)
                     .SetParameter("clr", this)
-                    .Run("clr.ShouldBeCalledWithBoolean(System.TypeCode.Boolean)"));
+                    .Execute("clr.ShouldBeCalledWithBoolean(System.TypeCode.Boolean)"));
 
         }
 
@@ -147,9 +152,24 @@ namespace Jint.Tests.Fixtures
         public void ShouldHandleNetObjects()
         {
             Assert.AreEqual("1",
-                CreateContext(Assert.Fail) // call Int32.ToString() 
-                    .SetParameter("i", 1)
-                    .Run("return i.ToString();"));
+                CreateContext(Assert.Fail) // call MyClass.ToString() 
+                    .SetParameter("i", new MyClass(1))
+                    .Execute("return i.ToString();"));
+        }
+
+        private class MyClass
+        {
+            private readonly int _value;
+
+            public MyClass(int value)
+            {
+                _value = value;
+            }
+
+            public override string ToString()
+            {
+                return _value.ToString();
+            }
         }
 
         [Test]
@@ -157,7 +177,7 @@ namespace Jint.Tests.Fixtures
         {
             const string script = "ccat=function (arg1,arg2){ return arg1+' '+arg2; }";
             JintEngine engine = new JintEngine().SetFunction("print", new Action<string>(Console.WriteLine));
-            engine.Run(script);
+            engine.Execute(script);
             Assert.AreEqual("Nicolas Penin", engine.CallFunction("ccat", "Nicolas", "Penin"));
         }
 
@@ -167,8 +187,8 @@ namespace Jint.Tests.Fixtures
             const string square = @"function square(x) { return x * x; } return square(2);";
             const string fibonacci = @"function fibonacci(n) { if (n == 0) return 0; else return n + fibonacci(n - 1); } return fibonacci(10); ";
 
-            Assert.AreEqual(4d, new JintEngine().Run(square));
-            Assert.AreEqual(55d, new JintEngine().Run(fibonacci));
+            Assert.AreEqual(4d, new JintEngine().Execute(square));
+            Assert.AreEqual(55d, new JintEngine().Execute(fibonacci));
         }
 
         [Test]
@@ -184,7 +204,7 @@ namespace Jint.Tests.Fixtures
 
             var engine = CreateContext(Assert.Fail);
 
-            Assert.AreEqual("hi, mom3True", engine.Run(script));
+            Assert.AreEqual("hi, mom3True", engine.Execute(script));
         }
 
         [Test]
@@ -203,7 +223,7 @@ namespace Jint.Tests.Fixtures
                 return sb.ToString();
             ";
 
-            Assert.AreEqual("hi, mom3True", new JintEngine().Run(script));
+            Assert.AreEqual("hi, mom3True", new JintEngine().Execute(script));
         }
 
         [ExpectedException(typeof(System.Security.SecurityException))]
@@ -219,29 +239,22 @@ namespace Jint.Tests.Fixtures
                 }                
             ";
 
-            new JintEngine().Run(script);
-        }
-
-        private static string GiveMeJavascript(double number, object instance)
-        {
-            return number + instance.ToString();
+            new JintEngine().Execute(script);
         }
 
         [Test]
         public void ShouldNotWrapJsInstancesIfExpected()
         {
             var engine = CreateContext(Assert.Fail)
-                .SetFunction("evaluate", new Func<double, object, string>(GiveMeJavascript));
+                .SetFunction("evaluate", new Func<object>(() => JsUndefined.Instance));
 
             const string script = @"
-                var r = evaluate(3, [1,2]);
+                var r = evaluate();
                 return r;
             ";
 
-            var r = engine.Run(script, false);
-
-            Assert.IsTrue(r is object);
-            Assert.AreEqual("31,2", r.ToString());
+            Assert.IsTrue(engine.Execute(script, false) is JsUndefined);
+            Assert.IsTrue(engine.Execute(script, true)  == null);
         }
 
         [Test]
@@ -255,7 +268,7 @@ namespace Jint.Tests.Fixtures
 
             new JintEngine()
                 .AllowClr()
-                .Run(script);
+                .Execute(script);
         }
 
         [Test]
@@ -272,7 +285,7 @@ namespace Jint.Tests.Fixtures
                 .AllowClr()
                 .SetParameter("userDir", userDirectory)
                 .AddPermission(new FileIOPermission(FileIOPermissionAccess.PathDiscovery, userDirectory))
-                .Run(script);
+                .Execute(script);
         }
 
         [Test]
@@ -291,7 +304,7 @@ namespace Jint.Tests.Fixtures
             var result = new JintEngine()
                 .AddPermission(new UIPermission(PermissionState.Unrestricted))
                 .AllowClr()
-                .Run(script);
+                .Execute(script);
             Assert.AreEqual("Test", result.ToString());
         }
 
@@ -300,11 +313,11 @@ namespace Jint.Tests.Fixtures
         {
             Assert.AreEqual(9d, CreateContext(Assert.Fail)
                 .SetFunction("square", new Func<double, double>(a => a * a))
-                .Run("return square(3);"));
+                .Execute("return square(3);"));
 
             CreateContext(Assert.Fail)
                 .SetFunction("print", new Action<string>(Console.Write))
-                .Run("print('hello');");
+                .Execute("print('hello');");
 
             const string script = @"
                 function square(x) { 
@@ -317,7 +330,7 @@ namespace Jint.Tests.Fixtures
             var result =
                 CreateContext(Assert.Fail)
                 .SetFunction("multiply", new Func<double, double, double>((x, y) => x * y))
-                .Run(script);
+                .Execute(script);
 
             Assert.AreEqual(16d, result);
         }
@@ -326,7 +339,7 @@ namespace Jint.Tests.Fixtures
         public void ShouldHandleDirectNewInvocation()
         {
             Assert.AreEqual("c", CreateContext(Assert.Fail)
-                .Run("return new System.Text.StringBuilder('c').ToString();"));
+                .Execute("return new System.Text.StringBuilder('c').ToString();"));
         }
 
         [Test]
@@ -341,7 +354,7 @@ namespace Jint.Tests.Fixtures
             ";
 
             Assert.AreEqual(9d, new JintEngine()
-                .Run(program));
+                .Execute(program));
         }
 
         [Test]
@@ -353,7 +366,7 @@ namespace Jint.Tests.Fixtures
                 return userObject.lastLoginTime;
             ";
 
-            object result = new JintEngine().Run(program);
+            object result = new JintEngine().Execute(program);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<DateTime>(result);
@@ -368,7 +381,7 @@ namespace Jint.Tests.Fixtures
                 return userObject.lastLoginTime;
             ";
 
-            object result = new JintEngine().Run(program);
+            object result = new JintEngine().Execute(program);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<DateTime>(result);
@@ -398,10 +411,10 @@ namespace Jint.Tests.Fixtures
         {
             var jint = new JintEngine();
 
-            jint.Run("i = 3; function square(x) { return x*x; }");
+            jint.Execute("i = 3; function square(x) { return x*x; }");
 
-            Assert.AreEqual(3d, jint.Run("return i;"));
-            Assert.AreEqual(9d, jint.Run("return square(i);"));
+            Assert.AreEqual(3d, jint.Execute("return i;"));
+            Assert.AreEqual(9d, jint.Execute("return square(i);"));
         }
 
         [Test]
@@ -413,7 +426,7 @@ namespace Jint.Tests.Fixtures
                 .SetFunction("print", new Action<string>(System.Console.WriteLine))
                 .SetParameter("foo", "native string");
 
-            jint.Run(@"
+            jint.Execute(@"
                 assert(7, foo.indexOf('string'));            
             ");
         }
@@ -429,7 +442,7 @@ namespace Jint.Tests.Fixtures
             ctx.SetParameter("foo", null);
 
             // strict equlity ecma 262.3 11.9.6 x === y: If type of (x) is null return true.
-            ctx.Run(@"
+            ctx.Execute(@"
                 assert(true, foo == null);
                 assert(true, foo === null);
             ");
@@ -441,7 +454,7 @@ namespace Jint.Tests.Fixtures
             //Strict mode enabled
             var engine = CreateContext(Assert.Fail, true, Options.Strict)
                 .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual));
-            engine.Run(@"
+            engine.Execute(@"
             try{
                 var test1=function(eval){}
                 //should not execute the next statement
@@ -464,7 +477,7 @@ namespace Jint.Tests.Fixtures
             //Strict mode disabled
             engine = CreateContext(Assert.Fail, true, Options.EcmaScript3)
                 .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual));
-            engine.Run(@"
+            engine.Execute(@"
             try{
                 var test1=function(eval){}
                 assert(true, true);
@@ -490,8 +503,8 @@ namespace Jint.Tests.Fixtures
                 .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual))
                 .SetFunction("print", new Action<string>(System.Console.WriteLine));
 
-            jint.Run(@" var g = []; function foo() { assert(0, g.length); }");
-            jint.Run(@" foo();");
+            jint.Execute(@" var g = []; function foo() { assert(0, g.length); }");
+            jint.Execute(@" foo();");
         }
 
         [Test]
@@ -502,9 +515,9 @@ namespace Jint.Tests.Fixtures
             .SetParameter("a", values)
             .AllowClr();
 
-            Assert.AreEqual(3, jint.Run("a[1];"));
-            jint.Run("a[1] = 4");
-            Assert.AreEqual(4, jint.Run("a[1];"));
+            Assert.AreEqual(3, jint.Execute("a[1];"));
+            jint.Execute("a[1] = 4");
+            Assert.AreEqual(4, jint.Execute("a[1];"));
             Assert.AreEqual(4, values[1]);
 
         }
@@ -518,9 +531,9 @@ namespace Jint.Tests.Fixtures
 
             jint.SetParameter("dic", dic);
 
-            Assert.AreEqual(1, jint.Run("return dic['a'];"));
-            jint.Run("dic['a'] = 4");
-            Assert.AreEqual(4, jint.Run("return dic['a'];"));
+            Assert.AreEqual(1, jint.Execute("return dic['a'];"));
+            jint.Execute("dic['a'] = 4");
+            Assert.AreEqual(4, jint.Execute("return dic['a'];"));
             Assert.AreEqual(4, dic["a"]);
         }
 
@@ -533,14 +546,14 @@ namespace Jint.Tests.Fixtures
 
             jint.SetParameter("box", box);
 
-            Assert.AreEqual(10, jint.Run("return box.Width"));
-            Assert.AreEqual(10, jint.Run("return box['Width']"));
+            Assert.AreEqual(10, jint.Execute("return box.Width"));
+            Assert.AreEqual(10, jint.Execute("return box['Width']"));
 
-            jint.Run("box['Height'] = 30;");
+            jint.Execute("box['Height'] = 30;");
 
             Assert.AreEqual(30, box.Height);
 
-            jint.Run("box.Height = 18;");
+            jint.Execute("box.Height = 18;");
             
             Assert.AreEqual(18, box.Height);
         }
@@ -554,14 +567,14 @@ namespace Jint.Tests.Fixtures
 
             jint.SetParameter("box", box);
 
-            Assert.AreEqual(10, jint.Run("return box.width"));
-            Assert.AreEqual(10, jint.Run("return box['width']"));
+            Assert.AreEqual(10, jint.Execute("return box.width"));
+            Assert.AreEqual(10, jint.Execute("return box['width']"));
 
-            jint.Run("box['height'] = 30;");
+            jint.Execute("box['height'] = 30;");
 
             Assert.AreEqual(30, box.height);
 
-            jint.Run("box.height = 18;");
+            jint.Execute("box.height = 18;");
 
             Assert.AreEqual(18, box.height);
 
@@ -577,7 +590,7 @@ namespace Jint.Tests.Fixtures
             jint.SetFunction("assert", new Action<object, object, string>(Assert.AreEqual));
             jint.SetParameter("box", box);
 
-            jint.Run(@"
+            jint.Execute(@"
                 assert(1, Number(box.Foo(1)));
                 assert(2, Number(box.Foo(2, null)));    
             ");
@@ -588,7 +601,7 @@ namespace Jint.Tests.Fixtures
         {
             var jint = CreateContext(Assert.Fail);
             jint.SetParameter("box", new Box());
-            jint.Run("box.Write(new Date);");
+            jint.Execute("box.Write(new Date);");
 
         }
 
@@ -597,11 +610,11 @@ namespace Jint.Tests.Fixtures
         {
             var engine = new JintEngine();
             engine.SetParameter("a", 4);
-            Assert.AreEqual(4, engine.Run("return a"));
-            Assert.AreEqual(4d, engine.Run("return 4"));
-            Assert.AreEqual(true, engine.Run("return a == 4"));
-            Assert.AreEqual(true, engine.Run("return 4 == 4"));
-            Assert.AreEqual(true, engine.Run("return a == a"));
+            Assert.AreEqual(4, engine.Execute("return a"));
+            Assert.AreEqual(4d, engine.Execute("return 4"));
+            Assert.AreEqual(true, engine.Execute("return a == 4"));
+            Assert.AreEqual(true, engine.Execute("return 4 == 4"));
+            Assert.AreEqual(true, engine.Execute("return a == a"));
         }
 
         [Test]
@@ -632,7 +645,7 @@ namespace Jint.Tests.Fixtures
                 render(contact);
             ";
 
-            engine.Run(script);
+            engine.Execute(script);
         }
 
         [Test]
@@ -640,35 +653,16 @@ namespace Jint.Tests.Fixtures
         {
             var engine = CreateContext(Assert.Fail);
 
-            Assert.AreEqual(System.String.Format("{0}", 1), engine.Run("System.String.Format('{0}', 1)"));
-            Assert.AreEqual("undefined", engine.Run("typeof thisIsNotDefined"));
-            Assert.AreEqual(System.String.Format("{0}", 1), engine.Run("System.String.Format('{0}', 1)"));
+            Assert.AreEqual(System.String.Format("{0}", 1), engine.Execute("System.String.Format('{0}', 1)"));
+            Assert.AreEqual("undefined", engine.Execute("typeof thisIsNotDefined"));
+            Assert.AreEqual(System.String.Format("{0}", 1), engine.Execute("System.String.Format('{0}', 1)"));
         }
 
         [Test]
-        public void ShouldDetectErrors()
-        {
-            string errors;
-            Assert.IsTrue(JintEngine.HasErrors("var s = @string?;", out errors));
-            Assert.IsTrue(JintEngine.HasErrors(")(----", out errors));
-        }
-
-        [Test]
-        [Ignore]
-        public void ShouldNotDetectErrors()
-        {
-            // todo: fix
-            string errors;
-            Assert.IsFalse(JintEngine.HasErrors("var s = 'bar'", out errors));
-            Assert.IsFalse(JintEngine.HasErrors("", out errors));
-            Assert.IsFalse(JintEngine.HasErrors("// comment", out errors));
-        }
-
-        [Test]
-        [ExpectedException(typeof(JintException))]
+        [ExpectedException(typeof(JsException))]
         public void RunningInvalidScriptSourceShouldThrow()
         {
-            new JintEngine().Run("var s = @string?;");
+            new JintEngine().Execute("var s = @string?;");
         }
 
         [Test]
@@ -683,7 +677,7 @@ namespace Jint.Tests.Fixtures
 
                 jint.SetFunction("foo", new Action(delegate { throw new ArgumentNullException("bar"); }));
 
-                jint.Run(@"foo();");
+                jint.Execute(@"foo();");
 
                 Assert.Fail();
             }
@@ -702,7 +696,7 @@ namespace Jint.Tests.Fixtures
 
             jint.SetFunction("callme", new Func<double, object>(x => jint.CallFunction("square", x)));
 
-            jint.Run(@"
+            jint.Execute(@"
                 square = function(x) { return x*x;}
                 assert(9, callme(3));
             ");
@@ -716,7 +710,7 @@ namespace Jint.Tests.Fixtures
                 }
             ));
 
-            jint.Run(@"
+            jint.Execute(@"
                 assert(true,callme(function() { return true; } ));
             ");
         }
@@ -729,7 +723,7 @@ namespace Jint.Tests.Fixtures
                 .SetFunction("getDouble", new Func<double>(() => { return 11.34543; }))
                 .SetFunction("getInt", new Func<int>(() => { return 13; }))
                 .SetFunction("print", new Action<string>(s => Console.WriteLine(s)))
-                .Run(@"
+                .Execute(@"
                     print( getDouble().toFixed(2) );
                     print( getInt().toFixed(2) );
                 ");

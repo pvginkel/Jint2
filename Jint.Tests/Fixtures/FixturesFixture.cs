@@ -42,7 +42,7 @@ namespace Jint.Tests.Fixtures
                 _includeCache.Add(fileName, source);
             }
 
-            engine.Run(source, fileName);
+            engine.Execute(source, fileName);
         }
 
         protected override JintEngine CreateContext(Action<string> errorAction)

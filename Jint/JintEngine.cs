@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
@@ -17,7 +15,6 @@ using Jint.Native;
 using Jint.Native.Interop;
 using Jint.Parser;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
-using TypeMarkerPhase = Jint.Bound.TypeMarkerPhase;
 
 namespace Jint
 {
@@ -27,8 +24,19 @@ namespace Jint
         private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
 
         public Options Options { get; private set; }
-        public bool IsClrAllowed { get; set; }
+        public bool IsClrAllowed { get; private set; }
+        public PermissionSet PermissionSet { get; private set; }
         internal TypeSystem TypeSystem { get; private set; }
+
+        public JsGlobal Global
+        {
+            get { return _runtime.Global; }
+        }
+
+        public JintEngine()
+            : this(Options.EcmaScript5 | Options.Strict)
+        {
+        }
 
         public JintEngine(Options options)
         {
@@ -37,332 +45,85 @@ namespace Jint
             TypeSystem = new TypeSystem();
 
             _runtime = new JintRuntime(this, Options);
-
-            ResetExpressionDump();
-        }
-
-        public PermissionSet PermissionSet { get; private set; }
-
-        /// <summary>
-        /// A global object associated with this engine instance
-        /// </summary>
-        public JsGlobal Global
-        {
-            get { return _runtime.Global; }
-        }
-
-        [DebuggerStepThrough]
-        public JintEngine()
-            : this(Options.EcmaScript5 | Options.Strict)
-        {
         }
 
         public JintEngine AllowClr()
         {
-            return AllowClr(true);
+            return SetAllowClr(true);
         }
 
-        public JintEngine AllowClr(bool allowed)
+        public JintEngine SetAllowClr(bool allowed)
         {
             IsClrAllowed = true;
-
             return this;
         }
 
-        internal static ProgramSyntax Compile(string source)
-        {
-            if (String.IsNullOrEmpty(source))
-                return null;
-
-            var lexer = new ES3Lexer(new ANTLRStringStream(source));
-            var parser = new ES3Parser(new CommonTokenStream(lexer), source);
-
-            var program = parser.Execute();
-
-            if (parser.Errors != null && parser.Errors.Count > 0)
-                throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
-
-            return program;
-        }
-
-        internal static BodySyntax CompileBlockStatements(string source)
-        {
-            BodySyntax block = null;
-            if (!string.IsNullOrEmpty(source))
-            {
-                var lexer = new ES3Lexer(new ANTLRStringStream(source));
-                var parser = new ES3Parser(new CommonTokenStream(lexer), source);
-
-                block = parser.ExecuteBlockStatements();
-
-                if (parser.Errors != null && parser.Errors.Count > 0)
-                    throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
-            }
-
-            return block;
-        }
-
-        /// <summary>
-        /// Pre-compiles the expression in order to check syntax errors.
-        /// If errors are detected, the Error property contains the message.
-        /// </summary>
-        /// <returns>True if the expression syntax is correct, otherwise False</returns>
-        public static bool HasErrors(string script, out string errors)
-        {
-            try
-            {
-                errors = null;
-                ProgramSyntax program = Compile(script);
-
-                // In case HasErrors() is called multiple times for the same expression
-                return program != null;
-            }
-            catch (Exception e)
-            {
-                errors = e.Message;
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="script">The script to execute</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(string script)
-        {
-            return Run(script, null);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="script">The script to execute</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(string script, string fileName)
-        {
-            return Run(script, true, fileName);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="program">The expression tree to execute</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        internal object Run(ProgramSyntax program, string fileName)
-        {
-            return Run(program, true, fileName);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="reader">The TextReader to read script from</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(TextReader reader, string fileName)
-        {
-            return Run(reader.ReadToEnd(), fileName);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="reader">The TextReader to read script from</param>
-        /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(TextReader reader, bool unwrap, string fileName)
-        {
-            return Run(reader.ReadToEnd(), unwrap, fileName);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="script">The script to execute</param>
-        /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(string script, bool unwrap)
-        {
-            return Run(script, unwrap, null);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="script">The script to execute</param>
-        /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        /// <exception cref="System.ArgumentException" />
-        /// <exception cref="System.Security.SecurityException" />
-        /// <exception cref="Jint.JintException" />
-        public object Run(string script, bool unwrap, string fileName)
-        {
-            if (script == null)
-                throw new
-                    ArgumentException("Script can't be null", "script");
-
-            ProgramSyntax program;
-
-            try
-            {
-                program = Compile(script);
-            }
-            catch (Exception e)
-            {
-                throw new JintException("An unexpected error occurred while parsing the script", e);
-            }
-
-            if (program == null)
-                return null;
-
-            return Run(program, unwrap, fileName);
-        }
-
-        /// <summary>
-        /// Runs a set of JavaScript statements and optionally returns a value if return is called
-        /// </summary>
-        /// <param name="program">The expression tree to execute</param>
-        /// <param name="unwrap">Whether to unwrap the returned value to a CLR instance. <value>True</value> by default.</param>
-        /// <returns>Optionally, returns a value from the scripts</returns>
-        internal object Run(ProgramSyntax program, bool unwrap, string fileName)
-        {
-            // Don't wrap exceptions while debugging to make stack traces
-            // easier to read.
-
-#if !DEBUG
-            try
-            {
-#endif
-                return CompileAndRun(program, unwrap, fileName);
-#if !DEBUG
-            }
-            catch (SecurityException)
-            {
-                throw;
-            }
-            catch (JsException e)
-            {
-                throw new JintException(e.Message, e);
-            }
-            catch (Exception e)
-            {
-                throw new JintException(e.Message, e);
-            }
-#endif
-        }
-
-        #region SetParameter overloads
-
-        /// <summary>
-        /// Defines an external object to be available inside the script
-        /// </summary>
-        /// <param name="name">Local name of the object during the execution of the script</param>
-        /// <param name="value">Available object</param>
-        /// <returns>The current JintEngine instance</returns>
         public JintEngine SetParameter(string name, object value)
         {
-            Global.GlobalScope.SetProperty(name, Global.WrapClr(value));
-
-            return this;
-        }
-
-        /// <summary>
-        /// Defines an external Double value to be available inside the script
-        /// </summary>
-        /// <param name="name">Local name of the Double value during the execution of the script</param>
-        /// <param name="value">Available Double value</param>
-        /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, double value)
-        {
-            Global.GlobalScope.SetProperty(name, value);
-
-            return this;
-        }
-
-        /// <summary>
-        /// Defines an external String instance to be available inside the script
-        /// </summary>
-        /// <param name="name">Local name of the String instance during the execution of the script</param>
-        /// <param name="value">Available String instance</param>
-        /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, string value)
-        {
             if (value == null)
-                Global.GlobalScope.SetProperty(name, JsNull.Instance);
+            {
+                value = JsNull.Instance;
+            }
             else
-                Global.GlobalScope.SetProperty(name, value);
+            {
+                switch (Type.GetTypeCode(value.GetType()))
+                {
+                    case TypeCode.Byte:
+                    case TypeCode.Decimal:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.SByte:
+                    case TypeCode.Single:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                        value = Convert.ToDouble(value);
+                        break;
 
+                    case TypeCode.Double:
+                    case TypeCode.Boolean:
+                    case TypeCode.String:
+                        break;
+
+                    case TypeCode.Char:
+                        value = new string((char)value, 1);
+                        break;
+
+                    case TypeCode.DateTime:
+                        value = Global.CreateDate((DateTime)value);
+                        break;
+
+                    default:
+                        if (!(
+                            value is JsObject ||
+                            value is JsNull ||
+                            value is JsUndefined
+                        ))
+                            value = Global.WrapClr(value);
+                        break;
+                }
+            }
+
+            Global.GlobalScope.SetProperty(name, value);
             return this;
         }
-
-        /// <summary>
-        /// Defines an external Int32 value to be available inside the script
-        /// </summary>
-        /// <param name="name">Local name of the Int32 value during the execution of the script</param>
-        /// <param name="value">Available Int32 value</param>
-        /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, int value)
-        {
-            Global.GlobalScope.SetProperty(name, Global.WrapClr(value));
-            return this;
-        }
-
-        /// <summary>
-        /// Defines an external Boolean value to be available inside the script
-        /// </summary>
-        /// <param name="name">Local name of the Boolean value during the execution of the script</param>
-        /// <param name="value">Available Boolean value</param>
-        /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, bool value)
-        {
-            Global.GlobalScope.SetProperty(name, BooleanBoxes.Box(value));
-
-            return this;
-        }
-
-        /// <summary>
-        /// Defines an external DateTime value to be available inside the script
-        /// </summary>
-        /// <param name="name">Local name of the DateTime value during the execution of the script</param>
-        /// <param name="value">Available DateTime value</param>
-        /// <returns>The current JintEngine instance</returns>
-        public JintEngine SetParameter(string name, DateTime value)
-        {
-            Global.GlobalScope.SetProperty(name, Global.CreateDate(value));
-
-            return this;
-        }
-        #endregion
 
         public JintEngine AddPermission(IPermission perm)
         {
             PermissionSet.AddPermission(perm);
-
             return this;
         }
 
-        public JintEngine SetFunction(string name, JsObject function)
+        public JintEngine DisableSecurity()
         {
-            Global.GlobalScope.SetProperty(name, function);
+            PermissionSet = new PermissionSet(PermissionState.Unrestricted);
+            return this;
+        }
 
+        public JintEngine EnableSecurity()
+        {
+            PermissionSet = new PermissionSet(PermissionState.None);
             return this;
         }
 
@@ -378,198 +139,7 @@ namespace Jint
                     @delegate
                 )
             );
-
             return this;
-        }
-
-        /// <summary>
-        /// Escapes a JavaScript string literal
-        /// </summary>
-        /// <param name="value">The string literal to escape</param>
-        /// <returns>The escaped string literal, without single quotes, back slashes and line breaks</returns>
-        public static string EscapeStringLiteral(string value)
-        {
-            return value.Replace("\\", "\\\\").Replace("'", "\\'").Replace(Environment.NewLine, "\\r\\n");
-        }
-
-        public JintEngine DisableSecurity()
-        {
-            PermissionSet = new PermissionSet(PermissionState.Unrestricted);
-            return this;
-        }
-
-        public JintEngine EnableSecurity()
-        {
-            PermissionSet = new PermissionSet(PermissionState.None);
-            return this;
-        }
-
-        private object CompileAndRun(ProgramSyntax program, bool unwrap, string fileName)
-        {
-            if (program == null)
-                throw new ArgumentNullException("program");
-
-            object result;
-
-            if (program.IsLiteral)
-            {
-                // If the whole program is a literal, there's no use in invoking
-                // the compiler.
-
-                result = Global.BuildLiteral(program);
-            }
-            else
-            {
-                PrepareTree(program);
-
-                var scriptBuilder = TypeSystem.CreateScriptBuilder(fileName);
-                var bindingVisitor = new BindingVisitor(scriptBuilder);
-
-                program.Accept(bindingVisitor);
-
-                var boundProgram = bindingVisitor.Program;
-                var resultExpressions = DefiniteAssignmentPhase.Perform(boundProgram);
-                boundProgram = ResultRewriterPhase.Perform(boundProgram, resultExpressions);
-                TypeMarkerPhase.Perform(boundProgram);
-
-                boundProgram = SquelchPhase.Perform(boundProgram);
-
-                PrintBound(boundProgram);
-
-                EnsureGlobalsDeclared(boundProgram);
-
-                var method = new CodeGenerator(this, scriptBuilder).BuildMainMethod(boundProgram);
-
-                result = method(_runtime);
-            }
-
-            return
-                result == null
-                ? null
-                : unwrap
-                    ? Global.Marshaller.MarshalJsValue<object>(result)
-                    : result;
-        }
-
-        [Conditional("DEBUG")]
-        private void PrintBound(BoundProgram program)
-        {
-            var functions = FunctionGatherer.Gather(program.Body);
-
-            var bodies = new List<BoundBody> { program.Body };
-            bodies.AddRange(functions.Select(p => p.Body));
-
-            using (var stream = File.Create("Bound Dump.txt"))
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                for (int i = 0; i < bodies.Count; i++)
-                {
-                    if (i == 0)
-                        writer.WriteLine("Program:");
-                    else
-                        writer.WriteLine("Function:");
-
-                    writer.WriteLine();
-                    new BoundTreePrettyPrintVisitor(writer).Visit(bodies[i]);
-                    writer.WriteLine();
-                }
-            }
-        }
-
-        private void EnsureGlobalsDeclared(BoundProgram program)
-        {
-            var scope = Global.GlobalScope;
-
-            foreach (var local in program.Body.Locals)
-            {
-                if (
-                    local.IsDeclared &&
-                    !scope.HasOwnProperty(local.Name)
-                )
-                    scope.DefineProperty(local.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
-            }
-        }
-
-        private void PrepareTree(SyntaxNode node)
-        {
-            node.Accept(new VariableMarkerPhase(this));
-        }
-
-        internal JsObject CompileFunction(object[] parameters)
-        {
-            if (parameters == null)
-                parameters = JsValue.EmptyArray;
-
-            var newParameters = new List<string>();
-
-            for (int i = 0; i < parameters.Length - 1; i++)
-            {
-                string arg = JsValue.ToString(parameters[i]);
-
-                foreach (string a in arg.Split(','))
-                {
-                    newParameters.Add(a.Trim());
-                }
-            }
-
-            BodySyntax newBody;
-            string sourceCode = null;
-
-            if (parameters.Length >= 1)
-            {
-                sourceCode = JsValue.ToString(parameters[parameters.Length - 1]);
-                newBody = CompileBlockStatements(sourceCode);
-            }
-            else
-            {
-                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection());
-            }
-
-            var function = new FunctionSyntax(null, newParameters, newBody, null, null);
-
-            PrepareTree(function);
-
-            var scriptBuilder = TypeSystem.CreateScriptBuilder(null);
-            var bindingVisitor = new BindingVisitor(scriptBuilder);
-
-            var boundFunction = bindingVisitor.DeclareFunction(function);
-
-            boundFunction = SquelchPhase.Perform(boundFunction);
-            DefiniteAssignmentPhase.Perform(boundFunction);
-            TypeMarkerPhase.Perform(boundFunction);
-
-            return _runtime.CreateFunction(
-                function.Name,
-                (JsFunction)Delegate.CreateDelegate(
-                    typeof(JsFunction),
-                    new CodeGenerator(this, scriptBuilder).BuildFunction(boundFunction, sourceCode)
-                ),
-                function.Parameters.ToArray()
-            );
-        }
-
-        [Conditional("DEBUG")]
-        private static void ResetExpressionDump()
-        {
-            File.WriteAllText("Dump.txt", "");
-        }
-
-        [Conditional("DEBUG")]
-        internal static void PrintExpression(Expression expression)
-        {
-            try
-            {
-                File.AppendAllText(
-                    "Dump.txt",
-                    (string)typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(expression, null),
-                    Encoding.UTF8
-                );
-            }
-            catch
-            {
-                // When permissions are set, we may not be able to access the
-                // debug view. Just swallow all exceptions here.
-            }
         }
 
         public object CallFunction(string name, params object[] arguments)
@@ -614,16 +184,44 @@ namespace Jint
             return Global.Marshaller.MarshalJsValue<object>(result);
         }
 
-        internal object Eval(object[] arguments)
+        public object ExecuteFile(string fileName)
         {
-            if (!(arguments[0] is string))
-                return arguments[0];
+            return ExecuteFile(fileName, true);
+        }
+
+        public object ExecuteFile(string fileName, bool unwrap)
+        {
+            using (var reader = File.OpenText(fileName))
+            {
+                return Execute(reader.ReadToEnd(), fileName, unwrap);
+            }
+        }
+
+        public object Execute(string script)
+        {
+            return Execute(script, null);
+        }
+
+        public object Execute(string script, string fileName)
+        {
+            return Execute(script, fileName, true);
+        }
+
+        public object Execute(string script, bool unwrap)
+        {
+            return Execute(script, null, unwrap);
+        }
+
+        public object Execute(string script, string fileName, bool unwrap)
+        {
+            if (script == null)
+                throw new ArgumentNullException("script");
 
             ProgramSyntax program;
 
             try
             {
-                program = Compile((string)arguments[0]);
+                program = Compile(script);
             }
             catch (Exception e)
             {
@@ -631,27 +229,177 @@ namespace Jint
             }
 
             if (program == null)
-                return JsNull.Instance;
+                return unwrap ? null : JsNull.Instance;
 
+            // Don't wrap exceptions while debugging to make stack traces
+            // easier to read.
+
+#if !DEBUG
             try
             {
-                return Run(program, false, null);
+#endif
+                return CompileAndRun(program, unwrap, fileName);
+#if !DEBUG
+            }
+            catch (SecurityException)
+            {
+                throw;
+            }
+            catch (JsException e)
+            {
+                throw new JintException(e.Message, e);
             }
             catch (Exception e)
             {
-                throw new JsException(JsErrorType.EvalError, e.Message);
+                throw new JintException(e.Message, e);
             }
+#endif
         }
 
-        internal int Compare(JsObject function, object x, object y)
+        internal JsObject CompileFunction(object[] parameters)
         {
-            var result = function.Execute(
-                _runtime,
-                JsNull.Instance,
-                new[] { x, y }
-            );
+            if (parameters == null)
+                parameters = JsValue.EmptyArray;
 
-            return (int)JsValue.ToNumber(result);
+            var newParameters = new List<string>();
+
+            for (int i = 0; i < parameters.Length - 1; i++)
+            {
+                string arg = JsValue.ToString(parameters[i]);
+
+                foreach (string a in arg.Split(','))
+                {
+                    newParameters.Add(a.Trim());
+                }
+            }
+
+            BodySyntax newBody;
+            string sourceCode = null;
+
+            if (parameters.Length >= 1)
+            {
+                sourceCode = JsValue.ToString(parameters[parameters.Length - 1]);
+                newBody = CompileBlockStatements(sourceCode);
+            }
+            else
+            {
+                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection());
+            }
+
+            var function = new FunctionSyntax(null, newParameters, newBody, null, null);
+
+            function.Accept(new VariableMarkerPhase(this));
+
+            var scriptBuilder = TypeSystem.CreateScriptBuilder(null);
+            var bindingVisitor = new BindingVisitor(scriptBuilder);
+
+            var boundFunction = bindingVisitor.DeclareFunction(function);
+
+            boundFunction = SquelchPhase.Perform(boundFunction);
+            DefiniteAssignmentPhase.Perform(boundFunction);
+            TypeMarkerPhase.Perform(boundFunction);
+
+            return _runtime.CreateFunction(
+                function.Name,
+                (JsFunction)Delegate.CreateDelegate(
+                    typeof(JsFunction),
+                    new CodeGenerator(this, scriptBuilder).BuildFunction(boundFunction, sourceCode)
+                ),
+                function.Parameters.ToArray()
+            );
+        }
+
+        private object CompileAndRun(ProgramSyntax program, bool unwrap, string fileName)
+        {
+            if (program == null)
+                throw new ArgumentNullException("program");
+
+            object result;
+
+            if (program.IsLiteral)
+            {
+                // If the whole program is a literal, there's no use in invoking
+                // the compiler.
+
+                result = Global.BuildLiteral(program);
+            }
+            else
+            {
+                program.Accept(new VariableMarkerPhase(this));
+
+                var scriptBuilder = TypeSystem.CreateScriptBuilder(fileName);
+                var bindingVisitor = new BindingVisitor(scriptBuilder);
+
+                program.Accept(bindingVisitor);
+
+                var boundProgram = bindingVisitor.Program;
+                var resultExpressions = DefiniteAssignmentPhase.Perform(boundProgram);
+                boundProgram = ResultRewriterPhase.Perform(boundProgram, resultExpressions);
+                TypeMarkerPhase.Perform(boundProgram);
+
+                boundProgram = SquelchPhase.Perform(boundProgram);
+
+                PrintBound(boundProgram);
+
+                EnsureGlobalsDeclared(boundProgram);
+
+                var method = new CodeGenerator(this, scriptBuilder).BuildMainMethod(boundProgram);
+
+                result = method(_runtime);
+            }
+
+            if (result == null)
+                return null;
+            if (unwrap)
+                return Global.Marshaller.MarshalJsValue<object>(result);
+
+            return result;
+        }
+
+        internal static ProgramSyntax Compile(string source)
+        {
+            if (String.IsNullOrEmpty(source))
+                return null;
+
+            var lexer = new ES3Lexer(new ANTLRStringStream(source));
+            var parser = new ES3Parser(new CommonTokenStream(lexer), source);
+
+            var program = parser.Execute();
+
+            if (parser.Errors != null && parser.Errors.Count > 0)
+                throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
+
+            return program;
+        }
+
+        internal static BodySyntax CompileBlockStatements(string source)
+        {
+            if (String.IsNullOrEmpty(source))
+                return null;
+
+            var lexer = new ES3Lexer(new ANTLRStringStream(source));
+            var parser = new ES3Parser(new CommonTokenStream(lexer), source);
+
+            var block = parser.ExecuteBlockStatements();
+
+            if (parser.Errors != null && parser.Errors.Count > 0)
+                throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
+
+            return block;
+        }
+
+        private void EnsureGlobalsDeclared(BoundProgram program)
+        {
+            var scope = Global.GlobalScope;
+
+            foreach (var local in program.Body.Locals)
+            {
+                if (
+                    local.IsDeclared &&
+                    !scope.HasOwnProperty(local.Name)
+                )
+                    scope.DefineProperty(local.Name, JsUndefined.Instance, PropertyAttributes.DontEnum);
+            }
         }
 
         internal object ResolveUndefined(string typeFullName, Type[] generics)
@@ -661,7 +409,8 @@ namespace Jint
 
             if (!String.IsNullOrEmpty(typeFullName))
             {
-                EnsureClrAllowed();
+                if (!IsClrAllowed)
+                    throw new SecurityException("Use of Clr is not allowed");
 
                 bool haveGenerics = generics != null && generics.Length > 0;
 
@@ -680,10 +429,29 @@ namespace Jint
             return new JsUndefined(typeFullName);
         }
 
-        private void EnsureClrAllowed()
+        [Conditional("DEBUG")]
+        private void PrintBound(BoundProgram program)
         {
-            if (!IsClrAllowed)
-                throw new SecurityException("Use of Clr is not allowed");
+            var functions = FunctionGatherer.Gather(program.Body);
+
+            var bodies = new List<BoundBody> { program.Body };
+            bodies.AddRange(functions.Select(p => p.Body));
+
+            using (var stream = File.Create("Bound Dump.txt"))
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                for (int i = 0; i < bodies.Count; i++)
+                {
+                    if (i == 0)
+                        writer.WriteLine("Program:");
+                    else
+                        writer.WriteLine("Function:");
+
+                    writer.WriteLine();
+                    new BoundTreePrettyPrintVisitor(writer).Visit(bodies[i]);
+                    writer.WriteLine();
+                }
+            }
         }
     }
 }

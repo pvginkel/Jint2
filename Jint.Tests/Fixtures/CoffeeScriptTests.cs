@@ -24,7 +24,7 @@ namespace Jint.Tests.Fixtures
                 "coffeescript-suite.js"
             );
 
-            return ctx.Run(File.ReadAllText(suitePath), suitePath);
+            return ctx.ExecuteFile(suitePath);
         }
 
         [TestCase("coffeescript.js")]

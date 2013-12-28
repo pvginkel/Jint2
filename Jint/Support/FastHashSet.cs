@@ -356,7 +356,7 @@ namespace Jint.Support
 
             public Entry(int index, PropertyAttributes attributes, int value, int next)
             {
-                Debug.Assert(value != null);
+                Debug.Assert(value >= 0);
 
                 _index = index;
                 _value = value * 8 | (int)attributes;
