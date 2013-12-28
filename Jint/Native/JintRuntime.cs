@@ -13,14 +13,14 @@ namespace Jint.Native
         public JsGlobal Global { get; private set; }
         public JsObject GlobalScope { get; private set; }
 
-        public JintRuntime(JintEngine engine, Options options)
+        public JintRuntime(JintEngine engine)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
 
             _engine = engine;
 
-            Global = new JsGlobal(this, engine, options);
+            Global = new JsGlobal(this, engine);
             GlobalScope = Global.GlobalScope;
         }
 

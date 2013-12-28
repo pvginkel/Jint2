@@ -79,7 +79,7 @@ namespace Jint.Native
             _values[offset] = value;
         }
 
-        public bool DeleteProperty(int index)
+        public bool DeleteProperty(int index, bool strict)
         {
             PropertyAttributes attributes;
             if (!Schema.TryGetAttributes(index, out attributes))
@@ -91,15 +91,15 @@ namespace Jint.Native
                 return true;
             }
 
-            if (_global.HasOption(Options.Strict))
-                throw new JintException("Property " + index + " isn't configurable");
+            if (strict)
+                throw new JsException(JsErrorType.TypeError, "Property " + index + " isn't configurable");
 
             return false;
         }
 
-        public bool DeleteProperty(object index)
+        public bool DeleteProperty(object index, bool strict)
         {
-            return DeleteProperty(_global.ResolveIdentifier(JsValue.ToString(index)));
+            return DeleteProperty(_global.ResolveIdentifier(JsValue.ToString(index)), strict);
         }
 
         public void DefineProperty(int index, object value, PropertyAttributes attributes)

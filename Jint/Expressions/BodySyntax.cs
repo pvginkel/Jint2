@@ -11,8 +11,9 @@ namespace Jint.Expressions
         public VariableCollection DeclaredVariables { get; private set; }
         public Closure Closure { get; set; }
         public Closure ParentClosure { get; set; }
+        public bool IsStrict { get; private set; }
 
-        public BodySyntax(BodyType bodyType, IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables)
+        public BodySyntax(BodyType bodyType, IEnumerable<SyntaxNode> statements, VariableCollection declaredVariables, bool isStrict)
             : base(statements)
         {
             if (declaredVariables == null)
@@ -20,6 +21,7 @@ namespace Jint.Expressions
 
             BodyType = bodyType;
             DeclaredVariables = declaredVariables;
+            IsStrict = isStrict;
         }
     }
 }

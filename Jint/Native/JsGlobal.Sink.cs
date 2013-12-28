@@ -49,12 +49,12 @@ namespace Jint.Native
             {
             }
 
-            public bool DeleteProperty(int index)
+            public bool DeleteProperty(int index, bool strict)
             {
                 return true;
             }
 
-            public bool DeleteProperty(object index)
+            public bool DeleteProperty(object index, bool strict)
             {
                 return true;
             }

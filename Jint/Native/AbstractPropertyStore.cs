@@ -38,14 +38,14 @@ namespace Jint.Native
             BaseStore.SetPropertyValue(index, value);
         }
 
-        public virtual bool DeleteProperty(int index)
+        public virtual bool DeleteProperty(int index, bool strict)
         {
-            return BaseStore.DeleteProperty(index);
+            return BaseStore.DeleteProperty(index, strict);
         }
 
-        public virtual bool DeleteProperty(object index)
+        public virtual bool DeleteProperty(object index, bool strict)
         {
-            return BaseStore.DeleteProperty(index);
+            return BaseStore.DeleteProperty(index, strict);
         }
 
         public virtual void DefineProperty(int index, object value, PropertyAttributes attributes)

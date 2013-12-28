@@ -23,7 +23,6 @@ namespace Jint
         private readonly JintRuntime _runtime;
         private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
 
-        public Options Options { get; private set; }
         public bool IsClrAllowed { get; private set; }
         public PermissionSet PermissionSet { get; private set; }
         internal TypeSystem TypeSystem { get; private set; }
@@ -34,17 +33,11 @@ namespace Jint
         }
 
         public JintEngine()
-            : this(Options.EcmaScript5 | Options.Strict)
         {
-        }
-
-        public JintEngine(Options options)
-        {
-            Options = options;
             PermissionSet = new PermissionSet(PermissionState.None);
             TypeSystem = new TypeSystem();
 
-            _runtime = new JintRuntime(this, Options);
+            _runtime = new JintRuntime(this);
         }
 
         public JintEngine AllowClr()
@@ -283,7 +276,7 @@ namespace Jint
             }
             else
             {
-                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection());
+                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection(), false);
             }
 
             var function = new FunctionSyntax(null, newParameters, newBody, null, null);

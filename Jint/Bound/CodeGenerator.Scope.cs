@@ -23,6 +23,7 @@ namespace Jint.Bound
             private int _tryCatchNesting;
 
             public ILBuilder IL { get; private set; }
+            public bool IsStrict { get; private set; }
             public BoundClosure Closure { get; private set; }
             public Scope Parent { get; private set; }
             public Stack<NamedLabel> BreakTargets { get; private set; }
@@ -36,9 +37,10 @@ namespace Jint.Bound
                 get { return _tryCatchNesting > 0; }
             }
 
-            public Scope(ILBuilder il, bool isFunction, BoundClosure closure, BoundVariable argumentsVariable, ITypeBuilder typeBuilder, Scope parent)
+            public Scope(ILBuilder il, bool isFunction, bool isStrict, BoundClosure closure, BoundVariable argumentsVariable, ITypeBuilder typeBuilder, Scope parent)
             {
                 IL = il;
+                IsStrict = isStrict;
                 _isFunction = isFunction;
                 Closure = closure;
                 ArgumentsVariable = argumentsVariable;

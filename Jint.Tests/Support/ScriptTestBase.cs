@@ -59,12 +59,7 @@ namespace Jint.Tests.Support
 
         protected virtual JintEngine CreateContext(Action<string> errorAction)
         {
-            return CreateContext(errorAction, Options.EcmaScript5 | Options.Strict);
-        }
-
-        protected JintEngine CreateContext(Action<string> errorAction, Options options)
-        {
-            var ctx = new JintEngine(options);
+            var ctx = new JintEngine();
 
             Action<string> failAction = Assert.Fail;
             Action<string> printAction = message => Trace.WriteLine(message);

@@ -12,18 +12,12 @@ namespace Jint.Native
         private readonly Dictionary<int, string> _identifiersByIndex = new Dictionary<int, string>();
 
         public JintEngine Engine { get; set; }
-
-        public Options Options { get; set; }
-
         public JsObject GlobalScope { get; private set; }
-
         public JsSchema RootSchema { get; private set; }
-
         internal JsObject PrototypeSink { get; private set; }
-
         internal Random Random { get; private set; }
 
-        public JsGlobal(JintRuntime runtime, JintEngine engine, Options options)
+        public JsGlobal(JintRuntime runtime, JintEngine engine)
         {
             if (runtime == null)
                 throw new ArgumentNullException("runtime");
@@ -34,7 +28,6 @@ namespace Jint.Native
 
             PrototypeSink = CreatePrototypeSink();
             RootSchema = new JsSchema();
-            Options = options;
             Engine = engine;
 
             // The Random instance is used by Math to generate random numbers.
@@ -70,11 +63,6 @@ namespace Jint.Native
         public JsObject WrapClr(object value)
         {
             return (JsObject)Marshaller.MarshalClrValue(value);
-        }
-
-        public bool HasOption(Options options)
-        {
-            return (Options & options) == options;
         }
 
         internal JsObject GetPrototype(object instance)

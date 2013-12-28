@@ -58,6 +58,7 @@ namespace Jint.Expressions
                         }
                         else if (statement.Type != SyntaxType.Empty)
                         {
+                            _isLiteral = false;
                             break;
                         }
                     }

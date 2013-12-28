@@ -92,7 +92,7 @@ namespace Jint.Native
                 var key = store.Length - 1;
                 var result = store.GetOwnProperty(key);
 
-                store.DeleteProperty(key);
+                store.DeleteProperty(key, false);
                 store.Length--;
 
                 return result;
@@ -187,11 +187,11 @@ namespace Jint.Native
                     }
                     else
                     {
-                        store.DeleteProperty(to);
+                        store.DeleteProperty(to, false);
                     }
                 }
 
-                store.DeleteProperty(store.Length - 1);
+                store.DeleteProperty(store.Length - 1, false);
                 store.Length--;
 
                 return first;

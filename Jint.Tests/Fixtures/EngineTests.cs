@@ -452,9 +452,10 @@ namespace Jint.Tests.Fixtures
         public void ShouldHandleStrictMode()
         {
             //Strict mode enabled
-            var engine = CreateContext(Assert.Fail, true, Options.Strict)
+            var engine = CreateContext(Assert.Fail, true)
                 .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual));
             engine.Execute(@"
+            'use strict';
             try{
                 var test1=function(eval){}
                 //should not execute the next statement
@@ -475,7 +476,7 @@ namespace Jint.Tests.Fixtures
             }");
 
             //Strict mode disabled
-            engine = CreateContext(Assert.Fail, true, Options.EcmaScript3)
+            engine = CreateContext(Assert.Fail, true)
                 .SetFunction("assert", new Action<object, object, string>(Assert.AreEqual));
             engine.Execute(@"
             try{

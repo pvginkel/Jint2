@@ -388,6 +388,7 @@ namespace Jint.Bound
                 scopedClosure,
                 _scope.GetArguments().ToReadOnlyArray(),
                 _scope.GetLocals().ToReadOnlyArray(),
+                syntax.IsStrict,
                 _scope.TypeManager
             );
         }

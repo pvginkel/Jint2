@@ -501,23 +501,50 @@ namespace Jint.Native
 
         public bool DeleteProperty(string index)
         {
-            return DeleteProperty(Global.ResolveIdentifier(index));
+            return DeleteProperty(index, false);
+        }
+
+        public bool DeleteProperty(string index, bool strict)
+        {
+            return DeleteProperty(Global.ResolveIdentifier(index), strict);
         }
 
         public bool DeleteProperty(int index)
         {
+            return DeleteProperty(index, false);
+        }
+
+        public bool DeleteProperty(int index, bool strict)
+        {
             if (PropertyStore != null)
-                return PropertyStore.DeleteProperty(index);
+                return PropertyStore.DeleteProperty(index, strict);
+
+            if (strict)
+                ThrowOnInvalidDelete(index);
 
             return true;
         }
 
         public bool DeleteProperty(object index)
         {
+            return DeleteProperty(index, false);
+        }
+
+        public bool DeleteProperty(object index, bool strict)
+        {
             if (PropertyStore != null)
-                return PropertyStore.DeleteProperty(index);
+                return PropertyStore.DeleteProperty(index, strict);
+
+            if (strict)
+                ThrowOnInvalidDelete(Global.ResolveIdentifier(index.ToString()));
 
             return true;
+        }
+
+        private void ThrowOnInvalidDelete(int index)
+        {
+            if (index == Id.prototype || index == Id.__proto__)
+                throw new JsException(JsErrorType.TypeError, "Property " + Global.GetIdentifier(index) + " isn't configurable");
         }
 
         public void DefineProperty(int index, JsFunction @delegate, int argumentCount, PropertyAttributes attributes)

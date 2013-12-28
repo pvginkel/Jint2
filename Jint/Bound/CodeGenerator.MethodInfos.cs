@@ -17,8 +17,8 @@ namespace Jint.Bound
         private static readonly MethodInfo _runtimeSetMemberByIndex = typeof(JintRuntime).GetMethod("SetMemberByIndex");
         private static readonly MethodInfo _concat = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
         private static readonly MethodInfo _substring = typeof(string).GetMethod("Substring", new[] { typeof(int), typeof(int) });
-        private static readonly MethodInfo _deleteByString = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(string) });
-        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(object) });
+        private static readonly MethodInfo _deleteByString = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(string), typeof(bool) });
+        private static readonly MethodInfo _deleteByInstance = typeof(JsObject).GetMethod("DeleteProperty", new[] { typeof(object), typeof(bool) });
         private static readonly MethodInfo _stringEquals = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(string) });
         private static readonly MethodInfo _runtimeGetGlobal = typeof(JintRuntime).GetProperty("Global").GetGetMethod();
         private static readonly MethodInfo _runtimeGetGlobalScope = typeof(JintRuntime).GetProperty("GlobalScope").GetGetMethod();

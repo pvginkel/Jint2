@@ -94,6 +94,7 @@ namespace Jint.Bound
                     generator.EmitBox(generator.EmitExpression(arguments[0]));
                     generator.IL.Emit(OpCodes.Castclass, typeof(JsObject));
                     generator.EmitExpression(arguments[1]);
+                    generator.IL.EmitConstant(generator._scope.IsStrict);
                     return generator.IL.EmitCall(_deleteByString);
                 };
 
@@ -103,6 +104,7 @@ namespace Jint.Bound
                     generator.EmitBox(generator.EmitExpression(arguments[0]));
                     generator.IL.Emit(OpCodes.Castclass, typeof(JsObject));
                     generator.EmitBox(generator.EmitExpression(arguments[1]));
+                    generator.IL.EmitConstant(generator._scope.IsStrict);
                     return generator.IL.EmitCall(_deleteByInstance);
                 };
 

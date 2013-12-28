@@ -13,39 +13,55 @@ namespace Jint.Parser
         {
             private List<SyntaxNode> _statements;
             private List<FunctionSyntax> _declaredFunctions;
+            private bool _hadStrict;
 
-            public List<FunctionSyntax> DeclaredFunctions
-            {
-                get
-                {
-                    if (_declaredFunctions == null)
-                        _declaredFunctions = new List<FunctionSyntax>();
-
-                    return _declaredFunctions;
-                }
-            }
+            public BodyBuilder Parent { get; private set; }
 
             public VariableCollection DeclaredVariables { get; private set; }
 
-            public List<SyntaxNode> Statements
+            public bool IsStrict
             {
                 get
                 {
-                    if (_statements == null)
-                        _statements = new List<SyntaxNode>();
-
-                    return _statements;
+                    return _hadStrict || (Parent != null && Parent.IsStrict);
                 }
             }
 
-            public BodyBuilder()
+            public BodyBuilder(BodyBuilder parent)
             {
+                Parent = parent;
                 DeclaredVariables = new VariableCollection();
+            }
+
+            public void AddStatement(SyntaxNode node)
+            {
+                if (_statements == null)
+                {
+                    _statements = new List<SyntaxNode>();
+
+                    var expressionStatement = node as ExpressionStatementSyntax;
+                    if (expressionStatement != null)
+                    {
+                        var value = expressionStatement.Expression as ValueSyntax;
+                        if (value != null)
+                            _hadStrict = value.Value is string && (string)value.Value == "use strict";
+                    }
+                }
+
+                _statements.Add(node);
+            }
+
+            public void AddDeclaredFunctions(FunctionSyntax function)
+            {
+                if (_declaredFunctions == null)
+                    _declaredFunctions = new List<FunctionSyntax>();
+
+                _declaredFunctions.Add(function);
             }
 
             public BodySyntax CreateBody(BodyType type)
             {
-                return new BodySyntax(type, GetStatements(), DeclaredVariables);
+                return new BodySyntax(type, GetStatements(), DeclaredVariables, IsStrict);
             }
 
             private IEnumerable<SyntaxNode> GetStatements()

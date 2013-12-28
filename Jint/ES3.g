@@ -1313,7 +1313,9 @@ block returns [BlockSyntax value]
 blockStatements returns [BodySyntax value]
 @init{
     var tempBody = _currentBody;
-    _currentBody = new BodyBuilder();
+    // Don't inherit _currentBody because we don't want to cascade strict
+    // in 'new Function'.
+    _currentBody = new BodyBuilder(null);
 }
 @after{
     $value = _currentBody.CreateBody(BodyType.Function);
@@ -1322,7 +1324,7 @@ blockStatements returns [BodySyntax value]
 	:
         (
             st=statement
-            { _currentBody.Statements.Add(st); }
+            { _currentBody.AddStatement(st); }
         )*
 	;
 
@@ -1883,7 +1885,7 @@ functionDeclaration returns [SyntaxNode value]
     BodySyntax body;
 }
 @after {
-    _currentBody.DeclaredFunctions.Add(new FunctionSyntax(
+    _currentBody.AddDeclaredFunctions(new FunctionSyntax(
         name,
         parameters,
         body,
@@ -1950,19 +1952,18 @@ formalParameterList returns [List<string> value]
 
 functionBody returns [BodySyntax value]
 @init{
-    var tempBody = _currentBody;
-    _currentBody = new BodyBuilder();
+    _currentBody = new BodyBuilder(_currentBody);
     var start = input.LT(1);
 }
 @after{
     $value = _currentBody.CreateBody(BodyType.Function);
-    _currentBody = tempBody;
+    _currentBody = _currentBody.Parent;
 }
 	:
         lb=LBRACE
         (
             se=sourceElement
-            { _currentBody.Statements.Add(se); }
+            { _currentBody.AddStatement(se); }
         )*
         RBRACE
 	;
@@ -1973,12 +1974,12 @@ functionBody returns [BodySyntax value]
 
 program returns [ProgramSyntax value]
 @init{
-    _currentBody = new BodyBuilder();
+    _currentBody = new BodyBuilder(null);
 }
 	:
         (
             follow=sourceElement
-            { _currentBody.Statements.Add(follow); }
+            { _currentBody.AddStatement(follow); }
         )*
         { $value = new ProgramSyntax(_currentBody.CreateBody(BodyType.Program)); }
 	;

@@ -17,7 +17,6 @@ namespace Jint.Compiler
         private const string WithPrefix = "<>with";
 #endif
 
-        private readonly bool _isStrict;
         private readonly List<BlockManager> _blocks = new List<BlockManager>();
         private readonly List<BlockManager> _pendingClosures = new List<BlockManager>();
         private BodySyntax _main;
@@ -28,8 +27,6 @@ namespace Jint.Compiler
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
-
-            _isStrict = engine.Options.HasFlag(Options.Strict);
         }
 
         public override void VisitProgram(ProgramSyntax syntax)
@@ -147,7 +144,7 @@ namespace Jint.Compiler
             Variable argumentsVariable;
             if (declaredVariables.TryGetValue(JsNames.Arguments, out argumentsVariable))
             {
-                if (_isStrict)
+                if (body.IsStrict)
                     throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
             }
             else
@@ -162,7 +159,7 @@ namespace Jint.Compiler
 
             // Check for strict mode.
 
-            if (_isStrict && declaredVariables.Contains("eval"))
+            if (body.IsStrict && declaredVariables.Contains("eval"))
                 throw new InvalidOperationException("Cannot use 'eval' as a parameter name in strict mode");
 
             // Add or mark the parameters.

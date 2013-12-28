@@ -141,7 +141,7 @@ namespace Jint.Native
             }
         }
 
-        public bool DeleteProperty(int index)
+        public bool DeleteProperty(int index, bool strict)
         {
             if (index >= 0)
             {
@@ -150,12 +150,12 @@ namespace Jint.Native
             }
 
             if (_baseStore != null)
-                return _baseStore.DeleteProperty(index);
+                return _baseStore.DeleteProperty(index, strict);
 
             return true;
         }
 
-        public bool DeleteProperty(object index)
+        public bool DeleteProperty(object index, bool strict)
         {
             int i;
             if (TryParseIndex(index, out i))
@@ -165,7 +165,7 @@ namespace Jint.Native
             }
 
             if (_baseStore != null)
-                return _baseStore.DeleteProperty(index);
+                return _baseStore.DeleteProperty(index, strict);
 
             return true;
         }

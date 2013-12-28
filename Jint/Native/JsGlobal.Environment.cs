@@ -45,13 +45,9 @@ namespace Jint.Native
             prototype.DefineProperty(Id.isPrototypeOf, ObjectFunctions.IsPrototypeOf, 1, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.propertyIsEnumerable, ObjectFunctions.PropertyIsEnumerable, 1, PropertyAttributes.DontEnum);
             prototype.DefineProperty(Id.getPrototypeOf, ObjectFunctions.GetPrototypeOf, 1, PropertyAttributes.DontEnum);
-
-            if (HasOption(Options.EcmaScript5))
-            {
-                prototype.DefineProperty(Id.defineProperty, ObjectFunctions.DefineProperty, 1, PropertyAttributes.DontEnum);
-                prototype.DefineProperty(Id.__lookupGetter__, ObjectFunctions.LookupGetter, 1, PropertyAttributes.DontEnum);
-                prototype.DefineProperty(Id.__lookupSetter__, ObjectFunctions.LookupSetter, 1, PropertyAttributes.DontEnum);
-            }
+            prototype.DefineProperty(Id.defineProperty, ObjectFunctions.DefineProperty, 1, PropertyAttributes.DontEnum);
+            prototype.DefineProperty(Id.__lookupGetter__, ObjectFunctions.LookupGetter, 1, PropertyAttributes.DontEnum);
+            prototype.DefineProperty(Id.__lookupSetter__, ObjectFunctions.LookupSetter, 1, PropertyAttributes.DontEnum);
 
             return CreateNakedFunction("Object", ObjectFunctions.Constructor, 0, prototype);
         }

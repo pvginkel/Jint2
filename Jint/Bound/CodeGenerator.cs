@@ -50,6 +50,7 @@ namespace Jint.Bound
             _scope = new Scope(
                 method.GetILBuilder(),
                 false,
+                program.Body.IsStrict,
                 program.Body.Closure,
                 null,
                 _scriptBuilder,
@@ -1157,6 +1158,7 @@ namespace Jint.Bound
             _scope = new Scope(
                 method.GetILBuilder(),
                 true,
+                function.Body.IsStrict,
                 function.Body.ScopedClosure,
                 argumentsLocal,
                 typeBuilder,

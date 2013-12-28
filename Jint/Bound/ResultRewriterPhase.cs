@@ -48,6 +48,7 @@ namespace Jint.Bound
                         body.ScopedClosure,
                         body.Arguments,
                         body.Locals,
+                        body.IsStrict,
                         body.TypeManager
                     )
                 );
@@ -181,6 +182,7 @@ namespace Jint.Bound
                     node.ScopedClosure,
                     node.Arguments,
                     node.Locals,
+                    node.IsStrict,
                     node.TypeManager
                 );
             }
