@@ -23,12 +23,6 @@ namespace Jint.Compiler
         private MarkerWithScope _withScope;
         private int _nextWithScopeIndex = 1;
 
-        public VariableMarkerPhase(JintEngine engine)
-        {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
-        }
-
         public override void VisitProgram(ProgramSyntax syntax)
         {
             // Mark all variables as global.

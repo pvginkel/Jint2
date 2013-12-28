@@ -14,14 +14,17 @@ using Jint.Expressions;
 using Jint.Native;
 using Jint.Native.Interop;
 using Jint.Parser;
+using Jint.Support;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint
 {
-    public class JintEngine
+    public partial class JintEngine
     {
         private readonly JintRuntime _runtime;
         private readonly ITypeResolver _typeResolver = CachedTypeResolver.Default;
+        private readonly Dictionary<FunctionHash, JsFunction> _cachedFunctions = new Dictionary<FunctionHash, JsFunction>();
+        private readonly Dictionary<ScriptHash, JsMain> _cachedScripts = new Dictionary<ScriptHash, JsMain>();
 
         public bool IsClrAllowed { get; private set; }
         public PermissionSet PermissionSet { get; private set; }
@@ -210,19 +213,17 @@ namespace Jint
             if (script == null)
                 throw new ArgumentNullException("script");
 
-            ProgramSyntax program;
+            var key = new ScriptHash(fileName, script);
+            JsMain @delegate;
 
-            try
+            if (!_cachedScripts.TryGetValue(key, out @delegate))
             {
-                program = Compile(script);
-            }
-            catch (Exception e)
-            {
-                throw new JsException(JsErrorType.SyntaxError, e.Message);
+                @delegate = CompileProgram(script, fileName);
+
+                _cachedScripts.Add(key, @delegate);
             }
 
-            if (program == null)
-                return unwrap ? null : JsNull.Instance;
+            object result;
 
             // Don't wrap exceptions while debugging to make stack traces
             // easier to read.
@@ -231,7 +232,8 @@ namespace Jint
             try
             {
 #endif
-                return CompileAndRun(program, unwrap, fileName);
+
+                result = @delegate(_runtime);
 #if !DEBUG
             }
             catch (SecurityException)
@@ -247,6 +249,88 @@ namespace Jint
                 throw new JintException(e.Message, e);
             }
 #endif
+
+            if (result == null)
+                return null;
+            if (unwrap)
+                return Global.Marshaller.MarshalJsValue<object>(result);
+
+            return result;
+        }
+
+        private JsMain CompileProgram(string script, string fileName)
+        {
+            ProgramSyntax program;
+
+            try
+            {
+                program = ParseProgram(script);
+
+                if (program == null)
+                    return p => JsNull.Instance;
+            }
+            catch (Exception e)
+            {
+                throw new JsException(JsErrorType.SyntaxError, e.Message);
+            }
+
+            if (program.IsLiteral)
+            {
+                // If the whole program is a literal, there's no use in invoking
+                // the compiler.
+
+                return p => Global.BuildLiteral(program);
+            }
+
+            program.Accept(new VariableMarkerPhase());
+
+            var scriptBuilder = TypeSystem.CreateScriptBuilder(fileName);
+            var bindingVisitor = new BindingVisitor(scriptBuilder);
+
+            program.Accept(bindingVisitor);
+
+            var boundProgram = bindingVisitor.Program;
+
+            var resultExpressions = DefiniteAssignmentPhase.Perform(boundProgram);
+            boundProgram = ResultRewriterPhase.Perform(boundProgram, resultExpressions);
+            TypeMarkerPhase.Perform(boundProgram);
+
+            boundProgram = SquelchPhase.Perform(boundProgram);
+
+            PrintBound(boundProgram);
+
+            EnsureGlobalsDeclared(boundProgram);
+
+            return new CodeGenerator(Global, scriptBuilder).BuildMainMethod(boundProgram);
+        }
+
+        private JsFunction CompileFunction(string sourceCode, IEnumerable<string> parameters)
+        {
+            BodySyntax newBody;
+
+            if (sourceCode == String.Empty)
+                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection(), false);
+            else
+                newBody = ParseBlockStatement(sourceCode);
+
+            var function = new FunctionSyntax(null, parameters, newBody, null, null);
+
+            function.Accept(new VariableMarkerPhase());
+
+            var scriptBuilder = TypeSystem.CreateScriptBuilder(null);
+            var bindingVisitor = new BindingVisitor(scriptBuilder);
+
+            var boundFunction = bindingVisitor.DeclareFunction(function);
+
+            DefiniteAssignmentPhase.Perform(boundFunction);
+            TypeMarkerPhase.Perform(boundFunction);
+
+            boundFunction = SquelchPhase.Perform(boundFunction);
+
+            return (JsFunction)Delegate.CreateDelegate(
+                typeof(JsFunction),
+                new CodeGenerator(Global, scriptBuilder).BuildFunction(boundFunction, sourceCode)
+            );
         }
 
         internal JsObject CompileFunction(object[] parameters)
@@ -266,90 +350,27 @@ namespace Jint
                 }
             }
 
-            BodySyntax newBody;
-            string sourceCode = null;
+            var parametersArray = newParameters.ToArray();
 
-            if (parameters.Length >= 1)
+            string sourceCode =
+                parameters.Length >= 1
+                ? JsValue.ToString(parameters[parameters.Length - 1])
+                : String.Empty;
+
+            var key = new FunctionHash(parametersArray, sourceCode);
+            JsFunction @delegate;
+
+            if (!_cachedFunctions.TryGetValue(key, out @delegate))
             {
-                sourceCode = JsValue.ToString(parameters[parameters.Length - 1]);
-                newBody = CompileBlockStatements(sourceCode);
-            }
-            else
-            {
-                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection(), false);
+                @delegate = CompileFunction(sourceCode, parametersArray);
+
+                _cachedFunctions.Add(key, @delegate);
             }
 
-            var function = new FunctionSyntax(null, newParameters, newBody, null, null);
-
-            function.Accept(new VariableMarkerPhase(this));
-
-            var scriptBuilder = TypeSystem.CreateScriptBuilder(null);
-            var bindingVisitor = new BindingVisitor(scriptBuilder);
-
-            var boundFunction = bindingVisitor.DeclareFunction(function);
-
-            boundFunction = SquelchPhase.Perform(boundFunction);
-            DefiniteAssignmentPhase.Perform(boundFunction);
-            TypeMarkerPhase.Perform(boundFunction);
-
-            return _runtime.CreateFunction(
-                function.Name,
-                (JsFunction)Delegate.CreateDelegate(
-                    typeof(JsFunction),
-                    new CodeGenerator(this, scriptBuilder).BuildFunction(boundFunction, sourceCode)
-                ),
-                function.Parameters.ToArray()
-            );
+            return _runtime.CreateFunction(null, @delegate, parametersArray);
         }
 
-        private object CompileAndRun(ProgramSyntax program, bool unwrap, string fileName)
-        {
-            if (program == null)
-                throw new ArgumentNullException("program");
-
-            object result;
-
-            if (program.IsLiteral)
-            {
-                // If the whole program is a literal, there's no use in invoking
-                // the compiler.
-
-                result = Global.BuildLiteral(program);
-            }
-            else
-            {
-                program.Accept(new VariableMarkerPhase(this));
-
-                var scriptBuilder = TypeSystem.CreateScriptBuilder(fileName);
-                var bindingVisitor = new BindingVisitor(scriptBuilder);
-
-                program.Accept(bindingVisitor);
-
-                var boundProgram = bindingVisitor.Program;
-                var resultExpressions = DefiniteAssignmentPhase.Perform(boundProgram);
-                boundProgram = ResultRewriterPhase.Perform(boundProgram, resultExpressions);
-                TypeMarkerPhase.Perform(boundProgram);
-
-                boundProgram = SquelchPhase.Perform(boundProgram);
-
-                PrintBound(boundProgram);
-
-                EnsureGlobalsDeclared(boundProgram);
-
-                var method = new CodeGenerator(this, scriptBuilder).BuildMainMethod(boundProgram);
-
-                result = method(_runtime);
-            }
-
-            if (result == null)
-                return null;
-            if (unwrap)
-                return Global.Marshaller.MarshalJsValue<object>(result);
-
-            return result;
-        }
-
-        internal static ProgramSyntax Compile(string source)
+        internal static ProgramSyntax ParseProgram(string source)
         {
             if (String.IsNullOrEmpty(source))
                 return null;
@@ -365,7 +386,7 @@ namespace Jint
             return program;
         }
 
-        internal static BodySyntax CompileBlockStatements(string source)
+        private static BodySyntax ParseBlockStatement(string source)
         {
             if (String.IsNullOrEmpty(source))
                 return null;

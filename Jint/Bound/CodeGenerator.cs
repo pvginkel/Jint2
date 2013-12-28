@@ -17,7 +17,7 @@ namespace Jint.Bound
     {
         private const string MainMethodName = "(global)";
 
-        private readonly JintEngine _engine;
+        private readonly IIdentifierManager _identifierManager;
         private readonly IScriptBuilder _scriptBuilder;
         private Scope _scope;
         private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
@@ -27,20 +27,20 @@ namespace Jint.Bound
             get { return _scope.IL; }
         }
 
-        public CodeGenerator(JintEngine engine, IScriptBuilder scriptBuilder)
+        public CodeGenerator(IIdentifierManager identifierManager, IScriptBuilder scriptBuilder)
         {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
+            if (identifierManager == null)
+                throw new ArgumentNullException("identifierManager");
             if (scriptBuilder == null)
                 throw new ArgumentNullException("scriptBuilder");
 
-            _engine = engine;
+            _identifierManager = identifierManager;
             _scriptBuilder = scriptBuilder;
 
             _scriptBuilder.CommitClosureFields();
         }
 
-        public Func<JintRuntime, object> BuildMainMethod(BoundProgram program)
+        public JsMain BuildMainMethod(BoundProgram program)
         {
             if (program == null)
                 throw new ArgumentNullException("program");
@@ -74,12 +74,7 @@ namespace Jint.Bound
 
             _scriptBuilder.Commit();
 
-            var result = (Func<JintRuntime, object>)Delegate.CreateDelegate(
-                typeof(Func<JintRuntime, object>),
-                method.Method
-            );
-
-            return result;
+            return (JsMain)Delegate.CreateDelegate(typeof(JsMain), method.Method);
         }
 
         private void EmitExceptionalReturn()
@@ -404,7 +399,7 @@ namespace Jint.Bound
             // Push the target onto the stack.
             EmitExpression(node.Expression);
             // Push the identifier onto the stack.
-            IL.EmitConstant(_engine.Global.ResolveIdentifier(node.Name));
+            IL.EmitConstant(_identifierManager.ResolveIdentifier(node.Name));
             // Push the getter onto the stack.
             if (node.GetFunction != null)
                 EmitExpression(node.GetFunction);
@@ -680,7 +675,7 @@ namespace Jint.Bound
                     _scope.EmitLoad(SpecialLocal.GlobalScope);
                     // Push the index of the local onto the stack.
                     var boundGlobal = (BoundGlobal)variable;
-                    IL.EmitConstant(_engine.Global.ResolveIdentifier(boundGlobal.Name));
+                    IL.EmitConstant(_identifierManager.ResolveIdentifier(boundGlobal.Name));
                     // Push the boxed expression onto the stack.
                     EmitBox(EmitExpression(value));
                     // Push the cache slot.
@@ -741,7 +736,7 @@ namespace Jint.Bound
 
             var constant = node.Index as BoundConstant;
             if (constant != null && constant.ValueType == BoundValueType.String)
-                EmitSetMember(node.Expression, _engine.Global.ResolveIdentifier((string)constant.Value), node.Value);
+                EmitSetMember(node.Expression, _identifierManager.ResolveIdentifier((string)constant.Value), node.Value);
             else
                 EmitSetMember(node.Expression, node.Index, node.Value);
         }
@@ -754,7 +749,7 @@ namespace Jint.Bound
 
             if (expression.ValueType == BoundValueType.Object)
             {
-                var cacheSlot = ResolveCacheSlot(expression, _engine.Global.GetIdentifier(index));
+                var cacheSlot = ResolveCacheSlot(expression, _identifierManager.GetIdentifier(index));
                 if (cacheSlot != null)
                 {
                     IL.Emit(OpCodes.Ldsflda, cacheSlot);
@@ -837,7 +832,7 @@ namespace Jint.Bound
                 _scope.EmitLoad(SpecialLocal.Runtime);
 
             EmitBox(EmitExpression(node.Expression));
-            IL.EmitConstant(_engine.Global.ResolveIdentifier(node.Index));
+            IL.EmitConstant(_identifierManager.ResolveIdentifier(node.Index));
 
             if (node.Expression.ValueType == BoundValueType.Object)
                 return IL.EmitCall(_objectHasProperty);
@@ -1249,7 +1244,7 @@ namespace Jint.Bound
 
             var constant = node.Index as BoundConstant;
             if (constant != null && constant.ValueType == BoundValueType.String)
-                return EmitGetMember(node.Expression, _engine.Global.ResolveIdentifier((string)constant.Value));
+                return EmitGetMember(node.Expression, _identifierManager.ResolveIdentifier((string)constant.Value));
 
             return EmitGetMember(node.Expression, node.Index);
         }
@@ -1264,7 +1259,7 @@ namespace Jint.Bound
 
             if (expression.ValueType == BoundValueType.Object)
             {
-                var cacheSlot = ResolveCacheSlot(expression, _engine.Global.GetIdentifier(index));
+                var cacheSlot = ResolveCacheSlot(expression, _identifierManager.GetIdentifier(index));
                 if (cacheSlot != null)
                 {
                     IL.Emit(OpCodes.Ldsflda, cacheSlot);
@@ -1296,7 +1291,7 @@ namespace Jint.Bound
                     _scope.EmitLoad(SpecialLocal.GlobalScope);
                     // Push the index onto the stack.
                     var boundGlobal = (BoundGlobal)variable;
-                    IL.EmitConstant(_engine.Global.ResolveIdentifier(boundGlobal.Name));
+                    IL.EmitConstant(_identifierManager.ResolveIdentifier(boundGlobal.Name));
                     // Emit the cache slot.
                     IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("global", boundGlobal.Name));
                     // Get the property from the global scope.

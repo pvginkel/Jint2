@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jint.Native
 {
-    public partial class JsGlobal
+    public partial class JsGlobal : IIdentifierManager
     {
         private readonly JintRuntime _runtime;
         private readonly Dictionary<string, int> _identifiersByName = new Dictionary<string, int>();
@@ -85,6 +85,11 @@ namespace Jint.Native
             throw new InvalidOperationException();
         }
 
+        int IIdentifierManager.ResolveIdentifier(string name)
+        {
+            return ResolveIdentifier(name);
+        }
+
         internal int ResolveIdentifier(string name)
         {
             if (name == null)
@@ -107,6 +112,11 @@ namespace Jint.Native
             // array indexes.
 
             return -result;
+        }
+
+        string IIdentifierManager.GetIdentifier(int index)
+        {
+            return GetIdentifier(index);
         }
 
         internal string GetIdentifier(int index)

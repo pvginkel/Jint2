@@ -36,10 +36,10 @@ namespace Jint.Tests.DefiniteAssignment
 
         private static BoundProgram Compile(string script)
         {
-            var programSyntax = JintEngine.Compile(script);
+            var programSyntax = JintEngine.ParseProgram(script);
 
             var engine = new JintEngine();
-            programSyntax.Accept(new VariableMarkerPhase(engine));
+            programSyntax.Accept(new VariableMarkerPhase());
 
             var visitor = new BindingVisitor(engine.TypeSystem.CreateScriptBuilder(null));
 
