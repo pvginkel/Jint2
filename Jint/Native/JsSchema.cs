@@ -56,7 +56,7 @@ namespace Jint.Native
 
             // Check whether we already have a transformation.
             if (_transformations != null)
-                schema = _transformations.GetValue(MakeAddIndex(index, attributes));
+                schema = _transformations.GetValue(MakeIndex(index, attributes));
 
             int newOffset;
 
@@ -84,7 +84,7 @@ namespace Jint.Native
                 if (_transformations == null)
                     _transformations = new SchemaTransformationHashSet();
 
-                _transformations.Add(MakeAddIndex(index, attributes), schema);
+                _transformations.Add(MakeIndex(index, attributes), schema);
             }
             else
             {
@@ -104,7 +104,7 @@ namespace Jint.Native
             return schema;
         }
 
-        private static int MakeAddIndex(int index, PropertyAttributes attributes)
+        private static int MakeIndex(int index, PropertyAttributes attributes)
         {
             return index * 8 + (int)attributes;
         }
@@ -121,7 +121,7 @@ namespace Jint.Native
             
             // Check whether we already have a transformation.
             if (_transformations != null)
-                schema = _transformations.GetValue(index);
+                schema = _transformations.GetValue(MakeIndex(index, 0));
 
             // Build the new schema if we don't have it yet and add it to the
             // list of transformations.
@@ -141,7 +141,7 @@ namespace Jint.Native
                 if (_transformations == null)
                     _transformations = new SchemaTransformationHashSet();
 
-                _transformations.Add(index, schema);
+                _transformations.Add(MakeIndex(index, 0), schema);
             }
 
             // Apply the transformation to the values array.
