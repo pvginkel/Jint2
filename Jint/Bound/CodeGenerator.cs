@@ -425,12 +425,20 @@ namespace Jint.Bound
 
         private void EmitBreak(BoundBreak node)
         {
-            IL.Emit(OpCodes.Br, FindLabelTarget(_scope.BreakTargets, node.Target).Label);
+            EmitBreakContinue(FindLabelTarget(_scope.BreakTargets, node.Target));
         }
 
         private void EmitContinue(BoundContinue node)
         {
-            IL.Emit(OpCodes.Br, FindLabelTarget(_scope.ContinueTargets, node.Target).Label);
+            EmitBreakContinue(FindLabelTarget(_scope.ContinueTargets, node.Target));
+        }
+
+        private void EmitBreakContinue(NamedLabel label)
+        {
+            if (_scope.InTryCatch)
+                IL.Emit(OpCodes.Leave, label.Label);
+            else
+                IL.Emit(OpCodes.Br, label.Label);
         }
 
         private NamedLabel FindLabelTarget(Stack<NamedLabel> targets, string label)

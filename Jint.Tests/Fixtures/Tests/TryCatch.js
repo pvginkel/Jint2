@@ -115,3 +115,19 @@ finally {
 
 assert(2, catch3);
 assert(2, finally1);
+
+function emitLeave() {
+    for (var i = 0; i < 10; i++) {
+        try {
+            continue;
+        }
+        catch (e) {
+            if (i > 0)
+                break;
+        }
+
+        i++;
+    }
+}
+
+emitLeave();
