@@ -11,15 +11,15 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\access-fannkuch.js";
+            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\controlflow-recursive.js";
 
             var jint = new JintEngine();
 
 #if false
-            jint.Run(program, fileName);
+            jint.ExecuteFile(fileName);
             Console.WriteLine("Attach");
             Console.ReadLine();
-            jint.Run(program, fileName);
+            jint.ExecuteFile(fileName);
 #else
 
             jint.ExecuteFile(fileName);
@@ -32,13 +32,15 @@ namespace Jint.Play
 
             for (int i = 0; ; i++)
             {
-                GC.Collect();
+                long memoryBefore = GC.GetTotalMemory(true);
 
                 var stopwatch = Stopwatch.StartNew();
 
                 jint.ExecuteFile(fileName);
 
                 var elapsed = stopwatch.Elapsed;
+
+                long memoryAfter = GC.GetTotalMemory(false);
 
                 times[timeOffset++] = elapsed;
                 if (timeOffset == times.Length)
@@ -52,14 +54,41 @@ namespace Jint.Play
                         lowest = average;
 
                     Console.WriteLine(
-                        "This run: {0}, average: {1}, lowest: {2}",
+                        "This run: {0}, average: {1}, lowest: {2}, memory usage: {3}",
                         elapsed.ToString("s\\.fffff"),
                         average.ToString("s\\.fffff"),
-                        lowest.ToString("s\\.fffff")
+                        lowest.ToString("s\\.fffff"),
+                        NiceMemory(memoryAfter - memoryBefore)
                     );
                 }
             }
 #endif
+        }
+
+        private static object NiceMemory(long bytes)
+        {
+            double value = bytes;
+            if (value > 1024)
+            {
+                value /= 1024;
+
+                if (value > 1024)
+                {
+                    value /= 1024;
+
+                    if (value > 1024)
+                    {
+                        value /= 1024;
+                        return value.ToString("0.0") + "Gb";
+                    }
+
+                    return value.ToString("0.0") + "Mb";
+                }
+
+                return value.ToString("0.0") + "Kb";
+            }
+
+            return bytes + "b";
         }
     }
 }

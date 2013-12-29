@@ -151,12 +151,14 @@ namespace Jint.Native
             /// </summary>
             public static object Eval(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                if (!(arguments[0] is string))
+                if (arguments.Length == 0)
+                    return JsNull.Instance;
+                if (arguments[0].GetJsType() != JsType.String)
                     return arguments[0];
 
                 try
                 {
-                    return runtime.Global.Engine.Execute((string)arguments[0], false);
+                    return runtime.Global.Engine.Execute(arguments[0].ToString(), false);
                 }
                 catch (JsException e)
                 {

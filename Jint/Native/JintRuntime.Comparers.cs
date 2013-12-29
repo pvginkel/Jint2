@@ -50,38 +50,38 @@ namespace Jint.Native
         {
             if (JsValue.IsClr(left) && JsValue.IsClr(right))
                 return JsValue.UnwrapValue(left).Equals(JsValue.UnwrapValue(right));
-            if (left.GetType() == right.GetType())
+
+            var leftType = left.GetJsType();
+            var rightType = right.GetJsType();
+
+            if (leftType == rightType)
             {
                 // If both are Objects but then only one is CLR
-                if (JsValue.IsUndefined(left))
-                    return true;
-                if (JsValue.IsNull(left))
-                    return true;
-
-                if (left is double)
-                    return (double)left == (double)right;
-                string leftString = left as string;
-                if (leftString != null)
-                    return leftString == (string)right;
-                if (left is bool)
-                    return (bool)left == (bool)right;
-                if (left is JsObject)
-                    return left == right;
-                return JsValue.UnwrapValue(left).Equals(JsValue.UnwrapValue(right));
+                switch (leftType)
+                {
+                    case JsType.Undefined:
+                    case JsType.Null: return true;
+                    case JsType.Number: return (double)left == (double)right;
+                    case JsType.String: return left.ToString() == right.ToString();
+                    case JsType.Boolean: return (bool)left == (bool)right;
+                    case JsType.Object: return left == right;
+                    default: return JsValue.UnwrapValue(left).Equals(JsValue.UnwrapValue(right));
+                }
             }
-            if (JsValue.IsNull(left) && JsValue.IsUndefined(right))
+
+            if (leftType == JsType.Null && rightType == JsType.Undefined)
                 return true;
-            if (JsValue.IsUndefined(left) && JsValue.IsNull(right))
+            if (leftType == JsType.Undefined && rightType == JsType.Null)
                 return true;
-            if (left is double && right is string)
+            if (leftType == JsType.Number && rightType == JsType.String)
                 return (double)left == JsValue.ToNumber(right);
-            if (left is string && right is double)
+            if (leftType == JsType.String && rightType == JsType.Null)
                 return JsValue.ToNumber(left) == JsValue.ToNumber(right);
-            if (left is bool || right is bool)
+            if (leftType == JsType.Boolean || rightType == JsType.Boolean)
                 return JsValue.ToNumber(left) == JsValue.ToNumber(right);
-            if (right is JsObject && (left is string || left is double))
+            if (rightType == JsType.Object && (leftType == JsType.String || leftType == JsType.Number))
                 return CompareEquality(left, JsValue.ToPrimitive(right));
-            if (left is JsObject && (right is string || right is double))
+            if (leftType == JsType.Object && (rightType == JsType.String || rightType == JsType.Number))
                 return CompareEquality(JsValue.ToPrimitive(left), right);
             return false;
         }
@@ -104,20 +104,6 @@ namespace Jint.Native
             return false;
         }
 
-        private static bool CompareEquality(object left, string right)
-        {
-            string leftString = left as string;
-            if (leftString != null)
-                return leftString == right;
-            if (left is double)
-                return (double)left == JsConvert.ToNumber(right);
-            if (left is bool)
-                return JsConvert.ToNumber((bool)left) == JsConvert.ToNumber(right);
-            if (left is JsObject)
-                return CompareEquality(JsValue.ToPrimitive(left), right);
-            return false;
-        }
-
         private static bool CompareEquality(bool left, object right)
         {
             if (right is bool)
@@ -130,20 +116,15 @@ namespace Jint.Native
             return JsConvert.ToNumber(left) == right;
         }
 
-        private static bool CompareEquality(bool left, string right)
-        {
-            return JsConvert.ToNumber(left) == JsConvert.ToNumber(right);
-        }
-
         private static bool CompareEquality(double left, object right)
         {
-            if (right is double)
-                return left == (double)right;
-            if (right is string)
-                return left == JsValue.ToNumber(right);
-            if (right is JsObject)
-                return CompareEquality(left, JsValue.ToPrimitive(right));
-            return false;
+            switch (right.GetJsType())
+            {
+                case JsType.Number: return left == (double)right;
+                case JsType.String: return left == JsValue.ToNumber(right);
+                case JsType.Object: return CompareEquality(left, JsValue.ToPrimitive(right));
+                default: return false;
+            }
         }
 
         private static bool CompareEquality(double left, bool right)
@@ -151,49 +132,23 @@ namespace Jint.Native
             return left == JsConvert.ToNumber(right);
         }
 
-        private static bool CompareEquality(double left, string right)
-        {
-            return left == JsConvert.ToNumber(right);
-        }
-
-        private static bool CompareEquality(string left, object right)
-        {
-            string rightString = right as string;
-            if (rightString != null)
-                return left == rightString;
-            if (right is double)
-                return JsConvert.ToNumber(left) == (double)right;
-            if (right is bool)
-                return JsConvert.ToNumber(left) == JsConvert.ToNumber((bool)right);
-            if (right is JsObject)
-                return CompareEquality(left, JsValue.ToPrimitive(right));
-            return false;
-        }
-
-        private static bool CompareEquality(string left, bool right)
-        {
-            return JsConvert.ToNumber(left) == JsConvert.ToNumber(right);
-        }
-
-        private static bool CompareEquality(string left, double right)
-        {
-            return JsConvert.ToNumber(left) == right;
-        }
-
         public static bool CompareSame(object left, object right)
         {
-            if (left.GetType() != right.GetType())
+            var leftType = left.GetJsType();
+            var rightType = right.GetJsType();
+
+            if (leftType != rightType)
                 return false;
-            if (JsValue.IsNullOrUndefined(left))
-                return true;
-            if (left is double)
-                return (double)left == JsValue.ToNumber(right);
-            string leftString = left as string;
-            if (leftString != null)
-                return leftString == JsValue.ToString(right);
-            if (left is bool)
-                return (bool)left == JsValue.ToBoolean(right);
-            return left == right;
+
+            switch (leftType)
+            {
+                case JsType.Null:
+                case JsType.Undefined: return true;
+                case JsType.Number: return (double)left == JsValue.ToNumber(right);
+                case JsType.String: return left.ToString() == JsValue.ToString(right);
+                case JsType.Boolean: return (bool)left == JsValue.ToBoolean(right);
+                default: return left == right;
+            }
         }
 
         private static bool CompareSame(object left, bool right)
@@ -210,14 +165,6 @@ namespace Jint.Native
             return false;
         }
 
-        private static bool CompareSame(object left, string right)
-        {
-            string leftString = left as string;
-            if (leftString != null)
-                return leftString == right;
-            return false;
-        }
-
         private static bool CompareSame(bool left, object right)
         {
             if (right is bool)
@@ -230,11 +177,6 @@ namespace Jint.Native
             return false;
         }
 
-        private static bool CompareSame(bool left, string right)
-        {
-            return false;
-        }
-
         private static bool CompareSame(double left, object right)
         {
             if (right is double)
@@ -243,29 +185,6 @@ namespace Jint.Native
         }
 
         private static bool CompareSame(double left, bool right)
-        {
-            return false;
-        }
-
-        private static bool CompareSame(double left, string right)
-        {
-            return false;
-        }
-
-        private static bool CompareSame(string left, object right)
-        {
-            string rightString = right as string;
-            if (rightString != null)
-                return left == rightString;
-            return false;
-        }
-
-        private static bool CompareSame(string left, bool right)
-        {
-            return false;
-        }
-
-        private static bool CompareSame(string left, double right)
         {
             return false;
         }

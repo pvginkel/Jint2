@@ -21,18 +21,14 @@ namespace Jint.Native
                     var argument = arguments[0];
 
                     var global = runtime.Global;
-                    JsObject result;
 
-                    if (argument is string)
-                        result = global.CreateObject(argument, global.StringClass);
-                    else if (argument is double)
-                        result = global.CreateObject((double)argument, global.NumberClass);
-                    else if (argument is bool)
-                        result = global.CreateObject(argument, global.BooleanClass);
-                    else
-                        return argument;
-
-                    return result;
+                    switch (argument.GetJsType())
+                    {
+                        case JsType.String: return global.CreateObject(argument, global.StringClass);
+                        case JsType.Number: return global.CreateObject((double)argument, global.NumberClass);
+                        case JsType.Boolean: return global.CreateObject(argument, global.BooleanClass);
+                        default: return argument;
+                    }
                 }
 
                 var obj = runtime.Global.CreateObject(callee.Prototype);

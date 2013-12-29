@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jint {
     public interface ITypeResolver {
-        Type ResolveType(string fullname);
+        Type ResolveType(string fullName);
 
     }
 }

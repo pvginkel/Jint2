@@ -45,6 +45,8 @@ namespace Jint.Bound
                 case TypeCode.Double: return BoundValueType.Number;
                 case TypeCode.String: return BoundValueType.String;
                 default:
+                    if (self == typeof(JsString))
+                        return BoundValueType.String;
                     if (self == typeof(void))
                         return BoundValueType.Unset;
                     if (typeof(JsObject).IsAssignableFrom(self))

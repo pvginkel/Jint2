@@ -22,21 +22,21 @@ namespace Jint
             }
         }
 
-        public Type ResolveType(string fullname)
+        public Type ResolveType(string fullName)
         {
             _lock.AcquireReaderLock(Timeout.Infinite);
 
             try
             {
-                if (_cache.ContainsKey(fullname))
+                if (_cache.ContainsKey(fullName))
                 {
-                    return _cache[fullname];
+                    return _cache[fullName];
                 }
 
                 Type type = null;
                 foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    type = a.GetType(fullname, false, false);
+                    type = a.GetType(fullName, false, false);
 
                     if (type != null)
                     {
@@ -46,7 +46,7 @@ namespace Jint
 
                 _lock.UpgradeToWriterLock(Timeout.Infinite);
 
-                _cache.Add(fullname, type);
+                _cache.Add(fullName, type);
                 return type;
 
             }

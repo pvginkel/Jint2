@@ -12,49 +12,70 @@ namespace Jint.Native
     {
         public static object Operation_Add(object left, object right)
         {
+            if (left is double && right is double)
+                return (double)left + (double)right;
+
             var leftPrimitive = JsValue.ToPrimitive(left);
             var rightPrimitive = JsValue.ToPrimitive(right);
 
-            if (leftPrimitive is string || rightPrimitive is string)
-                return JsValue.ToString(leftPrimitive) + JsValue.ToString(rightPrimitive);
+            var leftJsString = leftPrimitive as JsString;
+            if (leftJsString != null)
+                return JsString.Concat(leftJsString, rightPrimitive);
+            var rightJsString = rightPrimitive as JsString;
+            if (rightJsString != null)
+                return JsString.Concat(leftPrimitive, rightJsString);
+
+            var leftString = leftPrimitive as string;
+            if (leftString != null)
+                return JsString.Concat(leftString, rightPrimitive);
+            var rightString = rightPrimitive as string;
+            if (rightString != null)
+                return JsString.Concat(leftPrimitive, rightString);
 
             return JsValue.ToNumber(leftPrimitive) + JsValue.ToNumber(rightPrimitive);
         }
 
-        public static string Operation_Add(string left, object right)
-        {
-            return left + JsValue.ToString(JsValue.ToPrimitive(right));
-        }
-
-        public static string Operation_Add(object left, string right)
-        {
-            return JsValue.ToString(JsValue.ToPrimitive(left)) + right;
-        }
-
         public static object Operation_Add(double left, object right)
         {
+            if (right is double)
+                return left + (double)right;
+
             var rightPrimitive = JsValue.ToPrimitive(right);
+
+            var rightJsString = rightPrimitive as JsString;
+            if (rightJsString != null)
+                return JsString.Concat(left.ToString(CultureInfo.InvariantCulture), rightJsString);
 
             string rightString = rightPrimitive as string;
             if (rightString != null)
-                return left.ToString(CultureInfo.InvariantCulture) + rightString;
+                return JsString.Concat(left.ToString(CultureInfo.InvariantCulture), rightString);
 
             return left + JsValue.ToNumber(rightPrimitive);
         }
 
         public static object Operation_Add(object left, double right)
         {
+            if (left is double)
+                return (double)left + right;
+
             var leftPrimitive = JsValue.ToPrimitive(left);
+
+            var leftJsString = leftPrimitive as JsString;
+            if (leftJsString != null)
+                return JsString.Concat(leftJsString, right.ToString(CultureInfo.InvariantCulture));
 
             string leftString = leftPrimitive as string;
             if (leftString != null)
-                return leftString + right.ToString(CultureInfo.InvariantCulture);
+                return JsString.Concat(leftString, right.ToString(CultureInfo.InvariantCulture));
 
             return JsValue.ToNumber(leftPrimitive) + right;
         }
 
         public static double Operation_BitwiseAnd(object left, object right)
         {
+            if (left is double && right is double)
+                return (long)(double)left & (long)(double)right;
+
             if (JsValue.IsUndefined(left) || JsValue.IsUndefined(right))
                 return 0;
 
@@ -71,6 +92,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseAnd(object left, double right)
         {
+            if (left is double)
+                return (long)(double)left & (long)right;
+
             if (JsValue.IsUndefined(left))
                 return 0;
 
@@ -79,6 +103,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseExclusiveOr(object left, object right)
         {
+            if (left is double && right is double)
+                return (long)(double)left ^ (long)(double)right;
+
             if (JsValue.IsUndefined(left))
             {
                 if (JsValue.IsUndefined(right))
@@ -95,6 +122,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseExclusiveOr(double left, object right)
         {
+            if (right is double)
+                return (long)left ^ (long)(double)right;
+
             if (JsValue.IsUndefined(right))
                 return (long)left;
 
@@ -103,6 +133,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseExclusiveOr(object left, double right)
         {
+            if (left is double)
+                return (long)(double)left ^ (long)right;
+
             if (JsValue.IsUndefined(left))
                 return (long)right;
 
@@ -111,6 +144,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseNot(object operand)
         {
+            if (operand is double)
+                return Operation_BitwiseNot((double)operand);
+
             var number = JsValue.ToNumber(JsValue.ToPrimitive(operand));
 
             if (Double.IsNaN(number) || Double.IsInfinity(number))
@@ -129,6 +165,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseOr(object left, object right)
         {
+            if (left is double && right is double)
+                return (long)(double)left | (long)(double)right;
+
             if (JsValue.IsUndefined(left))
             {
                 if (JsValue.IsUndefined(right))
@@ -145,6 +184,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseOr(double left, object right)
         {
+            if (right is double)
+                return (long)left | (long)(double)right;
+
             if (JsValue.IsUndefined(right))
                 return (long)left;
 
@@ -153,6 +195,9 @@ namespace Jint.Native
 
         public static double Operation_BitwiseOr(object left, double right)
         {
+            if (left is double)
+                return (long)(double)left | (long)right;
+
             if (JsValue.IsUndefined(left))
                 return (long)right;
 
@@ -161,16 +206,25 @@ namespace Jint.Native
 
         public static double Operation_Divide(object left, object right)
         {
+            if (left is double && right is double)
+                return Operation_Divide((double)left, (double)right);
+
             return Operation_Divide(JsValue.ToNumber(left), JsValue.ToNumber(right));
         }
 
         public static double Operation_Divide(double left, object right)
         {
+            if (right is double)
+                return Operation_Divide(left, (double)right);
+
             return Operation_Divide(left, JsValue.ToNumber(right));
         }
 
         public static double Operation_Divide(object left, double right)
         {
+            if (left is double)
+                return Operation_Divide((double)left, right);
+
             return Operation_Divide(JsValue.ToNumber(left), right);
         }
 
@@ -208,6 +262,14 @@ namespace Jint.Native
 
         public static double Operation_LeftShift(object left, object right)
         {
+            if (left is double && right is double)
+                return (long)(double)left << (ushort)(double)right;
+
+            return OperationSow_LeftShift(left, right);
+        }
+
+        private static double OperationSow_LeftShift(object left, object right)
+        {
             if (JsValue.IsUndefined(left))
                 return 0;
             if (JsValue.IsUndefined(right))
@@ -217,6 +279,9 @@ namespace Jint.Native
 
         public static double Operation_LeftShift(double left, object right)
         {
+            if (right is double)
+                return (long)left << (ushort)(double)right;
+
             if (JsValue.IsUndefined(right))
                 return (long)left;
             return (long)left << (ushort)JsValue.ToNumber(right);
@@ -224,6 +289,9 @@ namespace Jint.Native
 
         public static double Operation_LeftShift(object left, double right)
         {
+            if (left is double)
+                return (long)(double)left << (ushort)right;
+
             if (JsValue.IsUndefined(left))
                 return 0;
             return (long)JsValue.ToNumber(left) << (ushort)right;
@@ -231,6 +299,9 @@ namespace Jint.Native
 
         public static double Operation_Modulo(object left, object right)
         {
+            if (left is double && right is double)
+                return Operation_Modulo((double)left, (double)right);
+
             double rightNumber = JsValue.ToNumber(right);
             if (Double.IsInfinity(rightNumber))
                 return Double.PositiveInfinity;
@@ -241,6 +312,9 @@ namespace Jint.Native
 
         public static double Operation_Modulo(double left, object right)
         {
+            if (right is double)
+                return Operation_Modulo(left, (double)right);
+
             double rightNumber = JsValue.ToNumber(right);
             if (Double.IsInfinity(rightNumber))
                 return Double.PositiveInfinity;
@@ -249,6 +323,9 @@ namespace Jint.Native
 
         public static double Operation_Modulo(object left, double right)
         {
+            if (left is double)
+                return Operation_Modulo((double)left, right);
+
             if (Double.IsInfinity(right))
                 return Double.PositiveInfinity;
             if (right == 0)
@@ -267,36 +344,49 @@ namespace Jint.Native
 
         public static double Operation_Multiply(object left, object right)
         {
+            if (left is double && right is double)
+                return (double)left * (double)right;
+
             return JsValue.ToNumber(left) * JsValue.ToNumber(right);
         }
 
         public static double Operation_Multiply(double left, object right)
         {
+            if (right is double)
+                return left * (double)right;
+
             return left * JsValue.ToNumber(right);
         }
 
         public static double Operation_Multiply(object left, double right)
         {
-            return JsValue.ToNumber(left) * right;
-        }
+            if (left is double)
+                return (double)left * right;
 
-        public static double Operation_Multiply(double left, double right)
-        {
-            return left * right;
+            return JsValue.ToNumber(left) * right;
         }
 
         public static double Operation_Negate(object operand)
         {
+            if (operand is double)
+                return -(double)operand;
+
             return -JsValue.ToNumber(operand);
         }
 
         public static bool Operation_Not(object operand)
         {
+            if (operand is bool)
+                return !(bool)operand;
+
             return !JsValue.ToBoolean(operand);
         }
 
         public static double Operation_RightShift(object left, object right)
         {
+            if (left is double && right is double)
+                return (long)(double)left >> (ushort)(double)right;
+
             if (JsValue.IsUndefined(left))
                 return 0;
             if (JsValue.IsUndefined(right))
@@ -306,6 +396,9 @@ namespace Jint.Native
 
         public static double Operation_RightShift(double left, object right)
         {
+            if (right is double)
+                return (long)left >> (ushort)(double)right;
+
             if (JsValue.IsUndefined(right))
                 return (long)left;
             return (long)left >> (ushort)JsValue.ToNumber(right);
@@ -313,6 +406,9 @@ namespace Jint.Native
 
         public static double Operation_RightShift(object left, double right)
         {
+            if (left is double)
+                return (long)(double)left >> (ushort)right;
+
             if (JsValue.IsUndefined(left))
                 return 0;
             return (long)JsValue.ToNumber(left) >> (ushort)right;
@@ -320,16 +416,25 @@ namespace Jint.Native
 
         public static double Operation_Subtract(object left, object right)
         {
+            if (left is double && right is double)
+                return (double)left - (double)right;
+
             return JsValue.ToNumber(left) - JsValue.ToNumber(right);
         }
 
         public static double Operation_Subtract(double left, object right)
         {
+            if (right is double)
+                return left - (double)right;
+
             return left - JsValue.ToNumber(right);
         }
 
         public static double Operation_Subtract(object left, double right)
         {
+            if (left is double)
+                return (double)left - right;
+
             return JsValue.ToNumber(left) - right;
         }
 
@@ -353,11 +458,17 @@ namespace Jint.Native
 
         public static double Operation_UnaryPlus(object operand)
         {
+            if (operand is double)
+                return (double)operand;
+
             return JsValue.ToNumber(operand);
         }
 
         public static double Operation_UnsignedRightShift(object left, object right)
         {
+            if (left is double && right is double)
+                return (long)(double)left >> (ushort)(double)right;
+
             if (JsValue.IsUndefined(left))
                 return 0;
             if (JsValue.IsUndefined(right))
@@ -367,6 +478,9 @@ namespace Jint.Native
 
         public static double Operation_UnsignedRightShift(double left, object right)
         {
+            if (right is double)
+                return (long)left >> (ushort)(double)right;
+
             if (JsValue.IsUndefined(right))
                 return (long)left;
             return (long)left >> (ushort)JsValue.ToNumber(right);
@@ -374,6 +488,9 @@ namespace Jint.Native
 
         public static double Operation_UnsignedRightShift(object left, double right)
         {
+            if (left is double)
+                return (long)(double)left >> (ushort)right;
+
             if (JsValue.IsUndefined(left))
                 return 0;
             return (long)JsValue.ToNumber(left) >> (ushort)right;
@@ -385,9 +502,8 @@ namespace Jint.Native
             if (@object != null)
                 return @object.GetProperty(index);
 
-            string stringObj = obj as string;
-            if (stringObj != null && index is double)
-                return stringObj.Substring((int)(double)index, 1);
+            if (index is double && JsValue.IsString(obj))
+                return obj.ToString().Substring((int)(double)index, 1);
 
             return GetMemberOnPrototype(obj, index);
         }

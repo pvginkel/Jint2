@@ -183,6 +183,7 @@
     <Compile Include="Native\JsGenericArguments.cs" />
     <Compile Include="Native\JsMain.cs" />
     <Compile Include="Native\JsSchema.cs" />
+    <Compile Include="Native\JsString.cs" />
     <Compile Include="Native\JsValue.cs" />
     <Compile Include="Native\JsConvert.cs" />
     <Compile Include="Native\JsDelegate.cs" />

@@ -23,17 +23,30 @@ namespace Jint.Native
                 {
                     // 15.5.1 - When String is called as a function rather than as a constructor, it performs a type conversion.
                     if (arguments.Length > 0)
-                        return JsValue.ToString(arguments[0]);
+                    {
+                        var argument = arguments[0];
+                        if (JsValue.IsString(argument))
+                            return argument;
+                        return JsValue.ToString(argument);
+                    }
 
                     return String.Empty;
                 }
                 else
                 {
                     // 15.5.2 - When String is called as part of a new expression, it is a constructor: it initializes the newly created object.
-                    target.Value =
-                        arguments.Length > 0
-                        ? JsValue.ToString(arguments[0])
-                        : String.Empty;
+                    if (arguments.Length > 0)
+                    {
+                        var argument = arguments[0];
+                        if (JsValue.IsString(argument))
+                            target.Value = argument;
+                        else
+                            target.Value = JsValue.ToString(argument);
+                    }
+                    else
+                    {
+                        target.Value = String.Empty;
+                    }
 
                     return target;
                 }
@@ -64,13 +77,16 @@ namespace Jint.Native
             // 15.5.4.2
             public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
+                if (JsValue.IsString(@this))
+                    return @this;
+
                 return ((JsObject)runtime.GetMemberByIndex(@this, Id.valueOf)).Execute(runtime, @this, arguments);
             }
 
             // 15.5.4.3
             public static object ValueOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                if (@this is string)
+                if (JsValue.IsString(@this))
                     return @this;
 
                 return ((JsObject)@this).Value;
@@ -123,7 +139,7 @@ namespace Jint.Native
             // 15.5.4.6
             public static object Concat(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
 
                 sb.Append(JsValue.ToString(@this));
 
@@ -450,9 +466,10 @@ namespace Jint.Native
             public static object Substring(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 string target = JsValue.ToString(@this);
-                int start = 0, end = target.Length;
+                int start = 0;
+                int end = target.Length;
 
-                if (arguments.Length > 0 && !double.IsNaN(JsValue.ToNumber(arguments[0])))
+                if (arguments.Length > 0 && !Double.IsNaN(JsValue.ToNumber(arguments[0])))
                     start = (int)JsValue.ToNumber(arguments[0]);
 
                 if (

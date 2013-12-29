@@ -70,19 +70,15 @@ namespace Jint.Native
             if (instance == null)
                 throw new ArgumentNullException("instance");
 
-            var @object = instance as JsObject;
-            if (@object != null)
-                return @object.Prototype;
-            if (instance is string)
-                return StringClass.Prototype;
-            if (instance is double)
-                return NumberClass.Prototype;
-            if (instance is bool)
-                return BooleanClass.Prototype;
-            if (JsValue.IsUndefined(instance))
-                return PrototypeSink;
-
-            throw new InvalidOperationException();
+            switch (instance.GetJsType())
+            {
+                case JsType.Object: return ((JsObject)instance).Prototype;
+                case JsType.String: return StringClass.Prototype;
+                case JsType.Number: return NumberClass.Prototype;
+                case JsType.Boolean: return BooleanClass.Prototype;
+                case JsType.Undefined: return PrototypeSink;
+                default: throw new InvalidOperationException();
+            }
         }
 
         int IIdentifierManager.ResolveIdentifier(string name)

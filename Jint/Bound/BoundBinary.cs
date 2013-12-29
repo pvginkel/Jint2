@@ -30,9 +30,10 @@ namespace Jint.Bound
             switch (Operation)
             {
                 case BoundExpressionType.Add:
-                    if (left == BoundValueType.String || right == BoundValueType.String)
-                        return BoundValueType.String;
-                    if (left == BoundValueType.Unknown || right == BoundValueType.Unknown)
+                    if (
+                        left == BoundValueType.Unknown || left == BoundValueType.String ||
+                        right == BoundValueType.Unknown || right == BoundValueType.String
+                    )
                         return BoundValueType.Unknown;
 
                     return BoundValueType.Number;
