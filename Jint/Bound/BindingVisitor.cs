@@ -64,12 +64,39 @@ namespace Jint.Bound
 
         public BoundNode VisitAssignment(AssignmentSyntax syntax)
         {
+            var identifier = syntax.Left as IdentifierSyntax;
+            if (identifier != null)
+            {
+                switch (identifier.Target.Type)
+                {
+                    case VariableType.Undefined:
+                        var builder = new BlockBuilder(this);
+
+                        var temporary = builder.CreateTemporary();
+
+                        builder.Add((BoundStatement)VisitExpressionStatement(
+                            new ExpressionStatementSyntax(syntax.Right, SourceLocation.Missing)
+                        ));
+
+                        builder.Add(new BoundSetVariable(
+                            temporary,
+                            new BoundGetVariable(BoundMagicVariable.Undefined),
+                            SourceLocation.Missing
+                        ));
+
+                        return builder.BuildExpression(temporary, SourceLocation.Missing);
+
+                    case VariableType.This:
+                    case VariableType.Null:
+                        return BuildThrow("ReferenceError", "Invalid left-hand side in assignment");
+                }
+            }
+
             if (syntax.Operation == AssignmentOperator.Assign)
             {
                 // Name anonymous function with the name if the identifier its
                 // initialized to.
 
-                var identifier = syntax.Left as IdentifierSyntax;
                 if (identifier != null)
                 {
                     var function = syntax.Right as FunctionSyntax;

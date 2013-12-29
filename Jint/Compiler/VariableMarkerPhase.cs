@@ -238,8 +238,12 @@ namespace Jint.Compiler
             // Arguments can be re-declared (if not strict). Because of this,
             // we check arguments after resolving in a scope.
 
-            if (identifier == JsNames.This)
-                return Variable.This;
+            switch (identifier)
+            {
+                case JsNames.This: return Variable.This;
+                case JsNames.TypeNull: return Variable.Null;
+                case JsNames.TypeUndefined: return Variable.Undefined;
+            }
 
             Variable variable;
 

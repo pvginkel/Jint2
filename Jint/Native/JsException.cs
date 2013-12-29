@@ -21,6 +21,7 @@ namespace Jint.Native
         }
 
         public JsException(object value)
+            : base(value.ToString())
         {
             if (value == null)
                 throw new ArgumentNullException("value");

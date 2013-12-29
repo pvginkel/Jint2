@@ -19,10 +19,19 @@ namespace Jint.Bound
         {
             get
             {
-                if (VariableType == BoundMagicVariableType.This)
-                    return BoundValueType.Unknown;
+                switch (VariableType)
+                {
+                    case BoundMagicVariableType.Null:
+                    case BoundMagicVariableType.Undefined:
+                    case BoundMagicVariableType.This:
+                        return BoundValueType.Unknown;
 
-                return BoundValueType.Object;
+                    case BoundMagicVariableType.Global:
+                        return BoundValueType.Object;
+
+                    default:
+                        throw new InvalidOperationException();
+                }
             }
         }
 

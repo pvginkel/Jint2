@@ -11,6 +11,8 @@ namespace Jint.Expressions
         Parameter,
         Local,
         This,
+        Null,
+        Undefined,
         Arguments,
         Global,
         WithScope

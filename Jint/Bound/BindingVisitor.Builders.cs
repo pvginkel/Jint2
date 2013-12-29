@@ -65,9 +65,6 @@ namespace Jint.Bound
 
                     return builder.BuildBlock(SourceLocation.Missing);
 
-                case VariableType.This:
-                    return BuildThrow("ReferenceError", "Invalid left-hand side in assignment");
-
                 case VariableType.Local:
                 case VariableType.Arguments:
                 case VariableType.Global:
@@ -79,6 +76,13 @@ namespace Jint.Bound
                         value,
                         SourceLocation.Missing
                     );
+
+                    /*
+                    // These are handled upstream.
+                case VariableType.This:
+                case VariableType.Null:
+                case VariableType.Undefined:
+                     */
 
                 default:
                     throw new InvalidOperationException("Cannot find variable of argument");
@@ -154,7 +158,7 @@ namespace Jint.Bound
                     ),
                     // Pass the arguments (the message).
                     arguments.ToReadOnly(),
-                    ReadOnlyArray<BoundExpression>.Null
+                    ReadOnlyArray<BoundExpression>.Empty
                 ),
                 SourceLocation.Missing
             );
@@ -212,6 +216,12 @@ namespace Jint.Bound
 
                 case VariableType.This:
                     return new BoundGetVariable(BoundMagicVariable.This);
+
+                case VariableType.Null:
+                    return new BoundGetVariable(BoundMagicVariable.Null);
+
+                case VariableType.Undefined:
+                    return new BoundGetVariable(BoundMagicVariable.Undefined);
 
                 case VariableType.Local:
                 case VariableType.Arguments:

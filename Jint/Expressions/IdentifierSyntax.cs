@@ -15,13 +15,7 @@ namespace Jint.Expressions
 
         public override bool IsAssignable
         {
-            get
-            {
-                return
-                    Name != JsNames.TypeUndefined &&
-                    Name != JsNames.This &&
-                    Name != JsNames.Arguments;
-            }
+            get { return true; }
         }
 
         public string Name { get; private set; }

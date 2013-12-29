@@ -8,6 +8,8 @@ namespace Jint.Expressions
     internal class Variable
     {
         public static readonly Variable This = new Variable(VariableType.This);
+        public static readonly Variable Null = new Variable(VariableType.Null);
+        public static readonly Variable Undefined = new Variable(VariableType.Undefined);
 
         public string Name { get; private set; }
         public int Index { get; private set; }

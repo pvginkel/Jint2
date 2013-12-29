@@ -42,12 +42,10 @@ namespace Jint.Tests.Support
         {
             public override void Write(string message)
             {
-                Console.Write(message);
             }
 
             public override void WriteLine(string message)
             {
-                Console.WriteLine(message);
             }
 
             public override void Fail(string message)

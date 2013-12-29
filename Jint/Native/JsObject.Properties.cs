@@ -122,11 +122,7 @@ namespace Jint.Native
             object value = GetPropertyRaw(index);
 
             if (value == null)
-            {
-                Trace.WriteLine("Undefined identifier " + Global.GetIdentifier(index));
-
                 return ResolveUndefined(index);
-            }
 
             return ResolvePropertyValue(value);
         }
@@ -183,6 +179,10 @@ namespace Jint.Native
 
         private object ResolveUndefined(int index)
         {
+#if TRACE_UNDEFINED
+            Trace.WriteLine("Undefined identifier " + Global.GetIdentifier(index));
+#endif
+
             // If we're the global scope, perform special handling on JsUndefined.
             if (this == Global.GlobalScope)
                 return Global.Engine.ResolveUndefined(Global.GetIdentifier(index), null);
@@ -263,11 +263,7 @@ namespace Jint.Native
             object value = GetPropertyRaw(index, ref cacheSlot);
 
             if (value == null)
-            {
-                Trace.WriteLine("Undefined identifier " + Global.GetIdentifier(index));
-
                 return ResolveUndefined(index);
-            }
 
             return ResolvePropertyValue(value);
         }
