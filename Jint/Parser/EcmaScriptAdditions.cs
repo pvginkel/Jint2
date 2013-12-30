@@ -7,7 +7,7 @@ using Jint.Expressions;
 
 namespace Jint.Parser
 {
-    partial class ES3Lexer
+    partial class EcmaScriptLexer
     {
         public override void ReportError(RecognitionException e)
         {
@@ -102,21 +102,21 @@ namespace Jint.Parser
 
         private string ExtractIdentifier(string text)
         {
-            return ES3Util.ExtractString(text, false);
+            return EcmaScriptUtil.ExtractString(text, false);
         }
     }
 
-    partial class ES3Parser
+    partial class EcmaScriptParser
     {
         private readonly string _sourceCode;
 
-        public ES3Parser(ITokenStream input, string sourceCode)
+        public EcmaScriptParser(ITokenStream input, string sourceCode)
             : base(input)
         {
             _sourceCode = sourceCode;
         }
 
-        public ES3Parser(ITokenStream input, RecognizerSharedState state, string sourceCode)
+        public EcmaScriptParser(ITokenStream input, RecognizerSharedState state, string sourceCode)
             : base(input, state)
         {
             _sourceCode = sourceCode;
@@ -242,7 +242,7 @@ namespace Jint.Parser
 
         private string ExtractString(string text)
         {
-            return ES3Util.ExtractString(text, true);
+            return EcmaScriptUtil.ExtractString(text, true);
         }
 
         public List<string> Errors { get; private set; }

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Jint.Parser
 {
-    internal static class ES3Util
+    internal static class EcmaScriptUtil
     {
         private static readonly Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
         private const string ValidOctalChars = "01234567";

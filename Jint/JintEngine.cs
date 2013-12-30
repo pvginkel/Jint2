@@ -375,8 +375,8 @@ namespace Jint
             if (String.IsNullOrEmpty(source))
                 return null;
 
-            var lexer = new ES3Lexer(new ANTLRStringStream(source));
-            var parser = new ES3Parser(new CommonTokenStream(lexer), source);
+            var lexer = new EcmaScriptLexer(new ANTLRStringStream(source));
+            var parser = new EcmaScriptParser(new CommonTokenStream(lexer), source);
 
             var program = parser.Execute();
 
@@ -391,8 +391,8 @@ namespace Jint
             if (String.IsNullOrEmpty(source))
                 return null;
 
-            var lexer = new ES3Lexer(new ANTLRStringStream(source));
-            var parser = new ES3Parser(new CommonTokenStream(lexer), source);
+            var lexer = new EcmaScriptLexer(new ANTLRStringStream(source));
+            var parser = new EcmaScriptParser(new CommonTokenStream(lexer), source);
 
             var block = parser.ExecuteBlockStatements();
 

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// $ANTLR 3.3.1.7705 ..\\ES3.g 2013-12-28 11:30:02
+// $ANTLR 3.3.1.7705 EcmaScript.g 2013-12-31 00:07:37
 
 // The variable 'variable' is assigned but its value is never used.
 #pragma warning disable 219
@@ -22,7 +22,7 @@ using Antlr.Runtime;
 namespace  Jint.Parser 
 {
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "3.3.1.7705")]
-internal partial class ES3Lexer : Antlr.Runtime.Lexer
+internal partial class EcmaScriptLexer : Antlr.Runtime.Lexer
 {
 	public const int EOF=-1;
 	public const int ABSTRACT=4;
@@ -197,24 +197,24 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
     // delegates
     // delegators
 
-	public ES3Lexer()
+	public EcmaScriptLexer()
 	{
 		OnCreated();
 	}
 
-	public ES3Lexer(ICharStream input )
+	public EcmaScriptLexer(ICharStream input )
 		: this(input, new RecognizerSharedState())
 	{
 	}
 
-	public ES3Lexer(ICharStream input, RecognizerSharedState state)
+	public EcmaScriptLexer(ICharStream input, RecognizerSharedState state)
 		: base(input, state)
 	{
 
 
 		OnCreated();
 	}
-	public override string GrammarFileName { get { return "..\\ES3.g"; } }
+	public override string GrammarFileName { get { return "EcmaScript.g"; } }
 
 
 	partial void OnCreated();
@@ -235,9 +235,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ABSTRACT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:9:10: ( 'abstract' )
+			// EcmaScript.g:9:10: ( 'abstract' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:9:12: 'abstract'
+			// EcmaScript.g:9:12: 'abstract'
 			{
 			DebugLocation(9, 12);
 			Match("abstract"); 
@@ -271,9 +271,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ADD;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:10:5: ( '+' )
+			// EcmaScript.g:10:5: ( '+' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:10:7: '+'
+			// EcmaScript.g:10:7: '+'
 			{
 			DebugLocation(10, 7);
 			Match('+'); 
@@ -306,9 +306,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ADDASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:11:8: ( '+=' )
+			// EcmaScript.g:11:8: ( '+=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:11:10: '+='
+			// EcmaScript.g:11:10: '+='
 			{
 			DebugLocation(11, 10);
 			Match("+="); 
@@ -342,9 +342,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = AND;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:12:5: ( '&' )
+			// EcmaScript.g:12:5: ( '&' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:12:7: '&'
+			// EcmaScript.g:12:7: '&'
 			{
 			DebugLocation(12, 7);
 			Match('&'); 
@@ -377,9 +377,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ANDASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:13:8: ( '&=' )
+			// EcmaScript.g:13:8: ( '&=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:13:10: '&='
+			// EcmaScript.g:13:10: '&='
 			{
 			DebugLocation(13, 10);
 			Match("&="); 
@@ -413,9 +413,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ASSIGN;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:14:8: ( '=' )
+			// EcmaScript.g:14:8: ( '=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:14:10: '='
+			// EcmaScript.g:14:10: '='
 			{
 			DebugLocation(14, 10);
 			Match('='); 
@@ -448,9 +448,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = BOOLEAN;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:15:9: ( 'boolean' )
+			// EcmaScript.g:15:9: ( 'boolean' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:15:11: 'boolean'
+			// EcmaScript.g:15:11: 'boolean'
 			{
 			DebugLocation(15, 11);
 			Match("boolean"); 
@@ -484,9 +484,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = BREAK;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:16:7: ( 'break' )
+			// EcmaScript.g:16:7: ( 'break' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:16:9: 'break'
+			// EcmaScript.g:16:9: 'break'
 			{
 			DebugLocation(16, 9);
 			Match("break"); 
@@ -520,9 +520,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = BYTE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:17:6: ( 'byte' )
+			// EcmaScript.g:17:6: ( 'byte' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:17:8: 'byte'
+			// EcmaScript.g:17:8: 'byte'
 			{
 			DebugLocation(17, 8);
 			Match("byte"); 
@@ -556,9 +556,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = CASE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:18:6: ( 'case' )
+			// EcmaScript.g:18:6: ( 'case' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:18:8: 'case'
+			// EcmaScript.g:18:8: 'case'
 			{
 			DebugLocation(18, 8);
 			Match("case"); 
@@ -592,9 +592,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = CATCH;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:19:7: ( 'catch' )
+			// EcmaScript.g:19:7: ( 'catch' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:19:9: 'catch'
+			// EcmaScript.g:19:9: 'catch'
 			{
 			DebugLocation(19, 9);
 			Match("catch"); 
@@ -628,9 +628,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = CHAR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:20:6: ( 'char' )
+			// EcmaScript.g:20:6: ( 'char' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:20:8: 'char'
+			// EcmaScript.g:20:8: 'char'
 			{
 			DebugLocation(20, 8);
 			Match("char"); 
@@ -664,9 +664,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = CLASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:21:7: ( 'class' )
+			// EcmaScript.g:21:7: ( 'class' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:21:9: 'class'
+			// EcmaScript.g:21:9: 'class'
 			{
 			DebugLocation(21, 9);
 			Match("class"); 
@@ -700,9 +700,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = COLON;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:22:7: ( ':' )
+			// EcmaScript.g:22:7: ( ':' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:22:9: ':'
+			// EcmaScript.g:22:9: ':'
 			{
 			DebugLocation(22, 9);
 			Match(':'); 
@@ -735,9 +735,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = COMMA;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:23:7: ( ',' )
+			// EcmaScript.g:23:7: ( ',' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:23:9: ','
+			// EcmaScript.g:23:9: ','
 			{
 			DebugLocation(23, 9);
 			Match(','); 
@@ -770,9 +770,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = CONST;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:24:7: ( 'const' )
+			// EcmaScript.g:24:7: ( 'const' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:24:9: 'const'
+			// EcmaScript.g:24:9: 'const'
 			{
 			DebugLocation(24, 9);
 			Match("const"); 
@@ -806,9 +806,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = CONTINUE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:25:10: ( 'continue' )
+			// EcmaScript.g:25:10: ( 'continue' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:25:12: 'continue'
+			// EcmaScript.g:25:12: 'continue'
 			{
 			DebugLocation(25, 12);
 			Match("continue"); 
@@ -842,9 +842,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DEBUGGER;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:26:10: ( 'debugger' )
+			// EcmaScript.g:26:10: ( 'debugger' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:26:12: 'debugger'
+			// EcmaScript.g:26:12: 'debugger'
 			{
 			DebugLocation(26, 12);
 			Match("debugger"); 
@@ -878,9 +878,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DEC;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:27:5: ( '--' )
+			// EcmaScript.g:27:5: ( '--' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:27:7: '--'
+			// EcmaScript.g:27:7: '--'
 			{
 			DebugLocation(27, 7);
 			Match("--"); 
@@ -914,9 +914,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DEFAULT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:28:9: ( 'default' )
+			// EcmaScript.g:28:9: ( 'default' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:28:11: 'default'
+			// EcmaScript.g:28:11: 'default'
 			{
 			DebugLocation(28, 11);
 			Match("default"); 
@@ -950,9 +950,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DELETE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:29:8: ( 'delete' )
+			// EcmaScript.g:29:8: ( 'delete' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:29:10: 'delete'
+			// EcmaScript.g:29:10: 'delete'
 			{
 			DebugLocation(29, 10);
 			Match("delete"); 
@@ -986,9 +986,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DIV;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:30:5: ( '/' )
+			// EcmaScript.g:30:5: ( '/' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:30:7: '/'
+			// EcmaScript.g:30:7: '/'
 			{
 			DebugLocation(30, 7);
 			Match('/'); 
@@ -1021,9 +1021,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DIVASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:31:8: ( '/=' )
+			// EcmaScript.g:31:8: ( '/=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:31:10: '/='
+			// EcmaScript.g:31:10: '/='
 			{
 			DebugLocation(31, 10);
 			Match("/="); 
@@ -1057,9 +1057,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DO;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:32:4: ( 'do' )
+			// EcmaScript.g:32:4: ( 'do' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:32:6: 'do'
+			// EcmaScript.g:32:6: 'do'
 			{
 			DebugLocation(32, 6);
 			Match("do"); 
@@ -1093,9 +1093,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DOT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:33:5: ( '.' )
+			// EcmaScript.g:33:5: ( '.' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:33:7: '.'
+			// EcmaScript.g:33:7: '.'
 			{
 			DebugLocation(33, 7);
 			Match('.'); 
@@ -1128,9 +1128,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DOUBLE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:34:8: ( 'double' )
+			// EcmaScript.g:34:8: ( 'double' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:34:10: 'double'
+			// EcmaScript.g:34:10: 'double'
 			{
 			DebugLocation(34, 10);
 			Match("double"); 
@@ -1164,9 +1164,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ELSE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:35:6: ( 'else' )
+			// EcmaScript.g:35:6: ( 'else' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:35:8: 'else'
+			// EcmaScript.g:35:8: 'else'
 			{
 			DebugLocation(35, 8);
 			Match("else"); 
@@ -1200,9 +1200,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ENUM;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:36:6: ( 'enum' )
+			// EcmaScript.g:36:6: ( 'enum' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:36:8: 'enum'
+			// EcmaScript.g:36:8: 'enum'
 			{
 			DebugLocation(36, 8);
 			Match("enum"); 
@@ -1236,9 +1236,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = EQ;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:37:4: ( '==' )
+			// EcmaScript.g:37:4: ( '==' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:37:6: '=='
+			// EcmaScript.g:37:6: '=='
 			{
 			DebugLocation(37, 6);
 			Match("=="); 
@@ -1272,9 +1272,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = EXPORT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:38:8: ( 'export' )
+			// EcmaScript.g:38:8: ( 'export' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:38:10: 'export'
+			// EcmaScript.g:38:10: 'export'
 			{
 			DebugLocation(38, 10);
 			Match("export"); 
@@ -1308,9 +1308,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = EXTENDS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:39:9: ( 'extends' )
+			// EcmaScript.g:39:9: ( 'extends' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:39:11: 'extends'
+			// EcmaScript.g:39:11: 'extends'
 			{
 			DebugLocation(39, 11);
 			Match("extends"); 
@@ -1344,9 +1344,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = FALSE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:40:7: ( 'false' )
+			// EcmaScript.g:40:7: ( 'false' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:40:9: 'false'
+			// EcmaScript.g:40:9: 'false'
 			{
 			DebugLocation(40, 9);
 			Match("false"); 
@@ -1380,9 +1380,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = FINAL;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:41:7: ( 'final' )
+			// EcmaScript.g:41:7: ( 'final' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:41:9: 'final'
+			// EcmaScript.g:41:9: 'final'
 			{
 			DebugLocation(41, 9);
 			Match("final"); 
@@ -1416,9 +1416,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = FINALLY;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:42:9: ( 'finally' )
+			// EcmaScript.g:42:9: ( 'finally' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:42:11: 'finally'
+			// EcmaScript.g:42:11: 'finally'
 			{
 			DebugLocation(42, 11);
 			Match("finally"); 
@@ -1452,9 +1452,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = FLOAT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:43:7: ( 'float' )
+			// EcmaScript.g:43:7: ( 'float' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:43:9: 'float'
+			// EcmaScript.g:43:9: 'float'
 			{
 			DebugLocation(43, 9);
 			Match("float"); 
@@ -1488,9 +1488,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = FOR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:44:5: ( 'for' )
+			// EcmaScript.g:44:5: ( 'for' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:44:7: 'for'
+			// EcmaScript.g:44:7: 'for'
 			{
 			DebugLocation(44, 7);
 			Match("for"); 
@@ -1524,9 +1524,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = FUNCTION;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:45:10: ( 'function' )
+			// EcmaScript.g:45:10: ( 'function' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:45:12: 'function'
+			// EcmaScript.g:45:12: 'function'
 			{
 			DebugLocation(45, 12);
 			Match("function"); 
@@ -1560,9 +1560,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = GOTO;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:46:6: ( 'goto' )
+			// EcmaScript.g:46:6: ( 'goto' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:46:8: 'goto'
+			// EcmaScript.g:46:8: 'goto'
 			{
 			DebugLocation(46, 8);
 			Match("goto"); 
@@ -1596,9 +1596,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = GT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:47:4: ( '>' )
+			// EcmaScript.g:47:4: ( '>' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:47:6: '>'
+			// EcmaScript.g:47:6: '>'
 			{
 			DebugLocation(47, 6);
 			Match('>'); 
@@ -1631,9 +1631,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = GTE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:48:5: ( '>=' )
+			// EcmaScript.g:48:5: ( '>=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:48:7: '>='
+			// EcmaScript.g:48:7: '>='
 			{
 			DebugLocation(48, 7);
 			Match(">="); 
@@ -1667,9 +1667,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = IF;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:49:4: ( 'if' )
+			// EcmaScript.g:49:4: ( 'if' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:49:6: 'if'
+			// EcmaScript.g:49:6: 'if'
 			{
 			DebugLocation(49, 6);
 			Match("if"); 
@@ -1703,9 +1703,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = IMPLEMENTS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:50:12: ( 'implements' )
+			// EcmaScript.g:50:12: ( 'implements' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:50:14: 'implements'
+			// EcmaScript.g:50:14: 'implements'
 			{
 			DebugLocation(50, 14);
 			Match("implements"); 
@@ -1739,9 +1739,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = IMPORT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:51:8: ( 'import' )
+			// EcmaScript.g:51:8: ( 'import' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:51:10: 'import'
+			// EcmaScript.g:51:10: 'import'
 			{
 			DebugLocation(51, 10);
 			Match("import"); 
@@ -1775,9 +1775,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = IN;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:52:4: ( 'in' )
+			// EcmaScript.g:52:4: ( 'in' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:52:6: 'in'
+			// EcmaScript.g:52:6: 'in'
 			{
 			DebugLocation(52, 6);
 			Match("in"); 
@@ -1811,9 +1811,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = INC;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:53:5: ( '++' )
+			// EcmaScript.g:53:5: ( '++' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:53:7: '++'
+			// EcmaScript.g:53:7: '++'
 			{
 			DebugLocation(53, 7);
 			Match("++"); 
@@ -1847,9 +1847,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = INSTANCEOF;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:54:12: ( 'instanceof' )
+			// EcmaScript.g:54:12: ( 'instanceof' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:54:14: 'instanceof'
+			// EcmaScript.g:54:14: 'instanceof'
 			{
 			DebugLocation(54, 14);
 			Match("instanceof"); 
@@ -1883,9 +1883,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = INT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:55:5: ( 'int' )
+			// EcmaScript.g:55:5: ( 'int' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:55:7: 'int'
+			// EcmaScript.g:55:7: 'int'
 			{
 			DebugLocation(55, 7);
 			Match("int"); 
@@ -1919,9 +1919,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = INTERFACE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:56:11: ( 'interface' )
+			// EcmaScript.g:56:11: ( 'interface' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:56:13: 'interface'
+			// EcmaScript.g:56:13: 'interface'
 			{
 			DebugLocation(56, 13);
 			Match("interface"); 
@@ -1955,9 +1955,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = INV;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:57:5: ( '~' )
+			// EcmaScript.g:57:5: ( '~' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:57:7: '~'
+			// EcmaScript.g:57:7: '~'
 			{
 			DebugLocation(57, 7);
 			Match('~'); 
@@ -1990,9 +1990,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LAND;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:58:6: ( '&&' )
+			// EcmaScript.g:58:6: ( '&&' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:58:8: '&&'
+			// EcmaScript.g:58:8: '&&'
 			{
 			DebugLocation(58, 8);
 			Match("&&"); 
@@ -2026,9 +2026,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LBRACE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:59:8: ( '{' )
+			// EcmaScript.g:59:8: ( '{' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:59:10: '{'
+			// EcmaScript.g:59:10: '{'
 			{
 			DebugLocation(59, 10);
 			Match('{'); 
@@ -2061,9 +2061,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LBRACK;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:60:8: ( '[' )
+			// EcmaScript.g:60:8: ( '[' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:60:10: '['
+			// EcmaScript.g:60:10: '['
 			{
 			DebugLocation(60, 10);
 			Match('['); 
@@ -2096,9 +2096,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LONG;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:61:6: ( 'long' )
+			// EcmaScript.g:61:6: ( 'long' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:61:8: 'long'
+			// EcmaScript.g:61:8: 'long'
 			{
 			DebugLocation(61, 8);
 			Match("long"); 
@@ -2132,9 +2132,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LOR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:62:5: ( '||' )
+			// EcmaScript.g:62:5: ( '||' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:62:7: '||'
+			// EcmaScript.g:62:7: '||'
 			{
 			DebugLocation(62, 7);
 			Match("||"); 
@@ -2168,9 +2168,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LPAREN;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:63:8: ( '(' )
+			// EcmaScript.g:63:8: ( '(' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:63:10: '('
+			// EcmaScript.g:63:10: '('
 			{
 			DebugLocation(63, 10);
 			Match('('); 
@@ -2203,9 +2203,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:64:4: ( '<' )
+			// EcmaScript.g:64:4: ( '<' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:64:6: '<'
+			// EcmaScript.g:64:6: '<'
 			{
 			DebugLocation(64, 6);
 			Match('<'); 
@@ -2238,9 +2238,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = LTE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:65:5: ( '<=' )
+			// EcmaScript.g:65:5: ( '<=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:65:7: '<='
+			// EcmaScript.g:65:7: '<='
 			{
 			DebugLocation(65, 7);
 			Match("<="); 
@@ -2274,9 +2274,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = MOD;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:66:5: ( '%' )
+			// EcmaScript.g:66:5: ( '%' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:66:7: '%'
+			// EcmaScript.g:66:7: '%'
 			{
 			DebugLocation(66, 7);
 			Match('%'); 
@@ -2309,9 +2309,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = MODASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:67:8: ( '%=' )
+			// EcmaScript.g:67:8: ( '%=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:67:10: '%='
+			// EcmaScript.g:67:10: '%='
 			{
 			DebugLocation(67, 10);
 			Match("%="); 
@@ -2345,9 +2345,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = MUL;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:68:5: ( '*' )
+			// EcmaScript.g:68:5: ( '*' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:68:7: '*'
+			// EcmaScript.g:68:7: '*'
 			{
 			DebugLocation(68, 7);
 			Match('*'); 
@@ -2380,9 +2380,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = MULASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:69:8: ( '*=' )
+			// EcmaScript.g:69:8: ( '*=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:69:10: '*='
+			// EcmaScript.g:69:10: '*='
 			{
 			DebugLocation(69, 10);
 			Match("*="); 
@@ -2416,9 +2416,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = NATIVE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:70:8: ( 'native' )
+			// EcmaScript.g:70:8: ( 'native' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:70:10: 'native'
+			// EcmaScript.g:70:10: 'native'
 			{
 			DebugLocation(70, 10);
 			Match("native"); 
@@ -2452,9 +2452,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = NEQ;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:71:5: ( '!=' )
+			// EcmaScript.g:71:5: ( '!=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:71:7: '!='
+			// EcmaScript.g:71:7: '!='
 			{
 			DebugLocation(71, 7);
 			Match("!="); 
@@ -2488,9 +2488,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = NEW;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:72:5: ( 'new' )
+			// EcmaScript.g:72:5: ( 'new' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:72:7: 'new'
+			// EcmaScript.g:72:7: 'new'
 			{
 			DebugLocation(72, 7);
 			Match("new"); 
@@ -2524,9 +2524,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = NOT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:73:5: ( '!' )
+			// EcmaScript.g:73:5: ( '!' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:73:7: '!'
+			// EcmaScript.g:73:7: '!'
 			{
 			DebugLocation(73, 7);
 			Match('!'); 
@@ -2559,9 +2559,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = NSAME;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:74:7: ( '!==' )
+			// EcmaScript.g:74:7: ( '!==' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:74:9: '!=='
+			// EcmaScript.g:74:9: '!=='
 			{
 			DebugLocation(74, 9);
 			Match("!=="); 
@@ -2595,9 +2595,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = NULL;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:75:6: ( 'null' )
+			// EcmaScript.g:75:6: ( 'null' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:75:8: 'null'
+			// EcmaScript.g:75:8: 'null'
 			{
 			DebugLocation(75, 8);
 			Match("null"); 
@@ -2631,9 +2631,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = OR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:76:4: ( '|' )
+			// EcmaScript.g:76:4: ( '|' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:76:6: '|'
+			// EcmaScript.g:76:6: '|'
 			{
 			DebugLocation(76, 6);
 			Match('|'); 
@@ -2666,9 +2666,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = ORASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:77:7: ( '|=' )
+			// EcmaScript.g:77:7: ( '|=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:77:9: '|='
+			// EcmaScript.g:77:9: '|='
 			{
 			DebugLocation(77, 9);
 			Match("|="); 
@@ -2702,9 +2702,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = PACKAGE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:78:9: ( 'package' )
+			// EcmaScript.g:78:9: ( 'package' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:78:11: 'package'
+			// EcmaScript.g:78:11: 'package'
 			{
 			DebugLocation(78, 11);
 			Match("package"); 
@@ -2738,9 +2738,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = PRIVATE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:79:9: ( 'private' )
+			// EcmaScript.g:79:9: ( 'private' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:79:11: 'private'
+			// EcmaScript.g:79:11: 'private'
 			{
 			DebugLocation(79, 11);
 			Match("private"); 
@@ -2774,9 +2774,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = PROTECTED;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:80:11: ( 'protected' )
+			// EcmaScript.g:80:11: ( 'protected' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:80:13: 'protected'
+			// EcmaScript.g:80:13: 'protected'
 			{
 			DebugLocation(80, 13);
 			Match("protected"); 
@@ -2810,9 +2810,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = PUBLIC;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:81:8: ( 'public' )
+			// EcmaScript.g:81:8: ( 'public' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:81:10: 'public'
+			// EcmaScript.g:81:10: 'public'
 			{
 			DebugLocation(81, 10);
 			Match("public"); 
@@ -2846,9 +2846,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = QUE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:82:5: ( '?' )
+			// EcmaScript.g:82:5: ( '?' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:82:7: '?'
+			// EcmaScript.g:82:7: '?'
 			{
 			DebugLocation(82, 7);
 			Match('?'); 
@@ -2881,9 +2881,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = RBRACE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:83:8: ( '}' )
+			// EcmaScript.g:83:8: ( '}' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:83:10: '}'
+			// EcmaScript.g:83:10: '}'
 			{
 			DebugLocation(83, 10);
 			Match('}'); 
@@ -2916,9 +2916,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = RBRACK;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:84:8: ( ']' )
+			// EcmaScript.g:84:8: ( ']' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:84:10: ']'
+			// EcmaScript.g:84:10: ']'
 			{
 			DebugLocation(84, 10);
 			Match(']'); 
@@ -2951,9 +2951,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = REF;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:85:5: ( 'ref' )
+			// EcmaScript.g:85:5: ( 'ref' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:85:7: 'ref'
+			// EcmaScript.g:85:7: 'ref'
 			{
 			DebugLocation(85, 7);
 			Match("ref"); 
@@ -2987,9 +2987,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = RETURN;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:86:8: ( 'return' )
+			// EcmaScript.g:86:8: ( 'return' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:86:10: 'return'
+			// EcmaScript.g:86:10: 'return'
 			{
 			DebugLocation(86, 10);
 			Match("return"); 
@@ -3023,9 +3023,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = RPAREN;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:87:8: ( ')' )
+			// EcmaScript.g:87:8: ( ')' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:87:10: ')'
+			// EcmaScript.g:87:10: ')'
 			{
 			DebugLocation(87, 10);
 			Match(')'); 
@@ -3058,9 +3058,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SAME;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:88:6: ( '===' )
+			// EcmaScript.g:88:6: ( '===' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:88:8: '==='
+			// EcmaScript.g:88:8: '==='
 			{
 			DebugLocation(88, 8);
 			Match("==="); 
@@ -3094,9 +3094,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SEMIC;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:89:7: ( ';' )
+			// EcmaScript.g:89:7: ( ';' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:89:9: ';'
+			// EcmaScript.g:89:9: ';'
 			{
 			DebugLocation(89, 9);
 			Match(';'); 
@@ -3129,9 +3129,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHL;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:90:5: ( '<<' )
+			// EcmaScript.g:90:5: ( '<<' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:90:7: '<<'
+			// EcmaScript.g:90:7: '<<'
 			{
 			DebugLocation(90, 7);
 			Match("<<"); 
@@ -3165,9 +3165,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHLASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:91:8: ( '<<=' )
+			// EcmaScript.g:91:8: ( '<<=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:91:10: '<<='
+			// EcmaScript.g:91:10: '<<='
 			{
 			DebugLocation(91, 10);
 			Match("<<="); 
@@ -3201,9 +3201,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHORT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:92:7: ( 'short' )
+			// EcmaScript.g:92:7: ( 'short' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:92:9: 'short'
+			// EcmaScript.g:92:9: 'short'
 			{
 			DebugLocation(92, 9);
 			Match("short"); 
@@ -3237,9 +3237,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:93:5: ( '>>' )
+			// EcmaScript.g:93:5: ( '>>' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:93:7: '>>'
+			// EcmaScript.g:93:7: '>>'
 			{
 			DebugLocation(93, 7);
 			Match(">>"); 
@@ -3273,9 +3273,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHRASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:94:8: ( '>>=' )
+			// EcmaScript.g:94:8: ( '>>=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:94:10: '>>='
+			// EcmaScript.g:94:10: '>>='
 			{
 			DebugLocation(94, 10);
 			Match(">>="); 
@@ -3309,9 +3309,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHU;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:95:5: ( '>>>' )
+			// EcmaScript.g:95:5: ( '>>>' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:95:7: '>>>'
+			// EcmaScript.g:95:7: '>>>'
 			{
 			DebugLocation(95, 7);
 			Match(">>>"); 
@@ -3345,9 +3345,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SHUASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:96:8: ( '>>>=' )
+			// EcmaScript.g:96:8: ( '>>>=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:96:10: '>>>='
+			// EcmaScript.g:96:10: '>>>='
 			{
 			DebugLocation(96, 10);
 			Match(">>>="); 
@@ -3381,9 +3381,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = STATIC;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:97:8: ( 'static' )
+			// EcmaScript.g:97:8: ( 'static' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:97:10: 'static'
+			// EcmaScript.g:97:10: 'static'
 			{
 			DebugLocation(97, 10);
 			Match("static"); 
@@ -3417,9 +3417,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SUB;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:98:5: ( '-' )
+			// EcmaScript.g:98:5: ( '-' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:98:7: '-'
+			// EcmaScript.g:98:7: '-'
 			{
 			DebugLocation(98, 7);
 			Match('-'); 
@@ -3452,9 +3452,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SUBASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:99:8: ( '-=' )
+			// EcmaScript.g:99:8: ( '-=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:99:10: '-='
+			// EcmaScript.g:99:10: '-='
 			{
 			DebugLocation(99, 10);
 			Match("-="); 
@@ -3488,9 +3488,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SUPER;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:100:7: ( 'super' )
+			// EcmaScript.g:100:7: ( 'super' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:100:9: 'super'
+			// EcmaScript.g:100:9: 'super'
 			{
 			DebugLocation(100, 9);
 			Match("super"); 
@@ -3524,9 +3524,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SWITCH;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:101:8: ( 'switch' )
+			// EcmaScript.g:101:8: ( 'switch' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:101:10: 'switch'
+			// EcmaScript.g:101:10: 'switch'
 			{
 			DebugLocation(101, 10);
 			Match("switch"); 
@@ -3560,9 +3560,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SYNCHRONIZED;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:102:14: ( 'synchronized' )
+			// EcmaScript.g:102:14: ( 'synchronized' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:102:16: 'synchronized'
+			// EcmaScript.g:102:16: 'synchronized'
 			{
 			DebugLocation(102, 16);
 			Match("synchronized"); 
@@ -3596,9 +3596,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = THIS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:103:6: ( 'this' )
+			// EcmaScript.g:103:6: ( 'this' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:103:8: 'this'
+			// EcmaScript.g:103:8: 'this'
 			{
 			DebugLocation(103, 8);
 			Match("this"); 
@@ -3632,9 +3632,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = THROW;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:104:7: ( 'throw' )
+			// EcmaScript.g:104:7: ( 'throw' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:104:9: 'throw'
+			// EcmaScript.g:104:9: 'throw'
 			{
 			DebugLocation(104, 9);
 			Match("throw"); 
@@ -3668,9 +3668,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = THROWS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:105:8: ( 'throws' )
+			// EcmaScript.g:105:8: ( 'throws' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:105:10: 'throws'
+			// EcmaScript.g:105:10: 'throws'
 			{
 			DebugLocation(105, 10);
 			Match("throws"); 
@@ -3704,9 +3704,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = TRANSIENT;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:106:11: ( 'transient' )
+			// EcmaScript.g:106:11: ( 'transient' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:106:13: 'transient'
+			// EcmaScript.g:106:13: 'transient'
 			{
 			DebugLocation(106, 13);
 			Match("transient"); 
@@ -3740,9 +3740,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = TRUE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:107:6: ( 'true' )
+			// EcmaScript.g:107:6: ( 'true' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:107:8: 'true'
+			// EcmaScript.g:107:8: 'true'
 			{
 			DebugLocation(107, 8);
 			Match("true"); 
@@ -3776,9 +3776,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = TRY;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:108:5: ( 'try' )
+			// EcmaScript.g:108:5: ( 'try' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:108:7: 'try'
+			// EcmaScript.g:108:7: 'try'
 			{
 			DebugLocation(108, 7);
 			Match("try"); 
@@ -3812,9 +3812,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = TYPEOF;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:109:8: ( 'typeof' )
+			// EcmaScript.g:109:8: ( 'typeof' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:109:10: 'typeof'
+			// EcmaScript.g:109:10: 'typeof'
 			{
 			DebugLocation(109, 10);
 			Match("typeof"); 
@@ -3848,9 +3848,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = VAR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:110:5: ( 'var' )
+			// EcmaScript.g:110:5: ( 'var' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:110:7: 'var'
+			// EcmaScript.g:110:7: 'var'
 			{
 			DebugLocation(110, 7);
 			Match("var"); 
@@ -3884,9 +3884,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = VOID;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:111:6: ( 'void' )
+			// EcmaScript.g:111:6: ( 'void' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:111:8: 'void'
+			// EcmaScript.g:111:8: 'void'
 			{
 			DebugLocation(111, 8);
 			Match("void"); 
@@ -3920,9 +3920,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = VOLATILE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:112:10: ( 'volatile' )
+			// EcmaScript.g:112:10: ( 'volatile' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:112:12: 'volatile'
+			// EcmaScript.g:112:12: 'volatile'
 			{
 			DebugLocation(112, 12);
 			Match("volatile"); 
@@ -3956,9 +3956,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = WHILE;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:113:7: ( 'while' )
+			// EcmaScript.g:113:7: ( 'while' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:113:9: 'while'
+			// EcmaScript.g:113:9: 'while'
 			{
 			DebugLocation(113, 9);
 			Match("while"); 
@@ -3992,9 +3992,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = WITH;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:114:6: ( 'with' )
+			// EcmaScript.g:114:6: ( 'with' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:114:8: 'with'
+			// EcmaScript.g:114:8: 'with'
 			{
 			DebugLocation(114, 8);
 			Match("with"); 
@@ -4028,9 +4028,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = XOR;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:115:5: ( '^' )
+			// EcmaScript.g:115:5: ( '^' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:115:7: '^'
+			// EcmaScript.g:115:7: '^'
 			{
 			DebugLocation(115, 7);
 			Match('^'); 
@@ -4063,9 +4063,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = XORASS;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:116:8: ( '^=' )
+			// EcmaScript.g:116:8: ( '^=' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:116:10: '^='
+			// EcmaScript.g:116:10: '^='
 			{
 			DebugLocation(116, 10);
 			Match("^="); 
@@ -4097,9 +4097,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("BSLASH", 109);
 		try
 		{
-			// ..\\ES3.g:214:2: ( '\\\\' )
+			// EcmaScript.g:214:2: ( '\\\\' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:214:4: '\\\\'
+			// EcmaScript.g:214:4: '\\\\'
 			{
 			DebugLocation(214, 4);
 			Match('\\'); 
@@ -4128,9 +4128,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("DQUOTE", 110);
 		try
 		{
-			// ..\\ES3.g:218:2: ( '\"' )
+			// EcmaScript.g:218:2: ( '\"' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:218:4: '\"'
+			// EcmaScript.g:218:4: '\"'
 			{
 			DebugLocation(218, 4);
 			Match('\"'); 
@@ -4159,9 +4159,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("SQUOTE", 111);
 		try
 		{
-			// ..\\ES3.g:222:2: ( '\\'' )
+			// EcmaScript.g:222:2: ( '\\'' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:222:4: '\\''
+			// EcmaScript.g:222:4: '\\''
 			{
 			DebugLocation(222, 4);
 			Match('\''); 
@@ -4190,9 +4190,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("TAB", 112);
 		try
 		{
-			// ..\\ES3.g:228:2: ( '\\u0009' )
+			// EcmaScript.g:228:2: ( '\\u0009' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:228:4: '\\u0009'
+			// EcmaScript.g:228:4: '\\u0009'
 			{
 			DebugLocation(228, 4);
 			Match('\t'); 
@@ -4221,9 +4221,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("VT", 113);
 		try
 		{
-			// ..\\ES3.g:232:2: ( '\\u000b' )
+			// EcmaScript.g:232:2: ( '\\u000b' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:232:4: '\\u000b'
+			// EcmaScript.g:232:4: '\\u000b'
 			{
 			DebugLocation(232, 4);
 			Match('\u000B'); 
@@ -4252,9 +4252,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("FF", 114);
 		try
 		{
-			// ..\\ES3.g:236:2: ( '\\u000c' )
+			// EcmaScript.g:236:2: ( '\\u000c' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:236:4: '\\u000c'
+			// EcmaScript.g:236:4: '\\u000c'
 			{
 			DebugLocation(236, 4);
 			Match('\f'); 
@@ -4283,9 +4283,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("SP", 115);
 		try
 		{
-			// ..\\ES3.g:240:2: ( '\\u0020' )
+			// EcmaScript.g:240:2: ( '\\u0020' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:240:4: '\\u0020'
+			// EcmaScript.g:240:4: '\\u0020'
 			{
 			DebugLocation(240, 4);
 			Match(' '); 
@@ -4314,9 +4314,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("NBSP", 116);
 		try
 		{
-			// ..\\ES3.g:244:2: ( '\\u00a0' )
+			// EcmaScript.g:244:2: ( '\\u00a0' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:244:4: '\\u00a0'
+			// EcmaScript.g:244:4: '\\u00a0'
 			{
 			DebugLocation(244, 4);
 			Match('\u00A0'); 
@@ -4345,9 +4345,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("USP", 117);
 		try
 		{
-			// ..\\ES3.g:248:2: ( '\\u1680' | '\\u180E' | '\\u2000' | '\\u2001' | '\\u2002' | '\\u2003' | '\\u2004' | '\\u2005' | '\\u2006' | '\\u2007' | '\\u2008' | '\\u2009' | '\\u200A' | '\\u202F' | '\\u205F' | '\\u3000' )
+			// EcmaScript.g:248:2: ( '\\u1680' | '\\u180E' | '\\u2000' | '\\u2001' | '\\u2002' | '\\u2003' | '\\u2004' | '\\u2005' | '\\u2006' | '\\u2007' | '\\u2008' | '\\u2009' | '\\u200A' | '\\u202F' | '\\u205F' | '\\u3000' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(248, 2);
 			if (input.LA(1)=='\u1680'||input.LA(1)=='\u180E'||(input.LA(1)>='\u2000' && input.LA(1)<='\u200A')||input.LA(1)=='\u202F'||input.LA(1)=='\u205F'||input.LA(1)=='\u3000')
@@ -4389,12 +4389,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = WhiteSpace;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:267:2: ( ( TAB | VT | FF | SP | NBSP | USP )+ )
+			// EcmaScript.g:267:2: ( ( TAB | VT | FF | SP | NBSP | USP )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:267:4: ( TAB | VT | FF | SP | NBSP | USP )+
+			// EcmaScript.g:267:4: ( TAB | VT | FF | SP | NBSP | USP )+
 			{
 			DebugLocation(267, 4);
-			// ..\\ES3.g:267:4: ( TAB | VT | FF | SP | NBSP | USP )+
+			// EcmaScript.g:267:4: ( TAB | VT | FF | SP | NBSP | USP )+
 			int cnt1=0;
 			try { DebugEnterSubRule(1);
 			while (true)
@@ -4414,7 +4414,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(267, 4);
 					input.Consume();
@@ -4467,9 +4467,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("LF", 119);
 		try
 		{
-			// ..\\ES3.g:275:2: ( '\\n' )
+			// EcmaScript.g:275:2: ( '\\n' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:275:4: '\\n'
+			// EcmaScript.g:275:4: '\\n'
 			{
 			DebugLocation(275, 4);
 			Match('\n'); 
@@ -4498,9 +4498,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("CR", 120);
 		try
 		{
-			// ..\\ES3.g:279:2: ( '\\r' )
+			// EcmaScript.g:279:2: ( '\\r' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:279:4: '\\r'
+			// EcmaScript.g:279:4: '\\r'
 			{
 			DebugLocation(279, 4);
 			Match('\r'); 
@@ -4529,9 +4529,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("LS", 121);
 		try
 		{
-			// ..\\ES3.g:283:2: ( '\\u2028' )
+			// EcmaScript.g:283:2: ( '\\u2028' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:283:4: '\\u2028'
+			// EcmaScript.g:283:4: '\\u2028'
 			{
 			DebugLocation(283, 4);
 			Match('\u2028'); 
@@ -4560,9 +4560,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("PS", 122);
 		try
 		{
-			// ..\\ES3.g:287:2: ( '\\u2029' )
+			// EcmaScript.g:287:2: ( '\\u2029' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:287:4: '\\u2029'
+			// EcmaScript.g:287:4: '\\u2029'
 			{
 			DebugLocation(287, 4);
 			Match('\u2029'); 
@@ -4591,9 +4591,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("LineTerminator", 123);
 		try
 		{
-			// ..\\ES3.g:291:2: ( CR | LF | LS | PS )
+			// EcmaScript.g:291:2: ( CR | LF | LS | PS )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(291, 2);
 			if (input.LA(1)=='\n'||input.LA(1)=='\r'||(input.LA(1)>='\u2028' && input.LA(1)<='\u2029'))
@@ -4635,12 +4635,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = EOL;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:295:2: ( ( ( CR ( LF )? ) | LF | LS | PS ) )
+			// EcmaScript.g:295:2: ( ( ( CR ( LF )? ) | LF | LS | PS ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:295:4: ( ( CR ( LF )? ) | LF | LS | PS )
+			// EcmaScript.g:295:4: ( ( CR ( LF )? ) | LF | LS | PS )
 			{
 			DebugLocation(295, 4);
-			// ..\\ES3.g:295:4: ( ( CR ( LF )? ) | LF | LS | PS )
+			// EcmaScript.g:295:4: ( ( CR ( LF )? ) | LF | LS | PS )
 			int alt3=4;
 			try { DebugEnterSubRule(3);
 			try { DebugEnterDecision(3, false);
@@ -4679,17 +4679,17 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:295:6: ( CR ( LF )? )
+				// EcmaScript.g:295:6: ( CR ( LF )? )
 				{
 				DebugLocation(295, 6);
-				// ..\\ES3.g:295:6: ( CR ( LF )? )
+				// EcmaScript.g:295:6: ( CR ( LF )? )
 				DebugEnterAlt(1);
-				// ..\\ES3.g:295:8: CR ( LF )?
+				// EcmaScript.g:295:8: CR ( LF )?
 				{
 				DebugLocation(295, 8);
 				mCR(); 
 				DebugLocation(295, 11);
-				// ..\\ES3.g:295:11: ( LF )?
+				// EcmaScript.g:295:11: ( LF )?
 				int alt2=2;
 				try { DebugEnterSubRule(2);
 				try { DebugEnterDecision(2, false);
@@ -4704,7 +4704,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(295, 11);
 					input.Consume();
@@ -4724,7 +4724,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:295:19: LF
+				// EcmaScript.g:295:19: LF
 				{
 				DebugLocation(295, 19);
 				mLF(); 
@@ -4733,7 +4733,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:295:24: LS
+				// EcmaScript.g:295:24: LS
 				{
 				DebugLocation(295, 24);
 				mLS(); 
@@ -4742,7 +4742,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:295:29: PS
+				// EcmaScript.g:295:29: PS
 				{
 				DebugLocation(295, 29);
 				mPS(); 
@@ -4784,15 +4784,15 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = MultiLineComment;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:302:2: ( '/*' ( options {greedy=false; } : . )* '*/' )
+			// EcmaScript.g:302:2: ( '/*' ( options {greedy=false; } : . )* '*/' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:302:4: '/*' ( options {greedy=false; } : . )* '*/'
+			// EcmaScript.g:302:4: '/*' ( options {greedy=false; } : . )* '*/'
 			{
 			DebugLocation(302, 4);
 			Match("/*"); 
 
 			DebugLocation(302, 9);
-			// ..\\ES3.g:302:9: ( options {greedy=false; } : . )*
+			// EcmaScript.g:302:9: ( options {greedy=false; } : . )*
 			try { DebugEnterSubRule(4);
 			while (true)
 			{
@@ -4826,7 +4826,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:302:41: .
+					// EcmaScript.g:302:41: .
 					{
 					DebugLocation(302, 41);
 					MatchAny(); 
@@ -4878,15 +4878,15 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = SingleLineComment;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:306:2: ( '//' (~ ( LineTerminator ) )* )
+			// EcmaScript.g:306:2: ( '//' (~ ( LineTerminator ) )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:306:4: '//' (~ ( LineTerminator ) )*
+			// EcmaScript.g:306:4: '//' (~ ( LineTerminator ) )*
 			{
 			DebugLocation(306, 4);
 			Match("//"); 
 
 			DebugLocation(306, 9);
-			// ..\\ES3.g:306:9: (~ ( LineTerminator ) )*
+			// EcmaScript.g:306:9: (~ ( LineTerminator ) )*
 			try { DebugEnterSubRule(5);
 			while (true)
 			{
@@ -4905,7 +4905,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(306, 9);
 					input.Consume();
@@ -4953,7 +4953,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("IdentifierStartASCII", 127);
 		try
 		{
-			// ..\\ES3.g:407:2: ( 'a' .. 'z' | 'A' .. 'Z' | '$' | '_' | BSLASH 'u' HexDigit HexDigit HexDigit HexDigit )
+			// EcmaScript.g:407:2: ( 'a' .. 'z' | 'A' .. 'Z' | '$' | '_' | BSLASH 'u' HexDigit HexDigit HexDigit HexDigit )
 			int alt6=5;
 			try { DebugEnterDecision(6, false);
 			switch (input.LA(1))
@@ -5046,7 +5046,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:407:4: 'a' .. 'z'
+				// EcmaScript.g:407:4: 'a' .. 'z'
 				{
 				DebugLocation(407, 4);
 				MatchRange('a','z'); 
@@ -5055,7 +5055,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:407:15: 'A' .. 'Z'
+				// EcmaScript.g:407:15: 'A' .. 'Z'
 				{
 				DebugLocation(407, 15);
 				MatchRange('A','Z'); 
@@ -5064,7 +5064,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:408:4: '$'
+				// EcmaScript.g:408:4: '$'
 				{
 				DebugLocation(408, 4);
 				Match('$'); 
@@ -5073,7 +5073,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:409:4: '_'
+				// EcmaScript.g:409:4: '_'
 				{
 				DebugLocation(409, 4);
 				Match('_'); 
@@ -5082,7 +5082,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 5:
 				DebugEnterAlt(5);
-				// ..\\ES3.g:410:4: BSLASH 'u' HexDigit HexDigit HexDigit HexDigit
+				// EcmaScript.g:410:4: BSLASH 'u' HexDigit HexDigit HexDigit HexDigit
 				{
 				DebugLocation(410, 4);
 				mBSLASH(); 
@@ -5123,7 +5123,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("IdentifierPart", 128);
 		try
 		{
-			// ..\\ES3.g:418:2: ( DecimalDigit | IdentifierStartASCII |{...}?)
+			// EcmaScript.g:418:2: ( DecimalDigit | IdentifierStartASCII |{...}?)
 			int alt7=3;
 			try { DebugEnterDecision(7, false);
 			switch (input.LA(1))
@@ -5211,7 +5211,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:418:4: DecimalDigit
+				// EcmaScript.g:418:4: DecimalDigit
 				{
 				DebugLocation(418, 4);
 				mDecimalDigit(); 
@@ -5220,7 +5220,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:419:4: IdentifierStartASCII
+				// EcmaScript.g:419:4: IdentifierStartASCII
 				{
 				DebugLocation(419, 4);
 				mIdentifierStartASCII(); 
@@ -5229,7 +5229,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:420:4: {...}?
+				// EcmaScript.g:420:4: {...}?
 				{
 				DebugLocation(420, 4);
 				if (!(( IsIdentifierPartUnicode(input.LA(1)) )))
@@ -5265,14 +5265,14 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("IdentifierNameASCIIStart", 129);
 		try
 		{
-			// ..\\ES3.g:424:2: ( IdentifierStartASCII ( IdentifierPart )* )
+			// EcmaScript.g:424:2: ( IdentifierStartASCII ( IdentifierPart )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:424:4: IdentifierStartASCII ( IdentifierPart )*
+			// EcmaScript.g:424:4: IdentifierStartASCII ( IdentifierPart )*
 			{
 			DebugLocation(424, 4);
 			mIdentifierStartASCII(); 
 			DebugLocation(424, 25);
-			// ..\\ES3.g:424:25: ( IdentifierPart )*
+			// EcmaScript.g:424:25: ( IdentifierPart )*
 			try { DebugEnterSubRule(8);
 			while (true)
 			{
@@ -5295,7 +5295,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:424:25: IdentifierPart
+					// EcmaScript.g:424:25: IdentifierPart
 					{
 					DebugLocation(424, 25);
 					mIdentifierPart(); 
@@ -5340,7 +5340,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = Identifier;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:444:2: ( IdentifierNameASCIIStart |)
+			// EcmaScript.g:444:2: ( IdentifierNameASCIIStart |)
 			int alt9=2;
 			try { DebugEnterDecision(9, false);
 			int LA9_0 = input.LA(1);
@@ -5357,7 +5357,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:444:4: IdentifierNameASCIIStart
+				// EcmaScript.g:444:4: IdentifierNameASCIIStart
 				{
 				DebugLocation(444, 4);
 				mIdentifierNameASCIIStart(); 
@@ -5366,7 +5366,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:445:4: 
+				// EcmaScript.g:445:4: 
 				{
 				DebugLocation(445, 4);
 				 ConsumeIdentifierUnicodeStart(); 
@@ -5401,9 +5401,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("DecimalDigit", 131);
 		try
 		{
-			// ..\\ES3.g:528:2: ( '0' .. '9' )
+			// EcmaScript.g:528:2: ( '0' .. '9' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(528, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='9'))
@@ -5443,9 +5443,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("HexDigit", 132);
 		try
 		{
-			// ..\\ES3.g:532:2: ( DecimalDigit | 'a' .. 'f' | 'A' .. 'F' )
+			// EcmaScript.g:532:2: ( DecimalDigit | 'a' .. 'f' | 'A' .. 'F' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(532, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='F')||(input.LA(1)>='a' && input.LA(1)<='f'))
@@ -5485,9 +5485,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("OctalDigit", 133);
 		try
 		{
-			// ..\\ES3.g:536:2: ( '0' .. '7' )
+			// EcmaScript.g:536:2: ( '0' .. '7' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(536, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='7'))
@@ -5527,9 +5527,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("ExponentPart", 134);
 		try
 		{
-			// ..\\ES3.g:540:2: ( ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+ )
+			// EcmaScript.g:540:2: ( ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:540:4: ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+
+			// EcmaScript.g:540:4: ( 'e' | 'E' ) ( '+' | '-' )? ( DecimalDigit )+
 			{
 			DebugLocation(540, 4);
 			if (input.LA(1)=='E'||input.LA(1)=='e')
@@ -5545,7 +5545,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				throw mse;}
 
 			DebugLocation(540, 18);
-			// ..\\ES3.g:540:18: ( '+' | '-' )?
+			// EcmaScript.g:540:18: ( '+' | '-' )?
 			int alt10=2;
 			try { DebugEnterSubRule(10);
 			try { DebugEnterDecision(10, false);
@@ -5560,7 +5560,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:
+				// EcmaScript.g:
 				{
 				DebugLocation(540, 18);
 				input.Consume();
@@ -5573,7 +5573,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			} finally { DebugExitSubRule(10); }
 
 			DebugLocation(540, 33);
-			// ..\\ES3.g:540:33: ( DecimalDigit )+
+			// EcmaScript.g:540:33: ( DecimalDigit )+
 			int cnt11=0;
 			try { DebugEnterSubRule(11);
 			while (true)
@@ -5593,7 +5593,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(540, 33);
 					input.Consume();
@@ -5642,7 +5642,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("DecimalIntegerLiteral", 135);
 		try
 		{
-			// ..\\ES3.g:544:2: ( '0' | '1' .. '9' ( DecimalDigit )* )
+			// EcmaScript.g:544:2: ( '0' | '1' .. '9' ( DecimalDigit )* )
 			int alt13=2;
 			try { DebugEnterDecision(13, false);
 			int LA13_0 = input.LA(1);
@@ -5666,7 +5666,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:544:4: '0'
+				// EcmaScript.g:544:4: '0'
 				{
 				DebugLocation(544, 4);
 				Match('0'); 
@@ -5675,12 +5675,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:545:4: '1' .. '9' ( DecimalDigit )*
+				// EcmaScript.g:545:4: '1' .. '9' ( DecimalDigit )*
 				{
 				DebugLocation(545, 4);
 				MatchRange('1','9'); 
 				DebugLocation(545, 13);
-				// ..\\ES3.g:545:13: ( DecimalDigit )*
+				// EcmaScript.g:545:13: ( DecimalDigit )*
 				try { DebugEnterSubRule(12);
 				while (true)
 				{
@@ -5699,7 +5699,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:
+						// EcmaScript.g:
 						{
 						DebugLocation(545, 13);
 						input.Consume();
@@ -5747,7 +5747,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = DecimalLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:549:2: ( DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )? | '.' ( DecimalDigit )+ ( ExponentPart )? | DecimalIntegerLiteral ( ExponentPart )? )
+			// EcmaScript.g:549:2: ( DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )? | '.' ( DecimalDigit )+ ( ExponentPart )? | DecimalIntegerLiteral ( ExponentPart )? )
 			int alt19=3;
 			try { DebugEnterDecision(19, false);
 			try
@@ -5764,14 +5764,14 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:549:4: DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )?
+				// EcmaScript.g:549:4: DecimalIntegerLiteral '.' ( DecimalDigit )* ( ExponentPart )?
 				{
 				DebugLocation(549, 4);
 				mDecimalIntegerLiteral(); 
 				DebugLocation(549, 26);
 				Match('.'); 
 				DebugLocation(549, 30);
-				// ..\\ES3.g:549:30: ( DecimalDigit )*
+				// EcmaScript.g:549:30: ( DecimalDigit )*
 				try { DebugEnterSubRule(14);
 				while (true)
 				{
@@ -5790,7 +5790,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:
+						// EcmaScript.g:
 						{
 						DebugLocation(549, 30);
 						input.Consume();
@@ -5810,7 +5810,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				} finally { DebugExitSubRule(14); }
 
 				DebugLocation(549, 44);
-				// ..\\ES3.g:549:44: ( ExponentPart )?
+				// EcmaScript.g:549:44: ( ExponentPart )?
 				int alt15=2;
 				try { DebugEnterSubRule(15);
 				try { DebugEnterDecision(15, false);
@@ -5825,7 +5825,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:549:44: ExponentPart
+					// EcmaScript.g:549:44: ExponentPart
 					{
 					DebugLocation(549, 44);
 					mExponentPart(); 
@@ -5841,12 +5841,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:550:4: '.' ( DecimalDigit )+ ( ExponentPart )?
+				// EcmaScript.g:550:4: '.' ( DecimalDigit )+ ( ExponentPart )?
 				{
 				DebugLocation(550, 4);
 				Match('.'); 
 				DebugLocation(550, 8);
-				// ..\\ES3.g:550:8: ( DecimalDigit )+
+				// EcmaScript.g:550:8: ( DecimalDigit )+
 				int cnt16=0;
 				try { DebugEnterSubRule(16);
 				while (true)
@@ -5866,7 +5866,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:
+						// EcmaScript.g:
 						{
 						DebugLocation(550, 8);
 						input.Consume();
@@ -5891,7 +5891,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				} finally { DebugExitSubRule(16); }
 
 				DebugLocation(550, 22);
-				// ..\\ES3.g:550:22: ( ExponentPart )?
+				// EcmaScript.g:550:22: ( ExponentPart )?
 				int alt17=2;
 				try { DebugEnterSubRule(17);
 				try { DebugEnterDecision(17, false);
@@ -5906,7 +5906,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:550:22: ExponentPart
+					// EcmaScript.g:550:22: ExponentPart
 					{
 					DebugLocation(550, 22);
 					mExponentPart(); 
@@ -5922,12 +5922,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:551:4: DecimalIntegerLiteral ( ExponentPart )?
+				// EcmaScript.g:551:4: DecimalIntegerLiteral ( ExponentPart )?
 				{
 				DebugLocation(551, 4);
 				mDecimalIntegerLiteral(); 
 				DebugLocation(551, 26);
-				// ..\\ES3.g:551:26: ( ExponentPart )?
+				// EcmaScript.g:551:26: ( ExponentPart )?
 				int alt18=2;
 				try { DebugEnterSubRule(18);
 				try { DebugEnterDecision(18, false);
@@ -5942,7 +5942,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:551:26: ExponentPart
+					// EcmaScript.g:551:26: ExponentPart
 					{
 					DebugLocation(551, 26);
 					mExponentPart(); 
@@ -5984,14 +5984,14 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = OctalIntegerLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:555:2: ( '0' ( OctalDigit )+ )
+			// EcmaScript.g:555:2: ( '0' ( OctalDigit )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:555:4: '0' ( OctalDigit )+
+			// EcmaScript.g:555:4: '0' ( OctalDigit )+
 			{
 			DebugLocation(555, 4);
 			Match('0'); 
 			DebugLocation(555, 8);
-			// ..\\ES3.g:555:8: ( OctalDigit )+
+			// EcmaScript.g:555:8: ( OctalDigit )+
 			int cnt20=0;
 			try { DebugEnterSubRule(20);
 			while (true)
@@ -6011,7 +6011,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(555, 8);
 					input.Consume();
@@ -6064,12 +6064,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = HexIntegerLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:559:2: ( ( '0x' | '0X' ) ( HexDigit )+ )
+			// EcmaScript.g:559:2: ( ( '0x' | '0X' ) ( HexDigit )+ )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:559:4: ( '0x' | '0X' ) ( HexDigit )+
+			// EcmaScript.g:559:4: ( '0x' | '0X' ) ( HexDigit )+
 			{
 			DebugLocation(559, 4);
-			// ..\\ES3.g:559:4: ( '0x' | '0X' )
+			// EcmaScript.g:559:4: ( '0x' | '0X' )
 			int alt21=2;
 			try { DebugEnterSubRule(21);
 			try { DebugEnterDecision(21, false);
@@ -6105,7 +6105,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:559:6: '0x'
+				// EcmaScript.g:559:6: '0x'
 				{
 				DebugLocation(559, 6);
 				Match("0x"); 
@@ -6115,7 +6115,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:559:13: '0X'
+				// EcmaScript.g:559:13: '0X'
 				{
 				DebugLocation(559, 13);
 				Match("0X"); 
@@ -6128,7 +6128,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			} finally { DebugExitSubRule(21); }
 
 			DebugLocation(559, 20);
-			// ..\\ES3.g:559:20: ( HexDigit )+
+			// EcmaScript.g:559:20: ( HexDigit )+
 			int cnt22=0;
 			try { DebugEnterSubRule(22);
 			while (true)
@@ -6148,7 +6148,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(559, 20);
 					input.Consume();
@@ -6199,9 +6199,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("CharacterEscapeSequence", 139);
 		try
 		{
-			// ..\\ES3.g:578:2: (~ ( DecimalDigit | 'x' | 'u' | LineTerminator ) )
+			// EcmaScript.g:578:2: (~ ( DecimalDigit | 'x' | 'u' | LineTerminator ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(578, 2);
 			if ((input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='/')||(input.LA(1)>=':' && input.LA(1)<='t')||(input.LA(1)>='v' && input.LA(1)<='w')||(input.LA(1)>='y' && input.LA(1)<='\u2027')||(input.LA(1)>='\u202A' && input.LA(1)<='\uFFFF'))
@@ -6241,9 +6241,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("ZeroToThree", 140);
 		try
 		{
-			// ..\\ES3.g:582:2: ( '0' .. '3' )
+			// EcmaScript.g:582:2: ( '0' .. '3' )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:
+			// EcmaScript.g:
 			{
 			DebugLocation(582, 2);
 			if ((input.LA(1)>='0' && input.LA(1)<='3'))
@@ -6283,7 +6283,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("OctalEscapeSequence", 141);
 		try
 		{
-			// ..\\ES3.g:586:2: ( OctalDigit | ZeroToThree OctalDigit | '4' .. '7' OctalDigit | ZeroToThree OctalDigit OctalDigit )
+			// EcmaScript.g:586:2: ( OctalDigit | ZeroToThree OctalDigit | '4' .. '7' OctalDigit | ZeroToThree OctalDigit OctalDigit )
 			int alt23=4;
 			try { DebugEnterDecision(23, false);
 			int LA23_0 = input.LA(1);
@@ -6331,7 +6331,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:586:4: OctalDigit
+				// EcmaScript.g:586:4: OctalDigit
 				{
 				DebugLocation(586, 4);
 				mOctalDigit(); 
@@ -6340,7 +6340,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:587:4: ZeroToThree OctalDigit
+				// EcmaScript.g:587:4: ZeroToThree OctalDigit
 				{
 				DebugLocation(587, 4);
 				mZeroToThree(); 
@@ -6351,7 +6351,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:588:4: '4' .. '7' OctalDigit
+				// EcmaScript.g:588:4: '4' .. '7' OctalDigit
 				{
 				DebugLocation(588, 4);
 				MatchRange('4','7'); 
@@ -6362,7 +6362,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:589:4: ZeroToThree OctalDigit OctalDigit
+				// EcmaScript.g:589:4: ZeroToThree OctalDigit OctalDigit
 				{
 				DebugLocation(589, 4);
 				mZeroToThree(); 
@@ -6397,9 +6397,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("HexEscapeSequence", 142);
 		try
 		{
-			// ..\\ES3.g:593:2: ( 'x' HexDigit HexDigit )
+			// EcmaScript.g:593:2: ( 'x' HexDigit HexDigit )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:593:4: 'x' HexDigit HexDigit
+			// EcmaScript.g:593:4: 'x' HexDigit HexDigit
 			{
 			DebugLocation(593, 4);
 			Match('x'); 
@@ -6432,9 +6432,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("UnicodeEscapeSequence", 143);
 		try
 		{
-			// ..\\ES3.g:597:2: ( 'u' HexDigit HexDigit HexDigit HexDigit )
+			// EcmaScript.g:597:2: ( 'u' HexDigit HexDigit HexDigit HexDigit )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:597:4: 'u' HexDigit HexDigit HexDigit HexDigit
+			// EcmaScript.g:597:4: 'u' HexDigit HexDigit HexDigit HexDigit
 			{
 			DebugLocation(597, 4);
 			Match('u'); 
@@ -6471,14 +6471,14 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("EscapeSequence", 144);
 		try
 		{
-			// ..\\ES3.g:601:2: ( BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF ) )
+			// EcmaScript.g:601:2: ( BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:602:2: BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
+			// EcmaScript.g:602:2: BSLASH ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
 			{
 			DebugLocation(602, 2);
 			mBSLASH(); 
 			DebugLocation(603, 2);
-			// ..\\ES3.g:603:2: ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
+			// EcmaScript.g:603:2: ( CharacterEscapeSequence | OctalEscapeSequence | HexEscapeSequence | UnicodeEscapeSequence | CR ( LF )? | LF )
 			int alt25=6;
 			try { DebugEnterSubRule(25);
 			try { DebugEnterDecision(25, false);
@@ -6519,7 +6519,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:604:3: CharacterEscapeSequence
+				// EcmaScript.g:604:3: CharacterEscapeSequence
 				{
 				DebugLocation(604, 3);
 				mCharacterEscapeSequence(); 
@@ -6528,7 +6528,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:605:5: OctalEscapeSequence
+				// EcmaScript.g:605:5: OctalEscapeSequence
 				{
 				DebugLocation(605, 5);
 				mOctalEscapeSequence(); 
@@ -6537,7 +6537,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 3:
 				DebugEnterAlt(3);
-				// ..\\ES3.g:606:5: HexEscapeSequence
+				// EcmaScript.g:606:5: HexEscapeSequence
 				{
 				DebugLocation(606, 5);
 				mHexEscapeSequence(); 
@@ -6546,7 +6546,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 4:
 				DebugEnterAlt(4);
-				// ..\\ES3.g:607:5: UnicodeEscapeSequence
+				// EcmaScript.g:607:5: UnicodeEscapeSequence
 				{
 				DebugLocation(607, 5);
 				mUnicodeEscapeSequence(); 
@@ -6555,12 +6555,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 5:
 				DebugEnterAlt(5);
-				// ..\\ES3.g:608:5: CR ( LF )?
+				// EcmaScript.g:608:5: CR ( LF )?
 				{
 				DebugLocation(608, 5);
 				mCR(); 
 				DebugLocation(608, 8);
-				// ..\\ES3.g:608:8: ( LF )?
+				// EcmaScript.g:608:8: ( LF )?
 				int alt24=2;
 				try { DebugEnterSubRule(24);
 				try { DebugEnterDecision(24, false);
@@ -6575,7 +6575,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:
+					// EcmaScript.g:
 					{
 					DebugLocation(608, 8);
 					input.Consume();
@@ -6592,7 +6592,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 6:
 				DebugEnterAlt(6);
-				// ..\\ES3.g:609:11: LF
+				// EcmaScript.g:609:11: LF
 				{
 				DebugLocation(609, 11);
 				mLF(); 
@@ -6630,7 +6630,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = StringLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:614:2: ( SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE | DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE )
+			// EcmaScript.g:614:2: ( SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE | DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE )
 			int alt28=2;
 			try { DebugEnterDecision(28, false);
 			int LA28_0 = input.LA(1);
@@ -6654,12 +6654,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:614:4: SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE
+				// EcmaScript.g:614:4: SQUOTE (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* SQUOTE
 				{
 				DebugLocation(614, 4);
 				mSQUOTE(); 
 				DebugLocation(614, 11);
-				// ..\\ES3.g:614:11: (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
+				// EcmaScript.g:614:11: (~ ( SQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
 				try { DebugEnterSubRule(26);
 				while (true)
 				{
@@ -6682,7 +6682,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:614:13: ~ ( SQUOTE | BSLASH | LineTerminator )
+						// EcmaScript.g:614:13: ~ ( SQUOTE | BSLASH | LineTerminator )
 						{
 						DebugLocation(614, 13);
 						input.Consume();
@@ -6692,7 +6692,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:614:53: EscapeSequence
+						// EcmaScript.g:614:53: EscapeSequence
 						{
 						DebugLocation(614, 53);
 						mEscapeSequence(); 
@@ -6717,12 +6717,12 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:615:4: DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE
+				// EcmaScript.g:615:4: DQUOTE (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )* DQUOTE
 				{
 				DebugLocation(615, 4);
 				mDQUOTE(); 
 				DebugLocation(615, 11);
-				// ..\\ES3.g:615:11: (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
+				// EcmaScript.g:615:11: (~ ( DQUOTE | BSLASH | LineTerminator ) | EscapeSequence )*
 				try { DebugEnterSubRule(27);
 				while (true)
 				{
@@ -6745,7 +6745,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 					{
 					case 1:
 						DebugEnterAlt(1);
-						// ..\\ES3.g:615:13: ~ ( DQUOTE | BSLASH | LineTerminator )
+						// EcmaScript.g:615:13: ~ ( DQUOTE | BSLASH | LineTerminator )
 						{
 						DebugLocation(615, 13);
 						input.Consume();
@@ -6755,7 +6755,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 						break;
 					case 2:
 						DebugEnterAlt(2);
-						// ..\\ES3.g:615:53: EscapeSequence
+						// EcmaScript.g:615:53: EscapeSequence
 						{
 						DebugLocation(615, 53);
 						mEscapeSequence(); 
@@ -6804,9 +6804,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("BackslashSequence", 146);
 		try
 		{
-			// ..\\ES3.g:623:2: ( BSLASH ~ ( LineTerminator ) )
+			// EcmaScript.g:623:2: ( BSLASH ~ ( LineTerminator ) )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:623:4: BSLASH ~ ( LineTerminator )
+			// EcmaScript.g:623:4: BSLASH ~ ( LineTerminator )
 			{
 			DebugLocation(623, 4);
 			mBSLASH(); 
@@ -6848,7 +6848,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("RegularExpressionFirstChar", 147);
 		try
 		{
-			// ..\\ES3.g:627:2: (~ ( LineTerminator | MUL | BSLASH | DIV ) | BackslashSequence )
+			// EcmaScript.g:627:2: (~ ( LineTerminator | MUL | BSLASH | DIV ) | BackslashSequence )
 			int alt29=2;
 			try { DebugEnterDecision(29, false);
 			int LA29_0 = input.LA(1);
@@ -6872,7 +6872,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:627:4: ~ ( LineTerminator | MUL | BSLASH | DIV )
+				// EcmaScript.g:627:4: ~ ( LineTerminator | MUL | BSLASH | DIV )
 				{
 				DebugLocation(627, 4);
 				input.Consume();
@@ -6882,7 +6882,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:628:4: BackslashSequence
+				// EcmaScript.g:628:4: BackslashSequence
 				{
 				DebugLocation(628, 4);
 				mBackslashSequence(); 
@@ -6913,7 +6913,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		TraceIn("RegularExpressionChar", 148);
 		try
 		{
-			// ..\\ES3.g:632:2: (~ ( LineTerminator | BSLASH | DIV ) | BackslashSequence )
+			// EcmaScript.g:632:2: (~ ( LineTerminator | BSLASH | DIV ) | BackslashSequence )
 			int alt30=2;
 			try { DebugEnterDecision(30, false);
 			int LA30_0 = input.LA(1);
@@ -6937,7 +6937,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			{
 			case 1:
 				DebugEnterAlt(1);
-				// ..\\ES3.g:632:4: ~ ( LineTerminator | BSLASH | DIV )
+				// EcmaScript.g:632:4: ~ ( LineTerminator | BSLASH | DIV )
 				{
 				DebugLocation(632, 4);
 				input.Consume();
@@ -6947,7 +6947,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				break;
 			case 2:
 				DebugEnterAlt(2);
-				// ..\\ES3.g:633:4: BackslashSequence
+				// EcmaScript.g:633:4: BackslashSequence
 				{
 				DebugLocation(633, 4);
 				mBackslashSequence(); 
@@ -6980,9 +6980,9 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 			int _type = RegularExpressionLiteral;
 			int _channel = DefaultTokenChannel;
-			// ..\\ES3.g:637:2: ({...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )* )
+			// EcmaScript.g:637:2: ({...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )* )
 			DebugEnterAlt(1);
-			// ..\\ES3.g:637:4: {...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )*
+			// EcmaScript.g:637:4: {...}? => DIV RegularExpressionFirstChar ( RegularExpressionChar )* DIV ( IdentifierPart )*
 			{
 			DebugLocation(637, 4);
 			if (!(( AreRegularExpressionsEnabled() )))
@@ -6994,7 +6994,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			DebugLocation(637, 46);
 			mRegularExpressionFirstChar(); 
 			DebugLocation(637, 73);
-			// ..\\ES3.g:637:73: ( RegularExpressionChar )*
+			// EcmaScript.g:637:73: ( RegularExpressionChar )*
 			try { DebugEnterSubRule(31);
 			while (true)
 			{
@@ -7013,7 +7013,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:637:73: RegularExpressionChar
+					// EcmaScript.g:637:73: RegularExpressionChar
 					{
 					DebugLocation(637, 73);
 					mRegularExpressionChar(); 
@@ -7034,7 +7034,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			DebugLocation(637, 96);
 			mDIV(); 
 			DebugLocation(637, 100);
-			// ..\\ES3.g:637:100: ( IdentifierPart )*
+			// EcmaScript.g:637:100: ( IdentifierPart )*
 			try { DebugEnterSubRule(32);
 			while (true)
 			{
@@ -7057,7 +7057,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 				{
 				case 1:
 					DebugEnterAlt(1);
-					// ..\\ES3.g:637:100: IdentifierPart
+					// EcmaScript.g:637:100: IdentifierPart
 					{
 					DebugLocation(637, 100);
 					mIdentifierPart(); 
@@ -7092,7 +7092,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 
 	public override void mTokens()
 	{
-		// ..\\ES3.g:1:8: ( ABSTRACT | ADD | ADDASS | AND | ANDASS | ASSIGN | BOOLEAN | BREAK | BYTE | CASE | CATCH | CHAR | CLASS | COLON | COMMA | CONST | CONTINUE | DEBUGGER | DEC | DEFAULT | DELETE | DIV | DIVASS | DO | DOT | DOUBLE | ELSE | ENUM | EQ | EXPORT | EXTENDS | FALSE | FINAL | FINALLY | FLOAT | FOR | FUNCTION | GOTO | GT | GTE | IF | IMPLEMENTS | IMPORT | IN | INC | INSTANCEOF | INT | INTERFACE | INV | LAND | LBRACE | LBRACK | LONG | LOR | LPAREN | LT | LTE | MOD | MODASS | MUL | MULASS | NATIVE | NEQ | NEW | NOT | NSAME | NULL | OR | ORASS | PACKAGE | PRIVATE | PROTECTED | PUBLIC | QUE | RBRACE | RBRACK | REF | RETURN | RPAREN | SAME | SEMIC | SHL | SHLASS | SHORT | SHR | SHRASS | SHU | SHUASS | STATIC | SUB | SUBASS | SUPER | SWITCH | SYNCHRONIZED | THIS | THROW | THROWS | TRANSIENT | TRUE | TRY | TYPEOF | VAR | VOID | VOLATILE | WHILE | WITH | XOR | XORASS | WhiteSpace | EOL | MultiLineComment | SingleLineComment | Identifier | DecimalLiteral | OctalIntegerLiteral | HexIntegerLiteral | StringLiteral | RegularExpressionLiteral )
+		// EcmaScript.g:1:8: ( ABSTRACT | ADD | ADDASS | AND | ANDASS | ASSIGN | BOOLEAN | BREAK | BYTE | CASE | CATCH | CHAR | CLASS | COLON | COMMA | CONST | CONTINUE | DEBUGGER | DEC | DEFAULT | DELETE | DIV | DIVASS | DO | DOT | DOUBLE | ELSE | ENUM | EQ | EXPORT | EXTENDS | FALSE | FINAL | FINALLY | FLOAT | FOR | FUNCTION | GOTO | GT | GTE | IF | IMPLEMENTS | IMPORT | IN | INC | INSTANCEOF | INT | INTERFACE | INV | LAND | LBRACE | LBRACK | LONG | LOR | LPAREN | LT | LTE | MOD | MODASS | MUL | MULASS | NATIVE | NEQ | NEW | NOT | NSAME | NULL | OR | ORASS | PACKAGE | PRIVATE | PROTECTED | PUBLIC | QUE | RBRACE | RBRACK | REF | RETURN | RPAREN | SAME | SEMIC | SHL | SHLASS | SHORT | SHR | SHRASS | SHU | SHUASS | STATIC | SUB | SUBASS | SUPER | SWITCH | SYNCHRONIZED | THIS | THROW | THROWS | TRANSIENT | TRUE | TRY | TYPEOF | VAR | VOID | VOLATILE | WHILE | WITH | XOR | XORASS | WhiteSpace | EOL | MultiLineComment | SingleLineComment | Identifier | DecimalLiteral | OctalIntegerLiteral | HexIntegerLiteral | StringLiteral | RegularExpressionLiteral )
 		int alt33=118;
 		try { DebugEnterDecision(33, false);
 		try
@@ -7109,7 +7109,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 		{
 		case 1:
 			DebugEnterAlt(1);
-			// ..\\ES3.g:1:10: ABSTRACT
+			// EcmaScript.g:1:10: ABSTRACT
 			{
 			DebugLocation(1, 10);
 			mABSTRACT(); 
@@ -7118,7 +7118,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 2:
 			DebugEnterAlt(2);
-			// ..\\ES3.g:1:19: ADD
+			// EcmaScript.g:1:19: ADD
 			{
 			DebugLocation(1, 19);
 			mADD(); 
@@ -7127,7 +7127,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 3:
 			DebugEnterAlt(3);
-			// ..\\ES3.g:1:23: ADDASS
+			// EcmaScript.g:1:23: ADDASS
 			{
 			DebugLocation(1, 23);
 			mADDASS(); 
@@ -7136,7 +7136,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 4:
 			DebugEnterAlt(4);
-			// ..\\ES3.g:1:30: AND
+			// EcmaScript.g:1:30: AND
 			{
 			DebugLocation(1, 30);
 			mAND(); 
@@ -7145,7 +7145,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 5:
 			DebugEnterAlt(5);
-			// ..\\ES3.g:1:34: ANDASS
+			// EcmaScript.g:1:34: ANDASS
 			{
 			DebugLocation(1, 34);
 			mANDASS(); 
@@ -7154,7 +7154,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 6:
 			DebugEnterAlt(6);
-			// ..\\ES3.g:1:41: ASSIGN
+			// EcmaScript.g:1:41: ASSIGN
 			{
 			DebugLocation(1, 41);
 			mASSIGN(); 
@@ -7163,7 +7163,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 7:
 			DebugEnterAlt(7);
-			// ..\\ES3.g:1:48: BOOLEAN
+			// EcmaScript.g:1:48: BOOLEAN
 			{
 			DebugLocation(1, 48);
 			mBOOLEAN(); 
@@ -7172,7 +7172,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 8:
 			DebugEnterAlt(8);
-			// ..\\ES3.g:1:56: BREAK
+			// EcmaScript.g:1:56: BREAK
 			{
 			DebugLocation(1, 56);
 			mBREAK(); 
@@ -7181,7 +7181,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 9:
 			DebugEnterAlt(9);
-			// ..\\ES3.g:1:62: BYTE
+			// EcmaScript.g:1:62: BYTE
 			{
 			DebugLocation(1, 62);
 			mBYTE(); 
@@ -7190,7 +7190,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 10:
 			DebugEnterAlt(10);
-			// ..\\ES3.g:1:67: CASE
+			// EcmaScript.g:1:67: CASE
 			{
 			DebugLocation(1, 67);
 			mCASE(); 
@@ -7199,7 +7199,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 11:
 			DebugEnterAlt(11);
-			// ..\\ES3.g:1:72: CATCH
+			// EcmaScript.g:1:72: CATCH
 			{
 			DebugLocation(1, 72);
 			mCATCH(); 
@@ -7208,7 +7208,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 12:
 			DebugEnterAlt(12);
-			// ..\\ES3.g:1:78: CHAR
+			// EcmaScript.g:1:78: CHAR
 			{
 			DebugLocation(1, 78);
 			mCHAR(); 
@@ -7217,7 +7217,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 13:
 			DebugEnterAlt(13);
-			// ..\\ES3.g:1:83: CLASS
+			// EcmaScript.g:1:83: CLASS
 			{
 			DebugLocation(1, 83);
 			mCLASS(); 
@@ -7226,7 +7226,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 14:
 			DebugEnterAlt(14);
-			// ..\\ES3.g:1:89: COLON
+			// EcmaScript.g:1:89: COLON
 			{
 			DebugLocation(1, 89);
 			mCOLON(); 
@@ -7235,7 +7235,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 15:
 			DebugEnterAlt(15);
-			// ..\\ES3.g:1:95: COMMA
+			// EcmaScript.g:1:95: COMMA
 			{
 			DebugLocation(1, 95);
 			mCOMMA(); 
@@ -7244,7 +7244,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 16:
 			DebugEnterAlt(16);
-			// ..\\ES3.g:1:101: CONST
+			// EcmaScript.g:1:101: CONST
 			{
 			DebugLocation(1, 101);
 			mCONST(); 
@@ -7253,7 +7253,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 17:
 			DebugEnterAlt(17);
-			// ..\\ES3.g:1:107: CONTINUE
+			// EcmaScript.g:1:107: CONTINUE
 			{
 			DebugLocation(1, 107);
 			mCONTINUE(); 
@@ -7262,7 +7262,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 18:
 			DebugEnterAlt(18);
-			// ..\\ES3.g:1:116: DEBUGGER
+			// EcmaScript.g:1:116: DEBUGGER
 			{
 			DebugLocation(1, 116);
 			mDEBUGGER(); 
@@ -7271,7 +7271,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 19:
 			DebugEnterAlt(19);
-			// ..\\ES3.g:1:125: DEC
+			// EcmaScript.g:1:125: DEC
 			{
 			DebugLocation(1, 125);
 			mDEC(); 
@@ -7280,7 +7280,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 20:
 			DebugEnterAlt(20);
-			// ..\\ES3.g:1:129: DEFAULT
+			// EcmaScript.g:1:129: DEFAULT
 			{
 			DebugLocation(1, 129);
 			mDEFAULT(); 
@@ -7289,7 +7289,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 21:
 			DebugEnterAlt(21);
-			// ..\\ES3.g:1:137: DELETE
+			// EcmaScript.g:1:137: DELETE
 			{
 			DebugLocation(1, 137);
 			mDELETE(); 
@@ -7298,7 +7298,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 22:
 			DebugEnterAlt(22);
-			// ..\\ES3.g:1:144: DIV
+			// EcmaScript.g:1:144: DIV
 			{
 			DebugLocation(1, 144);
 			mDIV(); 
@@ -7307,7 +7307,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 23:
 			DebugEnterAlt(23);
-			// ..\\ES3.g:1:148: DIVASS
+			// EcmaScript.g:1:148: DIVASS
 			{
 			DebugLocation(1, 148);
 			mDIVASS(); 
@@ -7316,7 +7316,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 24:
 			DebugEnterAlt(24);
-			// ..\\ES3.g:1:155: DO
+			// EcmaScript.g:1:155: DO
 			{
 			DebugLocation(1, 155);
 			mDO(); 
@@ -7325,7 +7325,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 25:
 			DebugEnterAlt(25);
-			// ..\\ES3.g:1:158: DOT
+			// EcmaScript.g:1:158: DOT
 			{
 			DebugLocation(1, 158);
 			mDOT(); 
@@ -7334,7 +7334,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 26:
 			DebugEnterAlt(26);
-			// ..\\ES3.g:1:162: DOUBLE
+			// EcmaScript.g:1:162: DOUBLE
 			{
 			DebugLocation(1, 162);
 			mDOUBLE(); 
@@ -7343,7 +7343,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 27:
 			DebugEnterAlt(27);
-			// ..\\ES3.g:1:169: ELSE
+			// EcmaScript.g:1:169: ELSE
 			{
 			DebugLocation(1, 169);
 			mELSE(); 
@@ -7352,7 +7352,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 28:
 			DebugEnterAlt(28);
-			// ..\\ES3.g:1:174: ENUM
+			// EcmaScript.g:1:174: ENUM
 			{
 			DebugLocation(1, 174);
 			mENUM(); 
@@ -7361,7 +7361,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 29:
 			DebugEnterAlt(29);
-			// ..\\ES3.g:1:179: EQ
+			// EcmaScript.g:1:179: EQ
 			{
 			DebugLocation(1, 179);
 			mEQ(); 
@@ -7370,7 +7370,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 30:
 			DebugEnterAlt(30);
-			// ..\\ES3.g:1:182: EXPORT
+			// EcmaScript.g:1:182: EXPORT
 			{
 			DebugLocation(1, 182);
 			mEXPORT(); 
@@ -7379,7 +7379,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 31:
 			DebugEnterAlt(31);
-			// ..\\ES3.g:1:189: EXTENDS
+			// EcmaScript.g:1:189: EXTENDS
 			{
 			DebugLocation(1, 189);
 			mEXTENDS(); 
@@ -7388,7 +7388,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 32:
 			DebugEnterAlt(32);
-			// ..\\ES3.g:1:197: FALSE
+			// EcmaScript.g:1:197: FALSE
 			{
 			DebugLocation(1, 197);
 			mFALSE(); 
@@ -7397,7 +7397,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 33:
 			DebugEnterAlt(33);
-			// ..\\ES3.g:1:203: FINAL
+			// EcmaScript.g:1:203: FINAL
 			{
 			DebugLocation(1, 203);
 			mFINAL(); 
@@ -7406,7 +7406,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 34:
 			DebugEnterAlt(34);
-			// ..\\ES3.g:1:209: FINALLY
+			// EcmaScript.g:1:209: FINALLY
 			{
 			DebugLocation(1, 209);
 			mFINALLY(); 
@@ -7415,7 +7415,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 35:
 			DebugEnterAlt(35);
-			// ..\\ES3.g:1:217: FLOAT
+			// EcmaScript.g:1:217: FLOAT
 			{
 			DebugLocation(1, 217);
 			mFLOAT(); 
@@ -7424,7 +7424,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 36:
 			DebugEnterAlt(36);
-			// ..\\ES3.g:1:223: FOR
+			// EcmaScript.g:1:223: FOR
 			{
 			DebugLocation(1, 223);
 			mFOR(); 
@@ -7433,7 +7433,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 37:
 			DebugEnterAlt(37);
-			// ..\\ES3.g:1:227: FUNCTION
+			// EcmaScript.g:1:227: FUNCTION
 			{
 			DebugLocation(1, 227);
 			mFUNCTION(); 
@@ -7442,7 +7442,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 38:
 			DebugEnterAlt(38);
-			// ..\\ES3.g:1:236: GOTO
+			// EcmaScript.g:1:236: GOTO
 			{
 			DebugLocation(1, 236);
 			mGOTO(); 
@@ -7451,7 +7451,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 39:
 			DebugEnterAlt(39);
-			// ..\\ES3.g:1:241: GT
+			// EcmaScript.g:1:241: GT
 			{
 			DebugLocation(1, 241);
 			mGT(); 
@@ -7460,7 +7460,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 40:
 			DebugEnterAlt(40);
-			// ..\\ES3.g:1:244: GTE
+			// EcmaScript.g:1:244: GTE
 			{
 			DebugLocation(1, 244);
 			mGTE(); 
@@ -7469,7 +7469,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 41:
 			DebugEnterAlt(41);
-			// ..\\ES3.g:1:248: IF
+			// EcmaScript.g:1:248: IF
 			{
 			DebugLocation(1, 248);
 			mIF(); 
@@ -7478,7 +7478,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 42:
 			DebugEnterAlt(42);
-			// ..\\ES3.g:1:251: IMPLEMENTS
+			// EcmaScript.g:1:251: IMPLEMENTS
 			{
 			DebugLocation(1, 251);
 			mIMPLEMENTS(); 
@@ -7487,7 +7487,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 43:
 			DebugEnterAlt(43);
-			// ..\\ES3.g:1:262: IMPORT
+			// EcmaScript.g:1:262: IMPORT
 			{
 			DebugLocation(1, 262);
 			mIMPORT(); 
@@ -7496,7 +7496,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 44:
 			DebugEnterAlt(44);
-			// ..\\ES3.g:1:269: IN
+			// EcmaScript.g:1:269: IN
 			{
 			DebugLocation(1, 269);
 			mIN(); 
@@ -7505,7 +7505,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 45:
 			DebugEnterAlt(45);
-			// ..\\ES3.g:1:272: INC
+			// EcmaScript.g:1:272: INC
 			{
 			DebugLocation(1, 272);
 			mINC(); 
@@ -7514,7 +7514,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 46:
 			DebugEnterAlt(46);
-			// ..\\ES3.g:1:276: INSTANCEOF
+			// EcmaScript.g:1:276: INSTANCEOF
 			{
 			DebugLocation(1, 276);
 			mINSTANCEOF(); 
@@ -7523,7 +7523,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 47:
 			DebugEnterAlt(47);
-			// ..\\ES3.g:1:287: INT
+			// EcmaScript.g:1:287: INT
 			{
 			DebugLocation(1, 287);
 			mINT(); 
@@ -7532,7 +7532,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 48:
 			DebugEnterAlt(48);
-			// ..\\ES3.g:1:291: INTERFACE
+			// EcmaScript.g:1:291: INTERFACE
 			{
 			DebugLocation(1, 291);
 			mINTERFACE(); 
@@ -7541,7 +7541,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 49:
 			DebugEnterAlt(49);
-			// ..\\ES3.g:1:301: INV
+			// EcmaScript.g:1:301: INV
 			{
 			DebugLocation(1, 301);
 			mINV(); 
@@ -7550,7 +7550,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 50:
 			DebugEnterAlt(50);
-			// ..\\ES3.g:1:305: LAND
+			// EcmaScript.g:1:305: LAND
 			{
 			DebugLocation(1, 305);
 			mLAND(); 
@@ -7559,7 +7559,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 51:
 			DebugEnterAlt(51);
-			// ..\\ES3.g:1:310: LBRACE
+			// EcmaScript.g:1:310: LBRACE
 			{
 			DebugLocation(1, 310);
 			mLBRACE(); 
@@ -7568,7 +7568,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 52:
 			DebugEnterAlt(52);
-			// ..\\ES3.g:1:317: LBRACK
+			// EcmaScript.g:1:317: LBRACK
 			{
 			DebugLocation(1, 317);
 			mLBRACK(); 
@@ -7577,7 +7577,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 53:
 			DebugEnterAlt(53);
-			// ..\\ES3.g:1:324: LONG
+			// EcmaScript.g:1:324: LONG
 			{
 			DebugLocation(1, 324);
 			mLONG(); 
@@ -7586,7 +7586,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 54:
 			DebugEnterAlt(54);
-			// ..\\ES3.g:1:329: LOR
+			// EcmaScript.g:1:329: LOR
 			{
 			DebugLocation(1, 329);
 			mLOR(); 
@@ -7595,7 +7595,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 55:
 			DebugEnterAlt(55);
-			// ..\\ES3.g:1:333: LPAREN
+			// EcmaScript.g:1:333: LPAREN
 			{
 			DebugLocation(1, 333);
 			mLPAREN(); 
@@ -7604,7 +7604,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 56:
 			DebugEnterAlt(56);
-			// ..\\ES3.g:1:340: LT
+			// EcmaScript.g:1:340: LT
 			{
 			DebugLocation(1, 340);
 			mLT(); 
@@ -7613,7 +7613,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 57:
 			DebugEnterAlt(57);
-			// ..\\ES3.g:1:343: LTE
+			// EcmaScript.g:1:343: LTE
 			{
 			DebugLocation(1, 343);
 			mLTE(); 
@@ -7622,7 +7622,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 58:
 			DebugEnterAlt(58);
-			// ..\\ES3.g:1:347: MOD
+			// EcmaScript.g:1:347: MOD
 			{
 			DebugLocation(1, 347);
 			mMOD(); 
@@ -7631,7 +7631,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 59:
 			DebugEnterAlt(59);
-			// ..\\ES3.g:1:351: MODASS
+			// EcmaScript.g:1:351: MODASS
 			{
 			DebugLocation(1, 351);
 			mMODASS(); 
@@ -7640,7 +7640,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 60:
 			DebugEnterAlt(60);
-			// ..\\ES3.g:1:358: MUL
+			// EcmaScript.g:1:358: MUL
 			{
 			DebugLocation(1, 358);
 			mMUL(); 
@@ -7649,7 +7649,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 61:
 			DebugEnterAlt(61);
-			// ..\\ES3.g:1:362: MULASS
+			// EcmaScript.g:1:362: MULASS
 			{
 			DebugLocation(1, 362);
 			mMULASS(); 
@@ -7658,7 +7658,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 62:
 			DebugEnterAlt(62);
-			// ..\\ES3.g:1:369: NATIVE
+			// EcmaScript.g:1:369: NATIVE
 			{
 			DebugLocation(1, 369);
 			mNATIVE(); 
@@ -7667,7 +7667,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 63:
 			DebugEnterAlt(63);
-			// ..\\ES3.g:1:376: NEQ
+			// EcmaScript.g:1:376: NEQ
 			{
 			DebugLocation(1, 376);
 			mNEQ(); 
@@ -7676,7 +7676,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 64:
 			DebugEnterAlt(64);
-			// ..\\ES3.g:1:380: NEW
+			// EcmaScript.g:1:380: NEW
 			{
 			DebugLocation(1, 380);
 			mNEW(); 
@@ -7685,7 +7685,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 65:
 			DebugEnterAlt(65);
-			// ..\\ES3.g:1:384: NOT
+			// EcmaScript.g:1:384: NOT
 			{
 			DebugLocation(1, 384);
 			mNOT(); 
@@ -7694,7 +7694,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 66:
 			DebugEnterAlt(66);
-			// ..\\ES3.g:1:388: NSAME
+			// EcmaScript.g:1:388: NSAME
 			{
 			DebugLocation(1, 388);
 			mNSAME(); 
@@ -7703,7 +7703,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 67:
 			DebugEnterAlt(67);
-			// ..\\ES3.g:1:394: NULL
+			// EcmaScript.g:1:394: NULL
 			{
 			DebugLocation(1, 394);
 			mNULL(); 
@@ -7712,7 +7712,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 68:
 			DebugEnterAlt(68);
-			// ..\\ES3.g:1:399: OR
+			// EcmaScript.g:1:399: OR
 			{
 			DebugLocation(1, 399);
 			mOR(); 
@@ -7721,7 +7721,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 69:
 			DebugEnterAlt(69);
-			// ..\\ES3.g:1:402: ORASS
+			// EcmaScript.g:1:402: ORASS
 			{
 			DebugLocation(1, 402);
 			mORASS(); 
@@ -7730,7 +7730,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 70:
 			DebugEnterAlt(70);
-			// ..\\ES3.g:1:408: PACKAGE
+			// EcmaScript.g:1:408: PACKAGE
 			{
 			DebugLocation(1, 408);
 			mPACKAGE(); 
@@ -7739,7 +7739,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 71:
 			DebugEnterAlt(71);
-			// ..\\ES3.g:1:416: PRIVATE
+			// EcmaScript.g:1:416: PRIVATE
 			{
 			DebugLocation(1, 416);
 			mPRIVATE(); 
@@ -7748,7 +7748,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 72:
 			DebugEnterAlt(72);
-			// ..\\ES3.g:1:424: PROTECTED
+			// EcmaScript.g:1:424: PROTECTED
 			{
 			DebugLocation(1, 424);
 			mPROTECTED(); 
@@ -7757,7 +7757,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 73:
 			DebugEnterAlt(73);
-			// ..\\ES3.g:1:434: PUBLIC
+			// EcmaScript.g:1:434: PUBLIC
 			{
 			DebugLocation(1, 434);
 			mPUBLIC(); 
@@ -7766,7 +7766,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 74:
 			DebugEnterAlt(74);
-			// ..\\ES3.g:1:441: QUE
+			// EcmaScript.g:1:441: QUE
 			{
 			DebugLocation(1, 441);
 			mQUE(); 
@@ -7775,7 +7775,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 75:
 			DebugEnterAlt(75);
-			// ..\\ES3.g:1:445: RBRACE
+			// EcmaScript.g:1:445: RBRACE
 			{
 			DebugLocation(1, 445);
 			mRBRACE(); 
@@ -7784,7 +7784,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 76:
 			DebugEnterAlt(76);
-			// ..\\ES3.g:1:452: RBRACK
+			// EcmaScript.g:1:452: RBRACK
 			{
 			DebugLocation(1, 452);
 			mRBRACK(); 
@@ -7793,7 +7793,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 77:
 			DebugEnterAlt(77);
-			// ..\\ES3.g:1:459: REF
+			// EcmaScript.g:1:459: REF
 			{
 			DebugLocation(1, 459);
 			mREF(); 
@@ -7802,7 +7802,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 78:
 			DebugEnterAlt(78);
-			// ..\\ES3.g:1:463: RETURN
+			// EcmaScript.g:1:463: RETURN
 			{
 			DebugLocation(1, 463);
 			mRETURN(); 
@@ -7811,7 +7811,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 79:
 			DebugEnterAlt(79);
-			// ..\\ES3.g:1:470: RPAREN
+			// EcmaScript.g:1:470: RPAREN
 			{
 			DebugLocation(1, 470);
 			mRPAREN(); 
@@ -7820,7 +7820,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 80:
 			DebugEnterAlt(80);
-			// ..\\ES3.g:1:477: SAME
+			// EcmaScript.g:1:477: SAME
 			{
 			DebugLocation(1, 477);
 			mSAME(); 
@@ -7829,7 +7829,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 81:
 			DebugEnterAlt(81);
-			// ..\\ES3.g:1:482: SEMIC
+			// EcmaScript.g:1:482: SEMIC
 			{
 			DebugLocation(1, 482);
 			mSEMIC(); 
@@ -7838,7 +7838,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 82:
 			DebugEnterAlt(82);
-			// ..\\ES3.g:1:488: SHL
+			// EcmaScript.g:1:488: SHL
 			{
 			DebugLocation(1, 488);
 			mSHL(); 
@@ -7847,7 +7847,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 83:
 			DebugEnterAlt(83);
-			// ..\\ES3.g:1:492: SHLASS
+			// EcmaScript.g:1:492: SHLASS
 			{
 			DebugLocation(1, 492);
 			mSHLASS(); 
@@ -7856,7 +7856,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 84:
 			DebugEnterAlt(84);
-			// ..\\ES3.g:1:499: SHORT
+			// EcmaScript.g:1:499: SHORT
 			{
 			DebugLocation(1, 499);
 			mSHORT(); 
@@ -7865,7 +7865,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 85:
 			DebugEnterAlt(85);
-			// ..\\ES3.g:1:505: SHR
+			// EcmaScript.g:1:505: SHR
 			{
 			DebugLocation(1, 505);
 			mSHR(); 
@@ -7874,7 +7874,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 86:
 			DebugEnterAlt(86);
-			// ..\\ES3.g:1:509: SHRASS
+			// EcmaScript.g:1:509: SHRASS
 			{
 			DebugLocation(1, 509);
 			mSHRASS(); 
@@ -7883,7 +7883,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 87:
 			DebugEnterAlt(87);
-			// ..\\ES3.g:1:516: SHU
+			// EcmaScript.g:1:516: SHU
 			{
 			DebugLocation(1, 516);
 			mSHU(); 
@@ -7892,7 +7892,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 88:
 			DebugEnterAlt(88);
-			// ..\\ES3.g:1:520: SHUASS
+			// EcmaScript.g:1:520: SHUASS
 			{
 			DebugLocation(1, 520);
 			mSHUASS(); 
@@ -7901,7 +7901,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 89:
 			DebugEnterAlt(89);
-			// ..\\ES3.g:1:527: STATIC
+			// EcmaScript.g:1:527: STATIC
 			{
 			DebugLocation(1, 527);
 			mSTATIC(); 
@@ -7910,7 +7910,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 90:
 			DebugEnterAlt(90);
-			// ..\\ES3.g:1:534: SUB
+			// EcmaScript.g:1:534: SUB
 			{
 			DebugLocation(1, 534);
 			mSUB(); 
@@ -7919,7 +7919,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 91:
 			DebugEnterAlt(91);
-			// ..\\ES3.g:1:538: SUBASS
+			// EcmaScript.g:1:538: SUBASS
 			{
 			DebugLocation(1, 538);
 			mSUBASS(); 
@@ -7928,7 +7928,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 92:
 			DebugEnterAlt(92);
-			// ..\\ES3.g:1:545: SUPER
+			// EcmaScript.g:1:545: SUPER
 			{
 			DebugLocation(1, 545);
 			mSUPER(); 
@@ -7937,7 +7937,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 93:
 			DebugEnterAlt(93);
-			// ..\\ES3.g:1:551: SWITCH
+			// EcmaScript.g:1:551: SWITCH
 			{
 			DebugLocation(1, 551);
 			mSWITCH(); 
@@ -7946,7 +7946,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 94:
 			DebugEnterAlt(94);
-			// ..\\ES3.g:1:558: SYNCHRONIZED
+			// EcmaScript.g:1:558: SYNCHRONIZED
 			{
 			DebugLocation(1, 558);
 			mSYNCHRONIZED(); 
@@ -7955,7 +7955,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 95:
 			DebugEnterAlt(95);
-			// ..\\ES3.g:1:571: THIS
+			// EcmaScript.g:1:571: THIS
 			{
 			DebugLocation(1, 571);
 			mTHIS(); 
@@ -7964,7 +7964,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 96:
 			DebugEnterAlt(96);
-			// ..\\ES3.g:1:576: THROW
+			// EcmaScript.g:1:576: THROW
 			{
 			DebugLocation(1, 576);
 			mTHROW(); 
@@ -7973,7 +7973,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 97:
 			DebugEnterAlt(97);
-			// ..\\ES3.g:1:582: THROWS
+			// EcmaScript.g:1:582: THROWS
 			{
 			DebugLocation(1, 582);
 			mTHROWS(); 
@@ -7982,7 +7982,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 98:
 			DebugEnterAlt(98);
-			// ..\\ES3.g:1:589: TRANSIENT
+			// EcmaScript.g:1:589: TRANSIENT
 			{
 			DebugLocation(1, 589);
 			mTRANSIENT(); 
@@ -7991,7 +7991,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 99:
 			DebugEnterAlt(99);
-			// ..\\ES3.g:1:599: TRUE
+			// EcmaScript.g:1:599: TRUE
 			{
 			DebugLocation(1, 599);
 			mTRUE(); 
@@ -8000,7 +8000,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 100:
 			DebugEnterAlt(100);
-			// ..\\ES3.g:1:604: TRY
+			// EcmaScript.g:1:604: TRY
 			{
 			DebugLocation(1, 604);
 			mTRY(); 
@@ -8009,7 +8009,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 101:
 			DebugEnterAlt(101);
-			// ..\\ES3.g:1:608: TYPEOF
+			// EcmaScript.g:1:608: TYPEOF
 			{
 			DebugLocation(1, 608);
 			mTYPEOF(); 
@@ -8018,7 +8018,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 102:
 			DebugEnterAlt(102);
-			// ..\\ES3.g:1:615: VAR
+			// EcmaScript.g:1:615: VAR
 			{
 			DebugLocation(1, 615);
 			mVAR(); 
@@ -8027,7 +8027,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 103:
 			DebugEnterAlt(103);
-			// ..\\ES3.g:1:619: VOID
+			// EcmaScript.g:1:619: VOID
 			{
 			DebugLocation(1, 619);
 			mVOID(); 
@@ -8036,7 +8036,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 104:
 			DebugEnterAlt(104);
-			// ..\\ES3.g:1:624: VOLATILE
+			// EcmaScript.g:1:624: VOLATILE
 			{
 			DebugLocation(1, 624);
 			mVOLATILE(); 
@@ -8045,7 +8045,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 105:
 			DebugEnterAlt(105);
-			// ..\\ES3.g:1:633: WHILE
+			// EcmaScript.g:1:633: WHILE
 			{
 			DebugLocation(1, 633);
 			mWHILE(); 
@@ -8054,7 +8054,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 106:
 			DebugEnterAlt(106);
-			// ..\\ES3.g:1:639: WITH
+			// EcmaScript.g:1:639: WITH
 			{
 			DebugLocation(1, 639);
 			mWITH(); 
@@ -8063,7 +8063,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 107:
 			DebugEnterAlt(107);
-			// ..\\ES3.g:1:644: XOR
+			// EcmaScript.g:1:644: XOR
 			{
 			DebugLocation(1, 644);
 			mXOR(); 
@@ -8072,7 +8072,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 108:
 			DebugEnterAlt(108);
-			// ..\\ES3.g:1:648: XORASS
+			// EcmaScript.g:1:648: XORASS
 			{
 			DebugLocation(1, 648);
 			mXORASS(); 
@@ -8081,7 +8081,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 109:
 			DebugEnterAlt(109);
-			// ..\\ES3.g:1:655: WhiteSpace
+			// EcmaScript.g:1:655: WhiteSpace
 			{
 			DebugLocation(1, 655);
 			mWhiteSpace(); 
@@ -8090,7 +8090,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 110:
 			DebugEnterAlt(110);
-			// ..\\ES3.g:1:666: EOL
+			// EcmaScript.g:1:666: EOL
 			{
 			DebugLocation(1, 666);
 			mEOL(); 
@@ -8099,7 +8099,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 111:
 			DebugEnterAlt(111);
-			// ..\\ES3.g:1:670: MultiLineComment
+			// EcmaScript.g:1:670: MultiLineComment
 			{
 			DebugLocation(1, 670);
 			mMultiLineComment(); 
@@ -8108,7 +8108,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 112:
 			DebugEnterAlt(112);
-			// ..\\ES3.g:1:687: SingleLineComment
+			// EcmaScript.g:1:687: SingleLineComment
 			{
 			DebugLocation(1, 687);
 			mSingleLineComment(); 
@@ -8117,7 +8117,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 113:
 			DebugEnterAlt(113);
-			// ..\\ES3.g:1:705: Identifier
+			// EcmaScript.g:1:705: Identifier
 			{
 			DebugLocation(1, 705);
 			mIdentifier(); 
@@ -8126,7 +8126,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 114:
 			DebugEnterAlt(114);
-			// ..\\ES3.g:1:716: DecimalLiteral
+			// EcmaScript.g:1:716: DecimalLiteral
 			{
 			DebugLocation(1, 716);
 			mDecimalLiteral(); 
@@ -8135,7 +8135,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 115:
 			DebugEnterAlt(115);
-			// ..\\ES3.g:1:731: OctalIntegerLiteral
+			// EcmaScript.g:1:731: OctalIntegerLiteral
 			{
 			DebugLocation(1, 731);
 			mOctalIntegerLiteral(); 
@@ -8144,7 +8144,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 116:
 			DebugEnterAlt(116);
-			// ..\\ES3.g:1:751: HexIntegerLiteral
+			// EcmaScript.g:1:751: HexIntegerLiteral
 			{
 			DebugLocation(1, 751);
 			mHexIntegerLiteral(); 
@@ -8153,7 +8153,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 117:
 			DebugEnterAlt(117);
-			// ..\\ES3.g:1:769: StringLiteral
+			// EcmaScript.g:1:769: StringLiteral
 			{
 			DebugLocation(1, 769);
 			mStringLiteral(); 
@@ -8162,7 +8162,7 @@ internal partial class ES3Lexer : Antlr.Runtime.Lexer
 			break;
 		case 118:
 			DebugEnterAlt(118);
-			// ..\\ES3.g:1:783: RegularExpressionLiteral
+			// EcmaScript.g:1:783: RegularExpressionLiteral
 			{
 			DebugLocation(1, 783);
 			mRegularExpressionLiteral(); 

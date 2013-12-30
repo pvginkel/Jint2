@@ -204,6 +204,8 @@ namespace Jint.Tests.Fixtures
 
             var engine = CreateContext(Assert.Fail);
 
+            engine.DisableSecurity();
+
             Assert.AreEqual("hi, mom3True", engine.Execute(script));
         }
 

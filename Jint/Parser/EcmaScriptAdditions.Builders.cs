@@ -7,7 +7,7 @@ using Jint.Expressions;
 
 namespace Jint.Parser
 {
-    partial class ES3Parser
+    partial class EcmaScriptParser
     {
         private class BodyBuilder
         {
@@ -96,7 +96,7 @@ namespace Jint.Parser
 
             public ExpressionSyntax Increment { get; set; }
 
-            public SyntaxNode CreateFor(ES3Parser parser, SourceLocation location)
+            public SyntaxNode CreateFor(EcmaScriptParser parser, SourceLocation location)
             {
                 if (Expression != null)
                 {
