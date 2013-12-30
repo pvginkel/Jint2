@@ -179,6 +179,8 @@
     <Compile Include="Native\Interop\NativeFactory.cs" />
     <Compile Include="Native\Interop\ProxyHelper.Builder.cs" />
     <Compile Include="Native\IPropertyStore.cs" />
+    <Compile Include="Native\ArrayShim.cs" />
+    <Compile Include="Native\ArrayShimOptions.cs" />
     <Compile Include="Native\JsFunctionSourceAttribute.cs" />
     <Compile Include="Native\JsGenericArguments.cs" />
     <Compile Include="Native\JsMain.cs" />
@@ -217,7 +219,7 @@
     <Compile Include="Native\JsNames.cs" />
     <Compile Include="Native\JsObject.Properties.cs" />
     <Compile Include="Native\PropertyAccessor.cs" />
-    <Compile Include="Native\RegExpOptions.cs" />
+    <Compile Include="Native\JsRegexOptions.cs" />
     <Compile Include="Native\JsType.cs" />
     <Compile Include="Native\Interop\NativeArrayIndexer.cs" />
     <Compile Include="Native\Interop\NativeMethodOverload.cs" />
@@ -226,7 +228,7 @@
     <Compile Include="Marshaller.cs" />
     <Compile Include="Native\ILiteral.cs" />
     <Compile Include="Native\PreferredType.cs" />
-    <Compile Include="Native\RegExpManager.cs" />
+    <Compile Include="Native\RegexManager.cs" />
     <Compile Include="Parser\ES3Additions.Builders.cs" />
     <Compile Include="Parser\ES3Lexer.cs" />
     <Compile Include="Parser\ES3Additions.cs" />
@@ -284,7 +286,6 @@
     <Compile Include="Native\JintRuntime.Comparers.cs" />
     <Compile Include="Native\JintRuntime.cs" />
     <Compile Include="Native\JintRuntime.Operations.cs" />
-    <Compile Include="Native\JsGlobal.Setup.cs" />
     <Compile Include="Native\JsGlobal.FunctionFunctions.cs" />
     <Compile Include="Native\JintRuntime.Operations.Generated.cs">
       <AutoGen>True</AutoGen>

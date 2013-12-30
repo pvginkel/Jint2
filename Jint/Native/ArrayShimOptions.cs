@@ -6,11 +6,9 @@ using System.Text;
 namespace Jint.Native
 {
     [Flags]
-    public enum RegExpOptions
+    internal enum ArrayShimOptions
     {
         None = 0,
-        Global = 1,
-        IgnoreCase = 2,
-        Multiline = 4
+        IncludeMissing = 1
     }
 }

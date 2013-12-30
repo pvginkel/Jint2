@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -142,6 +143,46 @@ namespace Jint.Native
             return value;
         }
 
+        // 9.4
+        public static double ToInteger(object value)
+        {
+            double number = ToNumber(value);
+            if (Double.IsNaN(number))
+                return 0;
+            if (number == 0 || Double.IsInfinity(number))
+                return number;
+            return Math.Round(number);
+        }
+
+        // 9.5
+        public static int ToInt32(object value)
+        {
+            double number = ToNumber(value);
+            if (Double.IsNaN(number) || Double.IsInfinity(number))
+                return 0;
+            return (int)number;
+        }
+
+        // 9.6
+        [CLSCompliant(false)]
+        public static uint ToUint32(object value)
+        {
+            double number = ToNumber(value);
+            if (Double.IsNaN(number) || Double.IsInfinity(number))
+                return 0;
+            return (uint)number;
+        }
+
+        // 9.7
+        [CLSCompliant(false)]
+        public static ushort ToUint16(object value)
+        {
+            double number = ToNumber(value);
+            if (Double.IsNaN(number) || Double.IsInfinity(number))
+                return 0;
+            return (ushort)number;
+        }
+
         public static string GetType(object value)
         {
             switch (GetJsType(value))
@@ -193,6 +234,27 @@ namespace Jint.Native
 
                 default:
                     throw new ArgumentOutOfRangeException("value");
+            }
+        }
+
+        public static string ToLocaleString(object value)
+        {
+            switch (GetJsType(value))
+            {
+                case JsType.Number: return ((double)value).ToString(CultureInfo.CurrentCulture);
+
+                case JsType.Boolean: return JsConvert.ToString((bool)value);
+
+                case JsType.Object:
+                    var @object = (JsObject)value;
+                    var function = @object.GetProperty(Id.toLocaleString) as JsObject;
+                    if (IsFunction(function))
+                        return function.Global.ExecuteFunction(function, @object, EmptyArray).ToString();
+
+                    return value.ToString();
+
+                default:
+                    return value.ToString();
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -32,54 +33,88 @@ namespace Jint.Native
             // 15.4.4.2
             public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                return ((JsObject)runtime.Global.ArrayClass.GetProperty(Id.join)).Execute(runtime, @this, JsValue.EmptyArray);
+                if (@this.FindArrayStore() == null)
+                    throw new JsException(JsErrorType.TypeError, "Object is not an array");
+
+                return ((JsObject)((JsObject)@this).GetProperty(Id.join)).Execute(runtime, @this, JsValue.EmptyArray);
             }
 
             // 15.4.4.3
             public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var global = runtime.Global;
-                var store = @this.FindArrayStore();
-                var result = global.CreateArray();
-                var resultStore = result.FindArrayStore();
+                var @object = @this as JsObject;
+                if (@object == null)
+                    return String.Empty;
 
-                for (int i = 0; i < store.Length; i++)
+                int length = (int)JsValue.ToUint32(@object.GetProperty(Id.length));
+                if (length == 0)
+                    return String.Empty;
+
+                string separator = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
+                var sb = new StringBuilder();
+
+                for (int i = 0; i < length; i++)
                 {
-                    var obj = (JsObject)store.GetOwnProperty(i);
+                    if (i > 0)
+                        sb.Append(separator);
 
-                    resultStore.DefineOrSetPropertyValue(
-                        i,
-                        ((JsObject)obj.GetProperty(Id.toLocaleString)).Execute(
-                            runtime, obj, arguments
-                        )
-                    );
+                    sb.Append(JsValue.ToLocaleString(@object.GetProperty(i)));
                 }
 
-                return result.ToString();
+                return sb.ToString();
             }
 
             // 15.4.4.4
             public static object Concat(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var store = @this.FindArrayStore();
-                if (store == null)
+                var result = runtime.Global.CreateArray();
+                var store = result.FindArrayStore();
+                int offset = 0;
+
+                foreach (var item in ThisAndArguments(@this, arguments))
                 {
-                    var array = runtime.Global.CreateArray();
-                    store = array.FindArrayStore();
-                    store.DefineOrSetPropertyValue(0, @this);
+                    var itemStore = item.FindArrayStore();
+                    if (itemStore != null)
+                    {
+                        foreach (int key in itemStore.GetKeys())
+                        {
+                            store.DefineOrSetPropertyValue(offset++, itemStore.GetValue(key));
+                        }
+                    }
+                    else
+                    {
+                        store.DefineOrSetPropertyValue(offset++, item);
+                    }
                 }
 
-                return store.Concat(arguments);
+                return result;
             }
 
             // 15.4.4.5
             public static object Join(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var store = @this.FindArrayStore();
-                if (store == null)
-                    return JsUndefined.Instance;
+                string separator;
+                if (arguments.Length == 0 || JsValue.IsUndefined(arguments[0]))
+                    separator = ",";
+                else
+                    separator = JsValue.ToString(arguments[0]);
 
-                return store.Join(arguments.Length > 0 ? arguments[0] : JsUndefined.Instance);
+                var shim = new ArrayShim(@this, ArrayShimOptions.IncludeMissing);
+                var sb = new StringBuilder();
+                bool hadOne = false;
+
+                foreach (var item in shim)
+                {
+                    if (hadOne)
+                        sb.Append(separator);
+                    else
+                        hadOne = true;
+
+                    if (!JsValue.IsNullOrUndefined(item.Value))
+                        sb.Append(JsValue.ToString(item.Value));
+                }
+
+                return sb.ToString();
             }
 
             // 15.4.4.6
@@ -179,9 +214,7 @@ namespace Jint.Native
                         if (accessor != null)
                             value = accessor.GetValue(@this);
                         else
-                        {
                             value = result;
-                        }
 
                         store.DefineOrSetPropertyValue(to, value);
                     }
@@ -257,19 +290,9 @@ namespace Jint.Native
 
                 if (compare != null)
                 {
-                    try
-                    {
-                        values.Sort((a, b) => (int)JsValue.ToNumber(
-                            compare.Execute(runtime, JsNull.Instance, a, b)
-                        ));
-                    }
-                    catch (Exception e)
-                    {
-                        if (e.InnerException is JsException)
-                            throw e.InnerException;
-
-                        throw;
-                    }
+                    values.Sort((a, b) => (int)JsValue.ToNumber(
+                        compare.Execute(runtime, JsNull.Instance, a, b)
+                    ));
                 }
                 else
                 {
@@ -292,7 +315,7 @@ namespace Jint.Native
                 var global = target.Global;
 
                 var result = global.CreateArray();
-                var resultStore = (ArrayPropertyStore)result.PropertyStore;
+                var resultStore = result.FindArrayStore();
 
                 int relativeStart = (int)JsValue.ToNumber(arguments[0]);
 
@@ -318,19 +341,16 @@ namespace Jint.Native
                         resultStore.DefineOrSetPropertyValue(k, item);
                 }
 
-                var items = new List<object>();
-
-                items.AddRange(arguments);
-                items.RemoveAt(0);
-                items.RemoveAt(0);
+                var items = new object[arguments.Length - 2];
+                Array.Copy(arguments, 2, items, 0, items.Length);
 
                 // Use non-destructing copy, determine direction
-                if (items.Count < actualDeleteCount)
+                if (items.Length < actualDeleteCount)
                 {
                     for (int k = actualStart; k < length - actualDeleteCount; k++)
                     {
                         int from = k + actualDeleteCount;
-                        int to = k + items.Count;
+                        int to = k + items.Length;
                         object item;
                         if (target.TryGetProperty(from, out item))
                             target.SetProperty(to, item);
@@ -338,19 +358,19 @@ namespace Jint.Native
                             target.DeleteProperty(to);
                     }
 
-                    for (int k = length; k > length - actualDeleteCount + items.Count; k--)
+                    for (int k = length; k > length - actualDeleteCount + items.Length; k--)
                     {
                         target.DeleteProperty(k - 1);
                     }
 
-                    target.SetProperty(Id.length, (double)(length - actualDeleteCount + items.Count));
+                    target.SetProperty(Id.length, (double)(length - actualDeleteCount + items.Length));
                 }
                 else
                 {
                     for (int k = length - actualDeleteCount; k > actualStart; k--)
                     {
                         int from = k + actualDeleteCount - 1;
-                        int to = k + items.Count - 1;
+                        int to = k + items.Length - 1;
                         object item;
                         if (target.TryGetProperty(from, out item))
                             target.SetProperty(to, item);
@@ -359,7 +379,7 @@ namespace Jint.Native
                     }
                 }
 
-                for (int k = 0; k < items.Count; k++)
+                for (int k = 0; k < items.Length; k++)
                 {
                     target.SetProperty(k, items[k]);
                 }
@@ -384,12 +404,9 @@ namespace Jint.Native
                         target.DeleteProperty(to);
                 }
 
-                var items = new List<object>(arguments);
-                for (int j = 0; items.Count > 0; j++)
+                for (int j = 0; j < arguments.Length; j++)
                 {
-                    object e = items[0];
-                    items.RemoveAt(0);
-                    target.SetProperty(j, e);
+                    target.SetProperty(j, arguments[(arguments.Length - 1) - j]);
                 }
 
                 return target.GetProperty(Id.length);
@@ -399,77 +416,67 @@ namespace Jint.Native
             public static object IndexOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (arguments.Length == 0)
-                    return (double)(-1);
+                    return (double)-1;
 
-                var target = (JsObject)@this;
-                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
-                if (length == 0)
-                    return (double)(-1);
+                var shim = new ArrayShim(@this);
+                if (shim.Length == 0)
+                    return (double)-1;
 
                 int n = 0;
                 if (arguments.Length > 1)
                     n = (int)JsValue.ToNumber(arguments[1]);
 
-                if (n >= length)
-                    return (double)(-1);
+                if (n >= shim.Length)
+                    return (double)-1;
 
                 var searchParameter = arguments[0];
 
-                int k;
-                if (n >= 0)
-                    k = n;
-                else
-                    k = length - Math.Abs(n);
-
-                while (k < length)
+                int start = n >= 0 ? n : shim.Length + n;
+                for (int k = start; k < shim.Length; k++)
                 {
                     object result;
                     if (
-                        target.TryGetProperty(k, out result) &&
+                        shim.TryGetProperty(k, out result) &&
                         JintRuntime.CompareSame(result, searchParameter)
                     )
                         return (double)k;
-                    k++;
                 }
 
-                return (double)(-1);
+                return (double)-1;
             }
 
             // 15.4.4.15
             public static object LastIndexOf(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (arguments.Length == 0)
-                    return (double)(-1);
+                    return (double)-1;
 
-                var target = (JsObject)@this;
-                int length = (int)JsValue.ToNumber(target.GetProperty(Id.length));
-                if (length == 0)
-                    return (double)(-1);
+                var shim = new ArrayShim(@this);
+                if (shim.Length == 0)
+                    return (double)-1;
 
-                int n = length;
+                int n = 0;
                 if (arguments.Length > 1)
                     n = (int)JsValue.ToNumber(arguments[1]);
 
-                int k;
-                var searchParameter = arguments[0];
-                if (n >= 0)
-                    k = Math.Min(n, length - 1);
-                else
-                    k = length - Math.Abs(n - 1);
+                if (n >= shim.Length)
+                    return (double)-1;
 
-                while (k >= 0)
+                var searchParameter = arguments[0];
+
+                int start = n >= 0 ? Math.Min(n, shim.Length - 1) : shim.Length + (n - 1);
+
+                for (int k = start; k >= 0; k--)
                 {
                     object result;
                     if (
-                        target.TryGetProperty(k, out result) &&
+                        shim.TryGetProperty(k, out result) &&
                         JintRuntime.CompareSame(result, searchParameter)
                     )
                         return (double)k;
-
-                    k--;
                 }
 
-                return (double)(-1);
+                return (double)-1;
             }
 
             public static object GetLength(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
@@ -513,6 +520,16 @@ namespace Jint.Native
                 public int Compare(object x, object y)
                 {
                     return JsValue.ToString(x).CompareTo(JsValue.ToString(y));
+                }
+            }
+
+            private static IEnumerable<object> ThisAndArguments(object @this, object[] arguments)
+            {
+                yield return @this;
+
+                foreach (var argument in arguments)
+                {
+                    yield return argument;
                 }
             }
         }

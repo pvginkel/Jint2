@@ -134,8 +134,7 @@ namespace Jint.Native
                 double d;
                 if (ParseDate(runtime.Global, JsValue.ToString(arguments[0]), CultureInfo.InvariantCulture, out d))
                     return d;
-                else
-                    return DoubleBoxes.NaN;
+                return DoubleBoxes.NaN;
             }
 
             public static object ParseLocale(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
@@ -620,15 +619,15 @@ namespace Jint.Native
             {
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    if (
-                        JsValue.IsUndefined(arguments[i]) || (
-                            arguments[i] is double && (
-                                Double.IsNaN(JsValue.ToNumber(arguments[i])) ||
-                                Double.IsInfinity(JsValue.ToNumber(arguments[i]))
-                            )
-                        )
-                    )
+                    if (JsValue.IsUndefined(arguments[i]))
                         return DoubleBoxes.NaN;
+
+                    if (arguments[i] is double)
+                    {
+                        double number = (double)arguments[i];
+                        if (Double.IsNaN(number) || Double.IsInfinity(number))
+                            return DoubleBoxes.NaN;
+                    }
                 }
 
                 var result = runtime.Global.DateClass.Construct(runtime, arguments);

@@ -42,12 +42,12 @@ namespace Jint.Native
                 return ((JsObject)((JsObject)@this).GetProperty(Id.toString)).Execute(runtime, @this, JsValue.EmptyArray);
             }
 
-            private static readonly char[] RDigits =
+            private static readonly char[] RadixDigits =
             {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
-                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
-                'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
-                'U', 'V', 'W', 'X', 'Y', 'Z'
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
+                'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
+                'u', 'v', 'w', 'x', 'y', 'z'
             };
 
             public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
@@ -70,12 +70,11 @@ namespace Jint.Native
                 )
                     radix = (int)JsValue.ToNumber(arguments[0]);
 
-                var longToBeFormatted = (long)value;
-
                 if (radix == 10)
-                    return value.ToString(CultureInfo.InvariantCulture).ToLower();
+                    return value.ToString("g", CultureInfo.InvariantCulture);
 
                 // Extract the magnitude for conversion.
+                var longToBeFormatted = (long)value;
                 long longPositive = Math.Abs(longToBeFormatted);
                 int digitIndex;
 
@@ -85,8 +84,7 @@ namespace Jint.Native
                 {
                     if (longPositive == 0) break;
 
-                    outDigits[outDigits.Length - digitIndex - 1] =
-                        RDigits[longPositive % radix];
+                    outDigits[outDigits.Length - digitIndex - 1] = RadixDigits[longPositive % radix];
                     longPositive /= radix;
                 }
 
@@ -94,8 +92,7 @@ namespace Jint.Native
                 if (longToBeFormatted < 0)
                     outDigits[outDigits.Length - digitIndex++ - 1] = '-';
 
-                return new string(outDigits,
-                    outDigits.Length - digitIndex, digitIndex).ToLower();
+                return new String(outDigits, outDigits.Length - digitIndex, digitIndex);
             }
 
             // 15.7.4.5
@@ -113,7 +110,10 @@ namespace Jint.Native
                 if (Double.IsNaN(value))
                     return JsValue.ToString(@this);
 
-                return value.ToString("f" + fractions, CultureInfo.InvariantCulture);
+                return value.ToString(
+                    "f" + fractions.ToString(CultureInfo.InvariantCulture),
+                    CultureInfo.InvariantCulture
+                );
             }
 
             // 15.7.4.6
@@ -131,7 +131,8 @@ namespace Jint.Native
                 if (fractions > 20 || fractions < 0)
                     throw new JsException(JsErrorType.SyntaxError, "Fraction Digits must be greater than 0 and lesser than 20");
 
-                string format = String.Concat("#.", new String('0', fractions), "e+0");
+                string format = "#." + new String('0', fractions)+ "e+0";
+
                 return value.ToString(format, CultureInfo.InvariantCulture);
             }
 
@@ -151,14 +152,10 @@ namespace Jint.Native
 
                 int precision = 0;
                 if (arguments.Length > 0)
-                {
                     precision = (int)JsValue.ToNumber(arguments[0]);
-                }
 
                 if (precision < 1 || precision > 21)
-                {
                     throw new JsException(JsErrorType.RangeError, "Precision must be between 1 and 21");
-                }
 
                 // Get the number of decimals
                 string stringValue = value.ToString("e23", CultureInfo.InvariantCulture);

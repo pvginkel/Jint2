@@ -1,7 +1,4 @@
-﻿// ReSharper disable StringIndexOfIsCultureSpecific.1
-// ReSharper disable StringIndexOfIsCultureSpecific.2
-// ReSharper disable StringCompareToIsCultureSpecific
-// ReSharper disable StringLastIndexOfIsCultureSpecific.1
+﻿// ReSharper disable StringIndexOfIsCultureSpecific.1, StringIndexOfIsCultureSpecific.2, StringCompareToIsCultureSpecific, StringLastIndexOfIsCultureSpecific.1
 
 using System;
 using System.Collections.Generic;
@@ -52,28 +49,6 @@ namespace Jint.Native
                 }
             }
 
-            private static string EvaluateReplacePattern(string matched, string before, string after, string newString, GroupCollection groups)
-            {
-                if (newString.Contains("$"))
-                {
-                    Regex rr = new Regex(@"\$\$|\$&|\$`|\$'|\$\d{1,2}", RegexOptions.Compiled);
-                    var res = rr.Replace(newString, delegate(Match m)
-                    {
-                        switch (m.Value)
-                        {
-                            case "$$": return "$";
-                            case "$&": return matched;
-                            case "$`": return before;
-                            case "$'": return after;
-                            default: int n = int.Parse(m.Value.Substring(1)); return n == 0 ? m.Value : groups[n].Value;
-                        }
-                    });
-
-                    return res;
-                }
-                return newString;
-            }
-
             // 15.5.4.2
             public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
@@ -95,45 +70,53 @@ namespace Jint.Native
             // 15.5.4.4
             public static object CharAt(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                return ((JsObject)runtime.GetMemberByIndex(@this, Id.substring)).Execute(
-                    runtime,
-                    @this,
-                    new[] { arguments[0], JsValue.ToNumber(arguments[0]) + 1 }
-                );
+                if (arguments.Length == 0)
+                    return String.Empty;
+
+                int pos = (int)JsValue.ToInteger(arguments[0]);
+                if (pos < 0)
+                    return String.Empty;
+
+                string value = JsValue.ToString(@this);
+                if (pos >= value.Length)
+                    return String.Empty;
+
+                return new String(value[pos], 1);
             }
 
             // 15.5.4.5
             public static object CharCodeAt(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var r = JsValue.ToString(@this);
-                var at = (int)JsValue.ToNumber(arguments[0]);
+                if (arguments.Length == 0)
+                    return String.Empty;
 
-                if (r == String.Empty || at > r.Length - 1)
+                int pos = (int)JsValue.ToInteger(arguments[0]);
+                if (pos < 0)
                     return DoubleBoxes.NaN;
-                else
-                    return (double)r[at];
+
+                string value = JsValue.ToString(@this);
+                if (pos >= value.Length)
+                    return DoubleBoxes.NaN;
+
+                return (double)value[pos];
             }
 
             // 15.5.3.2
             public static object FromCharCode(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                //var r = @this.ToString();
+                if (arguments.Length == 0)
+                    return String.Empty;
+                if (arguments.Length == 1)
+                    return new String((char)JsValue.ToUint16(arguments[0]), 1);
 
-                //if (r == String.Empty || at > r.Length - 1)
-                //{
-                //    return object.NaN;
-                //}
-                //else
-                //{
-                string result = string.Empty;
+                var sb = new StringBuilder(arguments.Length);
 
-                foreach (object arg in arguments)
+                for (int i = 0; i < arguments.Length; i++)
                 {
-                    result += (char)(uint)JsValue.ToNumber(arg);
+                    sb.Append((char)JsValue.ToUint16(arguments[i]));
                 }
 
-                return result;
-                //}
+                return sb.ToString();
             }
 
             // 15.5.4.6
@@ -161,19 +144,12 @@ namespace Jint.Native
                 if (searchString == String.Empty)
                 {
                     if (arguments.Length > 1)
-                    {
                         return (double)Math.Min(source.Length, position);
-                    }
-                    else
-                    {
-                        return (double)0;
-                    }
+                    return (double)0;
                 }
 
                 if (position >= source.Length)
-                {
-                    return (double)(-1);
-                }
+                    return (double)-1;
 
                 return (double)source.IndexOf(searchString, position);
             }
@@ -185,7 +161,7 @@ namespace Jint.Native
                 string searchString = JsValue.ToString(arguments[0]);
                 int position = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : source.Length;
 
-                return (double)source.Substring(0, position).LastIndexOf(searchString);
+                return (double)source.LastIndexOf(searchString, position);
             }
 
             // 15.5.4.9
@@ -197,47 +173,29 @@ namespace Jint.Native
             // 15.5.4.10
             public static object Match(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                JsObject regexpObject;
-                RegExpManager regexp;
+                RegexManager manager;
 
-                if (TryGetRegExpManager(arguments[0], out regexp))
-                {
-                    regexpObject = (JsObject)arguments[0];
-                }
-                else
-                {
-                    regexpObject = runtime.Global.CreateRegExp(JsValue.ToString(arguments[0]));
-                    regexp = (RegExpManager)regexpObject.Value;
-                }
+                if (!TryGetRegExpManager(arguments[0], out manager))
+                    manager = new RegexManager(JsValue.ToString(arguments[0]), null);
 
-                if (!regexp.IsGlobal)
-                {
-                    return ((JsObject)regexpObject.GetProperty(Id.exec)).Execute(
-                        runtime,
-                        regexpObject,
-                        new[] { @this }
-                    );
-                }
+                var input = JsValue.ToString(@this);
+
+                if (!manager.IsGlobal)
+                    return manager.Exec(runtime, input);
+
+                var matches = manager.Regex.Matches(input);
+                if (matches.Count == 0)
+                    return JsNull.Instance;
 
                 var result = runtime.Global.CreateArray();
-                var matches = Regex.Matches(JsValue.ToString(@this), regexp.Pattern, regexp.Options);
+                var store = result.FindArrayStore();
 
-                if (matches.Count > 0)
+                for (int i = 0; i < matches.Count; i++)
                 {
-                    var i = 0;
-
-                    foreach (Match match in matches)
-                    {
-                        result.SetProperty(
-                            i++,
-                            match.Value
-                        );
-                    }
-
-                    return result;
+                    store.DefineOrSetPropertyValue(i, matches[i].Value);
                 }
 
-                return JsNull.Instance;
+                return result;
             }
 
             // 15.5.4.11
@@ -247,148 +205,226 @@ namespace Jint.Native
                     return JsValue.ToString(@this);
 
                 var searchValue = arguments[0];
-
-                var replaceValue =
-                    arguments.Length > 1
-                    ? arguments[1]
-                    : JsUndefined.Instance;
+                var replaceValue = arguments.Length > 1 ? arguments[1] : JsUndefined.Instance;
 
                 string source = JsValue.ToString(@this);
-                RegExpManager regexp;
 
-                if (TryGetRegExpManager(searchValue, out regexp))
-                    return SearchWithRegExp(runtime, @this, searchValue, regexp, replaceValue, source);
+                RegexManager manager;
+                if (TryGetRegExpManager(searchValue, out manager))
+                    return ReplaceWithManager(runtime, manager, replaceValue, source);
 
                 string search = JsValue.ToString(searchValue);
                 int index = source.IndexOf(search);
 
-                if (index != -1)
-                {
-                    if (JsValue.IsFunction(replaceValue))
-                    {
-                        replaceValue = ((JsObject)replaceValue).Execute(
-                            runtime,
-                            runtime.GlobalScope,
-                            new[]
-                            {
-                                search,
-                                (double)index,
-                                (object)source
-                            }
-                        );
-
-                        return source.Substring(0, index) +
-                            replaceValue +
-                            source.Substring(index + search.Length);
-                    }
-
-                    string before = source.Substring(0, index);
-                    string after = source.Substring(index + search.Length);
-                    string newString = EvaluateReplacePattern(search, before, after, JsValue.ToString(replaceValue), null);
-                    return before + newString + after;
-                }
-
-                return source;
-            }
-
-            private static object SearchWithRegExp(JintRuntime runtime, object @this, object searchValue, RegExpManager regexp, object replaceValue, string source)
-            {
-                var regexpObject = (JsObject)searchValue;
-                int count = regexp.IsGlobal ? int.MaxValue : 1;
-                int lastIndex =
-                    regexp.IsGlobal
-                        ? 0
-                        : Math.Max(
-                            0,
-                            (int)JsValue.ToNumber(regexpObject.GetProperty(Id.lastIndex)) - 1
-                            );
-
-                if (regexp.IsGlobal)
-                    regexpObject.SetProperty(Id.lastIndex, (double)0);
-
-                string result;
+                if (index == -1)
+                    return source;
 
                 if (JsValue.IsFunction(replaceValue))
                 {
-                    if (lastIndex >= source.Length)
-                    {
-                        result = String.Empty;
-                    }
-                    else
-                    {
-                        result = regexp.Regex.Replace(
-                            source,
-                            m =>
-                            {
-                                var replaceParameters = new List<object>();
-                                if (!regexp.IsGlobal)
-                                    regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
+                    replaceValue = ((JsObject)replaceValue).Execute(
+                        runtime,
+                        runtime.GlobalScope,
+                        search,
+                        index,
+                        source
+                    );
 
-                                replaceParameters.Add(m.Value);
+                    return
+                        source.Substring(0, index) +
+                        JsValue.ToString(replaceValue) +
+                        source.Substring(index + search.Length);
+                }
 
-                                for (int i = 1; i < m.Groups.Count; i++)
-                                {
-                                    replaceParameters.Add(
-                                        m.Groups[i].Success
-                                        ? (object)m.Groups[i].Value
-                                        : JsUndefined.Instance
-                                    );
-                                }
+                var sb = new StringBuilder(source, 0, index, source.Length);
 
-                                replaceParameters.Add((double)m.Index);
-                                replaceParameters.Add(source);
+                EvaluateReplacePattern(sb, source, search, index, JsValue.ToString(replaceValue), null);
 
-                                return JsValue.ToString(((JsObject)replaceValue).Execute(
-                                    runtime,
-                                    runtime.GlobalScope,
-                                    replaceParameters.ToArray()
-                                ));
-                            },
-                            count,
-                            lastIndex
-                        );
-                    }
+                int count = source.Length - (index + search.Length);
+                if (count > 0)
+                    sb.Append(source, index + search.Length, count);
+
+                return sb.ToString();
+            }
+
+            private static object ReplaceWithManager(JintRuntime runtime, RegexManager manager, object replaceValue, string source)
+            {
+                int count;
+                int lastIndex;
+
+                if (manager.IsGlobal)
+                {
+                    count = int.MaxValue;
+                    lastIndex = 0;
+                    manager.LastIndex = 0;
                 }
                 else
                 {
-                    source = JsValue.ToString(@this);
+                    count = 1;
+                    lastIndex = Math.Max(0, manager.LastIndex - 1);
+                }
 
-                    if (lastIndex >= source.Length)
+                if (lastIndex >= source.Length)
+                    return String.Empty;
+
+                JsDelegate function = null;
+                string replace = null;
+                bool replacePattern = false;
+
+                if (JsValue.IsFunction(replaceValue))
+                {
+                    function = ((JsObject)replaceValue).Delegate;
+                }
+                else
+                {
+                    replace = JsValue.ToString(replaceValue);
+                    replacePattern = replace.IndexOf('$') != -1;
+                }
+
+                var sb = new StringBuilder();
+                int offset = 0;
+
+                foreach (Match match in manager.Regex.Matches(source, lastIndex))
+                {
+                    if (count-- == 0)
+                        break;
+
+                    if (match.Index > offset)
+                        sb.Append(source, offset, match.Index - offset);
+
+                    offset = match.Index + match.Length;
+
+                    if (!manager.IsGlobal)
+                        manager.LastIndex = match.Index + 1;
+
+                    if (replace != null)
                     {
-                        result = String.Empty;
+                        if (replacePattern)
+                        {
+                            EvaluateReplacePattern(
+                                sb,
+                                source,
+                                match.Value,
+                                match.Index,
+                                replace,
+                                match.Groups
+                            );
+                        }
+                        else
+                        {
+                            sb.Append(replace);
+                        }
                     }
                     else
                     {
-                        string value = JsValue.ToString(replaceValue);
+                        var replaceArguments = new object[match.Groups.Count + 2];
 
-                        result = regexp.Regex.Replace(
-                            source,
-                            m =>
-                            {
-                                if (!regexp.IsGlobal)
-                                    regexpObject.SetProperty(Id.lastIndex, (double)(m.Index + 1));
+                        for (int i = 0; i < match.Groups.Count; i++)
+                        {
+                            replaceArguments[i] = match.Groups[i].Success
+                                ? (object)match.Groups[i].Value
+                                : JsUndefined.Instance;
+                        }
 
-                                string after;
-                                if (source.Length > 0)
-                                    after = source.Substring(Math.Min(source.Length - 1, m.Index + m.Length));
-                                else
-                                    after = String.Empty;
+                        replaceArguments[replaceArguments.Length - 2] = match.Index;
+                        replaceArguments[replaceArguments.Length - 1] = source;
 
-                                return EvaluateReplacePattern(
-                                    m.Value,
-                                    source.Substring(0, m.Index),
-                                    after,
-                                    value,
-                                    m.Groups
-                                );
-                            },
-                            count,
-                            lastIndex
-                        );
+                        sb.Append(JsValue.ToString(function.Delegate(
+                            runtime,
+                            runtime.GlobalScope,
+                            (JsObject)replaceValue,
+                            replaceArguments
+                        )));
                     }
                 }
 
-                return result;
+                sb.Append(source, offset, source.Length - offset);
+
+                return sb.ToString();
+            }
+
+            private static void EvaluateReplacePattern(StringBuilder sb, string source, string matched, int matchOffset, string replacement, GroupCollection groups)
+            {
+                int offset = 0;
+                int count;
+
+                for (int i = 0; i < replacement.Length; i++)
+                {
+                    if (replacement[i] != '$')
+                        continue;
+
+                    if (i > offset)
+                    {
+                        sb.Append(replacement, offset, i - offset);
+                        offset = i;
+                    }
+
+                    switch (replacement[++i])
+                    {
+                        case '$':
+                            // Move the offset to the current index, so the
+                            // next append will include the $.
+                            offset = i;
+                            break;
+
+                        case '&':
+                            sb.Append(matched);
+                            offset = i + 1;
+                            break;
+
+                        case '`':
+                            if (matchOffset > 0)
+                                sb.Append(source, 0, matchOffset);
+                            offset = i + 1;
+                            break;
+
+                        case '\'':
+                            count = source.Length - (matchOffset + matched.Length);
+                            if (count > 0)
+                                sb.Append(source, matchOffset + matched.Length, count);
+                            break;
+
+                        default:
+                            int digit = GetDigit(replacement[i]);
+                            int index = 0;
+                            if (digit != -1)
+                            {
+                                index = digit;
+                                if (i + 1 < replacement.Length)
+                                {
+                                    digit = GetDigit(replacement[i + 1]);
+                                    if (digit != -1)
+                                    {
+                                        i++;
+                                        index = index * 10 + digit;
+                                    }
+                                }
+                            }
+
+                            // If we have index 0, we leave the offset at
+                            // the current position so the token will still
+                            // be included.
+                            if (index > 0)
+                            {
+                                offset = i + 1;
+                                if (groups != null && index < groups.Count)
+                                    sb.Append(groups[i].Value);
+                            }
+
+                            break;
+                    }
+                }
+
+                count = replacement.Length - offset;
+                if (count > 0)
+                    sb.Append(replacement, offset, count);
+            }
+
+            private static int GetDigit(char c)
+            {
+                int result = c - '0';
+                if (result >= 0 && result <= 9)
+                    return result;
+                return -1;
             }
 
             // 15.5.4.12
@@ -396,19 +432,17 @@ namespace Jint.Native
             {
                 // Converts the arguments to a regex
 
-                RegExpManager regexp;
-                if (!TryGetRegExpManager(arguments[0], out regexp))
-                {
-                    var regexpObject = runtime.Global.CreateRegExp(JsValue.ToString(arguments[0]));
-                    regexp = (RegExpManager)regexpObject.Value;
-                }
+                RegexManager manager;
+                if (!TryGetRegExpManager(arguments[0], out manager))
+                    manager = new RegexManager(JsValue.ToString(arguments[0]), null);
 
-                Match m = regexp.Regex.Match(JsValue.ToString(@this));
+                var input = JsValue.ToString(@this);
 
-                if (m != null && m.Success)
-                    return (double)m.Index;
+                var match = manager.Regex.Match(input);
+                if (match.Success)
+                    return (double)match.Index;
 
-                return (double)(-1);
+                return (double)-1;
             }
 
             // 15.5.4.13
@@ -417,6 +451,7 @@ namespace Jint.Native
                 string source = JsValue.ToString(@this);
                 int start = (int)JsValue.ToNumber(arguments[0]);
                 int end = source.Length;
+
                 if (arguments.Length > 1)
                 {
                     end = (int)JsValue.ToNumber(arguments[1]);
@@ -426,9 +461,7 @@ namespace Jint.Native
                 }
 
                 if (start < 0)
-                {
                     start = source.Length + start;
-                }
 
                 return source.Substring(start, end - start);
             }
@@ -436,27 +469,29 @@ namespace Jint.Native
             // 15.5.4.14
             public static object Split(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                JsObject array = runtime.Global.CreateArray();
+                var array = runtime.Global.CreateArray();
+                var store = array.FindArrayStore();
                 string target = JsValue.ToString(@this);
 
                 if (arguments.Length == 0 || JsValue.IsUndefined(arguments[0]))
                 {
-                    array.SetProperty(0, target);
+                    store.DefineOrSetPropertyValue(0, target);
+                    return array;
                 }
 
                 var separator = arguments[0];
-                int limit = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : Int32.MaxValue;
+                int limit = arguments.Length > 1 ? (int)JsValue.ToNumber(arguments[1]) : int.MaxValue;
                 string[] result;
 
-                RegExpManager regexp;
-                if (TryGetRegExpManager(separator, out regexp))
-                    result = regexp.Regex.Split(target, limit);
+                RegexManager manager;
+                if (TryGetRegExpManager(separator, out manager))
+                    result = manager.Regex.Split(target, limit);
                 else
                     result = target.Split(new[] { JsValue.ToString(separator) }, limit, StringSplitOptions.None);
 
                 for (int i = 0; i < result.Length; i++)
                 {
-                    array.SetProperty(i, result[i]);
+                    store.DefineOrSetPropertyValue(i, result[i]);
                 }
 
                 return array;
@@ -469,21 +504,24 @@ namespace Jint.Native
                 int start = 0;
                 int end = target.Length;
 
-                if (arguments.Length > 0 && !Double.IsNaN(JsValue.ToNumber(arguments[0])))
-                    start = (int)JsValue.ToNumber(arguments[0]);
+                if (arguments.Length > 0)
+                {
+                    double number = JsValue.ToNumber(arguments[0]);
+                    if (!Double.IsNaN(number))
+                        start = (int)JsValue.ToNumber(arguments[0]);
+                }
 
-                if (
-                    arguments.Length > 1 &&
-                    !JsValue.IsUndefined(arguments[1]) &&
-                    !Double.IsNaN(JsValue.ToNumber(arguments[1]))
-                )
-                    end = (int)JsValue.ToNumber(arguments[1]);
+                if (arguments.Length > 1 && !JsValue.IsUndefined(arguments[1]))
+                {
+                    double number = JsValue.ToNumber(arguments[1]);
+                    if (!Double.IsNaN(number))
+                        end = (int)JsValue.ToNumber(arguments[1]);
+                }
 
                 start = Math.Min(Math.Max(start, 0), Math.Max(0, target.Length - 1));
                 end = Math.Min(Math.Max(end, 0), target.Length);
-                target = target.Substring(start, end - start);
 
-                return target;
+                return target.Substring(start, end - start);
             }
 
             public static object Substr(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
@@ -491,21 +529,24 @@ namespace Jint.Native
                 string target = JsValue.ToString(@this);
                 int start = 0, end = target.Length;
 
-                if (arguments.Length > 0 && !Double.IsNaN(JsValue.ToNumber(arguments[0])))
-                    start = (int)JsValue.ToNumber(arguments[0]);
+                if (arguments.Length > 0)
+                {
+                    var number = JsValue.ToNumber(arguments[0]);
+                    if (!Double.IsNaN(number))
+                        start = (int)number;
+                }
 
-                if (
-                    arguments.Length > 1 &&
-                    !JsValue.IsUndefined(arguments[1]) &&
-                    !Double.IsNaN(JsValue.ToNumber(arguments[1]))
-                )
-                    end = (int)JsValue.ToNumber(arguments[1]);
+                if (arguments.Length > 1 && !JsValue.IsUndefined(arguments[1]))
+                {
+                    double number = JsValue.ToNumber(arguments[1]);
+                    if (!Double.IsNaN(number))
+                        end = (int)number;
+                }
 
                 start = Math.Min(Math.Max(start, 0), Math.Max(0, target.Length - 1));
                 end = Math.Min(Math.Max(end, 0), target.Length);
-                target = target.Substring(start, end);
 
-                return target;
+                return target.Substring(start, end);
             }
 
             // 15.5.4.16
@@ -538,11 +579,11 @@ namespace Jint.Native
                 return (double)JsValue.ToString(@this).Length;
             }
 
-            private static bool TryGetRegExpManager(object value, out RegExpManager manager)
+            private static bool TryGetRegExpManager(object value, out RegexManager manager)
             {
                 var @object = value as JsObject;
                 if (@object != null)
-                    manager = @object.Value as RegExpManager;
+                    manager = @object.Value as RegexManager;
                 else
                     manager = null;
 

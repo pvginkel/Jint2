@@ -11,7 +11,54 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\controlflow-recursive.js";
+            //ExecuteSunSpider();
+            ExecuteV8();
+        }
+
+        private static void ExecuteV8()
+        {
+            const string fileName = @"..\..\..\Jint.Benchmarks\Suites\V8\regexp.js";
+
+            var jint = new JintEngine();
+
+            jint.DisableSecurity();
+
+            jint.ExecuteFile(@"..\..\..\Jint.Benchmarks\Suites\V8\base.js");
+
+            jint.SetFunction(
+                "NotifyResult",
+                new Action<string, string>((name, result) => { })
+            );
+            jint.SetFunction(
+                "NotifyError",
+                new Action<string, object>((name, error) => { })
+            );
+
+            string score = null;
+
+            jint.SetFunction(
+                "NotifyScore",
+                new Action<string>(p => { score = p; })
+            );
+
+            jint.ExecuteFile(fileName);
+
+            Console.WriteLine("Attach");
+            Console.ReadLine();
+
+            jint.Execute(@"
+                BenchmarkSuite.RunSuites({
+                    NotifyResult: NotifyResult,
+                    NotifyError: NotifyError,
+                    NotifyScore: NotifyScore
+            });");
+
+            Console.WriteLine("Score: " + score);
+        }
+
+        private static void ExecuteSunSpider()
+        {
+            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\regexp-dna.js";
 
             var jint = new JintEngine();
 

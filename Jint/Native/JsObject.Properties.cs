@@ -258,7 +258,7 @@ namespace Jint.Native
             return GetPropertySlow(index, ref cacheSlot);
         }
 
-        public object GetPropertySlow(int index, ref DictionaryCacheSlot cacheSlot)
+        private object GetPropertySlow(int index, ref DictionaryCacheSlot cacheSlot)
         {
             object value = GetPropertyRaw(index, ref cacheSlot);
 

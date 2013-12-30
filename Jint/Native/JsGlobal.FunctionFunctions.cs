@@ -32,15 +32,13 @@ namespace Jint.Native
             public static object Call(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (!JsValue.IsFunction(@this))
-                    throw new ArgumentException("the target of call() must be a function");
+                    throw new JsException(JsErrorType.TypeError, "The target of call() must be a function");
 
-                object obj;
+                object target;
                 if (arguments.Length >= 1 && !JsValue.IsNullOrUndefined(arguments[0]))
-                    obj = arguments[0];
+                    target = arguments[0];
                 else
-                {
-                    obj = runtime.GlobalScope;
-                }
+                    target = runtime.GlobalScope;
 
                 object[] argumentsCopy;
 
@@ -55,7 +53,7 @@ namespace Jint.Native
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call
-                return ((JsObject)@this).Execute(runtime, obj, argumentsCopy);
+                return ((JsObject)@this).Execute(runtime, target, argumentsCopy);
             }
 
             public static object Apply(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
@@ -63,14 +61,12 @@ namespace Jint.Native
                 if (!JsValue.IsFunction(@this))
                     throw new ArgumentException("The target of call() must be a function");
 
-                object obj;
+                object target;
 
                 if (arguments.Length >= 1 && !JsValue.IsNullOrUndefined(arguments[0]))
-                    obj = arguments[0];
+                    target = arguments[0];
                 else
-                {
-                    obj = runtime.Global.GlobalScope;
-                }
+                    target = runtime.Global.GlobalScope;
 
                 object[] argumentsCopy;
 
@@ -96,7 +92,7 @@ namespace Jint.Native
                 }
 
                 // Executes the statements in 'that' and use _this as the target of the call
-                return ((JsObject)@this).Execute(runtime, obj, argumentsCopy);
+                return ((JsObject)@this).Execute(runtime, target, argumentsCopy);
             }
 
             public static object BaseConstructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)

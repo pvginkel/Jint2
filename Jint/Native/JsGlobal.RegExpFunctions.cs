@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Jint.Native
 {
@@ -10,6 +9,8 @@ namespace Jint.Native
     {
         private static class RegExpFunctions
         {
+            private static DictionaryCacheSlot _execCacheSlot;
+
             public static object Constructor(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
@@ -18,32 +19,23 @@ namespace Jint.Native
                     target = runtime.Global.CreateObject(callee.Prototype);
 
                 string pattern = null;
-                var options = RegExpOptions.None;
+                string options = null;
 
                 if (arguments.Length > 0)
                 {
-                    if (arguments.Length == 2)
-                    {
-                        foreach (char c in JsValue.ToString(arguments[1]))
-                        {
-                            switch (c)
-                            {
-                                case 'm': options |= RegExpOptions.Multiline; break;
-                                case 'i': options |= RegExpOptions.IgnoreCase; break;
-                                case 'g': options |= RegExpOptions.Global; break;
-                            }
-                        }
-                    }
-
                     pattern = JsValue.ToString(arguments[0]);
+                    if (arguments.Length > 1)
+                        options = JsValue.ToString(arguments[1]);
                 }
+
+                var manager = new RegexManager(pattern, options);
 
                 target.SetClass(JsNames.ClassRegexp);
                 target.IsClr = false;
-                target.Value = new RegExpManager(pattern, options);
+                target.Value = manager;
                 target.SetProperty(Id.source, pattern);
                 target.SetProperty(Id.lastIndex, (double)0);
-                target.SetProperty(Id.global, BooleanBoxes.Box(options.HasFlag(RegExpOptions.Global)));
+                target.SetProperty(Id.global, BooleanBoxes.Box(manager.IsGlobal));
 
                 return target;
             }
@@ -51,60 +43,26 @@ namespace Jint.Native
             public static object Exec(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 var target = (JsObject)@this;
-                var regexp = (RegExpManager)target.Value;
+                var manager = (RegexManager)target.Value;
 
-                var array = runtime.Global.CreateArray();
-                string input = JsValue.ToString(arguments[0]);
-                array.SetProperty(Id.input, input);
-
-                int i = 0;
-                var lastIndex = regexp.IsGlobal ? (int)JsValue.ToNumber(target.GetProperty(Id.lastIndex)) : 0;
-
-                if (lastIndex >= input.Length)
-                    return JsNull.Instance;
-
-                var matches = Regex.Matches(input.Substring(lastIndex), regexp.Pattern, regexp.Options);
-                if (matches.Count == 0)
-                    return JsNull.Instance;
-
-                // A[JsNumber.Box(i++)] = JsString.Box(matches[0].Value);
-                array.SetProperty(Id.index, (double)matches[0].Index);
-
-                if (regexp.IsGlobal)
-                    target.SetProperty(Id.lastIndex, (double)lastIndex + matches[0].Index + matches[0].Value.Length);
-
-                foreach (Group group in matches[0].Groups)
-                {
-                    array.SetProperty(i++, @group.Value);
-                }
-
-                return array;
+                return (object)manager.Exec(runtime, JsValue.ToString(arguments[0])) ?? JsNull.Instance;
             }
 
             public static object Test(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var regexp = (JsObject)@this;
-                var matches = ((JsObject)regexp.GetProperty(Id.exec)).Execute(runtime, @this, arguments);
-                var store = matches.FindArrayStore();
+                var matches = ((JsObject)((JsObject)@this).GetProperty(Id.exec, ref _execCacheSlot)).Execute(runtime, @this, arguments);
 
-                return BooleanBoxes.Box(store != null && store.Length > 0);
+                return BooleanBoxes.Box(!JsValue.IsNull(matches));
             }
 
             public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var regexp = (RegExpManager)((JsObject)@this).Value;
-
-                return "/" +
-                    regexp.Pattern +
-                    "/" +
-                    (regexp.IsGlobal ? "g" : String.Empty) +
-                    (regexp.IsIgnoreCase ? "i" : String.Empty) +
-                    (regexp.IsMultiLine ? "m" : String.Empty);
+                return ((JsObject)@this).Value.ToString();
             }
 
             public static object GetLastIndex(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                return ((JsObject)@this).GetProperty(Id.lastIndex);
+                return (double)((RegexManager)((JsObject)@this).Value).LastIndex;
             }
         }
     }

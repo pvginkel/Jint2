@@ -66,9 +66,9 @@ namespace Jint.Native
 
                 var result = JsValue.ToNumber(arguments[0]);
 
-                foreach (var p in arguments)
+                foreach (var argument in arguments)
                 {
-                    result = Math.Max(JsValue.ToNumber(p), result);
+                    result = Math.Max(JsValue.ToNumber(argument), result);
                 }
 
                 return result;
@@ -78,15 +78,13 @@ namespace Jint.Native
             public static object Min(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
                 if (arguments.Length == 0)
-                {
                     return DoubleBoxes.PositiveInfinity;
-                }
 
                 var result = JsValue.ToNumber(arguments[0]);
 
-                foreach (var p in arguments)
+                foreach (var argument in arguments)
                 {
-                    result = Math.Min(JsValue.ToNumber(p), result);
+                    result = Math.Min(JsValue.ToNumber(argument), result);
                 }
 
                 return result;

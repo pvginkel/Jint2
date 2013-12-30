@@ -5,7 +5,12 @@ using System.Text;
 
 namespace Jint.Native
 {
-    partial class JsGlobal
+    [Flags]
+    public enum JsRegexOptions
     {
+        None = 0,
+        Global = 1,
+        IgnoreCase = 2,
+        Multiline = 4
     }
 }

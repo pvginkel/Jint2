@@ -115,7 +115,7 @@ namespace Jint.Native
 
                 ToPropertyDescriptor(
                     runtime.Global,
-                    (JsObject)instance,
+                    instance,
                     JsValue.ToString(arguments[1]),
                     arguments[2]
                 );

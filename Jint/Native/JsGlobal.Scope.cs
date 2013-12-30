@@ -41,21 +41,6 @@ namespace Jint.Native
             scope.DefineProperty(Id.Infinity, NumberClass.GetProperty(Id.POSITIVE_INFINITY), PropertyAttributes.DontEnum); // 15.1.1.2
             scope.DefineProperty(Id.undefined, JsUndefined.Instance, PropertyAttributes.DontEnum); // 15.1.1.3
             scope.DefineProperty(JsNames.This, scope, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToBoolean, GlobalFunctions.ToBoolean, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToByte, GlobalFunctions.ToByte, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToChar, GlobalFunctions.ToChar, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToDateTime, GlobalFunctions.ToDateTime, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToDecimal, GlobalFunctions.ToDecimal, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToDouble, GlobalFunctions.ToDouble, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToInt16, GlobalFunctions.ToInt16, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToInt32, GlobalFunctions.ToInt32, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToInt64, GlobalFunctions.ToInt64, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToSByte, GlobalFunctions.ToSByte, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToSingle, GlobalFunctions.ToSingle, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToString, GlobalFunctions.ToString, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToUInt16, GlobalFunctions.ToUInt16, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToUInt32, GlobalFunctions.ToUInt32, 1, PropertyAttributes.DontEnum);
-            scope.DefineProperty(Id.ToUInt64, GlobalFunctions.ToUInt64, 1, PropertyAttributes.DontEnum);
             scope.DefineProperty(Id.eval, GlobalFunctions.Eval, 1, PropertyAttributes.DontEnum); // 15.1.2.1
             scope.DefineProperty(Id.parseInt, GlobalFunctions.ParseInt, 1, PropertyAttributes.DontEnum); // 15.1.2.2
             scope.DefineProperty(Id.parseFloat, GlobalFunctions.ParseFloat, 1, PropertyAttributes.DontEnum); // 15.1.2.3
@@ -71,81 +56,6 @@ namespace Jint.Native
 
         private static class GlobalFunctions
         {
-            public static object ToBoolean(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return BooleanBoxes.Box(Convert.ToBoolean(JsValue.UnwrapValue(arguments[0])));
-            }
-
-            public static object ToByte(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToByte(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToChar(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToChar(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToDateTime(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return runtime.Global.CreateDate((DateTime)JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToDecimal(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToDecimal(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToDouble(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return Convert.ToDouble(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToInt16(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToInt16(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToInt32(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToInt32(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToInt64(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToInt64(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToSByte(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToSByte(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToSingle(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToSingle(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return JsValue.ToString(@this);
-            }
-
-            public static object ToUInt16(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToUInt16(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToUInt32(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToUInt32(JsValue.UnwrapValue(arguments[0]));
-            }
-
-            public static object ToUInt64(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
-            {
-                return (double)Convert.ToUInt64(JsValue.UnwrapValue(arguments[0]));
-            }
-
             /// <summary>
             /// 15.1.2.1
             /// </summary>
