@@ -10,6 +10,11 @@ namespace Jint.Native
     {
         public DictionaryPropertyStore BaseStore { get; private set; }
 
+        public JsObject Owner
+        {
+            get { return BaseStore.Owner; }
+        }
+
         public AbstractPropertyStore(DictionaryPropertyStore baseStore)
         {
             if (baseStore == null)

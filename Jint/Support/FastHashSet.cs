@@ -386,6 +386,7 @@ namespace Jint.Support
 
         internal class SchemaHashSetDebugView
         {
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             private readonly SchemaHashSet _container;
 
             public SchemaHashSetDebugView(SchemaHashSet container)
@@ -411,6 +412,7 @@ namespace Jint.Support
                 }
             }
 
+            [DebuggerDisplay("Index={Index}, Value={Value}, Attributes={Attributes}")]
             private class DisplayEntry
             {
                 public int Index { get; private set; }
@@ -422,11 +424,6 @@ namespace Jint.Support
                     Index = entry.Index;
                     Value = entry.Value;
                     Attributes = entry.Attributes;
-                }
-
-                public override string ToString()
-                {
-                    return String.Format("Index={0}, Value={1}, Attributes={2}", Index, Value, Attributes);
                 }
             }
         }

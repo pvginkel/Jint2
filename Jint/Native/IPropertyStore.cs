@@ -7,6 +7,8 @@ namespace Jint.Native
 {
     internal interface IPropertyStore
     {
+        JsObject Owner { get; }
+
         object GetOwnPropertyRaw(int index);
         object GetOwnPropertyRaw(object index);
         void SetPropertyValue(int index, object value);

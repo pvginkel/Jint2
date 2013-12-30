@@ -7,6 +7,7 @@ using Jint.Support;
 
 namespace Jint.Native
 {
+    [DebuggerTypeProxy(typeof(DictionaryPropertyStoreDebugView))]
     internal sealed class DictionaryPropertyStore : IPropertyStore
     {
         private readonly JsGlobal _global;
@@ -121,6 +122,54 @@ namespace Jint.Native
         public IEnumerable<int> GetKeys()
         {
             return Schema.GetKeys(true);
+        }
+
+        internal class DictionaryPropertyStoreDebugView
+        {
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private readonly DictionaryPropertyStore _container;
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            private DisplayEntry[] Items
+            {
+                get
+                {
+                    var entries = new List<DisplayEntry>();
+
+                    foreach (int key in _container.Schema.GetKeys(false))
+                    {
+                        entries.Add(new DisplayEntry(
+                            _container.Owner.Global.GetIdentifier(key),
+                            _container._values[_container.Schema.GetOffset(key)],
+                            _container.Schema.GetAttributes(key)
+                        ));
+                    }
+
+                    entries.Sort((a, b) => a.Key.CompareTo(b.Key));
+
+                    return entries.ToArray();
+                }
+            }
+
+            public DictionaryPropertyStoreDebugView(DictionaryPropertyStore container)
+            {
+                _container = container;
+            }
+
+            [DebuggerDisplay("Key={Key}, Value={Value}, Attributes={Attributes}")]
+            private class DisplayEntry
+            {
+                public string Key { get; private set; }
+                public object Value { get; private set; }
+                public PropertyAttributes Attributes { get; private set; }
+
+                public DisplayEntry(string key, object value, PropertyAttributes attributes)
+                {
+                    Key = key;
+                    Value = value;
+                    Attributes = attributes;
+                }
+            }
         }
     }
 }

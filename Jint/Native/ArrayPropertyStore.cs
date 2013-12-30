@@ -9,11 +9,13 @@ using Jint.Support;
 
 namespace Jint.Native
 {
+    [DebuggerTypeProxy(typeof(ArrayPropertyStoreDebugView))]
     internal sealed class ArrayPropertyStore : SparseArray<object>, IPropertyStore
     {
-        private readonly JsObject _owner;
         private DictionaryPropertyStore _baseStore;
         private int _length;
+
+        public JsObject Owner { get; private set; }
 
         public int Length
         {
@@ -37,7 +39,7 @@ namespace Jint.Native
             if (owner == null)
                 throw new ArgumentNullException("owner");
 
-            _owner = owner;
+            Owner = owner;
         }
 
         public ArrayPropertyStore(JsObject owner, SparseArray<object> array)
@@ -46,7 +48,7 @@ namespace Jint.Native
             if (owner == null)
                 throw new ArgumentNullException("owner");
 
-            _owner = owner;
+            Owner = owner;
         }
 
         public object GetOwnProperty(int index)
@@ -58,7 +60,7 @@ namespace Jint.Native
 
             var accessor = result as PropertyAccessor;
             if (accessor != null)
-                return accessor.GetValue(_owner);
+                return accessor.GetValue(Owner);
 
             return result;
         }
@@ -72,7 +74,7 @@ namespace Jint.Native
 
             var accessor = result as PropertyAccessor;
             if (accessor != null)
-                return accessor.GetValue(_owner);
+                return accessor.GetValue(Owner);
 
             return result;
         }
@@ -221,7 +223,7 @@ namespace Jint.Native
         private void EnsureBaseStore()
         {
             if (_baseStore == null)
-                _baseStore = new DictionaryPropertyStore(_owner);
+                _baseStore = new DictionaryPropertyStore(Owner);
         }
 
         public JsObject Concat(object[] args)
@@ -250,7 +252,7 @@ namespace Jint.Native
 
                     if (
                         @object != null &&
-                        _owner.Global.ArrayClass.HasInstance(@object)
+                        Owner.Global.ArrayClass.HasInstance(@object)
                     )
                     {
                         // Array subclass.
@@ -272,7 +274,7 @@ namespace Jint.Native
                 }
             }
 
-            var result = _owner.Global.CreateArray();
+            var result = Owner.Global.CreateArray();
 
             result.PropertyStore = new ArrayPropertyStore(result, newArray)
             {
@@ -299,6 +301,51 @@ namespace Jint.Native
             }
 
             return String.Join(separatorString, map);
+        }
+
+        internal class ArrayPropertyStoreDebugView
+        {
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private readonly ArrayPropertyStore _container;
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            private DisplayEntry[] Items
+            {
+                get
+                {
+                    var entries = new List<DisplayEntry>();
+
+                    foreach (int key in _container.GetKeys())
+                    {
+                        entries.Add(new DisplayEntry(
+                            key,
+                            _container.GetOwnPropertyRaw(key)
+                        ));
+                    }
+
+                    entries.Sort((a, b) => a.Key.CompareTo(b.Key));
+
+                    return entries.ToArray();
+                }
+            }
+
+            public ArrayPropertyStoreDebugView(ArrayPropertyStore container)
+            {
+                _container = container;
+            }
+
+            [DebuggerDisplay("Key={Key}, Value={Value}")]
+            private class DisplayEntry
+            {
+                public int Key { get; private set; }
+                public object Value { get; private set; }
+
+                public DisplayEntry(int key, object value)
+                {
+                    Key = key;
+                    Value = value;
+                }
+            }
         }
     }
 }

@@ -27,6 +27,11 @@ namespace Jint.Native
 
             private static readonly int[] EmptyIntegers = new int[0];
 
+            public JsObject Owner
+            {
+                get { return null; }
+            }
+
             private SinkPropertyStore()
             {
             }
