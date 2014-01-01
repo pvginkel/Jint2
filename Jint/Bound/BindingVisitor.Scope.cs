@@ -20,6 +20,7 @@ namespace Jint.Bound
             public Scope Parent { get; private set; }
             public BoundClosure Closure { get; private set; }
             public BoundTypeManager TypeManager { get; private set; }
+            public bool IsArgumentsReferenced { get; set; }
 
             public Scope(Scope parent, BodySyntax body, IScriptBuilder scriptBuilder)
             {
@@ -40,17 +41,13 @@ namespace Jint.Bound
                 {
                     if (variable.Index >= 0)
                     {
-                        BoundClosureField closureField = null;
+                        BoundClosure closure = null;
+                        if (variable.Closure != null)
+                            closure = GetClosure(variable.Closure);
 
-                        if (variable.ClosureField != null)
-                        {
-                            var closure = GetClosure(variable.ClosureField.Closure);
-                            closureField = closure.Fields[Expressions.Closure.ArgumentsFieldName];
-                        }
-
-                        _arguments.Add(variable, new BoundArgument(variable.Name, variable.Index, closureField));
+                        _arguments.Add(variable, new BoundArgument(variable.Name, variable.Index, closure));
                     }
-                    else if (variable.ClosureField == null)
+                    else if (variable.Closure == null)
                     {
                         BoundLocalBase local;
                         if (variable.Type == VariableType.Global)
@@ -80,7 +77,7 @@ namespace Jint.Bound
 
             public BoundArgument GetArgument(Variable variable)
             {
-                if (variable.ClosureField != null)
+                if (variable.Closure != null)
                 {
                     // Find the scope this argument belongs to.
 
@@ -88,7 +85,7 @@ namespace Jint.Bound
 
                     while (scope != null)
                     {
-                        if (variable.ClosureField.Closure == scope._sourceClosure)
+                        if (variable.Closure == scope._sourceClosure)
                             return scope._arguments[variable];
 
                         scope = scope.Parent;
@@ -116,9 +113,9 @@ namespace Jint.Bound
 
             public BoundClosureField GetClosureField(Variable variable)
             {
-                Debug.Assert(variable.ClosureField != null);
+                Debug.Assert(variable.Closure != null);
 
-                var closure = GetClosure(variable.ClosureField.Closure);
+                var closure = GetClosure(variable.Closure);
 
                 if (variable.Type == VariableType.Arguments)
                     return closure.Fields[Expressions.Closure.ArgumentsFieldName];
@@ -138,7 +135,7 @@ namespace Jint.Bound
 
             public IBoundWritable GetWritable(Variable variable)
             {
-                if (variable.ClosureField != null)
+                if (variable.Closure != null)
                     return GetClosureField(variable);
                 if (variable.Index >= 0)
                     return GetArgument(variable);

@@ -18,39 +18,74 @@ namespace Jint.Bound
             private LocalBuilder _globalLocal;
             private LocalBuilder _globalScopeLocal;
             private readonly bool _isFunction;
+            private readonly BoundBody _body;
             private readonly bool _isStatic;
             private LocalBuilder _closureLocal;
             private int _tryCatchNesting;
+            private readonly Dictionary<BoundArgument, BoundVariable> _arguments;
 
             public ILBuilder IL { get; private set; }
-            public bool IsStrict { get; private set; }
-            public BoundClosure Closure { get; private set; }
             public Scope Parent { get; private set; }
             public Stack<NamedLabel> BreakTargets { get; private set; }
             public Stack<NamedLabel> ContinueTargets { get; private set; }
-            public BoundVariable ArgumentsVariable { get; private set; }
+            public LocalBuilder ArgumentsLocal { get; private set; }
+            public BoundClosureField ArgumentsClosureField { get; private set; }
             public ITypeBuilder TypeBuilder { get; private set; }
             public ExceptionalReturn ExceptionalReturn { get; private set; }
+
+            public BoundBodyFlags Flags
+            {
+                get { return _body.Flags; }
+            }
+
+            public BoundClosure Closure
+            {
+                get { return _body.ScopedClosure; }
+            }
+
+            public bool IsStrict
+            {
+                get { return (Flags & BoundBodyFlags.Strict) != 0; }
+            }
+
+            public bool IsArgumentsReferenced
+            {
+                get { return (Flags & BoundBodyFlags.ArgumentsReferenced) != 0; }
+            }
 
             public bool InTryCatch
             {
                 get { return _tryCatchNesting > 0; }
             }
 
-            public Scope(ILBuilder il, bool isFunction, bool isStrict, BoundClosure closure, BoundVariable argumentsVariable, ITypeBuilder typeBuilder, Scope parent)
+            public Scope(ILBuilder il, bool isFunction, BoundBody body, LocalBuilder argumentsLocal, BoundClosureField argumentsClosureField, ITypeBuilder typeBuilder, Scope parent)
             {
                 IL = il;
-                IsStrict = isStrict;
                 _isFunction = isFunction;
-                Closure = closure;
-                ArgumentsVariable = argumentsVariable;
+                _body = body;
+                ArgumentsLocal = argumentsLocal;
+                ArgumentsClosureField = argumentsClosureField;
                 TypeBuilder = typeBuilder;
                 Parent = parent;
 
                 _isStatic = TypeBuilder is IScriptBuilder;
+                if (body.MappedArguments != null)
+                    _arguments = body.MappedArguments.ToDictionary(p => p.Argument, p => p.Mapped);
 
                 BreakTargets = new Stack<NamedLabel>();
                 ContinueTargets = new Stack<NamedLabel>();
+            }
+
+            public BoundVariable GetMappedArgument(BoundArgument argument)
+            {
+                if (_arguments != null)
+                {
+                    BoundVariable result;
+                    _arguments.TryGetValue(argument, out result);
+                    return result;
+                }
+
+                return null;
             }
 
             public void EmitLocals(BoundTypeManager typeManager)
@@ -175,6 +210,24 @@ namespace Jint.Bound
                 // resolve the parent.
                 if (Closure != closure)
                     IL.Emit(OpCodes.Ldfld, Closure.Builder.ParentFields[closure.Builder].Field);
+            }
+
+            public Scope FindScope(BoundClosure closure)
+            {
+                // Here we find the scope that the closure actually belongs to,
+                // not the scope the closure is scoped in. This method is used
+                // to get the scope the closure actually belongs to to be able to
+                // get information that is cached in that scope, e.g. the
+                // _arguments and ArgumentsClosureField.
+
+                var scope = this;
+
+                while (scope._body.Closure != closure)
+                {
+                    scope = scope.Parent;
+                }
+
+                return scope;
             }
 
             public void SetClosureLocal(LocalBuilder closureLocal)

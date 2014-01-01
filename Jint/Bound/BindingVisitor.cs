@@ -70,6 +70,7 @@ namespace Jint.Bound
                 switch (identifier.Target.Type)
                 {
                     case VariableType.Undefined:
+                    case VariableType.Arguments:
                         var builder = new BlockBuilder(this);
 
                         var temporary = builder.CreateTemporary();
@@ -395,7 +396,7 @@ namespace Jint.Bound
             // Find the scoped closure; the function is going to be built on
             // that.
 
-            var scopedClosure = _scope.Closure;
+            BoundClosure scopedClosure = null;
             var scope = _scope;
 
             while (scope != null)
@@ -409,13 +410,63 @@ namespace Jint.Bound
                 scope = scope.Parent;
             }
 
+            var body = BuildBlock(syntax);
+
+            var flags = BoundBodyFlags.None;
+            if (syntax.IsStrict)
+                flags |= BoundBodyFlags.Strict;
+
+            var mappedArguments = ReadOnlyArray<BoundMappedArgument>.Null;
+
+            if (_scope.IsArgumentsReferenced)
+            {
+                flags |= BoundBodyFlags.ArgumentsReferenced;
+
+                // Is the arguments closed over?
+                if (_scope.GetArguments().Any(p => p.Closure != null))
+                {
+                    _scope.Closure.AddField(
+                        _scope.TypeManager.CreateType(Closure.ArgumentsFieldName, BoundTypeKind.ClosureField)
+                    );
+                }
+            }
+            else
+            {
+                var builder = new ReadOnlyArray<BoundMappedArgument>.Builder();
+
+                foreach (var argument in _scope.GetArguments())
+                {
+                    BoundVariable writable;
+
+                    if (argument.Closure != null)
+                    {
+                        writable = _scope.Closure.AddField(
+                            _scope.TypeManager.CreateType(argument.Name, BoundTypeKind.ClosureField)
+                        );
+                    }
+                    else
+                    {
+                        writable = new BoundLocal(
+                            true,
+                            _scope.TypeManager.CreateType(argument.Name, BoundTypeKind.Local)
+                        );
+                    }
+
+                    builder.Add(new BoundMappedArgument(argument, writable));
+                }
+
+                if (builder.Count > 0)
+                    mappedArguments = builder.ToReadOnly();
+            }
+
             return new BoundBody(
-                BuildBlock(syntax),
+                body,
                 _scope.Closure,
                 scopedClosure,
                 _scope.GetArguments().ToReadOnlyArray(),
                 _scope.GetLocals().ToReadOnlyArray(),
-                syntax.IsStrict,
+                mappedArguments,
+                flags,
                 _scope.TypeManager
             );
         }
@@ -913,7 +964,7 @@ namespace Jint.Bound
             var builder = new BlockBuilder(this);
 
             IBoundWritable variable;
-            if (syntax.Target.ClosureField != null)
+            if (syntax.Target.Closure != null)
                 variable = _scope.GetClosureField(syntax.Target);
             else
                 variable = _scope.GetLocal(syntax.Target);

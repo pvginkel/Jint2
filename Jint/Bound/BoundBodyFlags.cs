@@ -5,12 +5,11 @@ using System.Text;
 
 namespace Jint.Bound
 {
-    internal enum BoundMagicVariableType
+    [Flags]
+    internal enum BoundBodyFlags
     {
-        Global,
-        This,
-        Arguments,
-        Null,
-        Undefined
+        None = 0,
+        ArgumentsReferenced = 1,
+        Strict = 2
     }
 }

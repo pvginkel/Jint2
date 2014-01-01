@@ -10,11 +10,12 @@ namespace Jint.Expressions
         public static readonly Variable This = new Variable(VariableType.This);
         public static readonly Variable Null = new Variable(VariableType.Null);
         public static readonly Variable Undefined = new Variable(VariableType.Undefined);
+        public static readonly Variable Arguments = new Variable(VariableType.Arguments);
 
         public string Name { get; private set; }
         public int Index { get; private set; }
         public VariableType Type { get; set; }
-        public ClosedOverVariable ClosureField { get; set; }
+        public Closure Closure { get; set; }
         public WithScope WithScope { get; set; }
         public Variable FallbackVariable { get; private set; }
         public bool IsDeclared { get; set; }
@@ -47,7 +48,7 @@ namespace Jint.Expressions
 
         public override string ToString()
         {
-            return Name + " [" + Type + (ClosureField != null ? "*" : "") + "]";
+            return Name + " [" + Type + (Closure != null ? "*" : "") + "]";
         }
     }
 }

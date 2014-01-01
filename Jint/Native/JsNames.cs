@@ -17,6 +17,7 @@ namespace Jint.Native
 
         public const string This = "this";
         public const string Arguments = "arguments";
+        public const string Eval = "eval";
 
         public const string TypeObject = "object";
         public const string TypeBoolean = "boolean";

@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Native;
 
 namespace Jint.Bound
 {
@@ -175,15 +176,6 @@ namespace Jint.Bound
                     var block = new Block(_branch, null, false, false, null);
 
                     PushBlock(block);
-
-                    // Mark the arguments local as being assigned to.
-
-                    if (_isFunction)
-                    {
-                        var argumentsLocal = node.Locals.SingleOrDefault(p => p.Name == "arguments");
-                        if (argumentsLocal != null)
-                            MarkWrite(argumentsLocal);
-                    }
 
                     base.VisitBody(node);
 

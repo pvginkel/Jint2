@@ -66,9 +66,8 @@ namespace Jint.Bound
                     return builder.BuildBlock(SourceLocation.Missing);
 
                 case VariableType.Local:
-                case VariableType.Arguments:
                 case VariableType.Global:
-                    if (variable.ClosureField == null)
+                    if (variable.Closure == null)
                         return new BoundSetVariable(_scope.GetLocal(variable), value, SourceLocation.Missing);
 
                     return new BoundSetVariable(
@@ -82,6 +81,7 @@ namespace Jint.Bound
                 case VariableType.This:
                 case VariableType.Null:
                 case VariableType.Undefined:
+                case VariableType.Arguments:
                      */
 
                 default:
@@ -201,6 +201,13 @@ namespace Jint.Bound
         {
             switch (variable.Type)
             {
+                case VariableType.This: return new BoundGetVariable(BoundMagicVariable.This);
+                case VariableType.Null: return new BoundGetVariable(BoundMagicVariable.Null);
+                case VariableType.Undefined: return new BoundGetVariable(BoundMagicVariable.Undefined);
+                case VariableType.Arguments:
+                    _scope.IsArgumentsReferenced = true;
+                    return new BoundGetVariable(BoundMagicVariable.Arguments);
+
                 case VariableType.Parameter:
                     return new BoundGetVariable(_scope.GetArgument(variable));
 
@@ -214,19 +221,9 @@ namespace Jint.Bound
 
                     return builder.BuildExpression(result, SourceLocation.Missing);
 
-                case VariableType.This:
-                    return new BoundGetVariable(BoundMagicVariable.This);
-
-                case VariableType.Null:
-                    return new BoundGetVariable(BoundMagicVariable.Null);
-
-                case VariableType.Undefined:
-                    return new BoundGetVariable(BoundMagicVariable.Undefined);
-
                 case VariableType.Local:
-                case VariableType.Arguments:
                 case VariableType.Global:
-                    if (variable.ClosureField != null)
+                    if (variable.Closure != null)
                         return new BoundGetVariable(_scope.GetClosureField(variable));
 
                     return new BoundGetVariable(_scope.GetLocal(variable));

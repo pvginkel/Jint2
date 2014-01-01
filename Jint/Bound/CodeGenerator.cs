@@ -50,8 +50,8 @@ namespace Jint.Bound
             _scope = new Scope(
                 method.GetILBuilder(),
                 false,
-                program.Body.IsStrict,
-                program.Body.Closure,
+                program.Body,
+                null,
                 null,
                 _scriptBuilder,
                 null
@@ -61,6 +61,8 @@ namespace Jint.Bound
 
             if (program.Body.Closure != null)
                 EmitClosureSetup(program.Body);
+
+            EmitInitializeArguments(program.Body);
 
             EmitStatements(program.Body.Body);
 
@@ -75,6 +77,94 @@ namespace Jint.Bound
             _scriptBuilder.Commit();
 
             return (JsMain)Delegate.CreateDelegate(typeof(JsMain), method.Method);
+        }
+
+        private void EmitInitializeArguments(BoundBody body)
+        {
+            if (body.MappedArguments == null)
+                return;
+
+            foreach (var mapping in body.MappedArguments)
+            {
+                if (mapping.Mapped.Kind == BoundVariableKind.ClosureField)
+                {
+                    // Closure fields are initialized on the closure, so if we
+                    // don't have the index in the arguments, we can just skip
+                    // the complete set.
+
+                    var after = IL.DefineLabel();
+
+                    // Get the length of the arguments.
+                    _scope.EmitLoad(SpecialLocal.Arguments);
+                    IL.Emit(OpCodes.Ldlen);
+                    // Emit the index we want.
+                    IL.EmitConstant(mapping.Argument.Index);
+                    // If arguments.Length <= index jump over the set.
+                    IL.Emit(OpCodes.Ble, after);
+
+                    EmitSetVariable(
+                        mapping.Mapped,
+                        new BoundEmitExpression(
+                            BoundValueType.Unknown,
+                            () =>
+                            {
+                                // Push the arguments array onto the stack.
+                                _scope.EmitLoad(SpecialLocal.Arguments);
+                                // Get the correct member from the arguments object.
+                                IL.EmitConstant(mapping.Argument.Index);
+                                // Load the element out of the array.
+                                IL.Emit(OpCodes.Ldelem, typeof(object));
+                            }
+                        )
+                    );
+
+                    IL.MarkLabel(after);
+                }
+                else
+                {
+                    // Otherwise, we move the branch into the getter because
+                    // if we don't have the index, we need to initialize the local
+                    // with undefined.
+
+                    EmitSetVariable(
+                        mapping.Mapped,
+                        new BoundEmitExpression(
+                            BoundValueType.Unknown,
+                            () =>
+                            {
+                                var missingIndex = IL.DefineLabel();
+                                var after = IL.DefineLabel();
+
+                                // Get the length of the arguments.
+                                _scope.EmitLoad(SpecialLocal.Arguments);
+                                IL.Emit(OpCodes.Ldlen);
+                                // Emit the index we want.
+                                IL.EmitConstant(mapping.Argument.Index);
+                                // If arguments.Length <= index jump over getting the
+                                // element from the array.
+                                IL.Emit(OpCodes.Ble, missingIndex);
+
+                                // Push the arguments array onto the stack.
+                                _scope.EmitLoad(SpecialLocal.Arguments);
+                                // Get the correct member from the arguments object.
+                                IL.EmitConstant(mapping.Argument.Index);
+                                // Load the element out of the array.
+                                IL.Emit(OpCodes.Ldelem, typeof(object));
+                                // Jump to the end of the if.
+                                IL.Emit(OpCodes.Br, after);
+                                
+                                // We're missing the index.
+                                IL.MarkLabel(missingIndex);
+                                // Load undefined.
+                                _scope.EmitLoad(SpecialLocal.Undefined);
+
+                                // Mark the end of the if.
+                                IL.MarkLabel(after);
+                            }
+                        )
+                    );
+                }
+            }
         }
 
         private void EmitExceptionalReturn()
@@ -695,12 +785,19 @@ namespace Jint.Bound
                 case BoundVariableKind.Argument:
                     var argument = (BoundArgument)variable;
 
-                    // Push the arguments variable onto the stack.
-                    if (argument.ArgumentsClosureField != null)
-                        EmitGetVariable(argument.ArgumentsClosureField);
-                    else
-                        EmitGetVariable(_scope.ArgumentsVariable);
+                    // Check whether the argument is mapped to a local or closure
+                    // field.
 
+                    var scope = argument.Closure == null ? _scope : _scope.FindScope(argument.Closure);
+                    var mappedArgument = scope.GetMappedArgument(argument);
+                    if (mappedArgument != null)
+                    {
+                        EmitSetVariable(mappedArgument, value);
+                        return;
+                    }
+
+                    // Push the arguments variable onto the stack.
+                    EmitLoadArguments(scope);
                     // Emit the member on the arguments object to set.
                     IL.EmitConstant(argument.Index);
                     // Push the value onto the stack.
@@ -726,6 +823,22 @@ namespace Jint.Bound
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        private BoundValueType EmitLoadArguments(Scope scope)
+        {
+            if (scope.ArgumentsLocal != null)
+            {
+                Debug.Assert(scope == _scope);
+                IL.Emit(OpCodes.Ldloc, scope.ArgumentsLocal);
+            }
+            else
+            {
+                Debug.Assert(scope.ArgumentsClosureField != null);
+                EmitGetVariable(scope.ArgumentsClosureField);
+            }
+
+            return BoundValueType.Object;
         }
 
         private void EmitSetMember(BoundSetMember node)
@@ -1143,19 +1256,26 @@ namespace Jint.Bound
         {
             var method = typeBuilder.CreateFunction(typeof(JsFunction), function.Name, sourceCode);
 
-            var argumentsLocal = (BoundVariable)function.Body.Locals.SingleOrDefault(p => p.Name == "arguments");
-            if (argumentsLocal == null)
+            var argumentsReferenced = (function.Body.Flags & BoundBodyFlags.ArgumentsReferenced) != 0;
+            BoundClosureField argumentsClosureField = null;
+            LocalBuilder argumentsLocal = null;
+
+            var il = method.GetILBuilder();
+
+            if (argumentsReferenced)
             {
-                Debug.Assert(function.Body.Closure != null);
-                argumentsLocal = function.Body.Closure.Fields[Closure.ArgumentsFieldName];
+                if (function.Body.Closure != null)
+                    function.Body.Closure.Fields.TryGetValue(Closure.ArgumentsFieldName, out argumentsClosureField);
+                if (argumentsClosureField == null)
+                    argumentsLocal = il.DeclareLocal(typeof(JsObject));
             }
 
             _scope = new Scope(
-                method.GetILBuilder(),
+                il,
                 true,
-                function.Body.IsStrict,
-                function.Body.ScopedClosure,
+                function.Body,
                 argumentsLocal,
+                argumentsClosureField,
                 typeBuilder,
                 _scope
             );
@@ -1166,23 +1286,31 @@ namespace Jint.Bound
             if (function.Body.Closure != null)
                 EmitClosureSetup(function.Body);
 
-            // Put the closure local onto the stack if we're going to store
-            // the arguments in the closure.
-            if (argumentsLocal.Kind == BoundVariableKind.ClosureField)
-                _scope.EmitLoadClosure(_scope.Closure);
+            EmitInitializeArguments(function.Body);
 
-            // Initialize the arguments array.
+            // Build the arguments object when we need it.
 
-            _scope.EmitLoad(SpecialLocal.Runtime);
-            _scope.EmitLoad(SpecialLocal.Callee);
-            _scope.EmitLoad(SpecialLocal.Arguments);
+            if (argumentsReferenced)
+            {
+                // Put the closure local onto the stack if we're going to store
+                // the arguments in the closure.
 
-            IL.EmitCall(_runtimeCreateArguments);
+                if (argumentsClosureField != null)
+                    _scope.EmitLoadClosure(_scope.Closure);
 
-            if (argumentsLocal.Kind == BoundVariableKind.ClosureField)
-                IL.Emit(OpCodes.Stfld, ((BoundClosureField)argumentsLocal).Builder.Field);
-            else
-                IL.Emit(OpCodes.Stloc, _scope.GetLocal(argumentsLocal.Type));
+                // Initialize the arguments array.
+
+                _scope.EmitLoad(SpecialLocal.Runtime);
+                _scope.EmitLoad(SpecialLocal.Callee);
+                _scope.EmitLoad(SpecialLocal.Arguments);
+
+                IL.EmitCall(_runtimeCreateArguments);
+
+                if (argumentsClosureField != null)
+                    IL.Emit(OpCodes.Stfld, argumentsClosureField.Builder.Field);
+                else
+                    IL.Emit(OpCodes.Stloc, argumentsLocal);
+            }
 
             // Emit the body.
 
@@ -1320,18 +1448,23 @@ namespace Jint.Bound
                         case BoundMagicVariableType.This: return _scope.EmitLoad(SpecialLocal.This);
                         case BoundMagicVariableType.Null: return _scope.EmitLoad(SpecialLocal.Null);
                         case BoundMagicVariableType.Undefined: return _scope.EmitLoad(SpecialLocal.Undefined);
+                        case BoundMagicVariableType.Arguments: return EmitLoadArguments(_scope);
                         default: throw new InvalidOperationException();
                     }
 
                 case BoundVariableKind.Argument:
                     var argument = (BoundArgument)variable;
 
-                    // Push the arguments variable onto the stack.
-                    if (argument.ArgumentsClosureField != null)
-                        EmitGetVariable(argument.ArgumentsClosureField);
-                    else
-                        EmitGetVariable(_scope.ArgumentsVariable);
+                    // Check whether the argument is mapped to a local or closure
+                    // field.
 
+                    var scope = argument.Closure == null ? _scope : _scope.FindScope(argument.Closure);
+                    var mappedArgument = scope.GetMappedArgument(argument);
+                    if (mappedArgument != null)
+                        return EmitGetVariable(mappedArgument);
+
+                    // Push the arguments variable onto the stack.
+                    EmitLoadArguments(scope);
                     // Get the correct member from the arguments object.
                     IL.EmitConstant(argument.Index);
                     // Emit the cache slot.

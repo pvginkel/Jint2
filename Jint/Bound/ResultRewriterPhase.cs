@@ -43,12 +43,13 @@ namespace Jint.Bound
                             body.Body.Temporaries,
                             nodes.ToReadOnly(),
                             body.Body.Location
-                        ),
+                            ),
                         body.Closure,
                         body.ScopedClosure,
                         body.Arguments,
                         body.Locals,
-                        body.IsStrict,
+                        body.MappedArguments,
+                        body.Flags,
                         body.TypeManager
                     )
                 );
@@ -182,7 +183,8 @@ namespace Jint.Bound
                     node.ScopedClosure,
                     node.Arguments,
                     node.Locals,
-                    node.IsStrict,
+                    node.MappedArguments,
+                    node.Flags,
                     node.TypeManager
                 );
             }

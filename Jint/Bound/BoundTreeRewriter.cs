@@ -63,7 +63,8 @@ namespace Jint.Bound
                 node.ScopedClosure,
                 node.Arguments,
                 node.Locals,
-                node.IsStrict,
+                node.MappedArguments,
+                node.Flags,
                 node.TypeManager
             );
         }

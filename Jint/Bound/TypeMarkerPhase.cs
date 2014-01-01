@@ -11,87 +11,145 @@ namespace Jint.Bound
     {
         public static void Perform(BoundProgram node)
         {
-            Perform(node.Body, false);
+            Perform(node.Body);
         }
 
         public static void Perform(BoundFunction node)
         {
-            Perform(node.Body, true);
+            Perform(node.Body);
         }
 
-        private static void Perform(BoundBody body, bool isFunction)
+        private static void Perform(BoundBody body)
         {
-            new Marker(body.TypeManager, isFunction).Visit(body);
+            new Marker().Visit(body);
         }
 
         private class Marker : BoundTreeWalker
         {
-            private readonly BoundTypeManager _typeManager;
-            private readonly bool _isFunction;
-            private BoundTypeManager.TypeMarker _marker;
-
-            public Marker(BoundTypeManager typeManager, bool isFunction)
-            {
-                _typeManager = typeManager;
-                _isFunction = isFunction;
-            }
+            private Scope _scope;
 
             public override void VisitBody(BoundBody node)
             {
-                using (_marker = _typeManager.CreateTypeMarker())
+                _scope = new Scope(node, _scope);
+
+                using (_scope)
                 {
-                    // Mark the arguments local as object.
-
-                    if (_isFunction)
-                    {
-                        var argumentsLocal = (BoundVariable)node.Locals.SingleOrDefault(p => p.Name == "arguments");
-                        if (argumentsLocal == null)
-                        {
-                            Debug.Assert(node.Closure != null);
-                            argumentsLocal = node.Closure.Fields[Closure.ArgumentsFieldName];
-                        }
-
-                        MarkWrite(argumentsLocal, BoundValueType.Object);
-                    }
-
                     base.VisitBody(node);
                 }
-            }
 
-            private void MarkWrite(IBoundWritable variable, BoundValueType type)
-            {
-                var hasType = variable as BoundVariable;
-                if (hasType != null)
-                    _marker.MarkWrite(hasType.Type, type);
+                _scope = _scope.Parent;
             }
 
             public override void VisitSetVariable(BoundSetVariable node)
             {
                 base.VisitSetVariable(node);
 
-                MarkWrite(node.Variable, node.Value.ValueType);
+                _scope.MarkWrite(node.Variable, node.Value.ValueType);
             }
 
             public override void VisitForEachIn(BoundForEachIn node)
             {
-                MarkWrite(node.Target, BoundValueType.String);
+                _scope.MarkWrite(node.Target, BoundValueType.String);
 
                 base.VisitForEachIn(node);
             }
 
             public override void VisitCatch(BoundCatch node)
             {
-                MarkWrite(node.Target, BoundValueType.Unknown);
+                _scope.MarkWrite(node.Target, BoundValueType.Unknown);
 
                 base.VisitCatch(node);
             }
 
             public override void VisitCreateFunction(BoundCreateFunction node)
             {
-                // It's the responsibility of the phase to correctly process
-                // functions.
+                node.Function.Body.Accept(this);
+            }
 
-                Perform(node.Function.Body, true);
+            private class Scope : IDisposable
+            {
+                private BoundTypeManager.TypeMarker _marker;
+                private readonly Dictionary<BoundArgument, BoundVariable> _arguments;
+                private bool _disposed;
+
+                public Scope Parent { get; private set; }
+
+                public Scope(BoundBody body, Scope parent)
+                {
+                    Parent = parent;
+
+                    _marker = body.TypeManager.CreateTypeMarker();
+
+                    if (body.MappedArguments != null)
+                        _arguments = body.MappedArguments.ToDictionary(p => p.Argument, p => p.Mapped);
+
+                    if (body.MappedArguments != null)
+                    {
+                        foreach (var mapping in body.MappedArguments)
+                        {
+                            MarkWrite(mapping.Mapped, BoundValueType.Unknown);
+                        }
+                    }
+
+                    if (body.Closure != null)
+                    {
+                        var argumentsClosureField = body.Closure.Fields.SingleOrDefault(p => p.Name == Closure.ArgumentsFieldName);
+                        if (argumentsClosureField != null)
+                            MarkWrite(argumentsClosureField, BoundValueType.Object);
+                    }
+                }
+
+                public void MarkWrite(IBoundWritable writable, BoundValueType type)
+                {
+                    IBoundType boundType = null;
+
+                    var variable = writable as BoundVariable;
+                    if (variable != null)
+                    {
+                        boundType = variable.Type;
+                    }
+                    else if (_arguments != null)
+                    {
+                        var argument = writable as BoundArgument;
+                        if (argument != null)
+                            boundType = GetMappedArgument(argument).Type;
+                    }
+
+                    if (boundType != null)
+                        _marker.MarkWrite(boundType, type);
+                }
+
+                private BoundVariable GetMappedArgument(BoundArgument argument)
+                {
+                    var scope = this;
+
+                    while (scope != null)
+                    {
+                        BoundVariable result;
+                        if (scope._arguments.TryGetValue(argument, out result))
+                            return result;
+
+                        scope = scope.Parent;
+                    }
+
+                    // Shouldn't get here.
+
+                    throw new InvalidOperationException();
+                }
+
+                public void Dispose()
+                {
+                    if (!_disposed)
+                    {
+                        if (_marker != null)
+                        {
+                            _marker.Dispose();
+                            _marker = null;
+                        }
+
+                        _disposed = true;
+                    }
+                }
             }
         }
     }

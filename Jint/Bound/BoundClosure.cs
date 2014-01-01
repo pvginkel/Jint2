@@ -9,6 +9,8 @@ namespace Jint.Bound
 {
     internal class BoundClosure
     {
+        private readonly BoundClosureFieldCollection _fields;
+
         public BoundClosure Parent { get; private set; }
         public IKeyedCollection<string, BoundClosureField> Fields { get; private set; }
         public IClosureBuilder Builder { get; private set; }
@@ -23,14 +25,26 @@ namespace Jint.Bound
             Parent = parent;
             Builder = scriptBuilder.CreateClosureBuilder(this);
 
-            var fieldCollection = new BoundClosureFieldCollection();
+            _fields = new BoundClosureFieldCollection();
 
             foreach (var field in fields)
             {
-                fieldCollection.Add(new BoundClosureField(this, field));
+                _fields.Add(new BoundClosureField(this, field));
             }
 
-            Fields = ReadOnlyKeyedCollection.Create(fieldCollection);
+            Fields = ReadOnlyKeyedCollection.Create(_fields);
+        }
+
+        public BoundClosureField AddField(IBoundType type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            var field = new BoundClosureField(this, type);
+
+            _fields.Add(field);
+
+            return field;
         }
     }
 }

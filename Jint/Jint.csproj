@@ -60,6 +60,7 @@
     <Compile Include="Bound\BindingVisitor.cs" />
     <Compile Include="Bound\BindingVisitor.Scope.cs" />
     <Compile Include="Bound\BoundArgument.cs" />
+    <Compile Include="Bound\BoundBodyFlags.cs" />
     <Compile Include="Bound\BoundEmitExpression.cs" />
     <Compile Include="Bound\BoundBinary.cs" />
     <Compile Include="Bound\BoundBlock.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Bound\BoundTypeManager.DefiniteAssignmentMarker.cs" />
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
     <Compile Include="Bound\BoundTypeKind.cs" />
+    <Compile Include="Bound\BoundMappedArgument.cs" />
     <Compile Include="Bound\ResultRewriterPhase.cs" />
     <Compile Include="Compiler\ClosureParentField.cs" />
     <Compile Include="Compiler\IFunctionBuilder.cs" />
@@ -149,7 +151,6 @@
     <Compile Include="Bound\TypeMarkerPhase.cs" />
     <Compile Include="Expressions\BodySyntax.cs" />
     <Compile Include="Expressions\BodyType.cs" />
-    <Compile Include="Expressions\ClosedOverVariable.cs" />
     <Compile Include="Expressions\ISourceLocation.cs" />
     <Compile Include="Expressions\JsonProperty.cs" />
     <Compile Include="Expressions\JsonAccessorProperty.cs" />

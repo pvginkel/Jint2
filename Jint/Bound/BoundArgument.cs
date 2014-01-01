@@ -9,7 +9,7 @@ namespace Jint.Bound
     {
         public string Name { get; private set; }
         public int Index { get; private set; }
-        public BoundClosureField ArgumentsClosureField { get; private set; }
+        public BoundClosure Closure { get; private set; }
 
         public BoundValueType ValueType
         {
@@ -21,19 +21,19 @@ namespace Jint.Bound
             get { return BoundVariableKind.Argument; }
         }
 
-        public BoundArgument(string name, int index, BoundClosureField argumentsClosureField)
+        public BoundArgument(string name, int index, BoundClosure closure)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
             Name = name;
             Index = index;
-            ArgumentsClosureField = argumentsClosureField;
+            Closure = closure;
         }
 
         public override string ToString()
         {
-            return "Argument(" + Name + ")";
+            return "Argument(" + Name + (Closure != null ? "*" : "") + ")";
         }
     }
 }

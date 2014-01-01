@@ -13,7 +13,8 @@ namespace Jint.Bound
         public BoundClosure ScopedClosure { get; private set; }
         public ReadOnlyArray<BoundArgument> Arguments { get; private set; }
         public ReadOnlyArray<BoundLocalBase> Locals { get; private set; }
-        public bool IsStrict { get; private set; }
+        public ReadOnlyArray<BoundMappedArgument> MappedArguments { get; private set; }
+        public BoundBodyFlags Flags { get; private set; }
         public BoundTypeManager TypeManager { get; private set; }
 
         public override BoundKind Kind
@@ -21,7 +22,7 @@ namespace Jint.Bound
             get { return BoundKind.Body; }
         }
 
-        public BoundBody(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocalBase> locals, bool isStrict, BoundTypeManager typeManager)
+        public BoundBody(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocalBase> locals, ReadOnlyArray<BoundMappedArgument> mappedArguments, BoundBodyFlags flags, BoundTypeManager typeManager)
         {
             if (body == null)
                 throw new ArgumentNullException("body");
@@ -37,7 +38,8 @@ namespace Jint.Bound
             ScopedClosure = scopedClosure;
             Arguments = arguments;
             Locals = locals;
-            IsStrict = isStrict;
+            MappedArguments = mappedArguments;
+            Flags = flags;
             TypeManager = typeManager;
         }
 
@@ -53,7 +55,7 @@ namespace Jint.Bound
             return visitor.VisitBody(this);
         }
 
-        public BoundBody Update(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocalBase> locals, bool isStrict, BoundTypeManager typeManager)
+        public BoundBody Update(BoundBlock body, BoundClosure closure, BoundClosure scopedClosure, ReadOnlyArray<BoundArgument> arguments, ReadOnlyArray<BoundLocalBase> locals, ReadOnlyArray<BoundMappedArgument> mappedArguments, BoundBodyFlags flags, BoundTypeManager typeManager)
         {
             if (
                 body == Body &&
@@ -61,12 +63,13 @@ namespace Jint.Bound
                 scopedClosure == ScopedClosure &&
                 arguments == Arguments &&
                 locals == Locals &&
-                isStrict == IsStrict &&
+                mappedArguments == MappedArguments &&
+                flags == Flags &&
                 typeManager == TypeManager
             )
                 return this;
 
-            return new BoundBody(body, closure, scopedClosure, arguments, locals, isStrict, typeManager);
+            return new BoundBody(body, closure, scopedClosure, arguments, locals, mappedArguments, flags, typeManager);
         }
     }
 }

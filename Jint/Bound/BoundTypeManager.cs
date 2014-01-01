@@ -34,7 +34,7 @@ namespace Jint.Bound
             return new DefiniteAssignmentMarker(this, parentBranch);
         }
 
-        [DebuggerDisplay("Kind={Kind}, Type={Type}, DefinitelyAssigned={DefinitelyAssigned}")]
+        [DebuggerDisplay("Name={Name}, Kind={Kind}, Type={Type}, DefinitelyAssigned={DefinitelyAssigned}")]
         private class BoundType : IBoundType
         {
             private readonly BoundTypeManager _typeManager;

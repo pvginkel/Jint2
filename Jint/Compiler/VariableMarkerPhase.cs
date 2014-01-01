@@ -33,7 +33,7 @@ namespace Jint.Compiler
             }
 
             _main = syntax.Body;
-            _blocks.Add(new BlockManager(syntax.Body, null, null));
+            _blocks.Add(new BlockManager(syntax.Body, null));
 
             base.VisitProgram(syntax);
 
@@ -76,25 +76,15 @@ namespace Jint.Compiler
 
             // Add the variables that were closed over.
 
-            bool requireArguments = false;
-
             foreach (var variable in block.ClosedOverVariables)
             {
                 if (variable.Type == VariableType.Local)
                     fields.Add(variable.Name);
-                else
-                    requireArguments = true;
             }
-
-            if (requireArguments)
-                fields.Add(Closure.ArgumentsFieldName);
 
             // Build the closure.
 
-            var closure = new Closure(
-                parent != null ? parent.Block.Closure : null,
-                fields
-            );
+            var closure = new Closure(fields);
 
             block.Block.Closure = closure;
             block.Block.ParentClosure = parent != null ? parent.Block.Closure : null;
@@ -103,25 +93,7 @@ namespace Jint.Compiler
 
             foreach (var variable in block.ClosedOverVariables)
             {
-                if (variable.Type == VariableType.Parameter)
-                {
-                    if (block.ArgumentsVariable.ClosureField == null)
-                    {
-                        block.ArgumentsVariable.ClosureField = new ClosedOverVariable(
-                            closure,
-                            block.ArgumentsVariable
-                        );
-                    }
-
-                    variable.ClosureField = block.ArgumentsVariable.ClosureField;
-                }
-                else
-                {
-                    variable.ClosureField = new ClosedOverVariable(
-                        closure,
-                        variable
-                    );
-                }
+                variable.Closure = closure;
             }
         }
 
@@ -133,28 +105,13 @@ namespace Jint.Compiler
             var body = syntax.Body;
             var declaredVariables = body.DeclaredVariables;
 
-            // Setup the "arguments" and "this" variables.
-
-            Variable argumentsVariable;
-            if (declaredVariables.TryGetValue(JsNames.Arguments, out argumentsVariable))
-            {
-                if (body.IsStrict)
-                    throw new InvalidOperationException("Cannot use 'arguments' as a parameter name in strict mode");
-            }
-            else
-            {
-                argumentsVariable = new Variable(JsNames.Arguments, -1)
-                {
-                    Type = VariableType.Arguments
-                };
-
-                declaredVariables.Add(argumentsVariable);
-            }
-
             // Check for strict mode.
 
-            if (body.IsStrict && declaredVariables.Contains("eval"))
-                throw new InvalidOperationException("Cannot use 'eval' as a parameter name in strict mode");
+            if (
+                body.IsStrict &&
+                (declaredVariables.Contains(JsNames.Eval) || declaredVariables.Contains(JsNames.Arguments))
+            )
+                throw new JsException(JsErrorType.SyntaxError, "Assignment to eval or arguments is not allowed in strict mode");
 
             // Add or mark the parameters.
 
@@ -189,7 +146,7 @@ namespace Jint.Compiler
             if (_blocks.Count > 0)
                 parentBlock = _blocks[_blocks.Count - 1];
 
-            _blocks.Add(new BlockManager(syntax.Body, argumentsVariable, parentBlock));
+            _blocks.Add(new BlockManager(syntax.Body, parentBlock));
 
             base.VisitFunction(syntax);
 
@@ -235,14 +192,15 @@ namespace Jint.Compiler
 
         private Variable GetVariable(string identifier)
         {
-            // Arguments can be re-declared (if not strict). Because of this,
-            // we check arguments after resolving in a scope.
-
             switch (identifier)
             {
                 case JsNames.This: return Variable.This;
                 case JsNames.TypeNull: return Variable.Null;
                 case JsNames.TypeUndefined: return Variable.Undefined;
+                case JsNames.Arguments:
+                    if (_blocks[_blocks.Count - 1].Block.BodyType == BodyType.Function)
+                        return Variable.Arguments;
+                    break;
             }
 
             Variable variable;
@@ -280,10 +238,6 @@ namespace Jint.Compiler
                     return variable;
                 }
             }
-
-            // Check for arguments.
-
-            Debug.Assert(identifier != JsNames.Arguments);
 
             // Else, it's a reference to a global variable.
 
@@ -334,14 +288,12 @@ namespace Jint.Compiler
         private class BlockManager
         {
             public BodySyntax Block { get; private set; }
-            public Variable ArgumentsVariable { get; private set; }
             public BlockManager Parent { get; private set; }
             public HashSet<Variable> ClosedOverVariables { get; private set; }
 
-            public BlockManager(BodySyntax block, Variable argumentsVariable, BlockManager parent)
+            public BlockManager(BodySyntax block, BlockManager parent)
             {
                 Block = block;
-                ArgumentsVariable = argumentsVariable;
                 Parent = parent;
                 ClosedOverVariables = new HashSet<Variable>();
             }

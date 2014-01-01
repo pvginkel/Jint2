@@ -57,3 +57,19 @@ function duplicateArgument(arg1, arg2, arg1, arg2) {
 }
 
 assert('c,d', duplicateArgument('a', 'b', 'c', 'd'));
+
+function getClosedOverArgument(a) {
+    return (function () {
+        return a;
+    })();
+}
+
+assert(7, getClosedOverArgument(7));
+
+function getClosedOverFromRealArguments(a) {
+    return (function (b) {
+        return a + b;
+    })(arguments.length);
+}
+
+assert(9, getClosedOverFromRealArguments(7, 8));

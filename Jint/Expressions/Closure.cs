@@ -9,15 +9,13 @@ namespace Jint.Expressions
     {
         public const string ArgumentsFieldName = "<>arguments";
 
-        public Closure Parent { get; private set; }
         public IList<string> Fields { get; private set; }
 
-        public Closure(Closure parent, IEnumerable<string> fields)
+        public Closure(IEnumerable<string> fields)
         {
             if (fields == null)
                 throw new ArgumentNullException("fields");
 
-            Parent = parent;
             Fields = fields.ToReadOnly();
         }
     }
