@@ -105,6 +105,8 @@
     <Compile Include="Fixtures\TryCatchTests.cs" />
     <Compile Include="Fixtures\TypeOfTests.cs" />
     <Compile Include="Fixtures\WithTests.cs" />
+    <Compile Include="JsonInterpreting\JsonInterpretingFixture.cs" />
+    <Compile Include="JsonInterpreting\JsonInterpretingFixture.Support.cs" />
     <Compile Include="Mozilla\ArrayTests.cs" />
     <Compile Include="Mozilla\DateTests.cs" />
     <Compile Include="Mozilla\ExceptionTests.cs" />

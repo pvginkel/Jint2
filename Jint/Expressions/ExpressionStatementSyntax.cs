@@ -10,11 +10,6 @@ namespace Jint.Expressions
         public ExpressionSyntax Expression { get; private set; }
         public SourceLocation Location { get; private set; }
 
-        public override bool IsLiteral
-        {
-            get { return Expression.IsLiteral; }
-        }
-
         public override SyntaxType Type
         {
             get { return SyntaxType.ExpressionStatement; }

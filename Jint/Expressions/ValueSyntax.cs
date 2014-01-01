@@ -14,11 +14,6 @@ namespace Jint.Expressions
 
         public object Value { get; private set; }
 
-        public override bool IsLiteral
-        {
-            get { return true; }
-        }
-
         public ValueSyntax(object value)
         {
             if (value == null)

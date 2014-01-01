@@ -8,22 +8,9 @@ namespace Jint.Expressions
 {
     internal class ArrayDeclarationSyntax : ExpressionSyntax
     {
-        private bool? _isLiteral;
-
         public override SyntaxType Type
         {
             get { return SyntaxType.ArrayDeclaration; }
-        }
-
-        public override bool IsLiteral
-        {
-            get
-            {
-                if (!_isLiteral.HasValue)
-                    _isLiteral = Parameters.All(p => p.IsLiteral);
-
-                return _isLiteral.Value;
-            }
         }
 
         public IList<SyntaxNode> Parameters { get; private set; }

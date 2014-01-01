@@ -13,11 +13,6 @@ namespace Jint.Expressions
             get { return SyntaxType.CommaOperator; }
         }
 
-        public override bool IsLiteral
-        {
-            get { return Expressions.Count == 0 || (Expressions.Count == 1 && Expressions[0].IsLiteral); }
-        }
-
         public IList<ExpressionSyntax> Expressions { get; private set; }
 
         public CommaOperatorSyntax(IEnumerable<ExpressionSyntax> expressions)

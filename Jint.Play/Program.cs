@@ -11,8 +11,8 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            //ExecuteSunSpider();
-            ExecuteV8();
+            ExecuteSunSpider();
+            //ExecuteV8();
         }
 
         private static void ExecuteV8()

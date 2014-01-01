@@ -10,7 +10,6 @@ namespace Jint.Expressions
 
         public abstract SyntaxType Type { get; }
         public virtual bool IsAssignable { get { return false; } }
-        public virtual bool IsLiteral { get { return false; } }
 
         public abstract void Accept(ISyntaxVisitor visitor);
 

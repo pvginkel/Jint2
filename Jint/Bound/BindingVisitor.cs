@@ -512,7 +512,9 @@ namespace Jint.Bound
                     builder.Add(new BoundSetMember(
                         new BoundGetVariable(temporary),
                         BoundConstant.Create(dataProperty.Name),
-                        BuildExpression(dataProperty.Expression), SourceLocation.Missing));
+                        BuildExpression(dataProperty.Expression),
+                        SourceLocation.Missing
+                    ));
                 }
                 else
                 {

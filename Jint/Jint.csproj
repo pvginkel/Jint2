@@ -118,6 +118,8 @@
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
     <Compile Include="Bound\BoundTypeKind.cs" />
     <Compile Include="Bound\BoundMappedArgument.cs" />
+    <Compile Include="Bound\JsonInterpreter.cs" />
+    <Compile Include="Bound\JsonPrinter.cs" />
     <Compile Include="Bound\ResultRewriterPhase.cs" />
     <Compile Include="Compiler\ClosureParentField.cs" />
     <Compile Include="Compiler\IFunctionBuilder.cs" />
@@ -207,7 +209,6 @@
     <Compile Include="Native\JsGlobal.ArrayFunctions.cs" />
     <Compile Include="Native\JsGlobal.BooleanFunctions.cs" />
     <Compile Include="Native\JsGlobal.Builders.cs" />
-    <Compile Include="Native\JsGlobal.BuildLiteral.cs" />
     <Compile Include="Native\JsGlobal.DateFunctions.cs" />
     <Compile Include="Native\JsGlobal.Environment.cs" />
     <Compile Include="Native\JsGlobal.ErrorFunctions.cs" />

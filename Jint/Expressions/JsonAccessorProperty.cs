@@ -10,11 +10,6 @@ namespace Jint.Expressions
         public ExpressionSyntax GetExpression { get; private set; }
         public ExpressionSyntax SetExpression { get; private set; }
 
-        public override bool IsLiteral
-        {
-            get { return false; }
-        }
-
         public JsonAccessorProperty(string name, ExpressionSyntax getExpression, ExpressionSyntax setExpression)
             : base(name)
         {

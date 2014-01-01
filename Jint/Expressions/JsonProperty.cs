@@ -9,8 +9,6 @@ namespace Jint.Expressions
     {
         public string Name { get; private set; }
 
-        public abstract bool IsLiteral { get; }
-
         protected JsonProperty(string name)
         {
             if (name == null)

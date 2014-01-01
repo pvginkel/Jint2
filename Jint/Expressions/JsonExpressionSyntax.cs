@@ -8,20 +8,7 @@ namespace Jint.Expressions
 {
     internal class JsonExpressionSyntax : ExpressionSyntax
     {
-        private bool? _isLiteral;
-
         public IList<JsonProperty> Properties { get; private set; }
-
-        public override bool IsLiteral
-        {
-            get
-            {
-                if (!_isLiteral.HasValue)
-                    _isLiteral = Properties.All(p => p.IsLiteral);
-
-                return _isLiteral.Value;
-            }
-        }
 
         public JsonExpressionSyntax(IEnumerable<JsonProperty> properties)
         {

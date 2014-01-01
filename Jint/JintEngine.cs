@@ -218,15 +218,30 @@ namespace Jint
 
             if (!_cachedScripts.TryGetValue(key, out @delegate))
             {
-                @delegate = CompileProgram(script, fileName);
+                var compilationResult = CompileProgram(script, fileName);
 
-                _cachedScripts.Add(key, @delegate);
+                if (compilationResult.Main != null)
+                {
+                    @delegate = compilationResult.Main;
+                    _cachedScripts.Add(key, @delegate);
+                }
+                else
+                {
+                    var literalResult = compilationResult.LiteralResult;
+
+                    Debug.Assert(literalResult != null);
+
+                    if (unwrap)
+                        literalResult = Global.Marshaller.MarshalJsValue<object>(literalResult);
+
+                    return literalResult;
+                }
             }
-
-            object result;
 
             // Don't wrap exceptions while debugging to make stack traces
             // easier to read.
+
+            object result;
 
 #if !DEBUG
             try
@@ -258,7 +273,7 @@ namespace Jint
             return result;
         }
 
-        private JsMain CompileProgram(string script, string fileName)
+        private CompilationResult CompileProgram(string script, string fileName)
         {
             ProgramSyntax program;
 
@@ -267,19 +282,11 @@ namespace Jint
                 program = ParseProgram(script);
 
                 if (program == null)
-                    return p => JsNull.Instance;
+                    return new CompilationResult(JsNull.Instance, null);
             }
             catch (Exception e)
             {
                 throw new JsException(JsErrorType.SyntaxError, e.Message);
-            }
-
-            if (program.IsLiteral)
-            {
-                // If the whole program is a literal, there's no use in invoking
-                // the compiler.
-
-                return p => Global.BuildLiteral(program);
             }
 
             program.Accept(new VariableMarkerPhase());
@@ -291,6 +298,10 @@ namespace Jint
 
             var boundProgram = bindingVisitor.Program;
 
+            var interpreter = new JsonInterpreter(Global);
+            if (boundProgram.Body.Accept(interpreter))
+                return new CompilationResult(interpreter.Result, null);
+
             var resultExpressions = DefiniteAssignmentPhase.Perform(boundProgram);
             boundProgram = ResultRewriterPhase.Perform(boundProgram, resultExpressions);
             TypeMarkerPhase.Perform(boundProgram);
@@ -301,7 +312,9 @@ namespace Jint
 
             EnsureGlobalsDeclared(boundProgram);
 
-            return new CodeGenerator(Global, scriptBuilder).BuildMainMethod(boundProgram);
+            var main = new CodeGenerator(Global, scriptBuilder).BuildMainMethod(boundProgram);
+
+            return new CompilationResult(null, main);
         }
 
         private JsFunction CompileFunction(string sourceCode, IEnumerable<string> parameters)
@@ -465,6 +478,18 @@ namespace Jint
                     new BoundTreePrettyPrintVisitor(writer).Visit(bodies[i]);
                     writer.WriteLine();
                 }
+            }
+        }
+
+        private class CompilationResult
+        {
+            public object LiteralResult { get; private set; }
+            public JsMain Main { get; private set; }
+
+            public CompilationResult(object literalResult, JsMain main)
+            {
+                LiteralResult = literalResult;
+                Main = main;
             }
         }
     }
