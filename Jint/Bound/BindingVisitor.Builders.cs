@@ -14,7 +14,12 @@ namespace Jint.Bound
             switch (syntax.Type)
             {
                 case SyntaxType.Identifier:
-                    return BuildSet(((IdentifierSyntax)syntax).Identifier, value);
+                    var identifier = ((IdentifierSyntax)syntax).Identifier;
+
+                    if (identifier.Type == IdentifierType.Global)
+                        _scope.IsGlobalScopeReferenced = true;
+
+                    return BuildSet(identifier, value);
 
                 case SyntaxType.Property:
                     var property = (PropertySyntax)syntax;
@@ -67,6 +72,9 @@ namespace Jint.Bound
 
                 case IdentifierType.Local:
                 case IdentifierType.Global:
+                    if (identifier.Type == IdentifierType.Global)
+                        _scope.IsGlobalScopeReferenced = true;
+
                     if (identifier.Closure == null)
                         return new BoundSetVariable(_scope.GetLocal(identifier), value, SourceLocation.Missing);
 
@@ -135,7 +143,7 @@ namespace Jint.Bound
             );
         }
 
-        private static BoundStatement BuildThrow(string @class, string message)
+        private BoundStatement BuildThrow(string @class, string message)
         {
             var arguments = new ReadOnlyArray<BoundCallArgument>.Builder();
 
@@ -146,6 +154,8 @@ namespace Jint.Bound
                     false
                 ));
             }
+
+            _scope.IsGlobalScopeReferenced = true;
 
             // Build the throw.
             return new BoundThrow(
@@ -174,7 +184,12 @@ namespace Jint.Bound
             switch (syntax.Type)
             {
                 case SyntaxType.Identifier:
-                    return BuildGet(((IdentifierSyntax)syntax).Identifier, withTarget);
+                    var identifier = ((IdentifierSyntax)syntax).Identifier;
+
+                    if (identifier.Type == IdentifierType.Global)
+                        _scope.IsGlobalScopeReferenced = true;
+
+                    return BuildGet(identifier, withTarget);
 
                 case SyntaxType.Property:
                     var property = (PropertySyntax)syntax;

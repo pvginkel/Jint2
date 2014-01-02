@@ -10,6 +10,8 @@ namespace Jint.Bound
     {
         None = 0,
         ArgumentsReferenced = 1,
-        Strict = 2
+        Strict = 2,
+        GlobalReferenced = 4,
+        GlobalScopeReferenced = 8
     }
 }

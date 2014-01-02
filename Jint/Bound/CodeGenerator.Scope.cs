@@ -80,17 +80,23 @@ namespace Jint.Bound
 
             public void EmitLocals(BoundTypeManager typeManager)
             {
-                _globalLocal = IL.DeclareLocal(typeof(JsGlobal));
+                if ((_body.Flags & BoundBodyFlags.GlobalReferenced) != 0)
+                {
+                    _globalLocal = IL.DeclareLocal(typeof(JsGlobal));
 
-                EmitLoad(SpecialLocal.Runtime);
-                IL.EmitCall(_runtimeGetGlobal);
-                IL.Emit(OpCodes.Stloc, _globalLocal);
+                    EmitLoad(SpecialLocal.Runtime);
+                    IL.EmitCall(_runtimeGetGlobal);
+                    IL.Emit(OpCodes.Stloc, _globalLocal);
+                }
 
-                _globalScopeLocal = IL.DeclareLocal(typeof(JsObject));
+                if ((_body.Flags & BoundBodyFlags.GlobalScopeReferenced) != 0)
+                {
+                    _globalScopeLocal = IL.DeclareLocal(typeof(JsObject));
 
-                EmitLoad(SpecialLocal.Runtime);
-                IL.EmitCall(_runtimeGetGlobalScope);
-                IL.Emit(OpCodes.Stloc, _globalScopeLocal);
+                    EmitLoad(SpecialLocal.Runtime);
+                    IL.EmitCall(_runtimeGetGlobalScope);
+                    IL.Emit(OpCodes.Stloc, _globalScopeLocal);
+                }
 
                 foreach (var type in typeManager.Types)
                 {
@@ -124,10 +130,14 @@ namespace Jint.Bound
                         return BoundValueType.Unset;
 
                     case SpecialLocal.Global:
+                        Debug.Assert((_body.Flags & BoundBodyFlags.GlobalReferenced) != 0);
+
                         IL.Emit(OpCodes.Ldloc, _globalLocal);
                         return BoundValueType.Unset;
 
                     case SpecialLocal.GlobalScope:
+                        Debug.Assert((_body.Flags & BoundBodyFlags.GlobalScopeReferenced) != 0);
+
                         IL.Emit(OpCodes.Ldloc, _globalScopeLocal);
                         return BoundValueType.Object;
 

@@ -29,6 +29,8 @@ namespace Jint.Bound
 
         public BoundNode VisitArrayDeclaration(ArrayDeclarationSyntax syntax)
         {
+            _scope.IsGlobalReferenced = true;
+
             var creation = new BoundNewBuiltIn(BoundNewBuiltInType.Array);
 
             if (syntax.Parameters.Count == 0)
@@ -412,6 +414,10 @@ namespace Jint.Bound
             var flags = BoundBodyFlags.None;
             if (syntax.IsStrict)
                 flags |= BoundBodyFlags.Strict;
+            if (_scope.IsGlobalReferenced)
+                flags |= BoundBodyFlags.GlobalReferenced;
+            if (_scope.IsGlobalScopeReferenced)
+                flags |= BoundBodyFlags.GlobalScopeReferenced;
 
             var mappedArguments = ReadOnlyArray<BoundMappedArgument>.Null;
 
@@ -488,6 +494,8 @@ namespace Jint.Bound
 
         public BoundNode VisitJsonExpression(JsonExpressionSyntax syntax)
         {
+            _scope.IsGlobalReferenced = true;
+
             var creation = new BoundNewBuiltIn(BoundNewBuiltInType.Object);
 
             if (syntax.Properties.Count == 0)
@@ -579,6 +587,8 @@ namespace Jint.Bound
             }
             else
             {
+                _scope.IsGlobalScopeReferenced = true;
+
                 var identifierSyntax = syntax.Expression as IdentifierSyntax;
 
                 if (
@@ -691,6 +701,8 @@ namespace Jint.Bound
 
         public BoundNode VisitRegexp(RegexpSyntax syntax)
         {
+            _scope.IsGlobalReferenced = true;
+
             return new BoundRegEx(syntax.Regexp, syntax.Options);
         }
 
@@ -883,6 +895,8 @@ namespace Jint.Bound
 
                     if (identifier.Identifier.Type == IdentifierType.Global)
                     {
+                        _scope.IsGlobalScopeReferenced = true;
+
                         return new BoundDeleteMember(
                             new BoundGetVariable(BoundMagicVariable.Global),
                             BoundConstant.Create(identifier.Identifier)
@@ -958,6 +972,8 @@ namespace Jint.Bound
 
         public BoundNode VisitWith(WithSyntax syntax)
         {
+            _scope.IsGlobalScopeReferenced = true;
+
             var builder = new BlockBuilder(this);
 
             IBoundWritable variable;
