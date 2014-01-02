@@ -33,11 +33,6 @@ namespace Jint.Bound
             public ITypeBuilder TypeBuilder { get; private set; }
             public ExceptionalReturn ExceptionalReturn { get; private set; }
 
-            public BoundBodyFlags Flags
-            {
-                get { return _body.Flags; }
-            }
-
             public BoundClosure Closure
             {
                 get { return _body.ScopedClosure; }
@@ -45,12 +40,7 @@ namespace Jint.Bound
 
             public bool IsStrict
             {
-                get { return (Flags & BoundBodyFlags.Strict) != 0; }
-            }
-
-            public bool IsArgumentsReferenced
-            {
-                get { return (Flags & BoundBodyFlags.ArgumentsReferenced) != 0; }
+                get { return (_body.Flags & BoundBodyFlags.Strict) != 0; }
             }
 
             public bool InTryCatch

@@ -4,33 +4,43 @@ Copyrights 2008-2009 Xebic Reasearch BV. All rights reserved (see license.txt).
 Original work by Patrick Hulsmeijer.
 
 This ANTLR 3 LL(*) grammar is based on Ecma-262 3rd edition (JavaScript 1.5, JScript 5.5). 
-The annotations refer to the "A Grammar Summary" section (e.g. A.1 Lexical Grammar) and the numbers in parenthesis to the paragraph numbers (e.g. (7.8) ).
+The annotations refer to the "A Grammar Summary" section (e.g. A.1 Lexical Grammar)
+and the numbers in parenthesis to the paragraph numbers (e.g. (7.8) ).
 This document is best viewed with ANTLRWorks (www.antlr.org).
 
 
 The major challenges faced in defining this grammar were:
 
--1- Ambiguity surrounding the DIV sign in relation to the multiplicative expression and the regular expression literal.
-This is solved with some lexer driven magic: a gated semantical predicate turns the recognition of regular expressions on or off, based on the
-value of the RegularExpressionsEnabled property. When regular expressions are enabled they take precedence over division expressions. The decision whether
-regular expressions are enabled is based on the heuristics that the previous token can be considered as last token of a left-hand-side operand of a division.
+-1- Ambiguity surrounding the DIV sign in relation to the multiplicative
+expression and the regular expression literal.
+This is solved with some lexer driven magic: a gated semantical predicate
+turns the recognition of regular expressions on or off, based on the
+value of the RegularExpressionsEnabled property. When regular expressions
+are enabled they take precedence over division expressions. The decision whether
+regular expressions are enabled is based on the heuristics that the previous
+token can be considered as last token of a left-hand-side operand of a division.
 
 -2- Automatic semicolon insertion.
-This is solved within the parser. The semicolons are not physically inserted but the situations in which they should are recognized and treated as if they were.
+This is solved within the parser. The semicolons are not physically inserted
+but the situations in which they should are recognized and treated as if they were.
 The physical insertion of semicolons would be undesirable because of several reasons:
 - performance degration because of how ANTLR handles tokens in token streams
 - the alteration of the input, which we need to have unchanged
 - it is superfluous being of no interest to AST construction
 
 -3- Unicode identifiers
-Because ANTLR couldn't handle the unicode tables defined in the specification well and for performance reasons unicode identifiers are implemented as an action 
-driven alternative to ASCII identifiers. First the ASCII version is tried that is defined in detail in this grammar and then the unicode alternative is tried action driven.
-Because of the fact that the ASCII version is defined in detail the mTokens switch generation in the lexer can predict identifiers appropriately.
+Because ANTLR couldn't handle the unicode tables defined in the specification
+well and for performance reasons unicode identifiers are implemented as an action 
+driven alternative to ASCII identifiers. First the ASCII version is tried that
+is defined in detail in this grammar and then the unicode alternative is tried action driven.
+Because of the fact that the ASCII version is defined in detail the mTokens
+switch generation in the lexer can predict identifiers appropriately.
 For details see the identifier rules.
 
 
 The minor challenges were related to converting the grammar to an ANTLR LL(*) grammar:
-- Resolving the ambiguity between functionDeclaration vs functionExpression and block vs objectLiteral stemming from the expressionStatement production.
+- Resolving the ambiguity between functionDeclaration vs functionExpression
+  and block vs objectLiteral stemming from the expressionStatement production.
 - Left recursive nature of the left hand side expressions.
 - The assignmentExpression production.
 - The forStatement production.
@@ -60,13 +70,13 @@ tokens
 	CONTINUE 	= 'continue' ;
 	DEFAULT		= 'default' ;
 	DELETE		= 'delete' ;
-	DO 		= 'do' ;
+	DO 			= 'do' ;
 	ELSE 		= 'else' ;
 	FINALLY 	= 'finally' ;
 	FOR 		= 'for' ;
 	FUNCTION 	= 'function' ;
-	IF 		= 'if' ;
-	IN 		= 'in' ;
+	IF 			= 'if' ;
+	IN 			= 'in' ;
 	INSTANCEOF 	= 'instanceof' ;
 	NEW 		= 'new' ;
 	RETURN 		= 'return' ;
@@ -121,34 +131,34 @@ tokens
 	RPAREN		= ')' ;
 	LBRACK		= '[' ;
 	RBRACK		= ']' ;
-	DOT		= '.' ;
+	DOT			= '.' ;
 	SEMIC		= ';' ;
 	COMMA		= ',' ;
-	LT		= '<' ;
-	GT		= '>' ;
-	LTE		= '<=' ;
-	GTE		= '>=' ;
-	EQ		= '==' ;
-	NEQ		= '!=' ;
+	LT			= '<' ;
+	GT			= '>' ;
+	LTE			= '<=' ;
+	GTE			= '>=' ;
+	EQ			= '==' ;
+	NEQ			= '!=' ;
 	SAME		= '===' ;
 	NSAME		= '!==' ;
-	ADD		= '+' ;
-	SUB		= '-' ;
-	MUL		= '*' ;
-	MOD		= '%' ;
-	INC		= '++' ;
-	DEC		= '--' ;
-	SHL		= '<<' ;
-	SHR		= '>>' ;
-	SHU		= '>>>' ;
-	AND		= '&' ;
-	OR		= '|' ;
-	XOR		= '^' ;
-	NOT		= '!' ;
-	INV		= '~' ;
+	ADD			= '+' ;
+	SUB			= '-' ;
+	MUL			= '*' ;
+	MOD			= '%' ;
+	INC			= '++' ;
+	DEC			= '--' ;
+	SHL			= '<<' ;
+	SHR			= '>>' ;
+	SHU			= '>>>' ;
+	AND			= '&' ;
+	OR			= '|' ;
+	XOR			= '^' ;
+	NOT			= '!' ;
+	INV			= '~' ;
 	LAND		= '&&' ;
-	LOR		= '||' ;
-	QUE		= '?' ;
+	LOR			= '||' ;
+	QUE			= '?' ;
 	COLON		= ':' ;
 	ASSIGN		= '=' ;
 	ADDASS		= '+=' ;
@@ -162,7 +172,7 @@ tokens
 	ORASS		= '|=' ;
 	ORASS		= '|=' ;
 	XORASS		= '^=' ;
-	DIV		= '/' ;
+	DIV			= '/' ;
 	DIVASS		= '/=' ;
 	
 // Imaginary
@@ -201,7 +211,7 @@ tokens
 using System;
 using System.Text;
 using System.Globalization;
-using Jint.Expressions;
+using Jint.Ast;
 }
 
 //
@@ -505,11 +515,11 @@ punctuator
 // $<	Literals (7.8)
 
 literal returns [ExpressionSyntax value]
-	: exp1=NULL { $value = new IdentifierSyntax(exp1.Text); }
-	| exp2=booleanLiteral { $value = new ValueSyntax(exp2); }
-	| exp3=numericLiteral { $value = new ValueSyntax(exp3); }
-	| exp4=StringLiteral  { $value = new ValueSyntax(ExtractString(exp4.Text)); }
-	| exp5=RegularExpressionLiteral { $value = new RegexpSyntax(ExtractRegExpPattern(exp5.Text), ExtractRegExpOption(exp5.Text)); }
+	: exp1=NULL { $value = _builder.BuildIdentifier(exp1.Text); }
+	| exp2=booleanLiteral { $value = _builder.BuildConstant(exp2); }
+	| exp3=numericLiteral { $value = _builder.BuildConstant(exp3); }
+	| exp4=StringLiteral  { $value = _builder.BuildConstant(ExtractString(exp4.Text)); }
+	| exp5=RegularExpressionLiteral { $value = _builder.BuildRegularExpression(ExtractRegExpPattern(exp5.Text), ExtractRegExpOption(exp5.Text)); }
 	;
 
 booleanLiteral returns [bool value]
@@ -650,8 +660,8 @@ RegularExpressionLiteral
 // $<Primary expressions (11.1)
 
 primaryExpression returns [ExpressionSyntax value]
-	: ex1=THIS { $value = new IdentifierSyntax(ex1.Text); }
-	| ex2=Identifier { $value = new IdentifierSyntax(ex2.Text); }
+	: ex1=THIS { $value = _builder.BuildIdentifier(ex1.Text); }
+	| ex2=Identifier { $value = _builder.BuildIdentifier(ex2.Text); }
 	| ex3=literal { $value = ex3; }
 	| ex4=arrayLiteral { $value = ex4; }
 	| ex5=objectLiteral { $value = ex5; }
@@ -660,10 +670,10 @@ primaryExpression returns [ExpressionSyntax value]
 
 arrayLiteral returns [ArrayDeclarationSyntax value]
 @init {
-    var parameters = new List<SyntaxNode>();
+    var parameters = new ReadOnlyArray<SyntaxNode>.Builder();
 }
 @after {
-	$value = new ArrayDeclarationSyntax(parameters);
+	$value = _builder.BuildArrayDeclaration(parameters.ToReadOnly());
 }
 	:
         lb=LBRACK
@@ -679,8 +689,17 @@ arrayLiteral returns [ArrayDeclarationSyntax value]
 	;
 
 arrayItem returns [SyntaxNode value]
-	: ( expr=assignmentExpression  { $value = expr; } | { input.LA(1) == COMMA }? { $value = new IdentifierSyntax("undefined"); } | { input.LA(1) == RBRACK }? { $value = null; }  )
-	
+	:
+		(
+			expr=assignmentExpression
+			{ $value = expr; }
+		|
+			{ input.LA(1) == COMMA }?
+			{ $value = _builder.BuildIdentifier("undefined"); }
+		|
+			{ input.LA(1) == RBRACK }?
+			{ $value = null; } 
+		)
 	;
 
 objectLiteral returns [JsonExpressionSyntax value]
@@ -688,7 +707,7 @@ objectLiteral returns [JsonExpressionSyntax value]
     var builder = new JsonPropertyBuilder();
 }
 @after {
-	$value = new JsonExpressionSyntax(builder.GetProperties());
+	$value = _builder.BuildJsonExpression(builder.GetProperties());
 }
 	:
       lb=LBRACE (
@@ -713,18 +732,17 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
 @init {
     PropertyExpressionType mode;
     BodySyntax body;
-    List<string> parameters = null;
+    var parameters = ReadOnlyArray<string>.Null;
     string name;
     IToken start = null;
 }
 @after {
     $value = new PropertyDeclaration(
         name,
-        new FunctionSyntax(
+		_builder.BuildFunction(
             name,
             parameters,
             body,
-            null,
             GetLocation(start, input.LT(-1))
         ),
         mode
@@ -743,9 +761,10 @@ propertyFunctionAssignment returns [PropertyDeclaration value]
         {
             if (start == null)
                 start = input.LT(1);
+			_builder.EnterFunctionBody(parameters);
         }
-        statements=functionBody
-        { body = statements; } 
+        functionBody
+        { body = _builder.ExitBody(); } 
     ;
 
 propertyValueAssignment returns [PropertyDeclaration value]
@@ -769,7 +788,15 @@ propertyValueAssignment returns [PropertyDeclaration value]
     ;        
 
 accessor returns [PropertyExpressionType value]
-	: ex1=Identifier { ex1.Text=="get" || ex1.Text=="set" }?=> { if(ex1.Text=="get") $value= PropertyExpressionType.Get; if(ex1.Text=="set") $value=PropertyExpressionType.Set; }
+	:
+		ex1=Identifier
+		{ ex1.Text=="get" || ex1.Text=="set" }?=>
+		{
+			if (ex1.Text == "get")
+				$value = PropertyExpressionType.Get;
+			if (ex1.Text == "set")
+				$value = PropertyExpressionType.Set;
+		}
 	;
 
 propertyName returns [string value]
@@ -784,7 +811,8 @@ propertyName returns [string value]
 
 /*
 Refactored some rules to make them LL(*) compliant:
-all the expressions surrounding member selection and calls have been moved to leftHandSideExpression to make them right recursive
+all the expressions surrounding member selection and calls have been moved to
+leftHandSideExpression to make them right recursive
 */
 
 memberExpression returns [ExpressionSyntax value]
@@ -792,19 +820,22 @@ memberExpression returns [ExpressionSyntax value]
 	| func=functionExpression { $value = func; }
 	;
 	
-arguments returns [List<MethodArgument> value]
+arguments returns [ReadOnlyArray<MethodArgument> value]
 @init {
-	$value = new List<MethodArgument>();
+	var arguments = new ReadOnlyArray<MethodArgument>.Builder();
+}
+@after {
+	$value = arguments.ToReadOnly();
 }
 	:
         LPAREN
         (
             first=argument
-            { $value.Add(first); }
+            { arguments.Add(first); }
             (
                 COMMA
                 follow=argument
-                { $value.Add(follow); }
+                { arguments.Add(follow); }
             )*
         )?
         RPAREN
@@ -817,25 +848,38 @@ argument returns [MethodArgument value]
     :
         ( REF { isRef = true; } )?
         ex=assignmentExpression
-        { $value = new MethodArgument(ex, isRef); }
+        { $value = _builder.BuildMethodArgument(ex, isRef); }
     ;
 
-generics returns [List<ExpressionSyntax> value]
+generics returns [ReadOnlyArray<ExpressionSyntax> value]
 @init {
-	$value = new List<ExpressionSyntax>();
+	var generics = new ReadOnlyArray<ExpressionSyntax>.Builder();
 }
-	: LBRACE ( first=assignmentExpression { $value.Add(first); } ( COMMA follow=assignmentExpression { $value.Add(follow); })* )? RBRACE
-	
+@after {
+	$value = generics.ToReadOnly();
+}
+	:
+		LBRACE
+		(
+			first=assignmentExpression
+			{ generics.Add(first); }
+			(
+				COMMA
+				follow=assignmentExpression
+				{ generics.Add(follow); }
+			)*
+		)?
+		RBRACE
 	;
 	
 leftHandSideExpression returns [ExpressionSyntax value]
 @init {
-	List<ExpressionSyntax> gens = new List<ExpressionSyntax>();
+	var gens = ReadOnlyArray<ExpressionSyntax>.Empty;
     bool isNew = false;
 }
 @after{
     if (isNew)
-        $value = new NewSyntax($value);
+        $value = _builder.BuildNew($value);
 }
 	:
         (
@@ -851,7 +895,7 @@ leftHandSideExpression returns [ExpressionSyntax value]
             )?
             arg=arguments
             {
-                $value = new MethodCallSyntax(
+                $value = _builder.BuildMethodCall(
                     $value,
                     arg,
                     gens
@@ -860,14 +904,14 @@ leftHandSideExpression returns [ExpressionSyntax value]
                 if (isNew)
                 {
                     isNew = false;
-                    $value = new NewSyntax($value);
+                    $value = _builder.BuildNew($value);
                 }
             } 
 	
 		|
             LBRACK exp=expression RBRACK
             {
-                $value = new IndexerSyntax(
+                $value = _builder.BuildIndexer(
                     $value,
                     exp
                 );
@@ -876,7 +920,7 @@ leftHandSideExpression returns [ExpressionSyntax value]
 		|
             DOT id=Identifier
             {
-                $value = new PropertySyntax(
+                $value = _builder.BuildProperty(
                     $value,
                     $id.Text
                 );
@@ -895,12 +939,26 @@ We only must promote EOLs when the la is INC or DEC because this production is c
 In other words: only promote EOL when we are really in a postfix expression. A check on the la will ensure this.
 */
 postfixExpression returns [ExpressionSyntax value]
-	: left=leftHandSideExpression { $value = left; if (input.LA(1) == INC || input.LA(1) == DEC) PromoteEol();  } ( post=postfixOperator { $value = new UnarySyntax(post, $value); })?
+	:
+		left=leftHandSideExpression
+		{
+			$value = left;
+			if (input.LA(1) == INC || input.LA(1) == DEC)
+				PromoteEol();
+		}
+		(
+			post=postfixOperator
+			{ $value = _builder.BuildUnary(post, $value); }
+		)?
 	;
 	
 postfixOperator returns [SyntaxExpressionType value]
-	: op=INC { $op.Type = PINC; $value = SyntaxExpressionType.PostIncrementAssign; }
-	| op=DEC { $op.Type = PDEC; $value = SyntaxExpressionType.PostDecrementAssign; }
+	:
+		op=INC
+		{ $op.Type = PINC; $value = SyntaxExpressionType.PostIncrementAssign; }
+	|
+		op=DEC
+		{ $op.Type = PDEC; $value = SyntaxExpressionType.PostDecrementAssign; }
 	;
 
 // $>
@@ -909,7 +967,7 @@ postfixOperator returns [SyntaxExpressionType value]
 
 unaryExpression returns [ExpressionSyntax value]
 	: post=postfixExpression { $value = post; }
-	| op=unaryOperator exp=unaryExpression { $value = new UnarySyntax(op, exp); }
+	| op=unaryOperator exp=unaryExpression { $value = _builder.BuildUnary(op, exp); }
 	;
 	
 unaryOperator returns [SyntaxExpressionType value]
@@ -930,13 +988,21 @@ unaryOperator returns [SyntaxExpressionType value]
 
 multiplicativeExpression returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=unaryExpression { $value = left; } ( 
-		( MUL { type= SyntaxExpressionType.Multiply; } 
-		| DIV { type= SyntaxExpressionType.Divide; }
-		| MOD { type= SyntaxExpressionType.Modulo; }) 
-		right=unaryExpression { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=unaryExpression { $value = left; }
+		( 
+			(
+				MUL { type= SyntaxExpressionType.Multiply; } 
+			|
+				DIV { type= SyntaxExpressionType.Divide; }
+			|
+				MOD { type= SyntaxExpressionType.Modulo; }
+			)
+			right=unaryExpression
+			{ $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 // $>
@@ -945,12 +1011,20 @@ multiplicativeExpression returns [ExpressionSyntax value]
 
 additiveExpression returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=multiplicativeExpression { $value = left; } ( 
-		( ADD { type= SyntaxExpressionType.Add; }
-		| SUB { type= SyntaxExpressionType.Subtract; }) 
-		right=multiplicativeExpression { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=multiplicativeExpression
+		{ $value = left; }
+		(
+			(
+				ADD { type= SyntaxExpressionType.Add; }
+			|
+				SUB { type= SyntaxExpressionType.Subtract; }
+			)
+			right=multiplicativeExpression
+			{ $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 // $>
@@ -959,13 +1033,22 @@ additiveExpression returns [ExpressionSyntax value]
 
 shiftExpression returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=additiveExpression { $value = left; } ( 
-		( SHL { type= SyntaxExpressionType.LeftShift; }
-		| SHR { type= SyntaxExpressionType.RightShift; }
-		| SHU { type= SyntaxExpressionType.UnsignedRightShift; }) 
-		right=additiveExpression { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=additiveExpression
+		{ $value = left; }
+		(
+			(
+				SHL { type= SyntaxExpressionType.LeftShift; }
+			|
+				SHR { type= SyntaxExpressionType.RightShift; }
+			|
+				SHU { type= SyntaxExpressionType.UnsignedRightShift; }
+			)
+			right=additiveExpression
+			{ $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 // $>
@@ -974,29 +1057,49 @@ shiftExpression returns [ExpressionSyntax value]
 
 relationalExpression returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=shiftExpression { $value = left; } ( 
-		( LT { type= SyntaxExpressionType.LessThan; }
-		| GT { type= SyntaxExpressionType.GreaterThan; }
-		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
-		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
-		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  }
-		| IN { type= SyntaxExpressionType.In;  }) 
-		right=shiftExpression { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=shiftExpression { $value = left; }
+		(
+			(
+				LT { type= SyntaxExpressionType.LessThan; }
+			|
+				GT { type= SyntaxExpressionType.GreaterThan; }
+			|
+				LTE { type= SyntaxExpressionType.LessThanOrEqual; }
+			|
+				GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
+			|
+				INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  }
+			|
+				IN { type= SyntaxExpressionType.In;  }
+			)
+			right=shiftExpression
+			{ $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 relationalExpressionNoIn returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=shiftExpression { $value = left; } ( 
-		( LT { type= SyntaxExpressionType.LessThan; }
-		| GT { type= SyntaxExpressionType.GreaterThan; }
-		| LTE { type= SyntaxExpressionType.LessThanOrEqual; }
-		| GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
-		| INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  } ) 
-		right=shiftExpression { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=shiftExpression { $value = left; }
+		(
+			(
+				LT { type= SyntaxExpressionType.LessThan; }
+			|
+				GT { type= SyntaxExpressionType.GreaterThan; }
+			|
+				LTE { type= SyntaxExpressionType.LessThanOrEqual; }
+			|
+				GTE { type= SyntaxExpressionType.GreaterThanOrEqual; }
+			|
+				INSTANCEOF { type= SyntaxExpressionType.InstanceOf;  }
+			)
+			right=shiftExpression { $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 // $>
@@ -1005,26 +1108,44 @@ relationalExpressionNoIn returns [ExpressionSyntax value]
 
 equalityExpression returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=relationalExpression { $value = left; } ( 
-		( EQ { type= SyntaxExpressionType.Equal; }
-		| NEQ { type= SyntaxExpressionType.NotEqual; }
-		| SAME { type= SyntaxExpressionType.Same; }
-		| NSAME { type= SyntaxExpressionType.NotSame; }) 
-		right=relationalExpression { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=relationalExpression { $value = left; }
+		(
+			(
+				EQ { type= SyntaxExpressionType.Equal; }
+			|
+				NEQ { type= SyntaxExpressionType.NotEqual; }
+			|
+				SAME { type= SyntaxExpressionType.Same; }
+			|
+				NSAME { type= SyntaxExpressionType.NotSame; }
+			)
+			right=relationalExpression
+			{ $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 equalityExpressionNoIn returns [ExpressionSyntax value]
 @init {
-	SyntaxExpressionType type = SyntaxExpressionType.Unknown;
+	var type = SyntaxExpressionType.Unknown;
 }
-	: left=relationalExpressionNoIn { $value = left; } ( 
-		( EQ { type= SyntaxExpressionType.Equal; }
-		| NEQ { type= SyntaxExpressionType.NotEqual; }
-		| SAME { type= SyntaxExpressionType.Same; }
-		| NSAME { type= SyntaxExpressionType.NotSame; }) 
-		right=relationalExpressionNoIn { $value = new BinarySyntax(type, $value, right); })*
+	:
+		left=relationalExpressionNoIn { $value = left; }
+		(
+			(
+				EQ { type= SyntaxExpressionType.Equal; }
+			|
+				NEQ { type= SyntaxExpressionType.NotEqual; }
+			|
+				SAME { type= SyntaxExpressionType.Same; }
+			|
+				NSAME { type= SyntaxExpressionType.NotSame; }
+			)
+			right=relationalExpressionNoIn
+			{ $value = _builder.BuildBinary(type, $value, right); }
+		)*
 	;
 
 // $>
@@ -1032,27 +1153,63 @@ equalityExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary bitwise operators (11.10)
 
 bitwiseANDExpression returns [ExpressionSyntax value]
-	: left=equalityExpression { $value = left; } ( AND right=equalityExpression { $value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
+	:
+		left=equalityExpression
+		{ $value = left; }
+		(
+			AND right=equalityExpression
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.BitwiseAnd, $value, right); }
+		)*
 	;
 
 bitwiseANDExpressionNoIn returns [ExpressionSyntax value]
-	: left=equalityExpressionNoIn { $value = left; } ( AND right=equalityExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.BitwiseAnd, $value, right); })*
+	:
+		left=equalityExpressionNoIn
+		{ $value = left; }
+		(
+			AND right=equalityExpressionNoIn
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.BitwiseAnd, $value, right); }
+		)*
 	;
 		
 bitwiseXORExpression returns [ExpressionSyntax value]
-	: left=bitwiseANDExpression { $value = left; } ( XOR right=bitwiseANDExpression { $value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
+	:
+		left=bitwiseANDExpression
+		{ $value = left; }
+		(
+			XOR right=bitwiseANDExpression
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); }
+		)*
 	;
 		
 bitwiseXORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseANDExpressionNoIn { $value = left; } ( XOR right=bitwiseANDExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); })*
+	:
+		left=bitwiseANDExpressionNoIn
+		{ $value = left; }
+		(
+			XOR right=bitwiseANDExpressionNoIn
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.BitwiseExclusiveOr, $value, right); }
+		)*
 	;
 	
 bitwiseORExpression returns [ExpressionSyntax value]
-	: left=bitwiseXORExpression { $value = left; } ( OR right=bitwiseXORExpression { $value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
+	:
+		left=bitwiseXORExpression
+		{ $value = left; }
+		(
+			OR right=bitwiseXORExpression
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.BitwiseOr, $value, right); }
+		)*
 	;
 	
 bitwiseORExpressionNoIn returns [ExpressionSyntax value]
-	: left=bitwiseXORExpressionNoIn { $value = left; } ( OR right=bitwiseXORExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.BitwiseOr, $value, right); })*
+	:
+		left=bitwiseXORExpressionNoIn
+		{ $value = left; }
+		(
+			OR right=bitwiseXORExpressionNoIn
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.BitwiseOr, $value, right); }
+		)*
 	;
 
 // $>
@@ -1060,19 +1217,43 @@ bitwiseORExpressionNoIn returns [ExpressionSyntax value]
 // $<Binary logical operators (11.11)
 
 logicalANDExpression returns [ExpressionSyntax value]
-	:left= bitwiseORExpression { $value = left; } ( LAND right=bitwiseORExpression { $value = new BinarySyntax(SyntaxExpressionType.And, $value, right); })*
+	:
+		left=bitwiseORExpression
+		{ $value = left; }
+		(
+			LAND right=bitwiseORExpression
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.And, $value, right); }
+		)*
 	;
 
 logicalANDExpressionNoIn returns [ExpressionSyntax value]
-	:left= bitwiseORExpressionNoIn { $value = left; } ( LAND right=bitwiseORExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.And, $value, right); })*
+	:
+		left=bitwiseORExpressionNoIn
+		{ $value = left; }
+		(
+			LAND right=bitwiseORExpressionNoIn
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.And, $value, right); }
+		)*
 	;
 	
 logicalORExpression returns [ExpressionSyntax value]
-	: left=logicalANDExpression { $value = left; } ( LOR right=logicalANDExpression { $value = new BinarySyntax(SyntaxExpressionType.Or, $value, right); })*
+	:
+		left=logicalANDExpression
+		{ $value = left; }
+		(
+			LOR right=logicalANDExpression
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.Or, $value, right); }
+		)*
 	;
 	
 logicalORExpressionNoIn returns [ExpressionSyntax value]
-	: left=logicalANDExpressionNoIn { $value = left; } ( LOR right=logicalANDExpressionNoIn { $value = new BinarySyntax(SyntaxExpressionType.Or, $value, right); } )*
+	:
+		left=logicalANDExpressionNoIn
+		{ $value = left; }
+		(
+			LOR right=logicalANDExpressionNoIn
+			{ $value = _builder.BuildBinary(SyntaxExpressionType.Or, $value, right); }
+		)*
 	;
 
 // $>
@@ -1080,11 +1261,25 @@ logicalORExpressionNoIn returns [ExpressionSyntax value]
 // $<Conditional operator (11.12)
 
 conditionalExpression returns [ExpressionSyntax value]
-	: expr1=logicalORExpression { $value = expr1; } ( QUE expr2=assignmentExpression COLON expr3=assignmentExpression { $value = new TernarySyntax(expr1, expr2, expr3); })?
+	:
+		expr1=logicalORExpression
+		{ $value = expr1; }
+		(
+			QUE expr2=assignmentExpression
+			COLON expr3=assignmentExpression
+			{ $value = _builder.BuildTernary(expr1, expr2, expr3); }
+		)?
 	;
 
 conditionalExpressionNoIn returns [ExpressionSyntax value]
-	: expr1=logicalORExpressionNoIn { $value = expr1; } ( QUE expr2=assignmentExpressionNoIn COLON expr3=assignmentExpressionNoIn { $value = new TernarySyntax(expr1, expr2, expr3); })?
+	:
+		expr1=logicalORExpressionNoIn
+		{ $value = expr1; }
+		(
+			QUE expr2=assignmentExpressionNoIn
+			COLON expr3=assignmentExpressionNoIn
+			{ $value = _builder.BuildTernary(expr1, expr2, expr3); }
+		)?
 	;
 	
 // $>
@@ -1106,11 +1301,15 @@ assignmentOperator
 	: ASSIGN | MULASS | DIVASS | MODASS | ADDASS | SUBASS | SHLASS | SHRASS | SHUASS | ANDASS | XORASS | ORASS
 	;
 	
-But that didn't seem to work. Terence Par writes in his book that LL(*) conflicts in general can best be solved with auto backtracking. But that would be 
+But that didn't seem to work. Terence Par writes in his book that LL(*) conflicts
+in general can best be solved with auto backtracking. But that would be 
 a performance killer for such a heavy used rule.
-The solution I came up with is to always invoke the conditionalExpression first and than decide what to do based on the result of that rule.
-When the rule results in a Tree that can't be coming from a left hand side expression, then we're done.
-When it results in a Tree that is coming from a left hand side expression and the LA(1) is an assignment operator then parse the assignment operator
+The solution I came up with is to always invoke the conditionalExpression first
+and than decide what to do based on the result of that rule.
+When the rule results in a Tree that can't be coming from a left hand side
+expression, then we're done.
+When it results in a Tree that is coming from a left hand side expression and the
+LA(1) is an assignment operator then parse the assignment operator
 followed by the right recursive call.
 */
 assignmentExpression returns [ExpressionSyntax value]
@@ -1125,7 +1324,7 @@ assignmentExpression returns [ExpressionSyntax value]
             ass=assignmentOperator
             exp=assignmentExpression
             {
-                $value = new AssignmentSyntax(
+                $value = _builder.BuildAssignment(
                     ResolveAssignmentOperator($ass.text),
                     $value,
                     exp
@@ -1162,7 +1361,7 @@ assignmentExpressionNoIn returns [ExpressionSyntax value]
             ass=assignmentOperator
             exp=assignmentExpressionNoIn
             {
-                $value = new AssignmentSyntax(
+                $value = _builder.BuildAssignment(
                     ResolveAssignmentOperator($ass.text),
                     $value,
                     exp
@@ -1177,11 +1376,11 @@ assignmentExpressionNoIn returns [ExpressionSyntax value]
 
 expression returns [ExpressionSyntax value]
 @init {
-    List<ExpressionSyntax> nodes = null;
+	ReadOnlyArray<ExpressionSyntax>.Builder nodes = null;
 }
 @after {
     if (nodes != null)
-        $value = new CommaOperatorSyntax(nodes);
+        $value = _builder.BuildCommaOperator(nodes.ToReadOnly());
 }
 	:
         first=assignmentExpression
@@ -1191,7 +1390,10 @@ expression returns [ExpressionSyntax value]
             follow=assignmentExpression
             {
                 if (nodes == null)
-                    nodes = new List<ExpressionSyntax> { $value };
+				{
+                    nodes = new ReadOnlyArray<ExpressionSyntax>.Builder();
+					nodes.Add($value);
+				}
 
                 nodes.Add(follow);
             }
@@ -1200,11 +1402,11 @@ expression returns [ExpressionSyntax value]
 
 expressionNoIn returns [ExpressionSyntax value]
 @init {
-    List<ExpressionSyntax> nodes = null;
+	ReadOnlyArray<ExpressionSyntax>.Builder nodes = null;
 }
 @after {
     if (nodes != null)
-        $value = new CommaOperatorSyntax(nodes);
+        $value = _builder.BuildCommaOperator(nodes.ToReadOnly());
 }
 	:
         first=assignmentExpressionNoIn
@@ -1214,7 +1416,10 @@ expressionNoIn returns [ExpressionSyntax value]
             follow=assignmentExpressionNoIn
             {
                 if (nodes == null)
-                    nodes = new List<ExpressionSyntax> { $value };
+				{
+                    nodes = new ReadOnlyArray<ExpressionSyntax>.Builder();
+					nodes.Add($value);
+				}
 
                 nodes.Add(follow);
             }
@@ -1230,18 +1435,22 @@ expressionNoIn returns [ExpressionSyntax value]
 //
 
 /*
-This rule handles semicolons reported by the lexer and situations where the ECMA 3 specification states there should be semicolons automaticly inserted.
+This rule handles semicolons reported by the lexer and situations where the
+ECMA 3 specification states there should be semicolons automaticly inserted.
 The auto semicolons are not actually inserted but this rule behaves as if they were.
 
-In the following situations an ECMA 3 parser should auto insert absent but grammaticly required semicolons:
+In the following situations an ECMA 3 parser should auto insert absent but
+grammaticly required semicolons:
 - the current token is a right brace
 - the current token is the end of file (EOF) token
 - there is at least one end of line (EOL) token between the current token and the previous token.
 
 The RBRACE is handled by matching it but not consuming it.
 The EOF needs no further handling because it is not consumed by default.
-The EOL situation is handled by promoting the EOL or MultiLineComment with an EOL present from off channel to on channel
-and thus making it parseable instead of handling it as white space. This promoting is done in the action PromoteEOL.
+The EOL situation is handled by promoting the EOL or MultiLineComment with an
+EOL present from off channel to on channel
+and thus making it parseable instead of handling it as white space. This
+promoting is done in the action PromoteEOL.
 */
 semic
 @init
@@ -1259,9 +1468,12 @@ semic
 	;
 
 /*
-To solve the ambiguity between block and objectLiteral via expressionStatement all but the block alternatives have been moved to statementTail.
-Now when k = 1 and a semantical predicate is defined ANTLR generates code that always will prefer block when the LA(1) is a LBRACE.
-This will result in the same behaviour that is described in the specification under 12.4 on the expressionStatement rule.
+To solve the ambiguity between block and objectLiteral via expressionStatement
+all but the block alternatives have been moved to statementTail.
+Now when k = 1 and a semantical predicate is defined ANTLR generates code that
+always will prefer block when the LA(1) is a LBRACE.
+This will result in the same behaviour that is described in the specification
+under 12.4 on the expressionStatement rule.
 */
 statement returns [SyntaxNode value]
 options
@@ -1294,10 +1506,10 @@ statementTail returns [SyntaxNode value]
 
 block returns [BlockSyntax value] 
 @init {
-    var statements = new List<SyntaxNode>();
+    var statements = new ReadOnlyArray<SyntaxNode>.Builder();
 }
 @after{
-    $value = new BlockSyntax(statements);
+    $value = _builder.BuildBlock(statements.ToReadOnly());
 }
 	:
         lb=LBRACE
@@ -1310,21 +1522,11 @@ block returns [BlockSyntax value]
 
 // Used for the Function constructor, because it doesn't have braces.
 
-blockStatements returns [BodySyntax value]
-@init{
-    var tempBody = _currentBody;
-    // Don't inherit _currentBody because we don't want to cascade strict
-    // in 'new Function'.
-    _currentBody = new BodyBuilder(null);
-}
-@after{
-    $value = _currentBody.CreateBody(BodyType.Function);
-    _currentBody = tempBody;
-}
+blockStatements
 	:
         (
             st=statement
-            { _currentBody.AddStatement(st); }
+            { _builder.AddStatement(st); }
         )*
 	;
 
@@ -1335,11 +1537,11 @@ blockStatements returns [BodySyntax value]
 
 variableStatement returns [SyntaxNode value]
 @init {
-    var declarations = new List<VariableDeclaration>();
+    var declarations = new ReadOnlyArray<VariableDeclaration>.Builder();
     var start = input.LT(1);
 }
 @after {
-    $value = new VariableDeclarationSyntax(declarations, GetLocation(start, input.LT(-1)));
+    $value = _builder.BuildVariableDeclaration(declarations.ToReadOnly(), GetLocation(start, input.LT(-1)));
 }
 	:
         VAR first=variableDeclaration
@@ -1361,7 +1563,7 @@ variableDeclaration returns [VariableDeclaration value]
             ASSIGN ass=assignmentExpression
             { expression = ass; }
         )?
-        { $value = new VariableDeclaration($id.Text, expression, true, _currentBody.DeclaredVariables.AddOrGet($id.Text, true)); }
+        { $value = _builder.BuildVariableDeclaration($id.Text, expression, true); }
 	;
 	
 variableDeclarationNoIn returns [VariableDeclaration value]
@@ -1374,7 +1576,7 @@ variableDeclarationNoIn returns [VariableDeclaration value]
             ASSIGN ass=assignmentExpressionNoIn
             { expression = ass; }
         )?
-        { $value = new VariableDeclaration($id.Text, expression, true, _currentBody.DeclaredVariables.AddOrGet($id.Text, true)); }
+        { $value = _builder.BuildVariableDeclaration($id.Text, expression, true); }
 	;
 
 // $>
@@ -1382,7 +1584,7 @@ variableDeclarationNoIn returns [VariableDeclaration value]
 // $<Empty statement (12.3)
 
 emptyStatement returns [SyntaxNode value]
-	: SEMIC { $value = new EmptySyntax(); }
+	: SEMIC { $value = _builder.BuildEmpty(); }
 	;
 
 // $>
@@ -1390,7 +1592,8 @@ emptyStatement returns [SyntaxNode value]
 // $<ExpressionSyntax statement (12.4)
 
 /*
-The look ahead check on LBRACE and FUNCTION the specification mentions has been left out and its function, resolving the ambiguity between:
+The look ahead check on LBRACE and FUNCTION the specification mentions has been
+left out and its function, resolving the ambiguity between:
 - functionExpression and functionDeclaration
 - block and objectLiteral
 are moved to the statement and sourceElement rules.
@@ -1401,7 +1604,7 @@ expressionStatement returns [SyntaxNode value]
 }
 	:
         e=expression semic
-        { $value = new ExpressionStatementSyntax(e, GetLocation(start, input.LT(-1))); }
+        { $value = _builder.BuildExpressionStatement(e, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1424,7 +1627,7 @@ ifStatement returns [SyntaxNode value]
             ELSE els=statement
             { elseStatement = els; }
         )?
-        { $value = new IfSyntax(e, then, elseStatement, GetLocation(start, end)); }
+        { $value = _builder.BuildIf(e, then, elseStatement, GetLocation(start, end)); }
 	;
 
 // $>
@@ -1445,7 +1648,7 @@ doStatement returns [SyntaxNode value]
         DO st=statement
         { start = input.LT(1); }
         WHILE LPAREN e=expression RPAREN semic
-        { $value = new DoWhileSyntax(e, st, GetLocation(start, input.LT(-1))); }
+        { $value = _builder.BuildDoWhile(e, st, GetLocation(start, input.LT(-1))); }
 	;
 	
 whileStatement returns [SyntaxNode value]
@@ -1457,7 +1660,7 @@ whileStatement returns [SyntaxNode value]
         WHILE LPAREN e=expression RPAREN
         { end = input.LT(-1); }
         st=statement
-        { $value = new WhileSyntax(e, st, GetLocation(start, end)); }
+        { $value = _builder.BuildWhile(e, st, GetLocation(start, end)); }
 	;
 
 /*
@@ -1509,7 +1712,7 @@ forStatement returns [SyntaxNode value]
     IToken end;
 }
 @after {
-    $value = builder.CreateFor(this, GetLocation(start, end));
+    $value = builder.BuildFor(this, GetLocation(start, end));
 }
 	:
         FOR
@@ -1536,13 +1739,13 @@ forControl returns [ForBuilder value]
 
 forControlVar returns [ForBuilder value]
 @init {
-    $value = new ForBuilder();
-    var declarations = new List<VariableDeclaration>();
+    $value = new ForBuilder(_builder);
+    var declarations = new ReadOnlyArray<VariableDeclaration>.Builder();
     IToken start;
     IToken end = null;
 }
 @after {
-    $value.Initialization = new VariableDeclarationSyntax(declarations, GetLocation(start, end));
+    $value.Initialization = _builder.BuildVariableDeclaration(declarations.ToReadOnly(), GetLocation(start, end));
 }
 	:
         { start = input.LT(1); }
@@ -1578,7 +1781,7 @@ forControlVar returns [ForBuilder value]
 forControlExpression returns [ForBuilder value]
 @init
 {
-    $value = new ForBuilder();
+    $value = new ForBuilder(_builder);
 	bool isLhs;
 }
 	:
@@ -1608,7 +1811,7 @@ forControlExpression returns [ForBuilder value]
 
 forControlSemic returns [ForBuilder value]
 @init{
-	$value = new ForBuilder();
+	$value = new ForBuilder(_builder);
 }
 	:
         SEMIC
@@ -1628,7 +1831,8 @@ forControlSemic returns [ForBuilder value]
 // $<The continue statement (12.7)
 
 /*
-The action with the call to PromoteEOL after CONTINUE is to enforce the semicolon insertion rule of the specification that there are
+The action with the call to PromoteEOL after CONTINUE is to enforce the semicolon
+insertion rule of the specification that there are
 no line terminators allowed beween CONTINUE and the optional identifier.
 As an optimization we check the la first to decide whether there is an identier following.
 */
@@ -1639,13 +1843,16 @@ continueStatement returns [SyntaxNode value]
 }
 	:
         CONTINUE
-        { if (input.LA(1) == Identifier) PromoteEol(); }
+        {
+			if (input.LA(1) == Identifier)
+				PromoteEol();
+		}
         (
             lb=Identifier
             { label = $lb.Text; }
         )?
         semic
-        { $value = new ContinueSyntax(label, GetLocation(start, input.LT(-1))); }
+        { $value = _builder.BuildContinue(label, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1653,7 +1860,8 @@ continueStatement returns [SyntaxNode value]
 // $<The break statement (12.8)
 
 /*
-The action with the call to PromoteEOL after BREAK is to enforce the semicolon insertion rule of the specification that there are
+The action with the call to PromoteEOL after BREAK is to enforce the semicolon
+insertion rule of the specification that there are
 no line terminators allowed beween BREAK and the optional identifier.
 As an optimization we check the la first to decide whether there is an identier following.
 */
@@ -1664,12 +1872,15 @@ breakStatement returns [SyntaxNode value]
 }
 	:
         BREAK
-        { if (input.LA(1) == Identifier) PromoteEol(); }
+        {
+			if (input.LA(1) == Identifier)
+				PromoteEol();
+		}
         (
             lb=Identifier { label = $lb.Text; }
         )?
         semic
-        { $value = new BreakSyntax(label, GetLocation(start, input.LT(-1))); }
+        { $value = _builder.BuildBreak(label, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1677,7 +1888,8 @@ breakStatement returns [SyntaxNode value]
 // $<The return statement (12.9)
 
 /*
-The action calling PromoteEOL after RETURN ensures that there are no line terminators between RETURN and the optional expression as the specification states.
+The action calling PromoteEOL after RETURN ensures that there are no line
+terminators between RETURN and the optional expression as the specification states.
 When there are these get promoted to on channel and thus virtual semicolon wannabees.
 So the folowing code:
 
@@ -1702,7 +1914,7 @@ returnStatement returns [ReturnSyntax value]
             { returnExpression = expr; }
         )?
         semic
-        { $value = new ReturnSyntax(returnExpression, GetLocation(start, input.LT(-1))); }
+        { $value = _builder.BuildReturn(returnExpression, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1716,9 +1928,12 @@ withStatement returns [SyntaxNode value]
 }
 	:
         WITH LPAREN exp=expression RPAREN
-        { end = input.LT(-1); }
+        {
+			end = input.LT(-1);
+			_builder.EnterWith();
+		}
         smt=statement
-        { $value = new WithSyntax(exp, smt, GetLocation(start, end)); }
+        { $value = _builder.ExitWith(exp, smt, GetLocation(start, end)); }
 	;
 
 // $>
@@ -1728,7 +1943,7 @@ withStatement returns [SyntaxNode value]
 switchStatement returns [SyntaxNode value]
 @init {
     bool hadDefault = false;
-    var cases = new List<SwitchCase>();
+    var cases = new ReadOnlyArray<SwitchCase>.Builder();
     var start = input.LT(1);
     IToken end;
 }
@@ -1745,12 +1960,12 @@ switchStatement returns [SyntaxNode value]
             { cases.Add(cc); }
         )*
         RBRACE
-        { $value = new SwitchSyntax(e, cases, GetLocation(start, end)); }
+        { $value = _builder.BuildSwitch(e, cases.ToReadOnly(), GetLocation(start, end)); }
 	;
 
 caseClause returns [SwitchCase value]
 @init {
-    var statements = new List<SyntaxNode>();
+    var statements = new ReadOnlyArray<SyntaxNode>.Builder();
     var start = input.LT(1);
     IToken end;
 }
@@ -1762,9 +1977,9 @@ caseClause returns [SwitchCase value]
             { statements.Add(st); }
         )*
         {
-            $value = new SwitchCase(
+            $value = _builder.BuildSwitchCase(
                 e,
-                new BlockSyntax(statements),
+                _builder.BuildBlock(statements.ToReadOnly()),
                 GetLocation(start, end)
             );
         }
@@ -1772,7 +1987,7 @@ caseClause returns [SwitchCase value]
 	
 defaultClause returns [SwitchCase value]
 @init {
-    var statements = new List<SyntaxNode>();
+    var statements = new ReadOnlyArray<SyntaxNode>.Builder();
     var start = input.LT(1);
     IToken end;
 }
@@ -1784,9 +1999,9 @@ defaultClause returns [SwitchCase value]
             { statements.Add(st); }
         ) *
         {
-            $value = new SwitchCase(
+            $value = _builder.BuildSwitchCase(
                 null,
-                new BlockSyntax(statements),
+                new BlockSyntax(statements.ToReadOnly()),
                 GetLocation(start, end)
             );
         }
@@ -1799,7 +2014,7 @@ defaultClause returns [SwitchCase value]
 labelledStatement returns [SyntaxNode value]
 	:
         lb=Identifier COLON st=statement
-        { $value = new LabelSyntax($lb.Text, st); }
+        { $value = _builder.BuildLabel($lb.Text, st); }
 	;
 
 // $>
@@ -1807,8 +2022,10 @@ labelledStatement returns [SyntaxNode value]
 // $<The throw statement (12.13)
 
 /*
-The action calling PromoteEOL after THROW ensures that there are no line terminators between THROW and the expression as the specification states.
-When there are line terminators these get promoted to on channel and thus to virtual semicolon wannabees.
+The action calling PromoteEOL after THROW ensures that there are no line terminators
+between THROW and the expression as the specification states.
+When there are line terminators these get promoted to on channel and thus to
+virtual semicolon wannabees.
 So the folowing code:
 
 throw
@@ -1826,8 +2043,10 @@ throwStatement returns [SyntaxNode value]
     var start = input.LT(1);
 }
 	:
-        THROW { PromoteEol(); } exp=expression semic
-        { $value = new ThrowSyntax(exp, GetLocation(start, input.LT(-1))); }
+        THROW
+		{ PromoteEol(); }
+		exp=expression semic
+        { $value = _builder.BuildThrow(exp, GetLocation(start, input.LT(-1))); }
 	;
 
 // $>
@@ -1852,19 +2071,21 @@ tryStatement returns [TrySyntax value]
             last=finallyClause
             { @finally = last; }
         )
-        { $value = new TrySyntax(b, @catch, @finally); }
+        { $value = _builder.BuildTry(b, @catch, @finally); }
 	;
 	
 catchClause returns [CatchClause value]
 	:
-        CATCH LPAREN id=Identifier RPAREN b=block
-        { $value = new CatchClause($id.text, b, _currentBody.DeclaredVariables.AddOrGet($id.text, true)); }
+        CATCH LPAREN id=Identifier RPAREN
+		{ _builder.EnterCatch($id.text); }
+		b=block
+        { $value = _builder.ExitCatch(b); }
 	;
 	
 finallyClause returns [FinallyClause value]
 	:
         FINALLY b=block
-        { $value = new FinallyClause(b); }
+        { $value = _builder.BuildFinallyClause(b); }
 	;
 
 // $>
@@ -1881,42 +2102,43 @@ functionDeclaration returns [SyntaxNode value]
 @init {
     var start = input.LT(1);
     string name;
-    List<string> parameters;
+    ReadOnlyArray<string> parameters;
     BodySyntax body;
 }
 @after {
-    _currentBody.AddDeclaredFunctions(new FunctionSyntax(
+    _builder.AddDeclaredFunction(_builder.BuildFunction(
         name,
         parameters,
         body,
-        _currentBody.DeclaredVariables.AddOrGet(name, true),
         GetLocation(start, input.LT(-1))
     ));
 
-    $value = new EmptySyntax();
+    $value = _builder.BuildEmpty();
 }
 	:
         FUNCTION id=Identifier
         { name = $id.Text; } 
 		parms=formalParameterList
-        { parameters = parms; }
-		fb=functionBody
-        { body = fb; }
+        {
+			parameters = parms;
+			_builder.EnterFunctionBody(parameters);
+		}
+		functionBody
+        { body = _builder.ExitBody(); }
 	;
 
 functionExpression returns [FunctionSyntax value]
 @init {
     var start = input.LT(1);
     string name = null;
-    List<string> parameters;
+    ReadOnlyArray<string> parameters;
     BodySyntax body;
 }
 @after {
-	$value = new FunctionSyntax(
+	$value = _builder.BuildFunction(
         name,
         parameters,
         body,
-        name == null ? null : _currentBody.DeclaredVariables.AddOrGet(name, true),
         GetLocation(start, input.LT(-1))
     );
 }
@@ -1927,15 +2149,20 @@ functionExpression returns [FunctionSyntax value]
             { name = $id.Text; }
         )?
         fpl=formalParameterList
-        { parameters = fpl; }
-        fb=functionBody
-        { body = fb; }
+        {
+			parameters = fpl;
+			_builder.EnterFunctionBody(parameters);
+		}
+        functionBody
+        { body = _builder.ExitBody(); }
 	;
 
-formalParameterList returns [List<string> value]
+formalParameterList returns [ReadOnlyArray<string> value]
 @init {
-    List<string> identifiers = new List<string>();
-    $value = identifiers;
+    var identifiers = new ReadOnlyArray<string>.Builder();
+}
+@after {
+	$value = identifiers.ToReadOnly();
 }
 	:
         LPAREN
@@ -1950,20 +2177,12 @@ formalParameterList returns [List<string> value]
         RPAREN
 	;
 
-functionBody returns [BodySyntax value]
-@init{
-    _currentBody = new BodyBuilder(_currentBody);
-    var start = input.LT(1);
-}
-@after{
-    $value = _currentBody.CreateBody(BodyType.Function);
-    _currentBody = _currentBody.Parent;
-}
+functionBody
 	:
         lb=LBRACE
         (
             se=sourceElement
-            { _currentBody.AddStatement(se); }
+            { _builder.AddStatement(se); }
         )*
         RBRACE
 	;
@@ -1974,20 +2193,22 @@ functionBody returns [BodySyntax value]
 
 program returns [ProgramSyntax value]
 @init{
-    _currentBody = new BodyBuilder(null);
+	_builder.EnterProgramBody();
 }
 	:
         (
             follow=sourceElement
-            { _currentBody.AddStatement(follow); }
+            { _builder.AddStatement(follow); }
         )*
-        { $value = new ProgramSyntax(_currentBody.CreateBody(BodyType.Program)); }
+        { $value = _builder.BuildProgram(_builder.ExitBody()); }
 	;
 
 /*
-By setting k  to 1 for this rule and adding the semantical predicate ANTRL will generate code that will always prefer functionDeclararion over functionExpression
+By setting k  to 1 for this rule and adding the semantical predicate ANTRL
+will generate code that will always prefer functionDeclararion over functionExpression
 here and therefor remove the ambiguity between these to production.
-This will result in the same behaviour that is described in the specification under 12.4 on the expressionStatement rule.
+This will result in the same behaviour that is described in the specification
+under 12.4 on the expressionStatement rule.
 */
 sourceElement returns [SyntaxNode value]
 options
@@ -1995,11 +2216,14 @@ options
 	k = 1 ;
 }
 
-	: { input.LA(1) == FUNCTION }? func=functionDeclaration { $value = func; }
-	| stat=statement { $value = stat; }
+	:
+		{ input.LA(1) == FUNCTION }?
+		func=functionDeclaration { $value = func; }
+	|
+		stat=statement
+		{ $value = stat; }
 	;
 
 // $>
 
 // $>
-

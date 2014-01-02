@@ -4,7 +4,6 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Jint.Native;
 
 namespace Jint.Bound
 {
@@ -12,17 +11,17 @@ namespace Jint.Bound
     {
         public static IList<BoundExpression> Perform(BoundProgram node)
         {
-            return Perform(node.Body, false, null);
+            return Perform(node.Body, null);
         }
 
         public static void Perform(BoundFunction node)
         {
-            Perform(node.Body, true, null);
+            Perform(node.Body, null);
         }
 
-        private static BoundExpression[] Perform(BoundBody node, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
+        private static BoundExpression[] Perform(BoundBody node, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
         {
-            var marker = new Marker(node.TypeManager, isFunction, parentBranch);
+            var marker = new Marker(node.TypeManager, parentBranch);
 
             marker.Visit(node);
 
@@ -32,7 +31,6 @@ namespace Jint.Bound
         private class Marker : BoundTreeWalker
         {
             private readonly BoundTypeManager _typeManager;
-            private readonly bool _isFunction;
             private readonly BoundTypeManager.DefiniteAssignmentMarker.Branch _parentBranch;
             private readonly List<Block> _blocks = new List<Block>();
             private readonly Dictionary<BoundNode, string> _labels = new Dictionary<BoundNode, string>();
@@ -40,10 +38,9 @@ namespace Jint.Bound
 
             public BoundExpression[] ResultExpressions { get; private set; }
 
-            public Marker(BoundTypeManager typeManager, bool isFunction, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
+            public Marker(BoundTypeManager typeManager, BoundTypeManager.DefiniteAssignmentMarker.Branch parentBranch)
             {
                 _typeManager = typeManager;
-                _isFunction = isFunction;
                 _parentBranch = parentBranch;
             }
 
@@ -663,7 +660,7 @@ namespace Jint.Bound
                 // definitely assigned. However, we do know it isn't before the
                 // function reference is created, so we do it here.
 
-                Perform(node.Function.Body, true, _branch);
+                Perform(node.Function.Body, _branch);
             }
 
             private class Block

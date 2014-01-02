@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Jint.Expressions;
+using Jint.Ast;
 
 namespace Jint.Bound
 {

@@ -6,8 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using Jint.Ast;
 using Jint.Compiler;
-using Jint.Expressions;
 using Jint.Native;
 using Jint.Support;
 
@@ -1229,8 +1229,6 @@ namespace Jint.Bound
 
             var function = DeclareFunction(node.Function, typeBuilder, sourceCode);
 
-            var array = IL.EmitArray(node.Function.Parameters);
-
             _scope.EmitLoad(SpecialLocal.Runtime);
 
             IL.EmitConstant(node.Function.Name ?? String.Empty);
@@ -1245,7 +1243,7 @@ namespace Jint.Bound
             // Construct the delegate.
             IL.Emit(OpCodes.Newobj, _functionConstructor);
 
-            IL.Emit(OpCodes.Ldloc, array);
+            IL.EmitConstant(node.Function.Parameters.Count);
 
             IL.EmitCall(_runtimeCreateFunction);
 
@@ -1265,7 +1263,7 @@ namespace Jint.Bound
             if (argumentsReferenced)
             {
                 if (function.Body.Closure != null)
-                    function.Body.Closure.Fields.TryGetValue(Closure.ArgumentsFieldName, out argumentsClosureField);
+                    function.Body.Closure.Fields.TryGetValue(BoundClosure.ArgumentsFieldName, out argumentsClosureField);
                 if (argumentsClosureField == null)
                     argumentsLocal = il.DeclareLocal(typeof(JsObject));
             }

@@ -187,25 +187,15 @@ namespace Jint.Native
         {
             switch (GetJsType(value))
             {
-                case JsType.Null:
-                    return JsNames.TypeObject;
-
+                case JsType.Null: return JsNames.TypeObject;
+                case JsType.Boolean: return JsNames.TypeBoolean;
+                case JsType.Number: return JsNames.TypeNumber;
+                case JsType.String: return JsNames.TypeString;
+                case JsType.Undefined: return JsNames.TypeUndefined;
                 case JsType.Object:
                     if (((JsObject)value).Delegate != null)
                         return JsNames.TypeFunction;
                     return JsNames.TypeObject;
-
-                case JsType.Boolean:
-                    return JsNames.TypeBoolean;
-
-                case JsType.Number:
-                    return JsNames.TypeNumber;
-
-                case JsType.String:
-                    return JsNames.TypeString;
-
-                case JsType.Undefined:
-                    return JsNames.TypeUndefined;
 
                 default:
                     throw new ArgumentOutOfRangeException("value");

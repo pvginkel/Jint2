@@ -9,6 +9,8 @@ namespace Jint.Bound
 {
     internal class BoundClosure
     {
+        public const string ArgumentsFieldName = "<>arguments";
+
         private readonly BoundClosureFieldCollection _fields;
 
         public BoundClosure Parent { get; private set; }

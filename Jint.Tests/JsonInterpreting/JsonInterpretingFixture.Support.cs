@@ -44,8 +44,6 @@ namespace Jint.Tests.JsonInterpreting
             if (program == null)
                 return JsUndefined.Instance;
 
-            program.Accept(new VariableMarkerPhase());
-
             var typeSystem = new TypeSystem();
             var scriptBuilder = typeSystem.CreateScriptBuilder(null);
             var bindingVisitor = new BindingVisitor(scriptBuilder);

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using Jint.Ast;
 using Jint.Bound;
-using Jint.Expressions;
 
 namespace Jint.Support
 {

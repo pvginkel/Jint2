@@ -112,7 +112,7 @@ namespace Jint.Support
 
         public TItem this[int index]
         {
-            get { return ((IList<TItem>)_source)[index]; }
+            get { return _source[index]; }
             set
             {
                 throw new InvalidOperationException("Collection is read-only");

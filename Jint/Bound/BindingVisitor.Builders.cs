@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Jint.Expressions;
 using System.Diagnostics;
+using Jint.Ast;
 
 namespace Jint.Bound
 {
@@ -14,7 +14,7 @@ namespace Jint.Bound
             switch (syntax.Type)
             {
                 case SyntaxType.Identifier:
-                    return BuildSet(((IdentifierSyntax)syntax).Target, value);
+                    return BuildSet(((IdentifierSyntax)syntax).Identifier, value);
 
                 case SyntaxType.Property:
                     var property = (PropertySyntax)syntax;
@@ -39,18 +39,18 @@ namespace Jint.Bound
             }
         }
 
-        private BoundStatement BuildSet(Variable variable, BoundExpression value)
+        private BoundStatement BuildSet(IIdentifier identifier, BoundExpression value)
         {
-            switch (variable.Type)
+            switch (identifier.Type)
             {
-                case VariableType.Parameter:
+                case IdentifierType.Parameter:
                     return new BoundSetVariable(
-                        _scope.GetArgument(variable),
+                        _scope.GetArgument(identifier),
                         value,
                         SourceLocation.Missing
                     );
 
-                case VariableType.WithScope:
+                case IdentifierType.Scoped:
                     var builder = new BlockBuilder(this);
 
                     var valueTemporary = builder.CreateTemporary();
@@ -61,27 +61,27 @@ namespace Jint.Bound
                         SourceLocation.Missing
                     ));
 
-                    builder.Add(BuildSetWithScope(builder, variable.WithScope, variable.FallbackVariable, valueTemporary));
+                    builder.Add(BuildSetWithScope(builder, identifier.WithScope, identifier.Fallback, valueTemporary));
 
                     return builder.BuildBlock(SourceLocation.Missing);
 
-                case VariableType.Local:
-                case VariableType.Global:
-                    if (variable.Closure == null)
-                        return new BoundSetVariable(_scope.GetLocal(variable), value, SourceLocation.Missing);
+                case IdentifierType.Local:
+                case IdentifierType.Global:
+                    if (identifier.Closure == null)
+                        return new BoundSetVariable(_scope.GetLocal(identifier), value, SourceLocation.Missing);
 
                     return new BoundSetVariable(
-                        _scope.GetClosureField(variable),
+                        _scope.GetClosureField(identifier),
                         value,
                         SourceLocation.Missing
                     );
 
                     /*
                     // These are handled upstream.
-                case VariableType.This:
-                case VariableType.Null:
-                case VariableType.Undefined:
-                case VariableType.Arguments:
+                case IdentifierType.This:
+                case IdentifierType.Null:
+                case IdentifierType.Undefined:
+                case IdentifierType.Arguments:
                      */
 
                 default:
@@ -89,18 +89,18 @@ namespace Jint.Bound
             }
         }
 
-        private BoundIf BuildSetWithScope(BlockBuilder builder, WithScope withScope, Variable fallbackVariable, BoundTemporary value)
+        private BoundIf BuildSetWithScope(BlockBuilder builder, WithScope withScope, IIdentifier fallback, BoundTemporary value)
         {
             var withLocal = builder.CreateTemporary();
 
             builder.Add(new BoundSetVariable(
                 withLocal,
-                new BoundGetVariable(_withVariables[withScope.Variable]), SourceLocation.Missing
+                new BoundGetVariable(_withIdentifiers[withScope.Identifier]), SourceLocation.Missing
             ));
 
             var setter = new BoundSetMember(
                 new BoundGetVariable(withLocal),
-                BoundConstant.Create(fallbackVariable.Name),
+                BoundConstant.Create(fallback.Name),
                 new BoundGetVariable(value),
                 SourceLocation.Missing
             );
@@ -110,7 +110,7 @@ namespace Jint.Bound
             if (withScope.Parent == null)
             {
                 @else = BuildBlock(BuildSet(
-                    fallbackVariable,
+                    fallback,
                     new BoundGetVariable(value)
                 ));
             }
@@ -119,7 +119,7 @@ namespace Jint.Bound
                 @else = BuildBlock(BuildSetWithScope(
                     builder,
                     withScope.Parent,
-                    fallbackVariable,
+                    fallback,
                     value
                 ));
             }
@@ -127,7 +127,7 @@ namespace Jint.Bound
             return new BoundIf(
                 new BoundHasMember(
                     new BoundGetVariable(withLocal),
-                    fallbackVariable.Name
+                    fallback.Name
                 ),
                 BuildBlock(setter),
                 @else,
@@ -174,7 +174,7 @@ namespace Jint.Bound
             switch (syntax.Type)
             {
                 case SyntaxType.Identifier:
-                    return BuildGet(((IdentifierSyntax)syntax).Target, withTarget);
+                    return BuildGet(((IdentifierSyntax)syntax).Identifier, withTarget);
 
                 case SyntaxType.Property:
                     var property = (PropertySyntax)syntax;
@@ -197,49 +197,49 @@ namespace Jint.Bound
             }
         }
 
-        private BoundExpression BuildGet(Variable variable, BoundTemporary withTarget)
+        private BoundExpression BuildGet(IIdentifier identifier, BoundTemporary withTarget)
         {
-            switch (variable.Type)
+            switch (identifier.Type)
             {
-                case VariableType.This: return new BoundGetVariable(BoundMagicVariable.This);
-                case VariableType.Null: return new BoundGetVariable(BoundMagicVariable.Null);
-                case VariableType.Undefined: return new BoundGetVariable(BoundMagicVariable.Undefined);
-                case VariableType.Arguments:
+                case IdentifierType.This: return new BoundGetVariable(BoundMagicVariable.This);
+                case IdentifierType.Null: return new BoundGetVariable(BoundMagicVariable.Null);
+                case IdentifierType.Undefined: return new BoundGetVariable(BoundMagicVariable.Undefined);
+                case IdentifierType.Arguments:
                     _scope.IsArgumentsReferenced = true;
                     return new BoundGetVariable(BoundMagicVariable.Arguments);
 
-                case VariableType.Parameter:
-                    return new BoundGetVariable(_scope.GetArgument(variable));
+                case IdentifierType.Parameter:
+                    return new BoundGetVariable(_scope.GetArgument(identifier));
 
-                case VariableType.WithScope:
+                case IdentifierType.Scoped:
                     var builder = new BlockBuilder(this);
                     var result = builder.CreateTemporary();
 
                     builder.Add(
-                        BuildGetWithScope(builder, variable.WithScope, variable.FallbackVariable, result, withTarget)
+                        BuildGetWithScope(builder, identifier.WithScope, identifier.Fallback, result, withTarget)
                     );
 
                     return builder.BuildExpression(result, SourceLocation.Missing);
 
-                case VariableType.Local:
-                case VariableType.Global:
-                    if (variable.Closure != null)
-                        return new BoundGetVariable(_scope.GetClosureField(variable));
+                case IdentifierType.Local:
+                case IdentifierType.Global:
+                    if (identifier.Closure != null)
+                        return new BoundGetVariable(_scope.GetClosureField(identifier));
 
-                    return new BoundGetVariable(_scope.GetLocal(variable));
+                    return new BoundGetVariable(_scope.GetLocal(identifier));
 
                 default:
                     throw new InvalidOperationException("Cannot find variable of argument");
             }
         }
 
-        private BoundIf BuildGetWithScope(BlockBuilder builder, WithScope withScope, Variable fallbackVariable, BoundTemporary result, BoundTemporary withTarget)
+        private BoundIf BuildGetWithScope(BlockBuilder builder, WithScope withScope, IIdentifier fallback, BoundTemporary result, BoundTemporary withTarget)
         {
             var withLocal = builder.CreateTemporary();
 
             builder.Add(new BoundSetVariable(
                 withLocal,
-                new BoundGetVariable(_withVariables[withScope.Variable]),
+                new BoundGetVariable(_withIdentifiers[withScope.Identifier]),
                 SourceLocation.Missing
             ));
 
@@ -258,7 +258,7 @@ namespace Jint.Bound
                 result,
                 BuildGetMember(
                     new BoundGetVariable(withLocal),
-                    BoundConstant.Create(fallbackVariable.Name)
+                    BoundConstant.Create(fallback.Name)
                 ),
                 SourceLocation.Missing
             ));
@@ -270,7 +270,7 @@ namespace Jint.Bound
                 @else = BuildBlock(new BoundSetVariable(
                     result,
                     BuildGet(
-                        fallbackVariable,
+                        fallback,
                         null
                     ),
                     SourceLocation.Missing
@@ -281,7 +281,7 @@ namespace Jint.Bound
                 @else = BuildBlock(BuildGetWithScope(
                     builder,
                     withScope.Parent,
-                    fallbackVariable,
+                    fallback,
                     result,
                     withTarget
                 ));
@@ -290,7 +290,7 @@ namespace Jint.Bound
             return new BoundIf(
                 new BoundHasMember(
                     new BoundGetVariable(withLocal),
-                    fallbackVariable.Name
+                    fallback.Name
                 ),
                 getter.BuildBlock(SourceLocation.Missing),
                 @else,

@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Jint.Bound;
-using Jint.Compiler;
 using NUnit.Framework;
-using TypeMarkerPhase = Jint.Bound.TypeMarkerPhase;
 
 namespace Jint.Tests.TypeMarking
 {
@@ -55,7 +53,6 @@ namespace Jint.Tests.TypeMarking
             var programSyntax = JintEngine.ParseProgram(script);
 
             var engine = new JintEngine();
-            programSyntax.Accept(new VariableMarkerPhase());
 
             var visitor = new BindingVisitor(engine.TypeSystem.CreateScriptBuilder(null));
 

@@ -24,12 +24,12 @@ namespace Jint.Native
             GlobalScope = Global.GlobalScope;
         }
 
-        public JsObject CreateFunction(string name, JsFunction function, string[] parameters)
+        public JsObject CreateFunction(string name, JsFunction function, int parameterCount)
         {
             return Global.CreateFunction(
                 name,
                 function,
-                parameters == null ? 0 : parameters.Length
+                parameterCount
             );
         }
 

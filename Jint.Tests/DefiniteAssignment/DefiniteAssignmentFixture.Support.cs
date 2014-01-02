@@ -39,7 +39,6 @@ namespace Jint.Tests.DefiniteAssignment
             var programSyntax = JintEngine.ParseProgram(script);
 
             var engine = new JintEngine();
-            programSyntax.Accept(new VariableMarkerPhase());
 
             var visitor = new BindingVisitor(engine.TypeSystem.CreateScriptBuilder(null));
 

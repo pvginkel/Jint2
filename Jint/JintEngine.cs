@@ -8,13 +8,12 @@ using System.Security;
 using System.Security.Permissions;
 using System.Text;
 using Antlr.Runtime;
+using Jint.Ast;
 using Jint.Bound;
 using Jint.Compiler;
-using Jint.Expressions;
 using Jint.Native;
 using Jint.Native.Interop;
 using Jint.Parser;
-using Jint.Support;
 using PropertyAttributes = Jint.Native.PropertyAttributes;
 
 namespace Jint
@@ -277,19 +276,21 @@ namespace Jint
         {
             ProgramSyntax program;
 
+#if !DEBUG
             try
             {
+#endif
                 program = ParseProgram(script);
 
                 if (program == null)
                     return new CompilationResult(JsNull.Instance, null);
+#if !DEBUG
             }
             catch (Exception e)
             {
                 throw new JsException(JsErrorType.SyntaxError, e.Message);
             }
-
-            program.Accept(new VariableMarkerPhase());
+#endif
 
             var scriptBuilder = TypeSystem.CreateScriptBuilder(fileName);
             var bindingVisitor = new BindingVisitor(scriptBuilder);
@@ -317,18 +318,16 @@ namespace Jint
             return new CompilationResult(null, main);
         }
 
-        private JsFunction CompileFunction(string sourceCode, IEnumerable<string> parameters)
+        private JsFunction CompileFunction(string sourceCode, ReadOnlyArray<string> parameters)
         {
             BodySyntax newBody;
 
             if (sourceCode == String.Empty)
-                newBody = new BodySyntax(BodyType.Function, SyntaxNode.EmptyList, new VariableCollection(), false);
+                newBody = new BodySyntax(BodyType.Function, ReadOnlyArray<SyntaxNode>.Empty, ReadOnlyArray<IIdentifier>.Empty, false, null);
             else
-                newBody = ParseBlockStatement(sourceCode);
+                newBody = ParseBlockStatement(sourceCode, parameters);
 
-            var function = new FunctionSyntax(null, parameters, newBody, null, null);
-
-            function.Accept(new VariableMarkerPhase());
+            var function = new FunctionSyntax(null, parameters, newBody, null);
 
             var scriptBuilder = TypeSystem.CreateScriptBuilder(null);
             var bindingVisitor = new BindingVisitor(scriptBuilder);
@@ -363,7 +362,7 @@ namespace Jint
                 }
             }
 
-            var parametersArray = newParameters.ToArray();
+            var parametersArray = newParameters.ToReadOnlyArray();
 
             string sourceCode =
                 parameters.Length >= 1
@@ -380,7 +379,7 @@ namespace Jint
                 _cachedFunctions.Add(key, @delegate);
             }
 
-            return _runtime.CreateFunction(null, @delegate, parametersArray);
+            return _runtime.CreateFunction(null, @delegate, parametersArray.Count);
         }
 
         internal static ProgramSyntax ParseProgram(string source)
@@ -399,7 +398,7 @@ namespace Jint
             return program;
         }
 
-        private static BodySyntax ParseBlockStatement(string source)
+        private static BodySyntax ParseBlockStatement(string source, ReadOnlyArray<string> parameters)
         {
             if (String.IsNullOrEmpty(source))
                 return null;
@@ -407,7 +406,7 @@ namespace Jint
             var lexer = new EcmaScriptLexer(new ANTLRStringStream(source));
             var parser = new EcmaScriptParser(new CommonTokenStream(lexer), source);
 
-            var block = parser.ExecuteBlockStatements();
+            var block = parser.ExecuteBlockStatements(parameters);
 
             if (parser.Errors != null && parser.Errors.Count > 0)
                 throw new JintException(String.Join(Environment.NewLine, parser.Errors.ToArray()));

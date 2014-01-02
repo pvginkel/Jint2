@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Jint.Expressions;
 
 namespace Jint.Bound
 {
@@ -80,6 +78,12 @@ namespace Jint.Bound
 
                     _marker = body.TypeManager.CreateTypeMarker();
 
+                    foreach (var argument in body.Arguments)
+                    {
+                        if (argument.Closure != null)
+                            MarkWrite(body.Closure.Fields[argument.Name], BoundValueType.Unknown);
+                    }
+
                     if (body.MappedArguments != null)
                         _arguments = body.MappedArguments.ToDictionary(p => p.Argument, p => p.Mapped);
 
@@ -93,7 +97,7 @@ namespace Jint.Bound
 
                     if (body.Closure != null)
                     {
-                        var argumentsClosureField = body.Closure.Fields.SingleOrDefault(p => p.Name == Closure.ArgumentsFieldName);
+                        var argumentsClosureField = body.Closure.Fields.SingleOrDefault(p => p.Name == BoundClosure.ArgumentsFieldName);
                         if (argumentsClosureField != null)
                             MarkWrite(argumentsClosureField, BoundValueType.Object);
                     }

@@ -9,8 +9,8 @@ namespace Jint.Native
 {
     partial class JsGlobal
     {
-        private static readonly char[] ReservedEncoded = new[] { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
-        private static readonly char[] ReservedEncodedComponent = new[] { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
+        private static readonly char[] ReservedEncoded = { ';', ',', '/', '?', ':', '@', '&', '=', '+', '$', '#' };
+        private static readonly char[] ReservedEncodedComponent = { '-', '_', '.', '!', '~', '*', '\'', '(', ')', '[', ']' };
 
         private JsObject CreateGlobalScope()
         {

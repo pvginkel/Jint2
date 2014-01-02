@@ -270,7 +270,9 @@ namespace Jint.Native
 
         public override int GetHashCode()
         {
+            // ReSharper disable BaseObjectGetHashCodeCallInGetHashCode
             return Value != null ? Value.GetHashCode() : base.GetHashCode();
+            // ReSharper restore BaseObjectGetHashCodeCallInGetHashCode
         }
 
         public int CompareTo(JsObject other)

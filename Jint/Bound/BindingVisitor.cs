@@ -3,22 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Jint.Ast;
 using Jint.Compiler;
-using Jint.Expressions;
 
 namespace Jint.Bound
 {
-    internal partial class BindingVisitor : ISyntaxVisitor<BoundNode>
+    internal partial class BindingVisitor : ISyntaxTreeVisitor<BoundNode>
     {
-#if DEBUG
-        private const string WithPrefix = "__with";
-#else
-        private const string WithPrefix = "<>with";
-#endif
-
         private readonly IScriptBuilder _scriptBuilder;
         private readonly List<BoundFunction> _functions = new List<BoundFunction>();
-        private readonly Dictionary<Variable, IBoundReadable> _withVariables = new Dictionary<Variable, IBoundReadable>();
+        private readonly Dictionary<IIdentifier, IBoundReadable> _withIdentifiers = new Dictionary<IIdentifier, IBoundReadable>();
         private readonly Dictionary<FunctionSyntax, string> _functionNameHints = new Dictionary<FunctionSyntax, string>();
 
         private Scope _scope;
@@ -67,10 +61,10 @@ namespace Jint.Bound
             var identifier = syntax.Left as IdentifierSyntax;
             if (identifier != null)
             {
-                switch (identifier.Target.Type)
+                switch (identifier.Identifier.Type)
                 {
-                    case VariableType.Undefined:
-                    case VariableType.Arguments:
+                    case IdentifierType.Undefined:
+                    case IdentifierType.Arguments:
                         var builder = new BlockBuilder(this);
 
                         var temporary = builder.CreateTemporary();
@@ -87,8 +81,8 @@ namespace Jint.Bound
 
                         return builder.BuildExpression(temporary, SourceLocation.Missing);
 
-                    case VariableType.This:
-                    case VariableType.Null:
+                    case IdentifierType.This:
+                    case IdentifierType.Null:
                         return BuildThrow("ReferenceError", "Invalid left-hand side in assignment");
                 }
             }
@@ -101,8 +95,8 @@ namespace Jint.Bound
                 if (identifier != null)
                 {
                     var function = syntax.Right as FunctionSyntax;
-                    if (function != null && function.Name == null)
-                        _functionNameHints.Add(function, identifier.Name);
+                    if (function != null && function.Identifier == null)
+                        _functionNameHints.Add(function, identifier.Identifier.Name);
                 }
 
                 var builder = new BlockBuilder(this);
@@ -335,7 +329,7 @@ namespace Jint.Bound
         public BoundNode VisitForEachIn(ForEachInSyntax syntax)
         {
             return new BoundForEachIn(
-                _scope.GetWritable(syntax.Target),
+                _scope.GetWritable(syntax.Identifier),
                 BuildExpression(syntax.Expression),
                 BuildBlock(syntax.Body),
                 syntax.Location
@@ -350,7 +344,7 @@ namespace Jint.Bound
 
             var functionObject = new BoundCreateFunction(function);
 
-            if (syntax.Target == null)
+            if (syntax.Identifier == null)
                 return functionObject;
 
             var builder = new BlockBuilder(this);
@@ -364,7 +358,7 @@ namespace Jint.Bound
             ));
 
             builder.Add(BuildSet(
-                syntax.Target,
+                syntax.Identifier,
                 new BoundGetVariable(temporary)
             ));
 
@@ -375,8 +369,11 @@ namespace Jint.Bound
         {
             _scope = new Scope(_scope, syntax.Body, _scriptBuilder);
 
-            string name = syntax.Name;
-            if (name == null)
+            string name;
+
+            if (syntax.Identifier != null)
+                name = syntax.Identifier.Name;
+            else
                 _functionNameHints.TryGetValue(syntax, out name);
 
             var function = new BoundFunction(
@@ -426,7 +423,7 @@ namespace Jint.Bound
                 if (_scope.GetArguments().Any(p => p.Closure != null))
                 {
                     _scope.Closure.AddField(
-                        _scope.TypeManager.CreateType(Closure.ArgumentsFieldName, BoundTypeKind.ClosureField)
+                        _scope.TypeManager.CreateType(BoundClosure.ArgumentsFieldName, BoundTypeKind.ClosureField)
                     );
                 }
             }
@@ -440,9 +437,7 @@ namespace Jint.Bound
 
                     if (argument.Closure != null)
                     {
-                        writable = _scope.Closure.AddField(
-                            _scope.TypeManager.CreateType(argument.Name, BoundTypeKind.ClosureField)
-                        );
+                        writable = _scope.Closure.Fields[argument.Name];
                     }
                     else
                     {
@@ -588,7 +583,7 @@ namespace Jint.Bound
 
                 if (
                     identifierSyntax != null &&
-                    identifierSyntax.Target.Type == VariableType.WithScope
+                    identifierSyntax.Identifier.Type == IdentifierType.Scoped
                 )
                 {
                     // With a with scope, the target depends on how the variable
@@ -769,7 +764,7 @@ namespace Jint.Bound
             return new BoundTry(
                 BuildBlock(syntax.Body),
                 syntax.Catch == null ? null : new BoundCatch(
-                    _scope.GetWritable(syntax.Catch.Target),
+                    _scope.GetWritable(syntax.Catch.Identifier),
                     BuildBlock(syntax.Catch.Body)
                 ),
                 syntax.Finally == null ? null : new BoundFinally(
@@ -886,11 +881,11 @@ namespace Jint.Bound
                 case SyntaxType.Identifier:
                     var identifier = (IdentifierSyntax)syntax;
 
-                    if (identifier.Target.Type == VariableType.Global)
+                    if (identifier.Identifier.Type == IdentifierType.Global)
                     {
                         return new BoundDeleteMember(
                             new BoundGetVariable(BoundMagicVariable.Global),
-                            BoundConstant.Create(identifier.Name)
+                            BoundConstant.Create(identifier.Identifier)
                         );
                     }
                     else
@@ -935,12 +930,12 @@ namespace Jint.Bound
                 if (declaration.Expression != null)
                 {
                     var function = declaration.Expression as FunctionSyntax;
-                    if (function != null && function.Name == null)
-                        _functionNameHints.Add(function, declaration.Identifier);
+                    if (function != null && function.Identifier == null)
+                        _functionNameHints.Add(function, declaration.Identifier.Name);
 
                     hadOne = true;
                     builder.Add(BuildSet(
-                        declaration.Target,
+                        declaration.Identifier,
                         BuildExpression(declaration.Expression)
                     ));
                 }
@@ -966,10 +961,10 @@ namespace Jint.Bound
             var builder = new BlockBuilder(this);
 
             IBoundWritable variable;
-            if (syntax.Target.Closure != null)
-                variable = _scope.GetClosureField(syntax.Target);
+            if (syntax.Identifier.Closure != null)
+                variable = _scope.GetClosureField(syntax.Identifier);
             else
-                variable = _scope.GetLocal(syntax.Target);
+                variable = _scope.GetLocal(syntax.Identifier);
 
             builder.Add(new BoundSetVariable(
                 variable,
@@ -977,11 +972,11 @@ namespace Jint.Bound
                 SourceLocation.Missing
             ));
 
-            _withVariables.Add(syntax.Target, variable);
+            _withIdentifiers.Add(syntax.Identifier, variable);
 
             builder.Add(BuildBlock(syntax.Body));
 
-            _withVariables.Remove(syntax.Target);
+            _withIdentifiers.Remove(syntax.Identifier);
 
             return builder.BuildBlock(syntax.Location);
         }
