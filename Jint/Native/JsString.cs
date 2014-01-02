@@ -11,10 +11,14 @@ namespace Jint.Native
         // time for the string-validate-input test. However, used memory is
         // considerably less when the limit is set to 100.
         private const int Limit = 100;
+        // We need to limit the maximum number of nodes. If we don't do this,
+        // the stack may explode when the tree is flattened.
+        private const int MaxNodes = 100;
 
         private JsString _before;
         private string _value;
         private JsString _after;
+        private readonly int _nodes;
 
         public static readonly JsString Empty = new JsString(String.Empty);
 
@@ -27,6 +31,16 @@ namespace Jint.Native
         {
             _before = before;
             _after = after;
+
+            _nodes = before._nodes + after._nodes + 1;
+
+            // Flatten if we're going over the maximum number of nodes.
+
+            if (_nodes > MaxNodes)
+            {
+                Flatten();
+                _nodes = 0;
+            }
         }
 
         public static object Concat(string left, string right)
