@@ -283,7 +283,7 @@ namespace Jint.Support
         public BoundValueType EmitCall(MethodInfo methodInfo)
         {
             Emit(
-                methodInfo.IsStatic ? OpCodes.Call : OpCodes.Callvirt,
+                (methodInfo.DeclaringType.IsValueType || methodInfo.IsStatic) ? OpCodes.Call : OpCodes.Callvirt,
                 methodInfo
             );
 

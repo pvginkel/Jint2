@@ -23,6 +23,7 @@ namespace Jint.Bound
             public bool IsArgumentsReferenced { get; set; }
             public bool IsGlobalReferenced { get; set; }
             public bool IsGlobalScopeReferenced { get; set; }
+            public bool IsThisReferenced { get; set; }
 
             public Scope(Scope parent, BodySyntax body, IScriptBuilder scriptBuilder)
             {

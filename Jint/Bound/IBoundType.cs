@@ -9,6 +9,7 @@ namespace Jint.Bound
     {
         string Name { get; }
         BoundValueType Type { get; }
+        SpeculatedType SpeculatedType { get; }
         bool DefinitelyAssigned { get; }
         BoundTypeKind Kind { get; }
 

@@ -98,7 +98,7 @@ namespace Jint.Native
             return Global.CreateError(errorClass, exception.Message);
         }
 
-        public object New(object target, object[] arguments)
+        public JsObject New(object target, object[] arguments)
         {
             if (
                 _engine.IsClrAllowed &&

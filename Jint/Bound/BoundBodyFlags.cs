@@ -12,6 +12,7 @@ namespace Jint.Bound
         ArgumentsReferenced = 1,
         Strict = 2,
         GlobalReferenced = 4,
-        GlobalScopeReferenced = 8
+        GlobalScopeReferenced = 8,
+        ThisReferenced = 16
     }
 }

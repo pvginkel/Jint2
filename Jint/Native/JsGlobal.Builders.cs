@@ -14,7 +14,7 @@ namespace Jint.Native
 
         public JsObject CreateDate(double value)
         {
-            return (JsObject)DateClass.Construct(
+            return DateClass.Construct(
                 _runtime,
                 new[] { (object)value }
             );
@@ -82,7 +82,7 @@ namespace Jint.Native
 
         public JsObject CreateError(JsObject constructor, string message)
         {
-            return (JsObject)constructor.Construct(
+            return constructor.Construct(
                 _runtime,
                 new[] { (object)message }
             );
@@ -101,12 +101,12 @@ namespace Jint.Native
             else
                 arguments = new object[] { pattern };
 
-            return (JsObject)RegExpClass.Construct(_runtime, arguments);
+            return RegExpClass.Construct(_runtime, arguments);
         }
 
         public JsObject CreateArray()
         {
-            return (JsObject)ArrayClass.Construct(
+            return ArrayClass.Construct(
                 _runtime,
                 JsValue.EmptyArray
             );

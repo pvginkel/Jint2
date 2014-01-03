@@ -73,6 +73,7 @@
     <Compile Include="Bound\BoundGlobal.cs" />
     <Compile Include="Bound\BoundLabel.cs" />
     <Compile Include="Bound\BoundLocalBase.cs" />
+    <Compile Include="Bound\BoundMagicType.cs" />
     <Compile Include="Bound\BoundNodeExtensions.cs" />
     <Compile Include="Bound\BoundTypeManager.cs" />
     <Compile Include="Bound\BoundMagicVariable.cs" />
@@ -120,9 +121,11 @@
     <Compile Include="Bound\BoundTypeManager.TypeMarker.cs" />
     <Compile Include="Bound\BoundTypeKind.cs" />
     <Compile Include="Bound\BoundMappedArgument.cs" />
+    <Compile Include="Bound\CodeGenerator.VariableEmitters.cs" />
     <Compile Include="Bound\JsonInterpreter.cs" />
     <Compile Include="Bound\JsonPrinter.cs" />
     <Compile Include="Bound\ResultRewriterPhase.cs" />
+    <Compile Include="Bound\SpeculatedType.cs" />
     <Compile Include="Compiler\ClosureParentField.cs" />
     <Compile Include="Compiler\IFunctionBuilder.cs" />
     <Compile Include="Compiler\IScriptBuilder.cs" />
@@ -169,9 +172,13 @@
     <Compile Include="JintEngine.Compilation.cs" />
     <Compile Include="MarshalAccessorProperty.cs" />
     <Compile Include="Native\AbstractPropertyStore.cs" />
+    <Compile Include="Native\ArrayUnknownBox.cs" />
+    <Compile Include="Native\ArrayObjectBox.cs" />
     <Compile Include="Native\ArrayPropertyStore.cs" />
     <Compile Include="Native\BooleanBoxes.cs" />
     <Compile Include="Native\DictionaryCacheSlot.cs" />
+    <Compile Include="Native\DictionaryUnknownBox.cs" />
+    <Compile Include="Native\DictionaryObjectBox.cs" />
     <Compile Include="Native\DictionaryPropertyStore.cs" />
     <Compile Include="Native\DoubleBoxes.cs" />
     <Compile Include="Native\Id.cs">

@@ -418,6 +418,8 @@ namespace Jint.Bound
                 flags |= BoundBodyFlags.GlobalReferenced;
             if (_scope.IsGlobalScopeReferenced)
                 flags |= BoundBodyFlags.GlobalScopeReferenced;
+            if (_scope.IsThisReferenced)
+                flags |= BoundBodyFlags.ThisReferenced;
 
             var mappedArguments = ReadOnlyArray<BoundMappedArgument>.Null;
 

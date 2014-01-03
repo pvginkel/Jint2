@@ -43,6 +43,66 @@ namespace Jint.Bound
                 base.VisitSetVariable(node);
 
                 _scope.MarkWrite(node.Variable, node.Value.ValueType);
+
+                switch (node.Value.Kind)
+                {
+                    case BoundKind.NewBuiltIn:
+                        _scope.SpeculateType(
+                            node.Variable,
+                            ((BoundNewBuiltIn)node.Value).NewBuiltInType == BoundNewBuiltInType.Array
+                                ? SpeculatedType.Array
+                                : SpeculatedType.Object,
+                            true
+                        );
+                        break;
+
+                    case BoundKind.New:
+                        var getVariable = ((BoundNew)node.Value).Expression as BoundGetVariable;
+                        var type = SpeculatedType.Object;
+
+                        if (getVariable != null)
+                        {
+                            var @global = getVariable.Variable as BoundGlobal;
+                            if (@global != null && @global.Name == "Array")
+                                type = SpeculatedType.Array;
+                        }
+
+                        _scope.SpeculateType(
+                            node.Variable,
+                            type,
+                            true
+                        );
+                        break;
+
+                    case BoundKind.RegEx:
+                        _scope.SpeculateType(node.Variable, SpeculatedType.Object, true);
+                        break;
+
+                    case BoundKind.Call:
+                        var call = (BoundCall)node.Value;
+                        getVariable = call.Method as BoundGetVariable;
+                        if (getVariable != null)
+                        {
+                            var @global = getVariable.Variable as BoundGlobal;
+                            if (@global != null && @global.Name == "Array")
+                                _scope.SpeculateType(node.Variable, SpeculatedType.Array, true);
+                        }
+                        break;
+
+                    case BoundKind.GetVariable:
+                        getVariable = (BoundGetVariable)node.Value;
+                        _scope.SpeculateType(node.Variable, getVariable.Variable);
+                        break;
+
+                    case BoundKind.ExpressionBlock:
+                        var expressionBlock = (BoundExpressionBlock)node.Value;
+                        _scope.SpeculateType(node.Variable, expressionBlock.Result);
+                        break;
+
+                    case BoundKind.CreateFunction:
+                        _scope.SpeculateType(node.Variable, SpeculatedType.Object, true);
+                        break;
+                }
             }
 
             public override void VisitForEachIn(BoundForEachIn node)
@@ -64,10 +124,109 @@ namespace Jint.Bound
                 node.Function.Body.Accept(this);
             }
 
+            public override void VisitGetMember(BoundGetMember node)
+            {
+                var getVariable = node.Expression as BoundGetVariable;
+                if (getVariable != null)
+                {
+                    var type = SpeculatedType.Unknown;
+                    bool definite = false;
+                    bool ignore = false;
+
+                    var constant = node.Index as BoundConstant;
+                    if (constant != null)
+                    {
+                        switch (constant.Value as string)
+                        {
+                            case "length":
+                                // Length applies equally to arrays and objects;
+                                // however, we do prefer array but it's not
+                                // definite yet.
+                                type = SpeculatedType.Array;
+                                break;
+
+                            case "join":
+                            case "pop":
+                            case "push":
+                            case "reverse":
+                            case "shift":
+                            case "unshift":
+                            case "slice":
+                            case "sort":
+                            case "splice":
+                                type = SpeculatedType.Array;
+                                definite = true;
+                                break;
+
+                            case "toFixed":
+                            case "toExponential":
+                            case "toPrecision":
+                                // Number functions.
+                                ignore = true;
+                                break;
+                        }
+                    }
+
+                    if (!ignore)
+                    {
+                        if (type == SpeculatedType.Unknown)
+                        {
+                            type = node.Index.ValueType == BoundValueType.Number
+                                ? SpeculatedType.Array
+                                : SpeculatedType.Object;
+                        }
+
+                        _scope.SpeculateType(getVariable.Variable, type, definite);
+                    }
+                }
+
+                base.VisitGetMember(node);
+            }
+
+            public override void VisitSetMember(BoundSetMember node)
+            {
+                var getVariable = node.Expression as BoundGetVariable;
+                if (getVariable != null)
+                {
+                    var type = node.Index.ValueType == BoundValueType.Number
+                        ? SpeculatedType.Array
+                        : SpeculatedType.Object;
+
+                    _scope.SpeculateType(getVariable.Variable, type, false);
+                }
+
+                base.VisitSetMember(node);
+            }
+
+            public override void VisitDeleteMember(BoundDeleteMember node)
+            {
+                var getVariable = node.Expression as BoundGetVariable;
+                if (getVariable != null)
+                {
+                    var local = getVariable.Variable as BoundLocal;
+                    if (local != null)
+                    {
+                        var type = SpeculatedType.Object;
+
+                        if (node.Index.ValueType == BoundValueType.Number)
+                            type = SpeculatedType.Array;
+
+                        _scope.SpeculateType(
+                            local,
+                            type,
+                            false
+                        );
+                    }
+                }
+
+                base.VisitDeleteMember(node);
+            }
+
             private class Scope : IDisposable
             {
                 private BoundTypeManager.TypeMarker _marker;
                 private readonly Dictionary<BoundArgument, BoundVariable> _arguments;
+                private readonly Dictionary<BoundMagicVariableType, IBoundType> _magicTypes;
                 private bool _disposed;
 
                 public Scope Parent { get; private set; }
@@ -101,26 +260,86 @@ namespace Jint.Bound
                         if (argumentsClosureField != null)
                             MarkWrite(argumentsClosureField, BoundValueType.Object);
                     }
+
+                    _magicTypes = body.TypeManager.MagicTypes.ToDictionary(p => p.MagicType, p => p.Type);
+
+                    foreach (var item in _magicTypes)
+                    {
+                        switch (item.Key)
+                        {
+                            case BoundMagicVariableType.Arguments:
+                            case BoundMagicVariableType.Global:
+                                _marker.SpeculateType(item.Value, SpeculatedType.Object, true);
+                                _marker.MarkWrite(item.Value, BoundValueType.Object);
+                                break;
+
+                            case BoundMagicVariableType.This:
+                                _marker.MarkWrite(item.Value, BoundValueType.Unknown);
+                                break;
+                                
+                            default:
+                                throw new InvalidOperationException();
+                        }
+                    }
                 }
 
                 public void MarkWrite(IBoundWritable writable, BoundValueType type)
                 {
-                    IBoundType boundType = null;
-
-                    var variable = writable as BoundVariable;
-                    if (variable != null)
-                    {
-                        boundType = variable.Type;
-                    }
-                    else if (_arguments != null)
-                    {
-                        var argument = writable as BoundArgument;
-                        if (argument != null)
-                            boundType = GetMappedArgument(argument).Type;
-                    }
+                    var boundType = ResolveType(writable);
 
                     if (boundType != null)
                         _marker.MarkWrite(boundType, type);
+                }
+
+                public void SpeculateType(IBoundReadable target, SpeculatedType type, bool definite)
+                {
+                    var targetType = ResolveType(target);
+
+                    if (targetType != null)
+                    {
+#if TRACE_SPECULATION
+                        Trace.WriteLine("Speculating " + target + " to " + type + " definite " + definite);
+#endif
+                        _marker.SpeculateType(targetType, type, definite);
+                    }
+                }
+
+                public void SpeculateType(IBoundReadable target, IBoundReadable source)
+                {
+                    var sourceType = ResolveType(source);
+                    var targetType = ResolveType(target);
+
+                    if (sourceType != null && targetType != null)
+                    {
+#if TRACE_SPECULATION
+                        Trace.WriteLine("Speculating " + target + " from " + source);
+#endif
+                        _marker.SpeculateType(targetType, sourceType);
+                    }
+                }
+
+                private IBoundType ResolveType(IBoundReadable readable)
+                {
+                    var variable = readable as BoundVariable;
+                    if (variable != null)
+                        return variable.Type;
+
+                    if (_arguments != null)
+                    {
+                        var argument = readable as BoundArgument;
+                        if (argument != null)
+                            return GetMappedArgument(argument).Type;
+                    }
+
+                    var magic = readable as BoundMagicVariable;
+                    if (magic != null)
+                    {
+                        IBoundType result;
+                        if (_magicTypes.TryGetValue(magic.VariableType, out result))
+                            return result;
+                    }
+
+                    return null;
                 }
 
                 private BoundVariable GetMappedArgument(BoundArgument argument)

@@ -39,7 +39,7 @@ function Benchmark(name, run, setup, tearDown) {
   this.name = name;
   this.run = run;
   this.Setup = setup ? setup : function() { };
-  this.TearDown = tearDown ? tearDown : function() { };
+  this.TearDown = tearDown ? tearDown : function () { };
 }
 
 
@@ -198,11 +198,13 @@ BenchmarkSuite.prototype.NotifyError = function(error) {
 
 // Runs a single benchmark for at least a second and computes the
 // average time it takes to run a single iteration.
-BenchmarkSuite.prototype.RunSingleBenchmark = function(benchmark, data) {
+BenchmarkSuite.prototype.RunSingleBenchmark = function(benchmark, data, runs) {
   function Measure(data) {
     var elapsed = 0;
     var start = new Date();
-    for (var n = 0; elapsed < 1000; n++) {
+    if (runs == undefined)
+      runs = 1000;
+    for (var n = 0; elapsed < runs; n++) {
       benchmark.run();
       elapsed = new Date() - start;
     }
@@ -210,6 +212,10 @@ BenchmarkSuite.prototype.RunSingleBenchmark = function(benchmark, data) {
       data.runs += n;
       data.elapsed += elapsed;
     }
+  }
+
+  if (data == null && runs == 1) {
+    data = { runs: 0, elapsed: 0 };
   }
 
   if (data == null) {
@@ -220,8 +226,8 @@ BenchmarkSuite.prototype.RunSingleBenchmark = function(benchmark, data) {
   } else {
     Measure(data);
     // If we've run too few iterations, we continue for another second.
-    if (data.runs < 32) return data;
-    var usec = (data.elapsed * 1000) / data.runs;
+    if (data.runs < 32 && data.runs < runs) return data;
+    var usec = (data.elapsed * runs) / data.runs;
     this.NotifyStep(new BenchmarkResult(benchmark, usec));
     return null;
   }
@@ -260,7 +266,7 @@ BenchmarkSuite.prototype.RunStep = function(runner) {
 
   function RunNextBenchmark() {
     try {
-      data = suite.RunSingleBenchmark(suite.benchmarks[index], data);
+      data = suite.RunSingleBenchmark(suite.benchmarks[index], data, runner.Runs);
     } catch (e) {
       suite.NotifyError(e);
       return null;

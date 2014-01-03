@@ -216,9 +216,13 @@ namespace Jint.Bound
         {
             switch (identifier.Type)
             {
-                case IdentifierType.This: return new BoundGetVariable(BoundMagicVariable.This);
                 case IdentifierType.Null: return new BoundGetVariable(BoundMagicVariable.Null);
                 case IdentifierType.Undefined: return new BoundGetVariable(BoundMagicVariable.Undefined);
+
+                case IdentifierType.This:
+                    _scope.IsThisReferenced = true;
+                    return new BoundGetVariable(BoundMagicVariable.This);
+
                 case IdentifierType.Arguments:
                     _scope.IsArgumentsReferenced = true;
                     return new BoundGetVariable(BoundMagicVariable.Arguments);

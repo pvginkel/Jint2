@@ -59,7 +59,7 @@ namespace Jint.Native
             Delegate = @delegate;
         }
 
-        private void EnsurePropertyStore()
+        internal void EnsurePropertyStore()
         {
             if (PropertyStore == null)
                 PropertyStore = new DictionaryPropertyStore(this);
@@ -244,20 +244,19 @@ namespace Jint.Native
         }
 
         // 13.2.2
-        public object Construct(JintRuntime runtime, params object[] arguments)
+        public JsObject Construct(JintRuntime runtime, params object[] arguments)
         {
             if (Delegate == null)
                 throw new JsException(JsErrorType.TypeError, ToString() + " is not a function");
 
             var @this = Global.CreateObject((JsObject)GetProperty(Id.prototype));
-            var boxedThis = (object)@this;
 
-            var result = Delegate.Delegate(runtime, boxedThis, this, arguments) as JsObject;
+            var result = Delegate.Delegate(runtime, (object)@this, this, arguments) as JsObject;
 
             if (result != null)
                 return result;
 
-            return boxedThis;
+            return @this;
         }
 
         public object Execute(JintRuntime runtime, object @this, params object[] arguments)

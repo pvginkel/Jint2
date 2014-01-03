@@ -11,13 +11,13 @@ namespace Jint.Play
     {
         static void Main(string[] args)
         {
-            ExecuteSunSpider();
-            //ExecuteV8();
+            //ExecuteSunSpider();
+            ExecuteV8();
         }
 
         private static void ExecuteV8()
         {
-            const string fileName = @"..\..\..\Jint.Benchmarks\Suites\V8\regexp.js";
+            const string fileName = @"..\..\..\Jint.Benchmarks\Suites\V8\raytrace.js";
 
             var jint = new JintEngine();
 
@@ -50,7 +50,8 @@ namespace Jint.Play
                 BenchmarkSuite.RunSuites({
                     NotifyResult: NotifyResult,
                     NotifyError: NotifyError,
-                    NotifyScore: NotifyScore
+                    NotifyScore: NotifyScore,
+                    Runs: 1
             });");
 
             Console.WriteLine("Score: " + score);
@@ -58,7 +59,7 @@ namespace Jint.Play
 
         private static void ExecuteSunSpider()
         {
-            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\regexp-dna.js";
+            const string fileName = @"..\..\..\Jint.Tests\SunSpider\Tests\access-fannkuch.js";
 
             var jint = new JintEngine();
 

@@ -249,16 +249,13 @@ namespace Jint.Native
 
         public object GetProperty(int index, ref DictionaryCacheSlot cacheSlot)
         {
-            if (cacheSlot.Schema != null)
-            {
-                if (_dictionaryPropertyStore.Schema == cacheSlot.Schema)
-                    return _dictionaryPropertyStore.GetOwnPropertyRawUnchecked(cacheSlot.Index);
-            }
+            if (cacheSlot.Schema != null && _dictionaryPropertyStore.Schema == cacheSlot.Schema)
+                return _dictionaryPropertyStore.GetOwnPropertyRawUnchecked(cacheSlot.Index);
 
             return GetPropertySlow(index, ref cacheSlot);
         }
 
-        private object GetPropertySlow(int index, ref DictionaryCacheSlot cacheSlot)
+        internal object GetPropertySlow(int index, ref DictionaryCacheSlot cacheSlot)
         {
             object value = GetPropertyRaw(index, ref cacheSlot);
 
@@ -423,19 +420,13 @@ namespace Jint.Native
 
         public void SetProperty(int index, object value, ref DictionaryCacheSlot cacheSlot)
         {
-            if (cacheSlot.Schema != null)
-            {
-                if (_dictionaryPropertyStore.Schema == cacheSlot.Schema)
-                {
-                    _dictionaryPropertyStore.SetPropertyValueUnchecked(cacheSlot.Index, value);
-                    return;
-                }
-            }
-
-            SetPropertySlow(index, value, ref cacheSlot);
+            if (cacheSlot.Schema != null && _dictionaryPropertyStore.Schema == cacheSlot.Schema)
+                _dictionaryPropertyStore.SetPropertyValueUnchecked(cacheSlot.Index, value);
+            else
+                SetPropertySlow(index, value, ref cacheSlot);
         }
 
-        private void SetPropertySlow(int index, object value, ref DictionaryCacheSlot cacheSlot)
+        internal void SetPropertySlow(int index, object value, ref DictionaryCacheSlot cacheSlot)
         {
             // CLR objects have their own rules concerning how and when a
             // property is set.

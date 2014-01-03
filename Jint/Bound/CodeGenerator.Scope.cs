@@ -14,24 +14,27 @@ namespace Jint.Bound
     {
         private class Scope
         {
-            private readonly Dictionary<IBoundType, LocalBuilder> _locals = new Dictionary<IBoundType, LocalBuilder>();
+            private readonly Dictionary<IBoundType, ValueEmitter> _locals = new Dictionary<IBoundType, ValueEmitter>();
             private LocalBuilder _globalLocal;
-            private LocalBuilder _globalScopeLocal;
+            private LocalEmitter _thisLocal;
             private readonly bool _isFunction;
             private readonly BoundBody _body;
             private readonly bool _isStatic;
             private LocalBuilder _closureLocal;
             private int _tryCatchNesting;
             private readonly Dictionary<BoundArgument, BoundVariable> _arguments;
+            private Dictionary<BoundMagicVariableType, IBoundType> _magicTypes;
 
             public ILBuilder IL { get; private set; }
+            public BoundClosureField ArgumentsClosureField { get; private set; }
+            public CodeGenerator Generator { get; private set; }
             public Scope Parent { get; private set; }
             public Stack<NamedLabel> BreakTargets { get; private set; }
             public Stack<NamedLabel> ContinueTargets { get; private set; }
-            public LocalBuilder ArgumentsLocal { get; private set; }
-            public BoundClosureField ArgumentsClosureField { get; private set; }
+            public ValueEmitter ArgumentsEmitter { get; private set; }
             public ITypeBuilder TypeBuilder { get; private set; }
             public ExceptionalReturn ExceptionalReturn { get; private set; }
+            public LocalEmitter GlobalScopeEmitter { get; private set; }
 
             public BoundClosure Closure
             {
@@ -48,13 +51,15 @@ namespace Jint.Bound
                 get { return _tryCatchNesting > 0; }
             }
 
-            public Scope(ILBuilder il, bool isFunction, BoundBody body, LocalBuilder argumentsLocal, BoundClosureField argumentsClosureField, ITypeBuilder typeBuilder, Scope parent)
+            public Scope(CodeGenerator generator, ILBuilder il, bool isFunction, BoundBody body, BoundClosureField argumentsClosureField, ITypeBuilder typeBuilder, Scope parent)
             {
                 IL = il;
+                ArgumentsClosureField = argumentsClosureField;
+                Generator = generator;
                 _isFunction = isFunction;
                 _body = body;
-                ArgumentsLocal = argumentsLocal;
-                ArgumentsClosureField = argumentsClosureField;
+                if (argumentsClosureField != null)
+                    ArgumentsEmitter = new ClosureFieldEmitter(generator, argumentsClosureField);
                 TypeBuilder = typeBuilder;
                 Parent = parent;
 
@@ -80,6 +85,23 @@ namespace Jint.Bound
 
             public void EmitLocals(BoundTypeManager typeManager)
             {
+                _magicTypes = _body.TypeManager.MagicTypes.ToDictionary(p => p.MagicType, p => p.Type);
+
+                // Create the arguments local if it's required and there isn't
+                // a closure field for it.
+
+                if ((_body.Flags & BoundBodyFlags.ArgumentsReferenced) != 0 && ArgumentsEmitter == null)
+                {
+                    var type = _magicTypes[BoundMagicVariableType.Arguments];
+
+                    var argumentsEmitter = CreateEmitter(type);
+                    argumentsEmitter.DeclareLocal();
+
+                    ArgumentsEmitter = argumentsEmitter;
+
+                    _locals.Add(type, argumentsEmitter);
+                }
+
                 if ((_body.Flags & BoundBodyFlags.GlobalReferenced) != 0)
                 {
                     _globalLocal = IL.DeclareLocal(typeof(JsGlobal));
@@ -91,33 +113,94 @@ namespace Jint.Bound
 
                 if ((_body.Flags & BoundBodyFlags.GlobalScopeReferenced) != 0)
                 {
-                    _globalScopeLocal = IL.DeclareLocal(typeof(JsObject));
+                    var type = _magicTypes[BoundMagicVariableType.Global];
 
-                    EmitLoad(SpecialLocal.Runtime);
-                    IL.EmitCall(_runtimeGetGlobalScope);
-                    IL.Emit(OpCodes.Stloc, _globalScopeLocal);
+                    GlobalScopeEmitter = CreateEmitter(type);
+                    GlobalScopeEmitter.DeclareLocal();
+                    GlobalScopeEmitter.EmitSetValue(new BoundEmitExpression(
+                        BoundValueType.Object,
+                        () =>
+                        {
+                            EmitLoad(SpecialLocal.Runtime);
+                            IL.EmitCall(_runtimeGetGlobalScope);
+                        }
+                    ));
+
+                    _locals.Add(type, GlobalScopeEmitter);
                 }
+
+                if ((_body.Flags & BoundBodyFlags.ThisReferenced) != 0)
+                {
+                    // We can't set assign to _thisLocal because then EmitLoad
+                    // would return the local.
+
+                    var type = _magicTypes[BoundMagicVariableType.This];
+
+                    var thisLocal = CreateEmitter(type);
+                    thisLocal.DeclareLocal();
+                    thisLocal.EmitSetValue(new BoundEmitExpression(
+                        BoundValueType.Unknown,
+                        () => EmitLoad(SpecialLocal.This)
+                    ));
+
+                    _thisLocal = thisLocal;
+
+                    _locals.Add(type, _thisLocal);
+                }
+
+                var getUnknown = new BoundGetVariable(BoundMagicVariable.Undefined);
 
                 foreach (var type in typeManager.Types)
                 {
-                    if (
-                        type.Type != BoundValueType.Unset &&
-                        (type.Kind == BoundTypeKind.Local || type.Kind == BoundTypeKind.Temporary)
-                    )
+                    if (type.Type == BoundValueType.Unset)
+                        continue;
+
+                    if (type.Kind == BoundTypeKind.Local || type.Kind == BoundTypeKind.Temporary)
                     {
-                        var local = IL.DeclareLocal(type.Type.GetNativeType());
+                        var emitter = CreateEmitter(type);
+
+                        emitter.DeclareLocal();
 
                         if (type.Kind == BoundTypeKind.Local)
-                            local.SetLocalSymInfo(type.Name);
-
-                        _locals.Add(type, local);
+                            emitter.Local.SetLocalSymInfo(type.Name);
 
                         if (!type.DefinitelyAssigned)
-                        {
-                            EmitLoad(SpecialLocal.Undefined);
-                            IL.Emit(OpCodes.Stloc, local);
-                        }
+                            emitter.EmitSetValue(getUnknown);
+
+                        _locals.Add(type, emitter);
                     }
+                    else if (type.Kind == BoundTypeKind.ClosureField)
+                    {
+                        _locals.Add(type, new ClosureFieldEmitter(
+                            Generator,
+                            Closure.Fields[type.Name]
+                        ));
+                    }
+                }
+            }
+
+            private LocalEmitter CreateEmitter(IBoundType type)
+            {
+                switch (type.SpeculatedType)
+                {
+                    case SpeculatedType.Array:
+                        Debug.Assert(type.Type == BoundValueType.Object || type.Type == BoundValueType.Unknown);
+
+                        if (type.Type == BoundValueType.Object)
+                            return new SpeculatedArrayObjectEmitter(Generator, type);
+                        return new SpeculatedArrayUnknownEmitter(Generator, type);
+
+                    case SpeculatedType.Object:
+                        Debug.Assert(type.Type == BoundValueType.Object || type.Type == BoundValueType.Unknown);
+
+                        if (type.Type == BoundValueType.Object)
+                            return new SpeculatedDictionaryObjectEmitter(Generator, type);
+                        return new SpeculatedDictionaryUnknownEmitter(Generator, type);
+
+                    default:
+                        if (type.Type == BoundValueType.Object)
+                            return new ObjectEmitter(Generator, type);
+                        return new UnknownEmitter(Generator, type);
                 }
             }
 
@@ -138,18 +221,22 @@ namespace Jint.Bound
                     case SpecialLocal.GlobalScope:
                         Debug.Assert((_body.Flags & BoundBodyFlags.GlobalScopeReferenced) != 0);
 
-                        IL.Emit(OpCodes.Ldloc, _globalScopeLocal);
+                        GlobalScopeEmitter.EmitGetValue();
                         return BoundValueType.Object;
 
                     case SpecialLocal.This:
+                        Debug.Assert((_body.Flags & BoundBodyFlags.ThisReferenced) != 0);
+
                         if (_isFunction)
                         {
-                            EmitLoadArgument(1);
+                            if (_thisLocal != null)
+                                _thisLocal.EmitGetValue();
+                            else
+                                EmitLoadArgument(1);
                             return BoundValueType.Unknown;
                         }
 
-                        IL.Emit(OpCodes.Ldloc, _globalScopeLocal);
-                        return BoundValueType.Object;
+                        return EmitLoad(SpecialLocal.GlobalScope);
 
                     case SpecialLocal.Null:
                         IL.Emit(OpCodes.Ldsfld, _nullInstance);
@@ -166,12 +253,21 @@ namespace Jint.Bound
                         EmitLoadArgument(2);
                         return BoundValueType.Object;
 
-                    case SpecialLocal.Arguments:
+                    case SpecialLocal.ArgumentsRaw:
                         if (!_isFunction)
                             throw new InvalidOperationException();
 
                         EmitLoadArgument(3);
                         return BoundValueType.Unset;
+
+                    case SpecialLocal.Arguments:
+                        Debug.Assert((_body.Flags & BoundBodyFlags.ArgumentsReferenced) != 0);
+
+                        if (!_isFunction)
+                            throw new InvalidOperationException();
+
+                        ArgumentsEmitter.EmitGetValue();
+                        return BoundValueType.Object;
 
                     default:
                         throw new ArgumentOutOfRangeException("type");
@@ -193,9 +289,37 @@ namespace Jint.Bound
                 }
             }
 
-            public LocalBuilder GetLocal(IBoundType type)
+            public ValueEmitter GetEmitter(IBoundReadable readable)
             {
-                return _locals[type];
+                IBoundType type = null;
+
+                var variable = readable as BoundVariable;
+                if (variable != null)
+                {
+                    type = variable.Type;
+                }
+                else
+                {
+                    var magic = readable as BoundMagicVariable;
+                    if (magic != null)
+                        _magicTypes.TryGetValue(magic.VariableType, out type);
+                }
+
+                if (type == null)
+                    return null;
+
+                var scope = this;
+
+                while (scope != null)
+                {
+                    ValueEmitter emitter;
+                    if (scope._locals.TryGetValue(type, out emitter))
+                        return emitter;
+
+                    scope = scope.Parent;
+                }
+
+                return null;
             }
 
             public void EmitLoadClosure(BoundClosure closure)

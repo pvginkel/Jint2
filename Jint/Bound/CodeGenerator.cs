@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -48,10 +47,10 @@ namespace Jint.Bound
             var method = _scriptBuilder.CreateFunction(typeof(JsMain), MainMethodName, null);
 
             _scope = new Scope(
+                this,
                 method.GetILBuilder(),
                 false,
                 program.Body,
-                null,
                 null,
                 _scriptBuilder,
                 null
@@ -95,7 +94,7 @@ namespace Jint.Bound
                     var after = IL.DefineLabel();
 
                     // Get the length of the arguments.
-                    _scope.EmitLoad(SpecialLocal.Arguments);
+                    _scope.EmitLoad(SpecialLocal.ArgumentsRaw);
                     IL.Emit(OpCodes.Ldlen);
                     // Emit the index we want.
                     IL.EmitConstant(mapping.Argument.Index);
@@ -109,7 +108,7 @@ namespace Jint.Bound
                             () =>
                             {
                                 // Push the arguments array onto the stack.
-                                _scope.EmitLoad(SpecialLocal.Arguments);
+                                _scope.EmitLoad(SpecialLocal.ArgumentsRaw);
                                 // Get the correct member from the arguments object.
                                 IL.EmitConstant(mapping.Argument.Index);
                                 // Load the element out of the array.
@@ -136,7 +135,7 @@ namespace Jint.Bound
                                 var after = IL.DefineLabel();
 
                                 // Get the length of the arguments.
-                                _scope.EmitLoad(SpecialLocal.Arguments);
+                                _scope.EmitLoad(SpecialLocal.ArgumentsRaw);
                                 IL.Emit(OpCodes.Ldlen);
                                 // Emit the index we want.
                                 IL.EmitConstant(mapping.Argument.Index);
@@ -145,7 +144,7 @@ namespace Jint.Bound
                                 IL.Emit(OpCodes.Ble, missingIndex);
 
                                 // Push the arguments array onto the stack.
-                                _scope.EmitLoad(SpecialLocal.Arguments);
+                                _scope.EmitLoad(SpecialLocal.ArgumentsRaw);
                                 // Get the correct member from the arguments object.
                                 IL.EmitConstant(mapping.Argument.Index);
                                 // Load the element out of the array.
@@ -761,25 +760,18 @@ namespace Jint.Bound
             switch (variable.Kind)
             {
                 case BoundVariableKind.Global:
-                    // Push the global scope onto the stack.
-                    _scope.EmitLoad(SpecialLocal.GlobalScope);
-                    // Push the index of the local onto the stack.
-                    var boundGlobal = (BoundGlobal)variable;
-                    IL.EmitConstant(_identifierManager.ResolveIdentifier(boundGlobal.Name));
-                    // Push the boxed expression onto the stack.
-                    EmitBox(EmitExpression(value));
-                    // Push the cache slot.
-                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("global", boundGlobal.Name));
-                    // Set the property on the global scope.
-                    IL.EmitCall(_objectSetPropertyCached, BoundValueType.Unset);
+                    _scope.GlobalScopeEmitter.EmitSetMember(new BoundSetMember(
+                        new BoundGetVariable(BoundMagicVariable.Global),
+                        BoundConstant.Create(((BoundGlobal)variable).Name),
+                        value,
+                        SourceLocation.Missing
+                    ));
                     break;
 
                 case BoundVariableKind.Local:
                 case BoundVariableKind.Temporary:
-                    // Push the value onto the stack.
-                    EmitCast(EmitExpression(value), variable.ValueType);
-                    // Set the local.
-                    IL.Emit(OpCodes.Stloc, _scope.GetLocal(((BoundVariable)variable).Type));
+                case BoundVariableKind.ClosureField:
+                    _scope.GetEmitter(variable).EmitSetValue(value);
                     break;
 
                 case BoundVariableKind.Argument:
@@ -796,28 +788,18 @@ namespace Jint.Bound
                         return;
                     }
 
-                    // Push the arguments variable onto the stack.
-                    EmitLoadArguments(scope);
-                    // Emit the member on the arguments object to set.
-                    IL.EmitConstant(argument.Index);
-                    // Push the value onto the stack.
-                    EmitCast(EmitExpression(value), variable.ValueType);
-                    // Push the cache slot.
-                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("arguments", argument.Index.ToString(CultureInfo.InvariantCulture)));
-                    // Set the property.
-                    IL.EmitCall(_objectSetPropertyCached);
-                    return;
+                    BoundGetVariable getVariable;
+                    if (scope.ArgumentsClosureField != null)
+                        getVariable = new BoundGetVariable(scope.ArgumentsClosureField);
+                    else
+                        getVariable = new BoundGetVariable(BoundMagicVariable.Arguments);
 
-                case BoundVariableKind.ClosureField:
-                    var closureField = (BoundClosureField)variable;
-                    var closure = closureField.Closure;
-
-                    // Push the closure onto the stack.
-                    _scope.EmitLoadClosure(closure);
-                    // Push the value onto the stack.
-                    EmitCast(EmitExpression(value), variable.ValueType);
-                    // Set the closure field.
-                    IL.Emit(OpCodes.Stfld, closureField.Builder.Field);
+                    EmitSetMember(new BoundSetMember(
+                        getVariable,
+                        BoundConstant.Create((double)argument.Index),
+                        value,
+                        SourceLocation.Missing
+                    ));
                     return;
 
                 default:
@@ -825,24 +807,16 @@ namespace Jint.Bound
             }
         }
 
-        private BoundValueType EmitLoadArguments(Scope scope)
-        {
-            if (scope.ArgumentsLocal != null)
-            {
-                Debug.Assert(scope == _scope);
-                IL.Emit(OpCodes.Ldloc, scope.ArgumentsLocal);
-            }
-            else
-            {
-                Debug.Assert(scope.ArgumentsClosureField != null);
-                EmitGetVariable(scope.ArgumentsClosureField);
-            }
-
-            return BoundValueType.Object;
-        }
-
         private void EmitSetMember(BoundSetMember node)
         {
+            // Check whether we have an emitter for this statement.
+            var emitter = GetEmitter(node.Expression);
+            if (emitter != null)
+            {
+                emitter.EmitSetMember(node);
+                return;
+            }
+
             // When the index is a constant string, we shortcut to
             // resolving the identifier here and inserting the ID of the
             // identifier instead of emitting the string.
@@ -1256,23 +1230,17 @@ namespace Jint.Bound
 
             var argumentsReferenced = (function.Body.Flags & BoundBodyFlags.ArgumentsReferenced) != 0;
             BoundClosureField argumentsClosureField = null;
-            LocalBuilder argumentsLocal = null;
 
             var il = method.GetILBuilder();
 
-            if (argumentsReferenced)
-            {
-                if (function.Body.Closure != null)
-                    function.Body.Closure.Fields.TryGetValue(BoundClosure.ArgumentsFieldName, out argumentsClosureField);
-                if (argumentsClosureField == null)
-                    argumentsLocal = il.DeclareLocal(typeof(JsObject));
-            }
+            if (argumentsReferenced && function.Body.Closure != null)
+                function.Body.Closure.Fields.TryGetValue(BoundClosure.ArgumentsFieldName, out argumentsClosureField);
 
             _scope = new Scope(
+                this,
                 il,
                 true,
                 function.Body,
-                argumentsLocal,
                 argumentsClosureField,
                 typeBuilder,
                 _scope
@@ -1290,24 +1258,19 @@ namespace Jint.Bound
 
             if (argumentsReferenced)
             {
-                // Put the closure local onto the stack if we're going to store
-                // the arguments in the closure.
-
-                if (argumentsClosureField != null)
-                    _scope.EmitLoadClosure(_scope.Closure);
-
                 // Initialize the arguments array.
 
-                _scope.EmitLoad(SpecialLocal.Runtime);
-                _scope.EmitLoad(SpecialLocal.Callee);
-                _scope.EmitLoad(SpecialLocal.Arguments);
+                _scope.ArgumentsEmitter.EmitSetValue(new BoundEmitExpression(
+                    BoundValueType.Object,
+                    () =>
+                    {
+                        _scope.EmitLoad(SpecialLocal.Runtime);
+                        _scope.EmitLoad(SpecialLocal.Callee);
+                        _scope.EmitLoad(SpecialLocal.ArgumentsRaw);
 
-                IL.EmitCall(_runtimeCreateArguments);
-
-                if (argumentsClosureField != null)
-                    IL.Emit(OpCodes.Stfld, argumentsClosureField.Builder.Field);
-                else
-                    IL.Emit(OpCodes.Stloc, argumentsLocal);
+                        IL.EmitCall(_runtimeCreateArguments);
+                    }
+                ));
             }
 
             // Emit the body.
@@ -1364,6 +1327,11 @@ namespace Jint.Bound
 
         private BoundValueType EmitGetMember(BoundGetMember node)
         {
+            // Check whether we have an emitter for this statement.
+            var emitter = GetEmitter(node.Expression);
+            if (emitter != null)
+                return emitter.EmitGetMember(node);
+
             // When the index is a constant string, we shortcut to
             // resolving the identifier here and inserting the ID of the
             // identifier instead of emitting the string.
@@ -1373,6 +1341,32 @@ namespace Jint.Bound
                 return EmitGetMember(node.Expression, _identifierManager.ResolveIdentifier((string)constant.Value));
 
             return EmitGetMember(node.Expression, node.Index);
+        }
+
+        private ValueEmitter GetEmitter(BoundExpression expression)
+        {
+            var getVariable = expression as BoundGetVariable;
+            if (getVariable == null)
+                return null;
+
+            var emitter = _scope.GetEmitter(getVariable.Variable);
+            if (emitter != null)
+                return emitter;
+
+            if (getVariable.Variable.Kind == BoundVariableKind.Argument)
+            {
+                var mappedArgument = GetMappedArgument((BoundArgument)getVariable.Variable);
+                if (mappedArgument != null)
+                    return _scope.GetEmitter(mappedArgument);
+            }
+
+            return null;
+        }
+
+        private BoundVariable GetMappedArgument(BoundArgument argument)
+        {
+            var scope = argument.Closure == null ? _scope : _scope.FindScope(argument.Closure);
+            return scope.GetMappedArgument(argument);
         }
 
         private BoundValueType EmitGetMember(BoundExpression expression, int index)
@@ -1413,30 +1407,15 @@ namespace Jint.Bound
             switch (variable.Kind)
             {
                 case BoundVariableKind.Global:
-                    // Push the global scope onto the stack.
-                    _scope.EmitLoad(SpecialLocal.GlobalScope);
-                    // Push the index onto the stack.
-                    var boundGlobal = (BoundGlobal)variable;
-                    IL.EmitConstant(_identifierManager.ResolveIdentifier(boundGlobal.Name));
-                    // Emit the cache slot.
-                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("global", boundGlobal.Name));
-                    // Get the property from the global scope.
-                    return IL.EmitCall(_objectGetPropertyCached);
+                    return _scope.GlobalScopeEmitter.EmitGetMember(new BoundGetMember(
+                        new BoundGetVariable(BoundMagicVariable.Global),
+                        BoundConstant.Create(((BoundGlobal)variable).Name)
+                    ));
 
                 case BoundVariableKind.Local:
                 case BoundVariableKind.Temporary:
-                    IL.Emit(OpCodes.Ldloc, _scope.GetLocal(((BoundVariable)variable).Type));
-                    return variable.ValueType;
-
                 case BoundVariableKind.ClosureField:
-                    var closureField = (BoundClosureField)variable;
-                    var closure = closureField.Closure;
-
-                    // Push the closure onto the stack.
-                    _scope.EmitLoadClosure(closure);
-                    // Load the closure field.
-                    IL.Emit(OpCodes.Ldfld, closure.Fields[closureField.Name].Builder.Field);
-
+                    _scope.GetEmitter(variable).EmitGetValue();
                     return variable.ValueType;
 
                 case BoundVariableKind.Magic:
@@ -1446,7 +1425,7 @@ namespace Jint.Bound
                         case BoundMagicVariableType.This: return _scope.EmitLoad(SpecialLocal.This);
                         case BoundMagicVariableType.Null: return _scope.EmitLoad(SpecialLocal.Null);
                         case BoundMagicVariableType.Undefined: return _scope.EmitLoad(SpecialLocal.Undefined);
-                        case BoundMagicVariableType.Arguments: return EmitLoadArguments(_scope);
+                        case BoundMagicVariableType.Arguments: return _scope.EmitLoad(SpecialLocal.Arguments);
                         default: throw new InvalidOperationException();
                     }
 
@@ -1461,14 +1440,16 @@ namespace Jint.Bound
                     if (mappedArgument != null)
                         return EmitGetVariable(mappedArgument);
 
-                    // Push the arguments variable onto the stack.
-                    EmitLoadArguments(scope);
-                    // Get the correct member from the arguments object.
-                    IL.EmitConstant(argument.Index);
-                    // Emit the cache slot.
-                    IL.Emit(OpCodes.Ldsflda, ResolveCacheSlot("arguments", argument.Index.ToString(CultureInfo.InvariantCulture)));
-                    // Emit the call to get property.
-                    IL.EmitCall(_objectGetPropertyCached);
+                    BoundGetVariable getVariable;
+                    if (scope.ArgumentsClosureField != null)
+                        getVariable = new BoundGetVariable(scope.ArgumentsClosureField);
+                    else
+                        getVariable = new BoundGetVariable(BoundMagicVariable.Arguments);
+
+                    EmitGetMember(new BoundGetMember(
+                        getVariable,
+                        BoundConstant.Create((double)argument.Index)
+                    ));
 
                     return BoundValueType.Unknown;
 
@@ -1488,10 +1469,18 @@ namespace Jint.Bound
             var getVariable = expression as BoundGetVariable;
             if (getVariable != null)
             {
-                if (getVariable.Variable.Kind == BoundVariableKind.Local)
-                    return ResolveCacheSlot(((BoundLocal)getVariable.Variable).Name, member);
-                if (getVariable.Variable.Kind == BoundVariableKind.ClosureField)
-                    return ResolveCacheSlot(((BoundClosureField)getVariable.Variable).Name, member);
+                var variable = getVariable.Variable;
+                if (variable.Kind == BoundVariableKind.Argument)
+                    variable = GetMappedArgument((BoundArgument)variable);
+
+                if (variable.Kind == BoundVariableKind.Temporary)
+                    return ResolveCacheSlot("<>Temporary" + ((BoundTemporary)variable).Index, member);
+                if (variable.Kind == BoundVariableKind.Local)
+                    return ResolveCacheSlot(((BoundLocal)variable).Name, member);
+                if (variable.Kind == BoundVariableKind.ClosureField)
+                    return ResolveCacheSlot(((BoundClosureField)variable).Name, member);
+                if (variable.Kind == BoundVariableKind.Magic)
+                    return ResolveCacheSlot(((BoundMagicVariable)variable).VariableType.ToString(), member);
             }
 
             return null;
@@ -1511,6 +1500,7 @@ namespace Jint.Bound
             Null,
             Undefined,
             Callee,
+            ArgumentsRaw,
             Arguments
         }
     }
