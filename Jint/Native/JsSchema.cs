@@ -7,24 +7,56 @@ using Jint.Support;
 
 namespace Jint.Native
 {
-    public sealed class JsSchema
+    public sealed partial class JsSchema
     {
+#if SCHEMA_STATISTICS
+        private static int _createdSchemas;
+        private static int _createdNodes;
+        private static int _flattenedSchemas;
+        private static int _numberLookups;
+        private static int _numberLookupIterations;
+
+        public static void PrintStatistics()
+        {
+            Console.WriteLine(
+                "Created schemas={0}, created nodes={1}, flattened schemas={2}, number lookups={3}, number lookup iterations={4}",
+                _createdSchemas,
+                _createdNodes,
+                _flattenedSchemas,
+                _numberLookups,
+                _numberLookupIterations
+            );
+
+            _createdSchemas = 0;
+            _createdNodes = 0;
+            _flattenedSchemas = 0;
+            _numberLookups = 0;
+            _numberLookupIterations = 0;
+        }
+#endif
+
         private const int InitialTransformationsSize = 3;
+        private const int MaxLookupCount = 100;
         internal const int InitialArraySize = 20;
 
         private SchemaTransformationHashSet _transformations;
         private FreeEntry _freeList;
         private int _arraySize;
-        private INode _node;
+        private Node _node;
+        private int _lookupCount;
+        private SchemaHashSet _cachedSchema;
 
         public JsSchema()
         {
             GrowFreeEntries();
-            _node = TailNode.Instance;
         }
 
         private JsSchema(JsSchema schema)
         {
+#if SCHEMA_STATISTICS
+            _createdSchemas++;
+#endif
+
             _freeList = schema._freeList;
             _arraySize = schema._arraySize;
         }
@@ -80,7 +112,7 @@ namespace Jint.Native
                 schema._freeList = freeList.Next;
                 newOffset = freeList.Index;
 
-                schema._node = _node.Create(true, index, attributes, newOffset);
+                schema._node = new Node(true, index, attributes, newOffset, _node);
 
                 if (_transformations == null)
                     _transformations = new SchemaTransformationHashSet(InitialTransformationsSize);
@@ -133,7 +165,7 @@ namespace Jint.Native
                 // Apply the transformation to the schema and add the index to
                 // the free list.
 
-                schema._node = _node.Create(false, index, 0, -1);
+                schema._node = new Node(false, index, 0, -1, _node);
 
                 schema._freeList = new FreeEntry(oldOffset, schema._freeList);
 
@@ -151,51 +183,148 @@ namespace Jint.Native
             return schema;
         }
 
+        private Node FindNode(int index)
+        {
+#if SCHEMA_STATISTICS
+            _numberLookups++;
+#endif
+
+            var node = _node;
+            while (node != null)
+            {
+                CheckFlattenSchema();
+
+#if SCHEMA_STATISTICS
+                _numberLookupIterations++;
+#endif
+
+                if (node.Index == index)
+                {
+                    if (node.Added)
+                        return node;
+                    return null;
+                }
+
+                node = node.Parent;
+            }
+
+            return null;
+        }
+
+        private void CheckFlattenSchema()
+        {
+            if (++_lookupCount == MaxLookupCount)
+                QueueFlattenSchema(this);
+        }
+
+        private void FlattenSchema()
+        {
+#if SCHEMA_STATISTICS
+            _flattenedSchemas++;
+#endif
+
+            Debug.Assert(_cachedSchema == null);
+
+            var cachedSchema = new SchemaHashSet();
+
+            foreach (var node in GetNodes())
+            {
+                cachedSchema.Add(node.Index, node.Attributes, node.Offset);
+            }
+
+            _cachedSchema = cachedSchema;
+        }
+
         public int GetOffset(int index)
         {
-            return _node.GetOffset(index);
+            if (_cachedSchema != null)
+                return _cachedSchema.GetValue(index);
+
+            var node = FindNode(index);
+            return node != null ? node.Offset : -1;
         }
 
         public PropertyAttributes GetAttributes(int index)
         {
-            PropertyAttributes attributes;
-            _node.TryGetAttributes(index, out attributes);
-            return attributes;
+            if (_cachedSchema != null)
+                return _cachedSchema.GetAttributes(index);
+
+            var node = FindNode(index);
+            return node != null ? node.Attributes : 0;
         }
 
         public bool TryGetAttributes(int index, out PropertyAttributes attributes)
         {
-            return _node.TryGetAttributes(index, out attributes);
+            if (_cachedSchema != null)
+                return _cachedSchema.TryGetAttributes(index, out attributes);
+
+            var node = FindNode(index);
+            if (node != null)
+            {
+                attributes = node.Attributes;
+                return true;
+            }
+
+            attributes = 0;
+            return false;
         }
 
         public IEnumerable<int> GetKeys(bool enumerableOnly)
         {
+            if (_cachedSchema != null)
+                return _cachedSchema.GetKeys(enumerableOnly);
+
+            return GetKeysFromNode(enumerableOnly);
+        }
+
+        private IEnumerable<int> GetKeysFromNode(bool enumerableOnly)
+        {
+            foreach (var node in GetNodes())
+            {
+                if (
+                    !enumerableOnly ||
+                    (node.Attributes & PropertyAttributes.DontEnum) == 0
+                )
+                    yield return node.Index;
+            }
+        }
+
+        private IEnumerable<Node> GetNodes()
+        {
+#if SCHEMA_STATISTICS
+            _numberLookups++;
+#endif
+
             HashSet<int> removed = null;
-            HashSet<int> keys = new HashSet<int>();
+            var seen = new HashSet<int>();
 
-            _node.GetKeys(enumerableOnly, ref removed, keys);
+            var node = _node;
+            while (node != null)
+            {
+                CheckFlattenSchema();
 
-            return keys;
-            //HashSet<int> removed = null;
+#if SCHEMA_STATISTICS
+                _numberLookupIterations++;
+#endif
 
-            //var node = _node;
-            //while (node != null)
-            //{
-            //    if (!node.Added)
-            //    {
-            //        if (removed == null)
-            //            removed = new HashSet<int>();
+                if (!node.Added)
+                {
+                    if (removed == null)
+                        removed = new HashSet<int>();
 
-            //        removed.Add(node.Index);
-            //    }
-            //    else if (
-            //        (removed == null || !removed.Contains(node.Index)) &&
-            //        !(enumerableOnly && (node.Attributes & PropertyAttributes.DontEnum) != 0)
-            //    )
-            //        yield return node.Index;
+                    removed.Add(node.Index);
+                }
+                else if (
+                    (removed == null || !removed.Contains(node.Index)) &&
+                    !seen.Contains(node.Index)
+                )
+                {
+                    seen.Add(node.Index);
+                    yield return node;
+                }
 
-            //    node = node.Parent;
-            //}
+                node = node.Parent;
+            }
         }
 
         private class FreeEntry
@@ -210,203 +339,25 @@ namespace Jint.Native
             }
         }
 
-        private interface INode
+        private class Node
         {
-            int Depth { get; }
-
-            INode Create(bool added, int index, PropertyAttributes attributes, int offset);
-            int GetOffset(int index);
-            bool TryGetAttributes(int index, out PropertyAttributes attributes);
-            void GetKeys(bool enumerableOnly, ref HashSet<int> removed, HashSet<int> keys);
-        }
-
-        private sealed class TailNode : INode
-        {
-            public static readonly TailNode Instance = new TailNode();
-
-            public int Depth
-            {
-                get { return 0; }
-            }
-
-            private TailNode()
-            {
-            }
-
-            public INode Create(bool added, int index, PropertyAttributes attributes, int offset)
-            {
-                return new Node(added, index, attributes, offset, this);
-            }
-
-            public bool TryGetAttributes(int index, out PropertyAttributes attributes)
-            {
-                attributes = 0;
-                return false;
-            }
-
-            public int GetOffset(int index)
-            {
-                return -1;
-            }
-
-            public void GetKeys(bool enumerableOnly, ref HashSet<int> removed, HashSet<int> keys)
-            {
-            }
-        }
-
-        private sealed class Node : INode
-        {
-            private const int MaxDepth = 20;
-
             public bool Added { get; private set; }
             public int Index { get; private set; }
             public PropertyAttributes Attributes { get; private set; }
             public int Offset { get; private set; }
-            public INode Parent { get; private set; }
-            private SnapshotNode _snapshot;
+            public Node Parent { get; private set; }
 
-            public int Depth { get; private set; }
-
-            public Node(bool added, int index, PropertyAttributes attributes, int offset, INode parent)
+            public Node(bool added, int index, PropertyAttributes attributes, int offset, Node parent)
             {
+#if SCHEMA_STATISTICS
+                _createdNodes++;
+#endif
+
                 Added = added;
                 Index = index;
                 Attributes = attributes;
                 Offset = offset;
                 Parent = parent;
-                Depth = parent == null ? 1 : parent.Depth + 1;
-            }
-
-            public INode Create(bool added, int index, PropertyAttributes attributes, int offset)
-            {
-                if (_snapshot == null && Depth == MaxDepth)
-                    _snapshot = new SnapshotNode(this);
-
-                return new Node(added, index, attributes, offset, (INode)_snapshot ?? this);
-            }
-
-            public int GetOffset(int index)
-            {
-                if (_snapshot != null)
-                    return _snapshot.GetOffset(index);
-
-                if (index == Index)
-                {
-                    if (!Added)
-                        return -1;
-
-                    return Offset;
-                }
-
-                return Parent.GetOffset(index);
-            }
-
-            public bool TryGetAttributes(int index, out PropertyAttributes attributes)
-            {
-                if (_snapshot != null)
-                    return _snapshot.TryGetAttributes(index, out attributes);
-
-                if (index == Index)
-                {
-                    if (!Added)
-                    {
-                        attributes = 0;
-                        return false;
-                    }
-
-                    attributes = Attributes;
-                    return true;
-                }
-
-                return Parent.TryGetAttributes(index, out attributes);
-            }
-
-            public void GetKeys(bool enumerableOnly, ref HashSet<int> removed, HashSet<int> keys)
-            {
-                if (_snapshot != null)
-                {
-                    _snapshot.GetKeys(enumerableOnly, ref removed, keys);
-                    return;
-                }
-
-                if (!Added)
-                {
-                    if (removed == null)
-                        removed = new HashSet<int>();
-
-                    removed.Add(Index);
-                }
-                else if (
-                    (removed == null || !removed.Contains(Index)) &&
-                    !(enumerableOnly && (Attributes & PropertyAttributes.DontEnum) != 0)
-                )
-                {
-                    keys.Add(Index);
-                }
-
-                Parent.GetKeys(enumerableOnly, ref removed, keys);
-            }
-        }
-
-        private sealed class SnapshotNode : INode
-        {
-            private SchemaHashSet _schema;
-
-            public SnapshotNode(INode node)
-            {
-                BuildSnapshot(node, node.Depth);
-            }
-
-            private void BuildSnapshot(INode node, int depth)
-            {
-                var normalNode = node as Node;
-                if (normalNode != null)
-                {
-                    BuildSnapshot(normalNode.Parent, depth);
-
-                    if (_schema == null)
-                        _schema = new SchemaHashSet(depth * 10 / 7);
-
-                    if (normalNode.Added)
-                        _schema.Add(normalNode.Index, normalNode.Attributes, normalNode.Offset);
-                    else
-                        _schema.Remove(normalNode.Index);
-                }
-                else
-                {
-                    var snapshot = node as SnapshotNode;
-                    if (snapshot != null)
-                        _schema = new SchemaHashSet(snapshot._schema);
-                }
-            }
-
-            public int Depth
-            {
-                get { return 0; }
-            }
-
-            public INode Create(bool added, int index, PropertyAttributes attributes, int offset)
-            {
-                return new Node(added, index, attributes, offset, this);
-            }
-
-            public int GetOffset(int index)
-            {
-                return _schema.GetValue(index);
-            }
-
-            public bool TryGetAttributes(int index, out PropertyAttributes attributes)
-            {
-                return _schema.TryGetAttributes(index, out attributes);
-            }
-
-            public void GetKeys(bool enumerableOnly, ref HashSet<int> removed, HashSet<int> keys)
-            {
-                foreach (int key in _schema.GetKeys(enumerableOnly))
-                {
-                    if (!removed.Contains(key))
-                        keys.Add(key);
-                }
             }
         }
     }
