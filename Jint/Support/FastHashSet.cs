@@ -29,8 +29,13 @@ namespace Jint.Support
         }
 
         public SchemaHashSet()
+            : this(20)
         {
-            _entries = new Entry[PrimesHelper.GetPrime(20)];
+        }
+
+        public SchemaHashSet(int capacity)
+        {
+            _entries = new Entry[PrimesHelper.GetPrime(capacity)];
 
             for (int i = 0; i < _entries.Length; i++)
             {
@@ -386,7 +391,6 @@ namespace Jint.Support
 
         internal class SchemaHashSetDebugView
         {
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             private readonly SchemaHashSet _container;
 
             public SchemaHashSetDebugView(SchemaHashSet container)
@@ -412,7 +416,6 @@ namespace Jint.Support
                 }
             }
 
-            [DebuggerDisplay("Index={Index}, Value={Value}, Attributes={Attributes}")]
             private class DisplayEntry
             {
                 public int Index { get; private set; }
@@ -425,12 +428,15 @@ namespace Jint.Support
                     Value = entry.Value;
                     Attributes = entry.Attributes;
                 }
+
+                public override string ToString()
+                {
+                    return String.Format("Index={0}, Value={1}, Attributes={2}", Index, Value, Attributes);
+                }
             }
         }
     }
-}
-namespace Jint.Support
-{
+
     [DebuggerTypeProxy(typeof(SchemaTransformationHashSetDebugView))]
     internal sealed class SchemaTransformationHashSet
     {
@@ -444,8 +450,13 @@ namespace Jint.Support
         }
 
         public SchemaTransformationHashSet()
+            : this(20)
         {
-            _entries = new Entry[PrimesHelper.GetPrime(20)];
+        }
+
+        public SchemaTransformationHashSet(int capacity)
+        {
+            _entries = new Entry[PrimesHelper.GetPrime(capacity)];
         }
 
         public SchemaTransformationHashSet(SchemaTransformationHashSet other)
@@ -800,4 +811,5 @@ namespace Jint.Support
             }
         }
     }
+
 }

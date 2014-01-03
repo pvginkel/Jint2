@@ -64,9 +64,9 @@ using System.Linq;
 using System.Text;
 using Jint.Native;
 
-<# foreach (var configuration in configurations) { #>
 namespace Jint.Support
 {
+<# foreach (var configuration in configurations) { #>
     [DebuggerTypeProxy(typeof(<#= configuration.Name #>DebugView))]
     internal sealed class <#= configuration.Name #>
     {
@@ -80,8 +80,13 @@ namespace Jint.Support
         }
 
         public <#= configuration.Name #>()
+            : this(20)
         {
-            _entries = new Entry[PrimesHelper.GetPrime(20)];
+        }
+
+        public <#= configuration.Name #>(int capacity)
+        {
+            _entries = new Entry[PrimesHelper.GetPrime(capacity)];
 <# if (configuration.RequireInvalidate) { #>
 
             for (int i = 0; i < _entries.Length; i++)
@@ -564,8 +569,9 @@ namespace Jint.Support
             }
         }
     }
-}
+
 <# } #>
+}
 <#+ 
 
 private class Configuration
