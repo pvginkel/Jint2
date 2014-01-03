@@ -324,11 +324,14 @@ namespace Jint.Bound
                     if (variable != null)
                         return variable.Type;
 
-                    if (_arguments != null)
+                    var argument = readable as BoundArgument;
+                    if (argument != null)
                     {
-                        var argument = readable as BoundArgument;
-                        if (argument != null)
-                            return GetMappedArgument(argument).Type;
+                        variable = GetMappedArgument(argument);
+                        if (variable != null)
+                            return variable.Type;
+
+                        return null;
                     }
 
                     var magic = readable as BoundMagicVariable;
@@ -349,15 +352,16 @@ namespace Jint.Bound
                     while (scope != null)
                     {
                         BoundVariable result;
-                        if (scope._arguments.TryGetValue(argument, out result))
+                        if (
+                            scope._arguments != null &&
+                            scope._arguments.TryGetValue(argument, out result)
+                        )
                             return result;
 
                         scope = scope.Parent;
                     }
 
-                    // Shouldn't get here.
-
-                    throw new InvalidOperationException();
+                    return null;
                 }
 
                 public void Dispose()
