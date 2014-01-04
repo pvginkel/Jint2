@@ -70,20 +70,15 @@ namespace Jint.Native
 
                 object[] argumentsCopy;
 
-                if (
-                    arguments.Length >= 2 &&
-                    arguments[1] is JsObject
-                )
+                if (arguments.Length >= 2)
                 {
-                    var argument = (JsObject)arguments[1];
+                    var shim = new ArrayShim(arguments[1]);
 
-                    int length = (int)JsValue.ToNumber(argument.GetProperty(Id.length));
+                    argumentsCopy = new object[shim.Length];
 
-                    argumentsCopy = new object[length];
-
-                    for (int i = 0; i < length; i++)
+                    foreach (var item in shim)
                     {
-                        argumentsCopy[i] = argument.GetProperty(i);
+                        argumentsCopy[item.Key] = item.Value;
                     }
                 }
                 else

@@ -42,23 +42,20 @@ namespace Jint.Native
             // 15.4.4.3
             public static object ToLocaleString(JintRuntime runtime, object @this, JsObject callee, object[] arguments)
             {
-                var @object = @this as JsObject;
-                if (@object == null)
-                    return String.Empty;
-
-                int length = (int)JsValue.ToUint32(@object.GetProperty(Id.length));
-                if (length == 0)
-                    return String.Empty;
+                var shim = new ArrayShim(@this);
 
                 string separator = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
                 var sb = new StringBuilder();
+                bool hadOne = false;
 
-                for (int i = 0; i < length; i++)
+                foreach (var item in shim)
                 {
-                    if (i > 0)
+                    if (hadOne)
                         sb.Append(separator);
+                    else
+                        hadOne = true;
 
-                    sb.Append(JsValue.ToLocaleString(@object.GetProperty(i)));
+                    sb.Append(JsValue.ToLocaleString(item.Value));
                 }
 
                 return sb.ToString();
